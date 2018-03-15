@@ -58,7 +58,6 @@ var igv = (function (igv) {
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
-        this.sortDirection = true;
 
         // filter alignments
         this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
@@ -131,6 +130,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
         if (this.coverageTrack.height > 0) {
             this.coverageTrack.draw(options);
         }
@@ -144,44 +145,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.popupMenuItemList = function (config) {
+    igv.BAMTrack.prototype.contextMenuItemList = function (config) {
 
-        var self = this,
-            $e,
-            clickHandler,
-            list = [];
-
-        $e = $('<div>');
-        $e.text('Sort by base');
-
-        clickHandler = function () {
-
-            self.alignmentTrack.sortAlignmentRows(config.genomicLocation, self.sortOption);
-
-            self.trackView.update();
-
-            self.sortDirection = !(self.sortDirection);
-
-            config.popover.hide();
-
-        };
-
-        list.push({name: undefined, object: $e, click: clickHandler, init: undefined});
-
-        if (false === self.viewAsPairs) {
-
-            $e = $('<div>');
-            $e.text('View mate in split screen');
-
-            clickHandler = function () {
-                self.alignmentTrack.popupMenuItemList(config);
-            };
-
-            list.push({name: undefined, object: $e, click: clickHandler, init: undefined});
-
+        if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+            return [];
+        } else {
+            return this.alignmentTrack.contextMenuItemList(config);
         }
 
-        return list;
 
     };
 
@@ -328,14 +299,14 @@ var igv = (function (igv) {
             $e.text('Sort by base');
 
             clickHandler = function () {
-                var genomicState = _.first(igv.browser.genomicStateList),
+                var genomicState = igv.browser.genomicStateList[0],
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
 
                 popover.hide();
 
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / genomicState.locusCount));
+                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
                 self.altClick(genomicLocation, undefined, undefined);
@@ -409,6 +380,7 @@ var igv = (function (igv) {
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             coverageMap = alignmentContainer.coverageMap,
             bp,
@@ -422,6 +394,7 @@ var igv = (function (igv) {
             item,
             accumulatedHeight,
             sequence;
+
 
         if (this.top) ctx.translate(0, top);
 
@@ -609,11 +582,13 @@ var igv = (function (igv) {
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             packedAlignmentRows = alignmentContainer.packedAlignmentRows,
             sequence = alignmentContainer.sequence;
 
         var alignmentRowYInset = 0;
+
 
         if (this.top) ctx.translate(0, this.top);
 
@@ -901,63 +876,41 @@ var igv = (function (igv) {
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
+    AlignmentTrack.prototype.contextMenuItemList = function (config) {
 
-    AlignmentTrack.prototype.popupMenuItemList = function (config) {
+        var self = this,
+            clickHandler,
+            list = [];
 
-        var alignment,
-            loci,
-            mateLoci,
-            index,
-            head,
-            tail;
+        list.push({label: 'Sort by base', click: sortRows, init: undefined});
 
-        this.highlightedAlignmentReadNamed = undefined;
-
-        config.popover.hide();
-
-        alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
-        if (alignment) {
-
-            this.highlightedAlignmentReadNamed = alignment.readName;
-
-            loci = igv.browser.genomicStateList.map(function (gs) {
-                return gs.locusSearchString;
-            });
-
-            index = config.viewport.genomicState.locusIndex;
-            head = _.first(loci, 1 + index);
-            tail = _.size(loci) === 1 ? undefined : _.last(loci, _.size(loci) - (1 + index));
-
-            mateLoci = locusPairWithAlignmentAndViewport(alignment, config.viewport);
-
-            // discard last element of head and replace with mateLoci
-            head.splice(-1, 1);
-            Array.prototype.push.apply(head, mateLoci);
-            if (tail) {
-                Array.prototype.push.apply(head, tail);
-            }
-
-            igv.browser.search(head.join(' '));
+        var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
+        if (alignment && alignment.isPaired() && alignment.isMateMapped()) {
+            list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
         }
 
-        function locusPairWithAlignmentAndViewport(alignment, viewport) {
-            var left,
-                right,
-                centroid,
-                widthBP;
+        return list;
 
-            widthBP = viewport.$viewport.width() * viewport.genomicState.referenceFrame.bpPerPixel;
+        function sortRows() {
+            self.sortAlignmentRows(config.genomicLocation, self.sortOption);
+            self.parent.trackView.update();
+            self.sortDirection = !(self.sortDirection);
 
-            centroid = (alignment.start + (alignment.start + alignment.lengthOnRef)) / 2;
-            left = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
+        }
 
-            centroid = (alignment.mate.position + (alignment.mate.position + alignment.lengthOnRef)) / 2;
-            right = alignment.chr + ':' + Math.round(centroid - widthBP / 2.0).toString() + '-' + Math.round(centroid + widthBP / 2.0).toString();
-
-            return [left, right];
+        function viewMateInSplitScreen() {
+            if (alignment.mate) {
+                self.highlightedAlignmentReadNamed = alignment.readName;
+                igv.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
+            }
         }
     };
+
+    function parse(locusString) {
+        return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
+            return 0 === index ? value : parseInt(value, 10);
+        });
+    }
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
@@ -989,7 +942,7 @@ var igv = (function (igv) {
 
         return undefined;
 
-    }
+    };
 
     function getAlignmentColor(alignment) {
 
@@ -1115,7 +1068,7 @@ var igv = (function (igv) {
             "R2R1": "RL",
             "F1F2": "RL"
         }
-    }
+    };
 
     return igv;
 

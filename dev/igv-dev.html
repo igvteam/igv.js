@@ -192,14 +192,14 @@
                             })">VCF file with genotypes (chr 22)
         </div>
 
-<!--        <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                            name: 'Brain (BodyMap)',
-                            maxRows: 3000,
-                            samplingDepth: 10000,
-                            height: 200
-                        })">BAM File - deep coverage (Brain, BodyMap)
-        </div>-->
+        <!--        <div onclick="igv.browser.loadTrack({
+                                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+                                    name: 'Brain (BodyMap)',
+                                    maxRows: 3000,
+                                    samplingDepth: 10000,
+                                    height: 200
+                                })">BAM File - deep coverage (Brain, BodyMap)
+                </div>-->
 
 
         <div onclick="igv.browser.loadTrack({
@@ -208,7 +208,7 @@
                                 url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
                                 height: 500,
                                 autoHeight: false,
-                                viewAsPairs: true,
+                                viewAsPairs: false,
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
@@ -220,6 +220,7 @@
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 height: 200,
                                 autoHeight: false,
+                                viewAsPairs: false,
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
@@ -347,45 +348,60 @@
 
     $(document).ready(function () {
         var div,
-                options;
+            options;
 
         div = $("#myDiv")[0];
         options = {
+            showRuler: true,
             // locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
-            locus: 'chrX:138633329-138633330',
+            // locus: 'brca1',
+            // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
-            // locus: ['egfr', 'pten', 'myc'],
-            // locus: ['egfr'],
-            // locus: ['pten'],
-            // locus: ['myc'],
+            // locus: 'chr8:128,748,263-128,748,621',
+            locus: ['myc'],
+            // locus: ['myc', 'egfr'],
             // locus: ['1', '2'],
             // locus: ['2', '4', '8'],
             reference: {
                 id: "hg19",
-          //      fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-          //      cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+                //      fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+                //      cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                // {
-                //     url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
-                //     name: 'ENCODE - BigWig',
-                //     color: function (value) {
-                //         var red = Math.min(255, Math.max(100, Math.round(value / 2))),
-                //                 blue = 255 - red;
-                //         return "rgb(" + red + "," + blue + ",0)"
-                //     }
-                // },
+//                {
+//                    sourceType: 'gcs',
+//                    type: 'bam',
+//                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+//                    height: 500,
+//                    maxHeight: 2000,
+//                    autoHeight: false,
+//                    viewAsPairs: false,
+//                    name: 'NA12877'
+//                },
+               {
+                   sourceType: 'ga4gh',
+                   type: 'bam',
+                   url: 'https://genomics.googleapis.com/v1',
+                   readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                   height: 200,
+                   autoHeight: true,
+                   viewAsPairs: false,
+                   name: 'Ga4gh alignments'
+               },
+//                 {
+//                     url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
+//                     name: 'Big BigWig'
+//                 },
                 {
 
                     name: "Genes",
-                    autoHeight: true,
+                    autoHeight: false,
                     searchable: false,
-                    autoHeight: true,
                     type: "annotation",
                     format: "gtf",
                     sourceType: "file",

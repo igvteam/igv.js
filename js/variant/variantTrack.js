@@ -583,13 +583,13 @@ var igv = (function (igv) {
         return popupData;
     }
 
-    igv.VariantTrack.prototype.popupMenuItemList = function (config) {
+    igv.VariantTrack.prototype.contextMenuItemList = function (config) {
         var menuItems = [];
         var self = this;
 
         if (this.groupBy !== 'NONE' && igv.sampleInformation.hasAttributes()) {
             menuItems.push({
-                name: 'Sort groups',
+                label: 'Sort groups',
                 click: function () {
                     try {
                         self.callSetGroups.sort(function (a, b) {
@@ -599,7 +599,6 @@ var igv = (function (igv) {
                         self.callSetGroups.sort();
                     }
                     self.trackView.update();
-                    config.popover.hide();
                 }
             })
         }
@@ -621,12 +620,11 @@ var igv = (function (igv) {
                     if ('str' === variant.type) {
 
                         menuItems.push({
-                            name: 'Sort by allele length',
+                            label: 'Sort by allele length',
                             click: function () {
                                 sortCallSets(self.callSets, variant, sortDirection);
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                                 self.trackView.update();
-                                config.popover.hide();
                             }
                         });
 
