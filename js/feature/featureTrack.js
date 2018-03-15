@@ -368,20 +368,20 @@ var igv = (function (igv) {
     };
 
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
+    igv.FeatureTrack.prototype.contextMenuItemList = function (config) {
   
         if (this.render === renderSnp) {
 
             var menuItems = [], self = this;
 
             menuItems.push({
-                name: 'Color by function',
+                label: 'Color by function',
                 click: function () {
                     setColorBy('function');
                 }
             });
             menuItems.push({
-                name: 'Color by class',
+                label: 'Color by class',
                 click: function () {
                     setColorBy('class');
                 }
@@ -397,6 +397,7 @@ var igv = (function (igv) {
             config.popover.hide();
         }
     };
+
 
     igv.FeatureTrack.prototype.description = function () {
 
@@ -824,34 +825,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
-        if (this.render === renderSnp) {
 
-            var menuItems = [], self = this;
-
-            menuItems.push({
-                name: 'Color by function',
-                click: function () {
-                    setColorBy('function');
-                }
-            });
-            menuItems.push({
-                name: 'Color by class',
-                click: function () {
-                    setColorBy('class');
-                }
-            });
-
-            return menuItems;
-
-        }
-
-        function setColorBy(value) {
-            self.colorBy = value;
-            self.trackView.update();
-            config.popover.hide();
-        }
-    };
 
     return igv;
 
