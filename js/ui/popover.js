@@ -96,23 +96,17 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Popover.prototype.presentTrackPopupMenu = function (e, viewport) {
+    igv.Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
 
-        var track = viewport.trackView.track,
-            trackLocationState,
-            $container,
-            menuItems;
-
-        trackLocationState = createTrackLocationState(e, viewport);
-
-        if (undefined === trackLocationState) {
-            return
-        }
-
-        menuItems = igv.trackPopupMenuItemList(this, viewport, trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y);
+        var $container,
+            $popover = this.$popover;
 
         if (menuItems.length > 0) {
-
+            
+            menuItems = igv.trackMenuItemListHelper(menuItems, function () {
+                $popover.hide();
+            });
+            
             this.$popoverContent.empty();
             this.$popoverContent.removeClass("igv-popover-track-popup-content");
 
@@ -123,8 +117,8 @@ var igv = (function (igv) {
                 $container.append(item.object);
             });
 
-            this.$popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
-            this.$popover.show();
+            $popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
+            $popover.show();
         }
 
     };

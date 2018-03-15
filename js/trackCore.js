@@ -383,14 +383,13 @@ var igv = (function (igv) {
      * @param xOffset - (pixels) within track extent
      * @param yOffset - (pixels) within track extent
      */
-    igv.trackPopupMenuItemList = function (popover, viewport, genomicLocation, xOffset, yOffset) {
+    igv.trackContextMenuItemList = function (viewport, genomicLocation, xOffset, yOffset) {
 
         var config,
             menuItems;
 
         config =
         {
-            popover: popover,
             viewport: viewport,
             genomicState: viewport.genomicState,
             genomicLocation: genomicLocation,
@@ -440,7 +439,8 @@ var igv = (function (igv) {
                 var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
                 if (undefined !== number) {
-// If explicitly setting the height adust min or max, if neccessary.
+
+                    // If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -483,7 +483,7 @@ var igv = (function (igv) {
         return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
-    igv.trackMenuItemListHelper = function (itemList) {
+    igv.trackMenuItemListHelper = function (itemList, callback) {
 
         var list = [];
 
@@ -492,7 +492,14 @@ var igv = (function (igv) {
             list = itemList.map(function (item, i) {
                 var $e;
 
-                if (typeof item.label === 'string') {
+                // name and object fields checked for backward compatibility
+                if (item.name) {
+                    $e = $('<div>');
+                    $e.text(item.name);
+                } else if (item.object) {
+                    $e = item.object
+                }
+                else if (typeof item.label === 'string') {
                     $e = $('<div>');
                     $e.text(item.label)
                 }
@@ -505,7 +512,10 @@ var igv = (function (igv) {
                 }
 
                 if (item.click) {
-                    $e.click(item.click);
+                    $e.click(function () {
+                        item.click();
+                        if(typeof callback === "function") callback();
+                    });
                 }
 
                 return {object: $e, init: (item.init || undefined)};

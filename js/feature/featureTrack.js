@@ -394,7 +394,6 @@ var igv = (function (igv) {
         function setColorBy(value) {
             self.colorBy = value;
             self.trackView.update();
-            config.popover.hide();
         }
     };
 

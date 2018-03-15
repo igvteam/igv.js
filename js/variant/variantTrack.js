@@ -599,7 +599,6 @@ var igv = (function (igv) {
                         self.callSetGroups.sort();
                     }
                     self.trackView.update();
-                    config.popover.hide();
                 }
             })
         }
@@ -626,7 +625,6 @@ var igv = (function (igv) {
                                 sortCallSets(self.callSets, variant, sortDirection);
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                                 self.trackView.update();
-                                config.popover.hide();
                             }
                         });
 
