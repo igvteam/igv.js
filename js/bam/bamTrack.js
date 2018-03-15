@@ -901,7 +901,7 @@ var igv = (function (igv) {
         function viewMateInSplitScreen() {
             if (alignment.mate) {
                 self.highlightedAlignmentReadNamed = alignment.readName;
-                igv.browser.presentAlignmentMatePair(alignment, config.viewport.genomicState);
+                igv.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
             }
         }
     };
