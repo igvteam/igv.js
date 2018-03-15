@@ -130,6 +130,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.draw = function (options) {
 
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
         if (this.coverageTrack.height > 0) {
             this.coverageTrack.draw(options);
         }
@@ -146,7 +148,7 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.contextMenuItemList = function (config) {
 
         if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return undefined;
+            return [];
         } else {
             return this.alignmentTrack.contextMenuItemList(config);
         }
@@ -378,6 +380,7 @@ var igv = (function (igv) {
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             coverageMap = alignmentContainer.coverageMap,
             bp,
@@ -391,6 +394,7 @@ var igv = (function (igv) {
             item,
             accumulatedHeight,
             sequence;
+
 
         if (this.top) ctx.translate(0, top);
 
@@ -578,11 +582,13 @@ var igv = (function (igv) {
             bpPerPixel = options.bpPerPixel,
             bpStart = options.bpStart,
             pixelWidth = options.pixelWidth,
+            pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
             packedAlignmentRows = alignmentContainer.packedAlignmentRows,
             sequence = alignmentContainer.sequence;
 
         var alignmentRowYInset = 0;
+
 
         if (this.top) ctx.translate(0, this.top);
 

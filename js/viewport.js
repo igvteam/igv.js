@@ -558,6 +558,17 @@ var igv = (function (igv) {
                 menuItems = self.trackView.track.contextMenuItemList(config);
             }
 
+            if(menuItems.length > 0) {
+                menuItems.push({label: $('<HR>')});
+            }
+            menuItems.push(
+                {
+                    label: 'Save Image',
+                    click: function () {
+                        self.saveImage();
+                    }
+                });
+
             self.popover.presentTrackContextMenu(e, menuItems);
             e.preventDefault();
         });
