@@ -53,45 +53,45 @@ var igv = (function (igv) {
     igv.CenterGuide.prototype.repaint = function () {
 
         var ppb,
-            trackXY,
-            trackHalfWidth,
+            xy,
+            halfWidth,
             width,
             left,
             ls,
             ws,
             center,
-            rect,
             referenceFrame;
 
-        if (undefined === igv.browser.genomicStateList) {
-            return;
+        if (igv.browser.genomicStateList) {
+
+            referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
+            ppb = 1.0/referenceFrame.bpPerPixel;
+
+            if (ppb > 1) {
+
+                xy = igv.browser.trackViews[ 0 ].$viewportContainer.position();
+                halfWidth = Math.round( igv.browser.trackViews[ 0 ].$viewportContainer.width() / 2 );
+
+                center = xy.left + halfWidth;
+                width = referenceFrame.toPixels(1);
+                left = center - 0.5 * width;
+
+                ls = Math.round(left).toString() + 'px';
+                ws = Math.round(width).toString() + 'px';
+                this.$container.css({ left:ls, width:ws });
+
+                this.$container.removeClass('igv-center-guide-thin');
+                this.$container.addClass('igv-center-guide-wide');
+            } else {
+
+                this.$container.css({ left:'50%', width:'1px' });
+
+                this.$container.removeClass('igv-center-guide-wide');
+                this.$container.addClass('igv-center-guide-thin');
+            }
+
         }
 
-        referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
-        ppb = 1.0/referenceFrame.bpPerPixel;
-        if (ppb > 1) {
-
-            rect = igv.browser.syntheticViewportContainerBBox();
-            trackXY = rect.position;
-            trackHalfWidth = 0.5 * rect.width;
-
-            center = trackXY.left + trackHalfWidth;
-            width = referenceFrame.toPixels(1);
-            left = center - 0.5 * width;
-
-            ls = Math.round(left).toString() + 'px';
-            ws = Math.round(width).toString() + 'px';
-            this.$container.css({ left:ls, width:ws });
-
-            this.$container.removeClass('igv-center-guide-thin');
-            this.$container.addClass('igv-center-guide-wide');
-        } else {
-
-            this.$container.css({ left:'50%', width:'1px' });
-
-            this.$container.removeClass('igv-center-guide-wide');
-            this.$container.addClass('igv-center-guide-thin');
-        }
 
     };
 
