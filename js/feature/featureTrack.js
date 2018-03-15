@@ -389,6 +389,8 @@ var igv = (function (igv) {
 
             return menuItems;
 
+        } else {
+            return [];
         }
 
         function setColorBy(value) {
