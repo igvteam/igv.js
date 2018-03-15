@@ -643,43 +643,36 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.syntheticViewportContainerBBox = function () {
-
-        var $trackContainer = $(this.trackContainerDiv),
-            $track = $('<div class="igv-track-div">'),
-            $viewportContainer = $('<div class="igv-viewport-containe">'),
-            rect = {},
-            trackContainerWidth,
-            trackWidth;
-
-        $trackContainer.append($track);
-        $track.append($viewportContainer);
-
-        rect =
-            {
-                position: $viewportContainer.position(),
-                width: $viewportContainer.width(),
-                height: $viewportContainer.height()
-            };
-
-        // rect.position = $viewportContainer.position();
-        // rect.width = $viewportContainer.width();
-        // rect.height = $viewportContainer.height();
-
-        $track.remove();
-
-        return rect;
-    };
-
-    igv.Browser.prototype.syntheticViewportContainerWidth = function () {
-        return this.syntheticViewportContainerBBox().width;
-    };
-
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
     igv.Browser.prototype.viewportContainerWidth = function () {
-        return (this.trackViews && this.trackViews.length > 0) ? this.trackViews[0].$viewportContainer.width() : this.syntheticViewportContainerWidth();
+
+        return (this.trackViews && this.trackViews.length > 0) ? this.trackViews[0].$viewportContainer.width() : syntheticViewportContainerWidth.call(this);
+
+        function syntheticViewportContainerWidth() {
+
+            var $trackContainer = $(this.trackContainerDiv),
+                $track = $('<div class="igv-track-div">'),
+                $viewportContainer = $('<div class="igv-viewport-container">'),
+                rect;
+
+            $trackContainer.append($track);
+            $track.append($viewportContainer);
+
+            rect =
+                {
+                    position: $viewportContainer.position(),
+                    width: $viewportContainer.width(),
+                    height: $viewportContainer.height()
+                };
+
+
+            $track.remove();
+
+            return rect.width;
+        }
+
     };
 
     igv.Browser.prototype.viewportWidth = function () {
