@@ -922,7 +922,8 @@ var igv = (function (igv) {
         var self = this,
             index,
             viewportContainerWidth,
-            previousGenomicStateListLength;
+            previousGenomicStateListLength,
+            width;
 
         index = this.genomicStateList.indexOf(genomicState);
 
@@ -954,9 +955,7 @@ var igv = (function (igv) {
         });
 
         this.trackViews.forEach(function (trackView) {
-            trackView.viewports.forEach(function (viewport) {
-                viewport.setWidth(self.viewportContainerWidth() / self.genomicStateList.length);
-            });
+            trackView.resize();
         });
 
         if (true === doResize) {
@@ -966,18 +965,6 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicState, index, viewportWidth) {
-
-        var self = this;
-
-        if (this.ideoPanel) {
-            this.ideoPanel.setWidth(viewportWidth, false);
-        }
-
-        this.trackViews.forEach(function (trackView) {
-            trackView.viewports.forEach(function (viewport) {
-                viewport.setWidth(viewportWidth);
-            });
-        });
 
         if (index === this.genomicStateList.length) {
 
