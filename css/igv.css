@@ -81,6 +81,17 @@
       cursor: pointer;
       color: #0f0f0f; }
 
+.igv-multi-locus-panel-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 1px;
+  background-color: green;
+  border-right-color: #ff0000;
+  border-right-style: solid;
+  border-right-width: 1px; }
+
 .igv-navbar {
   position: relative;
   top: 0;
