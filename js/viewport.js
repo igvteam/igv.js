@@ -454,9 +454,7 @@ var igv = (function (igv) {
             contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
         }
 
-        $(this.contentDiv).height(contentHeight);
-        $(this.canvas).height(contentHeight);
-        this.canvas.setAttribute("height", contentHeight);
+        this.tile.invalidate = true;
     };
 
     igv.Viewport.prototype.getContentHeight = function () {
