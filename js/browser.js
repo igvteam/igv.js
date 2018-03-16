@@ -652,29 +652,32 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.viewportContainerWidth = function () {
 
-        return (this.trackViews && this.trackViews.length > 0) ? this.trackViews[0].$viewportContainer.width() : syntheticViewportContainerWidth.call(this);
+        if (this.trackViews && this.trackViews.length > 0) {
+
+            return this.trackViews[0].$viewportContainer.width();
+        } else {
+
+            return syntheticViewportContainerWidth.call(this);
+        }
 
         function syntheticViewportContainerWidth() {
 
-            var $trackContainer = $(this.trackContainerDiv),
-                $track = $('<div class="igv-track-div">'),
-                $viewportContainer = $('<div class="igv-viewport-container">'),
-                rect;
+            var $track,
+                $viewportContainer,
+                width;
 
-            $trackContainer.append($track);
+            $track = $('<div class="igv-track-div">');
+            $(this.trackContainerDiv).append($track);
+
+            $viewportContainer = $('<div class="igv-viewport-container">');
             $track.append($viewportContainer);
 
-            rect =
-                {
-                    position: $viewportContainer.position(),
-                    width: $viewportContainer.width(),
-                    height: $viewportContainer.height()
-                };
+            width = $viewportContainer.width();
 
-
+            // discard temporary DOM elements
             $track.remove();
 
-            return rect.width;
+            return width;
         }
 
     };
@@ -992,7 +995,7 @@ var igv = (function (igv) {
             this.trackViews.forEach(function (trackView) {
 
                 var viewport,
-                $detached;
+                    $detached;
 
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, viewportWidth);
                 trackView.viewports.splice(index, 0, viewport);
