@@ -25,25 +25,18 @@
 
 var igv = (function (igv) {
 
-    var log = function (txt) {
-        // if (console) console.log("karyo: " + txt);
-    };
-
-    igv.KaryoPanel = function ($parent, config) {
+    igv.KaryoPanel = function ($parent) {
         var self = this,
             contentDiv,
             canvas,
             tipCtx,
-            tipCanvas;
+            tipCanvas,
+            $canvas,
+            w,
+            h;
 
         this.$container = $('<div class="igv-karyo-div">');
         $parent.append(this.$container);
-
-        if (true === config.showKaryo) {
-            this.$container.show();
-        } else {
-            this.$container.hide();
-        }
 
         this.$karyoPanelToggle = igv.makeToggleButton('Karyotype Panel', 'Karyotype Panel', 'showKaryo', function () {
             return self.$container;
@@ -52,13 +45,22 @@ var igv = (function (igv) {
         this.ideograms = null;
         igv.guichromosomes = [];
 
-        contentDiv = $('<div class="igv-karyo-content-div"></div>')[0];
-        this.$container.append(contentDiv);
+        this.$content = $('<div class="igv-karyo-content-div"></div>');
+        this.$container.append(this.$content);
+        contentDiv = this.$content.get(0);
 
-        canvas = $('<canvas class="igv-karyo-canvas"></canvas>')[0];
-        $(contentDiv).append(canvas);
-        canvas.setAttribute('width', contentDiv.offsetWidth);
-        canvas.setAttribute('height', contentDiv.offsetHeight);
+        $canvas = $('<canvas class="igv-karyo-canvas">');
+        $(contentDiv).append($canvas);
+        canvas = $canvas.get(0);
+
+        w = this.$content.width();
+        h = this.$content.height();
+
+        canvas.style.width = (w + 'px');
+        canvas.setAttribute('width', w);
+
+        canvas.style.height = (h + 'px');
+        canvas.setAttribute('height', h);
 
         this.canvas = canvas;
         this.ctx = canvas.getContext("2d");
@@ -86,12 +88,10 @@ var igv = (function (igv) {
                 if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
                     var dy = mouseY - g.y;
                     var bp = Math.round(g.size * dy / g.h);
-                    //log("Found chr "+g.name+", bp="+bp+", mousex="+mouseX+", mousey="+mouseY);
+
                     tipCanvas.style.left = Math.round(mouseX + 20) + "px";
                     tipCanvas.style.top = Math.round(mouseY - 5) + "px";
 
-                    //log("width/height of tip canvas:"+tipCanvas.width+"/"+tipCanvas.height);
-                    //log("tipCanvas.left="+tipCanvas.style.left);
                     tipCtx.clearRect(0, 0, tipCanvas.width, tipCanvas.height);
                     tipCtx.fillStyle = 'rgb(255,255,220)';
                     tipCtx.fillRect(0, 0, tipCanvas.width, tipCanvas.height);
@@ -108,27 +108,26 @@ var igv = (function (igv) {
         };
 
         this.canvas.onclick = function (e) {
-
             var mouseCoords = igv.translateMouseCoordinates(e, canvas);
-            var mouseX = mouseCoords.x;
-            var mouseY = mouseCoords.y;
-            igv.navigateKaryo(mouseX, mouseY);
+            igv.navigateKaryo(mouseCoords.x, mouseCoords.y);
         }
 
     };
 
     // Move location of the reference panel by clicking on the genome ideogram
     igv.navigateKaryo = function (mouseX, mouseY) {
-        // check each chromosome if the coordinates are within its bound
-        for (var i = 0; i < igv.guichromosomes.length; i++) {
-            var g = igv.guichromosomes[i];
-            if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
-                var dy = mouseY - g.y;
-                var center = Math.round(g.size * dy / g.h);
-                log("Going to position " + center);
+        var i,
+            g,
+            dy,
+            center;
 
-                // the goto() signature is chr, start, end. We leave end undefined changing
-                // the interpretation of start to the center of the locus extent.
+        for (i = 0; i < igv.guichromosomes.length; i++) {
+
+            g = igv.guichromosomes[i];
+
+            if (g.x < mouseX && g.right > mouseX && g.y < mouseY && g.bottom > mouseY) {
+                dy = mouseY - g.y;
+                center = Math.round(g.size * dy / g.h);
                 igv.browser.goto(g.name, center, undefined);
                 break;
             }
@@ -139,53 +138,34 @@ var igv = (function (igv) {
 
     igv.KaryoPanel.prototype.resize = function () {
 
-        var canvas;
+        var w,
+            h;
 
-        if (undefined === igv.browser.genomicStateList) {
-            // console.log('karyo - resize: undefined === igv.browser.genomicStateList. Bail.');
-            return;
-        }
+        w = this.$content.width();
+        h = this.$content.height();
 
-        // if (_.size(igv.browser.genomicStateList) > 1) {
-        //     return;
-        // }
+        this.canvas.style.width = (w + 'px');
+        this.canvas.setAttribute('width', w);
 
-        canvas = this.canvas;
-        canvas.setAttribute('width', canvas.clientWidth);    //Must set the width & height of the canvas
-        canvas.setAttribute('height', canvas.clientHeight);
-        log("Resize called: width=" + canvas.clientWidth + "/" + canvas.clientHeight);
+        this.canvas.style.height = (h + 'px');
+        this.canvas.setAttribute('height', h);
+
         this.ideograms = undefined;
         this.repaint();
     };
 
     igv.KaryoPanel.prototype.repaint = function () {
 
-        if(this.canvasWidth === undefined|| this.canvasHeight === undefined) return;
-
-        var genome,
+        var chr,
             genomicState,
             referenceFrame,
             stainColors,
             w,
             h;
 
-
-        if (undefined === igv.browser.genomicStateList) {
-            // console.log('karyo - repaint: undefined === igv.browser.genomicStateList. Bail');
+        if(!igv.browser.genome.ideograms) {
             return;
         }
-
-        // if (_.size(igv.browser.genomicStateList) > 1) {
-        //     return;
-        // }
-
-        genome = igv.browser.genome;
-
-        if(!genome.ideograms) {
-            // console.log('karyo - no ideograms defined');
-            return;
-        }
-
 
         genomicState = _.first(igv.browser.genomicStateList);
         referenceFrame = genomicState.referenceFrame;
@@ -196,18 +176,18 @@ var igv = (function (igv) {
 
         this.ctx.clearRect(0, 0, w, h);
 
-        if (!(genome && referenceFrame && genome.chromosomes && referenceFrame.chrName)) {
+        if (!(igv.browser.genome && referenceFrame && igv.browser.genome.chromosomes && referenceFrame.chrName)) {
             return;
         }
 
-        var chromosomes = genome.chromosomes;
+        var chromosomes = igv.browser.genome.chromosomes;
         var image = this.ideograms;
 
 
         if (chromosomes.length < 1) {
-            log("No chromosomes yet, returning");
             return;
         }
+
         var nrchr = 24;
         var nrrows = 1;
         if (w < 300) nrrows = 2;
@@ -220,15 +200,15 @@ var igv = (function (igv) {
         var top = 25;
         var chrheight = ((h-25) / nrrows) - top;
 
-        var longestChr = genome.getLongestChromosome();
-        var cytobands = genome.getCytobands(longestChr.name);      // Longest chr
+        var longestChr = igv.browser.genome.getLongestChromosome();
+        var cytobands = igv.browser.genome.getCytobands(longestChr.name);      // Longest chr
 
         if(!cytobands) return;    // Cytobands not defined.
 
         var me = this;
         var maxLen = cytobands[cytobands.length - 1].end;
 
-        if (!image || image == null) {
+        if (!image || image === null) {
             drawImage.call(this);
         }
 
@@ -238,11 +218,9 @@ var igv = (function (igv) {
         this.ctx.save();
 
         // Translate chr to official name
-        var chr = referenceFrame.chrName;
-        if (this.genome) {
-            chr = this.genome.getChromosomeName(chr);
-        }
+        chr = igv.browser.genome.getChromosomeName( referenceFrame.chrName );
         var chromosome = igv.browser.genome.getChromosome(chr);
+
         if (chromosome) {
             var ideoScale = longestChr.bpLength / chrheight;   // Scale in bp per pixels
 
@@ -255,59 +233,74 @@ var igv = (function (igv) {
             this.ctx.strokeRect(chromosome.x - 3, boxPY1, chrwidth + 6, boxHeight + 6);
             this.ctx.restore();
         }
-        else log("Could not find chromosome " + chr);
-
 
         function drawImage() {
+            var i,
+                bufferCtx,
+                nr,
+                col,
+                row,
+                y,
+                chromosome,
+                guichrom,
+                chr;
+
             image = document.createElement('canvas');
             image.width = w;
-
             image.height = h;
-            var bufferCtx = image.getContext('2d');
-            var nr = 0;
-            var col = 0;
-            var row = 1;
-            var y = top;
+
+            bufferCtx = image.getContext('2d');
+            nr = 0;
+            col = 0;
+            row = 1;
+            y = top;
+
             igv.guichromosomes = [];
             for (chr in chromosomes) {
-                if (nr > nrchr) break;
-                if (row == 1 && nrrows == 2 && nr + 1 > nrchr / 2) {
+
+                if (nr > nrchr) {
+                    break;
+                }
+
+                if (row === 1 && nrrows === 2 && nr + 1 > nrchr / 2) {
                     row = 2;
                     col = 0;
                     y = y + chrheight + top;
                 }
+
                 nr++;
                 col++;
-                //log("Found chr "+chr);
-                var chromosome = genome.getChromosome(chr);
-                if (chr == 'chrM' && !chromosome.bpLength) chromosome.bpLength = 16000;
+
+                chromosome = igv.browser.genome.getChromosome(chr);
+
+                if (chr === 'chrM' && !chromosome.bpLength) {
+                    chromosome.bpLength = 16000;
+                }
+
                 chromosome.x = col * totalchrwidth;
                 chromosome.y = y;
 
-                var guichrom = new Object();
+                guichrom = {};
                 guichrom.name = chr;
+
                 igv.guichromosomes.push(guichrom);
 
                 drawIdeogram(guichrom, chromosome.x, chromosome.y, chromosome, bufferCtx, chrwidth, chrheight, maxLen);
 
             }
+
             this.ideograms = image;
 
-            // now add some tracks?
-            log("============= PROCESSING " + igv.browser.trackViews.length + " TRACKS");
             var tracknr = 0;
-            for (var i = 0; i < igv.browser.trackViews.length; i++) {
+            for (i = 0; i < igv.browser.trackViews.length; i++) {
                 var trackPanel = igv.browser.trackViews[i];
                 var track = trackPanel.track;
                 if (track.getSummary && track.loadSummary) {
-                    log("Found track with summary: " + track.name);
-
                     var source = track;
 
                     window.source = track;
                     source.loadSummary("chr1", 0, 1000000, function (featureList) {
                         if (featureList) {
-                            //log("Got summary feature list, will add to karyo track")
                             nr = 0;
                             for (chr in chromosomes) {
                                 var guichrom = igv.guichromosomes[nr];
@@ -318,9 +311,6 @@ var igv = (function (igv) {
                                 }
                             }
                         }
-                        else {
-                            //  log("Track and chr "+chr+" has no summary features");
-                        }
                     });
                     tracknr++;
                 }
@@ -328,182 +318,176 @@ var igv = (function (igv) {
         }
 
         function drawFeatures(source, featurelist, guichrom, ideogramLeft, top, bufferCtx, ideogramWidth, ideogramHeight, longestChr, tracknr) {
-            if (!genome) {
-                //log("no genome");
-                return;
-            }
-            if (!guichrom) {
-                //log("no chromosome");
-                return;
-            }
-            if (!featurelist) {
-                //log("Found no summary features on "+guichrom );
-                return;
-            }
-            var len = featurelist.length;
-            if (len == 0) {
-                //log("Found no summary features on "+guichrom );
-                return;
-            }
-            var scale = ideogramHeight / longestChr;
-            //  log("drawing " + len + " feaures of chrom " + guichrom.name);
-            var dx = 1;
-            for (var i = 0; i < featurelist.length; i++) {
-                var feature = featurelist[i];
-                var color = 'rgb(0,0,150)';
-                var value = feature.score;
-                if (source.getColor) {
-                    color = source.getColor(value);
-                    // log("got color: "+color+" for value "+value);
-                }
+            var i,
+                scale,
+                feature,
+                color,
+                value,
+                dx,
+                starty,
+                endy,
+                dy;
 
-                var starty = scale * feature.start + top;
-                var endy = scale * feature.end + top;
-                var dy = Math.max(0.01, endy - starty);
-                //    if (i < 3) log("Drawing feature  " + feature.start + "-" + feature.end + " -> " + starty + ", dy=" + dy);
-                bufferCtx.fillStyle = color; //g2D.setColor(getCytobandColor(cytoband));
-                bufferCtx.fillRect(ideogramLeft + ideogramWidth + tracknr * 2 + 1, starty, dx, dy);
+            if (igv.browser.genome && guichrom && featurelist && featurelist.length > 0) {
+
+                scale = ideogramHeight / longestChr;
+                dx = 1;
+
+                for (i = 0; i < featurelist.length; i++) {
+
+                    feature = featurelist[i];
+                    color = 'rgb(0,0,150)';
+                    value = feature.score;
+
+                    if (source.getColor) {
+                        color = source.getColor(value);
+                    }
+
+                    starty = scale * feature.start + top;
+                    endy = scale * feature.end + top;
+                    dy = Math.max(0.01, endy - starty);
+
+                    bufferCtx.fillStyle = color;
+                    bufferCtx.fillRect(ideogramLeft + ideogramWidth + tracknr * 2 + 1, starty, dx, dy);
+
+                }
 
             }
         }
 
         function drawIdeogram(guichrom, ideogramLeft, top, chromosome, bufferCtx, ideogramWidth, ideogramHeight, longestChr) {
+            var i,
+                cytobands,
+                centerx,
+                xC,
+                yC,
+                scale,
+                last,
+                lastPY,
+                MINH,
+                starty,
+                endy,
+                dy,
+                r,
+                name;
 
-            if (!genome) return;
-            if (!chromosome) return;
+            if (igv.browser.genome && chromosome) {
+                cytobands = igv.browser.genome.getCytobands(chromosome.name);
 
-            var cytobands = genome.getCytobands(chromosome.name);
+                if (cytobands) {
 
-            if (cytobands) {
+                    centerx = (ideogramLeft + ideogramWidth / 2);
+                    xC = [];
+                    yC = [];
+                    scale = ideogramHeight / longestChr;
 
-                var centerx = (ideogramLeft + ideogramWidth / 2);
-
-                var xC = [];
-                var yC = [];
-
-                var len = cytobands.length;
-                if (len == 0) {
-                    //log("Chr "+JSON.stringify(chromosome)+" has no length");
-                    //return;
-                }
-                var scale = ideogramHeight / longestChr;
-
-                guichrom.x = ideogramLeft;
-                guichrom.y = top;
-                guichrom.w = ideogramWidth;
-                guichrom.right = ideogramLeft + ideogramWidth;
-                var last = 0;
-                var lastPY = -1;
-                if (len > 0) {
-                    last = cytobands[len - 1].end;
-                    guichrom.h = scale * last;
-                    guichrom.size = last;
-                }
-                else {
-                    var MINH = 5;
-                    lastPY = top + MINH;
-                    guichrom.h = MINH;
-                    guichrom.size = MINH / scale;
-                }
-
-                guichrom.longest = longestChr;
-                guichrom.bottom = top + guichrom.h;
-
-                if (len > 0) {
-                    for (var i = 0; i < cytobands.length; i++) {
-                        var cytoband = cytobands[i];
-
-                        var starty = scale * cytoband.start + top;
-                        var endy = scale * cytoband.end + top;
-                        if (endy > lastPY) {
-                            if (cytoband.type == 'c') { // centermere: "acen"
-                                if (cytoband.name.charAt(0) == 'p') {
-                                    yC[0] = starty;
-                                    xC[0] = ideogramWidth + ideogramLeft;
-                                    yC[1] = starty;
-                                    xC[1] = ideogramLeft;
-                                    yC[2] = endy;
-                                    xC[2] = centerx;
-                                } else {
-                                    yC[0] = endy;
-                                    xC[0] = ideogramWidth + ideogramLeft;
-                                    yC[1] = endy;
-                                    xC[1] = ideogramLeft;
-                                    yC[2] = starty;
-                                    xC[2] = centerx;
-                                }
-                                // centromer: carl wants another color
-                                bufferCtx.fillStyle = "rgb(220, 150, 100)"; //g2D.setColor(Color.RED.darker());
-                                bufferCtx.strokeStyle = "rgb(150, 0, 0)"; //g2D.setColor(Color.RED.darker());
-                                bufferCtx.polygon(xC, yC, 1, 0);
-                                // g2D.fillPolygon(xC, yC, 3);
-                            } else {
-                                var dy = endy - starty;
-
-                                bufferCtx.fillStyle = getCytobandColor(cytoband); //g2D.setColor(getCytobandColor(cytoband));
-                                bufferCtx.fillRect(ideogramLeft, starty, ideogramWidth, dy);
-                            }
-                        }
-
-                        lastPY = endy;
+                    guichrom.x = ideogramLeft;
+                    guichrom.y = top;
+                    guichrom.w = ideogramWidth;
+                    guichrom.right = ideogramLeft + ideogramWidth;
+                    last = 0;
+                    lastPY = -1;
+                    if (cytobands.length > 0) {
+                        last = cytobands[cytobands.length - 1].end;
+                        guichrom.h = scale * last;
+                        guichrom.size = last;
+                    } else {
+                        MINH = 5;
+                        lastPY = top + MINH;
+                        guichrom.h = MINH;
+                        guichrom.size = MINH / scale;
                     }
 
+                    guichrom.longest = longestChr;
+                    guichrom.bottom = top + guichrom.h;
+
+                    if (cytobands.length > 0) {
+                        for (i = 0; i < cytobands.length; i++) {
+
+                            starty = scale * cytobands[i].start + top;
+                            endy = scale * cytobands[i].end + top;
+                            if (endy > lastPY) {
+                                if (cytobands[i].type === 'c') {
+                                    if (cytobands[i].name.charAt(0) === 'p') {
+                                        yC[0] = starty;
+                                        xC[0] = ideogramWidth + ideogramLeft;
+                                        yC[1] = starty;
+                                        xC[1] = ideogramLeft;
+                                        yC[2] = endy;
+                                        xC[2] = centerx;
+                                    } else {
+                                        yC[0] = endy;
+                                        xC[0] = ideogramWidth + ideogramLeft;
+                                        yC[1] = endy;
+                                        xC[1] = ideogramLeft;
+                                        yC[2] = starty;
+                                        xC[2] = centerx;
+                                    }
+                                    bufferCtx.fillStyle = "rgb(220, 150, 100)";
+                                    bufferCtx.strokeStyle = "rgb(150, 0, 0)";
+                                    bufferCtx.polygon(xC, yC, 1, 0);
+                                } else {
+                                    dy = endy - starty;
+                                    bufferCtx.fillStyle = getCytobandColor(cytobands[i]);
+                                    bufferCtx.fillRect(ideogramLeft, starty, ideogramWidth, dy);
+                                }
+                            }
+
+                            lastPY = endy;
+                        }
+
+                    }
                 }
+
+                bufferCtx.fillStyle = null;
+                bufferCtx.lineWidth = 1;
+                bufferCtx.strokeStyle = "darkgray";
+
+                r = ideogramWidth / 2;
+                bufferCtx.roundRect(ideogramLeft, top - r / 2, ideogramWidth, lastPY - top + r, ideogramWidth / 2, 0, 1);
+
+                bufferCtx.font = "bold 10px Arial";
+                bufferCtx.fillStyle = "rgb(0, 0, 0)";
+
+                name = chromosome.name;
+                if (name.length > 3) {
+                    name = name.substring(3);
+                }
+                bufferCtx.fillText(name, ideogramLeft + ideogramWidth / 2 - 3 * name.length, top - 10);
+
             }
-            bufferCtx.fillStyle = null;
-            bufferCtx.lineWidth = 1;
-            bufferCtx.strokeStyle = "darkgray";
-            var r = ideogramWidth / 2;
-            bufferCtx.roundRect(ideogramLeft, top - r / 2, ideogramWidth, lastPY - top + r, ideogramWidth / 2, 0, 1);
-
-            // draw chromosome name
-
-            bufferCtx.font = "bold 10px Arial";
-            bufferCtx.fillStyle = "rgb(0, 0, 0)";
-            var name = chromosome.name;
-            if (name.length > 3) name = name.substring(3);
-            //log("Drawing chr name "+name+" at "+(ideogramLeft + ideogramWidth / 2 - 3*name.length));
-            bufferCtx.fillText(name, ideogramLeft + ideogramWidth / 2 - 3 * name.length, top - 10);
         }
 
         function getCytobandColor(data) {
-            if (data.type == 'c') { // centermere: "acen"
+            var stain,
+                shade;
+
+            if (data.type === 'c') {
                 return "rgb(150, 10, 10)"
-
             } else {
-                var stain = data.stain; // + 4;
+                stain = data.stain;
+                shade = 230;
 
-                var shade = 230;
-                if (data.type == 'p') {
+                if (data.type === 'p') {
                     shade = Math.floor(230 - stain / 100.0 * 230);
                 }
-                var c = stainColors[shade];
-                if (c == null) {
-                    c = "rgb(" + shade + "," + shade + "," + shade + ")";
-                    stainColors[shade] = c;
-                }
-                //log("Got color: "+c);
-                return c;
 
+                if (undefined === stainColors[ shade ]) {
+                    stainColors[ shade ] = "rgb(" + shade + "," + shade + "," + shade + ")";
+                }
+
+                return stainColors[ shade ];
             }
         }
 
         function loadfeatures(source, chr, start, end, guichrom, bufferCtx, tracknr) {
-            //log("=== loadfeatures of chr " + chr + ", x=" + guichrom.x);
 
             source.getSummary(chr, start, end, function (featureList) {
-                var len;
                 if (featureList) {
-                    len = featureList.length;
-                    //log(" -->- loaded: chrom " + chr + " with " + len + " summary features, drawing them");
                     drawFeatures(source, featureList, guichrom, guichrom.x, guichrom.y, bufferCtx, chrwidth, chrheight, maxLen, tracknr);
                     me.repaint();
                 }
-                else {
-                    //log("Track and chr "+chr+" has no summary features yet");
-                }
             });
-
         }
 
     };
