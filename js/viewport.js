@@ -20,6 +20,7 @@ var igv = (function (igv) {
 
         $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
+
         $div.height(this.$viewport.height());
 
         this.canvas = $('<canvas>')[0];
@@ -36,21 +37,24 @@ var igv = (function (igv) {
 
         if (trackView.track instanceof igv.RulerTrack) {
             trackView.track.appendWholeGenomeContainer($(this.contentDiv));
-            trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
-        }
+            trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
+            trackView.track.addRulerSweeperWithGenomicState(genomicState, this, this.$viewport, $(this.contentDiv));
+        } else {
+            addMouseHandlers.call(this);
 
-        if (trackView.track instanceof igv.RulerTrack) {
+            dimen = Math.min(32, this.$viewport.height());
+            $spinner = $('<div class="igv-viewport-spinner">');
+            $spinner.css({'font-size': dimen + 'px'});
 
-            this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
-            $(this.contentDiv).append(this.$rulerLabel);
+            // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
+            $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
+            this.$viewport.append($spinner);
+            this.stopSpinner();
+            this.popover = new igv.Popover(igv.browser.$content);
 
-            this.$rulerLabel.click(function (e) {
-                igv.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
-            });
         }
 
         createZoomInNotice.call(this, $(this.contentDiv));
-
         $(this.contentDiv).append(self.$zoomInNotice);
 
         if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
@@ -62,9 +66,7 @@ var igv = (function (igv) {
             }
 
             $trackLabel = $('<div class="igv-track-label">');
-
             $trackLabel.html(trackView.track.name);
-
             $trackLabel.click(function (e) {
                 self.popover.presentContent(e.pageX, e.pageY, description);
             });
@@ -77,31 +79,11 @@ var igv = (function (igv) {
 
         }
 
-        if (trackView.track instanceof igv.RulerTrack) {
-            // do nothing
-        } else {
-            this.addMouseHandlers();
-
-            dimen = this.$viewport.height();
-            if (dimen > 32) {
-                dimen = 32;
-            }
-
-            $spinner = $('<div class="igv-viewport-spinner">');
-            $spinner.css({'font-size': dimen + 'px'});
-
-            // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
-            $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
-            this.$viewport.append($spinner);
-            this.stopSpinner();
-
-            this.popover = new igv.Popover(igv.browser.$content);
-
-        }
-
-        if (trackView.track instanceof igv.RulerTrack) {
-            trackView.track.addRulerSweeperWithGenomicState(this, genomicState);
-        }
+        this.canvas = $('<canvas>')[0];
+        $(this.contentDiv).append(this.canvas);
+        this.canvas.width = this.contentDiv.clientWidth;
+        this.canvas.height = this.contentDiv.clientHeight;
+        this.ctx = this.canvas.getContext("2d");
 
     };
 
@@ -228,7 +210,7 @@ var igv = (function (igv) {
             refFrameStart,
             refFrameEnd,
             drawConfiguration,
-            buffer;
+            newCanvas;
 
         if (!(viewIsReady.call(this))) {
             return;
@@ -246,10 +228,16 @@ var igv = (function (igv) {
 
         chr = referenceFrame.chrName;
         refFrameStart = referenceFrame.start;
-        refFrameEnd = refFrameStart + referenceFrame.toBP(this.canvas.width);
+        refFrameEnd = refFrameStart + referenceFrame.toBP($(self.contentDiv).width());
 
         // Paint existing cached image, if any, while data loads.
-        this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
+        //this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
+
+        if (self.canvas && self.tile && self.tile.chr === chr && self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
+            var pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
+            self.canvas.style.left = pixelOffset + "px";
+        }
+
 
         if (!tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
@@ -259,13 +247,15 @@ var igv = (function (igv) {
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
 
-            pixelWidth = 3 * this.canvas.width;
-            bpWidth = referenceFrame.toBP(pixelWidth);
+            pixelWidth = $(self.contentDiv).width() * 3;
+            bpWidth = pixelWidth * referenceFrame.bpPerPixel;
             bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
             bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
             // Adjust pixel width in case bounds were clamped
-            pixelWidth = (bpEnd - bpStart) / referenceFrame.bpPerPixel;
+            pixelWidth = +((bpEnd - bpStart) / referenceFrame.bpPerPixel);
+            var pixelHeight = self.getContentHeight();
+
 
             if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
                 return;
@@ -275,26 +265,39 @@ var igv = (function (igv) {
 
             self.startSpinner();
 
+            var newCanvas, ctx;
+
             // console.log('get features');
             getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
-
                     var roiPromises;
 
                     self.loading = undefined;
 
                     self.stopSpinner();
 
-                    buffer = document.createElement('canvas');
-                    buffer.width = pixelWidth;
-                    buffer.height = self.canvas.height;
+                    var devixePixelRatio = window.devicePixelRatio;
+                    newCanvas = $('<canvas>').get(0);
+                    newCanvas.style.width = pixelWidth + "px";
+                    newCanvas.style.height = pixelHeight + "px";
+                    newCanvas.width = devixePixelRatio * pixelWidth;
+                    newCanvas.height = devixePixelRatio * pixelHeight;
+                    ctx = newCanvas.getContext("2d");
+                    ctx.scale(devixePixelRatio, devixePixelRatio);
+
+                    var pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+                    newCanvas.style.position = 'absolute';
+                    newCanvas.style.left = pixelOffset + "px";
+                    newCanvas.style.top = self.canvas.style.top + "px";
+
+
                     drawConfiguration =
                     {
                         features: features,
-                        context: buffer.getContext('2d'),
-                        pixelWidth: buffer.width,
-                        pixelHeight: buffer.height,
+                        context: ctx,
+                        pixelWidth: pixelWidth,
+                        pixelHeight: pixelHeight,
                         bpStart: bpStart,
                         bpEnd: bpEnd,
                         bpPerPixel: referenceFrame.bpPerPixel,
@@ -344,8 +347,15 @@ var igv = (function (igv) {
 
                 .then(function (ignore) {
 
-                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, buffer);
-                    self.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
+                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
+
+                    if (self.canvas) {
+                        $(self.canvas).remove();
+                    }
+
+                    self.canvas = newCanvas;
+                    self.ctx = ctx;
+                    $(self.contentDiv).append(newCanvas);
                 })
 
                 .catch(function (error) {
@@ -499,8 +509,35 @@ var igv = (function (igv) {
         a.click();
     }
 
+    var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
+        this.chr = chr;
+        this.startBP = tileStart;
+        this.endBP = tileEnd;
+        this.bpPerPixel = bpPerPixel;
+        this.image = image;
+    };
 
-    igv.Viewport.prototype.addMouseHandlers = function () {
+    Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
+        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
+    };
+
+    Tile.prototype.overlapsRange = function (chr, start, end) {
+        return this.chr === chr && end >= this.startBP && start <= this.endBP;
+    };
+
+    var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
+        this.chr = chr;
+        this.startBP = tileStart;
+        this.endBP = tileEnd;
+        this.bpPerPixel = bpPerPixel;
+        this.features = features;
+    };
+
+    CachedFeatures.prototype.containsRange = function (chr, start, end, bpPerPixel) {
+        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
+    };
+
+    function addMouseHandlers() {
 
         var self = this,
             referenceFrame,
@@ -508,15 +545,13 @@ var igv = (function (igv) {
             isDragging,
             lastMouseX,
             mouseDownX,
-            canvasMouseDownX,
             lastClickTime,
             popupTimer;
 
-        referenceFrame = lastMouseX = mouseDownX = undefined;
         isMouseDown = isDragging = false;
+        lastClickTime = 0;
 
-
-        self.canvas.addEventListener("contextmenu", function (e) {
+        this.$viewport.on("contextmenu", function (e) {
 
             var trackLocationState,
                 menuItems;
@@ -536,12 +571,14 @@ var igv = (function (igv) {
                 y: trackLocationState.y
             };
 
+            // Track specific items
             menuItems = [];
             if (typeof self.trackView.track.contextMenuItemList === "function") {
                 menuItems = self.trackView.track.contextMenuItemList(config);
             }
 
-            if(menuItems.length > 0) {
+            // Add items common to all tracks
+            if (menuItems.length > 0) {
                 menuItems.push({label: $('<HR>')});
             }
             menuItems.push(
@@ -555,9 +592,8 @@ var igv = (function (igv) {
             self.popover.presentTrackContextMenu(e, menuItems);
             e.preventDefault();
         });
-        
 
-        this.$viewport.on('mousedown.viewport.pan', function (e) {
+        this.$viewport.on('mousedown', function (e) {
 
             var coords;
 
@@ -575,7 +611,7 @@ var igv = (function (igv) {
             referenceFrame = self.genomicState.referenceFrame;
         });
 
-        this.$viewport.on('mousemove.viewport.pan', igv.throttle(function (e) {
+        this.$viewport.on('mousemove', igv.throttle(function (e) {
 
             var chromosome,
                 coords,
@@ -623,21 +659,24 @@ var igv = (function (igv) {
 
         }, 10));
 
-        this.$viewport.on('mouseup.viewport.pan', mouseUpOrOut);
+        this.$viewport.on('mouseleave', function (e) {
 
-        this.$viewport.on('mouseleave.viewport.pan', mouseUpOrOut);
-
-        $(self.canvas).on('mousedown.viewport.canvas', function (e) {
             e.preventDefault();
-            canvasMouseDownX = igv.translateMouseCoordinates(e, self.canvas).x;
-            // console.log('canvas x ' + canvasMouseDownX);
+
+            if (true === isDragging) {
+                igv.browser.fireEvent('trackdragend');
+                isDragging = false;
+            }
+            isMouseDown = false;
+            mouseDownX = lastMouseX = undefined;
+            isDragging = false
+            referenceFrame = undefined;
         });
 
+        this.$viewport.on('mouseup', function (e) {
 
-        lastClickTime = 0;
-        $(self.canvas).on('click.viewport.canvas', function (e) {
-
-            var canvasMouseX,
+            var mouseX,
+                canvasMouseX,
                 frame,
                 location,
                 time,
@@ -648,7 +687,9 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            // console.log('click.viewport.canvas');
+            mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+
+            if(mouseDownX === undefined || Math.abs(mouseX - mouseDownX) < igv.browser.constants.dragThreshold) return;
 
             canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
             frame = self.genomicState.referenceFrame;
@@ -659,128 +700,77 @@ var igv = (function (igv) {
             if (time - lastClickTime < igv.browser.constants.doubleClickDelay) {
 
                 // double-click
-
                 if (popupTimer) {
                     window.clearTimeout(popupTimer);
                     popupTimer = undefined;
                 }
 
-                if (igv.browser.minimumBasesExtent() > Math.floor(self.$viewport.width() * frame.bpPerPixel / 2.0)) {
 
-                    // do nothing
+                newCenter = Math.round(frame.start + canvasMouseX * frame.bpPerPixel);
+                if ('all' === frame.chrName.toLowerCase()) {
 
-                } else {
-                    newCenter = Math.round(frame.start + canvasMouseX * frame.bpPerPixel);
-                    if ('all' === frame.chrName.toLowerCase()) {
+                    chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
 
-                        chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
-
-                        if (1 === igv.browser.genomicStateList.length) {
-                            string = chr;
-                        } else {
-                            loci = igv.browser.genomicStateList.map(function (g) {
-                                return g.locusSearchString;
-                            });
-                            loci[igv.browser.genomicStateList.indexOf(self.genomicState)] = chr;
-                            string = loci.join(' ');
-                        }
-
-                        igv.browser.search(string);
-
+                    if (1 === igv.browser.genomicStateList.length) {
+                        string = chr;
                     } else {
-                        frame.bpPerPixel /= 2;
-                        frame.start = Math.round((newCenter + frame.start) / 2.0);
-                        igv.browser.updateWithGenomicState(self.genomicState);
+                        loci = igv.browser.genomicStateList.map(function (g) {
+                            return g.locusSearchString;
+                        });
+                        loci[igv.browser.genomicStateList.indexOf(self.genomicState)] = chr;
+                        string = loci.join(' ');
                     }
 
+                    igv.browser.search(string);
+
+                } else {
+                    igv.browser.zoomIn(newCenter);
                 }
+
 
             } else {
 
                 if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-
                     self.trackView.track.shiftClick(location, e);
-                } else if (Math.abs(canvasMouseX - canvasMouseDownX) <= igv.browser.constants.dragThreshold && self.trackView.track.popupData) {
+                } else if (typeof self.trackView.track.popupData === "function") {
 
                     popupTimer = window.setTimeout(function () {
 
                             self.popover.presentTrackPopup(e, self);
-
-                            canvasMouseDownX = undefined;
                             popupTimer = undefined;
                         },
                         igv.browser.constants.doubleClickDelay);
                 }
             }
 
-            canvasMouseDownX = undefined;
+            isMouseDown = false;
+            mouseDownX = lastMouseX = undefined;
+            isDragging = false
             lastClickTime = time;
         });
 
-        function mouseUpOrOut(e) {
 
-            e.preventDefault();
+        function createTrackLocationState(e, viewport) {
 
-            if (true === isDragging) {
-                igv.browser.fireEvent('trackdragend');
-                isDragging = false;
+            var referenceFrame = viewport.genomicState.referenceFrame,
+                genomicLocation,
+                canvasCoords,
+                xOrigin;
+
+            canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
+            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+
+            if (undefined === genomicLocation || null === viewport.tile) {
+                return undefined;
             }
 
-            isMouseDown = false;
-            mouseDownX = lastMouseX = undefined;
-            referenceFrame = undefined;
+            xOrigin = Math.round(referenceFrame.toPixels((viewport.tile.startBP - referenceFrame.start)));
+
+            return {genomicLocation: genomicLocation, x: canvasCoords.x - xOrigin, y: canvasCoords.y}
+
         }
-
     };
 
-
-    var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
-        this.chr = chr;
-        this.startBP = tileStart;
-        this.endBP = tileEnd;
-        this.bpPerPixel = bpPerPixel;
-        this.image = image;
-    };
-
-    Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
-        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
-    };
-
-    Tile.prototype.overlapsRange = function (chr, start, end) {
-        return this.chr === chr && end >= this.startBP && start <= this.endBP;
-    };
-
-    var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
-        this.chr = chr;
-        this.startBP = tileStart;
-        this.endBP = tileEnd;
-        this.bpPerPixel = bpPerPixel;
-        this.features = features;
-    };
-
-    CachedFeatures.prototype.containsRange = function (chr, start, end, bpPerPixel) {
-        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
-    };
-
-    function createTrackLocationState(e, viewport) {
-
-        var referenceFrame = viewport.genomicState.referenceFrame,
-            genomicLocation,
-            canvasCoords,
-            xOrigin;
-
-        canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
-        genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-
-        if (undefined === genomicLocation || null === viewport.tile) {
-            return undefined;
-        }
-
-        xOrigin = Math.round(referenceFrame.toPixels((viewport.tile.startBP - referenceFrame.start)));
-
-        return {genomicLocation: genomicLocation, x: canvasCoords.x - xOrigin, y: canvasCoords.y}
-
-    }
 
     return igv;
 
