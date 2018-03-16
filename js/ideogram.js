@@ -45,20 +45,21 @@ var igv = (function (igv) {
         });
     };
 
-    function addBorders($ideogram, locusIndex, lociCount) {
+    function addBorders($ideogram, index, length) {
 
-        if (1 === lociCount || locusIndex === lociCount - 1) {
-            return;
-        }
+        // if (index < length && (1 + index !== length)) {
+        //     $ideogram.addClass('igv-ideogram-content-div-border-right');
+        // } else {
+        //     $ideogram.removeClass('igv-ideogram-content-div-border-right');
+        // }
 
-        $ideogram.addClass('igv-ideogram-content-div-border-right');
     }
 
     igv.IdeoPanel.prototype.setWidth = function (width, doRepaint) {
 
         this.panels.forEach(function (panel) {
-            panel.$ideogram.width(width);
             panel.$canvas.attr('width', width);
+            panel.$ideogram.width(width);
             panel.ideograms = {};
         });
 
@@ -69,18 +70,7 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.resize = function () {
-
-        var viewportContainerWidth;
-
-        viewportContainerWidth = igv.browser.viewportContainerWidth();
-        _.each(this.panels, function(panel, index) {
-            var genomicState = igv.browser.genomicStateList[ index ];
-            panel.$ideogram.width(Math.floor(viewportContainerWidth/igv.browser.genomicStateList.length));
-            panel.$canvas.attr('width', panel.$ideogram.width());
-            panel.ideograms = {};
-        });
-
-        this.repaint();
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true)
     };
 
     igv.IdeoPanel.prototype.repaint = function () {

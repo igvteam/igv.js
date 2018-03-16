@@ -272,6 +272,9 @@ $drag-drop-warning-color: red;
 
 #igv-content-header {
 
+  position: relative;
+  clear: both;
+
   white-space: nowrap;
 
   .igv-ideogram-left-shim {
@@ -306,7 +309,8 @@ $drag-drop-warning-color: red;
   }
 
   .igv-ideogram-content-div-border-right {
-    border-right-color: white;
+    //border-right-color: white;
+    border-right-color: #ff0000;
     border-right-style: solid;
     border-right-width: 4px;
   }
@@ -405,8 +409,8 @@ $drag-drop-warning-color: red;
 }
 
 .igv-viewport-div-border-right {
-  border-right-color: white;
-  //border-right-color: #00ff00;
+  //border-right-color: white;
+  border-right-color: #00ff00;
   border-right-style: solid;
   border-right-width: 4px;
 }
