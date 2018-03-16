@@ -345,10 +345,11 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.resize = function () {
-        var self = this;
+        var width;
 
+        width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
         this.viewports.forEach(function (viewport) {
-            viewport.resize();
+            viewport.setWidth(width);
         });
 
         this.update();
