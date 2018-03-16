@@ -22,14 +22,7 @@ var igv = (function (igv) {
         this.$viewport.append($div);
 
         $div.height(this.$viewport.height());
-
-        this.canvas = $('<canvas>')[0];
-        this.ctx = this.canvas.getContext("2d");
-        $div.append($(this.canvas));
-
         this.contentDiv = $div.get(0);
-
-        this.setWidth(width);
 
         if (trackView.track instanceof igv.SequenceTrack) {
             this.$viewport.addClass('igv-viewport-sequence');
@@ -37,8 +30,13 @@ var igv = (function (igv) {
 
         if (trackView.track instanceof igv.RulerTrack) {
             trackView.track.appendWholeGenomeContainer($(this.contentDiv));
-            trackView.track.appendLocusLabel($(this.contentDiv), this.genomicState);
-            trackView.track.addRulerSweeperWithGenomicState(genomicState, this, this.$viewport, $(this.contentDiv));
+            trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
+            this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
+            this.$rulerLabel.click(function (e) {
+                igv.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
+            });
+            $(this.contentDiv).append(this.$rulerLabel);
+            trackView.track.addRulerSweeperWithGenomicState(this, genomicState);
         } else {
             addMouseHandlers.call(this);
 
@@ -85,6 +83,8 @@ var igv = (function (igv) {
         this.canvas.height = this.contentDiv.clientHeight;
         this.ctx = this.canvas.getContext("2d");
 
+        this.setWidth(width);
+
     };
 
     function createZoomInNotice($parent) {
@@ -129,6 +129,21 @@ var igv = (function (igv) {
         $spinner.hide();
         $spinner.removeClass("fa-spin");
     };
+
+    igv.Viewport.prototype.resize = function () {
+
+        var contentWidth = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
+
+        // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
+
+        if (contentWidth > 0) {
+            this.setWidth(contentWidth);
+            this.canvas.style.width = this.$viewport.width() + "px";
+            this.canvas.setAttribute('width', this.$viewport.width());
+            this.update();
+        }
+    };
+
 
     /**
      * Return a promise to adjust content height to accomodate features for current genomic state
