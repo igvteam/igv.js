@@ -143,10 +143,10 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x - 5);
+            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
             exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
 
-            self.$cursorTrackingGuide.css({ left: exe + 'px' });
+            self.$cursorTrackingGuide.css({ left: exe + 'px' }); 
         }, 10));
 
     }
