@@ -151,12 +151,6 @@ var igv = (function (igv) {
 
             $viewport = viewport.$viewport;
 
-            // if (index < self.viewports.length && (1 + index) !== self.viewports.length) {
-            //     $viewport.addClass('igv-viewport-div-border-right');
-            // } else {
-            //     $viewport.removeClass('igv-viewport-div-border-right');
-            // }
-
             if (self.viewports.length > 1) {
                 $viewport.find('.igv-viewport-fa-close').show();
                 $viewport.find('.igv-viewport-content-ruler-div').show();
