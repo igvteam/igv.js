@@ -148,25 +148,6 @@ var igv = (function (igv) {
 
     };
 
-    function createTrackLocationState(e, viewport) {
-
-        var referenceFrame = viewport.genomicState.referenceFrame,
-            genomicLocation,
-            canvasCoords,
-            xOrigin;
-
-        canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
-        genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
-
-        if (undefined === genomicLocation || null === viewport.tile) {
-            return undefined;
-        }
-
-        xOrigin = Math.round(referenceFrame.toPixels((viewport.tile.startBP - referenceFrame.start)));
-
-        return {genomicLocation: genomicLocation, x: canvasCoords.x - xOrigin, y: canvasCoords.y}
-
-    }
 
     function clampPopoverLocation(pageX, pageY, popover) {
 
