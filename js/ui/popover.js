@@ -123,44 +123,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Popover.prototype.presentTrackPopup = function (e, viewport) {
-
-        var track = viewport.trackView.track,
-            referenceFrame = viewport.genomicState.referenceFrame,
-            trackLocationState,
-            dataList,
-            popupClickHandlerResult,
-            content,
-            config;
-
-        trackLocationState = createTrackLocationState(e, viewport);
-        if (undefined === trackLocationState) {
-            return
-        }
-
-        // dataList = track.popupData(trackLocationState.genomicLocation, trackLocationState.x, trackLocationState.y, referenceFrame);
-
-        config =
-        {
-            popover: this,
-            viewport: viewport,
-            genomicLocation: trackLocationState.genomicLocation,
-            x: trackLocationState.x,
-            y: trackLocationState.y
-        };
-        dataList = track.popupData(config);
-
-        popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
-
-        if (undefined === popupClickHandlerResult) {
-
-            if (_.size(dataList) > 0) {
-                content = igv.formatPopoverText(dataList);
-            }
-
-        } else if (typeof popupClickHandlerResult === 'string') {
-            content = popupClickHandlerResult;
-        }
+    igv.Popover.prototype.presentTrackPopup = function (e, content) {
 
         this.presentContent(e.pageX, e.pageY, content);
 
