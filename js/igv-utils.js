@@ -408,28 +408,7 @@ var igv = (function (igv) {
         return {x: posx, y: posy}
     };
 
-    /**
-     * Format markup for popover text from an array of name value pairs [{name, value}]
-     */
-    igv.formatPopoverText = function (nameValueArray) {
 
-        var markup = "<table class=\"igv-popover-table\">";
-
-        nameValueArray.forEach(function (nameValue) {
-
-            if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
-            } else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
-            }
-        });
-
-        markup += "</table>";
-        return markup;
-
-
-    };
 
     igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
