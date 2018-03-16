@@ -45,16 +45,6 @@ var igv = (function (igv) {
         });
     };
 
-    function addBorders($ideogram, index, length) {
-
-        // if (index < length && (1 + index !== length)) {
-        //     $ideogram.addClass('igv-ideogram-content-div-border-right');
-        // } else {
-        //     $ideogram.removeClass('igv-ideogram-content-div-border-right');
-        // }
-
-    }
-
     igv.IdeoPanel.prototype.setWidth = function (width, doRepaint) {
 
         this.panels.forEach(function (panel) {
@@ -134,8 +124,6 @@ var igv = (function (igv) {
         panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
 
         $parent.append(panel.$ideogram);
-
-        addBorders(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
 
         panel.$ideogram.width(width);
         percentage = panel.$ideogram.width()/panel.$ideogram.outerWidth();
