@@ -168,10 +168,6 @@ var igv = (function (igv) {
 
                     browser.toggleCenterGuide(browser.genomicStateList);
 
-                    if (browser.karyoPanel) {
-                        browser.karyoPanel.resize();
-                    }
-
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
                         browser.addTrack(browser.rulerTrack);
@@ -203,6 +199,14 @@ var igv = (function (igv) {
                     panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
                     browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
                     browser.ideoPanel.repaint();
+                }
+
+                if (true === config.showKaryo) {
+                    browser.karyoPanel = new igv.KaryoPanel($('#igvKaryoDiv'));
+                    browser.$navigation.append(browser.karyoPanel.$karyoPanelToggle);
+                    browser.karyoPanel.resize(panelWidth);
+                } else {
+                    $('#igvKaryoDiv').hide();
                 }
 
                 browser.updateLocusSearchWidget(genomicStateList[ 0 ]);
@@ -319,6 +323,7 @@ var igv = (function (igv) {
 
             $navigation = $('<div class="igv-navbar">');
             $controls.append($navigation);
+            browser.$navigation = $navigation;
 
             // IGV logo
             $igvLogo = $('<div class="igv-logo">');
@@ -409,14 +414,7 @@ var igv = (function (igv) {
             $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
             $controls.append($karyo);
         }
-        browser.karyoPanel = new igv.KaryoPanel($karyo, config);
 
-        $navigation.append(browser.karyoPanel.$karyoPanelToggle);
-
-        if (false === config.showKaryo) {
-            browser.karyoPanel.$karyoPanelToggle.hide();
-            $karyo.hide();
-        }
 
         return $controls.get(0);
     }
