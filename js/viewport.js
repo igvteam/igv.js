@@ -704,7 +704,7 @@ var igv = (function (igv) {
 
             mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
 
-            if(mouseDownX === undefined || Math.abs(mouseX - mouseDownX) > igv.browser.constants.dragThreshold) {
+            if (mouseDownX === undefined || Math.abs(mouseX - mouseDownX) > igv.browser.constants.dragThreshold) {
                 return;
             }
 
@@ -753,7 +753,10 @@ var igv = (function (igv) {
 
                     popupTimer = window.setTimeout(function () {
 
-                            self.popover.presentTrackPopup(e, self);
+                            var content = getPopupContent(e, self);
+                            if (content) {
+                                self.popover.presentTrackPopup(e, content);
+                            }
                             popupTimer = undefined;
                         },
                         igv.browser.constants.doubleClickDelay);
@@ -771,20 +774,55 @@ var igv = (function (igv) {
 
             var referenceFrame = viewport.genomicState.referenceFrame,
                 genomicLocation,
-                canvasCoords,
+                viewportCoords,
                 xOrigin;
 
-            canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
-            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(canvasCoords.x));
+            viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
+            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
             if (undefined === genomicLocation || null === viewport.tile) {
                 return undefined;
             }
 
-            xOrigin = Math.round(referenceFrame.toPixels((viewport.tile.startBP - referenceFrame.start)));
+            return {genomicLocation: genomicLocation, x: viewportCoords.x, y: viewportCoords.y}
 
-            return {genomicLocation: genomicLocation, x: canvasCoords.x - xOrigin, y: canvasCoords.y}
+        }
 
+        function getPopupContent(e, viewport) {
+
+            var track = viewport.trackView.track,
+                trackLocationState,
+                dataList,
+                popupClickHandlerResult,
+                content,
+                config;
+
+            trackLocationState = createTrackLocationState(e, viewport);
+            if (undefined === trackLocationState) {
+                return;
+            }
+
+            config =
+            {
+                viewport: viewport,
+                genomicLocation: trackLocationState.genomicLocation,
+                x: trackLocationState.x,
+                y: trackLocationState.y
+            };
+            dataList = track.popupData(config);
+
+            popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
+
+            if (undefined === popupClickHandlerResult) {
+                if (dataList.length > 0) {
+                    content = igv.formatPopoverText(dataList);
+                }
+
+            } else if (typeof popupClickHandlerResult === 'string') {
+                content = popupClickHandlerResult;
+            }
+
+            return content;
         }
     };
 
