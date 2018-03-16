@@ -13,17 +13,22 @@ var igv = (function (igv) {
             $div;
 
         this.trackView = trackView;
-        this.id = _.uniqueId('viewport_');
         this.genomicState = genomicState;
 
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
-        this.setWidth(width);
 
         $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
         $div.height(this.$viewport.height());
+
+        this.canvas = $('<canvas>')[0];
+        this.ctx = this.canvas.getContext("2d");
+        $div.append($(this.canvas));
+
         this.contentDiv = $div.get(0);
+
+        this.setWidth(width);
 
         if (trackView.track instanceof igv.SequenceTrack) {
             this.$viewport.addClass('igv-viewport-sequence');
@@ -33,14 +38,6 @@ var igv = (function (igv) {
             trackView.track.appendWholeGenomeContainer($(this.contentDiv));
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
         }
-
-        this.canvas = $('<canvas>')[0];
-
-        $(this.contentDiv).append(this.canvas);
-
-        this.canvas.setAttribute('width', this.contentDiv.clientWidth);
-        this.canvas.setAttribute('height', this.contentDiv.clientHeight);
-        this.ctx = this.canvas.getContext("2d");
 
         if (trackView.track instanceof igv.RulerTrack) {
 
@@ -120,11 +117,10 @@ var igv = (function (igv) {
     }
 
     igv.Viewport.prototype.setWidth = function (width) {
-        var percentage;
 
+        this.canvas.style.width = (width + 'px');
+        this.canvas.setAttribute('width', width);
         this.$viewport.width(width);
-        percentage = this.$viewport.width() / this.$viewport.outerWidth();
-        this.$viewport.width(Math.floor(percentage * width));
     };
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
@@ -151,21 +147,6 @@ var igv = (function (igv) {
         $spinner.hide();
         $spinner.removeClass("fa-spin");
     };
-
-    igv.Viewport.prototype.resize = function () {
-
-        var contentWidth = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
-
-        // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
-
-        if (contentWidth > 0) {
-            this.setWidth(contentWidth);
-            this.canvas.style.width = this.$viewport.width() + "px";
-            this.canvas.setAttribute('width', this.$viewport.width());
-            this.update();
-        }
-    };
-
 
     /**
      * Return a promise to adjust content height to accomodate features for current genomic state
