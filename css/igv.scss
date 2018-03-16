@@ -112,6 +112,9 @@ $drag-drop-warning-color: red;
   top: 0;
   width: 260px;
   float: left;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
 
   input {
     position: relative;
