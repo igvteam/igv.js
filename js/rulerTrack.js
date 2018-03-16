@@ -117,19 +117,13 @@ var igv = (function (igv) {
         $parent.append( $('<div>', { class: 'igv-whole-genome-container' }) );
     };
 
-    igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (genomicState, viewport, $viewport, $viewportContent) {
+    igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (viewport, genomicState) {
 
-        var rulerSweeper,
-            index;
-        rulerSweeper = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
+        var rulerSweeper;
 
-        if (1 === this.rulerSweepers) {
-            this.rulerSweepers.push(rulerSweeper);
-        } else {
-            index = igv.browser.genomicStateList.indexOf(genomicState);
-            this.rulerSweepers.splice(index, 0, rulerSweeper);
-        }
+        rulerSweeper = new igv.RulerSweeper(viewport, genomicState);
 
+        this.rulerSweepers.push(rulerSweeper);
     };
 
     igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
@@ -149,6 +143,7 @@ var igv = (function (igv) {
             shim,
             tickHeight,
             rulerSweeper,
+            $viewportContent,
             index,
             tickSeparationPixel,
             tickLabelNumber,
@@ -164,15 +159,17 @@ var igv = (function (igv) {
         key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
         rulerSweeper = this.rulerSweepers[ key ];
 
+        $viewportContent = $(rulerSweeper.viewport.contentDiv);
+
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 
-            rulerSweeper.$viewportContent.find('canvas').hide();
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+            $viewportContent.find('canvas').hide();
+            $viewportContent.find('.igv-whole-genome-container').show();
             rulerSweeper.disableMouseHandlers();
         } else {
 
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
-            rulerSweeper.$viewportContent.find('canvas').show();
+            $viewportContent.find('.igv-whole-genome-container').hide();
+            $viewportContent.find('canvas').show();
             rulerSweeper.addMouseHandlers();
 
             index = 0;

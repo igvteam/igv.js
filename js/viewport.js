@@ -103,7 +103,7 @@ var igv = (function (igv) {
         }
 
         if (trackView.track instanceof igv.RulerTrack) {
-            trackView.track.addRulerSweeperWithGenomicState(genomicState, this, this.$viewport, $(this.contentDiv));
+            trackView.track.addRulerSweeperWithGenomicState(this, genomicState);
         }
 
     };
