@@ -702,6 +702,9 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
+            isDragging = false;
+            isMouseDown = false;
+
             mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
 
             if (mouseDownX === undefined || Math.abs(mouseX - mouseDownX) > igv.browser.constants.dragThreshold) {
@@ -788,6 +791,13 @@ var igv = (function (igv) {
 
         }
 
+        /**
+         * Return markup for popup info window
+         *
+         * @param e
+         * @param viewport
+         * @returns {*}
+         */
         function getPopupContent(e, viewport) {
 
             var track = viewport.trackView.track,
@@ -815,7 +825,7 @@ var igv = (function (igv) {
 
             if (undefined === popupClickHandlerResult) {
                 if (dataList.length > 0) {
-                    content = igv.formatPopoverText(dataList);
+                    content = formatPopoverText(dataList);
                 }
 
             } else if (typeof popupClickHandlerResult === 'string') {
@@ -824,6 +834,29 @@ var igv = (function (igv) {
 
             return content;
         }
+
+        /**
+         * Format markup for popover text from an array of name value pairs [{name, value}]
+         */
+        function formatPopoverText(nameValueArray) {
+
+            var markup = "<table class=\"igv-popover-table\">";
+
+            nameValueArray.forEach(function (nameValue) {
+
+                if (nameValue.name) {
+                    markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
+                } else {
+                    // not a name/value pair
+                    markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                }
+            });
+
+            markup += "</table>";
+            return markup;
+
+
+        };
     };
 
 
