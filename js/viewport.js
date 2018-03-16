@@ -704,7 +704,9 @@ var igv = (function (igv) {
 
             mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
 
-            if(mouseDownX === undefined || Math.abs(mouseX - mouseDownX) < igv.browser.constants.dragThreshold) return;
+            if(mouseDownX === undefined || Math.abs(mouseX - mouseDownX) > igv.browser.constants.dragThreshold) {
+                return;
+            }
 
             canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
             frame = self.genomicState.referenceFrame;
