@@ -263,6 +263,8 @@
   padding-top: 4px; }
 
 #igv-content-header {
+  position: relative;
+  clear: both;
   white-space: nowrap; }
   #igv-content-header .igv-ideogram-left-shim {
     position: relative;
@@ -280,7 +282,7 @@
     margin-bottom: 2px;
     background-color: white; }
   #igv-content-header .igv-ideogram-content-div-border-right {
-    border-right-color: white;
+    border-right-color: #ff0000;
     border-right-style: solid;
     border-right-width: 4px; }
 
@@ -348,7 +350,7 @@
     background-color: #efefef; }
 
 .igv-viewport-div-border-right {
-  border-right-color: white;
+  border-right-color: #00ff00;
   border-right-style: solid;
   border-right-width: 4px; }
 
