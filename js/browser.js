@@ -758,7 +758,7 @@ var igv = (function (igv) {
     };
 
     // Zoom in by a factor of 2, keeping the same center location
-    igv.Browser.prototype.zoomIn = function () {
+    igv.Browser.prototype.zoomIn = function (centerBP) {
 
         var self = this;
 
@@ -775,7 +775,6 @@ var igv = (function (igv) {
             var genomicState = browser.genomicStateList[locusIndex],
                 referenceFrame = genomicState.referenceFrame,
                 viewportWidth = Math.floor(browser.viewportContainerWidth() / browser.genomicStateList.length),
-                centerBP,
                 mbe,
                 be;
 
@@ -787,7 +786,9 @@ var igv = (function (igv) {
             }
 
             // window center (base-pair units)
-            centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth / 2);
+            if(undefined === centerBP) {
+                centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth / 2);
+            }
 
             // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
             // which results in base-pair units
