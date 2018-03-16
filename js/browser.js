@@ -915,7 +915,6 @@ var igv = (function (igv) {
         });
 
         this.resize();
-
     };
 
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
@@ -944,19 +943,15 @@ var igv = (function (igv) {
             var bpp,
                 ee;
 
-            // ss = gs.referenceFrame.start;
-            // ee = ss + gs.referenceFrame.bpPerPixel * (viewportContainerWidth / previousGenomicStateListLength);
-            // bpp = (ee - ss) / (viewportContainerWidth / self.genomicStateList.length);
-
             ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
             bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
 
             self.genomicStateList[ i ].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, bpp);
         });
 
-        this.trackViews.forEach(function (trackView) {
-            trackView.resize();
-        });
+        // this.trackViews.forEach(function (trackView) {
+        //     trackView.resize();
+        // });
 
         if (true === doResize) {
             this.resize();
