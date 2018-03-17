@@ -1045,12 +1045,12 @@ var igv = (function (igv) {
         width = this.viewportContainerWidth() / this.genomicStateList.length;
         this.trackViews.forEach(function (trackView) {
 
-            genomicStateList.forEach(function (genomicState, i) {
+            genomicStateList.forEach(function (genomicState) {
 
-                var viewport ;
+                var viewport;
                 viewport = new igv.Viewport(trackView, trackView.$viewportContainer, genomicState, width);
-                trackView.viewports.push(viewport);
 
+                trackView.viewports.push(viewport);
             });
 
             trackView.decorateViewports();
