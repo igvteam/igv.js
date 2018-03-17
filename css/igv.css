@@ -295,7 +295,7 @@
   #igv-content-header .igv-ideogram-content-div-border-right {
     border-right-color: #ff0000;
     border-right-style: solid;
-    border-right-width: 4px; }
+    border-right-width: 8px; }
 
 .igv-content-div {
   position: relative;
@@ -363,7 +363,7 @@
 .igv-viewport-div-border-right {
   border-right-color: #00ff00;
   border-right-style: solid;
-  border-right-width: 4px; }
+  border-right-width: 8px; }
 
 .igv-viewport-fa-close {
   position: absolute;
