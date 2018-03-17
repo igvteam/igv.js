@@ -48,8 +48,14 @@ var igv = (function (igv) {
     igv.IdeoPanel.prototype.setWidth = function (width, doRepaint) {
 
         this.panels.forEach(function (panel) {
-            panel.$canvas.attr('width', width);
-            panel.$ideogram.width(width);
+            var canvas;
+
+            panel.$ideogram.outerWidth(width);
+
+            canvas = panel.$canvas.get(0);
+            canvas.style.width = (panel.$ideogram.width() + 'px');
+            canvas.setAttribute('width', panel.$ideogram.width());
+
             panel.ideograms = {};
         });
 
@@ -96,13 +102,18 @@ var igv = (function (igv) {
             // The viewport constructor always appends. Reorder here.
             $detached = panel.$ideogram.detach();
             $detached.insertAfter(this.panels[ index - 1 ].$ideogram);
-
         }
+
+        assessBorders(this.panels);
     };
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
+
         this.panels[ index ].$ideogram.remove();
         this.panels.splice(index, 1);
+
+        assessBorders(this.panels);
+
     };
 
     igv.IdeoPanel.prototype.repaintPanelWithGenomicState = function (genomicState) {
@@ -114,7 +125,7 @@ var igv = (function (igv) {
 
     function panelWithGenomicState($parent, genomicState, width) {
 
-        var percentage,
+        var canvas,
             panel;
 
         panel = {};
@@ -125,17 +136,22 @@ var igv = (function (igv) {
 
         $parent.append(panel.$ideogram);
 
-        panel.$ideogram.width(width);
-        percentage = panel.$ideogram.width()/panel.$ideogram.outerWidth();
-        panel.$ideogram.width(Math.floor(percentage * (width)));
+        addBorder(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
+
+        panel.$ideogram.outerWidth(width);
 
         panel.$canvas = $('<canvas>');
         panel.$ideogram.append(panel.$canvas);
 
-        panel.$canvas.attr('width', panel.$ideogram.width());
-        panel.$canvas.attr('height', panel.$ideogram.height());
+        canvas = panel.$canvas.get(0);
 
-        panel.ctx = panel.$canvas.get(0).getContext("2d");
+        canvas.style.width = (panel.$ideogram.width() + 'px');
+        canvas.setAttribute('width', panel.$ideogram.width());
+
+        canvas.style.height = (panel.$ideogram.height() + 'px');
+        canvas.setAttribute('height', panel.$ideogram.height());
+
+        panel.ctx = canvas.getContext("2d");
 
         panel.ideograms = {};
 
@@ -144,6 +160,30 @@ var igv = (function (igv) {
         });
 
         return panel;
+    }
+
+    function addBorder($ideogram, index, length) {
+
+        if (index < length && (1 + index !== length)) {
+            $ideogram.addClass('igv-ideogram-content-div-border-right');
+        } else {
+            $ideogram.removeClass('igv-ideogram-content-div-border-right');
+        }
+
+    }
+
+    function assessBorders (panels) {
+
+        panels.forEach(function (panel, p) {
+
+            if (1 === panels.length || (1 + p) === panels.length) {
+                panel.$ideogram.removeClass('igv-ideogram-content-div-border-right');
+            } else {
+                panel.$ideogram.addClass('igv-ideogram-content-div-border-right');
+            }
+
+        });
+
     }
 
     function repaintPanel (panel) {
