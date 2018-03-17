@@ -353,14 +353,14 @@
         div = $("#myDiv")[0];
         options = {
             showRuler: true,
-            // locus: 'all',
+            locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
             // locus: 'brca1',
             // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
             // locus: 'chr8:128,748,263-128,748,621',
-            locus: ['myc'],
+            // locus: ['myc'],
             // locus: ['myc', 'egfr'],
             // locus: ['1', '2'],
             // locus: ['2', '4', '8'],
@@ -373,26 +373,26 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-//                {
-//                    sourceType: 'gcs',
-//                    type: 'bam',
-//                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-//                    height: 500,
-//                    maxHeight: 2000,
-//                    autoHeight: false,
-//                    viewAsPairs: false,
-//                    name: 'NA12877'
-//                },
                {
-                   sourceType: 'ga4gh',
+                   sourceType: 'gcs',
                    type: 'bam',
-                   url: 'https://genomics.googleapis.com/v1',
-                   readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                   height: 200,
-                   autoHeight: true,
+                   url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                   height: 500,
+                   maxHeight: 2000,
+                   autoHeight: false,
                    viewAsPairs: false,
-                   name: 'Ga4gh alignments'
+                   name: 'NA12877'
                },
+               // {
+               //     sourceType: 'ga4gh',
+               //     type: 'bam',
+               //     url: 'https://genomics.googleapis.com/v1',
+               //     readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+               //     height: 200,
+               //     autoHeight: true,
+               //     viewAsPairs: false,
+               //     name: 'Ga4gh alignments'
+               // },
 //                 {
 //                     url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
 //                     name: 'Big BigWig'

@@ -79,12 +79,9 @@ var igv = (function (igv) {
 
         this.canvas = $('<canvas>')[0];
         $(this.contentDiv).append(this.canvas);
-        this.canvas.width = this.contentDiv.clientWidth;
-        this.canvas.height = this.contentDiv.clientHeight;
         this.ctx = this.canvas.getContext("2d");
 
         this.setWidth(width);
-
     };
 
     function createZoomInNotice($parent) {
