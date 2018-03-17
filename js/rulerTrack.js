@@ -113,19 +113,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.appendWholeGenomeContainer = function ($parent) {
-        $parent.append( $('<div>', { class: 'igv-whole-genome-container' }) );
-    };
-
-    igv.RulerTrack.prototype.addRulerSweeperWithGenomicState = function (viewport, genomicState) {
-
-        var rulerSweeper;
-
-        rulerSweeper = new igv.RulerSweeper(viewport, genomicState);
-
-        this.rulerSweepers.push(rulerSweeper);
-    };
-
     igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
         this.rulerSweepers.splice(index, 1);
     };
