@@ -101,10 +101,9 @@ var igv = (function (igv) {
     }
 
     igv.Viewport.prototype.setWidth = function (width) {
-
-        this.canvas.style.width = (width + 'px');
-        this.canvas.setAttribute('width', width);
-        this.$viewport.width(width);
+        this.$viewport.outerWidth(width);
+        this.canvas.style.width = (this.$viewport.width() + 'px');
+        this.canvas.setAttribute('width', this.$viewport.width());
     };
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
@@ -133,17 +132,8 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.resize = function () {
-
-        var contentWidth = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
-
-        // console.log('viewport(' + this.id + ').resize - width: ' + contentWidth);
-
-        if (contentWidth > 0) {
-            this.setWidth(contentWidth);
-            this.canvas.style.width = this.$viewport.width() + "px";
-            this.canvas.setAttribute('width', this.$viewport.width());
-            this.update();
-        }
+        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
+        this.update();
     };
 
 
