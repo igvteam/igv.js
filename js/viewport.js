@@ -10,33 +10,56 @@ var igv = (function (igv) {
             $trackLabel,
             $spinner,
             dimen,
-            $div;
+            $div,
+            $canvas,
+            rulerSweeper;
 
         this.trackView = trackView;
         this.genomicState = genomicState;
 
+        // viewport
         this.$viewport = $('<div class="igv-viewport-div">');
         $container.append(this.$viewport);
 
+        // viewport-content
         $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
-
         $div.height(this.$viewport.height());
         this.contentDiv = $div.get(0);
+
+        // viewport canvas
+        $canvas = $('<canvas>');
+        $(this.contentDiv).append($canvas);
+        this.canvas = $canvas.get(0);
+        this.ctx = this.canvas.getContext("2d");
+
+        this.setWidth(width);
+
 
         if (trackView.track instanceof igv.SequenceTrack) {
             this.$viewport.addClass('igv-viewport-sequence');
         }
 
         if (trackView.track instanceof igv.RulerTrack) {
-            trackView.track.appendWholeGenomeContainer($(this.contentDiv));
+
+            this.$wholeGenomeContainer = $('<div>', { class: 'igv-whole-genome-container' });
+            $(this.contentDiv).append(this.$wholeGenomeContainer);
+
+            rulerSweeper = new igv.RulerSweeper(this);
+            trackView.track.rulerSweepers.push(rulerSweeper);
+            rulerSweeper.layoutWholeGenome();
+
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
+
             this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
+
             this.$rulerLabel.click(function (e) {
                 igv.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
             });
+
             $(this.contentDiv).append(this.$rulerLabel);
-            trackView.track.addRulerSweeperWithGenomicState(this, genomicState);
+
+
         } else {
             addMouseHandlers.call(this);
 
@@ -77,11 +100,6 @@ var igv = (function (igv) {
 
         }
 
-        this.canvas = $('<canvas>')[0];
-        $(this.contentDiv).append(this.canvas);
-        this.ctx = this.canvas.getContext("2d");
-
-        this.setWidth(width);
     };
 
     function createZoomInNotice($parent) {
