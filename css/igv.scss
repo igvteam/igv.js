@@ -9,6 +9,8 @@ $igv-navbar-toggle-dark-dark: #737373;
 
 $igv-default-border-color: #bfbfbf;
 
+$igv-border-width: 8px;
+
 $igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
 $igv-ruler-blue-color: rgb(0, 102, 255);
 
@@ -329,7 +331,7 @@ $drag-drop-warning-color: red;
     //border-right-color: white;
     border-right-color: #ff0000;
     border-right-style: solid;
-    border-right-width: 4px;
+    border-right-width: $igv-border-width;
   }
 
 }
@@ -429,7 +431,7 @@ $drag-drop-warning-color: red;
   //border-right-color: white;
   border-right-color: #00ff00;
   border-right-style: solid;
-  border-right-width: 4px;
+  border-right-width: $igv-border-width;
 }
 
 .igv-viewport-fa-close {
