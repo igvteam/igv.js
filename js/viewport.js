@@ -96,6 +96,8 @@ var igv = (function (igv) {
         $e = $('<div>');
         this.$zoomInNotice.append($e);
         $e.text('Zoom in to see features');
+
+        this.$zoomInNotice.hide();
     }
 
     igv.Viewport.prototype.setWidth = function (width) {
@@ -325,6 +327,8 @@ var igv = (function (igv) {
                         viewportContainerWidth: igv.browser.viewportContainerWidth()
                     };
 
+                    ctx.save();
+
                     if (features) {
 
                         drawConfiguration.features = features;
@@ -362,6 +366,8 @@ var igv = (function (igv) {
 
                 .then(function (ignore) {
 
+                    ctx.restore();
+                    
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
 
                     if (self.canvas) {
@@ -454,7 +460,7 @@ var igv = (function (igv) {
             contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
         }
 
-        this.tile.invalidate = true;
+        if(this.tile) this.tile.invalidate = true;
     };
 
     igv.Viewport.prototype.getContentHeight = function () {
