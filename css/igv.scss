@@ -7,9 +7,11 @@ $igv-default-font-face: 'Open Sans', sans-serif;
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
 
-$igv-default-border-color: #bfbfbf;
-
 $igv-border-width: 8px;
+$igv-border-color: #bfbfbf;
+
+//$igv-ideogram-height: 14px;
+$igv-ideogram-height: 32px;
 
 $igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
 $igv-ruler-blue-color: rgb(0, 102, 255);
@@ -27,6 +29,45 @@ $drag-drop-light-translucent-color: rgba(200, 218, 223, 0.51);
 $drag-drop-highlight-color: #39bfd3;
 
 $drag-drop-warning-color: red;
+
+#igv-content-header {
+
+  position: relative;
+  clear: both;
+
+  white-space: nowrap;
+
+  .igv-ideogram-left-shim {
+    position: relative;
+
+    height: $igv-ideogram-height;
+    width: 50px;
+
+    display: inline-block;
+
+    background-color: white;
+
+  }
+
+  .igv-ideogram-content-div {
+    position: relative;
+
+    height: $igv-ideogram-height;
+
+    display: inline-block;
+
+    background-color: white;
+
+  }
+
+  .igv-ideogram-content-div-border-right {
+    border-right-color: $igv-border-color;
+    //border-right-color: #ff0000;
+    border-right-style: solid;
+    border-right-width: $igv-border-width;
+  }
+
+}
 
 // multi-locus panel border
 .igv-multi-locus-panel-border {
@@ -63,7 +104,7 @@ $drag-drop-warning-color: red;
   border-radius: 3px;
   border-width: thin;
 
-  border-color: $igv-default-border-color;
+  border-color: $igv-border-color;
   background-color: $igv-navbar-toggle-light-color;
 
   i {
@@ -141,7 +182,7 @@ $drag-drop-warning-color: red;
     border-style: solid;
     border-radius: 3px;
     border-width: thin;
-    border-color: $igv-default-border-color;
+    border-color: $igv-border-color;
     font-family: $igv-default-font-face;
     font-size: small;
     font-weight: 400;
@@ -289,53 +330,6 @@ $drag-drop-warning-color: red;
   padding-top:4px;
 }
 
-#igv-content-header {
-
-  position: relative;
-  clear: both;
-
-  white-space: nowrap;
-
-  .igv-ideogram-left-shim {
-    position: relative;
-
-    height: 14px;
-    width: 50px;
-
-    //float: left;
-    display: inline-block;
-
-    margin-top: 2px;
-    margin-bottom: 2px;
-
-    background-color: white;
-
-  }
-
-  .igv-ideogram-content-div {
-    position: relative;
-
-    height: 14px;
-
-    //float: left;
-    display: inline-block;
-
-    margin-top: 2px;
-    margin-bottom: 2px;
-
-    background-color: white;
-
-  }
-
-  .igv-ideogram-content-div-border-right {
-    //border-right-color: white;
-    border-right-color: #ff0000;
-    border-right-style: solid;
-    border-right-width: $igv-border-width;
-  }
-
-}
-
 .igv-content-div {
   position: relative;
   width: 100%;
@@ -428,8 +422,8 @@ $drag-drop-warning-color: red;
 }
 
 .igv-viewport-div-border-right {
-  //border-right-color: white;
-  border-right-color: #00ff00;
+  border-right-color: $igv-border-color;
+  //border-right-color: #00ff00;
   border-right-style: solid;
   border-right-width: $igv-border-width;
 }
