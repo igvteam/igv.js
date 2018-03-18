@@ -83,23 +83,24 @@
 
 #igv-content-header {
   position: relative;
+  height: 16px;
   clear: both;
   white-space: nowrap; }
   #igv-content-header .igv-ideogram-left-shim {
     position: relative;
-    height: 32px;
+    height: 100%;
     width: 50px;
     display: inline-block;
     background-color: white; }
   #igv-content-header .igv-ideogram-content-div {
     position: relative;
-    height: 32px;
+    height: 100%;
     display: inline-block;
     background-color: white; }
   #igv-content-header .igv-ideogram-content-div-border-right {
-    border-right-color: #bfbfbf;
+    border-right-color: #292929;
     border-right-style: solid;
-    border-right-width: 8px; }
+    border-right-width: 1px; }
 
 .igv-multi-locus-panel-border {
   position: absolute;
@@ -357,9 +358,9 @@
     background-color: #efefef; }
 
 .igv-viewport-div-border-right {
-  border-right-color: #bfbfbf;
+  border-right-color: #292929;
   border-right-style: solid;
-  border-right-width: 8px; }
+  border-right-width: 1px; }
 
 .igv-viewport-fa-close {
   position: absolute;

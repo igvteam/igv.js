@@ -285,7 +285,6 @@ var igv = (function (igv) {
                 yC,
                 chrLength,
                 scale,
-                lastPX,
                 start,
                 end,
                 i;
@@ -315,47 +314,49 @@ var igv = (function (igv) {
 
                 scale = width / chrLength;
 
-                lastPX = -1;
+                // round rect clipping path
+                ctx.beginPath();
+                ctx.roundRect(shim, shim + ideogramTop, width - 2 * shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
+                ctx.clip();
+
                 for (i = 0; i < cytobands.length; i++) {
 
                     cytoband = cytobands[i];
                     start = scale * cytoband.start;
                     end = scale * cytoband.end;
-                    if (end > lastPX) {
 
+                    if (cytoband.type === 'c') {
 
-                        if (cytoband.type === 'c') {
-
-                            if (cytoband.name.charAt(0) === 'p') {
-                                xC[0] = start;
-                                yC[0] = height + ideogramTop;
-                                xC[1] = start;
-                                yC[1] = ideogramTop;
-                                xC[2] = end;
-                                yC[2] = center;
-                            } else {
-                                xC[0] = end;
-                                yC[0] = height + ideogramTop;
-                                xC[1] = end;
-                                yC[1] = ideogramTop;
-                                xC[2] = start;
-                                yC[2] = center;
-                            }
-
-                            ctx.fillStyle = "rgb(150, 0, 0)";
-                            ctx.strokeStyle = "rgb(150, 0, 0)";
-                            ctx.polygon(xC, yC, 1, 0);
+                        if (cytoband.name.charAt(0) === 'p') {
+                            xC[0] = start;
+                            yC[0] = height + ideogramTop;
+                            xC[1] = start;
+                            yC[1] = ideogramTop;
+                            xC[2] = end;
+                            yC[2] = center;
                         } else {
-
-                            ctx.fillStyle = getCytobandColor(stainColors, cytoband);
-                            igv.graphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim);
+                            xC[0] = end;
+                            yC[0] = height + ideogramTop;
+                            xC[1] = end;
+                            yC[1] = ideogramTop;
+                            xC[2] = start;
+                            yC[2] = center;
                         }
+
+                        ctx.fillStyle = "rgb(150, 0, 0)";
+                        ctx.strokeStyle = "rgb(150, 0, 0)";
+                        ctx.polygon(xC, yC, 1, 0);
+                    } else {
+
+                        ctx.fillStyle = getCytobandColor(stainColors, cytoband);
+                        igv.graphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim);
                     }
                 }
             }
-            ctx.strokeStyle = "black";
-            // ctx.roundRect(shim, shim + ideogramTop, width - 2 * shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
-            lastPX = end;
+
+            // round rect border
+            ctx.strokeStyle = igv.Color.greyScale(41);
+            ctx.roundRect(shim, shim + ideogramTop, width - 2*shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
         }
 
         function getCytobandColor(colors, data) {
