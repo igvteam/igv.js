@@ -81,6 +81,26 @@
       cursor: pointer;
       color: #0f0f0f; }
 
+#igv-content-header {
+  position: relative;
+  clear: both;
+  white-space: nowrap; }
+  #igv-content-header .igv-ideogram-left-shim {
+    position: relative;
+    height: 32px;
+    width: 50px;
+    display: inline-block;
+    background-color: white; }
+  #igv-content-header .igv-ideogram-content-div {
+    position: relative;
+    height: 32px;
+    display: inline-block;
+    background-color: white; }
+  #igv-content-header .igv-ideogram-content-div-border-right {
+    border-right-color: #bfbfbf;
+    border-right-style: solid;
+    border-right-width: 8px; }
+
 .igv-multi-locus-panel-border {
   position: absolute;
   top: 0;
@@ -273,30 +293,6 @@
   margin-right: 10px;
   padding-top: 4px; }
 
-#igv-content-header {
-  position: relative;
-  clear: both;
-  white-space: nowrap; }
-  #igv-content-header .igv-ideogram-left-shim {
-    position: relative;
-    height: 14px;
-    width: 50px;
-    display: inline-block;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    background-color: white; }
-  #igv-content-header .igv-ideogram-content-div {
-    position: relative;
-    height: 14px;
-    display: inline-block;
-    margin-top: 2px;
-    margin-bottom: 2px;
-    background-color: white; }
-  #igv-content-header .igv-ideogram-content-div-border-right {
-    border-right-color: #ff0000;
-    border-right-style: solid;
-    border-right-width: 8px; }
-
 .igv-content-div {
   position: relative;
   width: 100%;
@@ -361,7 +357,7 @@
     background-color: #efefef; }
 
 .igv-viewport-div-border-right {
-  border-right-color: #00ff00;
+  border-right-color: #bfbfbf;
   border-right-style: solid;
   border-right-width: 8px; }
 

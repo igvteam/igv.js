@@ -192,10 +192,8 @@ var igv = (function (igv) {
             var y,
                 image,
                 chromosome,
-                widthPercentage,
-                xPercentage,
-                canvasWidth,
-                canvasHeight,
+                percentWidth,
+                percentX,
                 width,
                 widthBP,
                 x,
@@ -213,34 +211,29 @@ var igv = (function (igv) {
             }
 
             stainColors = [];
-            canvasWidth = panel.$canvas.width();
-            canvasHeight = panel.$canvas.height();
-            panel.ctx.clearRect(0, 0, canvasWidth, canvasHeight);
-            
+            igv.graphics.fillRect(panel.ctx, 0, 0, panel.$canvas.width(), panel.$canvas.height(), { fillStyle: igv.Color.greyScale(255) });
+
             if(referenceFrame.chrName.toLowerCase() === "all") {
                 return;
             }
 
             image = panel.ideograms[ referenceFrame.chrName ];
-
             if (undefined === image) {
 
                 image = document.createElement('canvas');
-                image.width = canvasWidth;
-                image.height = canvasHeight;
-                // image.height = 13;
+                image.style.width = (panel.$canvas.width() + 'px');
+                image.setAttribute('width', panel.$canvas.width());
 
-                drawIdeogram(image.getContext('2d'), image.width, image.height);
+                image.style.height = (panel.$canvas.height() + 'px');
+                image.setAttribute('height', panel.$canvas.height());
+
+                drawIdeogram(image.getContext('2d'), panel.$canvas.width(), panel.$canvas.height());
 
                 panel.ideograms[ referenceFrame.chrName ] = image;
             }
 
-            // y = (canvasHeight - image.height) / 2.0;
-            // panel.ctx.drawImage(image, 0, y);
             y = 0;
             panel.ctx.drawImage(image, 0, 0);
-
-            // panel.ctx.save();
 
             chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
 
@@ -249,14 +242,14 @@ var igv = (function (igv) {
 
             if (widthBP < chromosome.bpLength) {
 
-                widthPercentage = widthBP/chromosome.bpLength;
-                xPercentage =     xBP/chromosome.bpLength;
+                percentWidth = widthBP/chromosome.bpLength;
+                percentX =     xBP/chromosome.bpLength;
 
-                x =     Math.floor(    xPercentage * panel.$canvas.width());
-                width = Math.floor(widthPercentage * panel.$canvas.width());
+                x =     Math.floor(    percentX * panel.$canvas.width());
+                width = Math.floor(percentWidth * panel.$canvas.width());
 
                 x = Math.max(0, x);
-                x = Math.min(canvasWidth - width, x);
+                x = Math.min(panel.$canvas.width() - width, x);
 
                 // Push current context
                 panel.ctx.save();
@@ -281,82 +274,87 @@ var igv = (function (igv) {
             console.log("Error painting ideogram: " + e.message);
         }
 
-        function drawIdeogram(bufferCtx, ideogramWidth, ideogramHeight) {
+        function drawIdeogram(ctx, width, height) {
 
-            var shim = 1,
-                ideogramTop = 0;
+            var shim,
+                ideogramTop,
+                cytobands,
+                cytoband,
+                center,
+                xC,
+                yC,
+                chrLength,
+                scale,
+                lastPX,
+                start,
+                end,
+                i;
 
-            if (!igv.browser.genome) {
+            shim = 1;
+            ideogramTop = 0;
+
+            if (undefined === igv.browser.genome) {
                 return;
             }
 
-            var cytobands = igv.browser.genome.getCytobands(referenceFrame.chrName);
+            igv.graphics.fillRect(ctx, 0, 0, width, height, { fillStyle: igv.Color.greyScale(255) });
 
+            cytobands = igv.browser.genome.getCytobands(referenceFrame.chrName);
             if (cytobands) {
 
-                var center = (ideogramTop + ideogramHeight / 2);
+                center = (ideogramTop + height / 2);
 
-                var xC = [];
-                var yC = [];
+                xC = [];
+                yC = [];
 
-                var len = cytobands.length;
-                if (len === 0) {
+                if (0 === cytobands.length) {
                     return;
                 }
 
-                var chrLength = cytobands[len - 1].end;
+                chrLength = cytobands[cytobands.length - 1].end;
 
-                var scale = ideogramWidth / chrLength;
+                scale = width / chrLength;
 
-                var lastPX = -1;
-                for (var i = 0; i < cytobands.length; i++) {
-                    var cytoband = cytobands[i];
+                lastPX = -1;
+                for (i = 0; i < cytobands.length; i++) {
 
-                    var start = scale * cytoband.start;
-                    var end = scale * cytoband.end;
+                    cytoband = cytobands[i];
+                    start = scale * cytoband.start;
+                    end = scale * cytoband.end;
                     if (end > lastPX) {
 
 
-                        if (cytoband.type === 'c') { // centermere: "acen"
+                        if (cytoband.type === 'c') {
 
                             if (cytoband.name.charAt(0) === 'p') {
                                 xC[0] = start;
-                                yC[0] = ideogramHeight + ideogramTop;
+                                yC[0] = height + ideogramTop;
                                 xC[1] = start;
                                 yC[1] = ideogramTop;
                                 xC[2] = end;
                                 yC[2] = center;
                             } else {
                                 xC[0] = end;
-                                yC[0] = ideogramHeight + ideogramTop;
+                                yC[0] = height + ideogramTop;
                                 xC[1] = end;
                                 yC[1] = ideogramTop;
                                 xC[2] = start;
                                 yC[2] = center;
                             }
 
-                            bufferCtx.fillStyle = "rgb(150, 0, 0)";
-                            bufferCtx.strokeStyle = "rgb(150, 0, 0)";
-                            bufferCtx.polygon(xC, yC, 1, 0);
-
+                            ctx.fillStyle = "rgb(150, 0, 0)";
+                            ctx.strokeStyle = "rgb(150, 0, 0)";
+                            ctx.polygon(xC, yC, 1, 0);
                         } else {
 
-                            bufferCtx.fillStyle = getCytobandColor(stainColors, cytoband);
-
-                            // fillRect: function (ctx, x, y, w, h, properties)
-
-                            // bufferCtx.fillRect(start, ideogramTop, (end - start), ideogramHeight);
-                            bufferCtx.fillRect(start, shim + ideogramTop, (end - start), ideogramHeight - 2*shim);
+                            ctx.fillStyle = getCytobandColor(stainColors, cytoband);
+                            igv.graphics.fillRect(ctx, start, shim + ideogramTop, (end - start), height - 2 * shim);
                         }
                     }
                 }
             }
-            bufferCtx.strokeStyle = "black";
-
-            // roundRect(x, y, width, height, radius, fill, stroke)
-
-            // bufferCtx.roundRect(0, ideogramTop, ideogramWidth, ideogramHeight, ideogramHeight / 2, 0, 1);
-            bufferCtx.roundRect(shim, shim + ideogramTop, ideogramWidth - 2 * shim, ideogramHeight - 2*shim, (ideogramHeight - 2*shim)/2, 0, 1);
+            ctx.strokeStyle = "black";
+            // ctx.roundRect(shim, shim + ideogramTop, width - 2 * shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
             lastPX = end;
         }
 
