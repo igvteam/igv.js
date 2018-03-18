@@ -7,11 +7,14 @@ $igv-default-font-face: 'Open Sans', sans-serif;
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
 
-$igv-border-width: 8px;
 $igv-border-color: #bfbfbf;
 
 //$igv-ideogram-height: 14px;
-$igv-ideogram-height: 32px;
+$igv-ideogram-height: 16px;
+//$igv-ideogram-height: 32px;
+
+$igv-panel-border-width: 1px;
+$igv-panel-border-color: #292929;
 
 $igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
 $igv-ruler-blue-color: rgb(0, 102, 255);
@@ -33,6 +36,7 @@ $drag-drop-warning-color: red;
 #igv-content-header {
 
   position: relative;
+  height: $igv-ideogram-height;
   clear: both;
 
   white-space: nowrap;
@@ -40,7 +44,7 @@ $drag-drop-warning-color: red;
   .igv-ideogram-left-shim {
     position: relative;
 
-    height: $igv-ideogram-height;
+    height: 100%;
     width: 50px;
 
     display: inline-block;
@@ -52,7 +56,7 @@ $drag-drop-warning-color: red;
   .igv-ideogram-content-div {
     position: relative;
 
-    height: $igv-ideogram-height;
+    height: 100%;
 
     display: inline-block;
 
@@ -61,10 +65,10 @@ $drag-drop-warning-color: red;
   }
 
   .igv-ideogram-content-div-border-right {
-    border-right-color: $igv-border-color;
+    border-right-color: $igv-panel-border-color;
     //border-right-color: #ff0000;
     border-right-style: solid;
-    border-right-width: $igv-border-width;
+    border-right-width: $igv-panel-border-width;
   }
 
 }
@@ -422,10 +426,10 @@ $drag-drop-warning-color: red;
 }
 
 .igv-viewport-div-border-right {
-  border-right-color: $igv-border-color;
+  border-right-color: $igv-panel-border-color;
   //border-right-color: #00ff00;
   border-right-style: solid;
-  border-right-width: $igv-border-width;
+  border-right-width: $igv-panel-border-width;
 }
 
 .igv-viewport-fa-close {
