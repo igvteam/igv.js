@@ -711,14 +711,14 @@ var igv = (function (igv) {
                 loci,
                 chr;
 
-            if(3 === w.which) {
-                return;
-            }
-
             e.preventDefault();
 
             isDragging = false;
             isMouseDown = false;
+
+            if(3 === e.which) {
+                return;
+            }
 
             mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
 
