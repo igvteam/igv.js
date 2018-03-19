@@ -582,6 +582,8 @@ var igv = (function (igv) {
 
             trackLocationState = createTrackLocationState(e, self);
 
+            e.preventDefault();
+
             if (undefined === trackLocationState) {
                 return
             }
@@ -614,7 +616,7 @@ var igv = (function (igv) {
                 });
 
             self.popover.presentTrackContextMenu(e, menuItems);
-            e.preventDefault();
+
         });
 
         this.$viewport.on('mousedown', function (e) {
@@ -708,6 +710,10 @@ var igv = (function (igv) {
                 string,
                 loci,
                 chr;
+
+            if(3 === w.which) {
+                return;
+            }
 
             e.preventDefault();
 
