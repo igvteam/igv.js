@@ -465,6 +465,8 @@ var igv = (function (igv) {
             contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
         }
 
+        $(this.contentDiv).height(contentHeight);
+
         if(this.tile) this.tile.invalidate = true;
     };
 
