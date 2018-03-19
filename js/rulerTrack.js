@@ -183,7 +183,7 @@ var igv = (function (igv) {
                     center = {x: Math.round(pixel), y: self.height - (tickHeight / 0.75)};
                     size = {width: options.context.measureText(tickLabelText).width, height: 2};
 
-                    rect = rectWithCenterAndSize(center, size);
+                    rect = igv.Rect.makeWithCenterAndSize(center, size);
 
                     igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width / 2), self.height - (tickHeight / 0.75));
                 }
@@ -267,28 +267,6 @@ var igv = (function (igv) {
 
         return tickUnits;
     }
-
-    function rectWithCenterAndSize(center, size) {
-        var halfSize = sizeMake(size.width / 2.0, size.height / 2.0);
-        return rectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
-    }
-
-    function rectMake(x, y, width, height) {
-        var rect = {origin: {}, size: {}};
-
-        rect.origin.x = x;
-        rect.origin.y = y;
-
-        rect.size.width = width;
-        rect.size.height = height;
-
-        return rect;
-    }
-
-    function sizeMake(width, height) {
-        return {width: width, height: height};
-    }
-
 
     return igv;
 })(igv || {});
