@@ -70,17 +70,17 @@ module.exports = function (grunt) {
         },
 
         copy: {
-            // css: {
-            //     expand: true,
-            //     src: 'css/igv.css',
-            //     dest: 'dist'
-            // },
-            // img: {
-            //     expand: true,
-            //     cwd: 'css/img',
-            //     src: '**',
-            //     dest: 'dist/img/'
-            // },
+            css: {
+                expand: true,
+                src: 'css/igv.css',
+                dest: 'dist'
+            },
+            img: {
+                expand: true,
+                cwd: 'css/img',
+                src: '**',
+                dest: 'dist/css/img'
+            },
             cssExample: {
                 src: 'css/igv.css',
                 dest: 'examples/'
