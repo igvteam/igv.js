@@ -97,6 +97,9 @@
     height: 100%;
     display: inline-block;
     background-color: white; }
+    #igv-content-header .igv-ideogram-content-div canvas {
+      width: 100%;
+      height: 100%; }
   #igv-content-header .igv-ideogram-content-div-border-right {
     border-right-color: #292929;
     border-right-style: solid;
