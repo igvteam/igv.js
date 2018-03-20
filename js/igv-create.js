@@ -159,7 +159,7 @@ var igv = (function (igv) {
 
                     browser.genomicStateList = genomicStateList.map(function (gs) {
                         var obj;
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, (gs.end - gs.start)/viewportWidth);
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start)/viewportWidth);
                         obj = _.omit(gs, 'start', 'end');
                         return obj;
                     });
