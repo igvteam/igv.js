@@ -52,9 +52,7 @@ var igv = (function (igv) {
 
             panel.$ideogram.outerWidth(width);
 
-            canvas = panel.$canvas.get(0);
-            canvas.style.width = (panel.$ideogram.width() + 'px');
-            canvas.setAttribute('width', panel.$ideogram.width());
+            setupCanvasSize(panel);
 
             panel.ideograms = {};
         });
@@ -143,15 +141,7 @@ var igv = (function (igv) {
         panel.$canvas = $('<canvas>');
         panel.$ideogram.append(panel.$canvas);
 
-        canvas = panel.$canvas.get(0);
-
-        canvas.style.width = (panel.$ideogram.width() + 'px');
-        canvas.setAttribute('width', panel.$ideogram.width());
-
-        canvas.style.height = (panel.$ideogram.height() + 'px');
-        canvas.setAttribute('height', panel.$ideogram.height());
-
-        panel.ctx = canvas.getContext("2d");
+        setupCanvasSize(panel);
 
         panel.ideograms = {};
 
@@ -189,8 +179,7 @@ var igv = (function (igv) {
     function repaintPanel (panel) {
 
         try {
-            var y,
-                image,
+            var image,
                 chromosome,
                 percentWidth,
                 percentX,
@@ -217,23 +206,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            image = panel.ideograms[ referenceFrame.chrName ];
-            if (undefined === image) {
-
-                image = document.createElement('canvas');
-                image.style.width = (panel.$canvas.width() + 'px');
-                image.setAttribute('width', panel.$canvas.width());
-
-                image.style.height = (panel.$canvas.height() + 'px');
-                image.setAttribute('height', panel.$canvas.height());
-
-                drawIdeogram(image.getContext('2d'), panel.$canvas.width(), panel.$canvas.height());
-
-                panel.ideograms[ referenceFrame.chrName ] = image;
-            }
-
-            y = 0;
-            panel.ctx.drawImage(image, 0, 0);
+            drawIdeogram(panel.ctx, panel.$canvas.width(), panel.$canvas.height());
 
             chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
 
@@ -261,8 +234,8 @@ var igv = (function (igv) {
                 xx = x + (panel.ctx.lineWidth)/2;
                 ww = (width < 2) ? 1 : width - panel.ctx.lineWidth;
 
-                yy = y + (panel.ctx.lineWidth)/2;
-                hh = image.height - panel.ctx.lineWidth;
+                yy = panel.ctx.lineWidth/2;
+                hh = panel.$canvas.height() - panel.ctx.lineWidth;
 
                 panel.ctx.strokeRect(xx, yy, ww, hh);
 
@@ -277,6 +250,7 @@ var igv = (function (igv) {
         function drawIdeogram(ctx, width, height) {
 
             var shim,
+                shim2,
                 ideogramTop,
                 cytobands,
                 cytoband,
@@ -290,6 +264,7 @@ var igv = (function (igv) {
                 i;
 
             shim = 1;
+            shim2 = 0.5 * shim;
             ideogramTop = 0;
 
             if (undefined === igv.browser.genome) {
@@ -316,7 +291,7 @@ var igv = (function (igv) {
 
                 // round rect clipping path
                 ctx.beginPath();
-                ctx.roundRect(shim, shim + ideogramTop, width - 2 * shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
+                ctx.roundRect(shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
                 ctx.clip();
 
                 for (i = 0; i < cytobands.length; i++) {
@@ -356,7 +331,7 @@ var igv = (function (igv) {
 
             // round rect border
             ctx.strokeStyle = igv.Color.greyScale(41);
-            ctx.roundRect(shim, shim + ideogramTop, width - 2*shim, height - 2*shim, (height - 2*shim)/2, 0, 1);
+            ctx.roundRect(shim2, shim2 + ideogramTop, width - 2*shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
         }
 
         function getCytobandColor(colors, data) {
@@ -380,6 +355,18 @@ var igv = (function (igv) {
             }
         }
 
+    }
+
+    function setupCanvasSize(panel) {
+        var canvas = panel.$canvas.get(0);
+        var w = +panel.$ideogram.width();
+        var h = +panel.$ideogram.height();
+        canvas.style.width = w;
+        canvas.style.height = h;
+        canvas.width = window.devicePixelRatio * w;
+        canvas.height = window.devicePixelRatio * h;
+        panel.ctx = canvas.getContext("2d");
+        panel.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
     function clickHandler (panel, e) {
