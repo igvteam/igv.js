@@ -42,7 +42,7 @@ var igv = (function (igv) {
 
         if (trackView.track instanceof igv.RulerTrack) {
 
-            this.$wholeGenomeContainer = $('<div>', { class: 'igv-whole-genome-container' });
+            this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
             $(this.contentDiv).append(this.$wholeGenomeContainer);
 
             rulerSweeper = new igv.RulerSweeper(this);
@@ -299,14 +299,14 @@ var igv = (function (igv) {
 
                     self.stopSpinner();
 
-                    var devixePixelRatio = window.devicePixelRatio;
+                    var devicePixelRatio = window.devicePixelRatio;
                     newCanvas = $('<canvas>').get(0);
                     newCanvas.style.width = pixelWidth + "px";
                     newCanvas.style.height = pixelHeight + "px";
-                    newCanvas.width = devixePixelRatio * pixelWidth;
-                    newCanvas.height = devixePixelRatio * pixelHeight;
+                    newCanvas.width = devicePixelRatio * pixelWidth;
+                    newCanvas.height = devicePixelRatio * pixelHeight;
                     ctx = newCanvas.getContext("2d");
-                    ctx.scale(devixePixelRatio, devixePixelRatio);
+                    ctx.scale(devicePixelRatio, devicePixelRatio);
 
                     var pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
                     newCanvas.style.position = 'absolute';
@@ -372,7 +372,7 @@ var igv = (function (igv) {
                 .then(function (ignore) {
 
                     ctx.restore();
-                    
+
                     self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
 
                     if (self.canvas) {
@@ -465,9 +465,10 @@ var igv = (function (igv) {
             contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
         }
 
+        this.contentDiv.style.height = contentHeight + "px";
         $(this.contentDiv).height(contentHeight);
 
-        if(this.tile) this.tile.invalidate = true;
+        if (this.tile) this.tile.invalidate = true;
     };
 
     igv.Viewport.prototype.getContentHeight = function () {
@@ -475,45 +476,45 @@ var igv = (function (igv) {
         return $(this.contentDiv).height();
     };
 
-    igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
-
-        var offset, sx, dx, scale, sWidth, dWidth, iHeight,
-            tile = this.tile;
-
-        this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-
-        if (tile && tile.containsRange(chr, start, end, bpPerPixel)) {
-            this.xOffset = Math.round((tile.startBP - start) / tile.bpPerPixel);
-            this.ctx.drawImage(tile.image, this.xOffset, 0);
-            this.ctx.save();
-            this.ctx.restore();
-        } else if (tile && tile.overlapsRange(chr, start, end)) {
-
-            offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
-            if (offset > 0) {
-                sx = offset;
-                dx = 0;
-            } else {
-                sx = 0;
-                dx = -offset;
-            }
-
-            dWidth = tile.image.width;
-            if (bpPerPixel === tile.bpPerPixel) {
-                sWidth = dWidth;
-            } else {
-                scale = bpPerPixel / tile.bpPerPixel;
-                sWidth = Math.round(scale * dWidth);
-
-            }
-
-            iHeight = tile.image.height;
-
-            this.ctx.drawImage(tile.image, sx, 0, sWidth, iHeight, dx, 0, dWidth, iHeight);
-            this.ctx.save();
-            this.ctx.restore();
-        }
-    };
+    // igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
+    //
+    //     var offset, sx, dx, scale, sWidth, dWidth, iHeight,
+    //         tile = this.tile;
+    //
+    //     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    //
+    //     if (tile && tile.containsRange(chr, start, end, bpPerPixel)) {
+    //         this.xOffset = Math.round((tile.startBP - start) / tile.bpPerPixel);
+    //         this.ctx.drawImage(tile.image, this.xOffset, 0);
+    //         this.ctx.save();
+    //         this.ctx.restore();
+    //     } else if (tile && tile.overlapsRange(chr, start, end)) {
+    //
+    //         offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
+    //         if (offset > 0) {
+    //             sx = offset;
+    //             dx = 0;
+    //         } else {
+    //             sx = 0;
+    //             dx = -offset;
+    //         }
+    //
+    //         dWidth = tile.image.width;
+    //         if (bpPerPixel === tile.bpPerPixel) {
+    //             sWidth = dWidth;
+    //         } else {
+    //             scale = bpPerPixel / tile.bpPerPixel;
+    //             sWidth = Math.round(scale * dWidth);
+    //
+    //         }
+    //
+    //         iHeight = tile.image.height;
+    //
+    //         this.ctx.drawImage(tile.image, sx, 0, sWidth, iHeight, dx, 0, dWidth, iHeight);
+    //         this.ctx.save();
+    //         this.ctx.restore();
+    //     }
+    // };
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
@@ -521,18 +522,31 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.saveImage = function () {
 
-        var data, a, filename;
+        var data, a, filename, w, h, x, y, imageData, exportCanvas, exportCtx;
 
-        if (!this.canvas) return;
+        if (!this.ctx) return;
+
+        var devicePixelRatio = window.devicePixelRatio;
+        w = this.$viewport.width() * devicePixelRatio;
+        h = this.$viewport.height() * devicePixelRatio;
+        x = -$(this.canvas).position().left * devicePixelRatio;
+        y = -$(this.contentDiv).position().top * devicePixelRatio;
+
+        imageData = this.ctx.getImageData(x, y, w, h);
+        exportCanvas = document.createElement('canvas');
+        exportCtx = exportCanvas.getContext('2d');
+        exportCanvas.width = imageData.width;
+        exportCanvas.height = imageData.height;
+        exportCtx.putImageData(imageData, 0, 0);
 
         filename = this.trackView.track.name + ".png";
-
-        data = this.canvas.toDataURL("image/png")
+        data = exportCanvas.toDataURL("image/png")
         a = document.createElement('a');
         a.href = data;
         a.download = filename || "image.png";
         document.body.appendChild(a);
         a.click();
+        document.body.removeChild(a);
     }
 
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
@@ -718,7 +732,7 @@ var igv = (function (igv) {
             isDragging = false;
             isMouseDown = false;
 
-            if(3 === e.which) {
+            if (3 === e.which) {
                 return;
             }
 
