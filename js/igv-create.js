@@ -344,7 +344,7 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
-            $faSearch = $('<i class="fa fa-search">');
+            $faSearch = $('<i class="fas fa-search">');
             $searchContainer.append($faSearch);
 
             $faSearch.click(function () {
@@ -421,14 +421,14 @@ var igv = (function (igv) {
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
         $parent.append(browser.$zoomContainer);
 
-        $fa = $('<i class="fa fa-minus-circle">');
+        $fa = $('<i class="fas fa-minus-circle">');
         browser.$zoomContainer.append($fa);
         $fa.on('click', function () {
             browser.zoomOut();
         });
 
 
-        $fa = $('<i class="fa fa-plus-circle">');
+        $fa = $('<i class="fas fa-plus-circle">');
         browser.$zoomContainer.append($fa);
         $fa.on('click', function () {
             browser.zoomIn();

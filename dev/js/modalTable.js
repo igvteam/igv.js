@@ -45,7 +45,7 @@ var igv = (function (igv) {
         this.$spinner = $('<div>');
         this.$table.append(this.$spinner);
 
-        this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        this.$spinner.append($('<i class="fas fa-lg fa-spinner fa-spin"></i>'));
     };
 
     function teardownModalDOM(configuration) {

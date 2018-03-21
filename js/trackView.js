@@ -341,7 +341,7 @@ var igv = (function (igv) {
             return undefined;
         }
 
-        $gearButton = $('<i class="fa fa-gear">');
+        $gearButton = $('<i class="fas fa-cog">');
 
         $gearButton.click(function (e) {
             igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self);

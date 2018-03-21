@@ -235,7 +235,7 @@ var igv = (function (igv) {
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
             html.push('<div class="igv-track-menu-border-top">');
-            html.push(true === self.viewAsPairs ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
+            html.push(true === self.viewAsPairs ? '<i class="fas fa-check">' : '<i class="fas fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('View as pairs');
             html.push('</div>');
@@ -271,7 +271,7 @@ var igv = (function (igv) {
 
             parts.push('<div>');
 
-            parts.push(showCheck ? '<i class="fa fa-check"></i>' : '<i class="fa fa-check fa-check-hidden"></i>');
+            parts.push(showCheck ? '<i class="fas fa-check"></i>' : '<i class="fas fa-check fa-check-hidden"></i>');
 
             if (menuItem.key === 'tag') {
                 parts.push('<span id="color-by-tag">');

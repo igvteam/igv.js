@@ -773,9 +773,9 @@ var igv = (function (igv) {
         function groupByMarkup(buttonVal, selfVal, lut) {
             
             if (buttonVal === selfVal) {
-                return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
+                return '<div><i class="fas fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
             } else {
-                return '<div><i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[buttonVal] + '</div>';
+                return '<div><i class="fas fa-check fa-check-shim fa-check-hidden"></i>' + lut[buttonVal] + '</div>';
             }
         }
 
@@ -793,9 +793,9 @@ var igv = (function (igv) {
 
             chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
             if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
+                return chosen + '<i class="fas fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
             } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
+                return chosen + '<i class="fas fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
             }
 
         }
