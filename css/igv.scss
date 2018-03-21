@@ -6,6 +6,9 @@ $igv-default-font-face: 'Open Sans', sans-serif;
 
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
+$igv-navbar-button-height: 18px;
+$igv-navbar-button-width: 96px;
+$igv-navbar-button-font-size: 11px;
 
 $igv-border-color: #bfbfbf;
 
@@ -32,6 +35,10 @@ $drag-drop-light-translucent-color: rgba(200, 218, 223, 0.51);
 $drag-drop-highlight-color: #39bfd3;
 
 $drag-drop-warning-color: red;
+
+#igvControlDiv {
+  position: relative;
+}
 
 #igv-content-header {
 
@@ -98,16 +105,20 @@ $drag-drop-warning-color: red;
 // nav bar
 .igv-navbar {
 
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 2px;
+  margin-bottom: 4px;
+
   position: relative;
   top: 0;
   left: 0;
-
-  height: 30px;
-
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
+  height: 32px;
+  width: 100%;
 
   border-style: solid;
   border-radius: 3px;
@@ -127,24 +138,176 @@ $drag-drop-warning-color: red;
     color: #434343;
   }
 
+  // igv logo
+  .igv-logo {
+    width: 34px;
+    height: 16px;
+
+    margin-left: 8px;
+
+    background: url(img/igv-logo.svg);
+    background-size: 34px 16px;
+    background-repeat:no-repeat;
+    background-position: 0 0;
+  }
+
+  // drag & drop file upload button
+  .igv-drag-and-drop-presentation-button {
+    cursor: pointer;
+
+    height: $igv-navbar-button-height;
+    min-width: $igv-navbar-button-width;
+    text-transform: capitalize;
+
+    line-height: $igv-navbar-button-height;
+    text-align: center;
+    font-family: $igv-default-font-face;
+    font-size: $igv-navbar-button-font-size;
+    font-weight: 200;
+
+    color: $igv-navbar-toggle-dark-dark;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-light-color;
+
+    border-style: solid;
+    border-width: thin;
+    border-radius: 10px;
+  }
+
+  .igv-drag-and-drop-presentation-button:hover,
+  .igv-drag-and-drop-presentation-button:focus,
+  .igv-drag-and-drop-presentation-button:active  {
+    color: white;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-dark-dark;
+  }
+
+  // chromosome select widget
+  .igv-chromosome-select-widget-container {
+    height: 90%;
+    width: 96px;
+
+    select {
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  // locus goto | search icon
+  .igv-search-container {
+    height: 90%;
+    width: 260px;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    // locus goto
+    input {
+      display: block;
+      height: 20px;
+      width: 80%;
+
+      outline: none;
+      border-style: solid;
+      border-radius: 3px;
+      border-width: thin;
+      border-color: $igv-border-color;
+
+      font-family: $igv-default-font-face;
+      font-size: small;
+      font-weight: 400;
+      color: #444;
+
+      background-color: white;
+    }
+
+    // search icon
+    div {
+      height: 100%;
+      width: 32px;
+
+      padding-left: 6px;
+      padding-top: 9px;
+
+      i {
+        font-size: 18px;
+      }
+
+    }
+
+  }
+
+  // window size panel
+  .igv-windowsizepanel-content-div {
+
+    //width: 100px;
+
+    font-family: $igv-default-font-face;
+    font-size: 14px;
+    font-weight: 400;
+    color: #444;
+  }
+
+  // toggle buttons
+  .igv-nav-bar-toggle-button {
+    cursor: pointer;
+
+    height: $igv-navbar-button-height;
+    min-width: $igv-navbar-button-width;
+    text-transform: capitalize;
+
+    line-height: $igv-navbar-button-height;
+    text-align: center;
+    font-family: $igv-default-font-face;
+    font-size: $igv-navbar-button-font-size;
+    font-weight: 200;
+
+    color: $igv-navbar-toggle-dark-dark;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-light-color;
+
+    border-style: solid;
+    border-width: thin;
+    border-radius: 10px;
+  }
+
+  .igv-nav-bar-toggle-button-on {
+    color: $igv-navbar-toggle-dark-dark;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-light-color;
+  }
+
+  .igv-nav-bar-toggle-button-off {
+    color: white;
+    border-color: $igv-navbar-toggle-dark-dark;
+    background-color: $igv-navbar-toggle-dark-dark;
+  }
+
+  // nav bar - zoom
+  .igv-zoom-widget {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    width: 44px;
+    margin-right: 8px;
+
+    div {
+      i {
+        font-size: 24px;
+      }
+    }
+
+  }
 }
 
-// nav bar - logo
-.igv-logo {
-  float: left;
-  margin-left: 4px;
-  margin-right: 8px;
-  position: relative;
-  top: 4px;
-  left: 0;
-  width: 34px;
-  height: 16px;
-  background: url(img/igv-logo.svg);
-  background-size: 34px 16px;
-  background-repeat:no-repeat;
-  background-position: 0 0;
-}
-
+// TODO: figure out what to do with this
 .igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
@@ -159,53 +322,7 @@ $drag-drop-warning-color: red;
   background-position: 0 0;
 }
 
-// chromosome select widget
-.igv-chromosome-select-widget-container {
-  position: relative;
-  float: left;
-  height: 90%;
-  width: 96px;
-  margin-right: 4px;
-  //background-color: rgba(0, 191, 255, 0.51);
-
-  select {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-}
-
-// nav bar - search
-.igv-search-container {
-  position: relative;
-  top: 0;
-  width: 260px;
-  float: left;
-
-  input {
-    position: relative;
-    height: 20px;
-    width: 80%;
-    padding-left: 8px;
-    outline: none;
-    border-style: solid;
-    border-radius: 3px;
-    border-width: thin;
-    border-color: $igv-border-color;
-    font-family: $igv-default-font-face;
-    font-size: small;
-    font-weight: 400;
-    color: #444;
-    background-color: white;
-  }
-
-  i {
-    font-size: 18px;
-    padding-left: 6px;
-  }
-
-}
-
+// TODO: figure out what to do with this
 .igv-search-results {
   position: absolute;
   top: 32px;
@@ -237,63 +354,285 @@ $drag-drop-warning-color: red;
 
 }
 
-// nav bar - toggle buttons
-.igv-nav-bar-toggle-button {
+.igv-drag-drop-container {
+
+  position: absolute;
+  top: 100px;
+  left: 25%;
+  width: 50%;
+  //height: 360px;
+
+  text-align: center;
+  margin: 0 auto;
+
+  padding-top: 64px;
+  padding-bottom: 8px;
+  padding-left: 16px;
+  padding-right: 16px;
+
+  z-index: 2000;
+
+  background-color: $drag-drop-light-color;
+
+  display:flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+
+
+}
+
+.igv-drag-drop-container.is-dragover {
+  background-color: $drag-drop-light-translucent-color;
+}
+
+.igv-drag-and-drop-close-container {
+
+  position: absolute;
+  top: 16px;
+  right: 18px;
+
+  text-align: center;
+  line-height: 100%;
 
   cursor: pointer;
 
+  i.fa-times {
+    color: $drag-drop-medium-color;
+  }
+
+  i.fa-times-circle {
+    color: $drag-drop-dark-color;
+  }
+
+}
+
+.igv-drag-drop-surface {
   position: relative;
-  height: 20px;
-  min-width: 110px;
-  text-transform: capitalize;
 
-  float: right;
+  color: $drag-drop-dark-color;
 
-  margin-top: 2px;
-  margin-right: 5px;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
 
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
+  //background-color: $drag-drop-light-color;
+}
 
-  font-family: $igv-default-font-face;
-  font-size: 12px;
+.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
+  display: inline;
+}
+
+.igv-drag-and-drop-url-input-container {
+  position: relative;
+  width: 96%;
+  //padding-left: 2%;
+  //padding-right: 2%;
+  //margin-top: 1px;
+  margin: 8px auto;
+}
+
+.igv-drag-and-drop-url-input-container > div {
+  margin-top: 14px;
+  margin-bottom: 14px;
+}
+
+.igv-drag-drop-ok {
+
+  width: 90%;
+  margin: 4px auto;
+  padding: 4px;
+
+  color: $drag-drop-dark-color;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
   font-weight: 200;
 
   text-align: center;
-  vertical-align: middle;
+
 
   border-style: solid;
+  border-radius: 3px;
   border-width: thin;
-  border-radius: 10px;
+  border-color: $drag-drop-dark-color;
+
+  background-color: $drag-drop-light-color;
+
 }
 
-.igv-nav-bar-toggle-button-on {
-  color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-light-color;
-}
-
-.igv-nav-bar-toggle-button-off {
+.igv-drag-drop-ok:hover,
+.igv-drag-drop-ok:focus,
+.igv-drag-drop-ok:active  {
+  cursor: pointer;
   color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
+  background-color: $drag-drop-dark-color;
 }
 
-// nav bar - zoom
-.igv-zoom-widget {
-  position: relative;
-  float: right;
-  margin-left: 40px;
+.igv-drag-drop-cancel {
 
-  i {
-    font-size: 24px;
+  width: 90%;
+  margin: 4px auto;
+  padding: 4px;
+
+  color: white;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+
+  text-align: center;
+
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+  border-color: $drag-drop-dark-color;
+
+  background-color: $drag-drop-dark-color;
+
+}
+
+.igv-drag-drop-cancel:hover,
+.igv-drag-drop-cancel:focus,
+.igv-drag-drop-cancel:active  {
+  cursor: pointer;
+}
+
+.igv-drag-drop-warning {
+  position: relative;
+
+  width: 90%;
+  //height: 24px;
+  margin: 4px auto;
+
+  color: $igv-dark-grey-color;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+
+  text-align: left;
+  //vertical-align: middle;
+  //line-height: 24px;
+
+  border-style: solid;
+  border-radius: 3px;
+  border-width: thin;
+  border-color: $igv-dark-grey-color;
+
+  background-color: white;
+
+  overflow: auto;
+
+  #warning-message {
+    padding-top:4px;
+    padding-bottom:4px;
+    padding-left:8px;
+
+    float: left;
+    width: 90%;
+    background-color: transparent;
+    overflow: auto;
   }
 
-  i:first-child {
+  #warning-dismiss {
+    float: right;
+    color: $igv-light-grey-color;
+    padding-top: 2px;
     padding-right: 4px;
   }
+
+  #warning-dismiss:hover,
+  #warning-dismiss:focus,
+  #warning-dismiss:active {
+    cursor: pointer;
+    color: $igv-dark-grey-color;
+  }
+
+}
+
+.igv-drag-and-drop-url-input-feedback {
+
+  width: 100%;
+
+  color: $drag-drop-dark-color;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+
+  text-align: center;
+
+  padding-left: 4px;
+}
+
+.igv-drag-and-drop-url-input {
+
+  display: block;
+
+  width: 100%;
+
+  color: $drag-drop-dark-color;
+  background-color: transparent;
+
+  font-family: 'Open Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 200;
+
+  text-align: center;
+
+  //padding-left: 4px;
+  padding: 4px;
+  margin: 8px;
+
+  border: 0;
+  border-bottom: 2px solid $drag-drop-dark-color;
+
+}
+
+.igv-drag-and-drop-url-input:focus,
+.igv-drag-and-drop-url-input:active {
+  background: white;
+  border-bottom: transparent;
+}
+
+.igv-track-file-input-css {
+  width: 0.1px;
+  height: 0.1px;
+  opacity: 0;
+  overflow: hidden;
+  position: absolute;
+  z-index: -1;
+}
+
+.igv-track-file-input-css:hover + label strong {
+  color: $drag-drop-highlight-color;
+}
+
+.igv-drag-drop-file-input {
+  position: relative;
+}
+
+.igv-drag-drop-file-input label {
+  max-width: 80%;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  display: inline-block;
+  overflow: hidden;
+}
+
+.igv-drag-drop-shim {
+  position: relative;
+
+  width: 100%;
+  height: 8px;
+  margin: 0 auto;
+
+  color: transparent;
+
+  background-color: transparent;
+
 }
 
 // karyo
@@ -559,25 +898,6 @@ $drag-drop-warning-color: red;
     position: absolute;
   }
 
-}
-
-// window size panel
-.igv-windowsizepanel-content-div {
-
-  position: relative;
-  height: 100%;
-
-  float: left;
-
-  padding-top: 6px;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 100%;
-
-  font-family: $igv-default-font-face;
-  font-size: 14px;
-  font-weight: 400;
-  color: #444;
 }
 
 // track menu
@@ -1492,331 +1812,5 @@ $drag-drop-warning-color: red;
   z-index: 512;
 }
 
-// track file upload
-.igv-drag-and-drop-presentation-button {
-
-  position: relative;
-  height: 20px;
-  min-width: 110px;
-  text-transform: capitalize;
-
-  float: left;
-
-  margin-top: 2px;
-  margin-right: 5px;
-
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-
-  font-family: $igv-default-font-face;
-  font-size: 12px;
-  font-weight: 200;
-
-  text-align: center;
-  vertical-align: middle;
-
-  color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-light-color;
-
-
-  border-style: solid;
-  border-width: thin;
-  border-radius: 10px;
-}
-
-.igv-drag-and-drop-presentation-button:hover,
-.igv-drag-and-drop-presentation-button:focus,
-.igv-drag-and-drop-presentation-button:active  {
-
-  cursor: pointer;
-
-  color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
-}
-
-.igv-drag-drop-container {
-
-  position: absolute;
-  top: 100px;
-  left: 25%;
-  width: 50%;
-  //height: 360px;
-
-  text-align: center;
-  margin: 0 auto;
-
-  padding-top: 64px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  z-index: 2000;
-
-  background-color: $drag-drop-light-color;
-
-  display:flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-
-
-}
-
-.igv-drag-drop-container.is-dragover {
-  background-color: $drag-drop-light-translucent-color;
-}
-
-.igv-drag-and-drop-close-container {
-
-  position: absolute;
-  top: 16px;
-  right: 18px;
-
-  text-align: center;
-  line-height: 100%;
-
-  cursor: pointer;
-
-  i.fa-times {
-    color: $drag-drop-medium-color;
-  }
-
-  i.fa-times-circle {
-    color: $drag-drop-dark-color;
-  }
-
-}
-
-.igv-drag-drop-surface {
-  position: relative;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  //background-color: $drag-drop-light-color;
-}
-
-.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
-  display: inline;
-}
-
-.igv-drag-and-drop-url-input-container {
-  position: relative;
-  width: 96%;
-  //padding-left: 2%;
-  //padding-right: 2%;
-  //margin-top: 1px;
-  margin: 8px auto;
-}
-
-.igv-drag-and-drop-url-input-container > div {
-  margin-top: 14px;
-  margin-bottom: 14px;
-}
-
-.igv-drag-drop-ok {
-
-  width: 90%;
-  margin: 4px auto;
-  padding: 4px;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $drag-drop-dark-color;
-
-  background-color: $drag-drop-light-color;
-
-}
-
-.igv-drag-drop-ok:hover,
-.igv-drag-drop-ok:focus,
-.igv-drag-drop-ok:active  {
-  cursor: pointer;
-  color: white;
-  background-color: $drag-drop-dark-color;
-}
-
-.igv-drag-drop-cancel {
-
-  width: 90%;
-  margin: 4px auto;
-  padding: 4px;
-
-  color: white;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $drag-drop-dark-color;
-
-  background-color: $drag-drop-dark-color;
-
-}
-
-.igv-drag-drop-cancel:hover,
-.igv-drag-drop-cancel:focus,
-.igv-drag-drop-cancel:active  {
-  cursor: pointer;
-}
-
-.igv-drag-drop-warning {
-  position: relative;
-
-  width: 90%;
-  //height: 24px;
-  margin: 4px auto;
-
-  color: $igv-dark-grey-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-
-  text-align: left;
-  //vertical-align: middle;
-  //line-height: 24px;
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $igv-dark-grey-color;
-
-  background-color: white;
-
-  overflow: auto;
-
-  #warning-message {
-    padding-top:4px;
-    padding-bottom:4px;
-    padding-left:8px;
-
-    float: left;
-    width: 90%;
-    background-color: transparent;
-    overflow: auto;
-  }
-
-  #warning-dismiss {
-    float: right;
-    color: $igv-light-grey-color;
-    padding-top: 2px;
-    padding-right: 4px;
-  }
-
-  #warning-dismiss:hover,
-  #warning-dismiss:focus,
-  #warning-dismiss:active {
-    cursor: pointer;
-    color: $igv-dark-grey-color;
-  }
-
-}
-
-.igv-drag-and-drop-url-input-feedback {
-
-  width: 100%;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  padding-left: 4px;
-}
-
-.igv-drag-and-drop-url-input {
-
-  display: block;
-
-  width: 100%;
-
-  color: $drag-drop-dark-color;
-  background-color: transparent;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  //padding-left: 4px;
-  padding: 4px;
-  margin: 8px;
-
-  border: 0;
-  border-bottom: 2px solid $drag-drop-dark-color;
-
-}
-
-.igv-drag-and-drop-url-input:focus,
-.igv-drag-and-drop-url-input:active {
-  background: white;
-  border-bottom: transparent;
-}
-
-.igv-track-file-input-css {
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
-  overflow: hidden;
-  position: absolute;
-  z-index: -1;
-}
-
-.igv-track-file-input-css:hover + label strong {
-  color: $drag-drop-highlight-color;
-}
-
-.igv-drag-drop-file-input {
-  position: relative;
-}
-
-.igv-drag-drop-file-input label {
-  max-width: 80%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  display: inline-block;
-  overflow: hidden;
-}
-
-.igv-drag-drop-shim {
-  position: relative;
-
-  width: 100%;
-  height: 8px;
-  margin: 0 auto;
-
-  color: transparent;
-
-  background-color: transparent;
-
-}
 
 
