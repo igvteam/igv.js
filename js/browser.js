@@ -444,13 +444,15 @@ var igv = (function (igv) {
 
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         viewportWidth = this.viewportWidth();
-        this.genomicStateList.forEach(function (gstate) {
-            var referenceFrame = gstate.referenceFrame;
-            if(!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.end) {
-             referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth;
-            }
-        })
 
+        if(this.genomicStateList && viewportWidth > 0) {
+            this.genomicStateList.forEach(function (gstate) {
+                var referenceFrame = gstate.referenceFrame;
+                if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.end) {
+                    referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth;
+                }
+            })
+        }
 
         if (this.genomicStateList && 1 === this.genomicStateList.length && resizeWillExceedChromosomeLength(this.genomicStateList[0])) {
             this.search(this.genomicStateList[0].chromosome.name);
