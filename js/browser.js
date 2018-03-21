@@ -464,8 +464,10 @@ var igv = (function (igv) {
             })
         }
 
-        this.updateLocusSearchWidget(this.genomicStateList[0]);
-        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+        if(this.genomicStateList && this.genomicStateList.length > 0) {
+            this.updateLocusSearchWidget(this.genomicStateList[0]);
+            this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+        }
 
         function resizeWillExceedChromosomeLength(genomicState) {
             var
