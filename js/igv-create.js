@@ -92,9 +92,10 @@ var igv = (function (igv) {
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
         igv.dataRangeDialog.hide();
 
-        if (!config.showNavigation) {
-            $header.append($('<div class="igv-logo-nonav">'));
-        }
+        // TODO fix this
+        // if (!config.showNavigation) {
+        //     $header.append($('<div class="igv-logo-nonav">'));
+        // }
 
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
@@ -310,7 +311,8 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var $igvLogo,
+        var $div,
+            $igvLogo,
             $controls,
             $karyo,
             $navigation,
@@ -356,28 +358,27 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
+            $div = $('<div>');
+            $searchContainer.append($div);
+
             $faSearch = $('<i class="fa fa-search">');
-            $searchContainer.append($faSearch);
+            $div.append($faSearch);
 
             $faSearch.click(function () {
                 browser.search(browser.$searchInput.val());
             });
 
 
+            // TODO: Currently not used
             // search results presented in table
-            browser.$searchResults = $('<div class="igv-search-results">');
-            $searchContainer.append(browser.$searchResults.get(0));
-
-            browser.$searchResultsTable = $('<table>');
-            browser.$searchResults.append(browser.$searchResultsTable.get(0));
-
-            browser.$searchResults.hide();
+            // browser.$searchResults = $('<div class="igv-search-results">');
+            // $searchContainer.append(browser.$searchResults.get(0));
+            // browser.$searchResultsTable = $('<table>');
+            // browser.$searchResults.append(browser.$searchResultsTable.get(0));
+            // browser.$searchResults.hide();
 
             // window size panel
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
-
-            // zoom widget
-            zoomWidget(browser, $navigation);
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
@@ -407,6 +408,9 @@ var igv = (function (igv) {
 
             $navigation.append(browser.$trackLabelToggle);
 
+            // zoom widget
+            zoomWidget(browser, $navigation);
+
         }
 
         $karyo = $('#igvKaryoDiv');
@@ -421,20 +425,26 @@ var igv = (function (igv) {
 
     function zoomWidget(browser, $parent) {
 
-        var $fa;
+        var $div,
+            $fa;
 
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
         $parent.append(browser.$zoomContainer);
 
+        // zoom out
+        $div = $('<div>');
+        browser.$zoomContainer.append($div);
         $fa = $('<i class="fa fa-minus-circle">');
-        browser.$zoomContainer.append($fa);
+        $div.append($fa);
         $fa.on('click', function () {
             browser.zoomOut();
         });
 
-
+        // zoom in
+        $div = $('<div>');
+        browser.$zoomContainer.append($div);
         $fa = $('<i class="fa fa-plus-circle">');
-        browser.$zoomContainer.append($fa);
+        $div.append($fa);
         $fa.on('click', function () {
             browser.zoomIn();
         });
@@ -494,6 +504,7 @@ var igv = (function (igv) {
         if (config.flanking === undefined) {
             config.flanking = 1000;
         }
+
         if (config.pairsSupported === undefined) {
             config.pairsSupported = true;
         }
