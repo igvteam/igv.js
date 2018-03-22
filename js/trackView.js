@@ -387,14 +387,15 @@ var igv = (function (igv) {
         this.update();
     };
 
-    igv.TrackView.prototype.setTrackHeight = function (newHeight, update) {
+    igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
+        if(!force) {
+            if (this.track.minHeight) {
+                newHeight = Math.max(this.track.minHeight, newHeight);
+            }
 
-        if (this.track.minHeight) {
-            newHeight = Math.max(this.track.minHeight, newHeight);
-        }
-
-        if (this.track.maxHeight) {
-            newHeight = Math.min(this.track.maxHeight, newHeight);
+            if (this.track.maxHeight) {
+                newHeight = Math.min(this.track.maxHeight, newHeight);
+            }
         }
 
         this.track.height = newHeight;
