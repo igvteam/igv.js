@@ -447,7 +447,7 @@ var igv = (function (igv) {
                     if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
                         trackView.track.minHeight = number;
                     }
-                    trackView.setTrackHeight(number);
+                    trackView.setTrackHeight(number, true, true);
                     trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
 
                 }
