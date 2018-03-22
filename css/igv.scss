@@ -698,6 +698,8 @@ $drag-drop-warning-color: red;
 .igv-track-div {
   position: relative;
   width: 100%;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .igv-viewport-container {
@@ -974,8 +976,6 @@ $drag-drop-warning-color: red;
   width: 12px;
 
   margin-left: 2px;
-  margin-top: 1px;
-  margin-bottom: 1px;
 
   height: 100%;
 
