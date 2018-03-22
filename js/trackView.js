@@ -77,7 +77,7 @@ var igv = (function (igv) {
             appendRightHandGutter.call(this, $(this.trackDiv));
         }
 
-        attachDragWidget.call(this);
+        attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
 
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
@@ -216,69 +216,78 @@ var igv = (function (igv) {
 
     }
 
-    function attachDragWidget() {
+    function attachDragWidget($track, $viewportContainer) {
 
-        var self = this;
+        var self = this,
+            indexDestination,
+            indexDragged;
 
-        self.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
-        self.$viewportContainer.append(self.$trackDragScrim);
-        self.$trackDragScrim.hide();
+        this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
+        $viewportContainer.append(this.$trackDragScrim);
+        this.$trackDragScrim.hide();
 
         self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
-        $(self.trackDiv).append(self.$trackManipulationHandle);
+        $track.append(self.$trackManipulationHandle);
 
-        self.$trackManipulationHandle.mousedown(function (e) {
+        self.$trackManipulationHandle.on('mousedown.trackview', function (e) {
             e.preventDefault();
             self.isMouseDown = true;
-            igv.browser.dragTrackView = self;
+            igv.dragged = self;
         });
 
-        self.$trackManipulationHandle.mouseup(function (e) {
+        self.$trackManipulationHandle.on('mouseup.trackview', function (e) {
+            e.preventDefault();
             self.isMouseDown = undefined;
         });
 
-        self.$trackManipulationHandle.mouseenter(function (e) {
-
+        self.$trackManipulationHandle.on('mouseenter.trackview', function (e) {
+            e.preventDefault();
             self.isMouseIn = true;
-            igv.browser.dragTargetTrackView = self;
+            igv.dragDestination = self;
 
-            if (undefined === igv.browser.dragTrackView) {
+            if (undefined === igv.dragged) {
                 self.$trackDragScrim.show();
-            } else if (self === igv.browser.dragTrackView) {
+            } else if (self === igv.dragged) {
                 self.$trackDragScrim.show();
             }
 
-            if (igv.browser.dragTargetTrackView && igv.browser.dragTrackView) {
+            if ((igv.dragDestination && igv.dragged) && (igv.dragDestination !== igv.dragged)) {
 
-                if (igv.browser.dragTargetTrackView !== igv.browser.dragTrackView) {
+                indexDestination = igv.browser.trackViews.indexOf(igv.dragDestination);
+                indexDragged = igv.browser.trackViews.indexOf(igv.dragged);
 
-                    if (igv.browser.dragTargetTrackView.track.order < igv.browser.dragTrackView.track.order) {
+                igv.browser.trackViews[ indexDestination ] = igv.dragged;
+                igv.browser.trackViews[ indexDragged ] = igv.dragDestination;
 
-                        igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
-                        igv.browser.dragTargetTrackView.track.order = 1 + igv.browser.dragTrackView.track.order;
-                    } else {
-
-                        igv.browser.dragTrackView.track.order = igv.browser.dragTargetTrackView.track.order;
-                        igv.browser.dragTargetTrackView.track.order = igv.browser.dragTrackView.track.order - 1;
-                    }
-
-                    igv.browser.reorderTracks();
+                if (indexDestination < indexDragged) {
+                    $(igv.dragged.trackDiv).insertBefore($(igv.dragDestination.trackDiv));
+                } else {
+                    $(igv.dragged.trackDiv).insertAfter($(igv.dragDestination.trackDiv));
                 }
+
             }
 
         });
 
-        self.$trackManipulationHandle.mouseleave(function (e) {
-
+        self.$trackManipulationHandle.on('mouseleave.trackview', function (e) {
+            e.preventDefault();
             self.isMouseIn = undefined;
-            igv.browser.dragTargetTrackView = undefined;
+            igv.dragDestination = undefined;
 
-            if (self !== igv.browser.dragTrackView) {
+            if (self !== igv.dragged) {
                 self.$trackDragScrim.hide();
             }
 
         });
 
+        $(document).on('mouseup.document.trackview', function (e) {
+
+            if (igv.dragged) {
+                igv.dragged.$trackDragScrim.hide();
+            }
+
+            igv.dragged = undefined;
+        });
 
     }
 
