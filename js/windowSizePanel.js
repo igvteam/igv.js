@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel = function ($parent) {
 
-        this.$content = $('<div class="igv-windowsizepanel-content-div">');
+        this.$content = $('<div id="igv-windowsizepanel-content-div">');
         $parent.append(this.$content);
 
     };

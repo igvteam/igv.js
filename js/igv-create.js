@@ -58,11 +58,6 @@ var igv = (function (igv) {
 
         $(parentDiv).append(browser.$root);
 
-        // drag & drop
-        browser.trackFileLoad = new igv.TrackFileLoad();
-        browser.$root.append(browser.trackFileLoad.$container);
-        browser.trackFileLoad.$container.hide();
-
         setControls(browser, config);
 
         browser.$content = $('<div class="igv-content-div">');
@@ -323,7 +318,7 @@ var igv = (function (igv) {
 
         if (config.showNavigation) {
 
-            $navigation = $('<div class="igv-navbar">');
+            $navigation = $('<div id="igv-navbar">');
             $controls.append($navigation);
             browser.$navigation = $navigation;
 
@@ -332,7 +327,7 @@ var igv = (function (igv) {
             $navigation.append($igvLogo);
 
             // load local file
-            $navigation.append(browser.trackFileLoad.$presentationButton);
+            browser.trackFileLoad = new igv.TrackFileLoad($navigation, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
             } else {
@@ -347,10 +342,11 @@ var igv = (function (igv) {
                 browser.chromosomeSelectWidget.$container.hide();
             }
 
-            // search container
-            $searchContainer = $('<div class="igv-search-container">');
+            // locus goto widget container
+            $searchContainer = $('<div id="igv-search-container">');
             $navigation.append($searchContainer);
 
+            // locus goto input
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
             $searchContainer.append(browser.$searchInput);
 
@@ -358,6 +354,7 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
+            // search icon
             $div = $('<div>');
             $searchContainer.append($div);
 
@@ -377,7 +374,7 @@ var igv = (function (igv) {
             // browser.$searchResults.append(browser.$searchResultsTable.get(0));
             // browser.$searchResults.hide();
 
-            // window size panel
+            // window size display
             browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
             // cursor tracking guide
@@ -428,7 +425,7 @@ var igv = (function (igv) {
         var $div,
             $fa;
 
-        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
+        browser.$zoomContainer = $('<div id="igv-zoom-widget">');
         $parent.append(browser.$zoomContainer);
 
         // zoom out
