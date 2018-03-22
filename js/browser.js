@@ -113,22 +113,6 @@ var igv = (function (igv) {
             self.resize();
         }, 10);
 
-        $(document).on('mousedown.browser', function (e) {
-            self.isMouseDown = true;
-        });
-
-        $(document).on('mouseup.browser', function (e) {
-
-            self.isMouseDown = undefined;
-
-            if (self.dragTrackView) {
-                self.dragTrackView.$trackDragScrim.hide();
-            }
-
-            self.dragTrackView = undefined;
-
-        });
-
         $(document).on('click.browser', function (e) {
             var target = e.target;
             if (!self.$root.get(0).contains(target)) {
