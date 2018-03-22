@@ -29,12 +29,29 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackFileLoad = function () {
+    igv.TrackFileLoad = function ($buttonParent, $widgetParent) {
 
         var self = this;
 
+        // present drag & drop widget
+        this.$presentationButton = $('<div id="igv-drag-and-drop-presentation-button">');
+        $buttonParent.append(this.$presentationButton);
+
+        this.$presentationButton.text('Load Track');
+
+        this.$presentationButton.on('click', function () {
+
+            if (self.$container.is(':visible')) {
+                doDismiss(self);
+            } else {
+                doPresent(self);
+            }
+
+        });
+
         // drag & drop widget
         this.$container = $('<div class="igv-drag-drop-container">');
+        $widgetParent.append(this.$container);
 
         // drag & drop surface
         drag_drop_surface(this, this.$container);
@@ -49,19 +66,7 @@ var igv = (function (igv) {
         // dismiss drag & drop widget
         this.$container.append( dismissButton() );
 
-        // present drag & drop widget
-        this.$presentationButton = $('<div class="igv-drag-and-drop-presentation-button">');
-        this.$presentationButton.text('Load Track');
-
-        this.$presentationButton.on('click', function () {
-
-            if (self.$container.is(':visible')) {
-                doDismiss(self);
-            } else {
-                doPresent(self);
-            }
-
-        });
+        this.$container.hide();
 
         function dismissButton() {
 

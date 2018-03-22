@@ -119,7 +119,7 @@
   border-right-style: solid;
   border-right-width: 1px; }
 
-.igv-navbar {
+#igv-navbar {
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -137,14 +137,14 @@
   border-width: thin;
   border-color: #bfbfbf;
   background-color: #f3f3f3; }
-  .igv-navbar i {
+  #igv-navbar i {
     cursor: pointer;
     color: #666666; }
-  .igv-navbar i:hover,
-  .igv-navbar i:focus,
-  .igv-navbar i:active {
+  #igv-navbar i:hover,
+  #igv-navbar i:focus,
+  #igv-navbar i:active {
     color: #434343; }
-  .igv-navbar .igv-logo {
+  #igv-navbar .igv-logo {
     width: 34px;
     height: 16px;
     margin-left: 8px;
@@ -152,7 +152,7 @@
     background-size: 34px 16px;
     background-repeat: no-repeat;
     background-position: 0 0; }
-  .igv-navbar .igv-drag-and-drop-presentation-button {
+  #igv-navbar #igv-drag-and-drop-presentation-button {
     cursor: pointer;
     height: 18px;
     min-width: 96px;
@@ -168,19 +168,19 @@
     border-style: solid;
     border-width: thin;
     border-radius: 10px; }
-  .igv-navbar .igv-drag-and-drop-presentation-button:hover,
-  .igv-navbar .igv-drag-and-drop-presentation-button:focus,
-  .igv-navbar .igv-drag-and-drop-presentation-button:active {
+  #igv-navbar #igv-drag-and-drop-presentation-button:hover,
+  #igv-navbar #igv-drag-and-drop-presentation-button:focus,
+  #igv-navbar #igv-drag-and-drop-presentation-button:active {
     color: white;
     border-color: #737373;
     background-color: #737373; }
-  .igv-navbar .igv-chromosome-select-widget-container {
+  #igv-navbar #igv-chromosome-select-widget-container {
     height: 90%;
     width: 96px; }
-    .igv-navbar .igv-chromosome-select-widget-container select {
+    #igv-navbar #igv-chromosome-select-widget-container select {
       width: 100%;
       height: 100%; }
-  .igv-navbar .igv-search-container {
+  #igv-navbar #igv-search-container {
     height: 90%;
     width: 260px;
     display: flex;
@@ -188,33 +188,36 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center; }
-    .igv-navbar .igv-search-container input {
+    #igv-navbar #igv-search-container input {
       display: block;
       height: 20px;
       width: 80%;
+      padding-left: 8px;
+      line-height: 20px;
+      text-align: left;
+      font-family: "Open Sans", sans-serif;
+      font-size: small;
+      font-weight: 400;
+      color: #444;
       outline: none;
       border-style: solid;
       border-radius: 3px;
       border-width: thin;
       border-color: #bfbfbf;
-      font-family: "Open Sans", sans-serif;
-      font-size: small;
-      font-weight: 400;
-      color: #444;
       background-color: white; }
-    .igv-navbar .igv-search-container div {
+    #igv-navbar #igv-search-container div {
       height: 100%;
       width: 32px;
       padding-left: 6px;
       padding-top: 9px; }
-      .igv-navbar .igv-search-container div i {
+      #igv-navbar #igv-search-container div i {
         font-size: 18px; }
-  .igv-navbar .igv-windowsizepanel-content-div {
+  #igv-navbar #igv-windowsizepanel-content-div {
     font-family: "Open Sans", sans-serif;
     font-size: 14px;
     font-weight: 400;
     color: #444; }
-  .igv-navbar .igv-nav-bar-toggle-button {
+  #igv-navbar .igv-nav-bar-toggle-button {
     cursor: pointer;
     height: 18px;
     min-width: 96px;
@@ -230,15 +233,15 @@
     border-style: solid;
     border-width: thin;
     border-radius: 10px; }
-  .igv-navbar .igv-nav-bar-toggle-button-on {
+  #igv-navbar .igv-nav-bar-toggle-button-on {
     color: #737373;
     border-color: #737373;
     background-color: #f3f3f3; }
-  .igv-navbar .igv-nav-bar-toggle-button-off {
+  #igv-navbar .igv-nav-bar-toggle-button-off {
     color: white;
     border-color: #737373;
     background-color: #737373; }
-  .igv-navbar .igv-zoom-widget {
+  #igv-navbar #igv-zoom-widget {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -246,7 +249,7 @@
     align-items: center;
     width: 44px;
     margin-right: 8px; }
-    .igv-navbar .igv-zoom-widget div i {
+    #igv-navbar #igv-zoom-widget div i {
       font-size: 24px; }
 
 .igv-logo-nonav {
