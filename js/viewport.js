@@ -458,13 +458,6 @@ var igv = (function (igv) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000);
 
-        if (this.trackView.track.minHeight) {
-            contentHeight = Math.max(this.trackView.track.minHeight, contentHeight);
-        }
-        if (this.trackView.track.maxHeight) {
-            contentHeight = Math.min(this.trackView.track.maxHeight, contentHeight);
-        }
-
         this.contentDiv.style.height = contentHeight + "px";
         $(this.contentDiv).height(contentHeight);
 
