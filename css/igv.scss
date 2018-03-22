@@ -103,7 +103,7 @@ $drag-drop-warning-color: red;
 }
 
 // nav bar
-.igv-navbar {
+#igv-navbar {
 
   display: flex;
   flex-flow: row;
@@ -152,7 +152,7 @@ $drag-drop-warning-color: red;
   }
 
   // drag & drop file upload button
-  .igv-drag-and-drop-presentation-button {
+  #igv-drag-and-drop-presentation-button {
     cursor: pointer;
 
     height: $igv-navbar-button-height;
@@ -174,16 +174,16 @@ $drag-drop-warning-color: red;
     border-radius: 10px;
   }
 
-  .igv-drag-and-drop-presentation-button:hover,
-  .igv-drag-and-drop-presentation-button:focus,
-  .igv-drag-and-drop-presentation-button:active  {
+  #igv-drag-and-drop-presentation-button:hover,
+  #igv-drag-and-drop-presentation-button:focus,
+  #igv-drag-and-drop-presentation-button:active  {
     color: white;
     border-color: $igv-navbar-toggle-dark-dark;
     background-color: $igv-navbar-toggle-dark-dark;
   }
 
   // chromosome select widget
-  .igv-chromosome-select-widget-container {
+  #igv-chromosome-select-widget-container {
     height: 90%;
     width: 96px;
 
@@ -194,7 +194,7 @@ $drag-drop-warning-color: red;
   }
 
   // locus goto | search icon
-  .igv-search-container {
+  #igv-search-container {
     height: 90%;
     width: 260px;
 
@@ -210,16 +210,22 @@ $drag-drop-warning-color: red;
       height: 20px;
       width: 80%;
 
-      outline: none;
-      border-style: solid;
-      border-radius: 3px;
-      border-width: thin;
-      border-color: $igv-border-color;
+      padding-left: 8px;
+
+      line-height: 20px;
+      text-align: left;
 
       font-family: $igv-default-font-face;
       font-size: small;
       font-weight: 400;
       color: #444;
+
+      outline: none;
+
+      border-style: solid;
+      border-radius: 3px;
+      border-width: thin;
+      border-color: $igv-border-color;
 
       background-color: white;
     }
@@ -241,7 +247,7 @@ $drag-drop-warning-color: red;
   }
 
   // window size panel
-  .igv-windowsizepanel-content-div {
+  #igv-windowsizepanel-content-div {
 
     //width: 100px;
 
@@ -287,7 +293,7 @@ $drag-drop-warning-color: red;
   }
 
   // nav bar - zoom
-  .igv-zoom-widget {
+  #igv-zoom-widget {
 
     display: flex;
     flex-flow: row;
