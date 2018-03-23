@@ -35,6 +35,7 @@ var igv = (function (igv) {
 
         this.$select.on('change', function () {
             browser.search($(this).val());
+            $(this).blur();
         });
 
     };
