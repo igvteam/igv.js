@@ -44,7 +44,7 @@ var igv = (function (igv) {
             this.$viewport.addClass('igv-viewport-ruler');
 
             this.$close = $('<div class="igv-viewport-fa-close">');
-            this.$closeButton = $('<i class="fa fa-times-circle">');
+            this.$closeButton = $('<i class="fas fa-times-circle">');
             this.$close.append(this.$closeButton);
 
             this.$close.click(function (e) {
@@ -124,8 +124,8 @@ var igv = (function (igv) {
             $spinner = $('<div class="igv-viewport-spinner">');
             $spinner.css({'font-size': dimen + 'px'});
 
-            // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
-            $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
+            // $spinner.append($('<i class="fas fa-cog fa-spin fa-fw">'));
+            $spinner.append($('<i class="fas fa-spinner fa-spin fa-fw">'));
             this.$viewport.append($spinner);
             this.stopSpinner();
 

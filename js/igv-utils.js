@@ -199,7 +199,7 @@ var igv = (function (igv) {
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
         var $container = $('<div>'),
-            $fa = $('<i class="fa fa-times">');
+            $fa = $('<i class="fas fa-times">');
 
         $container.append($fa);
         $parent.append($container);
@@ -235,7 +235,7 @@ var igv = (function (igv) {
         var $container,
             $spinner;
 
-        $spinner = $('<i class="fa fa-spinner fa-spin">');
+        $spinner = $('<i class="fas fa-spinner fa-spin">');
         if (size) {
             $spinner.css("font-size", size);
         }

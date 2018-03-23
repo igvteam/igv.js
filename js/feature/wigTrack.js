@@ -100,7 +100,7 @@ var igv = (function (igv) {
             var html = [];
 
             html.push('<div id="datarange-autoscale">');
-            html.push(true === autoscale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
+            html.push(true === autoscale ? '<i class="fas fa-check">' : '<i class="fas fa-check fa-check-hidden">');
             html.push('</i>');
             html.push('Autoscale');
             html.push('</div>');

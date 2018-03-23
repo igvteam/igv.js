@@ -68,7 +68,7 @@ var igv = (function (igv) {
             var $container,
                 $fa;
 
-            $fa = $('<i class="fa">');
+            $fa = $('<i class="fas">');
 
             $fa.hover(fa_mousein, fa_mouseout);
 
@@ -500,7 +500,7 @@ var igv = (function (igv) {
         $warning.append($e);
 
         // dismiss warning
-        $fa = $('<i class="fa fa-times-circle">');
+        $fa = $('<i class="fas fa-times-circle">');
         $e.append($fa);
 
         $fa.on('click', function () {
