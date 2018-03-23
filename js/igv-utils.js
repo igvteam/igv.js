@@ -123,7 +123,7 @@ var igv = (function (igv) {
 
         return index < 0 ? filename : filename.substr(1 + index);
     };
-    
+
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
         return str.toLowerCase().endsWith( suffix )
@@ -181,7 +181,7 @@ var igv = (function (igv) {
         if(httpMessages.hasOwnProperty(string)) {
             string = httpMessages[string];
         }
-        
+
         igv.alert.$dialogLabel.text(string);
         igv.alert.show($parent);
 
@@ -225,7 +225,7 @@ var igv = (function (igv) {
             }
         );
 
-        $fa.click(closeHandler);
+        $container.click(closeHandler);
 
     };
 

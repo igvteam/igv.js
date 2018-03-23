@@ -77,13 +77,13 @@ var igv = (function (igv) {
 
             $fa.hover(fa_mousein, fa_mouseout);
 
-            $fa.on('click', function () {
+            $container = $('<div class="igv-drag-and-drop-close-container">');
+            $container.append($fa);
+
+            $container.on('click', function () {
                 fa_mouseout();
                 doDismiss(self);
             });
-
-            $container = $('<div class="igv-drag-and-drop-close-container">');
-            $container.append($fa);
 
             fa_mouseout();
 
