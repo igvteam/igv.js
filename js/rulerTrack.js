@@ -104,7 +104,8 @@ var igv = (function (igv) {
         $close = $('<div class="igv-viewport-fa-close">');
         $viewport.append($close);
 
-        $closeButton = $('<i class="fa fa-times-circle">');
+        $closeButton = $('<div>');
+        $closeButton.append($('<i class="fa fa-times-circle">'));
         $close.append($closeButton);
 
         $close.click(function (e) {
