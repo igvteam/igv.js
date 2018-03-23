@@ -308,6 +308,7 @@ var igv = (function (igv) {
 
         var $div,
             $genomic_location,
+            $locus_size_group,
             $toggle_button_container,
             $igvLogo,
             $controls,
@@ -336,7 +337,6 @@ var igv = (function (igv) {
                 browser.trackFileLoad.$presentationButton.hide();
             }
 
-
             $genomic_location = $('<div id="igv-genomic-location">');
             $navigation.append($genomic_location);
 
@@ -348,9 +348,13 @@ var igv = (function (igv) {
                 browser.chromosomeSelectWidget.$container.hide();
             }
 
+
+            $locus_size_group = $('<div id="igv-locus-size-group">');
+            $genomic_location.append($locus_size_group);
+
             // locus goto widget container
             $searchContainer = $('<div id="igv-search-container">');
-            $genomic_location.append($searchContainer);
+            $locus_size_group.append($searchContainer);
 
             // locus goto input
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
@@ -371,7 +375,6 @@ var igv = (function (igv) {
                 browser.search(browser.$searchInput.val());
             });
 
-
             // TODO: Currently not used
             // search results presented in table
             // browser.$searchResults = $('<div class="igv-search-results">');
@@ -381,7 +384,7 @@ var igv = (function (igv) {
             // browser.$searchResults.hide();
 
             // window size display
-            browser.windowSizePanel = new igv.WindowSizePanel($genomic_location);
+            browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
 
 
