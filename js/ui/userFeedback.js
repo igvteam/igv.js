@@ -44,7 +44,8 @@ var igv = (function (igv) {
         this.userFeedbackHeader.append(this.userFeedbackAlert[0]);
 
         // dismiss
-        this.userFeedbackDismiss = $('<i class="fa fa-times-circle">');
+        this.userFeedbackDismiss = $('<div>');
+        this.userFeedback.append($('<i class="fa fa-times-circle">'));
         this.userFeedbackHeader.append(this.userFeedbackDismiss[0]);
 
         this.userFeedbackDismiss.click(function () {

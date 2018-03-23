@@ -9,8 +9,6 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
@@ -19,6 +17,7 @@
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
 
     <!-- Vendor JS -->
+    <script src="../vendor/fontawesome-all.js"></script>
     <script src="../vendor/jquery-1.12.4.js"></script>
     <script src="../vendor/jquery-ui.js"></script>
     <script src="../vendor/jquery.mousewheel.js"></script>
@@ -191,16 +190,6 @@
                             visibilityWindow: 1000
                             })">VCF file with genotypes (chr 22)
         </div>
-
-        <!--        <div onclick="igv.browser.loadTrack({
-                                    url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                                    name: 'Brain (BodyMap)',
-                                    maxRows: 3000,
-                                    samplingDepth: 10000,
-                                    height: 200
-                                })">BAM File - deep coverage (Brain, BodyMap)
-                </div>-->
-
 
         <div onclick="igv.browser.loadTrack({
                                 sourceType: 'gcs',
