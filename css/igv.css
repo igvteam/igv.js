@@ -1143,23 +1143,23 @@
   border-width: thin;
   border-radius: 4px; }
 
-/* ok button */
-.igv-col-filler-ok-button {
-  margin-left: 8px;
-  padding-left: 1px;
-  padding-top: 5px;
-  width: 90%;
-  height: 90%;
-  border-color: white;
-  border-style: solid;
-  border-width: thin;
-  border-radius: 4px;
-  color: white;
+.igv-col-button {
+  width: 98px;
+  height: 36px;
+  line-height: 36px;
   text-align: center;
-  vertical-align: middle;
+  color: white;
   font-family: "Open Sans", sans-serif;
   font-size: medium;
   font-weight: 200;
+  margin-left: 8px;
+  border-color: white;
+  border-style: solid;
+  border-width: thin;
+  border-radius: 4px; }
+
+/* ok button */
+.igv-col-filler-ok-button {
   background-color: #5ea4e0; }
 
 .igv-col-filler-ok-button:hover,
@@ -1169,21 +1169,6 @@
 
 /* cancel button */
 .igv-col-filler-cancel-button {
-  margin-left: 8px;
-  padding-left: 1px;
-  padding-top: 5px;
-  width: 90%;
-  height: 90%;
-  border-color: white;
-  border-style: solid;
-  border-width: thin;
-  border-radius: 4px;
-  color: white;
-  text-align: center;
-  vertical-align: middle;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 200;
   background-color: #c4c4c4; }
 
 .igv-col-filler-cancel-button:hover,
@@ -1235,6 +1220,9 @@
 
 .igv-col-8-8 {
   width: 100%; }
+
+[class*='igv-col-'] {
+  float: left; }
 
 /*   end grid.css */
 .igv-fa-check-hidden {
@@ -1327,7 +1315,7 @@
   font-size: 24px;
   z-index: 512; }
 
-.spacer10 {
+.igv-spacer-10 {
   height: 10px;
   width: 100%;
   font-size: 0;
@@ -1335,42 +1323,5 @@
   padding: 0;
   border: 0;
   display: block; }
-
-[class*='igv-col-'] {
-  float: left; }
-
-[class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box; }
-
-.igv-cursor-ui-header {
-  margin-top: 4px;
-  width: 100%;
-  height: auto;
-  background-size: 100px 32px;
-  background-repeat: no-repeat;
-  background-position: 21px 9px; }
-
-.igv-cursor-ui-holder {
-  width: 640px;
-  margin: auto; }
-
-.igv-cursor-ui {
-  margin: auto;
-  width: 100%;
-  display: inline-block;
-  border: solid 1px grey;
-  background-color: #fff;
-  border-top: none;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  padding: 5px 5px 5px 5px; }
-
-.igv-cursor-ui-item {
-  float: left;
-  color: grey;
-  font-weight: 400;
-  padding: 5px 8px 5px 8px; }
 
 /*# sourceMappingURL=igv.css.map */
