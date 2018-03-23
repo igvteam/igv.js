@@ -229,6 +229,9 @@ var igv = (function (igv) {
         self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
         $track.append(self.$trackManipulationHandle);
 
+        return;
+
+
         self.$trackManipulationHandle.on('mousedown.trackview', function (e) {
             e.preventDefault();
             self.isMouseDown = true;
