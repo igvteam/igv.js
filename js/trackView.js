@@ -202,12 +202,14 @@ var igv = (function (igv) {
     function appendRightHandGutter($parent) {
 
         var self = this,
-            $gearButton;
+            $gearButton, $fa;
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $parent.append($(this.rightHandGutter));
 
-        $gearButton = $('<i class="fa fa-gear">');
+        $gearButton = $('<i>');
+        $fa = $('<i class="fa fa-cog">');
+        $gearButton.append($fa);
         $(this.rightHandGutter).append($gearButton);
 
         $gearButton.click(function (e) {
