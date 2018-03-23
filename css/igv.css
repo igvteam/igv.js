@@ -1016,12 +1016,8 @@
   margin: 8px; }
 
 .igv-grid-rect {
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  border-color: white;
-  padding-left: 4px;
-  padding-right: 4px;
+  position: relative;
+  width: 100%;
   background-color: white; }
 
 .igv-grid-rect-hidden {
@@ -1077,7 +1073,8 @@
   border-radius: 4px;
   border-width: thin;
   border-color: #7F7F7F;
-  width: 100%;
+  margin-left: 4px;
+  width: 90%;
   padding-left: 8px;
   vertical-align: middle;
   text-align: left;
