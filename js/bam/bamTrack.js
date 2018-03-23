@@ -125,7 +125,8 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
         return this.coverageTrack.computePixelHeight(alignmentContainer) +
-            this.alignmentTrack.computePixelHeight(alignmentContainer);
+            this.alignmentTrack.computePixelHeight(alignmentContainer) +
+            15;
 
     };
 
