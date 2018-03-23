@@ -525,10 +525,7 @@ var igv = (function (igv) {
         var viewports;
 
         igv.browser.updateLocusSearchWidget(this.genomicStateList[0]);
-
-        if (0 === genomicState) {
-            this.windowSizePanel.updateWithGenomicState(genomicState);
-        }
+        this.windowSizePanel.updateWithGenomicState(genomicState);
 
         if (this.ideoPanel) {
             this.ideoPanel.repaintPanelWithGenomicState(genomicState);

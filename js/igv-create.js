@@ -307,6 +307,8 @@ var igv = (function (igv) {
     function createStandardControls(browser, config) {
 
         var $div,
+            $genomic_location,
+            $toggle_button_container,
             $igvLogo,
             $controls,
             $karyo,
@@ -334,8 +336,12 @@ var igv = (function (igv) {
                 browser.trackFileLoad.$presentationButton.hide();
             }
 
+
+            $genomic_location = $('<div id="igv-genomic-location">');
+            $navigation.append($genomic_location);
+
             // chromosome select widget
-            browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $navigation);
+            browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
             if (true === config.showChromosomeWidget) {
                 browser.chromosomeSelectWidget.$container.show();
             } else {
@@ -344,7 +350,7 @@ var igv = (function (igv) {
 
             // locus goto widget container
             $searchContainer = $('<div id="igv-search-container">');
-            $navigation.append($searchContainer);
+            $genomic_location.append($searchContainer);
 
             // locus goto input
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
@@ -375,7 +381,13 @@ var igv = (function (igv) {
             // browser.$searchResults.hide();
 
             // window size display
-            browser.windowSizePanel = new igv.WindowSizePanel($navigation);
+            browser.windowSizePanel = new igv.WindowSizePanel($genomic_location);
+
+
+
+
+            $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
+            $navigation.append($toggle_button_container);
 
             // cursor tracking guide
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
@@ -391,19 +403,19 @@ var igv = (function (igv) {
                 return browser.$cursorTrackingGuide;
             }, undefined);
 
-            $navigation.append(browser.$cursorTrackingGuideToggle);
+            $toggle_button_container.append(browser.$cursorTrackingGuideToggle);
 
             // one base wide center guide
             browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
 
-            $navigation.append(browser.centerGuide.$centerGuideToggle);
+            $toggle_button_container.append(browser.centerGuide.$centerGuideToggle);
 
             // toggle track labels
             browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
             }, undefined);
 
-            $navigation.append(browser.$trackLabelToggle);
+            $toggle_button_container.append(browser.$trackLabelToggle);
 
             // zoom widget
             zoomWidget(browser, $navigation);
