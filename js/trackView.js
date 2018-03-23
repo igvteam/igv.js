@@ -261,8 +261,10 @@ var igv = (function (igv) {
 
                 if (indexDestination < indexDragged) {
                     $(igv.dragged.trackDiv).insertBefore($(igv.dragDestination.trackDiv));
+                    igv.dragDestination.track.order = 1 + igv.dragged.track.order;
                 } else {
                     $(igv.dragged.trackDiv).insertAfter($(igv.dragDestination.trackDiv));
+                    igv.dragDestination.track.order = igv.dragged.track.order - 1;
                 }
 
             }
