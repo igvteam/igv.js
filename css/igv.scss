@@ -191,6 +191,8 @@ $drag-drop-warning-color: red;
     justify-content: space-between;
     align-items: center;
 
+    width: 430px;
+
     // chromosome select widget
     #igv-chromosome-select-widget-container {
       height: 90%;
@@ -211,65 +213,74 @@ $drag-drop-warning-color: red;
       }
     }
 
-    // locus goto | search icon
-    #igv-search-container {
-      height: 90%;
-      width: 260px;
-
+    #igv-locus-size-group {
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: flex-start;
+      justify-content: space-between;
       align-items: center;
 
-      // locus goto
-      input {
-        display: block;
-        height: 20px;
-        width: 85%;
+      // locus goto | search icon
+      #igv-search-container {
+        height: 90%;
+        width: 260px;
 
-        padding-left: 8px;
-        margin-right: 8px;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: center;
 
-        line-height: 20px;
-        text-align: left;
+        // locus goto
+        input {
+          display: block;
+          height: 20px;
+          width: 85%;
 
-        font-family: $igv-default-font-face;
-        font-size: small;
-        font-weight: 400;
-        color: #444;
+          padding-left: 8px;
+          margin-right: 8px;
 
-        outline: none;
+          line-height: 20px;
+          text-align: left;
 
-        border-style: solid;
-        border-radius: 3px;
-        border-width: thin;
-        border-color: $igv-border-color;
+          font-family: $igv-default-font-face;
+          font-size: small;
+          font-weight: 400;
+          color: #444;
 
-        background-color: white;
-      }
+          outline: none;
 
-      // search icon
-      div {
-        height: 100%;
-        //width: 32px;
+          border-style: solid;
+          border-radius: 3px;
+          border-width: thin;
+          border-color: $igv-border-color;
 
-        i {
-          font-size: 18px;
+          background-color: white;
+        }
+
+        // search icon
+        div {
+          height: 100%;
+          //width: 32px;
+
+          i {
+            font-size: 18px;
+          }
+
         }
 
       }
 
-    }
+      // window size panel
+      #igv-windowsizepanel-content-div {
+        margin-left: 4px;
 
-    // window size panel
-    #igv-windowsizepanel-content-div {
-      margin-left: 4px;
+        font-family: $igv-default-font-face;
+        font-size: 14px;
+        font-weight: 400;
+        color: #444;
+      }
 
-      font-family: $igv-default-font-face;
-      font-size: 14px;
-      font-weight: 400;
-      color: #444;
     }
 
   }
