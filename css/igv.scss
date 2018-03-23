@@ -1422,14 +1422,16 @@ $drag-drop-warning-color: red;
 }
 
 .igv-grid-rect {
+  position: relative;
+  width: 100%;
 
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  border-color: white;
-
-  padding-left: 4px;
-  padding-right: 4px;
+  //border-radius: 4px;
+  //border-style: solid;
+  //border-width: thin;
+  //border-color: white;
+  //
+  //padding-left: 4px;
+  //padding-right: 4px;
 
   background-color: white;
 }
@@ -1515,8 +1517,8 @@ $drag-drop-warning-color: red;
   border-width: thin;
   border-color: $igv-grey-color;
 
-  width: 100%;
-
+  margin-left: 4px;
+  width: 90%;
   padding-left: 8px;
 
   vertical-align: middle;
@@ -1527,7 +1529,6 @@ $drag-drop-warning-color: red;
   font-weight: 200;
 
   color: #575757;
-
 }
 
 .igv-alert-dialog-text {
