@@ -1327,4 +1327,50 @@
   font-size: 24px;
   z-index: 512; }
 
+.spacer10 {
+  height: 10px;
+  width: 100%;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: block; }
+
+[class*='igv-col-'] {
+  float: left; }
+
+[class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box; }
+
+.igv-cursor-ui-header {
+  margin-top: 4px;
+  width: 100%;
+  height: auto;
+  background-size: 100px 32px;
+  background-repeat: no-repeat;
+  background-position: 21px 9px; }
+
+.igv-cursor-ui-holder {
+  width: 640px;
+  margin: auto; }
+
+.igv-cursor-ui {
+  margin: auto;
+  width: 100%;
+  display: inline-block;
+  border: solid 1px grey;
+  background-color: #fff;
+  border-top: none;
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  padding: 5px 5px 5px 5px; }
+
+.igv-cursor-ui-item {
+  float: left;
+  color: grey;
+  font-weight: 400;
+  padding: 5px 8px 5px 8px; }
+
 /*# sourceMappingURL=igv.css.map */
