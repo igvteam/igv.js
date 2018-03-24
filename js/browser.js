@@ -735,109 +735,113 @@ var igv = (function (igv) {
     };
 
     // Zoom in by a factor of 2, keeping the same center location
-    igv.Browser.prototype.zoomIn = function (centerBP) {
+    igv.Browser.prototype.zoomIn = function (centerBP, viewport) {
 
-        var self = this;
+        var self = this,
+            anyViewport;
 
         if (this.loadInProgress()) {
             return;
         }
 
-        _.each(_.range(_.size(this.genomicStateList)), function (locusIndex) {
-            zoomInWithLocusIndex(self, locusIndex);
-        });
+        if (viewport) {
 
-        function zoomInWithLocusIndex(browser, locusIndex) {
+            magnifyWithGenomicStateWithCenter.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
+            self.updateWithGenomicState(viewport.genomicState);
+        } else {
 
-            var genomicState = browser.genomicStateList[locusIndex],
-                referenceFrame = genomicState.referenceFrame,
-                viewportWidth = Math.floor(browser.viewportContainerWidth() / browser.genomicStateList.length),
-                mbe,
-                be;
-
-            // Have we reached the zoom-in threshold yet? If so, bail.
-            mbe = browser.minimumBasesExtent();
-            be = basesExtent(viewportWidth, referenceFrame.bpPerPixel / 2.0);
-            if (mbe > be) {
-                return;
-            }
-
-            // window center (base-pair units)
-            if (undefined === centerBP) {
-                centerBP = referenceFrame.start + referenceFrame.bpPerPixel * (viewportWidth / 2);
-            }
-
-            // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
-            // which results in base-pair units
-            referenceFrame.start = centerBP - (viewportWidth / 2) * (referenceFrame.bpPerPixel / 2.0);
-
-            // halve the bases-per-pixel
-            referenceFrame.bpPerPixel /= 2.0;
-
-            browser.updateWithGenomicState(genomicState);
-
-            function basesExtent(width, bpp) {
-                return Math.floor(width * bpp);
-            }
-
+            anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
+            this.genomicStateList.forEach(function (genomicState) {
+                magnifyWithGenomicStateWithCenter.call(self, genomicState, centerBP, anyViewport.$viewport.width());
+                self.updateWithGenomicState(genomicState);
+            });
         }
+
     };
+
+    function magnifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
+
+        var mbe,
+            be,
+            center,
+            cBP,
+            viewportHalfWidth,
+            delta;
+
+        // Have we reached the zoom-in threshold yet? If so, bail.
+        mbe = this.minimumBasesExtent();
+
+        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel/2.0);
+        if (mbe > be) {
+            return;
+        }
+
+        viewportHalfWidth = viewportWidth/2.0;
+
+        cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
+
+        // halve the bases-per-pixel
+        genomicState.referenceFrame.bpPerPixel /= 2.0;
+
+        // derive scaled (zoomed in) start location (base-pair units) by multiplying half-width by halve'd bases-per-pixel
+        // which results in base-pair units
+        genomicState.referenceFrame.start = cBP - genomicState.referenceFrame.toBP(viewportHalfWidth);
+
+    }
 
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
 
-        var self = this;
+        var self = this,
+            anyViewport;
 
         if (this.loadInProgress()) {
             return;
         }
 
-        _.each(_.range(_.size(this.genomicStateList)), function (locusIndex) {
-            zoomOutWithLocusIndex(self, locusIndex);
+        anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
+        this.genomicStateList.forEach(function (genomicState) {
+            minifyWithGenomicStateWithCenter.call(self, genomicState, genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(anyViewport.$viewport.width()/2.0), anyViewport.$viewport.width());
+            self.updateWithGenomicState(genomicState);
         });
 
-        function zoomOutWithLocusIndex(browser, locusIndex) {
-
-            var genomicState = browser.genomicStateList[locusIndex],
-                referenceFrame = genomicState.referenceFrame,
-                viewportWidth = Math.floor(browser.viewportContainerWidth() / browser.genomicStateList.length),
-                chromosome,
-                newScale,
-                maxScale,
-                centerBP,
-                chromosomeLengthBP,
-                widthBP;
-
-            newScale = referenceFrame.bpPerPixel * 2;
-            chromosomeLengthBP = 250000000;
-            if (browser.genome) {
-                chromosome = browser.genome.getChromosome(referenceFrame.chrName);
-                if (chromosome) {
-                    chromosomeLengthBP = chromosome.bpLength;
-                }
-            }
-            maxScale = chromosomeLengthBP / viewportWidth;
-            if (newScale > maxScale) {
-                newScale = maxScale;
-            }
-
-            centerBP = referenceFrame.start + referenceFrame.bpPerPixel * viewportWidth / 2;
-            widthBP = newScale * viewportWidth;
-
-            referenceFrame.start = Math.round(centerBP - widthBP / 2);
-
-            if (referenceFrame.start < 0) {
-                referenceFrame.start = 0;
-            } else if (referenceFrame.start > chromosomeLengthBP - widthBP) {
-                referenceFrame.start = chromosomeLengthBP - widthBP;
-            }
-
-            referenceFrame.bpPerPixel = newScale;
-
-            browser.updateWithGenomicState(genomicState);
-
-        }
     };
+
+    function minifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
+
+        var bppMinify,
+            chromosomeLengthBP,
+            chromosome,
+            viewportWidthBP;
+
+        bppMinify = 2.0 * genomicState.referenceFrame.bpPerPixel;
+        chromosomeLengthBP = 250000000;
+
+        if (this.genome) {
+            chromosome = this.genome.getChromosome(genomicState.referenceFrame.chrName);
+            if (chromosome) {
+                chromosomeLengthBP = chromosome.bpLength;
+            }
+        }
+
+        bppMinify = Math.min(bppMinify, chromosomeLengthBP/viewportWidth);
+        viewportWidthBP = bppMinify * viewportWidth;
+
+        genomicState.referenceFrame.start = Math.round(centerBP - viewportWidthBP/2.0);
+
+        if (genomicState.referenceFrame.start < 0) {
+            genomicState.referenceFrame.start = 0;
+        } else if (genomicState.referenceFrame.start > chromosomeLengthBP - viewportWidthBP) {
+            genomicState.referenceFrame.start = chromosomeLengthBP - viewportWidthBP;
+        }
+
+        genomicState.referenceFrame.bpPerPixel = bppMinify;
+
+    }
+
+    function basesExtent(width, bpp) {
+        return Math.floor(width * bpp);
+    }
 
     igv.Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
 
@@ -1400,13 +1404,13 @@ var igv = (function (igv) {
                 source = tokens[2].trim();
 
                 obj =
-                {
-                    gene: tokens[0],
-                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                };
+                    {
+                        gene: tokens[0],
+                        chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                        start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                        end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                        type: ("gtex" === source ? "snp" : "gene")
+                    };
 
                 results.push(obj);
 
