@@ -365,16 +365,13 @@ var igv = (function (igv) {
             });
 
             // search icon
-            $div = $('<div>');
+            $div = $('<i>');
             $searchContainer.append($div);
-
-            $faSearch = $('<i>');
-            $faSearch.append($('<i class="fa fa-search">'));
-            $div.append($faSearch);
-
-            $faSearch.click(function () {
+            $div.append(igv.createIcon("search"));
+            $div.click(function () {
                 browser.search(browser.$searchInput.val());
             });
+            $searchContainer.append($faSearch);
 
             // TODO: Currently not used
             // search results presented in table
@@ -442,12 +439,15 @@ var igv = (function (igv) {
             $fa;
 
         browser.$zoomContainer = $('<div id="igv-zoom-widget">');
+
+        browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
+
         $parent.append(browser.$zoomContainer);
 
         // zoom out
         $div = $('<i>');
         browser.$zoomContainer.append($div);
-        $fa = $('<i class="fa fa-minus-circle">');
+        $fa = igv.createIcon("minus-circle");
         $div.append($fa);
         $div.on('click', function () {
             browser.zoomOut();
@@ -456,7 +456,7 @@ var igv = (function (igv) {
         // zoom in
         $div = $('<i>');
         browser.$zoomContainer.append($div);
-        $fa = $('<i class="fa fa-plus-circle">');
+        $fa = igv.createIcon("plus-circle");
         $div.append($fa);
         $div.on('click', function () {
             browser.zoomIn();

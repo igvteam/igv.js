@@ -105,7 +105,7 @@ var igv = (function (igv) {
         $viewport.append($close);
 
         $closeButton = $('<div>');
-        $closeButton.append($('<i class="fa fa-times-circle">'));
+        $closeButton.append(igv.createIcon("times-circle"));
         $close.append($closeButton);
 
         $close.click(function (e) {
