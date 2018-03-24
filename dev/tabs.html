@@ -12,11 +12,17 @@
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
+
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
+    <!-- Dev CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/dev.css">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
+
     <!-- Vendor JS -->
-    <script src="../vendor/fontawesome-all.js"></script>
     <script src="../vendor/jquery.mousewheel.js"></script>
     <script src="../vendor/underscore.js"></script>
     <script src="../vendor/promise.js"></script>
@@ -25,6 +31,8 @@
     <script src="../vendor/inflate.js"></script>
 
     <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
@@ -136,9 +144,13 @@
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
 
+
     <script>
         $(function () {
-            $("#tabs").tabs();
+            $("#tabs").tabs({
+                active: 0
+            });
+
             var igvDiv, options;
             igvDiv = $("#igvDiv")[0];
             options =

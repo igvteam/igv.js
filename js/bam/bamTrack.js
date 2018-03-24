@@ -195,24 +195,18 @@ var igv = (function (igv) {
         $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $e.text('Color by');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
-        // menuItems.push('<div class="igv-track-menu-category igv-track-menu-border-top">Color by</div>');
 
         colorByMenuItems.forEach(function (item) {
             selected = (self.alignmentTrack.colorBy === item.key);
-            menuItems.push(colorByMarkup(item, selected));
+            menuItems.push(colorByCB(item, selected));
         });
 
-        html = [];
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
-            html.push('<div class="igv-track-menu-border-top">');
-            html.push(true === self.viewAsPairs ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
-            html.push('</i>');
-            html.push('View as pairs');
-            html.push('</div>');
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
             menuItems.push({
-                object: $(html.join('')),
+                object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                 click: function () {
                     var $fa = $(this).find('i');
 
@@ -221,9 +215,9 @@ var igv = (function (igv) {
                     self.viewAsPairs = !self.viewAsPairs;
 
                     if (true === self.viewAsPairs) {
-                        $fa.removeClass('fa-check-hidden');
+                        $fa.removeClass('igv-fa-check-hidden');
                     } else {
-                        $fa.addClass('fa-check-hidden');
+                        $fa.addClass('igv-fa-check-hidden');
                     }
 
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
@@ -234,28 +228,12 @@ var igv = (function (igv) {
 
         return menuItems;
 
-        function colorByMarkup(menuItem, showCheck, index) {
+        function colorByCB(menuItem, showCheck) {
 
             var $e,
-                clickHandler,
-                parts = [];
+                clickHandler;
 
-            parts.push('<div>');
-
-            parts.push(showCheck ? '<i class="fa fa-check"></i>' : '<i class="fa fa-check fa-check-hidden"></i>');
-
-            if (menuItem.key === 'tag') {
-                parts.push('<span id="color-by-tag">');
-            } else {
-                parts.push('<span>');
-            }
-
-            parts.push(menuItem.label);
-            parts.push('</span>');
-
-            parts.push('</div>');
-
-            $e = $(parts.join(''));
+            $e = igv.createCheckbox(menuItem.label, showCheck);
 
             clickHandler = function () {
 

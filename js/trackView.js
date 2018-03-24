@@ -207,9 +207,7 @@ var igv = (function (igv) {
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $parent.append($(this.rightHandGutter));
 
-        $gearButton = $('<i>');
-        $fa = $('<i class="fa fa-cog">');
-        $gearButton.append($fa);
+        $gearButton = igv.createWrappedIcon("cog");
         $(this.rightHandGutter).append($gearButton);
 
         $gearButton.click(function (e) {
