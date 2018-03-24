@@ -56,7 +56,7 @@ var igv = (function (igv) {
         $generic_container.append($header);
 
         // close button
-        $fa = $("<i>", { class:'fa fa-times' });
+        $fa = igv.createIcon("times");
         $header.append($fa);
 
         $fa.on('click', function (e) {
@@ -199,51 +199,13 @@ var igv = (function (igv) {
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
         var $container = $('<div>'),
-            $fa = $('<i class="fa fa-times">');
+            $fa = igv.createIcon("times");
 
         $container.append($fa);
         $parent.append($container);
 
-        $fa.hover(
-            function () {
-                $fa.removeClass("fa-times");
-                $fa.addClass("fa-times-circle");
-
-                $fa.css({
-                    color:"#222"
-                });
-            },
-
-            function () {
-                $fa.removeClass("fa-times-circle");
-                $fa.addClass("fa-times");
-
-                $fa.css({
-                    color:"#444"
-                });
-
-            }
-        );
-
         $container.click(closeHandler);
 
-    };
-
-    igv.spinner = function (size) {
-
-        // spinner
-        var $container,
-            $spinner;
-
-        $spinner = $('<i class="fa fa-spinner fa-spin">');
-        if (size) {
-            $spinner.css("font-size", size);
-        }
-
-        $container = $('<div class="igv-spinner-container">');
-        $container.append($spinner[0]);
-
-        return $container[0];
     };
 
     /**

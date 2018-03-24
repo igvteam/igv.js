@@ -53,6 +53,13 @@ module.exports = function (grunt) {
                     'vendor/zlib/deflate.js'
                 ],
                 dest: 'vendor/zlib_and_gzip.js'
+            },
+            css: {
+                src: [
+                    'css/igv.css',
+                    'vendor/fa-svg-with-js.css'
+                ],
+                dest: 'dist/igv.css'
             }
 
         },
@@ -70,19 +77,14 @@ module.exports = function (grunt) {
         },
 
         copy: {
-            css: {
-                expand: true,
-                src: 'css/igv.css',
-                dest: 'dist'
-            },
             img: {
                 expand: true,
                 cwd: 'css/img',
                 src: '**',
-                dest: 'dist/css/img'
+                dest: 'dist/img'
             },
             cssExample: {
-                src: 'css/igv.css',
+                src: 'dist/igv.css',
                 dest: 'examples/'
             },
             imgExample: {
@@ -97,11 +99,6 @@ module.exports = function (grunt) {
                 src: 'igv*',
                 dest: 'examples/js/'
             }
-            // jsExample: {
-            //     cwd: 'dist',
-            //     src: 'igv*',
-            //     dest: 'examples/js/'
-            // }
         }
     });
 
@@ -116,7 +113,7 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'copy']);
+    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'concat:css', 'copy']);
 
     grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
 

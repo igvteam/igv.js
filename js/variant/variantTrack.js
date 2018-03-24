@@ -721,27 +721,30 @@ var igv = (function (igv) {
             menuItems = [],
             mapped;
 
-        mapped = ["COLLAPSED", "SQUISHED", "EXPANDED"].map(function (displayMode, index) {
 
-            return {
-
-                object: $(displayModeMarkup(index, displayMode, self.displayMode)),
-                click: function () {
-                    popover.hide();
-                    self.displayMode = displayMode;
-                    self.trackView.update();
-                }
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+            var lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
             };
+
+            menuItems.push(
+                {
+                    object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        popover.hide();
+                        self.displayMode = displayMode;
+                        self.trackView.update();
+                    }
+                });
         });
 
-        menuItems = menuItems.concat(mapped);
 
         if (igv.sampleInformation.hasAttributes()) {
-            var $groupBy = {
-                object: $('<div class="igv-track-menu-border-top">Group By:</div>')
-            };
 
-            menuItems.push($groupBy);
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
             var attrs = {};
             var attributes = igv.sampleInformation.getAttributeNames();
@@ -755,49 +758,18 @@ var igv = (function (igv) {
             attributes.push("NONE");
             attrs.NONE = 'None';
 
-            var mappedAttrs = _.map(attributes, function (attr, index) {
-                return {
-                    object: $(groupByMarkup(attr, self.groupBy, attrs)),
+            attributes.forEach( function (attr, index) {
+                menuItems.push( {
+                    object: igv.createCheckbox(attrs[attr], attr === self.groupBy),
                     click: function () {
                         popover.hide();
                         self.groupCallSets(attr);
                     }
-                }
+                });
             });
 
-            menuItems = menuItems.concat(mappedAttrs);
         }
-
-        function groupByMarkup(buttonVal, selfVal, lut) {
-            
-            if (buttonVal === selfVal) {
-                return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
-            } else {
-                return '<div><i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[buttonVal] + '</div>';
-            }
-        }
-
-        function displayModeMarkup(index, displayMode, selfDisplayMode) {
-
-            var lut,
-                chosen;
-
-            lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
-
-            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
-            if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
-            } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
-            }
-
-        }
-
+        
         return menuItems;
 
     };
