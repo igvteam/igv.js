@@ -8,8 +8,6 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
@@ -17,18 +15,25 @@
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
 
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
+
     <!-- Vendor JS -->
     <script src="../vendor/jquery-1.12.4.js"></script>
+    <script src="../vendor/jquery-ui.js"></script>
     <script src="../vendor/jquery.mousewheel.js"></script>
     <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/promise.js"></script>
+
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
-    <script src="../vendor/promise.js"></script>
-    <script src="../vendor/jquery-ui.js"></script>
 
     <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
+    <script src="../js/bam/bamReaderNonIndexed.js"></script>
     <script src="../js/bam/bgzf.js"></script>
     <script src="../js/bam/bamSource.js"></script>
     <script src="../js/bam/bamTrack.js"></script>
@@ -63,6 +68,7 @@
     <script src="../js/feature/featureUtils.js"></script>
     <script src="../js/feature/segParser.js"></script>
     <script src="../js/feature/segTrack.js"></script>
+    <script type="text/javascript" src="../js/feature/dataWrapper.js"></script>
 
     <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -133,6 +139,9 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
+
 
 </head>
 

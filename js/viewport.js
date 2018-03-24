@@ -8,7 +8,7 @@ var igv = (function (igv) {
         var self = this,
             description,
             $trackLabel,
-            $spinner,
+            $spinnerContainer,
             dimen,
             $div,
             $canvas,
@@ -64,12 +64,12 @@ var igv = (function (igv) {
             addMouseHandlers.call(this);
 
             dimen = Math.min(32, this.$viewport.height());
-            $spinner = $('<div class="igv-viewport-spinner">');
-            $spinner.css({'font-size': dimen + 'px'});
-
-            // $spinner.append($('<i class="fa fa-cog fa-spin fa-fw">'));
-            $spinner.append($('<i class="fa fa-spinner fa-spin fa-fw">'));
-            this.$viewport.append($spinner);
+            $spinnerContainer = $('<div class="igv-viewport-spinner">');
+            $spinnerContainer.css({'font-size': dimen + 'px'});
+            
+            this.$spinner = igv.createIcon("spinner");
+            $spinnerContainer.append(this.$spinner);
+            this.$viewport.append($spinnerContainer);
             this.stopSpinner();
             this.popover = new igv.Popover(igv.browser.$content);
 
@@ -134,16 +134,24 @@ var igv = (function (igv) {
 
     };
 
+    //.fa5-spin {
+    //    -webkit-animation: fa5-spin 2s infinite linear;
+    //    animation: fa5-spin 2s infinite linear; }
+
     igv.Viewport.prototype.startSpinner = function () {
-        var $spinner = this.$viewport.find('.fa-spinner');
-        $spinner.addClass("fa-spin");
-        $spinner.show();
+        var $spinner = this.$spinner;
+        if($spinner) {
+            $spinner.addClass("fa5-spin");
+            $spinner.show();
+        }
     };
 
     igv.Viewport.prototype.stopSpinner = function () {
-        var $spinner = this.$viewport.find('.fa-spinner');
-        $spinner.hide();
-        $spinner.removeClass("fa-spin");
+        var $spinner = this.$spinner;
+        if($spinner) {
+            $spinner.hide();
+            $spinner.removeClass("fa5-spin");
+        }
     };
 
     igv.Viewport.prototype.resize = function () {

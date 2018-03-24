@@ -78,7 +78,7 @@ var igv = (function (igv) {
         menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
         menuItems.push({
-            object: $(htmlStringified(self.autoscale)),
+            object: igv.createCheckbox("Autoscale", self.autoscale),  
             click: function () {
                 var $fa = $(this).find('i');
 
@@ -87,26 +87,14 @@ var igv = (function (igv) {
                 self.autoscale = !self.autoscale;
 
                 if (true === self.autoscale) {
-                    $fa.removeClass('fa-check-hidden');
+                    $fa.removeClass('igv-fa-check-hidden');
                 } else {
-                    $fa.addClass('fa-check-hidden');
+                    $fa.addClass('igv-fa-check-hidden');
                 }
 
                 self.trackView.setDataRange(undefined, undefined, self.autoscale);
             }
         });
-
-        function htmlStringified(autoscale) {
-            var html = [];
-
-            html.push('<div id="datarange-autoscale">');
-            html.push(true === autoscale ? '<i class="fa fa-check">' : '<i class="fa fa-check fa-check-hidden">');
-            html.push('</i>');
-            html.push('Autoscale');
-            html.push('</div>');
-
-            return html.join('');
-        }
 
         return menuItems;
 
