@@ -61,7 +61,7 @@ var igv = (function (igv) {
         width = this.browser.viewportContainerWidth() / this.browser.genomicStateList.length;
         browser.genomicStateList.forEach(function (genomicState) {
 
-            var viewport ;
+            var viewport;
             viewport = new igv.Viewport(self, self.$viewportContainer, genomicState, width);
             self.viewports.push(viewport);
 
@@ -124,7 +124,7 @@ var igv = (function (igv) {
             this.track.removeRulerSweeperWithLocusIndex(index);
         }
 
-        this.viewports[ index ].$viewport.remove();
+        this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
 
         this.decorateViewports();
@@ -256,15 +256,13 @@ var igv = (function (igv) {
                 indexDestination = igv.browser.trackViews.indexOf(igv.dragDestination);
                 indexDragged = igv.browser.trackViews.indexOf(igv.dragged);
 
-                igv.browser.trackViews[ indexDestination ] = igv.dragged;
-                igv.browser.trackViews[ indexDragged ] = igv.dragDestination;
+                igv.browser.trackViews[indexDestination] = igv.dragged;
+                igv.browser.trackViews[indexDragged] = igv.dragDestination;
 
                 if (indexDestination < indexDragged) {
                     $(igv.dragged.trackDiv).insertBefore($(igv.dragDestination.trackDiv));
-                    igv.dragDestination.track.order = 1 + igv.dragged.track.order;
                 } else {
                     $(igv.dragged.trackDiv).insertAfter($(igv.dragDestination.trackDiv));
-                    igv.dragDestination.track.order = igv.dragged.track.order - 1;
                 }
 
             }
@@ -318,7 +316,7 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
-        if(!force) {
+        if (!force) {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight);
             }
@@ -331,6 +329,14 @@ var igv = (function (igv) {
         this.track.height = newHeight;
         $(this.trackDiv).height(newHeight);
 
+        // If the track does not manage its own content height set it here
+        if (typeof this.track.computePixelHeight !== "function") {
+            this.viewports.forEach(function (vp) {
+                vp.setContentHeight(newHeight);
+                vp.tile.invalidate = true;
+            });
+        }
+
         if (this.track.paintAxis) {
             $(this.controlCanvas).height(newHeight);
             this.controlCanvas.setAttribute('height', $(this.trackDiv).height());
@@ -340,7 +346,7 @@ var igv = (function (igv) {
             this.update();
         }
 
-    };
+    }
 
     igv.TrackView.prototype.isLoading = function () {
 
