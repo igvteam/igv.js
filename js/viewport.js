@@ -548,7 +548,7 @@ var igv = (function (igv) {
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
-    }
+    };
 
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
@@ -712,18 +712,18 @@ var igv = (function (igv) {
             }
             isMouseDown = false;
             mouseDownX = lastMouseX = undefined;
-            isDragging = false
+            isDragging = false;
             referenceFrame = undefined;
         });
 
         this.$viewport.on('mouseup', function (e) {
 
             var mouseX,
-                canvasMouseX,
-                frame,
-                location,
+                mouseXCanvas,
+                referenceFrame,
+                xBP,
                 time,
-                newCenter,
+                centerBP,
                 string,
                 loci,
                 chr;
@@ -743,9 +743,9 @@ var igv = (function (igv) {
                 return;
             }
 
-            canvasMouseX = igv.translateMouseCoordinates(e, self.canvas).x;
-            frame = self.genomicState.referenceFrame;
-            location = Math.floor((frame.start) + frame.toBP(canvasMouseX));
+            mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
+            referenceFrame = self.genomicState.referenceFrame;
+            xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
 
             time = Date.now();
 
@@ -757,11 +757,10 @@ var igv = (function (igv) {
                     popupTimer = undefined;
                 }
 
+                centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+                if ('all' === referenceFrame.chrName.toLowerCase()) {
 
-                newCenter = Math.round(frame.start + canvasMouseX * frame.bpPerPixel);
-                if ('all' === frame.chrName.toLowerCase()) {
-
-                    chr = igv.browser.genome.getChromosomeCoordinate(newCenter).chr;
+                    chr = igv.browser.genome.getChromosomeCoordinate(centerBP).chr;
 
                     if (1 === igv.browser.genomicStateList.length) {
                         string = chr;
@@ -776,14 +775,14 @@ var igv = (function (igv) {
                     igv.browser.search(string);
 
                 } else {
-                    igv.browser.zoomIn(newCenter);
+                    igv.browser.zoomIn(centerBP, self);
                 }
 
 
             } else {
 
                 if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-                    self.trackView.track.shiftClick(location, e);
+                    self.trackView.track.shiftClick(xBP, e);
                 } else if (typeof self.trackView.track.popupData === "function") {
 
                     popupTimer = window.setTimeout(function () {
@@ -800,7 +799,7 @@ var igv = (function (igv) {
 
             isMouseDown = false;
             mouseDownX = lastMouseX = undefined;
-            isDragging = false
+            isDragging = false;
             lastClickTime = time;
         });
 
@@ -888,8 +887,8 @@ var igv = (function (igv) {
             return markup;
 
 
-        };
-    };
+        }
+    }
 
 
     return igv;
