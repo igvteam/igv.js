@@ -736,6 +736,15 @@ var igv = (function (igv) {
 
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function (centerBP, viewport) {
+        doScale.call(this, centerBP, viewport, magnifyWithGenomicStateWithCenter);
+    };
+
+    // Zoom out by a factor of 2, keeping the same center location if possible
+    igv.Browser.prototype.zoomOut = function (centerBP, viewport) {
+        doScale.call(this, centerBP, viewport, minifyWithGenomicStateWithCenter);
+    };
+
+    function doScale(centerBP, viewport, func) {
 
         var self = this,
             anyViewport;
@@ -745,19 +754,17 @@ var igv = (function (igv) {
         }
 
         if (viewport) {
-
-            magnifyWithGenomicStateWithCenter.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
+            func.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
             self.updateWithGenomicState(viewport.genomicState);
         } else {
-
             anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
             this.genomicStateList.forEach(function (genomicState) {
-                magnifyWithGenomicStateWithCenter.call(self, genomicState, centerBP, anyViewport.$viewport.width());
+                func.call(self, genomicState, centerBP, anyViewport.$viewport.width());
                 self.updateWithGenomicState(genomicState);
             });
         }
 
-    };
+    }
 
     function magnifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
 
@@ -789,30 +796,18 @@ var igv = (function (igv) {
 
     }
 
-    // Zoom out by a factor of 2, keeping the same center location if possible
-    igv.Browser.prototype.zoomOut = function () {
-
-        var self = this,
-            anyViewport;
-
-        if (this.loadInProgress()) {
-            return;
-        }
-
-        anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
-        this.genomicStateList.forEach(function (genomicState) {
-            minifyWithGenomicStateWithCenter.call(self, genomicState, genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(anyViewport.$viewport.width()/2.0), anyViewport.$viewport.width());
-            self.updateWithGenomicState(genomicState);
-        });
-
-    };
-
     function minifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
 
         var bppMinify,
             chromosomeLengthBP,
             chromosome,
-            viewportWidthBP;
+            viewportHalfWidth,
+            viewportWidthBP,
+            cBP;
+
+        viewportHalfWidth = viewportWidth/2.0;
+        cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
+
 
         bppMinify = 2.0 * genomicState.referenceFrame.bpPerPixel;
         chromosomeLengthBP = 250000000;
@@ -827,7 +822,7 @@ var igv = (function (igv) {
         bppMinify = Math.min(bppMinify, chromosomeLengthBP/viewportWidth);
         viewportWidthBP = bppMinify * viewportWidth;
 
-        genomicState.referenceFrame.start = Math.round(centerBP - viewportWidthBP/2.0);
+        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP/2.0);
 
         if (genomicState.referenceFrame.start < 0) {
             genomicState.referenceFrame.start = 0;
