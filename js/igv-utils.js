@@ -370,6 +370,13 @@ var igv = (function (igv) {
         return {x: posx, y: posy}
     };
 
+    igv.pageCoordinates = function(e) {
+        var eFixed;
+        // Sets pageX and pageY for browsers that don't support them
+        eFixed = $.event.fix(e);
+        return {x:  eFixed.pageX, y: eFixed.pageY}
+    }
+
 
 
     igv.throttle = function (fn, threshhold, scope) {
