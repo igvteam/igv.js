@@ -137,7 +137,7 @@ var igv = (function (igv) {
 
         var $button;
 
-        $button = $('<div class="igv-nav-bar-toggle-button igv-nav-bar-toggle-button-off">');
+        $button = $('<div class="igv-nav-bar-button">');
         $button.text(label);
 
         $button.click(function () {
