@@ -54,7 +54,7 @@ var igv = (function (igv) {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {};
 
-        attachMouseHandlers.call(this);
+        addMouseHandlers.call(this);
 
     };
 
@@ -103,36 +103,6 @@ var igv = (function (igv) {
 
             }
         }
-    }
-
-    function attachMouseHandlers() {
-
-        var self = this;
-
-        window.onresize = igv.throttle(function () {
-            self.resize();
-        }, 10);
-
-        $(document).on('click.browser', function (e) {
-            var target = e.target;
-            if (!self.$root.get(0).contains(target)) {
-                // We've clicked outside the IGV div.  Close any open popovers.
-                igv.popover.hide();
-            }
-        });
-
-        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
-            var exe;
-
-            e.preventDefault();
-
-            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
-            exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
-
-            self.$cursorTrackingGuide.css({left: exe + 'px'});
-        }, 10));
-
     }
 
     igv.Browser.hasKnownFileExtension = function (config) {
@@ -429,7 +399,7 @@ var igv = (function (igv) {
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         viewportWidth = this.viewportWidth();
 
-        if(this.genomicStateList && viewportWidth > 0) {
+        if (this.genomicStateList && viewportWidth > 0) {
             this.genomicStateList.forEach(function (gstate) {
                 var referenceFrame = gstate.referenceFrame;
                 if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.end) {
@@ -448,7 +418,7 @@ var igv = (function (igv) {
             })
         }
 
-        if(this.genomicStateList && this.genomicStateList.length > 0) {
+        if (this.genomicStateList && this.genomicStateList.length > 0) {
             this.updateLocusSearchWidget(this.genomicStateList[0]);
             this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
         }
@@ -468,9 +438,9 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.repaint = function () {
 
-        if(this.ideoPanel) this.ideoPanel.repaint();
-        if(this.karyoPanel) this.karyoPanel.repaint();
-        if(this.centerGuide) this.centerGuide.repaint();
+        if (this.ideoPanel) this.ideoPanel.repaint();
+        if (this.karyoPanel) this.karyoPanel.repaint();
+        if (this.centerGuide) this.centerGuide.repaint();
         trackView.forEach(function (trackView) {
             trackView.repaint();
         })
@@ -509,9 +479,9 @@ var igv = (function (igv) {
 
         this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
 
-        if(this.ideoPanel) this.ideoPanel.repaint();
-        if(this.karyoPanel) this.karyoPanel.repaint();
-        if(this.centerGuide) this.centerGuide.repaint();
+        if (this.ideoPanel) this.ideoPanel.repaint();
+        if (this.karyoPanel) this.karyoPanel.repaint();
+        if (this.centerGuide) this.centerGuide.repaint();
 
         this.trackViews.forEach(function (trackView) {
             trackView.update();
@@ -1465,6 +1435,109 @@ var igv = (function (igv) {
         return results[0];
 
     };
+
+    igv.Browser.prototype.mouseDownOnViewport = function (e, viewport) {
+
+        var coords;
+
+        coords = igv.pageCoordinates(e);
+
+        this.vpMouseDown = {
+            viewport: viewport,
+            lastMouseX: coords.x,
+            mouseDownX: coords.x,
+            genomicState: viewport.genomicState,
+            referenceFrame: viewport.genomicState.referenceFrame
+        };
+
+    }
+
+    function addMouseHandlers() {
+
+        var self = this,
+            lastMouseX;
+
+
+        window.onresize = igv.throttle(function () {
+            self.resize();
+        }, 10);
+
+        $(document).on('click.browser', function (e) {
+            var target = e.target;
+            if (!self.$root.get(0).contains(target)) {
+                // We've clicked outside the IGV div.  Close any open popovers.
+                igv.popover.hide();
+            }
+        });
+
+        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+        $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
+            var exe;
+
+            e.preventDefault();
+
+            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
+            exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
+
+            self.$cursorTrackingGuide.css({left: exe + 'px'});
+        }, 10));
+
+
+        $(this.trackContainerDiv).on('mousemove', igv.throttle(function (e) {
+
+            var coords;
+
+            e.preventDefault();
+
+            if (self.loadInProgress()) {
+                return;
+            }
+
+            coords = igv.pageCoordinates(e);
+
+            if (self.vpMouseDown) {
+
+                if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
+                    self.vpMouseDown.viewport.isDragging = true;
+                }
+
+                if (self.vpMouseDown.viewport.isDragging) {
+
+                    self.vpMouseDown.viewport.shiftPixels(lastMouseX - coords.x);
+
+                    self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
+
+                    self.repaintWithGenomicState(self.vpMouseDown.genomicState);
+
+                    self.fireEvent('trackdrag');
+                }
+                lastMouseX = coords.x;
+            }
+
+        }, 10));
+
+        $(this.trackContainerDiv).on('mouseleave', function (e) {
+            mouseUpOrLeave(e);
+        });
+
+        $(this.trackContainerDiv).on('mouseup', function (e) {
+            mouseUpOrLeave(e);
+
+        });
+
+        function mouseUpOrLeave(e) {
+
+            e.preventDefault();
+
+            if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
+                self.fireEvent('trackdragend');
+                self.vpMouseDown.viewport.isDragging = false;
+            }
+            self.vpMouseDown = undefined;
+        }
+
+    };
+
 
     return igv;
 })

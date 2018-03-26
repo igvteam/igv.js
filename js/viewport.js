@@ -477,45 +477,9 @@ var igv = (function (igv) {
         return $(this.contentDiv).height();
     };
 
-    // igv.Viewport.prototype.paintImage = function (chr, start, end, bpPerPixel) {
-    //
-    //     var offset, sx, dx, scale, sWidth, dWidth, iHeight,
-    //         tile = this.tile;
-    //
-    //     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-    //
-    //     if (tile && tile.containsRange(chr, start, end, bpPerPixel)) {
-    //         this.xOffset = Math.round((tile.startBP - start) / tile.bpPerPixel);
-    //         this.ctx.drawImage(tile.image, this.xOffset, 0);
-    //         this.ctx.save();
-    //         this.ctx.restore();
-    //     } else if (tile && tile.overlapsRange(chr, start, end)) {
-    //
-    //         offset = Math.round((start - tile.startBP) / tile.bpPerPixel);
-    //         if (offset > 0) {
-    //             sx = offset;
-    //             dx = 0;
-    //         } else {
-    //             sx = 0;
-    //             dx = -offset;
-    //         }
-    //
-    //         dWidth = tile.image.width;
-    //         if (bpPerPixel === tile.bpPerPixel) {
-    //             sWidth = dWidth;
-    //         } else {
-    //             scale = bpPerPixel / tile.bpPerPixel;
-    //             sWidth = Math.round(scale * dWidth);
-    //
-    //         }
-    //
-    //         iHeight = tile.image.height;
-    //
-    //         this.ctx.drawImage(tile.image, sx, 0, sWidth, iHeight, dx, 0, dWidth, iHeight);
-    //         this.ctx.save();
-    //         this.ctx.restore();
-    //     }
-    // };
+    igv.Viewport.prototype.shiftPixels = function (pixels) {
+        this.genomicState.referenceFrame.shiftPixels(pixels, this.$viewport.width());
+    };
 
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
@@ -581,15 +545,11 @@ var igv = (function (igv) {
     function addMouseHandlers() {
 
         var self = this,
-            referenceFrame,
-            isMouseDown,
-            isDragging,
             lastMouseX,
             mouseDownX,
             lastClickTime,
             popupTimer;
 
-        isMouseDown = isDragging = false;
         lastClickTime = 0;
 
         this.$viewport.on("contextmenu", function (e) {
@@ -636,86 +596,19 @@ var igv = (function (igv) {
 
         });
 
+        /**
+         * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
+         */
         this.$viewport.on('mousedown', function (e) {
-
-            var coords;
-
-            e.preventDefault();
-
-            if (igv.popover) {
-                igv.popover.hide();
-            }
-
-            isMouseDown = true;
-
-            coords = igv.translateMouseCoordinates(e, self.$viewport.get(0));
-            mouseDownX = lastMouseX = coords.x;
-
-            referenceFrame = self.genomicState.referenceFrame;
+            mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+            igv.browser.mouseDownOnViewport(e, self);
         });
 
-        this.$viewport.on('mousemove', igv.throttle(function (e) {
 
-            var chromosome,
-                coords,
-                maxEnd,
-                maxStart;
-
-            e.preventDefault();
-
-            coords = igv.translateMouseCoordinates(e, self.$viewport.get(0));
-
-            if (referenceFrame && (true === isMouseDown)) {
-
-                if (mouseDownX && Math.abs(coords.x - mouseDownX) > igv.browser.constants.dragThreshold) {
-
-                    if (igv.browser.loadInProgress()) {
-                        return;
-                    }
-
-                    isDragging = true;
-
-                    referenceFrame.shiftBP(lastMouseX - coords.x);
-
-                    // clamp left
-                    referenceFrame.start = Math.max(0, referenceFrame.start);
-
-                    // clamp
-                    chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
-                    maxEnd = chromosome.bpLength;
-                    maxStart = maxEnd - (self.$viewport.width() * referenceFrame.bpPerPixel);
-
-                    if (referenceFrame.start > maxStart) {
-                        referenceFrame.start = maxStart;
-                    }
-
-                    igv.browser.updateLocusSearchWidget(igv.browser.genomicStateList[0]);
-
-                    igv.browser.repaintWithGenomicState(self.genomicState);
-
-                    igv.browser.fireEvent('trackdrag');
-                }
-
-                lastMouseX = coords.x;
-
-            }
-
-        }, 10));
-
-        this.$viewport.on('mouseleave', function (e) {
-
-            e.preventDefault();
-
-            if (true === isDragging) {
-                igv.browser.fireEvent('trackdragend');
-                isDragging = false;
-            }
-            isMouseDown = false;
-            mouseDownX = lastMouseX = undefined;
-            isDragging = false;
-            referenceFrame = undefined;
-        });
-
+        /**
+         * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
+         * those, it is a click.
+         */
         this.$viewport.on('mouseup', function (e) {
 
             var mouseX,
@@ -728,21 +621,14 @@ var igv = (function (igv) {
                 loci,
                 chr;
 
+            if (3 === e.which || self.isDragging || mouseDownX === undefined) {
+                return;
+            }
+
+            // This is a mouse click.  Handle it here, stop bubbling.
             e.preventDefault();
 
-            isDragging = false;
-            isMouseDown = false;
-
-            if (3 === e.which) {
-                return;
-            }
-
             mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-
-            if (mouseDownX === undefined || Math.abs(mouseX - mouseDownX) > igv.browser.constants.dragThreshold) {
-                return;
-            }
-
             mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
             referenceFrame = self.genomicState.referenceFrame;
             xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
@@ -797,10 +683,15 @@ var igv = (function (igv) {
                 }
             }
 
-            isMouseDown = false;
             mouseDownX = lastMouseX = undefined;
-            isDragging = false;
             lastClickTime = time;
+        });
+
+        /**
+         * Mouse has moved out of the viewport.  Cancel pending click.
+         */
+        this.$viewport.on('mouseout', function (e) {
+            mouseDownX = lastMouseX = lastClickTime = undefined;
         });
 
 
