@@ -138,52 +138,7 @@ $drag-drop-warning-color: red;
     color: #434343;
   }
 
-  // igv logo
-  .igv-logo {
-    width: 34px;
-    height: 16px;
-
-    margin-left: 8px;
-
-    background: url(img/igv-logo.svg);
-    background-size: 34px 16px;
-    background-repeat:no-repeat;
-    background-position: 0 0;
-  }
-
-  // drag & drop file upload button
-  #igv-drag-and-drop-presentation-button {
-    cursor: pointer;
-
-    height: $igv-navbar-button-height;
-    min-width: $igv-navbar-button-width;
-    text-transform: capitalize;
-
-    line-height: $igv-navbar-button-height;
-    text-align: center;
-    font-family: $igv-default-font-face;
-    font-size: $igv-navbar-button-font-size;
-    font-weight: 200;
-
-    color: $igv-navbar-toggle-dark-dark;
-    border-color: $igv-navbar-toggle-dark-dark;
-    background-color: $igv-navbar-toggle-light-color;
-
-    border-style: solid;
-    border-width: thin;
-    border-radius: 10px;
-  }
-
-  #igv-drag-and-drop-presentation-button:hover,
-  #igv-drag-and-drop-presentation-button:focus,
-  #igv-drag-and-drop-presentation-button:active  {
-    color: white;
-    border-color: $igv-navbar-toggle-dark-dark;
-    background-color: $igv-navbar-toggle-dark-dark;
-  }
-
-  // chromosome select widget | chromosome select widget | locus goto | search icon | window size
-  #igv-genomic-location {
+  #igv-nav-bar-left-container {
 
     display: flex;
     flex-flow: row;
@@ -191,94 +146,153 @@ $drag-drop-warning-color: red;
     justify-content: space-between;
     align-items: center;
 
-    width: 430px;
+    // igv logo
+    #igv-logo {
+      width: 34px;
+      height: 16px;
 
-    // chromosome select widget
-    #igv-chromosome-select-widget-container {
-      height: 90%;
-      width: 96px;
-      margin-right: 4px;
+      margin-left: 8px;
+      margin-right: 32px;
 
-      select {
-
-        outline: none;
-
-        font-family: $igv-default-font-face;
-        font-size: small;
-        font-weight: 400;
-        color: #444;
-
-        width: 100%;
-        height: 100%;
-      }
+      background: url(img/igv-logo.svg);
+      background-size: 34px 16px;
+      background-repeat:no-repeat;
+      background-position: 0 0;
     }
 
-    #igv-locus-size-group {
+    // drag & drop file upload button
+    #igv-drag-and-drop-presentation-button {
+
+      margin-right: 32px;
+
+      cursor: pointer;
+
+      height: $igv-navbar-button-height;
+      min-width: $igv-navbar-button-width;
+      text-transform: capitalize;
+
+      line-height: $igv-navbar-button-height;
+      text-align: center;
+      font-family: $igv-default-font-face;
+      font-size: $igv-navbar-button-font-size;
+      font-weight: 200;
+
+      color: $igv-navbar-toggle-dark-dark;
+      border-color: $igv-navbar-toggle-dark-dark;
+      background-color: $igv-navbar-toggle-light-color;
+
+      border-style: solid;
+      border-width: thin;
+      border-radius: 10px;
+    }
+
+    #igv-drag-and-drop-presentation-button:hover,
+    #igv-drag-and-drop-presentation-button:focus,
+    #igv-drag-and-drop-presentation-button:active  {
+      color: white;
+      border-color: $igv-navbar-toggle-dark-dark;
+      background-color: $igv-navbar-toggle-dark-dark;
+    }
+
+    // chromosome select widget | chromosome select widget | locus goto | search icon | window size
+    #igv-genomic-location {
+
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
 
-      // locus goto | search icon
-      #igv-search-container {
+      width: 430px;
+
+      // chromosome select widget
+      #igv-chromosome-select-widget-container {
         height: 90%;
-        width: 260px;
+        width: 96px;
+        margin-right: 4px;
 
-        display: flex;
-        flex-flow: row;
-        flex-wrap: nowrap;
-        justify-content: flex-start;
-        align-items: center;
+        select {
 
-        // locus goto
-        input {
-          display: block;
-          height: 20px;
-          width: 85%;
-
-          padding-left: 8px;
-          margin-right: 8px;
-
-          line-height: 20px;
-          text-align: left;
+          outline: none;
 
           font-family: $igv-default-font-face;
           font-size: small;
           font-weight: 400;
           color: #444;
 
-          outline: none;
-
-          border-style: solid;
-          border-radius: 3px;
-          border-width: thin;
-          border-color: $igv-border-color;
-
-          background-color: white;
-        }
-
-        // search icon
-        div {
+          width: 100%;
           height: 100%;
-          //width: 32px;
+        }
+      }
 
-          i {
-            font-size: 18px;
+      #igv-locus-size-group {
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+
+        // locus goto | search icon
+        #igv-search-container {
+          height: 90%;
+          width: 260px;
+
+          display: flex;
+          flex-flow: row;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          align-items: center;
+
+          // locus goto
+          input {
+            display: block;
+            height: 20px;
+            width: 85%;
+
+            padding-left: 8px;
+            margin-right: 8px;
+
+            line-height: 20px;
+            text-align: left;
+
+            font-family: $igv-default-font-face;
+            font-size: small;
+            font-weight: 400;
+            color: #444;
+
+            outline: none;
+
+            border-style: solid;
+            border-radius: 3px;
+            border-width: thin;
+            border-color: $igv-border-color;
+
+            background-color: white;
+          }
+
+          // search icon
+          div {
+            height: 100%;
+            //width: 32px;
+
+            i {
+              font-size: 18px;
+            }
+
           }
 
         }
 
-      }
+        // window size panel
+        #igv-windowsizepanel-content-div {
+          margin-left: 4px;
 
-      // window size panel
-      #igv-windowsizepanel-content-div {
-        margin-left: 4px;
+          font-family: $igv-default-font-face;
+          font-size: 14px;
+          font-weight: 400;
+          color: #444;
+        }
 
-        font-family: $igv-default-font-face;
-        font-size: 14px;
-        font-weight: 400;
-        color: #444;
       }
 
     }
@@ -361,7 +375,7 @@ $drag-drop-warning-color: red;
 }
 
 // TODO: figure out what to do with this
-.igv-logo-nonav {
+#igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
   position: absolute;

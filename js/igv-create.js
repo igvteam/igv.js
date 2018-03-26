@@ -89,7 +89,7 @@ var igv = (function (igv) {
 
         // TODO fix this
         // if (!config.showNavigation) {
-        //     $header.append($('<div class="igv-logo-nonav">'));
+        //     $header.append($('<div id="igv-logo-nonav">'));
         // }
 
         if (config.apiKey) igv.setApiKey(config.apiKey);
@@ -161,8 +161,6 @@ var igv = (function (igv) {
                     });
 
                     browser.zoomWidgetLayout();
-
-                    browser.toggleCenterGuide(browser.genomicStateList);
 
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
@@ -307,6 +305,7 @@ var igv = (function (igv) {
     function createStandardControls(browser, config) {
 
         var $div,
+            $igv_nav_bar_left_container,
             $genomic_location,
             $locus_size_group,
             $toggle_button_container,
@@ -325,12 +324,15 @@ var igv = (function (igv) {
             $controls.append($navigation);
             browser.$navigation = $navigation;
 
+            $igv_nav_bar_left_container = $('<div id="igv-nav-bar-left-container">');
+            $navigation.append($igv_nav_bar_left_container);
+
             // IGV logo
-            $igvLogo = $('<div class="igv-logo">');
-            $navigation.append($igvLogo);
+            $igvLogo = $('<div id="igv-logo">');
+            $igv_nav_bar_left_container.append($igvLogo);
 
             // load local file
-            browser.trackFileLoad = new igv.TrackFileLoad($navigation, browser.$root);
+            browser.trackFileLoad = new igv.TrackFileLoad($igv_nav_bar_left_container, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
             } else {
@@ -338,7 +340,7 @@ var igv = (function (igv) {
             }
 
             $genomic_location = $('<div id="igv-genomic-location">');
-            $navigation.append($genomic_location);
+            $igv_nav_bar_left_container.append($genomic_location);
 
             // chromosome select widget
             browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
@@ -394,29 +396,39 @@ var igv = (function (igv) {
             browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
             $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
 
-            if (true === config.showCursorTrackingGuide) {
-                browser.$cursorTrackingGuide.show();
-            } else {
-                browser.$cursorTrackingGuide.hide();
-            }
-
-            browser.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
+            browser.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'showCursorTrackingGuide', function () {
                 return browser.$cursorTrackingGuide;
             }, undefined);
 
             $toggle_button_container.append(browser.$cursorTrackingGuideToggle);
 
-            // one base wide center guide
-            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
+            if (true === config.showCursorTrackingGuide) {
+                browser.$cursorTrackingGuideToggle.show();
+            } else {
+                browser.$cursorTrackingGuideToggle.hide();
+            }
 
+            // center guide
+            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
             $toggle_button_container.append(browser.centerGuide.$centerGuideToggle);
 
+            if (true === config.showCenterGuide) {
+                browser.centerGuide.$centerGuideToggle.show();
+            } else {
+                browser.centerGuide.$centerGuideToggle.hide();
+            }
+
             // toggle track labels
-            browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
+            browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'trackLabelsVisible', function () {
                 return $(browser.trackContainerDiv).find('.igv-track-label');
             }, undefined);
-
             $toggle_button_container.append(browser.$trackLabelToggle);
+
+            if (true === config.showTrackLabels) {
+                browser.$trackLabelToggle.show();
+            } else {
+                browser.$trackLabelToggle.hide();
+            }
 
             // zoom widget
             zoomWidget(browser, $navigation);
@@ -492,6 +504,10 @@ var igv = (function (igv) {
 
         if (undefined === config.showKaryo) {
             config.showKaryo = false;
+        }
+
+        if (undefined === config.showTrackLabels) {
+            config.showTrackLabels = false;
         }
 
         if (undefined === config.trackLabelsVisible) {

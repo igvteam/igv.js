@@ -1035,9 +1035,6 @@ var igv = (function (igv) {
                         return gs;
                     });
 
-                    self.toggleCenterGuide(self.genomicStateList);
-                    self.toggleCursorGuide(self.genomicStateList);
-
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
                     return genomicStateList
