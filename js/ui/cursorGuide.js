@@ -29,37 +29,37 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackLabelControl = function ($parent, config) {
+    igv.CursorGuide = function ($controlParent, $guideParent, config) {
         var self = this;
 
-        this.$button = $('<div class="igv-nav-bar-button">');
-        $parent.append(this.$button);
-        this.$button.text('track labels');
+        this.$guide = $('<div class="igv-cursor-tracking-guide">');
+        $guideParent.append(this.$guide);
 
-        this.$button.on('click', function () {
-            if (true === igv.browser.trackLabelsVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
+        this.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'showCursorTrackingGuideButton', function () {
+            return self.$guide;
+        }, undefined);
 
-        if (true === config.showTrackLabelButton) {
-            this.$button.show();
+        $controlParent.append(this.$cursorTrackingGuideToggle);
+
+        if (true === config.showCursorTrackingGuideButton) {
+            this.$cursorTrackingGuideToggle.show();
         } else {
-            this.$button.hide();
+            this.$cursorTrackingGuideToggle.hide();
         }
 
-    };
+        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+        $guideParent.on('mousemove.cursorGuide', igv.throttle(function (e) {
+            var exe;
 
-    igv.TrackLabelControl.prototype.doHide = function () {
-        this.$button.addClass('igv-nav-bar-button-clicked');
-        igv.browser.hideTrackLabels();
-    };
+            e.preventDefault();
 
-    igv.TrackLabelControl.prototype.doShow = function () {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
-        igv.browser.showTrackLabels();
+            exe = Math.max(50, igv.translateMouseCoordinates(e, $guideParent.get(0)).x);
+            exe = Math.min($guideParent.innerWidth() - 65, exe);
+            // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
+
+            self.$guide.css({ left: exe + 'px' });
+        }, 10));
+
     };
 
     return igv;

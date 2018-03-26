@@ -446,6 +446,12 @@
   border-width: thin;
   border-radius: 10px; }
 
+.igv-nav-bar-button-clicked {
+  cursor: pointer;
+  color: white;
+  border-color: #737373;
+  background-color: #737373; }
+
 .igv-nav-bar-button:hover {
   cursor: pointer;
   color: white;

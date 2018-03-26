@@ -114,11 +114,7 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
-    igv.Browser.prototype.trackLabelsVisible = function () {
-        return this.trackLabelsVisible;
-    };
-
-    igv.Browser.prototype.hideTracklabels = function () {
+    igv.Browser.prototype.hideTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
             if (trackView.viewports[ 0 ].$trackLabel) {
@@ -130,7 +126,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.showTracklabels = function () {
+    igv.Browser.prototype.showTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
             if (trackView.viewports[ 0 ].$trackLabel) {
@@ -154,14 +150,14 @@ var igv = (function (igv) {
 
         if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
 
-            if (this.$cursorTrackingGuide.is(":visible")) {
-                this.$cursorTrackingGuideToggle.click();
+            if (this.cursorGuide.$guide.is(":visible")) {
+                this.cursorGuide.$cursorTrackingGuideToggle.click();
             }
 
-            this.$cursorTrackingGuideToggle.hide();
+            this.cursorGuide.$cursorTrackingGuideToggle.hide();
 
         } else {
-            this.$cursorTrackingGuideToggle.show();
+            this.cursorGuide.$cursorTrackingGuideToggle.show();
         }
     };
 
@@ -1504,19 +1500,6 @@ var igv = (function (igv) {
                 igv.popover.hide();
             }
         });
-
-        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
-            var exe;
-
-            e.preventDefault();
-
-            exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
-            exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
-
-            self.$cursorTrackingGuide.css({left: exe + 'px'});
-        }, 10));
-
 
         $(this.trackContainerDiv).on('mousemove', igv.throttle(function (e) {
 

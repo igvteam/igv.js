@@ -325,6 +325,13 @@ $igv-dark-grey-color: #373737;
   border-radius: 10px;
 }
 
+.igv-nav-bar-button-clicked {
+  cursor: pointer;
+  color: white;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-dark-dark;
+}
+
 .igv-nav-bar-button:hover {
   cursor: pointer;
   color: white;

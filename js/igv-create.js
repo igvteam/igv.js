@@ -387,36 +387,15 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
 
-
-
+            // cursor guide | center guide | track labels
             $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
             $navigation.append($toggle_button_container);
 
-            // cursor tracking guide
-            browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
-            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
-
-            browser.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'showCursorTrackingGuide', function () {
-                return browser.$cursorTrackingGuide;
-            }, undefined);
-
-            $toggle_button_container.append(browser.$cursorTrackingGuideToggle);
-
-            if (true === config.showCursorTrackingGuide) {
-                browser.$cursorTrackingGuideToggle.show();
-            } else {
-                browser.$cursorTrackingGuideToggle.hide();
-            }
+            // cursor guide
+            browser.cursorGuide = new igv.CursorGuide($toggle_button_container, $(browser.trackContainerDiv), config);
 
             // center guide
-            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
-            $toggle_button_container.append(browser.centerGuide.$centerGuideToggle);
-
-            if (true === config.showCenterGuide) {
-                browser.centerGuide.$centerGuideToggle.show();
-            } else {
-                browser.centerGuide.$centerGuideToggle.hide();
-            }
+            browser.centerGuide = new igv.CenterGuide($toggle_button_container, $(browser.trackContainerDiv), config);
 
             // toggle track labels
             browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, config);
@@ -485,24 +464,20 @@ var igv = (function (igv) {
             config.showIdeogram = true;
         }
 
-        if (undefined === config.showCursorTrackingGuide) {
-            config.showCursorTrackingGuide = true;
+        if (undefined === config.showCursorTrackingGuideButton) {
+            config.showCursorTrackingGuideButton = true;
         }
 
-        if (undefined === config.showCenterGuide) {
-            config.showCenterGuide = true;
+        if (undefined === config.showCenterGuideButton) {
+            config.showCenterGuideButton = true;
+        }
+
+        if (undefined === config.showTrackLabelButton) {
+            config.showTrackLabelButton = true;
         }
 
         if (undefined === config.showKaryo) {
             config.showKaryo = false;
-        }
-
-        if (undefined === config.showTrackLabels) {
-            config.showTrackLabels = true;
-        }
-
-        if (undefined === config.trackLabelsVisible) {
-            config.trackLabelsVisible = true;
         }
 
         if (config.showControls === undefined) {
