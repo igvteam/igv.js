@@ -114,6 +114,34 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
+    igv.Browser.prototype.trackLabelsVisible = function () {
+        return this.trackLabelsVisible;
+    };
+
+    igv.Browser.prototype.hideTracklabels = function () {
+
+        this.trackViews.forEach(function (trackView) {
+            if (trackView.viewports[ 0 ].$trackLabel) {
+                trackView.viewports[ 0 ].$trackLabel.hide();
+            }
+        });
+
+        this.trackLabelsVisible = false;
+
+    };
+
+    igv.Browser.prototype.showTracklabels = function () {
+
+        this.trackViews.forEach(function (trackView) {
+            if (trackView.viewports[ 0 ].$trackLabel) {
+                trackView.viewports[ 0 ].$trackLabel.show();
+            }
+        });
+
+        this.trackLabelsVisible = true;
+
+    };
+
     igv.Browser.prototype.disableZoomWidget = function () {
         this.$zoomContainer.hide();
     };
