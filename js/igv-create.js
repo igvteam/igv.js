@@ -419,16 +419,7 @@ var igv = (function (igv) {
             }
 
             // toggle track labels
-            browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'trackLabelsVisible', function () {
-                return $(browser.trackContainerDiv).find('.igv-track-label');
-            }, undefined);
-            $toggle_button_container.append(browser.$trackLabelToggle);
-
-            if (true === config.showTrackLabels) {
-                browser.$trackLabelToggle.show();
-            } else {
-                browser.$trackLabelToggle.hide();
-            }
+            browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, config);
 
             // zoom widget
             zoomWidget(browser, $navigation);
