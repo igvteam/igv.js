@@ -450,8 +450,7 @@ var igv = (function (igv) {
         $fa = igv.createIcon("minus-circle");
         $div.append($fa);
         $div.on('click', function () {
-            var nuthin = undefined;
-            browser.zoomOut(nuthin, nuthin);
+            browser.zoomOut();
         });
 
         // zoom in
@@ -460,8 +459,7 @@ var igv = (function (igv) {
         $fa = igv.createIcon("plus-circle");
         $div.append($fa);
         $div.on('click', function () {
-            var nuthin = undefined;
-            browser.zoomIn(nuthin, nuthin);
+            browser.zoomIn();
         });
 
     }

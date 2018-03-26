@@ -705,12 +705,22 @@ var igv = (function (igv) {
     };
 
     // Zoom in by a factor of 2, keeping the same center location
-    igv.Browser.prototype.zoomIn = function (centerBP, viewport) {
+    igv.Browser.prototype.zoomIn = function () {
+        var nuthin = undefined;
+        this.zoomInWithViewport(nuthin, nuthin);
+    };
+
+    igv.Browser.prototype.zoomInWithViewport = function (viewport, centerBP) {
         doScale.call(this, centerBP, viewport, magnifyWithGenomicStateWithCenter);
     };
 
     // Zoom out by a factor of 2, keeping the same center location if possible
-    igv.Browser.prototype.zoomOut = function (centerBP, viewport) {
+    igv.Browser.prototype.zoomOut = function () {
+        var nuthin = undefined;
+        this.zoomOutWithViewport(nuthin, nuthin);
+    };
+
+    igv.Browser.prototype.zoomOutWithViewport = function (viewport, centerBP) {
         doScale.call(this, centerBP, viewport, minifyWithGenomicStateWithCenter);
     };
 
