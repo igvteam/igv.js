@@ -38,7 +38,7 @@ var igv = (function (igv) {
         this.$container = $('<div class="igv-karyo-div">');
         $parent.append(this.$container);
 
-        this.$karyoPanelToggle = igv.makeToggleButton('Karyotype Panel', 'Karyotype Panel', 'showKaryo', function () {
+        this.$karyoPanelToggle = igv.makeToggleButton('Karyotype Panel', 'showKaryo', function () {
             return self.$container;
         }, undefined);
 

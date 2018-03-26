@@ -133,39 +133,24 @@ var igv = (function (igv) {
         return (path instanceof File);
     };
 
-    igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target, continuation) {
+    igv.makeToggleButton = function (label, configurationKey, get$Target, continuation) {
 
-        var $button = $('<div class="igv-nav-bar-toggle-button">');
+        var $button;
 
-        skin$ButtonWithTruthFunction($button, (true === igv.browser.config[ configurationKey ]), buttonOnLabel, buttonOffLabel);
+        $button = $('<div class="igv-nav-bar-toggle-button igv-nav-bar-toggle-button-off">');
+        $button.text(label);
 
         $button.click(function () {
 
             var $target = get$Target();
 
-            igv.browser.config[ configurationKey ] = !igv.browser.config[ configurationKey ];
-
             $target.toggle();
 
-            skin$ButtonWithTruthFunction($(this), $target.is(":visible"), buttonOnLabel, buttonOffLabel);
+            if (continuation) {
+                continuation();
+            }
         });
 
-        function skin$ButtonWithTruthFunction($b, truth, onLabel, offLabel) {
-
-            $b.removeClass('igv-nav-bar-toggle-button-on');
-            $b.removeClass('igv-nav-bar-toggle-button-off');
-            if (true === truth) {
-                $b.addClass('igv-nav-bar-toggle-button-off');
-                $b.text(offLabel);
-
-                if (continuation) {
-                    continuation();
-                }
-            } else {
-                $b.addClass('igv-nav-bar-toggle-button-on');
-                $b.text(onLabel);
-            }
-        }
 
         return $button;
     };
