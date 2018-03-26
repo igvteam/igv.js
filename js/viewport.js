@@ -661,7 +661,7 @@ var igv = (function (igv) {
                     igv.browser.search(string);
 
                 } else {
-                    igv.browser.zoomIn(centerBP, self);
+                    igv.browser.zoomInWithViewport(self, centerBP);
                 }
 
 
