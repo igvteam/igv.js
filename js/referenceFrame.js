@@ -54,12 +54,27 @@ var igv = (function (igv) {
         return bp / this.bpPerPixel;
     };
 
-    igv.ReferenceFrame.prototype.toBP = function(pixels) {
+    igv.ReferenceFrame.prototype.toBP = function (pixels) {
         return this.bpPerPixel * pixels;
     };
 
-    igv.ReferenceFrame.prototype.shiftBP = function (pixels) {
+    igv.ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
         this.start += pixels * this.bpPerPixel;
+
+        // clamp left
+        this.start = Math.max(0, this.start);
+
+        // clamp right
+        if (viewportWidth) {
+        
+            var chromosome = igv.browser.genome.getChromosome(this.chrName);
+            var maxEnd = chromosome.bpLength;
+            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+
+            if (this.start > maxStart) {
+                this.start = maxStart;
+            }
+        }
     };
 
     igv.ReferenceFrame.prototype.showLocus = function (pixels) {
@@ -75,7 +90,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.ReferenceFrame.prototype.description = function() {
+    igv.ReferenceFrame.prototype.description = function () {
         return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
     };
 
