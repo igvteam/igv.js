@@ -34,7 +34,7 @@ var igv = (function (igv) {
         var self = this;
 
         // present drag & drop widget
-        this.$presentationButton = $('<div id="igv-drag-and-drop-presentation-button">');
+        this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
         $buttonParent.append(this.$presentationButton);
 
         this.$presentationButton.text('Load Track');
