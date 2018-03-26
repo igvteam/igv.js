@@ -29,17 +29,26 @@
  */
 var igv = (function (igv) {
 
-    igv.CenterGuide = function ($parent, config) {
+    igv.CenterGuide = function ($controlParent, $guideParent, config) {
         var self = this;
 
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
-        $parent.append(this.$container);
+        $guideParent.append(this.$container);
 
-        this.$centerGuideToggle = igv.makeToggleButton('center line', 'showCenterGuide', function () {
+        this.$centerGuideToggle = igv.makeToggleButton('center line', 'showCenterGuideButton', function () {
             return self.$container;
         }, function () {
             self.repaint();
         });
+
+        $controlParent.append(this.$centerGuideToggle);
+
+        if (true === config.showCenterGuideButton) {
+            this.$centerGuideToggle.show();
+        } else {
+            this.$centerGuideToggle.hide();
+        }
+
 
     };
 
