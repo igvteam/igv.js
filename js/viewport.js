@@ -80,22 +80,22 @@ var igv = (function (igv) {
 
         if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
+            this.$trackLabel = $('<div class="igv-track-label">');
+            this.$viewport.append(this.$trackLabel);
+
             if (typeof trackView.track.description === 'function') {
                 description = trackView.track.description();
             } else {
                 description = trackView.track.description || trackView.track.name;
             }
 
-            $trackLabel = $('<div class="igv-track-label">');
-            $trackLabel.html(trackView.track.name);
-            $trackLabel.click(function (e) {
+            this.$trackLabel.html(trackView.track.name);
+            this.$trackLabel.click(function (e) {
                 self.popover.presentContent(e.pageX, e.pageY, description);
             });
 
-            this.$viewport.append($trackLabel);
-
-            if (igv.browser.$trackLabelToggle.hasClass('igv-nav-bar-toggle-button-on')) {
-                $trackLabel.hide();
+            if (false === igv.browser.trackLabelsVisible) {
+                this.$trackLabel.hide();
             }
 
         }
