@@ -495,11 +495,11 @@ var igv = (function (igv) {
         }
 
         if (undefined === config.showCursorTrackingGuide) {
-            config.showCursorTrackingGuide = false;
+            config.showCursorTrackingGuide = true;
         }
 
         if (undefined === config.showCenterGuide) {
-            config.showCenterGuide = false;
+            config.showCenterGuide = true;
         }
 
         if (undefined === config.showKaryo) {
@@ -507,7 +507,7 @@ var igv = (function (igv) {
         }
 
         if (undefined === config.showTrackLabels) {
-            config.showTrackLabels = false;
+            config.showTrackLabels = true;
         }
 
         if (undefined === config.trackLabelsVisible) {
