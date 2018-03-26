@@ -35,13 +35,7 @@ var igv = (function (igv) {
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
         $parent.append(this.$container);
 
-        if (true === config.showCenterGuide) {
-            this.$container.show();
-        } else {
-            this.$container.hide();
-        }
-
-        this.$centerGuideToggle = igv.makeToggleButton('center line', 'center line', 'showCenterGuide', function () {
+        this.$centerGuideToggle = igv.makeToggleButton('center line', 'showCenterGuide', function () {
             return self.$container;
         }, function () {
             self.repaint();
