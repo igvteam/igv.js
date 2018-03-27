@@ -63,6 +63,15 @@ var igv = (function (igv) {
         }
     };
 
+    igv.TrackLabelControl.prototype.disable = function () {
+        this.doHide();
+        this.$button.hide();
+    };
+
+    igv.TrackLabelControl.prototype.enable = function () {
+        this.$button.show();
+    };
+
     return igv;
 
 }) (igv || {});

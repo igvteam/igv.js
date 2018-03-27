@@ -54,12 +54,18 @@ var igv = (function (igv) {
     };
 
     igv.CenterGuide.prototype.doHide = function () {
-        this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+        }
         igv.browser.hideCenterGuide();
     };
 
     igv.CenterGuide.prototype.doShow = function () {
-        this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+        }
+
         igv.browser.showCenterGuide();
     };
 
@@ -75,6 +81,17 @@ var igv = (function (igv) {
 
         }
 
+    };
+
+    igv.CenterGuide.prototype.disable = function () {
+        this.doHide();
+        this.$centerGuideToggle.hide();
+    };
+
+    igv.CenterGuide.prototype.enable = function () {
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.show();
+        }
     };
 
     igv.CenterGuide.prototype.repaint = function () {

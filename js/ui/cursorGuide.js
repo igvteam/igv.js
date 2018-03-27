@@ -67,7 +67,9 @@ var igv = (function (igv) {
     };
 
     igv.CursorGuide.prototype.doHide = function () {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
+        if (this.$button) {
+            this.$button.removeClass('igv-nav-bar-button-clicked');
+        }
         igv.browser.hideCursorGuide();
     };
 
@@ -86,6 +88,17 @@ var igv = (function (igv) {
                 this.$button.removeClass('igv-nav-bar-button-clicked');
             }
 
+        }
+    };
+
+    igv.CursorGuide.prototype.disable = function () {
+        this.doHide();
+        this.$guide.hide();
+    };
+
+    igv.CursorGuide.prototype.enable = function () {
+        if (this.$button) {
+            this.$button.show();
         }
     };
 

@@ -1070,26 +1070,28 @@ var igv = (function (igv) {
                     self.ideoPanel.buildPanels($('#igv-content-header'), panelWidth);
                 }
 
+
+                // multi-locus mode
+                if (genomicStateList.length > 1) {
+                    self.centerGuide.disable();
+                    self.enableZoomWidget();
+                }
+                // whole-genome
+                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                    self.centerGuide.disable();
+                    self.disableZoomWidget();
+                }
+                // single locus
+                else {
+                    self.centerGuide.enable();
+                    self.enableZoomWidget();
+                }
+
                 self.update();
             })
             .catch(function (error) {
                 igv.presentAlert(error);
             });
-    };
-
-    igv.Browser.prototype.zoomWidgetLayout = function () {
-        var found;
-
-        found = _.filter(this.genomicStateList, function (g) {
-            return 'all' === g.locusSearchString.toLowerCase();
-        });
-
-        if (_.size(found) > 0) {
-            this.disableZoomWidget();
-        } else {
-            this.enableZoomWidget();
-        }
-
     };
 
     /**
