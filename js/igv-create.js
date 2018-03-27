@@ -157,8 +157,6 @@ var igv = (function (igv) {
                         return obj;
                     });
 
-                    browser.zoomWidgetLayout();
-
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
                         browser.addTrack(browser.rulerTrack);
@@ -228,6 +226,18 @@ var igv = (function (igv) {
                     browser.cursorGuide.setState(browser.centerGuideVisible);
                 }
 
+                // multi-locus mode
+                if (genomicStateList.length > 1) {
+
+                    // TODO: This is temporary until implement multi-locus center guides
+                    browser.centerGuide.disable();
+
+                }
+                // whole-genome
+                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                    browser.centerGuide.disable();
+                    browser.disableZoomWidget();
+                }
 
             })
             .catch(function (error) {
