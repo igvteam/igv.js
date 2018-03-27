@@ -53,13 +53,21 @@ var igv = (function (igv) {
     };
 
     igv.TrackLabelControl.prototype.doHide = function () {
-        this.$button.addClass('igv-nav-bar-button-clicked');
+        this.$button.removeClass('igv-nav-bar-button-clicked');
         igv.browser.hideTrackLabels();
     };
 
     igv.TrackLabelControl.prototype.doShow = function () {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
+        this.$button.addClass('igv-nav-bar-button-clicked');
         igv.browser.showTrackLabels();
+    };
+
+    igv.TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
+        if (true === trackLabelsVisible) {
+            this.$button.addClass('igv-nav-bar-button-clicked');
+        } else {
+            this.$button.removeClass('igv-nav-bar-button-clicked');
+        }
     };
 
     return igv;
