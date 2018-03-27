@@ -95,9 +95,6 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-
-        var width;
-
         // Load known genome table (make this optional)
 
         igv.Genome.getKnownGenomes()
@@ -206,6 +203,28 @@ var igv = (function (igv) {
                 browser.updateLocusSearchWidget(genomicStateList[ 0 ]);
 
                 browser.windowSizePanel.updateWithGenomicState(genomicStateList[ 0 ]);
+
+                if (false === config.showTrackLabels) {
+                    browser.hideTrackLabels();
+                } else {
+                    browser.showTrackLabels();
+                    browser.trackLabelControl.setState(browser.trackLabelsVisible);
+                }
+
+                if (false === config.showCursorTrackingGuide) {
+                    browser.hideCursorGuide();
+                } else {
+                    browser.showCursorGuide();
+                    browser.cursorGuide.setState(browser.cursorGuideVisible);
+                }
+
+                if (false === config.showCenterGuide) {
+                    browser.hideCenterGuide();
+                } else {
+                    browser.showCenterGuide();
+                    browser.cursorGuide.setState(browser.centerGuideVisible);
+                }
+
 
             })
             .catch(function (error) {
@@ -468,12 +487,24 @@ var igv = (function (igv) {
             config.showCursorTrackingGuideButton = true;
         }
 
+        if (undefined === config.showCursorTrackingGuide) {
+            config.showCursorTrackingGuide = false;
+        }
+
         if (undefined === config.showCenterGuideButton) {
             config.showCenterGuideButton = true;
         }
 
+        if (undefined === config.showCenterGuide) {
+            config.showCenterGuide = false;
+        }
+
         if (undefined === config.showTrackLabelButton) {
             config.showTrackLabelButton = true;
+        }
+
+        if (undefined === config.showTrackLabels) {
+            config.showTrackLabels = true;
         }
 
         if (undefined === config.showKaryo) {
