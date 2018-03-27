@@ -152,22 +152,14 @@ var igv = (function (igv) {
 
     // center guide
     igv.Browser.prototype.hideCenterGuide = function () {
-
+        this.centerGuide.$container.hide();
         this.centerGuideVisible = false;
     };
 
     igv.Browser.prototype.showCenterGuide = function () {
-
+        this.centerGuide.$container.show();
         this.centerGuideVisible = true;
     };
-
-
-
-
-
-
-
-
 
     igv.Browser.prototype.disableZoomWidget = function () {
         this.$zoomContainer.hide();
@@ -176,36 +168,6 @@ var igv = (function (igv) {
     igv.Browser.prototype.enableZoomWidget = function () {
         this.$zoomContainer.show();
     };
-
-    // igv.Browser.prototype.toggleCursorGuide = function (genomicStateList) {
-    //
-    //     if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
-    //
-    //         if (this.cursorGuide.$guide.is(":visible")) {
-    //             this.cursorGuide.$cursorTrackingGuideToggle.click();
-    //         }
-    //
-    //         this.cursorGuide.$cursorTrackingGuideToggle.hide();
-    //
-    //     } else {
-    //         this.cursorGuide.$cursorTrackingGuideToggle.show();
-    //     }
-    // };
-    //
-    // igv.Browser.prototype.toggleCenterGuide = function (genomicStateList) {
-    //
-    //     if (_.size(genomicStateList) > 1 || 'all' === (_.first(genomicStateList)).locusSearchString.toLowerCase()) {
-    //
-    //         if (this.centerGuide.$container.is(":visible")) {
-    //             this.centerGuide.$centerGuideToggle.click();
-    //         }
-    //
-    //         this.centerGuide.$centerGuideToggle.hide();
-    //
-    //     } else {
-    //         this.centerGuide.$centerGuideToggle.show();
-    //     }
-    // };
 
     igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
 
