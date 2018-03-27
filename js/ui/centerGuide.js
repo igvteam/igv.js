@@ -29,29 +29,53 @@
  */
 var igv = (function (igv) {
 
-    igv.CenterGuide = function ($controlParent, $guideParent, config) {
+    igv.CenterGuide = function ($guideParent, $controlParent, config) {
         var self = this;
 
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
         $guideParent.append(this.$container);
 
-        this.$centerGuideToggle = igv.makeToggleButton('center line', 'showCenterGuideButton', function () {
-            return self.$container;
-        }, function () {
-            self.repaint();
-        });
-
-        $controlParent.append(this.$centerGuideToggle);
-
         if (true === config.showCenterGuideButton) {
-            this.$centerGuideToggle.show();
-        } else {
-            this.$centerGuideToggle.hide();
-        }
 
+            this.$centerGuideToggle = $('<div class="igv-nav-bar-button">');
+            $controlParent.append(this.$centerGuideToggle);
+            this.$centerGuideToggle.text('center line');
+
+            this.$centerGuideToggle.on('click', function () {
+                if (true === igv.browser.centerGuideVisible) {
+                    self.doHide();
+                } else {
+                    self.doShow();
+                }
+            });
+
+        }
 
     };
 
+    igv.CenterGuide.prototype.doHide = function () {
+        this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+        igv.browser.hideCenterGuide();
+    };
+
+    igv.CenterGuide.prototype.doShow = function () {
+        this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+        igv.browser.showCenterGuide();
+    };
+
+    igv.CenterGuide.prototype.setState = function (centerGuideVisible) {
+
+        if (this.$centerGuideToggle) {
+
+            if (true === centerGuideVisible) {
+                this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+            } else {
+                this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+            }
+
+        }
+
+    };
 
     igv.CenterGuide.prototype.repaint = function () {
 
