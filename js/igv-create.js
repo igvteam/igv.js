@@ -208,7 +208,10 @@ var igv = (function (igv) {
                     browser.hideTrackLabels();
                 } else {
                     browser.showTrackLabels();
-                    browser.trackLabelControl.setState(browser.trackLabelsVisible);
+                    if (browser.trackLabelControl) {
+                        browser.trackLabelControl.setState(browser.trackLabelsVisible);
+                    }
+
                 }
 
                 if (false === config.showCursorTrackingGuide) {
@@ -411,13 +414,15 @@ var igv = (function (igv) {
             $navigation.append($toggle_button_container);
 
             // cursor guide
-            browser.cursorGuide = new igv.CursorGuide($toggle_button_container, $(browser.trackContainerDiv), config);
+            browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config);
 
             // center guide
-            browser.centerGuide = new igv.CenterGuide($toggle_button_container, $(browser.trackContainerDiv), config);
+            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config);
 
             // toggle track labels
-            browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, config);
+            if (true === config.showTrackLabelButton) {
+                browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container);
+            }
 
             // zoom widget
             zoomWidget(browser, $navigation);

@@ -29,7 +29,7 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackLabelControl = function ($parent, config) {
+    igv.TrackLabelControl = function ($parent) {
         var self = this;
 
         this.$button = $('<div class="igv-nav-bar-button">');
@@ -43,13 +43,6 @@ var igv = (function (igv) {
                 self.doShow();
             }
         });
-
-        if (true === config.showTrackLabelButton) {
-            this.$button.show();
-        } else {
-            this.$button.hide();
-        }
-
     };
 
     igv.TrackLabelControl.prototype.doHide = function () {

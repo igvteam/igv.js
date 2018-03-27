@@ -29,24 +29,11 @@
  */
 var igv = (function (igv) {
 
-    igv.CursorGuide = function ($controlParent, $guideParent, config) {
+    igv.CursorGuide = function ($guideParent, $controlParent, config) {
         var self = this;
 
         this.$guide = $('<div class="igv-cursor-tracking-guide">');
         $guideParent.append(this.$guide);
-
-
-        this.$button = $('<div class="igv-nav-bar-button">');
-        $controlParent.append(this.$button);
-        this.$button.text('cursor guide');
-
-        this.$button.on('click', function () {
-            if (true === igv.browser.cursorGuideVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
         $guideParent.on('mousemove.cursorGuide', igv.throttle(function (e) {
@@ -61,6 +48,22 @@ var igv = (function (igv) {
             self.$guide.css({ left: exe + 'px' });
         }, 10));
 
+        if (true === config.showCursorTrackingGuideButton) {
+
+            this.$button = $('<div class="igv-nav-bar-button">');
+            $controlParent.append(this.$button);
+            this.$button.text('cursor guide');
+
+            this.$button.on('click', function () {
+                if (true === igv.browser.cursorGuideVisible) {
+                    self.doHide();
+                } else {
+                    self.doShow();
+                }
+            });
+
+        }
+
     };
 
     igv.CursorGuide.prototype.doHide = function () {
@@ -74,10 +77,15 @@ var igv = (function (igv) {
     };
 
     igv.CursorGuide.prototype.setState = function (cursorGuideVisible) {
-        if (true === cursorGuideVisible) {
-            this.$button.addClass('igv-nav-bar-button-clicked');
-        } else {
-            this.$button.removeClass('igv-nav-bar-button-clicked');
+
+        if (this.$button) {
+
+            if (true === cursorGuideVisible) {
+                this.$button.addClass('igv-nav-bar-button-clicked');
+            } else {
+                this.$button.removeClass('igv-nav-bar-button-clicked');
+            }
+
         }
     };
 
