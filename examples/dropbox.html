@@ -10,21 +10,11 @@
 
     <title>IGV Example - Dropbox</title>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
-
     <!-- IGV CSS -->
-    <link rel="stylesheet" href="css/igv.css">
-
-    <!-- Shims for legacy browsers -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
-
-    <!-- JQuery JS -->
-    <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script>
+    <link rel="stylesheet" href="../dist/igv-all.css">
 
     <!-- IGV JS-->
-    <script src="js/igv.min.js"></script>
+    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -37,8 +27,10 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        var options;
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var div = document.getElementById("myDiv"),
+                options;
 
         options = {
             showKaryo: false,
@@ -65,7 +57,7 @@
             ]
         };
 
-        igv.createBrowser($("#myDiv")[0], options);
+        igv.createBrowser(div, options);
 
     })
 
