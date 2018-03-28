@@ -412,7 +412,8 @@
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    align-items: center; }
+    align-items: center;
+    margin-right: 8px; }
     #igv-navbar #igv-nav-bar-toggle-button-container div {
       margin-left: 0;
       margin-right: 4px; }
@@ -445,6 +446,12 @@
   border-style: solid;
   border-width: thin;
   border-radius: 10px; }
+
+.igv-nav-bar-button-clicked {
+  cursor: pointer;
+  color: white;
+  border-color: #737373;
+  background-color: #737373; }
 
 .igv-nav-bar-button:hover {
   cursor: pointer;
