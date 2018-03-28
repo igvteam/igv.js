@@ -59,7 +59,7 @@ module.exports = function (grunt) {
                     'css/igv.css',
                     'vendor/fa-svg-with-js.css'
                 ],
-                dest: 'dist/igv.css'
+                dest: 'dist/igv-all.css'
             }
 
         },
