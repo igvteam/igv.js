@@ -170,7 +170,7 @@ var igv = (function (igv) {
                     }
 
                     if (config.tracks) {
-                        browser.loadTracksWithConfigList(config.tracks);
+                        browser.loadTrackList(config.tracks);
                     }
 
                     return browser.genomicStateList;

@@ -29858,7 +29858,7 @@ var igv = (function (igv) {
         this.$zoomContainer.show();
     };
 
-    igv.Browser.prototype.loadTracksWithConfigList = function (configList) {
+    igv.Browser.prototype.loadTrackList = function (configList) {
 
         var self = this,
             loadedTracks = [];
@@ -29868,11 +29868,6 @@ var igv = (function (igv) {
             if (track) {
                 loadedTracks.push(track);
             }
-        });
-
-        // Really we should just resize the new trackViews, but currently there is no way to get a handle on those
-        this.trackViews.forEach(function (trackView) {
-            trackView.resize();
         });
 
         return loadedTracks;
@@ -29954,7 +29949,7 @@ var igv = (function (igv) {
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
-        //trackView.update();
+        trackView.update();
     };
 
     igv.Browser.prototype.reorderTracks = function () {
@@ -42136,7 +42131,7 @@ var igv = (function (igv) {
                     }
 
                     if (config.tracks) {
-                        browser.loadTracksWithConfigList(config.tracks);
+                        browser.loadTrackList(config.tracks);
                     }
 
                     return browser.genomicStateList;
@@ -49582,7 +49577,7 @@ var igv = (function (igv) {
                 configurations = _.map(_.pluck(dataF, 'file'), function (f) {
                     return {url: f, indexed: false}
                 });
-                igv.browser.loadTracksWithConfigList(configurations);
+                igv.browser.loadTrackList(configurations);
             }
 
             // notify user about missing index files
@@ -49644,7 +49639,7 @@ var igv = (function (igv) {
 
                 });
 
-                igv.browser.loadTracksWithConfigList(configurations);
+                igv.browser.loadTrackList(configurations);
             }
 
             if (str) {
