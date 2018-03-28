@@ -166,7 +166,7 @@ var igv = (function (igv) {
                 configurations = _.map(_.pluck(dataF, 'file'), function (f) {
                     return {url: f, indexed: false}
                 });
-                igv.browser.loadTracksWithConfigList(configurations);
+                igv.browser.loadTrackList(configurations);
             }
 
             // notify user about missing index files
@@ -228,7 +228,7 @@ var igv = (function (igv) {
 
                 });
 
-                igv.browser.loadTracksWithConfigList(configurations);
+                igv.browser.loadTrackList(configurations);
             }
 
             if (str) {
