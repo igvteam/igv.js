@@ -1059,7 +1059,7 @@ $igv-dark-grey-color: #373737;
   border-style: solid;
   border-width: thin;
 
-  z-index: 1999;
+  z-index: 2048;
 
   background-color: white;
 }
@@ -1067,8 +1067,12 @@ $igv-dark-grey-color: #373737;
 .igv-grid-container-alert-dialog {
 
   position: absolute;
+  top: 0;
+  left:0;
 
-  max-width: 300px;
+  width: 256px;
+
+  padding-bottom: 4px;
 
   border-color: $igv-grey-color;
   border-radius: 4px;
