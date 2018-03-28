@@ -94,7 +94,7 @@ var modal_table_example = (function (modal_table_example) {
         encodeDatasource = new igv.EncodeDataSource(columnFormat);
 
         loadTracks = function (configurationList) {
-          browser.loadTracksWithConfigList(configurationList);
+          browser.loadTrackList(configurationList);
         };
         config =
             {
