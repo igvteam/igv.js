@@ -433,6 +433,7 @@
       justify-content: space-between;
       align-items: center;
       width: 44px;
+      margin-left: 16px;
       margin-right: 8px; }
       #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget div i {
         font-size: 24px; }
