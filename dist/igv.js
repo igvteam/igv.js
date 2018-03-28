@@ -29805,6 +29805,27 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
+    //
+    igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
+
+        // multi-locus mode
+        if (genomicStateList.length > 1) {
+            this.centerGuide.disable();
+            this.enableZoomWidget();
+        }
+        // whole-genome
+        else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+            this.centerGuide.disable();
+            this.disableZoomWidget();
+        }
+        // single locus
+        else {
+            this.centerGuide.enable();
+            this.enableZoomWidget();
+        }
+
+    };
+
     // track labels
     igv.Browser.prototype.hideTrackLabels = function () {
 
@@ -30607,9 +30628,7 @@ var igv = (function (igv) {
             self.genomicStateList[i].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
         });
 
-        // this.trackViews.forEach(function (trackView) {
-        //     trackView.resize();
-        // });
+        this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
         if (true === doResize) {
             this.resize();
@@ -30668,6 +30687,8 @@ var igv = (function (igv) {
         if (this.rulerTrack) {
             this.rulerTrack.updateLocusLabel();
         }
+
+        this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
         this.resize();
     };
@@ -30755,21 +30776,23 @@ var igv = (function (igv) {
                 }
 
 
-                // multi-locus mode
-                if (genomicStateList.length > 1) {
-                    self.centerGuide.disable();
-                    self.enableZoomWidget();
-                }
-                // whole-genome
-                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
-                    self.centerGuide.disable();
-                    self.disableZoomWidget();
-                }
-                // single locus
-                else {
-                    self.centerGuide.enable();
-                    self.enableZoomWidget();
-                }
+                // // multi-locus mode
+                // if (genomicStateList.length > 1) {
+                //     self.centerGuide.disable();
+                //     self.enableZoomWidget();
+                // }
+                // // whole-genome
+                // else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                //     self.centerGuide.disable();
+                //     self.disableZoomWidget();
+                // }
+                // // single locus
+                // else {
+                //     self.centerGuide.enable();
+                //     self.enableZoomWidget();
+                // }
+
+                self.updateUIWithGenomicStateListChange(genomicStateList);
 
                 self.update();
             })
@@ -42299,6 +42322,7 @@ var igv = (function (igv) {
 
         var $div,
             $igv_nav_bar_left_container,
+            $igv_nav_bar_right_container,
             $genomic_location,
             $locus_size_group,
             $toggle_button_container,
@@ -42380,9 +42404,14 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
 
+
             // cursor guide | center guide | track labels
+
+            $igv_nav_bar_right_container = $('<div id="igv-nav-bar-right-container">');
+            $navigation.append($igv_nav_bar_right_container);
+
             $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
-            $navigation.append($toggle_button_container);
+            $igv_nav_bar_right_container.append($toggle_button_container);
 
             // cursor guide
             browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config);
@@ -42396,7 +42425,7 @@ var igv = (function (igv) {
             }
 
             // zoom widget
-            zoomWidget(browser, $navigation);
+            zoomWidget(browser, $igv_nav_bar_right_container);
 
         }
 
