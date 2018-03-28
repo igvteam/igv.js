@@ -194,8 +194,13 @@ var igv = (function (igv) {
                 ww,
                 hh;
 
+            var w = panel.$canvas.width();
+            var h = panel.$canvas.height();
+            
+            if(!(w > 0 && h > 0)) return;
+
             referenceFrame = panel.genomicState.referenceFrame;
-            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chrName))) {
+            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chrName) && panel.$canvas.height() > 0)) {
                 return;
             }
 
@@ -346,7 +351,7 @@ var igv = (function (igv) {
                     shade = Math.floor(230 - stain / 100.0 * 230);
                 }
                 var c = colors[shade];
-                if (c == null) {
+                if (!c) {
                     c = "rgb(" + shade + "," + shade + "," + shade + ")";
                     colors[shade] = c;
                 }
@@ -361,8 +366,8 @@ var igv = (function (igv) {
         var canvas = panel.$canvas.get(0);
         var w = +panel.$ideogram.width();
         var h = +panel.$ideogram.height();
-        canvas.style.width = w;
-        canvas.style.height = h;
+        canvas.style.width = w + "px";
+        canvas.style.height = h + "px";
         canvas.width = window.devicePixelRatio * w;
         canvas.height = window.devicePixelRatio * h;
         panel.ctx = canvas.getContext("2d");
