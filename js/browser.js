@@ -116,6 +116,27 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
+    //
+    igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
+
+        // multi-locus mode
+        if (genomicStateList.length > 1) {
+            this.centerGuide.disable();
+            this.enableZoomWidget();
+        }
+        // whole-genome
+        else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+            this.centerGuide.disable();
+            this.disableZoomWidget();
+        }
+        // single locus
+        else {
+            this.centerGuide.enable();
+            this.enableZoomWidget();
+        }
+
+    };
+
     // track labels
     igv.Browser.prototype.hideTrackLabels = function () {
 
@@ -918,9 +939,7 @@ var igv = (function (igv) {
             self.genomicStateList[i].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
         });
 
-        // this.trackViews.forEach(function (trackView) {
-        //     trackView.resize();
-        // });
+        this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
         if (true === doResize) {
             this.resize();
@@ -979,6 +998,8 @@ var igv = (function (igv) {
         if (this.rulerTrack) {
             this.rulerTrack.updateLocusLabel();
         }
+
+        this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
         this.resize();
     };
@@ -1066,21 +1087,23 @@ var igv = (function (igv) {
                 }
 
 
-                // multi-locus mode
-                if (genomicStateList.length > 1) {
-                    self.centerGuide.disable();
-                    self.enableZoomWidget();
-                }
-                // whole-genome
-                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
-                    self.centerGuide.disable();
-                    self.disableZoomWidget();
-                }
-                // single locus
-                else {
-                    self.centerGuide.enable();
-                    self.enableZoomWidget();
-                }
+                // // multi-locus mode
+                // if (genomicStateList.length > 1) {
+                //     self.centerGuide.disable();
+                //     self.enableZoomWidget();
+                // }
+                // // whole-genome
+                // else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                //     self.centerGuide.disable();
+                //     self.disableZoomWidget();
+                // }
+                // // single locus
+                // else {
+                //     self.centerGuide.enable();
+                //     self.enableZoomWidget();
+                // }
+
+                self.updateUIWithGenomicStateListChange(genomicStateList);
 
                 self.update();
             })
