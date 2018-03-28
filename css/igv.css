@@ -968,12 +968,15 @@
   border-radius: 4px;
   border-style: solid;
   border-width: thin;
-  z-index: 1999;
+  z-index: 2048;
   background-color: white; }
 
 .igv-grid-container-alert-dialog {
   position: absolute;
-  max-width: 300px;
+  top: 0;
+  left: 0;
+  width: 256px;
+  padding-bottom: 4px;
   border-color: #7F7F7F;
   border-radius: 4px;
   border-style: solid;
