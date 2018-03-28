@@ -365,7 +365,10 @@ var igv = (function (igv) {
     igv.TrackView.prototype.resize = function () {
         var width;
 
+
         width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
+
+        if(width === 0) return;
         this.viewports.forEach(function (viewport) {
             viewport.setWidth(width);
         });
@@ -379,7 +382,10 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.update = function () {
 
-        var maxContentHeight, heightPromises = [], self = this;
+        var maxContentHeight, w, h,
+            heightPromises = [],
+            self = this;
+
 
         this.viewports.forEach(function (viewport) {
             heightPromises.push(viewport.adjustContentHeight());
