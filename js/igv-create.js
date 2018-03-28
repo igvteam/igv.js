@@ -338,6 +338,7 @@ var igv = (function (igv) {
 
         var $div,
             $igv_nav_bar_left_container,
+            $igv_nav_bar_right_container,
             $genomic_location,
             $locus_size_group,
             $toggle_button_container,
@@ -419,9 +420,14 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
 
+
             // cursor guide | center guide | track labels
+
+            $igv_nav_bar_right_container = $('<div id="igv-nav-bar-right-container">');
+            $navigation.append($igv_nav_bar_right_container);
+
             $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
-            $navigation.append($toggle_button_container);
+            $igv_nav_bar_right_container.append($toggle_button_container);
 
             // cursor guide
             browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config);
@@ -435,7 +441,7 @@ var igv = (function (igv) {
             }
 
             // zoom widget
-            zoomWidget(browser, $navigation);
+            zoomWidget(browser, $igv_nav_bar_right_container);
 
         }
 
