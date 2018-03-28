@@ -60,7 +60,9 @@
                                  url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                  indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
-                                 label: 'dbSNP 137'})">dbSNP 137 (bed tabix)</a></li>
+                                 label: 'dbSNP 137'})">dbSNP 137 (bed tabix)
+                            </a>
+                        </li>
 
                         <li>
                             <a href="#"
@@ -68,8 +70,19 @@
                                 {
                                 url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/encode/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                                 name: 'Gm12878H3k4me3'
-                                })">Encode bigwig</a></li>
+                                })">Encode bigwig
+                            </a>
+                        </li>
 
+                        <li>
+                            <a href="#"
+                               onclick="igv.browser.loadTrack(
+                                {
+                                url:'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                                label: 'HG02450'
+                                })">1KG Bam (HG02450)
+                            </a>
+                        </li>
 
                     </ul>
                 </li>
