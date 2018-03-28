@@ -407,29 +407,35 @@
           font-size: 14px;
           font-weight: 400;
           color: #444; }
-  #igv-navbar #igv-nav-bar-toggle-button-container {
+  #igv-navbar #igv-nav-bar-right-container {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    align-items: center;
-    margin-right: 8px; }
-    #igv-navbar #igv-nav-bar-toggle-button-container div {
-      margin-left: 0;
-      margin-right: 4px; }
-    #igv-navbar #igv-nav-bar-toggle-button-container div:last-child {
-      margin-left: 0;
-      margin-right: 0; }
-  #igv-navbar #igv-zoom-widget {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-    width: 44px;
-    margin-right: 8px; }
-    #igv-navbar #igv-zoom-widget div i {
-      font-size: 24px; }
+    align-items: center; }
+    #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container {
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      margin-right: 8px; }
+      #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container div {
+        margin-left: 0;
+        margin-right: 4px; }
+      #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container div:last-child {
+        margin-left: 0;
+        margin-right: 0; }
+    #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget {
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+      width: 44px;
+      margin-right: 8px; }
+      #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget div i {
+        font-size: 24px; }
 
 .igv-nav-bar-button {
   height: 18px;
