@@ -316,7 +316,8 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
-        if (!force) {
+
+        if(!force) {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight);
             }

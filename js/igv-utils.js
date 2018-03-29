@@ -387,6 +387,8 @@ var igv = (function (igv) {
         }
     };
 
+    var foo = typeof igv.throttle;
+
     igv.splitStringRespectingQuotes = function (string, delim) {
 
         var tokens = [],
