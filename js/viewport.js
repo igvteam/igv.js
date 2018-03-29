@@ -66,7 +66,7 @@ var igv = (function (igv) {
             dimen = Math.min(32, this.$viewport.height());
             $spinnerContainer = $('<div class="igv-viewport-spinner">');
             $spinnerContainer.css({'font-size': dimen + 'px'});
-            
+
             this.$spinner = igv.createIcon("spinner");
             $spinnerContainer.append(this.$spinner);
             this.$viewport.append($spinnerContainer);
@@ -140,7 +140,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.startSpinner = function () {
         var $spinner = this.$spinner;
-        if($spinner) {
+        if ($spinner) {
             $spinner.addClass("fa5-spin");
             $spinner.show();
         }
@@ -148,7 +148,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.stopSpinner = function () {
         var $spinner = this.$spinner;
-        if($spinner) {
+        if ($spinner) {
             $spinner.hide();
             $spinner.removeClass("fa5-spin");
         }
@@ -466,7 +466,6 @@ var igv = (function (igv) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000);
 
-        this.contentDiv.style.height = contentHeight + "px";
         $(this.contentDiv).height(contentHeight);
 
         if (this.tile) this.tile.invalidate = true;
@@ -596,12 +595,14 @@ var igv = (function (igv) {
 
         });
 
+
         /**
          * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
          */
         this.$viewport.on('mousedown', function (e) {
             mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             igv.browser.mouseDownOnViewport(e, self);
+
         });
 
 

@@ -25904,7 +25904,8 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
         return this.coverageTrack.computePixelHeight(alignmentContainer) +
-            this.alignmentTrack.computePixelHeight(alignmentContainer);
+            this.alignmentTrack.computePixelHeight(alignmentContainer) +
+            15;
 
     };
 
@@ -26251,28 +26252,28 @@ var igv = (function (igv) {
 
             // A
             tmp = coverage.posA + coverage.negA;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor(((coverage.posA + coverage.negA) / coverage.total) * 100.0) + "%)";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posA+"+, "+coverage.negA+"- )";
             nameValues.push({name: 'A', value: tmp});
 
 
             // C
             tmp = coverage.posC + coverage.negC;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posC+"+, "+coverage.negC+"- )";
             nameValues.push({name: 'C', value: tmp});
 
             // G
             tmp = coverage.posG + coverage.negG;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posG+"+, "+coverage.negG+"- )";
             nameValues.push({name: 'G', value: tmp});
 
             // T
             tmp = coverage.posT + coverage.negT;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posT+"+, "+coverage.negT+"- )";
             nameValues.push({name: 'T', value: tmp});
 
             // N
             tmp = coverage.posN + coverage.negN;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%)";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posN+"+, "+coverage.negN+"- )";
             nameValues.push({name: 'N', value: tmp});
 
         }
@@ -26913,7 +26914,7 @@ var igv = (function (igv) {
 
             magic = readInt(ba, 0);
             if (magic !== BAM1_MAGIC_NUMBER) {
-                throw new Error('BAM header contains an invalid BAM magic');
+                throw new Error('BAM header errror: bad magic number.  This could be caused by either a corrupt or missing file.');
             }
 
             samHeaderLen = readInt(ba, 4);
@@ -29814,7 +29815,7 @@ var igv = (function (igv) {
             this.enableZoomWidget();
         }
         // whole-genome
-        else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+        else if ('all' === genomicStateList[0].locusSearchString) {
             this.centerGuide.disable();
             this.disableZoomWidget();
         }
@@ -29830,8 +29831,8 @@ var igv = (function (igv) {
     igv.Browser.prototype.hideTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[ 0 ].$trackLabel) {
-                trackView.viewports[ 0 ].$trackLabel.hide();
+            if (trackView.viewports[0].$trackLabel) {
+                trackView.viewports[0].$trackLabel.hide();
             }
         });
 
@@ -29841,11 +29842,10 @@ var igv = (function (igv) {
     igv.Browser.prototype.showTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[ 0 ].$trackLabel) {
-                trackView.viewports[ 0 ].$trackLabel.show();
+            if (trackView.viewports[0].$trackLabel) {
+                trackView.viewports[0].$trackLabel.show();
             }
         });
-
         this.trackLabelsVisible = true;
     };
 
@@ -29854,6 +29854,19 @@ var igv = (function (igv) {
         this.cursorGuide.$guide.hide();
         this.cursorGuideVisible = false;
     };
+
+    // // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+    // $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
+    //     var exe;
+    //
+    //     e.preventDefault();
+    //
+    //     exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
+    //     exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
+    //
+    //     self.$cursorTrackingGuide.css({left: exe + 'px'});
+    // }, 10));
+
 
     igv.Browser.prototype.showCursorGuide = function () {
         this.cursorGuide.$guide.show();
@@ -30459,7 +30472,7 @@ var igv = (function (igv) {
             func.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
             self.updateWithGenomicState(viewport.genomicState);
         } else {
-            anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
+            anyViewport = this.trackViews[0].viewports[0];
             this.genomicStateList.forEach(function (genomicState) {
                 func.call(self, genomicState, centerBP, anyViewport.$viewport.width());
                 self.updateWithGenomicState(genomicState);
@@ -30480,12 +30493,12 @@ var igv = (function (igv) {
         // Have we reached the zoom-in threshold yet? If so, bail.
         mbe = this.minimumBasesExtent();
 
-        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel/2.0);
+        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel / 2.0);
         if (mbe > be) {
             return;
         }
 
-        viewportHalfWidth = viewportWidth/2.0;
+        viewportHalfWidth = viewportWidth / 2.0;
 
         cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
 
@@ -30507,7 +30520,7 @@ var igv = (function (igv) {
             viewportWidthBP,
             cBP;
 
-        viewportHalfWidth = viewportWidth/2.0;
+        viewportHalfWidth = viewportWidth / 2.0;
         cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
 
 
@@ -30521,10 +30534,10 @@ var igv = (function (igv) {
             }
         }
 
-        bppMinify = Math.min(bppMinify, chromosomeLengthBP/viewportWidth);
+        bppMinify = Math.min(bppMinify, chromosomeLengthBP / viewportWidth);
         viewportWidthBP = bppMinify * viewportWidth;
 
-        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP/2.0);
+        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP / 2.0);
 
         if (genomicState.referenceFrame.start < 0) {
             genomicState.referenceFrame.start = 0;
@@ -31102,13 +31115,13 @@ var igv = (function (igv) {
                 source = tokens[2].trim();
 
                 obj =
-                    {
-                        gene: tokens[0],
-                        chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                        start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                        end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                        type: ("gtex" === source ? "snp" : "gene")
-                    };
+                {
+                    gene: tokens[0],
+                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                    type: ("gtex" === source ? "snp" : "gene")
+                };
 
                 results.push(obj);
 
@@ -44274,6 +44287,8 @@ var igv = (function (igv) {
         }
     };
 
+    var foo = typeof igv.throttle;
+
     igv.splitStringRespectingQuotes = function (string, delim) {
 
         var tokens = [],
@@ -50419,7 +50434,8 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
-        if (!force) {
+
+        if(!force) {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight);
             }
@@ -53426,7 +53442,7 @@ var igv = (function (igv) {
             dimen = Math.min(32, this.$viewport.height());
             $spinnerContainer = $('<div class="igv-viewport-spinner">');
             $spinnerContainer.css({'font-size': dimen + 'px'});
-            
+
             this.$spinner = igv.createIcon("spinner");
             $spinnerContainer.append(this.$spinner);
             this.$viewport.append($spinnerContainer);
@@ -53500,7 +53516,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.startSpinner = function () {
         var $spinner = this.$spinner;
-        if($spinner) {
+        if ($spinner) {
             $spinner.addClass("fa5-spin");
             $spinner.show();
         }
@@ -53508,7 +53524,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.stopSpinner = function () {
         var $spinner = this.$spinner;
-        if($spinner) {
+        if ($spinner) {
             $spinner.hide();
             $spinner.removeClass("fa5-spin");
         }
@@ -53826,7 +53842,6 @@ var igv = (function (igv) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000);
 
-        this.contentDiv.style.height = contentHeight + "px";
         $(this.contentDiv).height(contentHeight);
 
         if (this.tile) this.tile.invalidate = true;
@@ -53956,12 +53971,14 @@ var igv = (function (igv) {
 
         });
 
+
         /**
          * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
          */
         this.$viewport.on('mousedown', function (e) {
             mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             igv.browser.mouseDownOnViewport(e, self);
+
         });
 
 

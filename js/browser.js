@@ -125,7 +125,7 @@ var igv = (function (igv) {
             this.enableZoomWidget();
         }
         // whole-genome
-        else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+        else if ('all' === genomicStateList[0].locusSearchString) {
             this.centerGuide.disable();
             this.disableZoomWidget();
         }
@@ -141,8 +141,8 @@ var igv = (function (igv) {
     igv.Browser.prototype.hideTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[ 0 ].$trackLabel) {
-                trackView.viewports[ 0 ].$trackLabel.hide();
+            if (trackView.viewports[0].$trackLabel) {
+                trackView.viewports[0].$trackLabel.hide();
             }
         });
 
@@ -152,11 +152,10 @@ var igv = (function (igv) {
     igv.Browser.prototype.showTrackLabels = function () {
 
         this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[ 0 ].$trackLabel) {
-                trackView.viewports[ 0 ].$trackLabel.show();
+            if (trackView.viewports[0].$trackLabel) {
+                trackView.viewports[0].$trackLabel.show();
             }
         });
-
         this.trackLabelsVisible = true;
     };
 
@@ -165,6 +164,19 @@ var igv = (function (igv) {
         this.cursorGuide.$guide.hide();
         this.cursorGuideVisible = false;
     };
+
+    // // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+    // $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
+    //     var exe;
+    //
+    //     e.preventDefault();
+    //
+    //     exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
+    //     exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
+    //
+    //     self.$cursorTrackingGuide.css({left: exe + 'px'});
+    // }, 10));
+
 
     igv.Browser.prototype.showCursorGuide = function () {
         this.cursorGuide.$guide.show();
@@ -770,7 +782,7 @@ var igv = (function (igv) {
             func.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
             self.updateWithGenomicState(viewport.genomicState);
         } else {
-            anyViewport = this.trackViews[ 0 ].viewports[ 0 ];
+            anyViewport = this.trackViews[0].viewports[0];
             this.genomicStateList.forEach(function (genomicState) {
                 func.call(self, genomicState, centerBP, anyViewport.$viewport.width());
                 self.updateWithGenomicState(genomicState);
@@ -791,12 +803,12 @@ var igv = (function (igv) {
         // Have we reached the zoom-in threshold yet? If so, bail.
         mbe = this.minimumBasesExtent();
 
-        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel/2.0);
+        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel / 2.0);
         if (mbe > be) {
             return;
         }
 
-        viewportHalfWidth = viewportWidth/2.0;
+        viewportHalfWidth = viewportWidth / 2.0;
 
         cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
 
@@ -818,7 +830,7 @@ var igv = (function (igv) {
             viewportWidthBP,
             cBP;
 
-        viewportHalfWidth = viewportWidth/2.0;
+        viewportHalfWidth = viewportWidth / 2.0;
         cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
 
 
@@ -832,10 +844,10 @@ var igv = (function (igv) {
             }
         }
 
-        bppMinify = Math.min(bppMinify, chromosomeLengthBP/viewportWidth);
+        bppMinify = Math.min(bppMinify, chromosomeLengthBP / viewportWidth);
         viewportWidthBP = bppMinify * viewportWidth;
 
-        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP/2.0);
+        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP / 2.0);
 
         if (genomicState.referenceFrame.start < 0) {
             genomicState.referenceFrame.start = 0;
@@ -1413,13 +1425,13 @@ var igv = (function (igv) {
                 source = tokens[2].trim();
 
                 obj =
-                    {
-                        gene: tokens[0],
-                        chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                        start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                        end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                        type: ("gtex" === source ? "snp" : "gene")
-                    };
+                {
+                    gene: tokens[0],
+                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
+                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                    type: ("gtex" === source ? "snp" : "gene")
+                };
 
                 results.push(obj);
 

@@ -78,7 +78,7 @@ var igv = (function (igv) {
 
             magic = readInt(ba, 0);
             if (magic !== BAM1_MAGIC_NUMBER) {
-                throw new Error('BAM header contains an invalid BAM magic');
+                throw new Error('BAM header errror: bad magic number.  This could be caused by either a corrupt or missing file.');
             }
 
             samHeaderLen = readInt(ba, 4);
