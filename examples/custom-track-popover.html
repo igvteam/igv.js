@@ -14,20 +14,17 @@
     <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
     <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" type="text/css" href="//maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
-
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/test/dist/css/igv.css">
+    <link rel="stylesheet" type="text/css" href="../dist/igv-all.css">
 
-    <!-- jQuery JS -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- jQuery JS -  NOT REQUIRED FOR IGV -->
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
 
     <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="https://igv.org/web/test/dist/igv.js"></script>
+    <script type="text/javascript" src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -35,27 +32,22 @@
 
 <div class="jumbotron">
     <div class="container">
-        <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
-        <p>In this example we show how to use the <code>trackclick</code> event to disable the default pop-over. Instead
-            we're going to use it as a hook to implement custom click behavior.
+        <h2>IGV.js <code>trackclick</code> Event Example</h2>
+        <p>In this example we show how to use the <code>trackclick</code> event to customize the contents of the gene
+            track pop-over. To do this, we subscribe to the <code>trackclick</code> event and return custom pop-over HTML to
+            override the default appearance.
         </p>
         <h3>Try it out:</h3>
         <ol>
-            <li>Click on any features on the gene track.</li>
-            <li>Notice the genes you've clicked get added to the list on the right.</li>
+            <li>Click on any feature on the gene track.</li>
+            <li>Notice that the pop-over text has been customized to include a link.</li>
         </ol>
     </div>
 </div>
 
 <div class="container-fluid">
     <div class="row">
-        <div class="col-sm-9" id="igvDiv"></div>
-        <div class="col-sm-3 bg-info" style="min-height: 500px;">
-            <h4>Selected Genes</h4>
-            <ul id="geneList">
-
-            </ul>
-        </div>
+        <div class="col-sm-12" id="igvDiv"></div>
     </div>
 </div>
 <!-- container -->
@@ -94,23 +86,36 @@
 
         var myIgvBrowser = igv.createBrowser(div, options);
 
-        var genesInList = {};
-
         myIgvBrowser.on('trackclick', function (track, popoverData) {
-            var symbol = null;
+            var markup = "<table class=\"igv-popover-table\">";
+
+            // Don't show a pop-over when there's no data.
+            if (!popoverData || !popoverData.length) {
+                return false;
+            }
+
             popoverData.forEach(function (nameValue) {
-                if (nameValue.name && nameValue.name === 'Name') {
-                    symbol = nameValue.value;
+                if (nameValue.name) {
+                    var value = nameValue.name === 'Name'
+                        ? '<a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
+                        : nameValue.value;
+
+                    markup += "<tr><td class=\"igv-popover-td\">"
+                            + "<div class=\"igv-popover-name-value\">"
+                            + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>"
+                            + "<span class=\"igv-popover-value\">" + value + "</span>"
+                            + "</div>" + "</td></tr>";
+                }
+                else {
+                    // not a name/value pair
+                    markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
                 }
             });
 
-            if (symbol && !genesInList[symbol]) {
-                genesInList[symbol] = true;
-                $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol+ '">' + symbol + '</a></li>');
-            }
+            markup += "</table>";
 
-            // Prevent default pop-over behavior
-            return false;
+            // By returning a string from the trackclick handler we're asking IGV to use our custom HTML in its pop-over.
+            return markup;
         });
 
     });

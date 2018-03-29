@@ -71,41 +71,51 @@ var igv = (function (igv) {
     igv.RulerTrack = function () {
 
         this.height = 40;
-        // this.height = 50;
-        // this.height = 24;
-
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = true;
+        this.rulerSweepers = [];
 
     };
 
-    igv.RulerTrack.prototype.createRulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
+    igv.RulerTrack.prototype.updateLocusLabel = function () {
+        var self = this;
 
-        if (undefined === this.rulerSweepers) {
-            this.rulerSweepers = {};
-        }
+        this.trackView.viewports.forEach(function (viewport) {
+            var str;
+            str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
 
-        this.rulerSweepers[genomicState.locusIndex.toString()] = new igv.RulerSweeper(viewport, $viewport, $viewportContent, genomicState);
-    };
-
-    igv.RulerTrack.prototype.locusLabelWithGenomicState = function (genomicState) {
-
-        var $label;
-
-        $label = $('<div class = "igv-viewport-content-ruler-div">');
-        $label.text(genomicState.locusSearchString);
-        $label.data('referenceFrame', JSON.parse(JSON.stringify(genomicState.referenceFrame)));
-
-        $label.click(function (e) {
-            genomicState.referenceFrame.set( $(this).data('referenceFrame') );
-            igv.browser.selectMultiLocusPanelWithGenomicState(genomicState);
+            // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
+            viewport.$rulerLabel.text( str );
         });
 
-        return $label;
+    };
+
+    igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+
+        var $close,
+            $closeButton;
+
+        $viewport.addClass('igv-viewport-ruler');
+
+        $close = $('<div class="igv-viewport-fa-close">');
+        $viewport.append($close);
+
+        $closeButton = $('<div>');
+        $closeButton.append(igv.createIcon("times-circle"));
+        $close.append($closeButton);
+
+        $close.click(function (e) {
+            igv.browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+        });
+
+    };
+
+    igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
+        this.rulerSweepers.splice(index, 1);
     };
 
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -121,6 +131,7 @@ var igv = (function (igv) {
             shim,
             tickHeight,
             rulerSweeper,
+            $viewportContent,
             index,
             tickSeparationPixel,
             tickLabelNumber,
@@ -130,26 +141,27 @@ var igv = (function (igv) {
             center,
             size,
             maximumLabelWidthPixel,
+            key,
             bp;
 
+        key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
+        rulerSweeper = this.rulerSweepers[ key ];
 
-        rulerSweeper = this.rulerSweepers[options.genomicState.locusIndex.toString()];
+        $viewportContent = $(rulerSweeper.viewport.contentDiv);
 
         if ('all' === options.referenceFrame.chrName.toLowerCase()) {
 
-            rulerSweeper.$viewportContent.find('canvas').hide();
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').show();
+            $viewportContent.find('canvas').hide();
+            $viewportContent.find('.igv-whole-genome-container').show();
             rulerSweeper.disableMouseHandlers();
         } else {
 
-            rulerSweeper.$viewportContent.find('.igv-whole-genome-container').hide();
-            rulerSweeper.$viewportContent.find('canvas').show();
+            $viewportContent.find('.igv-whole-genome-container').hide();
+            $viewportContent.find('canvas').show();
             rulerSweeper.addMouseHandlers();
 
-            updateLocusLabelWithGenomicState(options.viewport.$viewport.find('.igv-viewport-content-ruler-div'), options.genomicState);
-
             index = 0;
-            for (var i = 0; i < _.size(tickKeys); i++) {
+            for (var i = 0; i < tickKeys.length; i++) {
                 tickSeparationPixel = options.referenceFrame.toPixels(tickValues[tickKeys[i]]);
                 if (tickSeparationPixel > TickSeparationThreshold) {
                     index = i;
@@ -162,7 +174,7 @@ var igv = (function (igv) {
             bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
             bp = Math.min(options.genomicState.chromosome.bpLength, bp);
             maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
-            // console.log('width metric ' + Math.round(maximumLabelWidthPixel) + ' width ' + Math.round(tickSeparationPixel));
+
             for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {
 
                 if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
@@ -172,7 +184,7 @@ var igv = (function (igv) {
                     center = {x: Math.round(pixel), y: self.height - (tickHeight / 0.75)};
                     size = {width: options.context.measureText(tickLabelText).width, height: 2};
 
-                    rect = rectWithCenterAndSize(center, size);
+                    rect = igv.Rect.makeWithCenterAndSize(center, size);
 
                     igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width / 2), self.height - (tickHeight / 0.75));
                 }
@@ -256,33 +268,6 @@ var igv = (function (igv) {
 
         return tickUnits;
     }
-
-    function updateLocusLabelWithGenomicState($label, state) {
-        $label.text(state.locusSearchString);
-    }
-
-    function rectWithCenterAndSize(center, size) {
-        var halfSize = sizeMake(size.width / 2.0, size.height / 2.0);
-        return rectMake(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
-    };
-
-    function rectMake(x, y, width, height) {
-        var rect = {origin: {}, size: {}};
-
-        rect.origin.x = x;
-        rect.origin.y = y;
-
-        rect.size.width = width;
-        rect.size.height = height;
-
-        return rect;
-    };
-
-
-    function sizeMake(width, height) {
-        return {width: width, height: height};
-    };
-
 
     return igv;
 })(igv || {});

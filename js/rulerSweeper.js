@@ -25,29 +25,28 @@
  */
 var igv = (function (igv) {
 
-    igv.RulerSweeper = function (viewport, $viewport, $viewportContent, genomicState) {
+    igv.RulerSweeper = function (viewport) {
+
+        var index;
 
         this.viewport = viewport;
-        this.$viewport = $viewport;
-        this.$viewportContent = $viewportContent;
-        this.genomicState = genomicState;
 
         this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-        this.$viewportContent.append(this.$rulerSweeper);
+        $(viewport.contentDiv).append(this.$rulerSweeper);
 
-        this.wholeGenomeLayout(this.$viewportContent.find('.igv-whole-genome-container'));
+        index = igv.browser.genomicStateList.indexOf(viewport.genomicState);
 
         this.mouseHandlers =
             {
                 document:
                     {
-                        down:'mousedown.rulersweeper.' + this.genomicState.locusIndex,
-                        move:'mousemove.rulersweeper.' + this.genomicState.locusIndex,
-                          up:'mouseup.rulersweeper.' + this.genomicState.locusIndex
+                        down:'mousedown.rulersweeper.' + index,
+                        move:'mousemove.rulersweeper.' + index,
+                          up:'mouseup.rulersweeper.' + index
                     },
                 viewport:
                     {
-                        down:'mousedown.rulersweeper.viewport.' + this.genomicState.locusIndex
+                        down:'mousedown.rulersweeper.viewport.' + index
                     }
 
             };
@@ -55,10 +54,10 @@ var igv = (function (igv) {
         this.addMouseHandlers();
     };
 
-    igv.RulerSweeper.prototype.wholeGenomeLayout = function ($container) {
+    igv.RulerSweeper.prototype.layoutWholeGenome = function () {
 
         var self = this,
-            viewportWidth,
+            pixels,
             extent,
             nameLast,
             chrLast,
@@ -72,20 +71,25 @@ var igv = (function (igv) {
 
         extent = Math.floor(chrLast.bpLength/1000) + igv.browser.genome.getCumulativeOffset(nameLast);
 
-        viewportWidth = this.$viewport.width();
+        pixels = this.viewport.$viewport.width();
+
         scraps = 0;
-        _.each(igv.browser.genome.wgChromosomeNames, function (name) {
-            var w,
+        igv.browser.genome.wgChromosomeNames.forEach(function (name) {
+            var chr,
+                w,
                 percentage;
 
-            percentage = (igv.browser.genome.getChromosome(name).bpLength)/extent;
-            if (percentage * viewportWidth < 1.0) {
+            chr = igv.browser.genome.getChromosome(name);
+
+            percentage = chr.bpLength/extent;
+
+            if (percentage * pixels < 1.0) {
                 scraps += percentage;
             } else {
                 $div = $('<div>');
-                $container.append($div);
+                self.viewport.$wholeGenomeContainer.append($div);
 
-                w = Math.floor(percentage * viewportWidth);
+                w = Math.floor(percentage * pixels);
                 $div.width(w);
 
                 $e = $('<span>');
@@ -97,17 +101,17 @@ var igv = (function (igv) {
                     var locusString,
                         loci;
 
-                    self.$viewportContent.find('.igv-whole-genome-container').hide();
-                    self.$viewportContent.find('canvas').show();
+                    self.viewport.$wholeGenomeContainer.hide();
+                    $(self.viewport.canvas).hide();
 
-                    if (1 === self.genomicState.locusCount) {
+                    if (1 === igv.browser.genomicStateList.length) {
                         locusString = name;
                     } else {
                         loci = _.map(igv.browser.genomicStateList, function (g) {
                             return g.locusSearchString;
                         });
 
-                        loci[ self.genomicState.locusIndex ] = name;
+                        loci[ igv.browser.genomicStateList.indexOf(self.viewport.genomicState) ] = name;
                         locusString = loci.join(' ');
                     }
 
@@ -117,12 +121,12 @@ var igv = (function (igv) {
 
         });
 
-        scraps *= viewportWidth;
+        scraps *= pixels;
         scraps = Math.floor(scraps);
         if (scraps >= 1) {
 
             $div = $('<div>');
-            $container.append($div);
+            self.viewport.$wholeGenomeContainer.append($div);
 
             $div.width(scraps);
 
@@ -141,7 +145,7 @@ var igv = (function (igv) {
         $(document).off(this.mouseHandlers.document.move);
         $(document).off(this.mouseHandlers.document.up);
 
-        this.$viewport.off(this.mouseHandlers.viewport.down);
+        this.viewport.$viewport.off(this.mouseHandlers.viewport.down);
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -165,7 +169,7 @@ var igv = (function (igv) {
 
             isMouseIn = true;
 
-            mouseDown = translateMouseCoordinates(e, self.$viewport).x;
+            mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
 
             if (true === isMouseDown ) {
 
@@ -185,8 +189,8 @@ var igv = (function (igv) {
 
             if (isMouseDown && isMouseIn) {
 
-                mouseCurrent = translateMouseCoordinates(e, self.$viewport).x;
-                mouseCurrent = Math.min(mouseCurrent, self.$viewport.width());
+                mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
+                mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
                 mouseCurrent = Math.max(mouseCurrent, 0);
 
                 dx = mouseCurrent - mouseDown;
@@ -219,15 +223,15 @@ var igv = (function (igv) {
 
                 if (width > threshold) {
                     // console.log('start | end '+  igv.numberFormatter(extent.start) + ' | ' + igv.numberFormatter(extent.end));
-                    igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(self.genomicState.referenceFrame.chrName), extent);
-                    self.viewport.goto(self.genomicState.referenceFrame.chrName, extent.start, extent.end);
+                    igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName), extent);
+                    self.viewport.goto(self.viewport.genomicState.referenceFrame.chrName, extent.start, extent.end);
                 }
 
             }
 
         });
 
-        this.$viewport.on(this.mouseHandlers.viewport.down, function (e) {
+        this.viewport.$viewport.on(this.mouseHandlers.viewport.down, function (e) {
 
             isMouseDown = true;
         });
@@ -235,7 +239,7 @@ var igv = (function (igv) {
     };
 
     function bp(pixel) {
-        return this.genomicState.referenceFrame.start + (pixel * this.genomicState.referenceFrame.bpPerPixel);
+        return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
     }
 
     function translateMouseCoordinates(e, $target) {
@@ -253,122 +257,6 @@ var igv = (function (igv) {
         posy = eFixed.pageY - $target.offset().top;
 
         return { x: posx, y: posy }
-    }
-
-    function addRulerTrackHandlers(trackView) {
-
-        var isMouseDown = undefined,
-            isMouseIn = undefined,
-            mouseDownXY = undefined,
-            mouseMoveXY = undefined,
-            left,
-            rulerSweepWidth,
-            rulerWidth = $(trackView.contentDiv).width(),
-            dx;
-
-        $(document).mousedown(function (e) {
-
-            mouseDownXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
-
-            left = mouseDownXY.x;
-            rulerSweepWidth = 0;
-            trackView.rulerSweeper.css({"display": "inline", "left": left + "px", "width": rulerSweepWidth + "px"});
-
-            isMouseIn = true;
-        });
-
-        $(trackView.contentDiv).mousedown(function (e) {
-            isMouseDown = true;
-        });
-
-        $(document).mousemove(function (e) {
-
-            if (isMouseDown && isMouseIn) {
-
-                mouseMoveXY = igv.translateMouseCoordinates(e, trackView.contentDiv);
-                dx = mouseMoveXY.x - mouseDownXY.x;
-
-                rulerSweepWidth = Math.abs(dx);
-
-                trackView.rulerSweeper.css({"width": rulerSweepWidth + "px"});
-
-                if (dx < 0) {
-                    left = mouseDownXY.x + dx;
-                    trackView.rulerSweeper.css({"left": left + "px"});
-                }
-
-                trackView.rulerSweeper.css({backgroundColor: 'rgba(68, 134, 247, 0.75)'});
-            }
-        });
-
-        $(document).mouseup(function (e) {
-
-            var locus,
-                ss,
-                ee,
-                trackHalfWidthBP,
-                trackWidthBP,
-                centroidZoom,
-                chromosome,
-                chromosomeLength;
-
-            if (isMouseDown) {
-
-                isMouseDown = false;
-                isMouseIn = false;
-
-                trackView.rulerSweeper.css({"display": "none", "left": 0 + "px", "width": 0 + "px"});
-
-                ss = igv.browser.referenceFrame.start + (left * igv.browser.referenceFrame.bpPerPixel);
-                ee = ss + rulerSweepWidth * igv.browser.referenceFrame.bpPerPixel;
-
-                if (sweepWidthThresholdUnmet(rulerSweepWidth)) {
-
-                    chromosome = igv.browser.genome.getChromosome(igv.browser.referenceFrame.chr);
-                    chromosomeLength = chromosome.bpLength;
-
-                    trackWidthBP = igv.browser.trackViewportWidth() / igv.browser.pixelPerBasepairThreshold();
-                    trackHalfWidthBP = 0.5 * trackWidthBP;
-
-                    centroidZoom = (ee + ss) / 2;
-
-                    if (centroidZoom - trackHalfWidthBP < 0) {
-
-                        ss = 1;
-                        //ee = igv.browser.trackViewportWidthBP();
-                        ee = trackWidthBP;
-                    }
-                    else if (centroidZoom + trackHalfWidthBP > chromosomeLength) {
-
-                        ee = chromosomeLength;
-                        //ss = 1 + ee - igv.browser.trackViewportWidthBP();
-                        ss = 1 + ee - trackWidthBP;
-                    }
-                    else {
-                        ss = 1 + centroidZoom - trackHalfWidthBP;
-                        ee = centroidZoom + trackHalfWidthBP;
-                    }
-
-                }
-
-                locus = igv.browser.referenceFrame.chr + ":" + igv.numberFormatter(Math.floor(ss)) + "-" + igv.numberFormatter(Math.floor(ee));
-                igv.browser.search(locus, undefined);
-
-
-            }
-
-        });
-
-        function sweepWidthThresholdUnmet(sweepWidth) {
-
-            if ((rulerWidth / (igv.browser.referenceFrame.bpPerPixel * sweepWidth) ) > igv.browser.pixelPerBasepairThreshold()) {
-                return true;
-            } else {
-                return false;
-            }
-
-        }
-
     }
 
     return igv;

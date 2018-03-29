@@ -147,7 +147,7 @@ var igv = (function (igv) {
             fn = path.toLowerCase();
 
             // Special case -- UCSC refgene files
-            if(fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
+            if (fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
                 config.format = "refgene";
                 return;
             }
@@ -383,14 +383,13 @@ var igv = (function (igv) {
      * @param xOffset - (pixels) within track extent
      * @param yOffset - (pixels) within track extent
      */
-    igv.trackPopupMenuItemList = function (popover, viewport, genomicLocation, xOffset, yOffset) {
+    igv.trackContextMenuItemList = function (viewport, genomicLocation, xOffset, yOffset) {
 
         var config,
             menuItems;
 
         config =
         {
-            popover: popover,
             viewport: viewport,
             genomicState: viewport.genomicState,
             genomicLocation: genomicLocation,
@@ -399,8 +398,8 @@ var igv = (function (igv) {
         };
 
         menuItems = [];
-        if (typeof viewport.trackView.track.popupMenuItemList === "function") {
-            menuItems = igv.trackMenuItemListHelper(viewport.trackView.track.popupMenuItemList(config));
+        if (typeof viewport.trackView.track.contextMenuItemList === "function") {
+            menuItems = igv.trackMenuItemListHelper(viewport.trackView.track.contextMenuItemList(config));
         }
 
         return menuItems;
@@ -440,7 +439,8 @@ var igv = (function (igv) {
                 var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
 
                 if (undefined !== number) {
-// If explicitly setting the height adust min or max, if neccessary.
+
+                    // If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -454,14 +454,14 @@ var igv = (function (igv) {
 
             }, undefined));
         }
-            if (igv.doProvideColoSwatchWidget(trackView.track)) {
-                menuItems.push(igv.colorPickerMenuItem(popover, trackView))
-            }
+        if (igv.doProvideColoSwatchWidget(trackView.track)) {
+            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+        }
 
-            all = [];
-            if (trackView.track.menuItemList) {
-                all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
-            }
+        all = [];
+        if (trackView.track.menuItemList) {
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+        }
         if (trackView.track.removable !== false) {
 
             all.push(
@@ -483,20 +483,28 @@ var igv = (function (igv) {
         return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
-    igv.trackMenuItemListHelper = function (itemList) {
+    igv.trackMenuItemListHelper = function (itemList, callback) {
 
         var list = [];
 
-        if (_.size(itemList) > 0) {
+        if (itemList.length > 0) {
 
-            list = _.map(itemList, function (item, i) {
+            list = itemList.map(function (item, i) {
                 var $e;
 
+                // name and object fields checked for backward compatibility
                 if (item.name) {
                     $e = $('<div>');
                     $e.text(item.name);
-                } else {
+                } else if (item.object) {
                     $e = item.object
+                }
+                else if (typeof item.label === 'string') {
+                    $e = $('<div>');
+                    $e.text(item.label)
+                }
+                else {
+                    $e = $(item.label);
                 }
 
                 if (0 === i) {
@@ -504,7 +512,10 @@ var igv = (function (igv) {
                 }
 
                 if (item.click) {
-                    $e.click(item.click);
+                    $e.click(function () {
+                        item.click();
+                        if(typeof callback === "function") callback();
+                    });
                 }
 
                 return {object: $e, init: (item.init || undefined)};
@@ -580,7 +591,7 @@ var igv = (function (igv) {
             popover.hide();
         });
 
-        return { object: $e };
+        return {object: $e};
 
     };
 

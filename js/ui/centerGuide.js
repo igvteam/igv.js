@@ -29,69 +29,113 @@
  */
 var igv = (function (igv) {
 
-    igv.CenterGuide = function ($parent, config) {
+    igv.CenterGuide = function ($guideParent, $controlParent, config) {
         var self = this;
 
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
-        $parent.append(this.$container);
+        $guideParent.append(this.$container);
 
-        if (true === config.showCenterGuide) {
-            this.$container.show();
-        } else {
-            this.$container.hide();
+        if (true === config.showCenterGuideButton) {
+
+            this.$centerGuideToggle = $('<div class="igv-nav-bar-button">');
+            $controlParent.append(this.$centerGuideToggle);
+            this.$centerGuideToggle.text('center line');
+
+            this.$centerGuideToggle.on('click', function () {
+                if (true === igv.browser.centerGuideVisible) {
+                    self.doHide();
+                } else {
+                    self.doShow();
+                }
+            });
+
         }
-
-        this.$centerGuideToggle = igv.makeToggleButton('center line', 'center line', 'showCenterGuide', function () {
-            return self.$container;
-        }, function () {
-            self.repaint();
-        });
 
     };
 
+    igv.CenterGuide.prototype.doHide = function () {
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+        }
+        igv.browser.hideCenterGuide();
+    };
+
+    igv.CenterGuide.prototype.doShow = function () {
+
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+        }
+
+        igv.browser.showCenterGuide();
+    };
+
+    igv.CenterGuide.prototype.setState = function (centerGuideVisible) {
+
+        if (this.$centerGuideToggle) {
+
+            if (true === centerGuideVisible) {
+                this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+            } else {
+                this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+            }
+
+        }
+
+    };
+
+    igv.CenterGuide.prototype.disable = function () {
+        this.doHide();
+        this.$centerGuideToggle.hide();
+    };
+
+    igv.CenterGuide.prototype.enable = function () {
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.show();
+        }
+    };
 
     igv.CenterGuide.prototype.repaint = function () {
 
         var ppb,
-            trackXY,
-            trackHalfWidth,
+            xy,
+            halfWidth,
             width,
             left,
             ls,
             ws,
             center,
-            rect,
             referenceFrame;
 
-        if (undefined === igv.browser.genomicStateList) {
-            return;
+        if (igv.browser.genomicStateList) {
+
+            referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
+            ppb = 1.0/referenceFrame.bpPerPixel;
+
+            if (ppb > 1) {
+
+                xy = igv.browser.trackViews[ 0 ].$viewportContainer.position();
+                halfWidth = Math.round( igv.browser.trackViews[ 0 ].$viewportContainer.width() / 2 );
+
+                center = xy.left + halfWidth;
+                width = referenceFrame.toPixels(1);
+                left = center - 0.5 * width;
+
+                ls = Math.round(left).toString() + 'px';
+                ws = Math.round(width).toString() + 'px';
+                this.$container.css({ left:ls, width:ws });
+
+                this.$container.removeClass('igv-center-guide-thin');
+                this.$container.addClass('igv-center-guide-wide');
+            } else {
+
+                this.$container.css({ left:'50%', width:'1px' });
+
+                this.$container.removeClass('igv-center-guide-wide');
+                this.$container.addClass('igv-center-guide-thin');
+            }
+
         }
 
-        referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
-        ppb = 1.0/referenceFrame.bpPerPixel;
-        if (ppb > 1) {
-
-            rect = igv.browser.syntheticViewportContainerBBox();
-            trackXY = rect.position;
-            trackHalfWidth = 0.5 * rect.width;
-
-            center = trackXY.left + trackHalfWidth;
-            width = referenceFrame.toPixels(1);
-            left = center - 0.5 * width;
-
-            ls = Math.round(left).toString() + 'px';
-            ws = Math.round(width).toString() + 'px';
-            this.$container.css({ left:ls, width:ws });
-
-            this.$container.removeClass('igv-center-guide-thin');
-            this.$container.addClass('igv-center-guide-wide');
-        } else {
-
-            this.$container.css({ left:'50%', width:'1px' });
-
-            this.$container.removeClass('igv-center-guide-wide');
-            this.$container.addClass('igv-center-guide-thin');
-        }
 
     };
 
