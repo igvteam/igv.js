@@ -1508,15 +1508,22 @@ var igv = (function (igv) {
 
     }
 
+    igv.Browser.prototype.dispose = function () {
+
+        $(window).off('resize.browser');
+        $(document).off('click.browser');
+
+    }
+
     function addMouseHandlers() {
 
         var self = this,
             lastMouseX;
 
 
-        window.onresize = igv.throttle(function () {
+        $(window).on('resize.browser', igv.throttle(function () {
             self.resize();
-        }, 10);
+        }, 10));
 
         $(document).on('click.browser', function (e) {
             var target = e.target;
