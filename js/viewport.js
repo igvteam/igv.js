@@ -513,6 +513,13 @@ var igv = (function (igv) {
         document.body.removeChild(a);
     };
 
+    /**
+     * Called when the associated track is removed.  Do any needed cleanup here.
+     */
+    igv.Viewport.prototype.dispose = function () {
+        this.cachedFeatures = undefined;
+    }
+    
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
