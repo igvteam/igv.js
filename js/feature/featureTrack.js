@@ -404,6 +404,13 @@ var igv = (function (igv) {
     };
 
     /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    igv.FeatureTrack.prototype.dispose = function () {
+        this.trackView = undefined;
+    }
+
+    /**
      * @param feature
      * @param bpStart  genomic location of the left edge of the current canvas
      * @param xScale  scale in base-pairs per pixel
