@@ -9,14 +9,16 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>BAM - Dev</title>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="https://igv.org/web/beta/igv.css">
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <!-- Vendor JS -->
     <script src="../vendor/jquery-1.12.4.js"></script>
@@ -29,6 +31,8 @@
     <script src="../vendor/inflate.js"></script>
 
     <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
@@ -94,6 +98,8 @@
     <script src="../js/ui/dialog.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/cursorGuide.js"></script>
+    <script src="../js/ui/trackLabelControl.js"></script>
     <script src="../js/ui/userFeedback.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/popover.js"></script>
@@ -137,6 +143,8 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
 
 </head>
 
@@ -156,7 +164,7 @@
             showNavigation: true,
             showRuler: true,
             genome: "hg19",
-            locus: "chr8:128,747,267-128,754,546",
+            locus: "chr7:140,453,036-140,453,236",
             tracks: [
                 {
                     name: "Genes",
@@ -169,10 +177,24 @@
                     order: Number.MAX_VALUE,
                     displayMode: "EXPANDED"
                 },
+//                {
+//                   // url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+//                    url: "http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
+//                   // url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
+//                    name: '1KG NA12877'
+//                },
+                    // Issue 588
                 {
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                   // url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                    name: '1KG NA12877'
+                    colorBy:"strand",
+                    format:"bam",
+                    indexURL:"https://s3.us-east-2.amazonaws.com/khaled-bam-files/5bb4ec2b-b3ca-416d-b1b4-a29599748c5d",
+                    name:"Alignments",
+                    sourceType:"file",
+                    type:"alignment",
+                    url:"https://s3.us-east-2.amazonaws.com/khaled-bam-files/22d7f3b6-4289-4f88-b275-9e8ac9dcc191",
+                    //samplingDepth: 3000,
+                   // maxRows: 3000,
+                   // alignmentRowHeight: 5
                 }
 
             ]

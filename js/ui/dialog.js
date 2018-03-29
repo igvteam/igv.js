@@ -82,7 +82,7 @@ var igv = (function (igv) {
 
         // ok button
         $column = $('<div class="igv-col igv-col-2-4">');
-        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller = $('<div class="igv-col-button igv-col-filler-ok-button">');
         $columnFiller.text("OK");
 
         this.$ok = $columnFiller;
@@ -117,7 +117,7 @@ var igv = (function (igv) {
 
         // ok button
         $column = $('<div class="igv-col igv-col-3-8">');
-        $columnFiller = $('<div class="igv-col-filler-ok-button">');
+        $columnFiller = $('<div class="igv-col-button igv-col-filler-ok-button">');
         $columnFiller.text("OK");
 
         this.$ok = $columnFiller;
@@ -129,7 +129,7 @@ var igv = (function (igv) {
 
         // cancel button
         $column = $('<div class="igv-col igv-col-3-8">');
-        $columnFiller = $('<div class="igv-col-filler-cancel-button">');
+        $columnFiller = $('<div class="igv-col-button igv-col-filler-cancel-button">');
         $columnFiller.text("Cancel");
         $columnFiller.click(function() {
             self.$dialogInput.val(undefined);

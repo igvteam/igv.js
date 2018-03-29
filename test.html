@@ -14,11 +14,9 @@
     <link rel="stylesheet" type="text/css" href='https://fonts.googleapis.com/css?family=PT+Sans:400,700'>
     <link rel="stylesheet" type="text/css" href='https://fonts.googleapis.com/css?family=Open+Sans'>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css"/>
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" href="dist/css/igv.css">
+    <link rel="stylesheet" href="dist/igv-all.css">
 
     <!-- Shims for legacy browsers -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
@@ -100,15 +98,6 @@
                             name: '1KG variants',
                             visibilityWindow: 1000
                             })">VCF file with genotypes (chr 22)
-    </div>
-
-    <div onclick="igv.browser.loadTrack({
-                            url: 'https://data.broadinstitute.org/igvdata/BodyMap/hg19/IlluminaHiSeq2000_BodySites/brain_merged/accepted_hits.bam',
-                            name: 'Brain (BodyMap)',
-                            maxRows: 3000,
-                            samplingDepth: 10000,
-                            height: 200
-                        })">BAM File - deep coverage (Brain, BodyMap)
     </div>
 
 
@@ -253,7 +242,8 @@
                             indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
                             order: Number.MAX_VALUE,
                             visibilityWindow: 300000000,
-                            displayMode: "EXPANDED"
+                            displayMode: "EXPANDED",
+                            autoHeight: true
                         }
                     ]
                 };
