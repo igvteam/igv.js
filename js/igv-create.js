@@ -572,6 +572,7 @@ var igv = (function (igv) {
 
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
+        igv.browser.dispose();
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
     };
