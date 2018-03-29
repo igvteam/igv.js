@@ -912,7 +912,7 @@ $igv-dark-grey-color: #373737;
 }
 
 .igv-cursor-tracking-guide {
-
+  pointer-events: none;
   position: absolute;
   top: 0;
   bottom: 0;
