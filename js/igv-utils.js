@@ -56,7 +56,7 @@ var igv = (function (igv) {
         $generic_container.append($header);
 
         // close button
-        $fa = $("<i>", { class:'fa fa-times' });
+        $fa = igv.createIcon("times");
         $header.append($fa);
 
         $fa.on('click', function (e) {
@@ -123,7 +123,7 @@ var igv = (function (igv) {
 
         return index < 0 ? filename : filename.substr(1 + index);
     };
-    
+
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
         return str.toLowerCase().endsWith( suffix )
@@ -133,39 +133,24 @@ var igv = (function (igv) {
         return (path instanceof File);
     };
 
-    igv.makeToggleButton = function (buttonOnLabel, buttonOffLabel, configurationKey, get$Target, continuation) {
+    igv.makeToggleButton = function (label, configurationKey, get$Target, continuation) {
 
-        var $button = $('<div class="igv-nav-bar-toggle-button">');
+        var $button;
 
-        skin$ButtonWithTruthFunction($button, (true === igv.browser.config[ configurationKey ]), buttonOnLabel, buttonOffLabel);
+        $button = $('<div class="igv-nav-bar-button">');
+        $button.text(label);
 
         $button.click(function () {
 
             var $target = get$Target();
 
-            igv.browser.config[ configurationKey ] = !igv.browser.config[ configurationKey ];
-
             $target.toggle();
 
-            skin$ButtonWithTruthFunction($(this), $target.is(":visible"), buttonOnLabel, buttonOffLabel);
+            if (continuation) {
+                continuation();
+            }
         });
 
-        function skin$ButtonWithTruthFunction($b, truth, onLabel, offLabel) {
-
-            $b.removeClass('igv-nav-bar-toggle-button-on');
-            $b.removeClass('igv-nav-bar-toggle-button-off');
-            if (true === truth) {
-                $b.addClass('igv-nav-bar-toggle-button-off');
-                $b.text(offLabel);
-
-                if (continuation) {
-                    continuation();
-                }
-            } else {
-                $b.addClass('igv-nav-bar-toggle-button-on');
-                $b.text(onLabel);
-            }
-        }
 
         return $button;
     };
@@ -181,7 +166,7 @@ var igv = (function (igv) {
         if(httpMessages.hasOwnProperty(string)) {
             string = httpMessages[string];
         }
-        
+
         igv.alert.$dialogLabel.text(string);
         igv.alert.show($parent);
 
@@ -199,51 +184,13 @@ var igv = (function (igv) {
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
         var $container = $('<div>'),
-            $fa = $('<i class="fa fa-times">');
+            $fa = igv.createIcon("times");
 
         $container.append($fa);
         $parent.append($container);
 
-        $fa.hover(
-            function () {
-                $fa.removeClass("fa-times");
-                $fa.addClass("fa-times-circle");
+        $container.click(closeHandler);
 
-                $fa.css({
-                    color:"#222"
-                });
-            },
-
-            function () {
-                $fa.removeClass("fa-times-circle");
-                $fa.addClass("fa-times");
-
-                $fa.css({
-                    color:"#444"
-                });
-
-            }
-        );
-
-        $fa.click(closeHandler);
-
-    };
-
-    igv.spinner = function (size) {
-
-        // spinner
-        var $container,
-            $spinner;
-
-        $spinner = $('<i class="fa fa-spinner fa-spin">');
-        if (size) {
-            $spinner.css("font-size", size);
-        }
-
-        $container = $('<div class="igv-spinner-container">');
-        $container.append($spinner[0]);
-
-        return $container[0];
     };
 
     /**
@@ -408,28 +355,14 @@ var igv = (function (igv) {
         return {x: posx, y: posy}
     };
 
-    /**
-     * Format markup for popover text from an array of name value pairs [{name, value}]
-     */
-    igv.formatPopoverText = function (nameValueArray) {
-
-        var markup = "<table class=\"igv-popover-table\">";
-
-        nameValueArray.forEach(function (nameValue) {
-
-            if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
-            } else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
-            }
-        });
-
-        markup += "</table>";
-        return markup;
+    igv.pageCoordinates = function(e) {
+        var eFixed;
+        // Sets pageX and pageY for browsers that don't support them
+        eFixed = $.event.fix(e);
+        return {x:  eFixed.pageX, y: eFixed.pageY}
+    }
 
 
-    };
 
     igv.throttle = function (fn, threshhold, scope) {
         threshhold || (threshhold = 200);
@@ -453,6 +386,8 @@ var igv = (function (igv) {
             }
         }
     };
+
+    var foo = typeof igv.throttle;
 
     igv.splitStringRespectingQuotes = function (string, delim) {
 

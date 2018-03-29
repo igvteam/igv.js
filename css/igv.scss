@@ -1,13 +1,24 @@
 
 @import "igv-colorpicker";
 @import "igv-generic-container";
+@import "igv-drag-drop-file";
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
+$igv-navbar-button-height: 18px;
+$igv-navbar-button-width: 96px;
+$igv-navbar-button-font-size: 11px;
 
-$igv-default-border-color: #bfbfbf;
+$igv-border-color: #bfbfbf;
+
+//$igv-ideogram-height: 14px;
+$igv-ideogram-height: 16px;
+//$igv-ideogram-height: 32px;
+
+$igv-panel-border-width: 1px;
+$igv-panel-border-color: #292929;
 
 $igv-ruler-sweeper-color: rgba(68, 134, 247, 0.25);
 $igv-ruler-blue-color: rgb(0, 102, 255);
@@ -16,35 +27,95 @@ $igv-light-grey-color: #bfbfbf;
 $igv-grey-color: #7F7F7F;
 $igv-dark-grey-color: #373737;
 
-// drag & drop
-$drag-drop-dark-color: #36464b;
-$drag-drop-medium-color: #92b0b3;
-$drag-drop-light-color: #c8dadf;
-$drag-drop-light-translucent-color: rgba(200, 218, 223, 0.51);
+#igvControlDiv {
+  position: relative;
+}
 
-$drag-drop-highlight-color: #39bfd3;
+#igv-content-header {
 
-$drag-drop-warning-color: red;
+  position: relative;
+  height: $igv-ideogram-height;
+  clear: both;
+
+  white-space: nowrap;
+
+  .igv-ideogram-left-shim {
+    position: relative;
+
+    height: 100%;
+    width: 50px;
+
+    display: inline-block;
+
+    background-color: white;
+
+  }
+
+  .igv-ideogram-content-div {
+    position: relative;
+
+    height: 100%;
+
+    display: inline-block;
+
+    background-color: white;
+
+    canvas {
+      width:100%;
+      height:100%;
+    }
+
+  }
+
+  .igv-ideogram-content-div-border-right {
+    border-right-color: $igv-panel-border-color;
+    //border-right-color: #ff0000;
+    border-right-style: solid;
+    border-right-width: $igv-panel-border-width;
+  }
+
+}
+
+// multi-locus panel border
+.igv-multi-locus-panel-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  height: 100%;
+  width: 1px;
+
+  background-color: green;
+
+  border-right-color: #ff0000;
+  border-right-style: solid;
+  border-right-width: 1px;
+
+}
 
 // nav bar
-.igv-navbar {
+#igv-navbar {
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+
+  margin-top: 2px;
+  margin-bottom: 4px;
 
   position: relative;
   top: 0;
   left: 0;
-
-  height: 30px;
-
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-left: 4px;
-  padding-right: 4px;
+  height: 32px;
+  width: 100%;
 
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
 
-  border-color: $igv-default-border-color;
+  border-color: $igv-border-color;
   background-color: $igv-navbar-toggle-light-color;
 
   i {
@@ -58,25 +129,232 @@ $drag-drop-warning-color: red;
     color: #434343;
   }
 
+  #igv-nav-bar-left-container {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    // igv logo
+    #igv-logo {
+      width: 34px;
+      height: 16px;
+
+      margin-left: 8px;
+      margin-right: 32px;
+
+      background: url(img/igv-logo.svg);
+      background-size: 34px 16px;
+      background-repeat:no-repeat;
+      background-position: 0 0;
+    }
+
+    // drag & drop file upload button
+    #igv-drag-and-drop-presentation-button {
+      margin-right: 32px;
+    }
+
+    // chromosome select widget | chromosome select widget | locus goto | search icon | window size
+    #igv-genomic-location {
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+
+      //width: 430px;
+
+      // chromosome select widget
+      #igv-chromosome-select-widget-container {
+        height: 90%;
+        width: 96px;
+        margin-right: 4px;
+
+        select {
+
+          outline: none;
+
+          font-family: $igv-default-font-face;
+          font-size: small;
+          font-weight: 400;
+          color: #444;
+
+          width: 100%;
+          height: 100%;
+        }
+      }
+
+      #igv-locus-size-group {
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+
+        // locus goto | search icon
+        #igv-search-container {
+          height: 90%;
+          width: 260px;
+
+          display: flex;
+          flex-flow: row;
+          flex-wrap: nowrap;
+          justify-content: flex-start;
+          align-items: center;
+
+          // locus goto
+          input {
+            display: block;
+            height: 20px;
+            width: 85%;
+
+            padding-left: 8px;
+            margin-right: 8px;
+
+            line-height: 20px;
+            text-align: left;
+
+            font-family: $igv-default-font-face;
+            font-size: small;
+            font-weight: 400;
+            color: #444;
+
+            outline: none;
+
+            border-style: solid;
+            border-radius: 3px;
+            border-width: thin;
+            border-color: $igv-border-color;
+
+            background-color: white;
+          }
+
+          // search icon
+          div {
+            height: 100%;
+            //width: 32px;
+
+            i {
+              font-size: 18px;
+            }
+
+          }
+
+        }
+
+        // window size panel
+        #igv-windowsizepanel-content-div {
+          margin-left: 4px;
+
+          font-family: $igv-default-font-face;
+          font-size: 14px;
+          font-weight: 400;
+          color: #444;
+        }
+
+      }
+
+    }
+
+  }
+
+  #igv-nav-bar-right-container {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+
+    // toggle buttons
+    #igv-nav-bar-toggle-button-container {
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+
+      margin-right: 8px;
+
+      div {
+        margin-left: 0;
+        margin-right: 4px;
+      }
+
+      div:last-child {
+        margin-left: 0;
+        margin-right: 0;
+      }
+
+    }
+
+    // nav bar - zoom
+    #igv-zoom-widget {
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+
+      width: 44px;
+
+      margin-left: 16px;
+      margin-right: 8px;
+
+      div {
+        i {
+          font-size: 24px;
+        }
+      }
+
+    }
+
+  }
 }
 
-// nav bar - logo
-.igv-logo {
-  float: left;
-  margin-left: 4px;
-  margin-right: 8px;
-  position: relative;
-  top: 4px;
-  left: 0;
-  width: 34px;
-  height: 16px;
-  background: url(img/igv-logo.svg);
-  background-size: 34px 16px;
-  background-repeat:no-repeat;
-  background-position: 0 0;
+
+// drag & drop file upload button
+.igv-nav-bar-button {
+  height: $igv-navbar-button-height;
+  min-width: $igv-navbar-button-width;
+  text-transform: capitalize;
+
+  line-height: $igv-navbar-button-height;
+  text-align: center;
+  font-family: $igv-default-font-face;
+  font-size: $igv-navbar-button-font-size;
+  font-weight: 200;
+
+  color: $igv-navbar-toggle-dark-dark;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-light-color;
+
+  border-style: solid;
+  border-width: thin;
+  border-radius: 10px;
 }
 
-.igv-logo-nonav {
+.igv-nav-bar-button-clicked {
+  cursor: pointer;
+  color: white;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-dark-dark;
+}
+
+.igv-nav-bar-button:hover {
+  cursor: pointer;
+  color: white;
+  border-color: $igv-navbar-toggle-dark-dark;
+  background-color: $igv-navbar-toggle-dark-dark;
+}
+
+// TODO: figure out what to do with this
+#igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
   position: absolute;
@@ -90,56 +368,7 @@ $drag-drop-warning-color: red;
   background-position: 0 0;
 }
 
-// chromosome select widget
-.igv-chromosome-select-widget-container {
-  position: relative;
-  float: left;
-  height: 90%;
-  width: 96px;
-  margin-right: 4px;
-  //background-color: rgba(0, 191, 255, 0.51);
-
-  select {
-    position: relative;
-    width: 100%;
-    height: 100%;
-  }
-}
-
-// nav bar - search
-.igv-search-container {
-  position: relative;
-  top: 0;
-  width: 260px;
-  float: left;
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-
-  input {
-    position: relative;
-    height: 20px;
-    width: 80%;
-    padding-left: 8px;
-    outline: none;
-    border-style: solid;
-    border-radius: 3px;
-    border-width: thin;
-    border-color: $igv-default-border-color;
-    font-family: $igv-default-font-face;
-    font-size: small;
-    font-weight: 400;
-    color: #444;
-    background-color: white;
-  }
-
-  i {
-    font-size: 18px;
-    padding-left: 6px;
-  }
-
-}
-
+// TODO: figure out what to do with this
 .igv-search-results {
   position: absolute;
   top: 32px;
@@ -171,65 +400,6 @@ $drag-drop-warning-color: red;
 
 }
 
-// nav bar - toggle buttons
-.igv-nav-bar-toggle-button {
-
-  cursor: pointer;
-
-  position: relative;
-  height: 20px;
-  min-width: 110px;
-  text-transform: capitalize;
-
-  float: right;
-
-  margin-top: 2px;
-  margin-right: 5px;
-
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-
-  font-family: $igv-default-font-face;
-  font-size: 12px;
-  font-weight: 200;
-
-  text-align: center;
-  vertical-align: middle;
-
-  border-style: solid;
-  border-width: thin;
-  border-radius: 10px;
-}
-
-.igv-nav-bar-toggle-button-on {
-  color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-light-color;
-}
-
-.igv-nav-bar-toggle-button-off {
-  color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
-}
-
-// nav bar - zoom
-.igv-zoom-widget {
-  position: relative;
-  float: right;
-  margin-left: 40px;
-
-  i {
-    font-size: 24px;
-  }
-
-  i:first-child {
-    padding-right: 4px;
-  }
-}
-
 // karyo
 .igv-karyo-div {
   position: relative;
@@ -255,43 +425,6 @@ $drag-drop-warning-color: red;
   top:0;
   width:100%;
   height:100%;
-}
-
-// ideogram
-.igv-ideogram-left-shim {
-  position: relative;
-  float: left;
-  height: 14px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  width: 50px;
-}
-
-.igv-ideogram-content-div {
-  position: relative;
-  float: left;
-  height: 14px;
-  margin-top: 2px;
-  margin-bottom: 2px;
-  background-color: white;
-
-  canvas {
-    width:100%;
-    height:100%;
-  }
-
-}
-
-.igv-ideogram-content-div-border-right {
-  border-right-color: white;
-  border-right-style: solid;
-  border-right-width: 4px;
-}
-
-.igv-ideogram-content-div-border-left {
-  border-left-color: white;
-  border-left-style: solid;
-  border-left-width: thin;
 }
 
 // root container
@@ -324,106 +457,90 @@ $drag-drop-warning-color: red;
 .igv-track-div {
   position: relative;
   width: 100%;
-  //overflow:hidden;
+  margin-top: 2px;
+  margin-bottom: 2px;
 }
 
 .igv-viewport-container {
   position: absolute;
-  left:  0;
+  left:  50px;
   right: 50px;
   height: 100%;
 
-  /*overflow: hidden;*/
+  white-space: nowrap;
 
   overflow-x: hidden;
   overflow-y: hidden;
 
 }
 
-.igv-viewport-container-shim {
-  left:  50px;
-}
-
 .igv-viewport-div {
-
-  float: left;
-
   position: relative;
-  /*width: 100%;*/
+
+  //float: left;
+  display: inline-block;
+
   height: 100%;
 
   overflow-x: hidden;
   overflow-y: hidden;
-
 }
 
 .igv-viewport-content-div {
   position: absolute;
   width: 100%;
-  height:100%;
+}
 
-  .igv-whole-genome-container {
-    display:flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
+.igv-whole-genome-container {
+  display:flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 
-    width: 100%;
+  width: 100%;
+  height: 100%;
+
+  background-color: white;
+
+  div {
+
+    font-family: $igv-default-font-face;
+    font-size: 10px;
+    font-weight: 400;
+    color: #444;
+
     height: 100%;
+    text-align: center;
 
-    background-color: white;
-
-    div {
-
-      font-family: $igv-default-font-face;
-      font-size: 10px;
-      font-weight: 400;
-      color: #444;
-
-      height: 100%;
-      text-align: center;
-
-      span {
-        display: block;
-        padding-top: 6px;
-        text-overflow: ellipsis;
-      }
-
-      border-right-color: #bfbfbf;
-      border-right-style: solid;
-      border-right-width: thin;
+    span {
+      display: block;
+      padding-top: 6px;
+      text-overflow: ellipsis;
     }
 
-    div:last-child {
-      border-right-color: transparent;
-    }
-
-    div:hover,
-    div:focus,
-    div:active  {
-      cursor: pointer;
-      background-color: #efefef;
-    }
-
+    border-right-color: #bfbfbf;
+    border-right-style: solid;
+    border-right-width: thin;
   }
 
-  canvas {
-    width: 100%;
-    height: 100%;
+  div:last-child {
+    border-right-color: transparent;
+  }
+
+  div:hover,
+  div:focus,
+  div:active  {
+    cursor: pointer;
+    background-color: #efefef;
   }
 
 }
 
 .igv-viewport-div-border-right {
-  border-right-color: white;
+  border-right-color: $igv-panel-border-color;
+  //border-right-color: #00ff00;
   border-right-style: solid;
-  border-right-width: 4px;
-}
-
-.igv-viewport-div-border-left {
-  border-left-color: rgba(0, 0, 0, 0.25);
-  border-left-style: solid;
-  border-left-width: thin;
+  border-right-width: $igv-panel-border-width;
 }
 
 .igv-viewport-fa-close {
@@ -469,6 +586,10 @@ $drag-drop-warning-color: red;
   font-size: 10px;
   font-weight: 200;
   text-align: center;
+
+  >div {
+    height: 100%;
+  }
 }
 
 .igv-viewport-sequence {
@@ -546,25 +667,6 @@ $drag-drop-warning-color: red;
 
 }
 
-// window size panel
-.igv-windowsizepanel-content-div {
-
-  position: relative;
-  height: 100%;
-
-  float: left;
-
-  padding-top: 6px;
-  text-align: center;
-  vertical-align: middle;
-  line-height: 100%;
-
-  font-family: $igv-default-font-face;
-  font-size: 14px;
-  font-weight: 400;
-  color: #444;
-}
-
 // track menu
 .igv-track-menu-container {
 
@@ -633,8 +735,6 @@ $drag-drop-warning-color: red;
   width: 12px;
 
   margin-left: 2px;
-  margin-top: 1px;
-  margin-bottom: 1px;
 
   height: 100%;
 
@@ -812,7 +912,7 @@ $drag-drop-warning-color: red;
 }
 
 .igv-cursor-tracking-guide {
-
+  pointer-events: none;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -959,7 +1059,7 @@ $drag-drop-warning-color: red;
   border-style: solid;
   border-width: thin;
 
-  z-index: 1999;
+  z-index: 2048;
 
   background-color: white;
 }
@@ -967,8 +1067,12 @@ $drag-drop-warning-color: red;
 .igv-grid-container-alert-dialog {
 
   position: absolute;
+  top: 0;
+  left:0;
 
-  max-width: 300px;
+  width: 256px;
+
+  padding-bottom: 4px;
 
   border-color: $igv-grey-color;
   border-radius: 4px;
@@ -1034,42 +1138,22 @@ $drag-drop-warning-color: red;
 }
 
 .igv-grid-rect {
+  position: relative;
+  width: 100%;
 
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  border-color: white;
-
-  padding-left: 4px;
-  padding-right: 4px;
+  //border-radius: 4px;
+  //border-style: solid;
+  //border-width: thin;
+  //border-color: white;
+  //
+  //padding-left: 4px;
+  //padding-right: 4px;
 
   background-color: white;
 }
 
 .igv-grid-rect-hidden {
   display: none;
-}
-
-.igv-grid-colorpicker {
-  height: 32px;
-}
-
-.igv-grid-colorpicker:after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-.igv-grid-colorpicker-user-error {
-
-  height: 16px;
-
-  color: #55aeff;
-  font-family: $igv-default-font-face;
-  font-size: small;
-  font-weight: 400;
-
-  background-color: white;
 }
 
 .igv-grid-dialog {
@@ -1149,8 +1233,8 @@ $drag-drop-warning-color: red;
   border-width: thin;
   border-color: $igv-grey-color;
 
-  width: 100%;
-
+  margin-left: 4px;
+  width: 90%;
   padding-left: 8px;
 
   vertical-align: middle;
@@ -1161,7 +1245,6 @@ $drag-drop-warning-color: red;
   font-weight: 200;
 
   color: #575757;
-
 }
 
 .igv-alert-dialog-text {
@@ -1253,28 +1336,29 @@ $drag-drop-warning-color: red;
 
 }
 
-/* ok button */
-.igv-col-filler-ok-button {
+.igv-col-button {
+
+  width: 98px;
+  height: 36px;
+
+  line-height: 36px;
+  text-align: center;
+  color: white;
+  font-family: $igv-default-font-face;
+  font-size: medium;
+  font-weight: 200;
 
   margin-left: 8px;
-  padding-left: 1px;
-  padding-top: 5px;
-  width: 90%;
-  height: 90%;
 
   border-color: white;
   border-style: solid;
   border-width: thin;
   border-radius: 4px;
 
-  color: white;
-  text-align: center;
-  vertical-align: middle;
+}
 
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 200;
-
+/* ok button */
+.igv-col-filler-ok-button {
   background-color: #5ea4e0;
 }
 
@@ -1286,26 +1370,6 @@ $drag-drop-warning-color: red;
 
 /* cancel button */
 .igv-col-filler-cancel-button {
-
-  margin-left: 8px;
-  padding-left: 1px;
-  padding-top: 5px;
-  width: 90%;
-  height: 90%;
-
-  border-color: white;
-  border-style: solid;
-  border-width: thin;
-  border-radius: 4px;
-
-  color: white;
-  text-align: center;
-  vertical-align: middle;
-
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 200;
-
   background-color: #c4c4c4;
 }
 
@@ -1374,9 +1438,13 @@ $drag-drop-warning-color: red;
   width: 100%;
 }
 
+[class*='igv-col-'] {
+  float: left;
+}
+
 /*   end grid.css */
 
-.fa-check-hidden {
+.igv-fa-check-hidden {
   color: rgba(255, 255, 255, 0);
 }
 
@@ -1501,7 +1569,7 @@ $drag-drop-warning-color: red;
 
 // dross
 
-.spacer10 {
+.igv-spacer-10 {
   height: 10px;
   width: 100%;
   font-size: 0;
@@ -1510,379 +1578,3 @@ $drag-drop-warning-color: red;
   border: 0;
   display: block;
 }
-
-[class*='igv-col-'] {
-  float: left;
-}
-
-[class*='igv-'], [class*='igv-']:after, [class*='igv-']:before {
-  -webkit-box-sizing: border-box;
-  -moz-box-sizing: border-box;
-  box-sizing: border-box;
-}
-
-.igv-cursor-ui-header {
-
-  margin-top: 4px;
-
-  width: 100%;
-  height: auto;
-
-  background-size: 100px 32px;
-  background-repeat:no-repeat;
-  background-position: 21px 9px;
-}
-
-.igv-cursor-ui-holder {
-  width: 640px;
-  margin:auto;
-}
-
-.igv-cursor-ui {
-  margin:auto;
-  width: 100%;
-  display:inline-block;
-  border: solid 1px grey;
-  background-color: #fff;
-  border-top: none;
-  border-bottom-left-radius: 5px;
-  border-bottom-right-radius: 5px;
-  padding: 5px 5px 5px 5px;
-}
-
-.igv-cursor-ui-item {
-  float:left;
-  color: grey;
-  font-weight: 400;
-  padding: 5px 8px 5px 8px;
-}
-
-// track file upload
-
-.igv-drag-and-drop-presentation-button {
-
-  position: relative;
-  height: 20px;
-  min-width: 110px;
-  text-transform: capitalize;
-
-  float: left;
-
-  margin-top: 2px;
-  margin-right: 5px;
-
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-  padding-bottom: 2px;
-
-  font-family: $igv-default-font-face;
-  font-size: 12px;
-  font-weight: 200;
-
-  text-align: center;
-  vertical-align: middle;
-
-  color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-light-color;
-
-
-  border-style: solid;
-  border-width: thin;
-  border-radius: 10px;
-}
-
-.igv-drag-and-drop-presentation-button:hover,
-.igv-drag-and-drop-presentation-button:focus,
-.igv-drag-and-drop-presentation-button:active  {
-
-  cursor: pointer;
-
-  color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
-}
-
-.igv-drag-drop-container {
-
-  position: absolute;
-  top: 100px;
-  left: 25%;
-  width: 50%;
-  //height: 360px;
-
-  text-align: center;
-  margin: 0 auto;
-
-  padding-top: 64px;
-  padding-bottom: 8px;
-  padding-left: 16px;
-  padding-right: 16px;
-
-  z-index: 2000;
-
-  background-color: $drag-drop-light-color;
-
-  display:flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-
-
-}
-
-.igv-drag-drop-container.is-dragover {
-  background-color: $drag-drop-light-translucent-color;
-}
-
-.igv-drag-and-drop-close-container {
-
-  position: absolute;
-  top: 16px;
-  right: 18px;
-
-  text-align: center;
-  line-height: 100%;
-
-  cursor: pointer;
-
-  i.fa-times {
-    color: $drag-drop-medium-color;
-  }
-
-  i.fa-times-circle {
-    color: $drag-drop-dark-color;
-  }
-
-}
-
-.igv-drag-drop-surface {
-  position: relative;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  //background-color: $drag-drop-light-color;
-}
-
-.igv-drag-drop-surface .igv-drag-drop-surface-blurb {
-  display: inline;
-}
-
-.igv-drag-and-drop-url-input-container {
-  position: relative;
-  width: 96%;
-  //padding-left: 2%;
-  //padding-right: 2%;
-  //margin-top: 1px;
-  margin: 8px auto;
-}
-
-.igv-drag-and-drop-url-input-container > div {
-  margin-top: 14px;
-  margin-bottom: 14px;
-}
-
-.igv-drag-drop-ok {
-
-  width: 90%;
-  margin: 4px auto;
-  padding: 4px;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $drag-drop-dark-color;
-
-  background-color: $drag-drop-light-color;
-
-}
-
-.igv-drag-drop-ok:hover,
-.igv-drag-drop-ok:focus,
-.igv-drag-drop-ok:active  {
-  cursor: pointer;
-  color: white;
-  background-color: $drag-drop-dark-color;
-}
-
-.igv-drag-drop-cancel {
-
-  width: 90%;
-  margin: 4px auto;
-  padding: 4px;
-
-  color: white;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $drag-drop-dark-color;
-
-  background-color: $drag-drop-dark-color;
-
-}
-
-.igv-drag-drop-cancel:hover,
-.igv-drag-drop-cancel:focus,
-.igv-drag-drop-cancel:active  {
-  cursor: pointer;
-}
-
-.igv-drag-drop-warning {
-  position: relative;
-
-  width: 90%;
-  //height: 24px;
-  margin: 4px auto;
-
-  color: $igv-dark-grey-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 400;
-
-  text-align: left;
-  //vertical-align: middle;
-  //line-height: 24px;
-
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: $igv-dark-grey-color;
-
-  background-color: white;
-
-  overflow: auto;
-
-  #warning-message {
-    padding-top:4px;
-    padding-bottom:4px;
-    padding-left:8px;
-
-    float: left;
-    width: 90%;
-    background-color: transparent;
-    overflow: auto;
-  }
-
-  #warning-dismiss {
-    float: right;
-    color: $igv-light-grey-color;
-    padding-top: 2px;
-    padding-right: 4px;
-  }
-
-  #warning-dismiss:hover,
-  #warning-dismiss:focus,
-  #warning-dismiss:active {
-    cursor: pointer;
-    color: $igv-dark-grey-color;
-  }
-
-}
-
-.igv-drag-and-drop-url-input-feedback {
-
-  width: 100%;
-
-  color: $drag-drop-dark-color;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  padding-left: 4px;
-}
-
-.igv-drag-and-drop-url-input {
-
-  display: block;
-
-  width: 100%;
-
-  color: $drag-drop-dark-color;
-  background-color: transparent;
-
-  font-family: 'Open Sans', sans-serif;
-  font-size: 18px;
-  font-weight: 200;
-
-  text-align: center;
-
-  //padding-left: 4px;
-  padding: 4px;
-  margin: 8px;
-
-  border: 0;
-  border-bottom: 2px solid $drag-drop-dark-color;
-
-}
-
-.igv-drag-and-drop-url-input:focus,
-.igv-drag-and-drop-url-input:active {
-  background: white;
-  border-bottom: transparent;
-}
-
-.igv-track-file-input-css {
-  width: 0.1px;
-  height: 0.1px;
-  opacity: 0;
-  overflow: hidden;
-  position: absolute;
-  z-index: -1;
-}
-
-.igv-track-file-input-css:hover + label strong {
-  color: $drag-drop-highlight-color;
-}
-
-.igv-drag-drop-file-input {
-  position: relative;
-}
-
-.igv-drag-drop-file-input label {
-  max-width: 80%;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  cursor: pointer;
-  display: inline-block;
-  overflow: hidden;
-}
-
-.igv-drag-drop-shim {
-  position: relative;
-
-  width: 100%;
-  height: 8px;
-  margin: 0 auto;
-
-  color: transparent;
-
-  background-color: transparent;
-
-}
-
-

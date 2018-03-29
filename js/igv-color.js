@@ -67,11 +67,9 @@ var igv = (function (igv) {
 
         $swatch = $('<div>', {class: 'igv-color-swatch'});
 
-        $fa = $('<i>', {class: 'fa fa-square fa-lg', 'aria-hidden': 'true'});
+        $fa = igv.createIcon("square", rgbString);
         $swatch.append($fa);
-
-        $fa.css({color: rgbString});
-
+        
         return $swatch;
     };
 

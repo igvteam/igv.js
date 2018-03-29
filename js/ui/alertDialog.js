@@ -85,7 +85,7 @@ var igv = (function (igv) {
 
         // ok button
         $col = $('<div class="igv-col igv-col-2-4">');
-        this.$ok = $('<div class="igv-col-filler-ok-button">');
+        this.$ok = $('<div class="igv-col-button igv-col-filler-ok-button">');
         this.$ok.text("OK");
 
         this.$ok.unbind();

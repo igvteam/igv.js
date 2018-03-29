@@ -58,11 +58,6 @@ var igv = (function (igv) {
 
         $(parentDiv).append(browser.$root);
 
-        // drag & drop
-        browser.trackFileLoad = new igv.TrackFileLoad();
-        browser.$root.append(browser.trackFileLoad.$container);
-        browser.trackFileLoad.$container.hide();
-
         setControls(browser, config);
 
         browser.$content = $('<div class="igv-content-div">');
@@ -92,15 +87,13 @@ var igv = (function (igv) {
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
         igv.dataRangeDialog.hide();
 
-        if (!config.showNavigation) {
-            $header.append($('<div class="igv-logo-nonav">'));
-        }
+        // TODO fix this
+        // if (!config.showNavigation) {
+        //     $header.append($('<div id="igv-logo-nonav">'));
+        // }
 
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
-
-
-        var width;
 
         // Load known genome table (make this optional)
 
@@ -136,70 +129,114 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
-                igv.browser.genome = genome;
-                igv.browser.genome.id = config.reference.id;
+                browser.genome = genome;
+                browser.genome.id = config.reference.id;
 
                 if (true === config.encodeEnabled) {
-                    igv.browser.encodeTable.loadData(config.reference.id, undefined, undefined, undefined);
+                    browser.encodeTable.loadData(config.reference.id, undefined, undefined, undefined);
                 }
 
-                igv.browser.chromosomeSelectWidget.update(igv.browser.genome);
+                browser.chromosomeSelectWidget.update(browser.genome);
 
-                width = igv.browser.viewportContainerWidth();
-
-                return igv.browser.getGenomicStateList(getInitialLocus(config), width)
+                return browser.getGenomicStateList(getInitialLocus(config))
             })
 
             .then(function (genomicStateList) {
 
-                var errorString;
+                var viewportWidth,
+                    errorString;
 
                 if (genomicStateList.length > 0) {
 
-                    igv.browser.genomicStateList = genomicStateList.map(function (genomicState, index) {
-                        genomicState.locusIndex = index;
-                        genomicState.locusCount = genomicStateList.length;
-                        genomicState.referenceFrame = new igv.ReferenceFrame(genomicState.chromosome.name, genomicState.start, (genomicState.end - genomicState.start) / (width / genomicState.locusCount));
-                        return genomicState;
+                    viewportWidth = browser.viewportContainerWidth()/genomicStateList.length;
+
+                    browser.genomicStateList = genomicStateList.map(function (gs) {
+                        var obj;
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start)/viewportWidth);
+                        obj = _.omit(gs, 'start', 'end');
+                        return obj;
                     });
 
-                    igv.browser.updateLocusSearchWidget(_.first(igv.browser.genomicStateList));
-
-                    igv.browser.zoomWidgetLayout();
-
-                    // igv.browser.toggleCursorGuide(igv.browser.genomicStateList);
-                    igv.browser.toggleCenterGuide(igv.browser.genomicStateList);
-
-                    if (igv.browser.karyoPanel) {
-                        igv.browser.karyoPanel.resize();
-                    }
-
-                    if (true === config.showIdeogram) {
-                        igv.browser.ideoPanel = new igv.IdeoPanel($header);
-                        igv.browser.ideoPanel.repaint();
-                    }
-
                     if (config.showRuler) {
-                        igv.browser.rulerTrack = new igv.RulerTrack();
-                        igv.browser.addTrack(igv.browser.rulerTrack);
+                        browser.rulerTrack = new igv.RulerTrack();
+                        browser.addTrack(browser.rulerTrack);
                     }
 
                     if (config.roi) {
-                        igv.browser.roi = [];
+                        browser.roi = [];
                         config.roi.forEach(function (r) {
-                            igv.browser.roi.push(new igv.ROI(r));
+                            browser.roi.push(new igv.ROI(r));
                         });
                     }
 
                     if (config.tracks) {
-                        igv.browser.loadTracksWithConfigList(config.tracks);
+                        browser.loadTrackList(config.tracks);
                     }
 
-                    igv.browser.windowSizePanel.updateWithGenomicState(_.first(igv.browser.genomicStateList));
+                    return browser.genomicStateList;
 
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
                     igv.presentAlert(errorString, undefined);
+                }
+
+            })
+            .then(function (genomicStateList) {
+                var panelWidth;
+
+                if (true === config.showIdeogram) {
+                    panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
+                    browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
+                    browser.ideoPanel.repaint();
+                }
+
+                if (true === config.showKaryo) {
+                    browser.karyoPanel = new igv.KaryoPanel($('#igvKaryoDiv'));
+                    browser.$navigation.append(browser.karyoPanel.$karyoPanelToggle);
+                    browser.karyoPanel.resize(panelWidth);
+                } else {
+                    $('#igvKaryoDiv').hide();
+                }
+
+                browser.updateLocusSearchWidget(genomicStateList[ 0 ]);
+
+                browser.windowSizePanel.updateWithGenomicState(genomicStateList[ 0 ]);
+
+                if (false === config.showTrackLabels) {
+                    browser.hideTrackLabels();
+                } else {
+                    browser.showTrackLabels();
+                    if (browser.trackLabelControl) {
+                        browser.trackLabelControl.setState(browser.trackLabelsVisible);
+                    }
+
+                }
+
+                if (false === config.showCursorTrackingGuide) {
+                    browser.hideCursorGuide();
+                } else {
+                    browser.showCursorGuide();
+                    browser.cursorGuide.setState(browser.cursorGuideVisible);
+                }
+
+                if (false === config.showCenterGuide) {
+                    browser.hideCenterGuide();
+                } else {
+                    browser.showCenterGuide();
+                    browser.cursorGuide.setState(browser.centerGuideVisible);
+                }
+
+                // multi-locus mode
+                if (genomicStateList.length > 1) {
+
+                    // TODO: This is temporary until implement multi-locus center guides
+                    browser.centerGuide.disable();
+
+                }
+                // whole-genome
+                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                    browser.centerGuide.disable();
+                    browser.disableZoomWidget();
                 }
 
             })
@@ -299,7 +336,13 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var $igvLogo,
+        var $div,
+            $igv_nav_bar_left_container,
+            $igv_nav_bar_right_container,
+            $genomic_location,
+            $locus_size_group,
+            $toggle_button_container,
+            $igvLogo,
             $controls,
             $karyo,
             $navigation,
@@ -310,33 +353,45 @@ var igv = (function (igv) {
 
         if (config.showNavigation) {
 
-            $navigation = $('<div class="igv-navbar">');
+            $navigation = $('<div id="igv-navbar">');
             $controls.append($navigation);
+            browser.$navigation = $navigation;
+
+            $igv_nav_bar_left_container = $('<div id="igv-nav-bar-left-container">');
+            $navigation.append($igv_nav_bar_left_container);
 
             // IGV logo
-            $igvLogo = $('<div class="igv-logo">');
-            $navigation.append($igvLogo);
+            $igvLogo = $('<div id="igv-logo">');
+            $igv_nav_bar_left_container.append($igvLogo);
 
             // load local file
-            $navigation.append(browser.trackFileLoad.$presentationButton);
+            browser.trackFileLoad = new igv.TrackFileLoad($igv_nav_bar_left_container, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
             } else {
                 browser.trackFileLoad.$presentationButton.hide();
             }
 
+            $genomic_location = $('<div id="igv-genomic-location">');
+            $igv_nav_bar_left_container.append($genomic_location);
+
             // chromosome select widget
-            browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $navigation);
+            browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
             if (true === config.showChromosomeWidget) {
                 browser.chromosomeSelectWidget.$container.show();
             } else {
                 browser.chromosomeSelectWidget.$container.hide();
             }
 
-            // search container
-            $searchContainer = $('<div class="igv-search-container">');
-            $navigation.append($searchContainer);
 
+            $locus_size_group = $('<div id="igv-locus-size-group">');
+            $genomic_location.append($locus_size_group);
+
+            // locus goto widget container
+            $searchContainer = $('<div id="igv-search-container">');
+            $locus_size_group.append($searchContainer);
+
+            // locus goto input
             browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
             $searchContainer.append(browser.$searchInput);
 
@@ -344,56 +399,49 @@ var igv = (function (igv) {
                 browser.search($(this).val());
             });
 
-            $faSearch = $('<i class="fa fa-search">');
-            $searchContainer.append($faSearch);
-
-            $faSearch.click(function () {
+            // search icon
+            $div = $('<i>');
+            $searchContainer.append($div);
+            $div.append(igv.createIcon("search"));
+            $div.click(function () {
                 browser.search(browser.$searchInput.val());
             });
+            $searchContainer.append($faSearch);
 
-
+            // TODO: Currently not used
             // search results presented in table
-            browser.$searchResults = $('<div class="igv-search-results">');
-            $searchContainer.append(browser.$searchResults.get(0));
+            // browser.$searchResults = $('<div class="igv-search-results">');
+            // $searchContainer.append(browser.$searchResults.get(0));
+            // browser.$searchResultsTable = $('<table>');
+            // browser.$searchResults.append(browser.$searchResultsTable.get(0));
+            // browser.$searchResults.hide();
 
-            browser.$searchResultsTable = $('<table>');
-            browser.$searchResults.append(browser.$searchResultsTable.get(0));
+            // window size display
+            browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
-            browser.$searchResults.hide();
 
-            // window size panel
-            browser.windowSizePanel = new igv.WindowSizePanel($navigation);
 
-            // zoom widget
-            zoomWidget(browser, $navigation);
+            // cursor guide | center guide | track labels
 
-            // cursor tracking guide
-            browser.$cursorTrackingGuide = $('<div class="igv-cursor-tracking-guide">');
-            $(browser.trackContainerDiv).append(browser.$cursorTrackingGuide);
+            $igv_nav_bar_right_container = $('<div id="igv-nav-bar-right-container">');
+            $navigation.append($igv_nav_bar_right_container);
 
-            if (true === config.showCursorTrackingGuide) {
-                browser.$cursorTrackingGuide.show();
-            } else {
-                browser.$cursorTrackingGuide.hide();
-            }
+            $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
+            $igv_nav_bar_right_container.append($toggle_button_container);
 
-            browser.$cursorTrackingGuideToggle = igv.makeToggleButton('cursor guide', 'cursor guide', 'showCursorTrackingGuide', function () {
-                return browser.$cursorTrackingGuide;
-            }, undefined);
+            // cursor guide
+            browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config);
 
-            $navigation.append(browser.$cursorTrackingGuideToggle);
-
-            // one base wide center guide
-            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), config);
-
-            $navigation.append(browser.centerGuide.$centerGuideToggle);
+            // center guide
+            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config);
 
             // toggle track labels
-            browser.$trackLabelToggle = igv.makeToggleButton('track labels', 'track labels', 'trackLabelsVisible', function () {
-                return $(browser.trackContainerDiv).find('.igv-track-label');
-            }, undefined);
+            if (true === config.showTrackLabelButton) {
+                browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container);
+            }
 
-            $navigation.append(browser.$trackLabelToggle);
+            // zoom widget
+            zoomWidget(browser, $igv_nav_bar_right_container);
 
         }
 
@@ -402,35 +450,37 @@ var igv = (function (igv) {
             $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
             $controls.append($karyo);
         }
-        browser.karyoPanel = new igv.KaryoPanel($karyo, config);
 
-        $navigation.append(browser.karyoPanel.$karyoPanelToggle);
-
-        if (false === config.showKaryo) {
-            browser.karyoPanel.$karyoPanelToggle.hide();
-            $karyo.hide();
-        }
 
         return $controls.get(0);
     }
 
     function zoomWidget(browser, $parent) {
 
-        var $fa;
+        var $div,
+            $fa;
 
-        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
+        browser.$zoomContainer = $('<div id="igv-zoom-widget">');
+
+        browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
+
         $parent.append(browser.$zoomContainer);
 
-        $fa = $('<i class="fa fa-minus-circle">');
-        browser.$zoomContainer.append($fa);
-        $fa.on('click', function () {
+        // zoom out
+        $div = $('<i>');
+        browser.$zoomContainer.append($div);
+        $fa = igv.createIcon("minus-circle");
+        $div.append($fa);
+        $div.on('click', function () {
             browser.zoomOut();
         });
 
-
-        $fa = $('<i class="fa fa-plus-circle">');
-        browser.$zoomContainer.append($fa);
-        $fa.on('click', function () {
+        // zoom in
+        $div = $('<i>');
+        browser.$zoomContainer.append($div);
+        $fa = igv.createIcon("plus-circle");
+        $div.append($fa);
+        $div.on('click', function () {
             browser.zoomIn();
         });
 
@@ -454,20 +504,32 @@ var igv = (function (igv) {
             config.showIdeogram = true;
         }
 
+        if (undefined === config.showCursorTrackingGuideButton) {
+            config.showCursorTrackingGuideButton = true;
+        }
+
         if (undefined === config.showCursorTrackingGuide) {
             config.showCursorTrackingGuide = false;
+        }
+
+        if (undefined === config.showCenterGuideButton) {
+            config.showCenterGuideButton = true;
         }
 
         if (undefined === config.showCenterGuide) {
             config.showCenterGuide = false;
         }
 
-        if (undefined === config.showKaryo) {
-            config.showKaryo = false;
+        if (undefined === config.showTrackLabelButton) {
+            config.showTrackLabelButton = true;
         }
 
-        if (undefined === config.trackLabelsVisible) {
-            config.trackLabelsVisible = true;
+        if (undefined === config.showTrackLabels) {
+            config.showTrackLabels = true;
+        }
+
+        if (undefined === config.showKaryo) {
+            config.showKaryo = false;
         }
 
         if (config.showControls === undefined) {
@@ -489,6 +551,7 @@ var igv = (function (igv) {
         if (config.flanking === undefined) {
             config.flanking = 1000;
         }
+
         if (config.pairsSupported === undefined) {
             config.pairsSupported = true;
         }
