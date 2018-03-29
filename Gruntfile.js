@@ -82,22 +82,6 @@ module.exports = function (grunt) {
                 cwd: 'css/img',
                 src: '**',
                 dest: 'dist/img'
-            },
-            cssExample: {
-                src: 'dist/igv.css',
-                dest: 'examples/'
-            },
-            imgExample: {
-                expand: true,
-                cwd: 'css/img',
-                src:'**',
-                dest:'examples/css/img/'
-            },
-            jsExample: {
-                expand: true,
-                cwd: 'dist',
-                src: 'igv*',
-                dest: 'examples/js/'
             }
         }
     });
