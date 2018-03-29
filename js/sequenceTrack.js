@@ -127,10 +127,14 @@ var igv = (function (igv) {
                     popover.hide();
 
                     if (self.frameTranslate) {
-                        self.trackView.viewports[0].canvas.height = 115;
+                        self.trackView.viewports.forEach(function (vp) {
+                            vp.setContentHeight(115);
+                        })
                         self.trackView.setTrackHeight(115);
                     } else {
-                        self.trackView.viewports[0].canvas.height = 25;
+                        self.trackView.viewports.forEach(function (vp) {
+                            vp.setContentHeight(25);
+                        })
                         self.trackView.setTrackHeight(25);
                     }
 
@@ -265,6 +269,7 @@ var igv = (function (igv) {
                             c = 'rgb(0, 153, 0)';
                             aaS = 'START'; //Color blind accessible
                         }
+                        ctx.fillRect(p0, y, p1 - p0, h);
                         igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: c});
                         if (bpPerPixel <= 1 / 10) {
                             igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15); //centers text in rect
