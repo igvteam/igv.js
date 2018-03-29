@@ -9,14 +9,15 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
     <!-- Dev CSS -->
     <link rel="stylesheet" type="text/css" href="../css/dev.css">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <!-- Vendor JS -->
     <script src="../vendor/jquery-1.12.4.js"></script>
@@ -29,6 +30,8 @@
     <script src="../vendor/inflate.js"></script>
 
     <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
@@ -93,7 +96,9 @@
     <script src="../js/ui/dataRangeDialog.js"></script>
     <script src="../js/ui/dialog.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/cursorGuide.js"></script>
     <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/trackLabelControl.js"></script>
     <script src="../js/ui/userFeedback.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/popover.js"></script>
@@ -137,6 +142,8 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
 
 </head>
 
@@ -195,7 +202,7 @@
                                 url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
                                 height: 500,
                                 autoHeight: false,
-                                viewAsPairs: true,
+                                viewAsPairs: false,
                                 name: 'NA12877'})">Google Cloud Storage - NA12877_S1.bam
         </div>
 
@@ -207,6 +214,7 @@
                                 readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                                 height: 200,
                                 autoHeight: false,
+                                viewAsPairs: false,
                                 name: 'Ga4gh alignments'})">GA4Gh Alignments (Global Alliance, Google server)
         </div>
 
@@ -329,11 +337,25 @@
 
         div = $("#myDiv")[0];
         options = {
+            showIdeogram: true,
+            showRuler: true,
+
+            // showLoadFileWidget: true,
+
+            showChromosomeWidget: true,
+
+            showCursorTrackingGuide: true,
+            showCenterGuide: true,
+            showTrackLabels: true,
+
             // locus: 'all',
             // locus: '1',
             // locus: 'SLC25A3',
-            // locus: ['egfr', 'myc', 'pten'],
-            locus: ['myc', 'muc1'],
+            locus: ['brca1', 'myc', 'brca2'],
+            // locus: ['1', 'myc', 'pten'],
+            // locus: ['egfr', 'myc', 'pten', 'slc25a3'],
+            // locus: ['myc', 'egfr'],
+            // locus: ['myc', 'myc'],
             // locus: ['myc'],
             // locus: ['2', '4', '8'],
             reference: {
@@ -345,23 +367,24 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-                {
-                    url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
-                    name: 'GM12878H3k4m3 (tdf)'
-                },
-                {
-                    sourceType: 'gcs',
-                    type: 'bam',
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                    height: 500,
-                    maxHeight: 2000,
-                    autoHeight: true,
-                    viewAsPairs: true,
-                    name: 'NA12877'
-                },
+                // {
+                //     url: 'https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf',
+                //     name: 'GM12878H3k4m3 (tdf)'
+                // },
+                // {
+                //     sourceType: 'gcs',
+                //     type: 'bam',
+                //     url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                //     height: 500,
+                //     maxHeight: 2000,
+                //     autoHeight: false,
+                //     viewAsPairs: false,
+                //     name: 'NA12877'
+                // },
                 {
 
                     name: "Genes",
+                    autoHeight: false,
                     searchable: false,
                     type: "annotation",
                     format: "gtf",

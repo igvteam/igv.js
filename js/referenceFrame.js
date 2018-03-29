@@ -28,10 +28,19 @@
 var igv = (function (igv) {
 
 
-    igv.ReferenceFrame = function (chrName, start, bpPerPixel) {
+    igv.ReferenceFrame = function (chrName, start, end, bpPerPixel) {
         this.chrName = chrName;
         this.start = start;
+        this.end = end;
         this.bpPerPixel = bpPerPixel;
+    };
+
+    igv.ReferenceFrame.prototype.calculateEnd = function (pixels) {
+        return this.start + this.bpPerPixel * pixels;
+    };
+
+    igv.ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
+        return (end - this.start) / pixels;
     };
 
     igv.ReferenceFrame.prototype.set = function (json) {
@@ -45,15 +54,43 @@ var igv = (function (igv) {
         return bp / this.bpPerPixel;
     };
 
-    igv.ReferenceFrame.prototype.toBP = function(pixels) {
+    igv.ReferenceFrame.prototype.toBP = function (pixels) {
         return this.bpPerPixel * pixels;
     };
 
-    igv.ReferenceFrame.prototype.shiftPixels = function(pixels) {
+    igv.ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
         this.start += pixels * this.bpPerPixel;
+
+        // clamp left
+        this.start = Math.max(0, this.start);
+
+        // clamp right
+        if (viewportWidth) {
+        
+            var chromosome = igv.browser.genome.getChromosome(this.chrName);
+            var maxEnd = chromosome.bpLength;
+            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+
+            if (this.start > maxStart) {
+                this.start = maxStart;
+            }
+        }
     };
 
-    igv.ReferenceFrame.prototype.description = function() {
+    igv.ReferenceFrame.prototype.showLocus = function (pixels) {
+        var ss,
+            ee;
+
+        if ('all' === this.chrName.toLowerCase()) {
+            return this.chrName.toLowerCase();
+        } else {
+            ss = igv.numberFormatter(Math.round(this.start));
+            ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+            return this.chrName + ':' + ss + '-' + ee;
+        }
+    };
+
+    igv.ReferenceFrame.prototype.description = function () {
         return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
     };
 

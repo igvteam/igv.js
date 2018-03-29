@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.FeatureTrack = function (config) {
 
-        if(config.height === undefined) {
+        if (config.height === undefined) {
             config.height = 50;
         }
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
@@ -208,7 +208,7 @@ var igv = (function (igv) {
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
-     */ 
+     */
     igv.FeatureTrack.prototype.popupData = function (config) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
@@ -303,85 +303,62 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
-            menuItems = [],
-            mapped;
+            menuItems = [];
 
         if (this.render === renderSnp) {
-            var colorByItems = (["function", "class"]).map( function (colorScheme, index) {
-                return {
-                    object: $(colorSchemeMarkup(colorScheme, index, self.colorBy)),
+            (["function", "class"]).forEach(function (colorScheme) {
+                menuItems.push({
+                    object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                     click: function () {
                         popover.hide();
                         self.colorBy = colorScheme;
                         self.trackView.update();
                     }
-                }
+                });
             });
-            menuItems = menuItems.concat(colorByItems);
         }
 
-        mapped = (["COLLAPSED", "SQUISHED", "EXPANDED"]).map(function (displayMode, index) {
-            return {
-                object: $(markupStringified(displayMode, index, self.displayMode)),
-                click: function () {
-                    popover.hide();
-                    self.displayMode = displayMode;
-                    self.trackView.update();
-                }
-            };
-        });
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
-        menuItems = menuItems.concat(mapped);
-
-        function markupStringified(displayMode, index, selfDisplayMode) {
-
-            var lut,
-                chosen;
-
-            lut =
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+            var lut =
             {
                 "COLLAPSED": "Collapse",
                 "SQUISHED": "Squish",
                 "EXPANDED": "Expand"
             };
 
-            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
-            if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
-            } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
-            }
+            menuItems.push(
+                {
+                    object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        popover.hide();
+                        self.displayMode = displayMode;
+                        self.trackView.update();
+                    }
+                });
+        });
 
-        }
-
-        function colorSchemeMarkup(colorScheme, index, selfColorScheme) {
-            var chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
-            if (colorScheme === selfColorScheme) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + 'Color by ' + colorScheme + '</div>'
-            } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + 'Color by ' + colorScheme + '</div>';
-            }
-        }
 
         return menuItems;
 
     };
 
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
-  
+    igv.FeatureTrack.prototype.contextMenuItemList = function (config) {
+
         if (this.render === renderSnp) {
 
             var menuItems = [], self = this;
 
             menuItems.push({
-                name: 'Color by function',
+                label: 'Color by function',
                 click: function () {
                     setColorBy('function');
                 }
             });
             menuItems.push({
-                name: 'Color by class',
+                label: 'Color by class',
                 click: function () {
                     setColorBy('class');
                 }
@@ -389,14 +366,16 @@ var igv = (function (igv) {
 
             return menuItems;
 
+        } else {
+            return [];
         }
 
         function setColorBy(value) {
             self.colorBy = value;
             self.trackView.update();
-            config.popover.hide();
         }
     };
+
 
     igv.FeatureTrack.prototype.description = function () {
 
@@ -554,7 +533,7 @@ var igv = (function (igv) {
             }
         }
         windowX = Math.round(options.viewportContainerX);
-        windowX1 = windowX + options.viewportContainerWidth / (options.genomicState.locusCount || 1);
+        windowX1 = windowX + options.viewportContainerWidth / (igv.browser.genomicStateList.length || 1);
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
     }
@@ -824,34 +803,6 @@ var igv = (function (igv) {
         }
     }
 
-    igv.FeatureTrack.prototype.popupMenuItemList = function (config) {
-        if (this.render === renderSnp) {
-
-            var menuItems = [], self = this;
-
-            menuItems.push({
-                name: 'Color by function',
-                click: function () {
-                    setColorBy('function');
-                }
-            });
-            menuItems.push({
-                name: 'Color by class',
-                click: function () {
-                    setColorBy('class');
-                }
-            });
-
-            return menuItems;
-
-        }
-
-        function setColorBy(value) {
-            self.colorBy = value;
-            self.trackView.update();
-            config.popover.hide();
-        }
-    };
 
     return igv;
 

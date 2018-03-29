@@ -18,11 +18,7 @@
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" href="css/igv.css">
-
-    <!-- Shims for legacy browsers -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es5-shim/4.5.7/es5-shim.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/es6-shim/0.35.3/es6-shim.js"></script>
+    <link rel="stylesheet" href="../dist/igv-all.css">
 
     <!-- jQuery JS -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
@@ -31,8 +27,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
-    <script src="js/igv.min.js"></script>
-
+    <script src="../dist/igv.min.js"></script>
 
 
 </head>
@@ -65,7 +60,9 @@
                                  url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                  indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
-                                 label: 'dbSNP 137'})">dbSNP 137 (bed tabix)</a></li>
+                                 label: 'dbSNP 137'})">dbSNP 137 (bed tabix)
+                            </a>
+                        </li>
 
                         <li>
                             <a href="#"
@@ -73,8 +70,19 @@
                                 {
                                 url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/encode/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                                 name: 'Gm12878H3k4me3'
-                                })">Encode bigwig</a></li>
+                                })">Encode bigwig
+                            </a>
+                        </li>
 
+                        <li>
+                            <a href="#"
+                               onclick="igv.browser.loadTrack(
+                                {
+                                url:'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                                label: 'HG02450'
+                                })">1KG Bam (HG02450)
+                            </a>
+                        </li>
 
                     </ul>
                 </li>
@@ -113,9 +121,9 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
+    document.addEventListener("DOMContentLoaded", function () {
 
-        var div = $("#igvDiv")[0],
+        var div = document.getElementById("igvDiv"),
                 options = {
                     showNavigation: true,
                     showRuler: true,

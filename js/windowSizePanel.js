@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel = function ($parent) {
 
-        this.$content = $('<div class="igv-windowsizepanel-content-div">');
+        this.$content = $('<div id="igv-windowsizepanel-content-div">');
         $parent.append(this.$content);
 
     };
@@ -42,22 +42,13 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
 
-        var viewportWidth,
-            referenceFrame,
-            length;
-
-        if (1 === genomicState.locusCount && 'all' !== genomicState.locusSearchString.toLowerCase()) {
+        if (1 === igv.browser.genomicStateList.length && genomicState.locusSearchString && 'all' !== genomicState.locusSearchString.toLowerCase()) {
             this.show();
         } else {
             this.hide();
         }
 
-        viewportWidth = igv.Viewport.viewportWidthAtLocusIndex(genomicState.locusIndex);
-        referenceFrame = genomicState.referenceFrame;
-
-        length = viewportWidth * referenceFrame.bpPerPixel;
-
-        this.$content.text( igv.prettyBasePairNumber(Math.round(length)) );
+        this.$content.text( igv.prettyBasePairNumber(Math.round( igv.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
     };
 
     return igv;
