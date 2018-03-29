@@ -862,6 +862,7 @@
   /*border-right-color: rgba(0,0,0,0);*/ }
 
 .igv-cursor-tracking-guide {
+  pointer-events: none;
   position: absolute;
   top: 0;
   bottom: 0;
