@@ -871,11 +871,7 @@
   z-index: 1;
   border-left-style: dotted;
   border-left-width: thin;
-  border-left-color: rgba(127, 127, 127, 0.76);
-  display: none;
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none; }
+  border-left-color: rgba(127, 127, 127, 0.76); }
 
 .igv-clickable {
   cursor: pointer;

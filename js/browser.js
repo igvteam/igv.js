@@ -1540,7 +1540,8 @@ var igv = (function (igv) {
 
         $(this.trackContainerDiv).on('mousemove', igv.throttle(function (e) {
 
-            var coords;
+            var coords,
+                exe;
 
             e.preventDefault();
 
@@ -1549,6 +1550,12 @@ var igv = (function (igv) {
             }
 
             coords = igv.pageCoordinates(e);
+
+            if (self.cursorGuide.$guide) {
+                exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
+                exe = Math.min($(self.trackContainerDiv).innerWidth() - 65, exe);
+                self.cursorGuide.$guide.css({ left: exe + 'px' });
+            }
 
             if (self.vpMouseDown) {
 
