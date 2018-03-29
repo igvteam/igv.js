@@ -338,6 +338,7 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
+            trackPanelRemoved.dispose();
             this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             this.fireEvent('trackremoved', [trackPanelRemoved.track]);
@@ -1512,6 +1513,10 @@ var igv = (function (igv) {
 
         $(window).off('resize.browser');
         $(document).off('click.browser');
+
+        this.trackViews.forEach(function (tv) {
+            tv.dispose();
+        })
 
     }
 
