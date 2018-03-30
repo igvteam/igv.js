@@ -86,10 +86,9 @@ var igv = (function (igv) {
             key,
             rulerSweeper,
             $viewportContent,
-            range,
+            pixelWidthBP,
             tickSpacing,
             tickLabelText,
-            n,
             shim,
             center,
             size,
@@ -115,11 +114,9 @@ var igv = (function (igv) {
             tickHeight = 6;
             shim = 2;
 
-            range = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tickSpacing = createTickSpacing(range, false);
-
-            n = Math.floor(range/tickSpacing.unitMultiplier);
-            tickLabelText = igv.numberFormatter(n) + " " + tickSpacing.majorUnit;
+            pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
+            tickSpacing = createTickSpacing(pixelWidthBP);
+            tickLabelText = igv.numberFormatter(Math.floor(pixelWidthBP/tickSpacing.unitMultiplier)) + " " + tickSpacing.majorUnit;
 
             center = { x: options.pixelWidth, y: this.height - (tickHeight / 0.75)};
             size = { width: options.context.measureText(tickLabelText).width, height: 2};
@@ -137,7 +134,7 @@ var igv = (function (igv) {
 
     function drawTicks(options, tickHeight, shim, tickSpacing) {
 
-        var numberOfMinorTicks,
+        var numberOfHalfTicks,
             numberOfMajorTicks,
             bp,
             pixel,
@@ -145,10 +142,8 @@ var igv = (function (igv) {
             labelWidth,
             labelX;
 
-        // Find starting point closest to the current origin
-        numberOfMinorTicks = Math.floor(options.bpStart/tickSpacing.minorTick) - 1;
+        // major ticks
         numberOfMajorTicks = Math.floor(options.bpStart/tickSpacing.majorTick) - 1;
-
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
@@ -156,77 +151,89 @@ var igv = (function (igv) {
             pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
 
             label = igv.numberFormatter(Math.floor(bp / tickSpacing.unitMultiplier)) + " " + tickSpacing.majorUnit;
-
             labelWidth = options.context.measureText(label).width;
             labelX = pixel - labelWidth / 2;
-
-            if (0 === /*numberOfMajorTicks % 2*/0) {
-                igv.graphics.fillText(options.context, label, labelX, this.height - (tickHeight / 0.75));
-            }
+            igv.graphics.fillText(options.context, label, labelX, this.height - (tickHeight / 0.75));
 
             igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
 
             ++numberOfMajorTicks;
         }
 
-        // TODO: This will add additional minor tick marks between the major tick marks.
-        // pixel = 0;
-        // while (pixel < options.pixelWidth) {
-        //
-        //     bp = Math.floor(numberOfMinorTicks * tickSpacing.minorTick);
-        //     pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
-        //
-        //     igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
-        //
-        //     ++numberOfMinorTicks;
-        // }
+        // major ticks
+        numberOfHalfTicks = Math.floor(options.bpStart/tickSpacing.halfTick) - 1;
+        pixel = 0;
+        while (pixel < options.pixelWidth) {
+
+            bp = Math.floor(numberOfHalfTicks * tickSpacing.halfTick);
+            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+
+            igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
+
+            ++numberOfHalfTicks;
+        }
 
     }
 
-    function createTickSpacing(lengthBP, doUseKBScale) {
-        var numberOfZeroes,
+    function createTickSpacing(pixelWidthBP) {
+        var ts,
+            numberOfZeroes,
             majorUnit,
             unitMultiplier,
             numberOfMajorTicks,
             numer,
             denom;
 
-        if (lengthBP < 10) {
+        if (pixelWidthBP < 10) {
             return new igv.TickSpacing(1, "bp", 1);
         }
 
-        // How many zeros
-        numberOfZeroes = Math.floor(Math.log10(lengthBP));
-        majorUnit = doUseKBScale ? "kb" : "bp";
+        numberOfZeroes = Math.floor(Math.log10(pixelWidthBP));
 
-        unitMultiplier = 1;
         if (numberOfZeroes > 9) {
-            majorUnit = doUseKBScale ? "tb" : "gb";
+            majorUnit = "gb";
             unitMultiplier = 1e9;
-        }
-        if (numberOfZeroes > 6) {
-            majorUnit = doUseKBScale ? "gb" : "mb";
+        } else if (numberOfZeroes > 6) {
+            majorUnit = "mb";
             unitMultiplier = 1e6;
-        } else if (numberOfZeroes > 3) {
-            majorUnit = doUseKBScale ? "mb" : "kb";
+        } else if (numberOfZeroes >= 3) {
+            majorUnit = "kb";
             unitMultiplier = 1e3;
+        } else {
+            majorUnit = "bp";
+            unitMultiplier = 1;
         }
 
-        numberOfMajorTicks = lengthBP / Math.pow(10, numberOfZeroes - 1);
+        numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
 
         if (numberOfMajorTicks < 25) {
-            return new igv.TickSpacing(Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier);
+            ts = new igv.TickSpacing(Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier);
         } else {
-            return new igv.TickSpacing(Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
+            // ts = new igv.TickSpacing(Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
+            ts = new igv.TickSpacing(Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
         }
+
+        ts.description( ('number of major ticks ' + Math.floor(numberOfMajorTicks)) );
+
+        return ts;
 
     }
 
     igv.TickSpacing = function (majorTick, majorUnit, unitMultiplier) {
+
         this.majorTick = majorTick;
-        this.minorTick = majorTick / 10.0;
         this.majorUnit = majorUnit;
+
+        this.halfTick = majorTick / 2;
+        this.halfUnit = majorUnit;
+
+        this.minorTick = majorTick / 10.0;
+
         this.unitMultiplier = unitMultiplier;
+    };
+
+    igv.TickSpacing.prototype.description = function (blurb) {
+        console.log(blurb + ' tick ' + this.majorTick + ' ' + this.majorUnit + ' ' + ' multiplier ' + this.unitMultiplier);
     };
 
     return igv;
