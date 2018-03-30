@@ -25,49 +25,6 @@
 
 var igv = (function (igv) {
 
-    var TickSeparationThreshold,
-        tickNumbers,
-        tickKeys,
-        tickDivisors,
-        tickUnits,
-        tickValues;
-
-    TickSeparationThreshold = 50;
-
-    tickNumbers =
-        [
-            1e8,
-
-            5e7,
-            1e7,
-
-            5e6,
-            1e6,
-
-            5e5,
-            1e5,
-
-            5e4,
-            1e4,
-
-            5e3,
-            1e3,
-
-            5e2,
-            1e2,
-
-            5e1,
-            1e1
-        ].reverse();
-
-    tickKeys = _.map(tickNumbers, function (number) {
-        return number.toString()
-    });
-    tickDivisors = createTickDivisiors();
-    tickUnits = createTickUnits();
-    tickValues = createTickValues();
-
-    //
     igv.RulerTrack = function () {
 
         this.height = 40;
@@ -125,24 +82,19 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.draw = function (options) {
-
         var self = this,
-            pixel,
-            shim,
-            tickHeight,
+            key,
             rulerSweeper,
             $viewportContent,
-            index,
-            tickSeparationPixel,
-            tickLabelNumber,
+            range,
+            tickSpacing,
             tickLabelText,
-            toggle,
-            rect,
+            n,
+            shim,
             center,
             size,
-            maximumLabelWidthPixel,
-            key,
-            bp;
+            rect,
+            tickHeight;
 
         key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
         rulerSweeper = this.rulerSweepers[ key ];
@@ -160,37 +112,22 @@ var igv = (function (igv) {
             $viewportContent.find('canvas').show();
             rulerSweeper.addMouseHandlers();
 
-            index = 0;
-            for (var i = 0; i < tickKeys.length; i++) {
-                tickSeparationPixel = options.referenceFrame.toPixels(tickValues[tickKeys[i]]);
-                if (tickSeparationPixel > TickSeparationThreshold) {
-                    index = i;
-                    break;
-                }
-            }
-
-            shim = 2;
             tickHeight = 6;
-            bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
-            bp = Math.min(options.genomicState.chromosome.bpLength, bp);
-            maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
+            shim = 2;
 
-            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {
+            range = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
+            tickSpacing = createTickSpacing(range, false);
 
-                if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
+            n = Math.floor(range/tickSpacing.unitMultiplier);
+            tickLabelText = igv.numberFormatter(n) + " " + tickSpacing.majorUnit;
 
-                    tickLabelText = tickLabelString(tickLabelNumber, index);
+            center = { x: options.pixelWidth, y: this.height - (tickHeight / 0.75)};
+            size = { width: options.context.measureText(tickLabelText).width, height: 2};
+            rect = igv.Rect.makeWithCenterAndSize(center, size);
 
-                    center = {x: Math.round(pixel), y: self.height - (tickHeight / 0.75)};
-                    size = {width: options.context.measureText(tickLabelText).width, height: 2};
+            igv.graphics.fillText(options.context, tickLabelText, Math.round(options.pixelWidth - rect.size.width / 2), self.height - (tickHeight / 0.75));
 
-                    rect = igv.Rect.makeWithCenterAndSize(center, size);
-
-                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width / 2), self.height - (tickHeight / 0.75));
-                }
-
-                igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
-            }
+            drawTicks.call(this, options, tickHeight, shim, tickSpacing);
 
             igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
@@ -198,76 +135,83 @@ var igv = (function (igv) {
 
     };
 
-    function tickLabelString(tickLabelNumber, index) {
-        var tickUnit,
-            tickDivisor,
-            string,
-            number;
+    function drawTicks(options, tickHeight, shim, tickSpacing) {
 
-        tickUnit = tickUnits[tickKeys[index]];
-        tickDivisor = tickDivisors[tickKeys[index]];
+        var numberOfTicks,
+            bp,
+            pixel,
+            label,
+            labelWidth,
+            labelX;
 
-        number = Math.round(tickLabelNumber / tickDivisor);
-        string = igv.numberFormatter(number) + ' ' + tickUnit;
+        // Find starting point closest to the current origin
+        numberOfTicks = Math.floor(options.bpStart/tickSpacing.majorTick) - 1;
 
-        return string;
+        pixel = 0;
+        while (pixel < options.pixelWidth) {
+
+            bp = Math.floor(numberOfTicks * tickSpacing.majorTick);
+            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+
+            label = igv.numberFormatter(Math.floor(bp / tickSpacing.unitMultiplier)) + " " + tickSpacing.majorUnit;
+
+            labelWidth = options.context.measureText(label).width;
+            labelX = pixel - labelWidth / 2;
+
+            if (0 === /*numberOfTicks % 2*/0) {
+                igv.graphics.fillText(options.context, label, labelX, this.height - (tickHeight / 0.75));
+            }
+
+            igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
+
+            ++numberOfTicks;
+        }
+
     }
 
-    function createTickDivisiors() {
-        var tickDivisiors = {};
-        tickDivisiors[1e8.toString()] = 1e6;
-        tickDivisiors[5e7.toString()] = 1e6;
-        tickDivisiors[1e7.toString()] = 1e6;
-        tickDivisiors[5e6.toString()] = 1e6;
-        tickDivisiors[1e6.toString()] = 1e6;
+    function createTickSpacing(lengthBP, doUseKBScale) {
+        var numberOfZeroes,
+            majorUnit,
+            unitMultiplier,
+            nMajorTicks;
 
-        tickDivisiors[5e5.toString()] = 1e3;
-        tickDivisiors[1e5.toString()] = 1e3;
-        tickDivisiors[5e4.toString()] = 1e3;
-        tickDivisiors[1e4.toString()] = 1e3;
-        tickDivisiors[5e3.toString()] = 1e3;
-        tickDivisiors[1e3.toString()] = 1e3;
+        if (lengthBP < 10) {
+            return new igv.TickSpacing(1, "bp", 1);
+        }
 
-        tickDivisiors[5e2.toString()] = 1;
-        tickDivisiors[1e2.toString()] = 1;
-        tickDivisiors[5e1.toString()] = 1;
-        tickDivisiors[1e1.toString()] = 1;
+        // How many zeros
+        numberOfZeroes = Math.floor(Math.log10(lengthBP));
+        majorUnit = doUseKBScale ? "kb" : "bp";
 
-        return tickDivisiors;
+        unitMultiplier = 1;
+        if (numberOfZeroes > 9) {
+            majorUnit = doUseKBScale ? "tb" : "gb";
+            unitMultiplier = 1e9;
+        }
+        if (numberOfZeroes > 6) {
+            majorUnit = doUseKBScale ? "gb" : "mb";
+            unitMultiplier = 1e6;
+        } else if (numberOfZeroes > 3) {
+            majorUnit = doUseKBScale ? "mb" : "kb";
+            unitMultiplier = 1e3;
+        }
+
+        nMajorTicks = lengthBP / Math.pow(10, numberOfZeroes - 1);
+
+        if (nMajorTicks < 25) {
+            return new igv.TickSpacing(Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier);
+        } else {
+            return new igv.TickSpacing(Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
+        }
+
     }
 
-    function createTickValues() {
-        var tickValues = {};
-
-        _.each(tickNumbers, function (number) {
-            tickValues[number.toString()] = number;
-        });
-
-        return tickValues;
-    }
-
-    function createTickUnits() {
-        var tickUnits = {};
-        tickUnits[1e8.toString()] = 'mb';
-        tickUnits[5e7.toString()] = 'mb';
-        tickUnits[1e7.toString()] = 'mb';
-        tickUnits[5e6.toString()] = 'mb';
-        tickUnits[1e6.toString()] = 'mb';
-
-        tickUnits[5e5.toString()] = 'kb';
-        tickUnits[1e5.toString()] = 'kb';
-        tickUnits[5e4.toString()] = 'kb';
-        tickUnits[1e4.toString()] = 'kb';
-        tickUnits[5e3.toString()] = 'kb';
-        tickUnits[1e3.toString()] = 'kb';
-
-        tickUnits[5e2.toString()] = '';
-        tickUnits[1e2.toString()] = '';
-        tickUnits[5e1.toString()] = '';
-        tickUnits[1e1.toString()] = '';
-
-        return tickUnits;
-    }
+    igv.TickSpacing = function (majorTick, majorUnit, unitMultiplier) {
+        this.majorTick = majorTick;
+        this.minorTick = majorTick / 10.0;
+        this.majorUnit = majorUnit;
+        this.unitMultiplier = unitMultiplier;
+    };
 
     return igv;
 })(igv || {});
