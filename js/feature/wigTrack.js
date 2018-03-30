@@ -281,6 +281,13 @@ var igv = (function (igv) {
         }
     }
 
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    igv.WIGTrack.prototype.dispose = function () {
+        this.trackView = undefined;
+    }
+
     function autoscale(features) {
         var min = 0,
             max = -Number.MAX_VALUE;

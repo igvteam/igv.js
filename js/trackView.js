@@ -317,7 +317,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
 
-        if(!force) {
+        if (!force) {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight);
             }
@@ -369,7 +369,7 @@ var igv = (function (igv) {
 
         width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
 
-        if(width === 0) return;
+        if (width === 0) return;
         this.viewports.forEach(function (viewport) {
             viewport.setWidth(width);
         });
@@ -427,6 +427,31 @@ var igv = (function (igv) {
 
     };
 
+    /**
+     * Do any cleanup here
+     */
+    igv.TrackView.prototype.dispose = function () {
+        this.$trackManipulationHandle.off('mousedown.trackview');
+        this.$trackManipulationHandle.off('mouseup.trackview');
+        this.$trackManipulationHandle.off('mouseenter.trackview');
+        this.$trackManipulationHandle.off('mouseleave.trackview');
+        $(document).off('mouseup.document.trackview');
+        $(window).off("mousemove.igv");
+        $(window).off("mouseup.igv");
+
+        if (typeof this.track.dispose === "function") {
+            this.track.dispose();
+        }
+        this.track = undefined;
+
+        this.viewports.forEach(function (viewport) {
+            viewport.dispose();
+        })
+        this.viewports = undefined;
+
+
+    }
+
     igv.TrackScrollbar = function ($viewportContainer, viewports) {
 
         var self = this,
@@ -449,9 +474,9 @@ var igv = (function (igv) {
 
             offY = event.pageY - $(this).position().top;
 
-            $(window).on("mousemove .igv", null, null, mouseMove);
+            $(window).on("mousemove.igv", null, null, mouseMove);
 
-            $(window).on("mouseup .igv", null, null, mouseUp);
+            $(window).on("mouseup.igv", null, null, mouseUp);
 
             // <= prevents start of horizontal track panning)
             event.stopPropagation();
@@ -476,8 +501,8 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $(window).off("mousemove .igv", null, mouseMove);
-            $(window).off("mouseup .igv", null, mouseUp);
+            $(window).off("mousemove.igv", null, mouseMove);
+            $(window).off("mouseup.igv", null, mouseUp);
         }
 
         function moveScrollerTo(y) {
