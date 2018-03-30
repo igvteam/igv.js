@@ -347,6 +347,19 @@ var igv = (function (igv) {
     };
 
     /**
+     * API function
+     */
+    igv.Browser.prototype.removeAllTracks = function () {
+        var self = this;
+        this.trackViews.forEach(function (tv) {
+            self.trackContainerDiv.removeChild(tv.trackDiv);
+            self.fireEvent('trackremoved', [tv.track]);
+            tv.dispose();
+        });
+        this.trackViews = [];
+    }
+
+    /**
      *
      * @param property
      * @param value
