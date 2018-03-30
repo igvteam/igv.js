@@ -335,6 +335,13 @@ var igv = (function (igv) {
         return color;
     }
 
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    igv.BAMTrack.prototype.dispose = function () {
+        this.trackView = undefined;
+    }
+
     CoverageTrack = function (config, parent) {
 
         this.parent = parent;
