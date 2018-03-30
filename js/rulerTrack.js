@@ -137,7 +137,8 @@ var igv = (function (igv) {
 
     function drawTicks(options, tickHeight, shim, tickSpacing) {
 
-        var numberOfTicks,
+        var numberOfMinorTicks,
+            numberOfMajorTicks,
             bp,
             pixel,
             label,
@@ -145,12 +146,13 @@ var igv = (function (igv) {
             labelX;
 
         // Find starting point closest to the current origin
-        numberOfTicks = Math.floor(options.bpStart/tickSpacing.majorTick) - 1;
+        numberOfMinorTicks = Math.floor(options.bpStart/tickSpacing.minorTick) - 1;
+        numberOfMajorTicks = Math.floor(options.bpStart/tickSpacing.majorTick) - 1;
 
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
-            bp = Math.floor(numberOfTicks * tickSpacing.majorTick);
+            bp = Math.floor(numberOfMajorTicks * tickSpacing.majorTick);
             pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
 
             label = igv.numberFormatter(Math.floor(bp / tickSpacing.unitMultiplier)) + " " + tickSpacing.majorUnit;
@@ -158,14 +160,26 @@ var igv = (function (igv) {
             labelWidth = options.context.measureText(label).width;
             labelX = pixel - labelWidth / 2;
 
-            if (0 === /*numberOfTicks % 2*/0) {
+            if (0 === /*numberOfMajorTicks % 2*/0) {
                 igv.graphics.fillText(options.context, label, labelX, this.height - (tickHeight / 0.75));
             }
 
             igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
 
-            ++numberOfTicks;
+            ++numberOfMajorTicks;
         }
+
+        // TODO: This will add additional minor tick marks between the major tick marks.
+        // pixel = 0;
+        // while (pixel < options.pixelWidth) {
+        //
+        //     bp = Math.floor(numberOfMinorTicks * tickSpacing.minorTick);
+        //     pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+        //
+        //     igv.graphics.strokeLine(options.context, pixel, this.height - tickHeight, pixel, this.height - shim);
+        //
+        //     ++numberOfMinorTicks;
+        // }
 
     }
 
@@ -173,7 +187,9 @@ var igv = (function (igv) {
         var numberOfZeroes,
             majorUnit,
             unitMultiplier,
-            nMajorTicks;
+            numberOfMajorTicks,
+            numer,
+            denom;
 
         if (lengthBP < 10) {
             return new igv.TickSpacing(1, "bp", 1);
@@ -196,9 +212,9 @@ var igv = (function (igv) {
             unitMultiplier = 1e3;
         }
 
-        nMajorTicks = lengthBP / Math.pow(10, numberOfZeroes - 1);
+        numberOfMajorTicks = lengthBP / Math.pow(10, numberOfZeroes - 1);
 
-        if (nMajorTicks < 25) {
+        if (numberOfMajorTicks < 25) {
             return new igv.TickSpacing(Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier);
         } else {
             return new igv.TickSpacing(Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
