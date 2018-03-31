@@ -238,8 +238,6 @@ var igv = (function (igv) {
 
             clickHandler = function () {
 
-                igv.popover.hide();
-
                 if ('tag' === menuItem.key) {
 
                     igv.dialog.configure(function () {
