@@ -115,14 +115,7 @@ var igv = (function (igv) {
             shim = 2;
 
             pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tick = new igv.Tick(pixelWidthBP);
-            label = igv.numberFormatter(Math.floor(pixelWidthBP/tick.unitMultiplier)) + " " + tick.majorUnit;
-
-            center = { x: options.pixelWidth, y: this.height - (tickHeight / 0.75)};
-            size = { width: options.context.measureText(label).width, height: 2};
-            rect = igv.Rect.makeWithCenterAndSize(center, size);
-
-            igv.graphics.fillText(options.context, label, Math.round(options.pixelWidth - rect.size.width / 2), self.height - (tickHeight / 0.75));
+            tick = new igv.Tick(pixelWidthBP, options);
 
             tick.drawTicks(options, tickHeight, shim, this.height);
 
@@ -132,19 +125,18 @@ var igv = (function (igv) {
 
     };
 
-    igv.Tick = function (pixelWidthBP) {
+    igv.Tick = function (pixelWidthBP, options) {
 
-        initialize.call(this, pixelWidthBP);
+        initialize.call(this, pixelWidthBP, options);
 
-        function initialize (pixelWidthBP) {
+        function initialize(pixelWidthBP, options) {
 
-            var ts,
-                numberOfZeroes,
+            var numberOfZeroes,
                 majorUnit,
                 unitMultiplier,
                 numberOfMajorTicks,
-                numer,
-                denom;
+                str,
+                labelWidthBP;
 
             if (pixelWidthBP < 10) {
                 set.call(this, 1, "bp", 1);
@@ -158,13 +150,16 @@ var igv = (function (igv) {
             } else if (numberOfZeroes > 6) {
                 majorUnit = "mb";
                 unitMultiplier = 1e6;
-            } else if (numberOfZeroes >= 3) {
+            } else if (numberOfZeroes > 3) {
                 majorUnit = "kb";
                 unitMultiplier = 1e3;
             } else {
                 majorUnit = "bp";
                 unitMultiplier = 1;
             }
+
+            str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
+            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText( str ).width));
 
             numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
 
@@ -174,9 +169,7 @@ var igv = (function (igv) {
                 set.call(this, Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
             }
 
-            this.description( ('number of major ticks ' + Math.floor(numberOfMajorTicks)) );
-
-            return ts;
+            // this.description( (Math.floor(numberOfMajorTicks)) );
         }
 
         function set(majorTick, majorUnit, unitMultiplier) {
@@ -185,7 +178,7 @@ var igv = (function (igv) {
             this.majorUnit = majorUnit;
 
             this.halfTick = majorTick / 2;
-            this.halfUnit = majorUnit;
+            this.quarterTick = majorTick / 4;
 
             this.minorTick = majorTick / 10.0;
 
@@ -196,20 +189,21 @@ var igv = (function (igv) {
 
     igv.Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
 
-        var numberOfHalfTicks,
-            numberOfMajorTicks,
+        var numberOfTicks,
             bp,
             pixel,
             label,
             labelWidth,
-            labelX;
+            labelX,
+            numer,
+            floored;
 
         // major ticks
-        numberOfMajorTicks = Math.floor(options.bpStart/this.majorTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart/this.majorTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
-            bp = Math.floor(numberOfMajorTicks * this.majorTick);
+            bp = Math.floor(numberOfTicks * this.majorTick);
             pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
 
             label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
@@ -219,27 +213,36 @@ var igv = (function (igv) {
 
             igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
 
-            ++numberOfMajorTicks;
+            ++numberOfTicks;
         }
 
         // major ticks
-        numberOfHalfTicks = Math.floor(options.bpStart/this.halfTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart/this.halfTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
-            bp = Math.floor(numberOfHalfTicks * this.halfTick);
+            bp = Math.floor(numberOfTicks * this.halfTick);
             pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+            numer = bp / this.unitMultiplier;
+            floored = Math.floor(numer);
+            // console.log(numer - floored);
+            if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
+                label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
+                labelWidth = options.context.measureText(label).width;
+                labelX = pixel - labelWidth / 2;
+                igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
+            }
 
             igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
 
-            ++numberOfHalfTicks;
+            ++numberOfTicks;
         }
 
 
     };
 
     igv.Tick.prototype.description = function (blurb) {
-        console.log(blurb + ' tick ' + this.majorTick + ' ' + this.majorUnit + ' ' + ' multiplier ' + this.unitMultiplier);
+        console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
     };
 
     return igv;
