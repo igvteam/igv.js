@@ -169,9 +169,6 @@ var igv = (function (igv) {
 
         igv.alert.$dialogLabel.text(string);
         igv.alert.show($parent);
-
-        igv.popover.hide();
-
     };
 
     var httpMessages = {

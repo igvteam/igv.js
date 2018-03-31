@@ -286,10 +286,6 @@ var igv = (function (igv) {
 
         var trackView;
 
-        if (typeof igv.popover !== "undefined") {
-            igv.popover.hide();
-        }
-
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
@@ -705,10 +701,6 @@ var igv = (function (igv) {
             referenceFrame,
             width,
             maxBpPerPixel;
-
-        if (igv.popover) {
-            igv.popover.hide();
-        }
 
         // Translate chr to official name
         if (undefined === this.genome) {
