@@ -123,10 +123,6 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
 
-        if (igv.popover) {
-            igv.popover.hide();
-        }
-
         this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.genomicState.referenceFrame.start = Math.round(start);
 
