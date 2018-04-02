@@ -91,8 +91,22 @@ var igv = (function (igv) {
 
             this.$trackLabel.html(trackView.track.name);
             this.$trackLabel.click(function (e) {
+                e.stopPropagation();
                 self.popover.presentContent(e.pageX, e.pageY, description);
+
             });
+            this.$trackLabel.mousedown(function (e) {
+                // Prevent bubbling
+                e.stopPropagation();
+            })
+            this.$trackLabel.mouseup(function (e) {
+                // Prevent  bubbling
+                e.stopPropagation();
+            })
+            this.$trackLabel.mousemove(function (e) {
+                // Prevent  bubbling
+                e.stopPropagation();
+            })
 
             if (false === igv.browser.trackLabelsVisible) {
                 this.$trackLabel.hide();
