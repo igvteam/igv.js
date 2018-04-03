@@ -1069,6 +1069,8 @@ var igv = (function (igv) {
         var self = this,
             loci;
 
+        if(string && string.trim().toLowerCase() === "all") string = "all";
+
         loci = string.split(' ');
 
         this.getGenomicStateList(loci)
