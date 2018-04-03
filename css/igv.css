@@ -274,6 +274,7 @@
   position: relative;
   height: 16px;
   clear: both;
+  margin-top: 10px;
   white-space: nowrap; }
   #igv-content-header .igv-ideogram-left-shim {
     position: relative;
