@@ -1143,40 +1143,49 @@ var igv = (function (igv) {
             searchConfig = igv.browser.searchConfig,
             geneNameLoci,
             genomicState,
-            locusGenomicStates = [],
-            promises;
+            result = [],
+            promises,
+            ordered,
+            dictionary;
+
+        ordered = {};
+        loci.forEach(function (locus, index) {
+            ordered[ locus ] = index;
+        });
+
 
         geneNameLoci = [];
-
+        dictionary = {};
         // Try locus string first  (e.g.  chr1:100-200)
         loci.forEach(function (locus) {
             genomicState = isLocusChrNameStartEnd(locus, self.genome);
             if (genomicState) {
                 genomicState.locusSearchString = locus;
-                locusGenomicStates.push(genomicState);
+                result.push(genomicState);
+                dictionary[ locus ] = genomicState;
             }
             else {
                 geneNameLoci.push(locus);
             }
         });
 
-        if (geneNameLoci.length === 0)
-            return Promise.resolve(locusGenomicStates);
-
-        else {
+        if (geneNameLoci.length === 0) {
+            return Promise.resolve(result);
+        } else {
             // Search based on feature symbol
 
             // Try local feature cache first.  This is created from feature tracks tagged "searchable"
             promises = [];
             geneNameLoci.forEach(function (locus) {
-                var result,
+                var feature,
                     genomicState;
 
-                result = self.featureDB[locus.toLowerCase()];
-                if (result) {
-                    genomicState = processSearchResult(result, locus);
+                feature = self.featureDB[locus.toLowerCase()];
+                if (feature) {
+                    genomicState = processSearchResult(feature, locus);
                     if (genomicState) {
-                        locusGenomicStates.push(genomicState);
+                        result.push(genomicState);
+                        dictionary[ locus ] = genomicState;
                     }
                 } else {
                     promises.push(searchPromise(locus));  // Not found, create promise to search via webservice
@@ -1190,20 +1199,51 @@ var igv = (function (igv) {
                     .all(promises)
 
                     .then(function (searchResponses) {
+                        var cooked;
 
                         searchResponses.forEach(function (response) {
                             var genomicState = processSearchResult(response.result, response.locusSearchString);
                             if (genomicState) {
-                                locusGenomicStates.push(genomicState);
+                                result.push(genomicState);
+                                dictionary[ genomicState.locusSearchString ] = genomicState;
                             }
                         });
 
-                        return locusGenomicStates;
+                        cooked = Array(Object.keys(dictionary).length);
+                        result.forEach(function (r) {
+                            var key,
+                                index;
+                            key = r.locusSearchString;
+                            index = ordered[ key ];
+                            cooked[ index ] = r;
+                        });
+
+                        return preserveOrder(result, dictionary, ordered);
                     });
+            } else {
+
+                return Promise.resolve( preserveOrder(result, dictionary, ordered) );
             }
         }
 
         /* End of function  */
+        function preserveOrder(list, dictionary, indexDictionary) {
+            var orderedList;
+
+            orderedList = Array(Object.keys(dictionary).length);
+
+            list.forEach(function (g) {
+                var key,
+                    index;
+                key = g.locusSearchString;
+                index = indexDictionary[ key ];
+                orderedList[ index ] = g;
+            });
+
+            // return result;
+            return orderedList;
+
+        }
 
         function searchPromise(locus) {
 
