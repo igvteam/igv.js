@@ -25947,7 +25947,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.menuItemList = function () {
+    igv.BAMTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             $e,
@@ -25958,7 +25958,7 @@ var igv = (function (igv) {
             selected;
 
         // sort by genomic location
-        menuItems.push(sortMenuItem());
+        menuItems.push(sortMenuItem(popover));
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -25991,6 +25991,8 @@ var igv = (function (igv) {
                 click: function () {
                     var $fa = $(this).find('i');
 
+                    popover.hide();
+
                     self.viewAsPairs = !self.viewAsPairs;
 
                     if (true === self.viewAsPairs) {
@@ -26015,6 +26017,8 @@ var igv = (function (igv) {
             $e = igv.createCheckbox(menuItem.label, showCheck);
 
             clickHandler = function () {
+
+                igv.popover.hide();
 
                 if ('tag' === menuItem.key) {
 
@@ -26045,7 +26049,7 @@ var igv = (function (igv) {
 
         }
 
-        function sortMenuItem() {
+        function sortMenuItem(popover) {
 
             var $e,
                 clickHandler;
@@ -26058,6 +26062,8 @@ var igv = (function (igv) {
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
+
+                popover.hide();
 
                 viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
@@ -26107,13 +26113,6 @@ var igv = (function (igv) {
             color = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
         }
         return color;
-    }
-
-    /**
-     * Called when the track is removed.  Do any needed cleanup here
-     */
-    igv.BAMTrack.prototype.dispose = function () {
-        this.trackView = undefined;
     }
 
     CoverageTrack = function (config, parent) {
@@ -29977,6 +29976,10 @@ var igv = (function (igv) {
 
         var trackView;
 
+        if (typeof igv.popover !== "undefined") {
+            igv.popover.hide();
+        }
+
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
@@ -30025,26 +30028,12 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
-            trackPanelRemoved.dispose();
             this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             this.fireEvent('trackremoved', [trackPanelRemoved.track]);
         }
 
     };
-
-    /**
-     * API function
-     */
-    igv.Browser.prototype.removeAllTracks = function () {
-        var self = this;
-        this.trackViews.forEach(function (tv) {
-            self.trackContainerDiv.removeChild(tv.trackDiv);
-            self.fireEvent('trackremoved', [tv.track]);
-            tv.dispose();
-        });
-        this.trackViews = [];
-    }
 
     /**
      *
@@ -30392,6 +30381,10 @@ var igv = (function (igv) {
             referenceFrame,
             width,
             maxBpPerPixel;
+
+        if (igv.popover) {
+            igv.popover.hide();
+        }
 
         // Translate chr to official name
         if (undefined === this.genome) {
@@ -30760,8 +30753,6 @@ var igv = (function (igv) {
         var self = this,
             loci;
 
-        if(string && string.trim().toLowerCase() === "all") string = "all";
-
         loci = string.split(' ');
 
         this.getGenomicStateList(loci)
@@ -30836,57 +30827,40 @@ var igv = (function (igv) {
             searchConfig = igv.browser.searchConfig,
             geneNameLoci,
             genomicState,
-            result,
-            unique,
-            promises,
-            ordered,
-            dictionary;
+            locusGenomicStates = [],
+            promises;
 
-        ordered = {};
-        unique = [];
-        // prune duplicates as the order list is built
-        loci.forEach(function (locus, index) {
-
-            if (undefined === ordered[ locus ]) {
-                unique.push(locus);
-                ordered[ locus ] = unique.indexOf(locus);
-            }
-
-        });
-
-        result = [];
         geneNameLoci = [];
-        dictionary = {};
+
         // Try locus string first  (e.g.  chr1:100-200)
-        unique.forEach(function (locus) {
+        loci.forEach(function (locus) {
             genomicState = isLocusChrNameStartEnd(locus, self.genome);
             if (genomicState) {
                 genomicState.locusSearchString = locus;
-                result.push(genomicState);
-                dictionary[ locus ] = genomicState;
+                locusGenomicStates.push(genomicState);
             }
             else {
                 geneNameLoci.push(locus);
             }
         });
 
-        if (geneNameLoci.length === 0) {
-            return Promise.resolve(result);
-        } else {
+        if (geneNameLoci.length === 0)
+            return Promise.resolve(locusGenomicStates);
+
+        else {
             // Search based on feature symbol
 
             // Try local feature cache first.  This is created from feature tracks tagged "searchable"
             promises = [];
             geneNameLoci.forEach(function (locus) {
-                var feature,
+                var result,
                     genomicState;
 
-                feature = self.featureDB[locus.toLowerCase()];
-                if (feature) {
-                    genomicState = processSearchResult(feature, locus);
+                result = self.featureDB[locus.toLowerCase()];
+                if (result) {
+                    genomicState = processSearchResult(result, locus);
                     if (genomicState) {
-                        result.push(genomicState);
-                        dictionary[ locus ] = genomicState;
+                        locusGenomicStates.push(genomicState);
                     }
                 } else {
                     promises.push(searchPromise(locus));  // Not found, create promise to search via webservice
@@ -30900,51 +30874,20 @@ var igv = (function (igv) {
                     .all(promises)
 
                     .then(function (searchResponses) {
-                        var cooked;
 
                         searchResponses.forEach(function (response) {
                             var genomicState = processSearchResult(response.result, response.locusSearchString);
                             if (genomicState) {
-                                result.push(genomicState);
-                                dictionary[ genomicState.locusSearchString ] = genomicState;
+                                locusGenomicStates.push(genomicState);
                             }
                         });
 
-                        cooked = Array(Object.keys(dictionary).length);
-                        result.forEach(function (r) {
-                            var key,
-                                index;
-                            key = r.locusSearchString;
-                            index = ordered[ key ];
-                            cooked[ index ] = r;
-                        });
-
-                        return preserveOrder(result, dictionary, ordered);
+                        return locusGenomicStates;
                     });
-            } else {
-
-                return Promise.resolve( preserveOrder(result, dictionary, ordered) );
             }
         }
 
         /* End of function  */
-        function preserveOrder(list, dictionary, indexDictionary) {
-            var orderedList;
-
-            orderedList = Array(Object.keys(dictionary).length);
-
-            list.forEach(function (g) {
-                var key,
-                    index;
-                key = g.locusSearchString;
-                index = indexDictionary[ key ];
-                orderedList[ index ] = g;
-            });
-
-            return orderedList;
-            // return list;
-
-        }
 
         function searchPromise(locus) {
 
@@ -31255,26 +31198,15 @@ var igv = (function (igv) {
 
     }
 
-    igv.Browser.prototype.dispose = function () {
-
-        $(window).off('resize.browser');
-        $(document).off('click.browser');
-
-        this.trackViews.forEach(function (tv) {
-            tv.dispose();
-        })
-
-    }
-
     function addMouseHandlers() {
 
         var self = this,
             lastMouseX;
 
 
-        $(window).on('resize.browser', igv.throttle(function () {
+        window.onresize = igv.throttle(function () {
             self.resize();
-        }, 10));
+        }, 10);
 
         $(document).on('click.browser', function (e) {
             var target = e.target;
@@ -34900,7 +34832,7 @@ var igv = (function (igv) {
         return data;
     }
 
-    igv.FeatureTrack.prototype.menuItemList = function () {
+    igv.FeatureTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [];
@@ -34910,6 +34842,7 @@ var igv = (function (igv) {
                 menuItems.push({
                     object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                     click: function () {
+                        popover.hide();
                         self.colorBy = colorScheme;
                         self.trackView.update();
                     }
@@ -34931,6 +34864,7 @@ var igv = (function (igv) {
                 {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
+                        popover.hide();
                         self.displayMode = displayMode;
                         self.trackView.update();
                     }
@@ -35000,13 +34934,6 @@ var igv = (function (igv) {
         }
 
     };
-
-    /**
-     * Called when the track is removed.  Do any needed cleanup here
-     */
-    igv.FeatureTrack.prototype.dispose = function () {
-        this.trackView = undefined;
-    }
 
     /**
      * @param feature
@@ -36233,7 +36160,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.SegTrack.prototype.menuItemList = function () {
+    igv.SegTrack.prototype.menuItemList = function (popover) {
 
         var self = this;
 
@@ -36241,7 +36168,8 @@ var igv = (function (igv) {
             {
                 name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
                 click: function () {
-                     self.toggleSampleHeight();
+                    popover.hide();
+                    self.toggleSampleHeight();
                 }
             }
         ];
@@ -36875,17 +36803,19 @@ var igv = (function (igv) {
         return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
     };
 
-    igv.WIGTrack.prototype.menuItemList = function () {
+    igv.WIGTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [];
 
-        menuItems.push(igv.dataRangeMenuItem(this.trackView));
+        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
         menuItems.push({
             object: igv.createCheckbox("Autoscale", self.autoscale),  
             click: function () {
                 var $fa = $(this).find('i');
+
+                popover.hide();
 
                 self.autoscale = !self.autoscale;
 
@@ -37082,13 +37012,6 @@ var igv = (function (igv) {
         else {
             return null;
         }
-    }
-
-    /**
-     * Called when the track is removed.  Do any needed cleanup here
-     */
-    igv.WIGTrack.prototype.dispose = function () {
-        this.trackView = undefined;
     }
 
     function autoscale(features) {
@@ -42646,7 +42569,6 @@ var igv = (function (igv) {
 
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
-        igv.browser.dispose();
         $(".igv-grid-container-dialog").remove();
         // $(".igv-grid-container-dialog").remove();
     };
@@ -44147,6 +44069,9 @@ var igv = (function (igv) {
 
         igv.alert.$dialogLabel.text(string);
         igv.alert.show($parent);
+
+        igv.popover.hide();
+
     };
 
     var httpMessages = {
@@ -46600,6 +46525,49 @@ var igv = (function (igv) {
 
 var igv = (function (igv) {
 
+    var TickSeparationThreshold,
+        tickNumbers,
+        tickKeys,
+        tickDivisors,
+        tickUnits,
+        tickValues;
+
+    TickSeparationThreshold = 50;
+
+    tickNumbers =
+        [
+            1e8,
+
+            5e7,
+            1e7,
+
+            5e6,
+            1e6,
+
+            5e5,
+            1e5,
+
+            5e4,
+            1e4,
+
+            5e3,
+            1e3,
+
+            5e2,
+            1e2,
+
+            5e1,
+            1e1
+        ].reverse();
+
+    tickKeys = _.map(tickNumbers, function (number) {
+        return number.toString()
+    });
+    tickDivisors = createTickDivisiors();
+    tickUnits = createTickUnits();
+    tickValues = createTickValues();
+
+    //
     igv.RulerTrack = function () {
 
         this.height = 40;
@@ -46657,18 +46625,24 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.draw = function (options) {
+
         var self = this,
-            key,
+            pixel,
+            shim,
+            tickHeight,
             rulerSweeper,
             $viewportContent,
-            pixelWidthBP,
-            tick,
-            label,
-            shim,
+            index,
+            tickSeparationPixel,
+            tickLabelNumber,
+            tickLabelText,
+            toggle,
+            rect,
             center,
             size,
-            rect,
-            tickHeight;
+            maximumLabelWidthPixel,
+            key,
+            bp;
 
         key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
         rulerSweeper = this.rulerSweepers[ key ];
@@ -46686,13 +46660,37 @@ var igv = (function (igv) {
             $viewportContent.find('canvas').show();
             rulerSweeper.addMouseHandlers();
 
-            tickHeight = 6;
+            index = 0;
+            for (var i = 0; i < tickKeys.length; i++) {
+                tickSeparationPixel = options.referenceFrame.toPixels(tickValues[tickKeys[i]]);
+                if (tickSeparationPixel > TickSeparationThreshold) {
+                    index = i;
+                    break;
+                }
+            }
+
             shim = 2;
+            tickHeight = 6;
+            bp = options.bpStart + options.referenceFrame.toBP(options.pixelWidth);
+            bp = Math.min(options.genomicState.chromosome.bpLength, bp);
+            maximumLabelWidthPixel = options.context.measureText(tickLabelString(bp, index)).width;
 
-            pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tick = new igv.Tick(pixelWidthBP, options);
+            for (pixel = 0, toggle = 0, tickLabelNumber = options.bpStart; pixel < options.pixelWidth; pixel += tickSeparationPixel, toggle++, tickLabelNumber += tickValues[tickKeys[index]]) {
 
-            tick.drawTicks(options, tickHeight, shim, this.height);
+                if (0 === toggle % 2 || maximumLabelWidthPixel < tickSeparationPixel) {
+
+                    tickLabelText = tickLabelString(tickLabelNumber, index);
+
+                    center = {x: Math.round(pixel), y: self.height - (tickHeight / 0.75)};
+                    size = {width: options.context.measureText(tickLabelText).width, height: 2};
+
+                    rect = igv.Rect.makeWithCenterAndSize(center, size);
+
+                    igv.graphics.fillText(options.context, tickLabelText, Math.round(pixel - rect.size.width / 2), self.height - (tickHeight / 0.75));
+                }
+
+                igv.graphics.strokeLine(options.context, Math.round(pixel), this.height - tickHeight, Math.round(pixel), this.height - shim);
+            }
 
             igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
@@ -46700,125 +46698,76 @@ var igv = (function (igv) {
 
     };
 
-    igv.Tick = function (pixelWidthBP, options) {
+    function tickLabelString(tickLabelNumber, index) {
+        var tickUnit,
+            tickDivisor,
+            string,
+            number;
 
-        initialize.call(this, pixelWidthBP, options);
+        tickUnit = tickUnits[tickKeys[index]];
+        tickDivisor = tickDivisors[tickKeys[index]];
 
-        function initialize(pixelWidthBP, options) {
+        number = Math.round(tickLabelNumber / tickDivisor);
+        string = igv.numberFormatter(number) + ' ' + tickUnit;
 
-            var numberOfZeroes,
-                majorUnit,
-                unitMultiplier,
-                numberOfMajorTicks,
-                str,
-                labelWidthBP;
+        return string;
+    }
 
-            if (pixelWidthBP < 10) {
-                set.call(this, 1, "bp", 1);
-            }
+    function createTickDivisiors() {
+        var tickDivisiors = {};
+        tickDivisiors[1e8.toString()] = 1e6;
+        tickDivisiors[5e7.toString()] = 1e6;
+        tickDivisiors[1e7.toString()] = 1e6;
+        tickDivisiors[5e6.toString()] = 1e6;
+        tickDivisiors[1e6.toString()] = 1e6;
 
-            numberOfZeroes = Math.floor(Math.log10(pixelWidthBP));
+        tickDivisiors[5e5.toString()] = 1e3;
+        tickDivisiors[1e5.toString()] = 1e3;
+        tickDivisiors[5e4.toString()] = 1e3;
+        tickDivisiors[1e4.toString()] = 1e3;
+        tickDivisiors[5e3.toString()] = 1e3;
+        tickDivisiors[1e3.toString()] = 1e3;
 
-            if (numberOfZeroes > 9) {
-                majorUnit = "gb";
-                unitMultiplier = 1e9;
-            } else if (numberOfZeroes > 6) {
-                majorUnit = "mb";
-                unitMultiplier = 1e6;
-            } else if (numberOfZeroes > 3) {
-                majorUnit = "kb";
-                unitMultiplier = 1e3;
-            } else {
-                majorUnit = "bp";
-                unitMultiplier = 1;
-            }
+        tickDivisiors[5e2.toString()] = 1;
+        tickDivisiors[1e2.toString()] = 1;
+        tickDivisiors[5e1.toString()] = 1;
+        tickDivisiors[1e1.toString()] = 1;
 
-            str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
-            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText( str ).width));
+        return tickDivisiors;
+    }
 
-            numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
+    function createTickValues() {
+        var tickValues = {};
 
-            if (numberOfMajorTicks < 25) {
-                set.call(this, Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier);
-            } else {
-                set.call(this, Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier);
-            }
+        _.each(tickNumbers, function (number) {
+            tickValues[number.toString()] = number;
+        });
 
-            // this.description( (Math.floor(numberOfMajorTicks)) );
-        }
+        return tickValues;
+    }
 
-        function set(majorTick, majorUnit, unitMultiplier) {
+    function createTickUnits() {
+        var tickUnits = {};
+        tickUnits[1e8.toString()] = 'mb';
+        tickUnits[5e7.toString()] = 'mb';
+        tickUnits[1e7.toString()] = 'mb';
+        tickUnits[5e6.toString()] = 'mb';
+        tickUnits[1e6.toString()] = 'mb';
 
-            this.majorTick = majorTick;
-            this.majorUnit = majorUnit;
+        tickUnits[5e5.toString()] = 'kb';
+        tickUnits[1e5.toString()] = 'kb';
+        tickUnits[5e4.toString()] = 'kb';
+        tickUnits[1e4.toString()] = 'kb';
+        tickUnits[5e3.toString()] = 'kb';
+        tickUnits[1e3.toString()] = 'kb';
 
-            this.halfTick = majorTick / 2;
-            this.quarterTick = majorTick / 4;
+        tickUnits[5e2.toString()] = '';
+        tickUnits[1e2.toString()] = '';
+        tickUnits[5e1.toString()] = '';
+        tickUnits[1e1.toString()] = '';
 
-            this.minorTick = majorTick / 10.0;
-
-            this.unitMultiplier = unitMultiplier;
-        }
-
-    };
-
-    igv.Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
-
-        var numberOfTicks,
-            bp,
-            pixel,
-            label,
-            labelWidth,
-            labelX,
-            numer,
-            floored;
-
-        // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.majorTick) - 1;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
-
-            bp = Math.floor(numberOfTicks * this.majorTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
-
-            label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
-            labelWidth = options.context.measureText(label).width;
-            labelX = pixel - labelWidth / 2;
-            igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-
-            igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
-
-            ++numberOfTicks;
-        }
-
-        // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.halfTick) - 1;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
-
-            bp = Math.floor(numberOfTicks * this.halfTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
-            numer = bp / this.unitMultiplier;
-            floored = Math.floor(numer);
-            // console.log(numer - floored);
-            if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
-                label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
-                labelWidth = options.context.measureText(label).width;
-                labelX = pixel - labelWidth / 2;
-                igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-            }
-
-            igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
-
-            ++numberOfTicks;
-        }
-
-
-    };
-
-    igv.Tick.prototype.description = function (blurb) {
-        console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
-    };
+        return tickUnits;
+    }
 
     return igv;
 })(igv || {});
@@ -47044,7 +46993,7 @@ var igv = (function (igv) {
         };
     };
 
-    igv.SequenceTrack.prototype.menuItemList = function() {
+    igv.SequenceTrack.prototype.menuItemList = function(popover) {
         var self = this;
 
         return [
@@ -47052,6 +47001,7 @@ var igv = (function (igv) {
                 name: self.reversed ? "Forward" : "Reverse",
                 click: function () {
                     self.reversed = !self.reversed;
+                    popover.hide();
                     igv.browser.update();
                 }
             },
@@ -47059,6 +47009,8 @@ var igv = (function (igv) {
                 name: self.frameTranslate ? "Close Translation" : "Three-frame Translate",
                 click: function(){
                     self.frameTranslate = !self.frameTranslate;
+                    popover.hide();
+
                     if (self.frameTranslate) {
                         self.trackView.viewports.forEach(function (vp) {
                             vp.setContentHeight(115);
@@ -49280,6 +49232,7 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for contextual (right-click) track popup menu.
+     * @param popover
      * @param viewport
      * @param genomicLocation - (bp)
      * @param xOffset - (pixels) within track extent
@@ -49309,16 +49262,17 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for track "gear" menu.
+     * @param popover
      * @param trackView
      */
-    igv.trackMenuItemList = function (trackView) {
+    igv.trackMenuItemList = function (popover, trackView) {
 
         var menuItems = [],
             all;
 
         if (trackView.track.config.type !== 'sequence') {
 
-            menuItems.push(igv.trackMenuItem(trackView, "Set track name", function () {
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
                 return "Track Name"
             }, trackView.track.name, function () {
 
@@ -49333,7 +49287,7 @@ var igv = (function (igv) {
 
             }, undefined));
 
-            menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
+            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
                 return "Track Height"
             }, trackView.trackDiv.clientHeight, function () {
 
@@ -49341,7 +49295,7 @@ var igv = (function (igv) {
 
                 if (undefined !== number) {
 
-// If explicitly setting the height adust min or max, if neccessary.
+                    // If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -49356,21 +49310,23 @@ var igv = (function (igv) {
             }, undefined));
         }
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(trackView))
+            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
         }
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
         }
         if (trackView.track.removable !== false) {
 
             all.push(
-                igv.trackMenuItem(trackView, "Remove track", function () {
+                igv.trackMenuItem(popover, trackView, "Remove track", function () {
                     var label = "Remove " + trackView.track.name;
                     return '<div class="igv-dialog-label-centered">' + label + '</div>';
                 }, undefined, function () {
+                    popover.hide();
                     trackView.browser.removeTrack(trackView.track);
+                    // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
         }
@@ -49426,6 +49382,7 @@ var igv = (function (igv) {
 
     /**
      * Configure item for track "gear" menu.
+     * @param popover - passed to allow menu-item handler to close popup
      * @param trackView
      * @param menuItemLabel - menu item string
      * @param dialogLabelHandler - dialog label creation handler
@@ -49433,7 +49390,7 @@ var igv = (function (igv) {
      * @param dialogClickHandler
      * @param doAddTopBorder
      */
-    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
+    igv.trackMenuItem = function (popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
 
         var $e,
             clickHandler;
@@ -49451,6 +49408,7 @@ var igv = (function (igv) {
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.dialog.show($element);
+            popover.hide();
         };
 
         $e.click(clickHandler);
@@ -49458,7 +49416,7 @@ var igv = (function (igv) {
         return {object: $e, init: undefined};
     };
 
-    igv.dataRangeMenuItem = function (trackView) {
+    igv.dataRangeMenuItem = function (popover, trackView) {
 
         var $e,
             clickHandler;
@@ -49469,14 +49427,15 @@ var igv = (function (igv) {
         clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
-         };
+            popover.hide();
+        };
 
         $e.click(clickHandler);
 
         return {object: $e, init: undefined};
     };
 
-    igv.colorPickerMenuItem = function (trackView) {
+    igv.colorPickerMenuItem = function (popover, trackView) {
         var $e;
 
         $e = $('<div>');
@@ -49484,7 +49443,8 @@ var igv = (function (igv) {
 
         $e.click(function () {
             trackView.$colorpicker_container.toggle();
-         });
+            popover.hide();
+        });
 
         return {object: $e};
 
@@ -50235,11 +50195,7 @@ var igv = (function (igv) {
             appendRightHandGutter.call(this, $(this.trackDiv));
         }
 
-        if (this.track instanceof igv.RulerTrack) {
-            // do nuthin
-        } else {
-            attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
-        }
+        attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
 
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
@@ -50479,7 +50435,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
 
-        if (!force) {
+        if(!force) {
             if (this.track.minHeight) {
                 newHeight = Math.max(this.track.minHeight, newHeight);
             }
@@ -50531,7 +50487,7 @@ var igv = (function (igv) {
 
         width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
 
-        if (width === 0) return;
+        if(width === 0) return;
         this.viewports.forEach(function (viewport) {
             viewport.setWidth(width);
         });
@@ -50589,31 +50545,6 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     * Do any cleanup here
-     */
-    igv.TrackView.prototype.dispose = function () {
-        this.$trackManipulationHandle.off('mousedown.trackview');
-        this.$trackManipulationHandle.off('mouseup.trackview');
-        this.$trackManipulationHandle.off('mouseenter.trackview');
-        this.$trackManipulationHandle.off('mouseleave.trackview');
-        $(document).off('mouseup.document.trackview');
-        $(window).off("mousemove.igv");
-        $(window).off("mouseup.igv");
-
-        if (typeof this.track.dispose === "function") {
-            this.track.dispose();
-        }
-        this.track = undefined;
-
-        this.viewports.forEach(function (viewport) {
-            viewport.dispose();
-        })
-        this.viewports = undefined;
-
-
-    }
-
     igv.TrackScrollbar = function ($viewportContainer, viewports) {
 
         var self = this,
@@ -50636,9 +50567,9 @@ var igv = (function (igv) {
 
             offY = event.pageY - $(this).position().top;
 
-            $(window).on("mousemove.igv", null, null, mouseMove);
+            $(window).on("mousemove .igv", null, null, mouseMove);
 
-            $(window).on("mouseup.igv", null, null, mouseUp);
+            $(window).on("mouseup .igv", null, null, mouseUp);
 
             // <= prevents start of horizontal track panning)
             event.stopPropagation();
@@ -50663,8 +50594,8 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $(window).off("mousemove.igv", null, mouseMove);
-            $(window).off("mouseup.igv", null, mouseUp);
+            $(window).off("mousemove .igv", null, mouseMove);
+            $(window).off("mouseup .igv", null, mouseUp);
         }
 
         function moveScrollerTo(y) {
@@ -53143,7 +53074,7 @@ var igv = (function (igv) {
         this.trackView.update();
     };
 
-    igv.VariantTrack.prototype.menuItemList = function () {
+    igv.VariantTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [],
@@ -53162,6 +53093,7 @@ var igv = (function (igv) {
                 {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
+                        popover.hide();
                         self.displayMode = displayMode;
                         self.trackView.update();
                     }
@@ -53189,6 +53121,7 @@ var igv = (function (igv) {
                 menuItems.push( {
                     object: igv.createCheckbox(attrs[attr], attr === self.groupBy),
                     click: function () {
+                        popover.hide();
                         self.groupCallSets(attr);
                     }
                 });
@@ -53518,13 +53451,8 @@ var igv = (function (igv) {
 
         }
 
-        if (trackView.track instanceof igv.SequenceTrack) {
-            // do nuthin
-        } else if (trackView.track instanceof igv.RulerTrack) {
-            // do nuthin
-        } else {
-            self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
-        }
+        createZoomInNotice.call(this, $(this.contentDiv));
+        $(this.contentDiv).append(self.$zoomInNotice);
 
         if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
@@ -53539,22 +53467,8 @@ var igv = (function (igv) {
 
             this.$trackLabel.html(trackView.track.name);
             this.$trackLabel.click(function (e) {
-                e.stopPropagation();
                 self.popover.presentContent(e.pageX, e.pageY, description);
-
             });
-            this.$trackLabel.mousedown(function (e) {
-                // Prevent bubbling
-                e.stopPropagation();
-            })
-            this.$trackLabel.mouseup(function (e) {
-                // Prevent  bubbling
-                e.stopPropagation();
-            })
-            this.$trackLabel.mousemove(function (e) {
-                // Prevent  bubbling
-                e.stopPropagation();
-            })
 
             if (false === igv.browser.trackLabelsVisible) {
                 this.$trackLabel.hide();
@@ -53565,19 +53479,16 @@ var igv = (function (igv) {
     };
 
     function createZoomInNotice($parent) {
-        var $e,
-            $notice;
+        var $e;
 
-        $notice = $('<div class="zoom-in-notice-container">');
-        $parent.append($notice);
+        this.$zoomInNotice = $('<div class="zoom-in-notice-container">');
+        $parent.append(this.$zoomInNotice);
 
         $e = $('<div>');
-        $notice.append($e);
+        this.$zoomInNotice.append($e);
         $e.text('Zoom in to see features');
 
-        $notice.hide();
-
-        return $notice;
+        this.$zoomInNotice.hide();
     }
 
     igv.Viewport.prototype.setWidth = function (width) {
@@ -53587,6 +53498,10 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.goto = function (chr, start, end) {
+
+        if (igv.popover) {
+            igv.popover.hide();
+        }
 
         this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
         this.genomicState.referenceFrame.start = Math.round(start);
@@ -53708,14 +53623,12 @@ var igv = (function (igv) {
         }
 
         // TODO -- show whole genome zoom in notice here
-        if (this.$zoomInNotice) {
-            if (showZoomInNotice.call(this)) {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.$zoomInNotice.show();
-                return;
-            } else {
-                this.$zoomInNotice.hide();
-            }
+        if (showZoomInNotice.call(this)) {
+            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            this.$zoomInNotice.show();
+            return;
+        } else {
+            this.$zoomInNotice.hide();
         }
 
 
@@ -53976,13 +53889,6 @@ var igv = (function (igv) {
         document.body.removeChild(a);
     };
 
-    /**
-     * Called when the associated track is removed.  Do any needed cleanup here.
-     */
-    igv.Viewport.prototype.dispose = function () {
-        this.cachedFeatures = undefined;
-    }
-    
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;

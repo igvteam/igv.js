@@ -70,17 +70,19 @@ var igv = (function (igv) {
         return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
     };
 
-    igv.WIGTrack.prototype.menuItemList = function () {
+    igv.WIGTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             menuItems = [];
 
-        menuItems.push(igv.dataRangeMenuItem(this.trackView));
+        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
 
         menuItems.push({
             object: igv.createCheckbox("Autoscale", self.autoscale),  
             click: function () {
                 var $fa = $(this).find('i');
+
+                popover.hide();
 
                 self.autoscale = !self.autoscale;
 
