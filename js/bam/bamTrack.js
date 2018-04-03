@@ -167,7 +167,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.menuItemList = function () {
+    igv.BAMTrack.prototype.menuItemList = function (popover) {
 
         var self = this,
             $e,
@@ -178,7 +178,7 @@ var igv = (function (igv) {
             selected;
 
         // sort by genomic location
-        menuItems.push(sortMenuItem());
+        menuItems.push(sortMenuItem(popover));
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -210,6 +210,8 @@ var igv = (function (igv) {
                 object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                 click: function () {
                     var $fa = $(this).find('i');
+
+                    popover.hide();
 
                     self.viewAsPairs = !self.viewAsPairs;
 
@@ -265,7 +267,7 @@ var igv = (function (igv) {
 
         }
 
-        function sortMenuItem() {
+        function sortMenuItem(popover) {
 
             var $e,
                 clickHandler;
@@ -278,6 +280,8 @@ var igv = (function (igv) {
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
+
+                popover.hide();
 
                 viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
