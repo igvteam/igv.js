@@ -1145,21 +1145,29 @@ var igv = (function (igv) {
             searchConfig = igv.browser.searchConfig,
             geneNameLoci,
             genomicState,
-            result = [],
+            result,
+            unique,
             promises,
             ordered,
             dictionary;
 
         ordered = {};
+        unique = [];
+        // prune duplicates as the order list is built
         loci.forEach(function (locus, index) {
-            ordered[ locus ] = index;
+
+            if (undefined === ordered[ locus ]) {
+                unique.push(locus);
+                ordered[ locus ] = unique.indexOf(locus);
+            }
+
         });
 
-
+        result = [];
         geneNameLoci = [];
         dictionary = {};
         // Try locus string first  (e.g.  chr1:100-200)
-        loci.forEach(function (locus) {
+        unique.forEach(function (locus) {
             genomicState = isLocusChrNameStartEnd(locus, self.genome);
             if (genomicState) {
                 genomicState.locusSearchString = locus;
@@ -1242,8 +1250,8 @@ var igv = (function (igv) {
                 orderedList[ index ] = g;
             });
 
-            // return result;
             return orderedList;
+            // return list;
 
         }
 
