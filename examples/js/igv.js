@@ -42064,7 +42064,7 @@ var igv = (function (igv) {
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(browser.$root, igv.Dialog.dialogConstructor);
+        igv.dialog = new igv.Dialog(browser.$root);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components

@@ -1114,13 +1114,25 @@ $igv-dark-grey-color: #373737;
   background-color: rgb(196, 196, 196);
 
   div {
-    position: relative;
-    padding-left: 4px;
 
-    i {
-      cursor: pointer;
-    }
+    position: absolute;
+    top: 3px;
+    right: 3px;
 
+    height: 100%;
+    width: 16px;
+
+    text-align: center;
+    line-height: 100%;
+
+    color: #444;
+    font-size: medium;
+
+  }
+
+  div:hover {
+    cursor: pointer;
+    //color: white;
   }
 
 }
@@ -1524,11 +1536,9 @@ $igv-dark-grey-color: #373737;
     text-align: center;
     line-height: 100%;
 
-    i {
       cursor: pointer;
       color: #444;
       font-size: small;
-    }
 
   }
 
