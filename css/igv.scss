@@ -547,7 +547,17 @@ $igv-dark-grey-color: #373737;
   position: absolute;
   top: 4px;
   right: 4px;
+
+  font-size: 16px;
+  color: #666666;
+
   z-index: 1000;
+
+}
+
+.igv-viewport-fa-close:hover {
+  cursor: pointer;
+  color: #434343;
 }
 
 .igv-viewport-content-ruler-div {
