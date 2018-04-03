@@ -377,7 +377,6 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for contextual (right-click) track popup menu.
-     * @param popover
      * @param viewport
      * @param genomicLocation - (bp)
      * @param xOffset - (pixels) within track extent
@@ -407,17 +406,16 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for track "gear" menu.
-     * @param popover
      * @param trackView
      */
-    igv.trackMenuItemList = function (popover, trackView) {
+    igv.trackMenuItemList = function (trackView) {
 
         var menuItems = [],
             all;
 
         if (trackView.track.config.type !== 'sequence') {
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track name", function () {
                 return "Track Name"
             }, trackView.track.name, function () {
 
@@ -432,7 +430,7 @@ var igv = (function (igv) {
 
             }, undefined));
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
             }, trackView.trackDiv.clientHeight, function () {
 
@@ -440,7 +438,7 @@ var igv = (function (igv) {
 
                 if (undefined !== number) {
 
-                    // If explicitly setting the height adust min or max, if neccessary.
+// If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -455,23 +453,21 @@ var igv = (function (igv) {
             }, undefined));
         }
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+            menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
         }
         if (trackView.track.removable !== false) {
 
             all.push(
-                igv.trackMenuItem(popover, trackView, "Remove track", function () {
+                igv.trackMenuItem(trackView, "Remove track", function () {
                     var label = "Remove " + trackView.track.name;
                     return '<div class="igv-dialog-label-centered">' + label + '</div>';
                 }, undefined, function () {
-                    popover.hide();
                     trackView.browser.removeTrack(trackView.track);
-                    // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
         }
@@ -527,7 +523,6 @@ var igv = (function (igv) {
 
     /**
      * Configure item for track "gear" menu.
-     * @param popover - passed to allow menu-item handler to close popup
      * @param trackView
      * @param menuItemLabel - menu item string
      * @param dialogLabelHandler - dialog label creation handler
@@ -535,7 +530,7 @@ var igv = (function (igv) {
      * @param dialogClickHandler
      * @param doAddTopBorder
      */
-    igv.trackMenuItem = function (popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
+    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
 
         var $e,
             clickHandler;
@@ -553,7 +548,6 @@ var igv = (function (igv) {
             var $element = $(trackView.trackDiv);
             igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.dialog.show($element);
-            popover.hide();
         };
 
         $e.click(clickHandler);
@@ -561,7 +555,7 @@ var igv = (function (igv) {
         return {object: $e, init: undefined};
     };
 
-    igv.dataRangeMenuItem = function (popover, trackView) {
+    igv.dataRangeMenuItem = function (trackView) {
 
         var $e,
             clickHandler;
@@ -572,15 +566,14 @@ var igv = (function (igv) {
         clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
-            popover.hide();
-        };
+         };
 
         $e.click(clickHandler);
 
         return {object: $e, init: undefined};
     };
 
-    igv.colorPickerMenuItem = function (popover, trackView) {
+    igv.colorPickerMenuItem = function (trackView) {
         var $e;
 
         $e = $('<div>');
@@ -588,8 +581,7 @@ var igv = (function (igv) {
 
         $e.click(function () {
             trackView.$colorpicker_container.toggle();
-            popover.hide();
-        });
+         });
 
         return {object: $e};
 
