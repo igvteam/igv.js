@@ -274,6 +274,7 @@
   position: relative;
   height: 16px;
   clear: both;
+  margin-top: 10px;
   white-space: nowrap; }
   #igv-content-header .igv-ideogram-left-shim {
     position: relative;
@@ -609,7 +610,13 @@
   position: absolute;
   top: 4px;
   right: 4px;
+  font-size: 16px;
+  color: #666666;
   z-index: 1000; }
+
+.igv-viewport-fa-close:hover {
+  cursor: pointer;
+  color: #434343; }
 
 .igv-viewport-content-ruler-div {
   position: absolute;

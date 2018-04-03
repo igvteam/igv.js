@@ -79,7 +79,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.SegTrack.prototype.menuItemList = function (popover) {
+    igv.SegTrack.prototype.menuItemList = function () {
 
         var self = this;
 
@@ -87,8 +87,7 @@ var igv = (function (igv) {
             {
                 name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
                 click: function () {
-                    popover.hide();
-                    self.toggleSampleHeight();
+                     self.toggleSampleHeight();
                 }
             }
         ];
