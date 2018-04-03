@@ -1005,10 +1005,17 @@
   border-width: thin;
   background-color: #c4c4c4; }
   .igv-grid-header div {
-    position: relative;
-    padding-left: 4px; }
-    .igv-grid-header div i {
-      cursor: pointer; }
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    height: 100%;
+    width: 16px;
+    text-align: center;
+    line-height: 100%;
+    color: #444;
+    font-size: medium; }
+  .igv-grid-header div:hover {
+    cursor: pointer; }
 
 .igv-grid-header-blurb {
   margin-top: 4px;
@@ -1278,11 +1285,10 @@
     height: 100%;
     width: 16px;
     text-align: center;
-    line-height: 100%; }
-    .igv-popover-header div i {
-      cursor: pointer;
-      color: #444;
-      font-size: small; }
+    line-height: 100%;
+    cursor: pointer;
+    color: #444;
+    font-size: small; }
   .igv-popover-header div:hover {
     color: white; }
 
