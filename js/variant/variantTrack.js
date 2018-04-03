@@ -715,7 +715,7 @@ var igv = (function (igv) {
         this.trackView.update();
     };
 
-    igv.VariantTrack.prototype.menuItemList = function (popover) {
+    igv.VariantTrack.prototype.menuItemList = function () {
 
         var self = this,
             menuItems = [],
@@ -734,7 +734,6 @@ var igv = (function (igv) {
                 {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
-                        popover.hide();
                         self.displayMode = displayMode;
                         self.trackView.update();
                     }
@@ -762,7 +761,6 @@ var igv = (function (igv) {
                 menuItems.push( {
                     object: igv.createCheckbox(attrs[attr], attr === self.groupBy),
                     click: function () {
-                        popover.hide();
                         self.groupCallSets(attr);
                     }
                 });

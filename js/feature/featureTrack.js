@@ -300,7 +300,7 @@ var igv = (function (igv) {
         return data;
     }
 
-    igv.FeatureTrack.prototype.menuItemList = function (popover) {
+    igv.FeatureTrack.prototype.menuItemList = function () {
 
         var self = this,
             menuItems = [];
@@ -310,7 +310,6 @@ var igv = (function (igv) {
                 menuItems.push({
                     object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                     click: function () {
-                        popover.hide();
                         self.colorBy = colorScheme;
                         self.trackView.update();
                     }
@@ -332,7 +331,6 @@ var igv = (function (igv) {
                 {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
-                        popover.hide();
                         self.displayMode = displayMode;
                         self.trackView.update();
                     }
