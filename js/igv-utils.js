@@ -180,13 +180,16 @@ var igv = (function (igv) {
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
-        var $container = $('<div>'),
-            $fa = igv.createIcon("times");
+        var $container,
+            $fa;
 
-        $container.append($fa);
+        $container = $('<div>');
         $parent.append($container);
 
-        $container.click(closeHandler);
+        $fa = igv.createIcon("times");
+        $container.append($fa);
+
+        $fa.click(closeHandler);
 
     };
 
