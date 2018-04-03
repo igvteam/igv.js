@@ -108,7 +108,7 @@ var igv = (function (igv) {
         };
     };
 
-    igv.SequenceTrack.prototype.menuItemList = function(popover) {
+    igv.SequenceTrack.prototype.menuItemList = function() {
         var self = this;
 
         return [
@@ -116,7 +116,6 @@ var igv = (function (igv) {
                 name: self.reversed ? "Forward" : "Reverse",
                 click: function () {
                     self.reversed = !self.reversed;
-                    popover.hide();
                     igv.browser.update();
                 }
             },
@@ -124,8 +123,6 @@ var igv = (function (igv) {
                 name: self.frameTranslate ? "Close Translation" : "Three-frame Translate",
                 click: function(){
                     self.frameTranslate = !self.frameTranslate;
-                    popover.hide();
-
                     if (self.frameTranslate) {
                         self.trackView.viewports.forEach(function (vp) {
                             vp.setContentHeight(115);
