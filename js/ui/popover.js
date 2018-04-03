@@ -29,10 +29,10 @@
 var igv = (function (igv) {
 
     igv.Popover = function ($parent) {
-        this.$parent = this.initializationHelper($parent);
+        this.$parent = initializationHelper.call(this, $parent);
     };
 
-    igv.Popover.prototype.initializationHelper = function ($parent) {
+    function initializationHelper($parent) {
 
         var self = this,
             $popoverHeader;
@@ -59,7 +59,7 @@ var igv = (function (igv) {
 
         return $parent;
 
-    };
+    }
 
     igv.Popover.prototype.hide = function () {
         this.$popover.hide();
