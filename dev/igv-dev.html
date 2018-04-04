@@ -369,29 +369,15 @@
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
             tracks: [
-               // {
-               //     sourceType: 'gcs',
-               //     type: 'bam',
-               //     url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-               //     height: 500,
-               //     maxHeight: 2000,
-               //     autoHeight: true,
-               //     viewAsPairs: false,
-               //     name: 'NA12877'
-               // },
-               {
-                   sourceType: 'ga4gh',
-                   type: 'bam',
-                   url: 'https://genomics.googleapis.com/v1',
-                   readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
-                   height: 200,
-                   autoHeight: true,
-                   viewAsPairs: false,
-                   name: 'Ga4gh alignments'
-               },
                 {
-                    url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
-                    name: 'Big BigWig'
+                    sourceType: 'gcs',
+                    type: 'bam',
+                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                    height: 500,
+                    maxHeight: 2000,
+                    autoHeight: true,
+                    viewAsPairs: true,
+                    name: 'NA12877'
                 },
                 {
 
