@@ -237,13 +237,24 @@ var igv = (function (igv) {
             $e = igv.createCheckbox(menuItem.label, showCheck);
 
             clickHandler = function () {
+                var labelHTMLFunction,
+                    inputValue,
+                    clickFunction;
+
+                igv.popover.hide();
 
                 if ('tag' === menuItem.key) {
 
-                    igv.dialog.configure(function () {
+                    labelHTMLFunction = function () {
                         return "Tag Name"
-                    }, self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '', function () {
-                        var tag = igv.dialog.$dialogInput.val().trim();
+                    };
+
+                    inputValue = self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '';
+
+                    clickFunction = function () {
+                        var tag;
+
+                        tag = igv.dialog.$dialogInput.val().trim();
                         self.alignmentTrack.colorBy = 'tag';
 
                         if (tag !== self.alignmentTrack.colorByTag) {
@@ -253,8 +264,9 @@ var igv = (function (igv) {
                         }
 
                         self.trackView.update();
-                    }, undefined, undefined);
+                    };
 
+                    igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
                     igv.dialog.show($(self.trackView.trackDiv));
 
                 } else {
