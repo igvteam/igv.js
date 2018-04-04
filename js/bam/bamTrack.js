@@ -28,8 +28,8 @@ var igv = (function (igv) {
 
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
-    const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
-    const DEFAULT_TRACK_HEIGHT = 300;
+    var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
+    var DEFAULT_TRACK_HEIGHT = 300;
 
     igv.BAMTrack = function (config) {
 
@@ -167,7 +167,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.menuItemList = function (popover) {
+    igv.BAMTrack.prototype.menuItemList = function () {
 
         var self = this,
             $e,
@@ -178,7 +178,7 @@ var igv = (function (igv) {
             selected;
 
         // sort by genomic location
-        menuItems.push(sortMenuItem(popover));
+        menuItems.push(sortMenuItem());
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -210,8 +210,6 @@ var igv = (function (igv) {
                 object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                 click: function () {
                     var $fa = $(this).find('i');
-
-                    popover.hide();
 
                     self.viewAsPairs = !self.viewAsPairs;
 
@@ -279,7 +277,7 @@ var igv = (function (igv) {
 
         }
 
-        function sortMenuItem(popover) {
+        function sortMenuItem() {
 
             var $e,
                 clickHandler;
@@ -292,8 +290,6 @@ var igv = (function (igv) {
                     referenceFrame = genomicState.referenceFrame,
                     genomicLocation,
                     viewportHalfWidth;
-
-                popover.hide();
 
                 viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));

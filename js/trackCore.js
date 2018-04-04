@@ -454,21 +454,22 @@ var igv = (function (igv) {
 
             }, undefined));
         }
+
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+            menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
         }
+
         if (trackView.track.removable !== false) {
 
             all.push(
                 igv.trackMenuItem(popover, trackView, "Remove track", function () {
                     return trackView.track.name;
                 }, undefined, function () {
-                    popover.hide();
                     trackView.browser.removeTrack(trackView.track);
                 }, true)
             );
@@ -557,15 +558,12 @@ var igv = (function (igv) {
                 igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
                 igv.dialog.show($element);
             }
-            popover.hide();
         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return { object: $e, click: clickHandler };
     };
 
-    igv.dataRangeMenuItem = function (popover, trackView) {
+    igv.dataRangeMenuItem = function (trackView) {
 
         var $e,
             clickHandler;
@@ -576,26 +574,22 @@ var igv = (function (igv) {
         clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
-            popover.hide();
-        };
+         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return { object: $e, click: clickHandler };
     };
 
-    igv.colorPickerMenuItem = function (popover, trackView) {
+    igv.colorPickerMenuItem = function (trackView) {
         var $e;
 
         $e = $('<div>');
         $e.text('Set track color');
 
-        $e.click(function () {
+        clickHandler = function () {
             trackView.$colorpicker_container.toggle();
-            popover.hide();
-        });
+        };
 
-        return {object: $e};
+        return { object: $e, click: clickHandler };
 
     };
 
