@@ -28,8 +28,8 @@ var igv = (function (igv) {
 
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
-    const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
-    const DEFAULT_TRACK_HEIGHT = 300;
+    var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
+    var DEFAULT_TRACK_HEIGHT = 300;
 
     igv.BAMTrack = function (config) {
 
@@ -184,7 +184,7 @@ var igv = (function (igv) {
 
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
 
-        if (self.alignmentTrack.hasPairs) {
+        if (true === self.alignmentTrack.hasPairs) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
             colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
             colorByMenuItems.push({key: 'fragmentLength', label: 'fragment length'});
@@ -196,6 +196,7 @@ var igv = (function (igv) {
         $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $e.text('Color by');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+
 
         colorByMenuItems.forEach(function (item) {
             selected = (self.alignmentTrack.colorBy === item.key);
@@ -524,7 +525,7 @@ var igv = (function (igv) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
-        this.top = config.coverageTrackHeight == 0 ? 0 : config.coverageTrackHeight + 5;
+        this.top = config.coverageTrackHeight === 0 ? 0 : config.coverageTrackHeight + 5;
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
@@ -542,8 +543,9 @@ var igv = (function (igv) {
         this.pairColors["RR"] = config.rrColor || "rgb(20, 50, 200)";
         this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)";
 
-        this.colorBy = config.colorBy || "pairOrientation";
+
         this.colorByTag = config.colorByTag;
+
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
         // sort alignment rows
@@ -552,6 +554,12 @@ var igv = (function (igv) {
         this.sortDirection = true;
 
         this.hasPairs = false;   // Until proven otherwise
+
+        this.colorBy = config.colorBy || "pairOrientation";
+
+        if (false === this.hasPairs && 'pairOrientation' === this.colorBy) {
+            this.colorBy = 'none';
+        }
 
     };
 
