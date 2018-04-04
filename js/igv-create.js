@@ -83,6 +83,10 @@ var igv = (function (igv) {
         igv.dialog = new igv.Dialog(browser.$root);
         igv.dialog.hide();
 
+        // Dialog object -- singleton shared by all components
+        igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
+        // igv.trackRemovalDialog.hide();
+
         // Data Range Dialog object -- singleton shared by all components
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
         igv.dataRangeDialog.hide();
