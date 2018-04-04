@@ -466,12 +466,10 @@ var igv = (function (igv) {
 
             all.push(
                 igv.trackMenuItem(popover, trackView, "Remove track", function () {
-                    var label = "Remove " + trackView.track.name;
-                    return '<div class="igv-dialog-label-centered">' + label + '</div>';
+                    return trackView.track.name;
                 }, undefined, function () {
                     popover.hide();
                     trackView.browser.removeTrack(trackView.track);
-                    // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
         }
@@ -551,8 +549,14 @@ var igv = (function (igv) {
 
         clickHandler = function () {
             var $element = $(trackView.trackDiv);
-            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.dialog.show($element);
+
+            if ('Remove track' === menuItemLabel) {
+                igv.trackRemovalDialog.configure( { name: dialogLabelHandler(), click: dialogClickHandler } );
+                igv.trackRemovalDialog.present($(trackView.trackDiv));
+            } else {
+                igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+                igv.dialog.show($element);
+            }
             popover.hide();
         };
 
