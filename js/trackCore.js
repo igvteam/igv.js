@@ -560,9 +560,7 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return { object: $e, click: clickHandler };
     };
 
     igv.dataRangeMenuItem = function (popover, trackView) {
@@ -579,9 +577,7 @@ var igv = (function (igv) {
             popover.hide();
         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return { object: $e, click: clickHandler };
     };
 
     igv.colorPickerMenuItem = function (popover, trackView) {
@@ -590,12 +586,12 @@ var igv = (function (igv) {
         $e = $('<div>');
         $e.text('Set track color');
 
-        $e.click(function () {
+        clickHandler = function () {
             trackView.$colorpicker_container.toggle();
             popover.hide();
-        });
+        };
 
-        return {object: $e};
+        return { object: $e, click: clickHandler };
 
     };
 
