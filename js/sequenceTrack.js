@@ -108,7 +108,7 @@ var igv = (function (igv) {
         };
     };
 
-    igv.SequenceTrack.prototype.menuItemList = function(popover) {
+    igv.SequenceTrack.prototype.menuItemList = function () {
         var self = this;
 
         return [
