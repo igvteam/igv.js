@@ -33,6 +33,7 @@ var igv = (function (igv) {
         // dialog container
         this.$container = $("<div>", { id:'track-removal-dialog', class:'igv-track-removal-dialog-container' });
         $parent.append(this.$container);
+        this.$container.offset( { left:0, top:0 } );
 
         // dialog header
         $header = $("<div>", { id:'track-removal-dialog-header' });
