@@ -34,83 +34,66 @@ var igv = (function (igv) {
         this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.findCenterAlignment = function (bpStart, bpEnd) {
+    igv.BamAlignmentRow.prototype.findCenterAlignment = function (genomicLocation) {
 
-        var centerAlignment = undefined;
+        var centerAlignment, a, i;
 
         // find single alignment that overlaps sort location
-        this.alignments.forEach(function(a){
 
-            if (undefined === centerAlignment) {
-
-                if ((a.start + a.lengthOnRef) < bpStart || a.start > bpEnd) {
-                    // do nothing
+        for (i = 0; i < this.alignments.length; i++) {
+            a = this.alignments[i];
+            if (alignmentContains(a, genomicLocation)) {
+                if (a.paired) {
+                    if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
+                        centerAlignment = a.firstAlignment;
+                    } else if (a.secondAlignment && alignmentContains(a.secondAlignment, genomicLocation)) {
+                        centerAlignment = a.secondAlignment;
+                    }
                 } else {
                     centerAlignment = a;
                 }
-
+                break;
             }
-
-        });
-
-        return centerAlignment;
-    };
-
-    igv.BamAlignmentRow.prototype.updateScore = function (genomicLocation, genomicInterval, sortOption) {
-
-        this.score = this.calculateScore(genomicLocation, (1 + genomicLocation), genomicInterval, sortOption);
-
-    };
-
-    igv.BamAlignmentRow.prototype.calculateScore = function (bpStart, bpEnd, interval, sortOption) {
-
-        var baseScore,
-            baseScoreFirst,
-            baseScoreSecond,
-            alignment,
-            blockFirst,
-            blockSecond,
-            block;
-
-        alignment = this.findCenterAlignment(bpStart, bpEnd);
-        if (undefined === alignment) {
-            return Number.MAX_VALUE;
         }
 
-        baseScoreFirst = baseScoreSecond = undefined;
+        return centerAlignment;
+
+        function alignmentContains(a, genomicLocation) {
+            return genomicLocation >= a.start && genomicLocation <= a.start + a.lengthOnRef
+        }
+    }
+
+    igv.BamAlignmentRow.prototype.updateScore = function (genomicLocation, genomicInterval, sortOption, sortDirection) {
+
+        this.score = this.calculateScore(genomicLocation, genomicInterval, sortOption, sortDirection);
+
+    };
+
+    igv.BamAlignmentRow.prototype.calculateScore = function (genomicLocation, interval, sortOption, sortDirection) {
+
+        var baseScore,
+            alignment,
+            block;
+
+        alignment = this.findCenterAlignment(genomicLocation);
+        if (undefined === alignment) {
+            return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
+        }
 
         if ("NUCLEOTIDE" === sortOption.sort) {
 
             if (alignment.blocks && alignment.blocks.length > 0) {
-                blockFirst = blockAtGenomicLocation(alignment.blocks, bpStart, interval.start);
-                if (blockFirst) {
-                    baseScoreFirst = blockScoreWithObject(blockFirst, interval);
+                block = blockAtGenomicLocation(alignment.blocks, genomicLocation, interval.start);
+                if (block) {
+                    baseScore = blockScoreWithObject(block, interval);
                 }
-                // baseScoreFirst = nucleotideBlockScores(alignment.blocks);
             }
-
-            if (alignment.firstAlignment && alignment.firstAlignment.blocks && alignment.firstAlignment.blocks.length > 0) {
-                blockFirst = blockAtGenomicLocation(alignment.firstAlignment.blocks, bpStart, interval.start);
-                if (blockFirst) {
-                    baseScoreFirst = blockScoreWithObject(blockFirst, interval);
-                }
-                // baseScoreFirst = nucleotideBlockScores(alignment.firstAlignment.blocks);
-            }
-
-            if (alignment.secondAlignment && alignment.secondAlignment.blocks && alignment.secondAlignment.blocks.length > 0) {
-                blockSecond = blockAtGenomicLocation(alignment.secondAlignment.blocks, bpStart, interval.start);
-                if (blockSecond) {
-                    baseScoreSecond = blockScoreWithObject(blockSecond, interval);
-                }
-                // baseScoreSecond = nucleotideBlockScores(alignment.secondAlignment.blocks);
-            }
-
-            baseScore = (undefined === baseScoreFirst) ? baseScoreSecond : baseScoreFirst;
-
             return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+
         } else if ("STRAND" === sortOption.sort) {
 
             return alignment.strand ? 1 : -1;
+
         } else if ("START" === sortOption.sort) {
 
             return alignment.start;
@@ -129,7 +112,12 @@ var igv = (function (igv) {
                      i++, genomicOffset++, blockLocation++) {
 
                     if (genomicLocation === blockLocation) {
-                        result = { block: block, blockSeqIndex: i, referenceSequenceIndex: genomicOffset, location: genomicLocation };
+                        result = {
+                            block: block,
+                            blockSeqIndex: i,
+                            referenceSequenceIndex: genomicOffset,
+                            location: genomicLocation
+                        };
                     }
 
                 }
@@ -162,11 +150,11 @@ var igv = (function (igv) {
                 return 2;
             } else if (reference === base) {
                 return 3;
-            } else if ("X" === base|| reference !== base) {
+            } else if ("X" === base || reference !== base) {
 
-                coverage = interval.coverageMap.coverage[ (obj.location - interval.coverageMap.bpStart) ];
+                coverage = interval.coverageMap.coverage[(obj.location - interval.coverageMap.bpStart)];
 
-                count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
+                count = coverage["pos" + base] + coverage["neg" + base];
                 phred = (coverage.qual) ? coverage.qual : 0;
 
                 return -(count + (phred / 1000.0));
@@ -214,10 +202,10 @@ var igv = (function (igv) {
                     else if (base === reference) {
                         result = 3;
                     }
-                    else if (base === "X" || base !== reference){
+                    else if (base === "X" || base !== reference) {
 
-                        coverage = coverageMap.coverage[ (bpBlockSequence - coverageMap.bpStart) ];
-                        count = coverage[ "pos" + base ] + coverage[ "neg" + base ];
+                        coverage = coverageMap.coverage[(bpBlockSequence - coverageMap.bpStart)];
+                        count = coverage["pos" + base] + coverage["neg" + base];
                         phred = (coverage.qual) ? coverage.qual : 0;
                         result = -(count + (phred / 1000.0));
                     } else {

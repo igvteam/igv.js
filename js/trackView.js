@@ -77,7 +77,11 @@ var igv = (function (igv) {
             appendRightHandGutter.call(this, $(this.trackDiv));
         }
 
-        attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
+        if (this.track instanceof igv.RulerTrack) {
+            // do nuthin
+        } else {
+            attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
+        }
 
         if (igv.doProvideColoSwatchWidget(this.track)) {
 
