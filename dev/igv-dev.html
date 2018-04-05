@@ -46,6 +46,7 @@
     <script src="../js/bam/bamUtils.js"></script>
     <script src="../js/bam/bamWebserviceReader.js"></script>
     <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -370,14 +371,8 @@
 
             tracks: [
                 {
-                    sourceType: 'gcs',
-                    type: 'bam',
-                    url: 'gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                    height: 500,
-                    maxHeight: 2000,
-                    autoHeight: true,
-                    viewAsPairs: true,
-                    name: 'NA12877'
+                    url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                    label: 'HG02450'
                 },
                 {
 
