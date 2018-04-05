@@ -461,7 +461,10 @@ var igv = (function (igv) {
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover),
+                function () {
+                    popover.hide();
+                }));
         }
 
         if (trackView.track.removable !== false) {
@@ -513,7 +516,7 @@ var igv = (function (igv) {
                 if (item.click) {
                     $e.click(function () {
                         item.click();
-                        if(typeof callback === "function") callback();
+                        if (typeof callback === "function") callback();
                     });
                 }
 
@@ -552,7 +555,7 @@ var igv = (function (igv) {
             var $element = $(trackView.trackDiv);
 
             if ('Remove track' === menuItemLabel) {
-                igv.trackRemovalDialog.configure( { name: dialogLabelHandler(), click: dialogClickHandler } );
+                igv.trackRemovalDialog.configure({name: dialogLabelHandler(), click: dialogClickHandler});
                 igv.trackRemovalDialog.present($(trackView.trackDiv));
             } else {
                 igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
@@ -560,7 +563,7 @@ var igv = (function (igv) {
             }
         };
 
-        return { object: $e, click: clickHandler };
+        return {object: $e, click: clickHandler};
     };
 
     igv.dataRangeMenuItem = function (trackView) {
@@ -574,9 +577,9 @@ var igv = (function (igv) {
         clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
-         };
+        };
 
-        return { object: $e, click: clickHandler };
+        return {object: $e, click: clickHandler};
     };
 
     igv.colorPickerMenuItem = function (trackView) {
@@ -589,7 +592,7 @@ var igv = (function (igv) {
             trackView.$colorpicker_container.toggle();
         };
 
-        return { object: $e, click: clickHandler };
+        return {object: $e, click: clickHandler};
 
     };
 
