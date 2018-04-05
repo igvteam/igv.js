@@ -415,31 +415,8 @@ var igv = (function (igv) {
             all;
 
         if (trackView.track.config.type !== 'sequence') {
-
             menuItems.push(igv.trackRenameMenuItem(trackView));
-
-            menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
-                return "Track Height"
-            }, trackView.trackDiv.clientHeight, function () {
-
-                var number = parseFloat(igv.dialog.$dialogInput.val(), 10);
-
-                if (undefined !== number) {
-
-                    // If explicitly setting the height adust min or max, if neccessary.
-                    if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
-                        trackView.track.minHeight = number;
-                    }
-                    if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
-                        trackView.track.minHeight = number;
-                    }
-                    trackView.setTrackHeight(number, true, true);
-
-                    // Explicitly setting track height turns off autoHeight
-                    trackView.track.autoHeight = false;
-                }
-
-            }));
+            menuItems.push(igv.trackHeightMenuItem(trackView));
         }
 
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
@@ -610,6 +587,53 @@ var igv = (function (igv) {
             };
 
             igv.dialog.configure(dialogLabelHandler, trackView.track.name, dialogClickHandler);
+            igv.dialog.show( $(trackView.trackDiv) );
+        };
+
+        return { object: $e, click: menuClickHandler };
+
+
+    };
+
+    igv.trackHeightMenuItem = function (trackView) {
+
+        var $e,
+            menuClickHandler;
+
+        $e = $('<div>');
+        $e.text('Set track height');
+
+        menuClickHandler = function () {
+            var dialogLabelHandler,
+                dialogClickHandler;
+
+            dialogLabelHandler = function () {
+                return "Track Height"
+            };
+
+            dialogClickHandler = function () {
+
+                var number;
+
+                number = parseFloat(igv.dialog.$dialogInput.val(), 10);
+                if (undefined !== number) {
+
+                    // If explicitly setting the height adust min or max, if neccessary.
+                    if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
+                        trackView.track.minHeight = number;
+                    }
+                    if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
+                        trackView.track.minHeight = number;
+                    }
+                    trackView.setTrackHeight(number, true, true);
+
+                    // Explicitly setting track height turns off autoHeight
+                    trackView.track.autoHeight = false;
+                }
+
+            };
+
+            igv.dialog.configure(dialogLabelHandler, trackView.trackDiv.clientHeight, dialogClickHandler);
             igv.dialog.show( $(trackView.trackDiv) );
         };
 
