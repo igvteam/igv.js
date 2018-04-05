@@ -28,8 +28,8 @@ var igv = (function (igv) {
 
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
-    const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
-    const DEFAULT_TRACK_HEIGHT = 300;
+    var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
+    var DEFAULT_TRACK_HEIGHT = 300;
 
     igv.BAMTrack = function (config) {
 
@@ -148,12 +148,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.contextMenuItemList = function (config) {
 
-        if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return [];
-        } else {
-            return this.alignmentTrack.contextMenuItemList(config);
-        }
-
+        return this.alignmentTrack.contextMenuItemList(config);
 
     };
 
@@ -167,7 +162,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.menuItemList = function (popover) {
+    igv.BAMTrack.prototype.menuItemList = function () {
 
         var self = this,
             $e,
@@ -177,8 +172,8 @@ var igv = (function (igv) {
             tagLabel,
             selected;
 
-        // sort by genomic location
-        menuItems.push(sortMenuItem(popover));
+        // sort by @ center line
+        //menuItems.push(sortMenuItem());
 
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
@@ -211,8 +206,6 @@ var igv = (function (igv) {
                 click: function () {
                     var $fa = $(this).find('i');
 
-                    popover.hide();
-
                     self.viewAsPairs = !self.viewAsPairs;
 
                     if (true === self.viewAsPairs) {
@@ -237,13 +230,22 @@ var igv = (function (igv) {
             $e = igv.createCheckbox(menuItem.label, showCheck);
 
             clickHandler = function () {
+                var labelHTMLFunction,
+                    inputValue,
+                    clickFunction;
 
                 if ('tag' === menuItem.key) {
 
-                    igv.dialog.configure(function () {
+                    labelHTMLFunction = function () {
                         return "Tag Name"
-                    }, self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '', function () {
-                        var tag = igv.dialog.$dialogInput.val().trim();
+                    };
+
+                    inputValue = self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '';
+
+                    clickFunction = function () {
+                        var tag;
+
+                        tag = igv.dialog.$dialogInput.val().trim();
                         self.alignmentTrack.colorBy = 'tag';
 
                         if (tag !== self.alignmentTrack.colorByTag) {
@@ -253,8 +255,9 @@ var igv = (function (igv) {
                         }
 
                         self.trackView.update();
-                    }, undefined, undefined);
+                    };
 
+                    igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
                     igv.dialog.show($(self.trackView.trackDiv));
 
                 } else {
@@ -267,7 +270,7 @@ var igv = (function (igv) {
 
         }
 
-        function sortMenuItem(popover) {
+        function sortMenuItem() {
 
             var $e,
                 clickHandler;
@@ -281,12 +284,11 @@ var igv = (function (igv) {
                     genomicLocation,
                     viewportHalfWidth;
 
-                popover.hide();
-
                 viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
-                self.altClick(genomicLocation, undefined, undefined);
+                self.sortOption = {sort: "NUCLEOTIDE"};
+                self.alignmentTrack.sortAlignmentRows(genomicLocation, sortOption);
 
                 if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
                     igv.browser.centerGuide.$centerGuideToggle.trigger("click");
@@ -477,28 +479,28 @@ var igv = (function (igv) {
 
             // A
             tmp = coverage.posA + coverage.negA;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posA+"+, "+coverage.negA+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
             nameValues.push({name: 'A', value: tmp});
 
 
             // C
             tmp = coverage.posC + coverage.negC;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posC+"+, "+coverage.negC+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
             nameValues.push({name: 'C', value: tmp});
 
             // G
             tmp = coverage.posG + coverage.negG;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posG+"+, "+coverage.negG+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
             nameValues.push({name: 'G', value: tmp});
 
             // T
             tmp = coverage.posT + coverage.negT;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posT+"+, "+coverage.negT+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
             nameValues.push({name: 'T', value: tmp});
 
             // N
             tmp = coverage.posN + coverage.negN;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posN+"+, "+coverage.negN+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
             nameValues.push({name: 'N', value: tmp});
 
         }
@@ -841,13 +843,15 @@ var igv = (function (igv) {
         var self = this;
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
-            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
+            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption, self.sortDirection);
         });
 
         this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-            // return rowA.score - rowB.score;
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
+
+        this.parent.trackView.update();
+        this.sortDirection = !(this.sortDirection);
 
     };
 
@@ -866,20 +870,18 @@ var igv = (function (igv) {
             clickHandler,
             list = [];
 
-        list.push({label: 'Sort by base', click: sortRows, init: undefined});
+        list.push({label: 'Sort by base', click: sortRows});
 
         var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        if (alignment && alignment.isPaired() && alignment.isMateMapped()) {
+        if (alignment && !alignment.paired && alignment.isPaired() && alignment.isMateMapped()) {
             list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
         }
 
         return list;
 
         function sortRows() {
+            self.sortOption = {sort: "NUCLEOTIDE"};
             self.sortAlignmentRows(config.genomicLocation, self.sortOption);
-            self.parent.trackView.update();
-            self.sortDirection = !(self.sortDirection);
-
         }
 
         function viewMateInSplitScreen() {
@@ -889,6 +891,7 @@ var igv = (function (igv) {
             }
         }
     };
+
 
     function parse(locusString) {
         return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
