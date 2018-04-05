@@ -412,8 +412,9 @@ var igv = (function (igv) {
      */
     igv.trackMenuItemList = function (popover, trackView) {
 
-        var menuItems = [],
-            all;
+        var all,
+            menuItems = [],
+            trackMenuItems;
 
         if (trackView.track.config.type !== 'sequence') {
 
@@ -459,20 +460,22 @@ var igv = (function (igv) {
             menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
-        all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
+            trackMenuItems = trackView.track.menuItemList();
+            if (0 === menuItems.length) {
+                all = trackMenuItems;
+            } else {
+                all = menuItems.concat(trackMenuItems);
+            }
+
         }
 
         if (trackView.track.removable !== false) {
-
-            all.push(
-                igv.trackMenuItem(popover, trackView, "Remove track", function () {
+            all.push(igv.trackMenuItem(popover, trackView, "Remove track", function () {
                     return trackView.track.name;
                 }, undefined, function () {
                     trackView.browser.removeTrack(trackView.track);
-                }, true)
-            );
+                }, true));
         }
 
         return all;
@@ -513,7 +516,9 @@ var igv = (function (igv) {
                 if (item.click) {
                     $e.click(function () {
                         item.click();
-                        if(typeof callback === "function") callback();
+                        if(typeof callback === "function") {
+                            callback();
+                        }
                     });
                 }
 
