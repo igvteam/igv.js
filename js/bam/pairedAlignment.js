@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
     igv.PairedAlignment = function (firstAlignment) {
 
+        this.paired = true;
         this.firstAlignment = firstAlignment;
         this.chr = firstAlignment.chr;
         this.readName = firstAlignment.readName;

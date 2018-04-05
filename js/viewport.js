@@ -75,8 +75,13 @@ var igv = (function (igv) {
 
         }
 
-        createZoomInNotice.call(this, $(this.contentDiv));
-        $(this.contentDiv).append(self.$zoomInNotice);
+        if (trackView.track instanceof igv.SequenceTrack) {
+            // do nuthin
+        } else if (trackView.track instanceof igv.RulerTrack) {
+            // do nuthin
+        } else {
+            self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
+        }
 
         if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
 
@@ -117,16 +122,19 @@ var igv = (function (igv) {
     };
 
     function createZoomInNotice($parent) {
-        var $e;
+        var $e,
+            $notice;
 
-        this.$zoomInNotice = $('<div class="zoom-in-notice-container">');
-        $parent.append(this.$zoomInNotice);
+        $notice = $('<div class="zoom-in-notice-container">');
+        $parent.append($notice);
 
         $e = $('<div>');
-        this.$zoomInNotice.append($e);
+        $notice.append($e);
         $e.text('Zoom in to see features');
 
-        this.$zoomInNotice.hide();
+        $notice.hide();
+
+        return $notice;
     }
 
     igv.Viewport.prototype.setWidth = function (width) {
@@ -257,12 +265,14 @@ var igv = (function (igv) {
         }
 
         // TODO -- show whole genome zoom in notice here
-        if (showZoomInNotice.call(this)) {
-            this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-            this.$zoomInNotice.show();
-            return;
-        } else {
-            this.$zoomInNotice.hide();
+        if (this.$zoomInNotice) {
+            if (showZoomInNotice.call(this)) {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                this.$zoomInNotice.show();
+                return;
+            } else {
+                this.$zoomInNotice.hide();
+            }
         }
 
 
@@ -764,7 +774,7 @@ var igv = (function (igv) {
             popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
 
             if (undefined === popupClickHandlerResult) {
-                if (dataList.length > 0) {
+                if (dataList && dataList.length > 0) {
                     content = formatPopoverText(dataList);
                 }
 

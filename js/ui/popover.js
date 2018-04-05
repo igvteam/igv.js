@@ -29,10 +29,10 @@
 var igv = (function (igv) {
 
     igv.Popover = function ($parent) {
-        this.$parent = this.initializationHelper($parent);
+        this.$parent = initializationHelper.call(this, $parent);
     };
 
-    igv.Popover.prototype.initializationHelper = function ($parent) {
+    function initializationHelper($parent) {
 
         var self = this,
             $popoverHeader;
@@ -59,7 +59,7 @@ var igv = (function (igv) {
 
         return $parent;
 
-    };
+    }
 
     igv.Popover.prototype.hide = function () {
         this.$popover.hide();
@@ -67,11 +67,16 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView) {
 
-        var $container,
-            items;
+        var self = this,
+            $container,
+            menuItems;
 
-        items = igv.trackMenuItemList(this, trackView);
-        if (_.size(items) > 0) {
+        menuItems = igv.trackMenuItemList(this, trackView);
+        if (menuItems.length > 0) {
+
+            menuItems = igv.trackMenuItemListHelper(menuItems, function () {
+                self.$popover.hide();
+            });
 
             this.$popoverContent.empty();
             this.$popoverContent.removeClass("igv-popover-track-popup-content");
@@ -79,14 +84,13 @@ var igv = (function (igv) {
             $container = $('<div class="igv-track-menu-container">');
             this.$popoverContent.append($container);
 
-            _.each(items, function (item) {
+            menuItems.forEach(function (item) {
 
                 if (item.init) {
                     item.init();
                 }
 
                 $container.append(item.object);
-
             });
 
             this.$popover.css(clampPopoverLocation(pageX, pageY, this));

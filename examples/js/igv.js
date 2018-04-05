@@ -25946,7 +25946,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.BAMTrack.prototype.menuItemList = function (popover) {
+    igv.BAMTrack.prototype.menuItemList = function () {
 
         var self = this,
             $e,
@@ -34819,7 +34819,7 @@ var igv = (function (igv) {
         return data;
     }
 
-    igv.FeatureTrack.prototype.menuItemList = function (popover) {
+    igv.FeatureTrack.prototype.menuItemList = function () {
 
         var self = this,
             menuItems = [];
@@ -36147,7 +36147,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.SegTrack.prototype.menuItemList = function (popover) {
+    igv.SegTrack.prototype.menuItemList = function () {
 
         var self = this;
 
@@ -36790,12 +36790,12 @@ var igv = (function (igv) {
         return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
     };
 
-    igv.WIGTrack.prototype.menuItemList = function (popover) {
+    igv.WIGTrack.prototype.menuItemList = function () {
 
         var self = this,
             menuItems = [];
 
-        menuItems.push(igv.dataRangeMenuItem(popover, this.trackView));
+        menuItems.push(igv.dataRangeMenuItem(this.trackView));
 
         menuItems.push({
             object: igv.createCheckbox("Autoscale", self.autoscale),  
@@ -42064,7 +42064,7 @@ var igv = (function (igv) {
         igv.alert.hide();
 
         // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(browser.$root, igv.Dialog.dialogConstructor);
+        igv.dialog = new igv.Dialog(browser.$root);
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
@@ -49295,12 +49295,12 @@ var igv = (function (igv) {
             }, undefined));
         }
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+            menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList()));
         }
         if (trackView.track.removable !== false) {
 
@@ -53058,7 +53058,7 @@ var igv = (function (igv) {
         this.trackView.update();
     };
 
-    igv.VariantTrack.prototype.menuItemList = function (popover) {
+    igv.VariantTrack.prototype.menuItemList = function () {
 
         var self = this,
             menuItems = [],

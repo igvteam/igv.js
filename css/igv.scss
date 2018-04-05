@@ -37,6 +37,8 @@ $igv-dark-grey-color: #373737;
   height: $igv-ideogram-height;
   clear: both;
 
+  margin-top: 10px;
+
   white-space: nowrap;
 
   .igv-ideogram-left-shim {
@@ -547,7 +549,17 @@ $igv-dark-grey-color: #373737;
   position: absolute;
   top: 4px;
   right: 4px;
+
+  font-size: 16px;
+  color: #666666;
+
   z-index: 1000;
+
+}
+
+.igv-viewport-fa-close:hover {
+  cursor: pointer;
+  color: #434343;
 }
 
 .igv-viewport-content-ruler-div {
@@ -1042,6 +1054,153 @@ $igv-dark-grey-color: #373737;
 
 }
 
+.igv-ellipsis {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.igv-track-removal-dialog-container {
+
+  position: absolute;
+  top: 0;
+  left:0;
+
+  width:300px;
+  height:200px;
+
+  font-family: $igv-default-font-face;
+  font-size: medium;
+  font-weight: 200;
+
+  border-color: $igv-grey-color;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+
+  z-index: 2048;
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  // header
+  #track-removal-dialog-header {
+    width: 100%;
+    height: 24px;
+
+    cursor: move;
+
+    border-color: rgb(196, 196, 196);
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+
+    background-color: rgb(196, 196, 196);
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+
+    // close button container
+    div {
+      height: 100%;
+      width: 16px;
+      margin-right: 6px;
+
+      text-align: center;
+      line-height: 100%;
+
+      color: #444;
+      font-size: medium;
+
+    }
+
+    div:hover {
+      cursor: pointer;
+    }
+
+  }
+
+  // one-liner
+  .track-removal-dialog-one-liner {
+    margin-top: 8px;
+
+    width: 95%;
+    height: 24px;
+
+    color: $igv-dark-grey-color;
+
+    line-height: 24px;
+    text-align: left;
+    padding-left: 8px;
+
+    background-color: white;
+  }
+
+  #track-removal-dialog-ok-cancel {
+
+    width: 100%;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center;
+
+    div {
+      width: 98px;
+      height: 36px;
+
+      margin-top: 32px;
+
+      line-height: 36px;
+      text-align: center;
+      color: white;
+      font-family: $igv-default-font-face;
+      font-size: medium;
+      font-weight: 200;
+
+      border-color: white;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+
+    }
+
+    div:first-child {
+      margin-left: 32px;
+      margin-right: 0;
+      background-color: #2B81AF;
+    }
+
+    div:last-child {
+      margin-left: 0;
+      margin-right: 32px;
+      background-color: #c4c4c4;
+    }
+
+    div:first-child:hover {
+      cursor: pointer;
+      background-color: #25597f;
+    }
+
+    div:last-child:hover {
+      cursor: pointer;
+      background-color: #7e7e7e;
+    }
+
+  }
+
+}
+
 .igv-dialog-label-centered {
   text-align: center;
 }
@@ -1102,13 +1261,25 @@ $igv-dark-grey-color: #373737;
   background-color: rgb(196, 196, 196);
 
   div {
-    position: relative;
-    padding-left: 4px;
 
-    i {
-      cursor: pointer;
-    }
+    position: absolute;
+    top: 3px;
+    right: 3px;
 
+    height: 100%;
+    width: 16px;
+
+    text-align: center;
+    line-height: 100%;
+
+    color: #444;
+    font-size: medium;
+
+  }
+
+  div:hover {
+    cursor: pointer;
+    //color: white;
   }
 
 }
@@ -1512,11 +1683,9 @@ $igv-dark-grey-color: #373737;
     text-align: center;
     line-height: 100%;
 
-    i {
       cursor: pointer;
       color: #444;
       font-size: small;
-    }
 
   }
 

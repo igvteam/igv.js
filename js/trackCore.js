@@ -454,24 +454,26 @@ var igv = (function (igv) {
 
             }, undefined));
         }
+
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(igv.colorPickerMenuItem(popover, trackView))
+            menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover)));
+            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover),
+                function () {
+                    popover.hide();
+                }));
         }
+
         if (trackView.track.removable !== false) {
 
             all.push(
                 igv.trackMenuItem(popover, trackView, "Remove track", function () {
-                    var label = "Remove " + trackView.track.name;
-                    return '<div class="igv-dialog-label-centered">' + label + '</div>';
+                    return trackView.track.name;
                 }, undefined, function () {
-                    popover.hide();
                     trackView.browser.removeTrack(trackView.track);
-                    // trackView.browser.removeTrackByName(trackView.track.name);
                 }, true)
             );
         }
@@ -514,7 +516,7 @@ var igv = (function (igv) {
                 if (item.click) {
                     $e.click(function () {
                         item.click();
-                        if(typeof callback === "function") callback();
+                        if (typeof callback === "function") callback();
                     });
                 }
 
@@ -551,17 +553,20 @@ var igv = (function (igv) {
 
         clickHandler = function () {
             var $element = $(trackView.trackDiv);
-            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.dialog.show($element);
-            popover.hide();
+
+            if ('Remove track' === menuItemLabel) {
+                igv.trackRemovalDialog.configure({name: dialogLabelHandler(), click: dialogClickHandler});
+                igv.trackRemovalDialog.present($(trackView.trackDiv));
+            } else {
+                igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+                igv.dialog.show($element);
+            }
         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return {object: $e, click: clickHandler};
     };
 
-    igv.dataRangeMenuItem = function (popover, trackView) {
+    igv.dataRangeMenuItem = function (trackView) {
 
         var $e,
             clickHandler;
@@ -572,26 +577,22 @@ var igv = (function (igv) {
         clickHandler = function () {
             igv.dataRangeDialog.configureWithTrackView(trackView);
             igv.dataRangeDialog.show();
-            popover.hide();
         };
 
-        $e.click(clickHandler);
-
-        return {object: $e, init: undefined};
+        return {object: $e, click: clickHandler};
     };
 
-    igv.colorPickerMenuItem = function (popover, trackView) {
+    igv.colorPickerMenuItem = function (trackView) {
         var $e;
 
         $e = $('<div>');
         $e.text('Set track color');
 
-        $e.click(function () {
+        clickHandler = function () {
             trackView.$colorpicker_container.toggle();
-            popover.hide();
-        });
+        };
 
-        return {object: $e};
+        return {object: $e, click: clickHandler};
 
     };
 
