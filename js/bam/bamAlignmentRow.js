@@ -34,73 +34,66 @@ var igv = (function (igv) {
         this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.findCenterAlignment = function (bpStart, bpEnd) {
+    igv.BamAlignmentRow.prototype.findCenterAlignment = function (genomicLocation) {
 
-        var centerAlignment = undefined;
+        var centerAlignment, a, i;
 
         // find single alignment that overlaps sort location
-        this.alignments.forEach(function (a) {
 
-            if (undefined === centerAlignment) {
-
-                if ((a.start + a.lengthOnRef) < bpStart || a.start > bpEnd) {
-                    // do nothing
+        for (i = 0; i < this.alignments.length; i++) {
+            a = this.alignments[i];
+            if (alignmentContains(a, genomicLocation)) {
+                if (a.paired) {
+                    if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
+                        centerAlignment = a.firstAlignment;
+                    } else if (a.secondAlignment && alignmentContains(a.secondAlignment, genomicLocation)) {
+                        centerAlignment = a.secondAlignment;
+                    }
                 } else {
                     centerAlignment = a;
                 }
-
+                break;
             }
-
-        });
+        }
 
         return centerAlignment;
-    };
+
+        function alignmentContains(a, genomicLocation) {
+            return genomicLocation >= a.start && genomicLocation <= a.start + a.lengthOnRef
+        }
+    }
 
     igv.BamAlignmentRow.prototype.updateScore = function (genomicLocation, genomicInterval, sortOption, sortDirection) {
 
-        this.score = this.calculateScore(genomicLocation, (1 + genomicLocation), genomicInterval, sortOption, sortDirection);
+        this.score = this.calculateScore(genomicLocation, genomicInterval, sortOption, sortDirection);
 
     };
 
-    igv.BamAlignmentRow.prototype.calculateScore = function (bpStart, bpEnd, interval, sortOption, sortDirection) {
+    igv.BamAlignmentRow.prototype.calculateScore = function (genomicLocation, interval, sortOption, sortDirection) {
 
         var baseScore,
             alignment,
             block;
 
-        alignment = this.findCenterAlignment(bpStart, bpEnd);
+        alignment = this.findCenterAlignment(genomicLocation);
         if (undefined === alignment) {
             return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
         }
 
         if ("NUCLEOTIDE" === sortOption.sort) {
 
-            // Could be a single, or paired alignment
-            if (alignment.blocks) {
-                if (alignment.blocks && alignment.blocks.length > 0) {
-                    block = blockAtGenomicLocation(alignment.blocks, bpStart, interval.start);
-                    if (block) {
-                        baseScore = blockScoreWithObject(block, interval);
-                    }
-                }
-            }
-            else {
-                if (alignment.firstAlignment && alignment.firstAlignment.blocks && alignment.firstAlignment.blocks.length > 0) {
-                    block = blockAtGenomicLocation(alignment.firstAlignment.blocks, bpStart, interval.start);
-                }
-                else if (alignment.secondAlignment && alignment.secondAlignment.blocks && alignment.secondAlignment.blocks.length > 0) {
-                    block = blockAtGenomicLocation(alignment.secondAlignment.blocks, bpStart, interval.start);
-                }
+            if (alignment.blocks && alignment.blocks.length > 0) {
+                block = blockAtGenomicLocation(alignment.blocks, genomicLocation, interval.start);
                 if (block) {
                     baseScore = blockScoreWithObject(block, interval);
                 }
             }
-
-
             return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+
         } else if ("STRAND" === sortOption.sort) {
 
             return alignment.strand ? 1 : -1;
+
         } else if ("START" === sortOption.sort) {
 
             return alignment.start;
