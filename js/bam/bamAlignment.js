@@ -177,47 +177,47 @@ var igv = (function (igv) {
             isFirst,
             tagDict;
 
-        if(this.insertions) {
-            for(var i = 0; i < this.insertions.length; i += 1) {
+        if (this.insertions) {
+            for (var i = 0; i < this.insertions.length; i += 1) {
                 var ins_start = this.insertions[i].start;
-                if(genomicLocation == ins_start || genomicLocation == ins_start - 1) {
-                    nameValues.push({name: 'Insertion', value: this.insertions[i].seq });
-                    nameValues.push({name: 'Location', value: ins_start });
+                if (genomicLocation == ins_start || genomicLocation == ins_start - 1) {
+                    nameValues.push({name: 'Insertion', value: this.insertions[i].seq});
+                    nameValues.push({name: 'Location', value: ins_start});
                     return nameValues;
                 }
             }
         }
 
-        nameValues.push({ name: 'Read Name', value: this.readName });
+        nameValues.push({name: 'Read Name', value: this.readName});
 
         // Sample
         // Read group
         nameValues.push("<hr>");
 
         // Add 1 to genomic location to map from 0-based computer units to user-based units
-        nameValues.push({ name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true });
+        nameValues.push({name: 'Alignment Start', value: igv.numberFormatter(1 + this.start), borderTop: true});
 
-        nameValues.push({ name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true });
-        nameValues.push({ name: 'Cigar', value: this.cigar });
-        nameValues.push({ name: 'Mapped', value: yesNo(this.isMapped()) });
-        nameValues.push({ name: 'Mapping Quality', value: this.mq });
-        nameValues.push({ name: 'Secondary', value: yesNo(this.isSecondary()) });
-        nameValues.push({ name: 'Supplementary', value: yesNo(this.isSupplementary()) });
-        nameValues.push({ name: 'Duplicate', value: yesNo(this.isDuplicate()) });
-        nameValues.push({ name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck()) });
+        nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true});
+        nameValues.push({name: 'Cigar', value: this.cigar});
+        nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
+        nameValues.push({name: 'Mapping Quality', value: this.mq});
+        nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())});
+        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())});
+        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())});
+        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});
 
         if (this.isPaired()) {
             nameValues.push("<hr>");
-            nameValues.push({ name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true });
-            nameValues.push({ name: 'Mate is Mapped', value: yesNo(this.isMateMapped()) });
-            if(this.pairOrientation) {
+            nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
+            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
+            if (this.pairOrientation) {
                 nameValues.push({name: 'Pair Orientation', value: this.pairOrientation});
             }
             if (this.isMateMapped()) {
-                nameValues.push({ name: 'Mate Chromosome', value: this.mate.chr });
-                nameValues.push({ name: 'Mate Start', value: (this.mate.position + 1)});
-                nameValues.push({ name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
-                nameValues.push({ name: 'Insert Size', value: this.fragmentLength });
+                nameValues.push({name: 'Mate Chromosome', value: this.mate.chr});
+                nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)});
+                nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
+                nameValues.push({name: 'Insert Size', value: this.fragmentLength});
                 // Mate Start
                 // Mate Strand
                 // Insert Size
@@ -235,20 +235,50 @@ var igv = (function (igv) {
             if (tagDict.hasOwnProperty(key)) {
 
                 if (isFirst) {
-                    nameValues.push({ name: key, value: tagDict[key], borderTop: true });
+                    nameValues.push({name: key, value: tagDict[key], borderTop: true});
                     isFirst = false;
                 } else {
-                    nameValues.push({ name: key, value: tagDict[key] });
+                    nameValues.push({name: key, value: tagDict[key]});
                 }
 
             }
         }
+
+        nameValues.push("<hr>");
+        nameValues.push({name: 'Genomic Location: ', value: igv.numberFormatter(1 + genomicLocation)});
+        nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
 
         return nameValues;
 
 
         function yesNo(bool) {
             return bool ? 'Yes' : 'No';
+        }
+    }
+
+
+    igv.BamAlignment.prototype.readBaseAt = function (genomicLocation) {
+
+        var block;
+
+        block = blockAtGenomicLocation(this.blocks, genomicLocation);
+        if (block) {
+            return block.baseAt(genomicLocation);
+        }
+        else {
+            return undefined;
+        }
+
+        function blockAtGenomicLocation(blocks, genomicLocation) {
+
+            var i, block;
+            for (i = 0; i < blocks.length; i++) {
+                block = blocks[i];
+                if (genomicLocation >= block.start && genomicLocation <= block.start + block.len) {
+                    return block;
+                }
+            }
+            return undefined;
         }
     }
 
@@ -269,8 +299,6 @@ var igv = (function (igv) {
         return dataView.getFloat32(offset, littleEndian);
 
     }
-
-
 
 
     igv.BamFilter = function (options) {

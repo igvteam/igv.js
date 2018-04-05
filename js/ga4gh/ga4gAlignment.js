@@ -311,7 +311,7 @@ var igv = (function (igv) {
                 case 'X' :
                     blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual === "*" ? "*" : record.qual.slice(seqOffset, c.len);
-                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
+                    blocks.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType}));
                     seqOffset += c.len;
                     pos += c.len;
                     break;
