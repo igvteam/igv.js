@@ -535,7 +535,7 @@ var igv = (function (igv) {
 
                     blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                    blocks.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType});
+                    blocks.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType}));
                     seqOffset += c.len;
                     pos += c.len;
 
@@ -610,10 +610,8 @@ var igv = (function (igv) {
         });
 
         return tagDict;
-
     }
-
-
+    
     return igv;
 
 })

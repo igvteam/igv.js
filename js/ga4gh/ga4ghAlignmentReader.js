@@ -353,7 +353,7 @@ var igv = (function (igv) {
                                 blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
                                 blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                                 if (insertions === undefined) insertions = [];
-                                insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                                insertions.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals}));
                                 seqOffset += c.len;
                                 break;
                             case 'M' :
