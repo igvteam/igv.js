@@ -49353,7 +49353,7 @@ var igv = (function (igv) {
 
                 trackView.update();
 
-            }, undefined));
+            }));
 
             menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
@@ -49375,7 +49375,7 @@ var igv = (function (igv) {
 
                 }
 
-            }, undefined));
+            }));
         }
 
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
@@ -49394,7 +49394,7 @@ var igv = (function (igv) {
                     return trackView.track.name;
                 }, undefined, function () {
                     trackView.browser.removeTrack(trackView.track);
-                }, true)
+                })
             );
         }
 
