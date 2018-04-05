@@ -87,124 +87,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackFileLoad.prototype.loadLocalFiles = function (files) {
-
-        var dataFiles,
-            indexFiles,
-            missing,
-            configurations,
-            ifMissingDf,
-            dfMissingIf,
-            dataF,
-            indexF,
-            keysMissing,
-            keysPresent,
-            filenames,
-            str,
-            blurb_0,
-            blurb_1;
-
-        dataFiles = extractDataFiles(files);
-
-        indexFiles = extractIndexFiles(files);
-
-        if (undefined === dataFiles && undefined === indexFiles) {
-            this.warnWithMessage('ERROR: ' + 'No data or index file(s) provided.');
-        }
-        // if there are no index files
-        else if (undefined === indexFiles) {
-
-            keysMissing = [];
-            _.each(dataFiles, function (dataFile, key) {
-                // if data file requires an associated index file
-                if (false === igv.TrackFileLoad.keyToIndexExtension[dataFile.indexExtensionLookup].optional) {
-                    keysMissing.push(key);
-                }
-            });
-
-            // render files that don't require and index file
-            keysPresent = _.difference(_.keys(dataFiles), keysMissing);
-            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
-
-            if (dataF) {
-                configurations = _.map(_.pluck(dataF, 'file'), function (f) {
-                    return {url: f, indexed: false}
-                });
-                igv.browser.loadTrackList(configurations);
-            }
-
-            // notify user about missing index files
-            if (_.size(keysMissing) > 0) {
-
-                filenames = _.map(keysMissing, function (key) {
-                    return dataFiles[key].file.name;
-                });
-
-                str = filenames.join(' and ');
-                this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
-            } else {
-                doDismiss.call(this);
-            }
-
-        }
-        // No data files present. All index files are missing their associated data files
-        else if (undefined === dataFiles) {
-
-            blurb_0 = _.map(indexFiles, function (m) {
-                return m.name;
-            }).join(' and ');
-
-            blurb_0 += ' require an associated data file.';
-
-            this.warnWithMessage('ERROR: ' + blurb_0);
-        }
-        // We have a mix of data and index files.
-        else {
-
-            dfMissingIf = dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles);
-            ifMissingDf = indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles);
-
-            str = undefined;
-            blurb_0 = (dfMissingIf) ? dfMissingIf.blurb : undefined;
-            blurb_1 = ( ifMissingDf) ? ifMissingDf.blurb : undefined;
-            if (blurb_0 && blurb_1) {
-                str = blurb_0 + ' ' + blurb_1;
-            } else if (blurb_0) {
-                str = blurb_0;
-            } else if (blurb_1) {
-                str = blurb_1;
-            }
-
-            keysPresent = (dfMissingIf) ? _.difference(_.keys(dataFiles), dfMissingIf.missing) : _.keys(dataFiles);
-            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
-
-            keysPresent = (ifMissingDf) ? _.difference(_.keys(indexFiles), ifMissingDf.missing) : _.keys(indexFiles);
-            indexF = (_.size(keysPresent) > 0) ? _.pick(indexFiles, keysPresent) : undefined;
-
-            if (dataF) {
-                configurations = _.map(_.keys(dataF), function (key) {
-
-                    if (indexF && indexF[key]) {
-                        return {url: dataF[key].file, indexURL: indexF[key]}
-                    } else {
-                        return {url: dataF[key].file, indexed: false}
-                    }
-
-                });
-
-                igv.browser.loadTrackList(configurations);
-            }
-
-            if (str) {
-                this.warnWithMessage('ERROR: ' + str);
-            } else {
-                doDismiss.call(this);
-            }
-
-        }
-
-    };
-
     igv.TrackFileLoad.prototype.warnWithMessage = function (message) {
         this.$warning.find('#warning-message').text(message);
         this.$warning.show();
@@ -240,6 +122,23 @@ var igv = (function (igv) {
         }
 
     };
+
+    function ingestDragDropData (dataTransfer) {
+        var url,
+            files;
+
+        url = dataTransfer.getData('text/uri-list');
+        files = dataTransfer.files;
+
+        if (files.length > 0) {
+            loadLocalFiles.call(this, files);
+        } else if ('' !== url) {
+            processURL.call(this, url, this.$index_url_input.val());
+        } else {
+            console.log('whah?');
+        }
+
+    }
 
     function indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles) {
         var keysMissing,
@@ -400,7 +299,7 @@ var igv = (function (igv) {
                 $('.igv-drag-drop-container').removeClass('is-dragover');
             })
             .on('drop', function (e) {
-                self.loadLocalFiles(e.originalEvent.dataTransfer.files);
+                ingestDragDropData.call(self, e.originalEvent.dataTransfer);
             });
 
         // load local file container
@@ -412,7 +311,7 @@ var igv = (function (igv) {
         this.$file_input_container.append(this.$file_input);
 
         this.$file_input.on('change', function (e) {
-            self.loadLocalFiles(e.target.files)
+            loadLocalFiles.call(self, e.target.files)
         });
 
         blurb(this.$file_input_container, 'Choose file(s)', 'igv-track-file-input', 'load-file-blurb');
@@ -585,28 +484,7 @@ var igv = (function (igv) {
         $ok.hide();
 
         $ok.on('click', function (e) {
-            var _url,
-                _indexURL,
-                extension,
-                key;
-
-            _url = ("" === self.$url_input.val()      ) ? undefined : self.$url_input.val();
-            _indexURL = ("" === self.$index_url_input.val()) ? undefined : self.$index_url_input.val();
-
-            extension = igv.getExtension({url: _url});
-            key = (igv.TrackFileLoad.keyToIndexExtension[extension]) ? extension : 'any';
-            if (undefined === _indexURL && false === igv.TrackFileLoad.keyToIndexExtension[key].optional) {
-                self.warnWithMessage('ERROR. A ' + extension + ' data URL requires an associated index URL.');
-            } else if (undefined === _url) {
-                self.warnWithMessage('ERROR. A data URL must be entered.');
-            } else if (undefined === _indexURL && true === igv.TrackFileLoad.keyToIndexExtension[key].optional) {
-                igv.browser.loadTrack({url: _url, indexURL: undefined, indexed: false});
-                doDismiss.call(self);
-            } else {
-                igv.browser.loadTrack({url: _url, indexURL: _indexURL});
-                doDismiss.call(self);
-            }
-
+            processURL.call(self, self.$url_input.val(), self.$index_url_input.val());
         });
 
         // cancel
@@ -618,6 +496,153 @@ var igv = (function (igv) {
         $cancel.on('click', function (e) {
             doDismiss.call(self);
         });
+    }
+
+    function loadLocalFiles(files) {
+
+        var dataFiles,
+            indexFiles,
+            configurations,
+            ifMissingDf,
+            dfMissingIf,
+            dataF,
+            indexF,
+            keysMissing,
+            keysPresent,
+            filenames,
+            str,
+            blurb_0,
+            blurb_1;
+
+        dataFiles = extractDataFiles(files);
+
+        indexFiles = extractIndexFiles(files);
+
+        if (undefined === dataFiles && undefined === indexFiles) {
+            this.warnWithMessage('ERROR: ' + 'No data or index file(s) provided.');
+        }
+        // if there are no index files
+        else if (undefined === indexFiles) {
+
+            keysMissing = [];
+            _.each(dataFiles, function (dataFile, key) {
+                // if data file requires an associated index file
+                if (false === igv.TrackFileLoad.keyToIndexExtension[dataFile.indexExtensionLookup].optional) {
+                    keysMissing.push(key);
+                }
+            });
+
+            // render files that don't require and index file
+            keysPresent = _.difference(_.keys(dataFiles), keysMissing);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
+
+            if (dataF) {
+                configurations = _.map(_.pluck(dataF, 'file'), function (f) {
+                    return {url: f, indexed: false}
+                });
+                igv.browser.loadTrackList(configurations);
+            }
+
+            // notify user about missing index files
+            if (_.size(keysMissing) > 0) {
+
+                filenames = _.map(keysMissing, function (key) {
+                    return dataFiles[key].file.name;
+                });
+
+                str = filenames.join(' and ');
+                this.warnWithMessage('ERROR: ' + str + ' require an associated index file.');
+            } else {
+                doDismiss.call(this);
+            }
+
+        }
+        // No data files present. All index files are missing their associated data files
+        else if (undefined === dataFiles) {
+
+            blurb_0 = _.map(indexFiles, function (m) {
+                return m.name;
+            }).join(' and ');
+
+            blurb_0 += ' require an associated data file.';
+
+            this.warnWithMessage('ERROR: ' + blurb_0);
+        }
+        // We have a mix of data and index files.
+        else {
+
+            dfMissingIf = dataFilesMissingAssociatedIndexFilesAndWarningBlurb(dataFiles, indexFiles);
+            ifMissingDf = indexFilesMissingAssociatedDataFilesAndWarningBlurb(dataFiles, indexFiles);
+
+            str = undefined;
+            blurb_0 = (dfMissingIf) ? dfMissingIf.blurb : undefined;
+            blurb_1 = ( ifMissingDf) ? ifMissingDf.blurb : undefined;
+            if (blurb_0 && blurb_1) {
+                str = blurb_0 + ' ' + blurb_1;
+            } else if (blurb_0) {
+                str = blurb_0;
+            } else if (blurb_1) {
+                str = blurb_1;
+            }
+
+            keysPresent = (dfMissingIf) ? _.difference(_.keys(dataFiles), dfMissingIf.missing) : _.keys(dataFiles);
+            dataF = (_.size(keysPresent) > 0) ? _.pick(dataFiles, keysPresent) : undefined;
+
+            keysPresent = (ifMissingDf) ? _.difference(_.keys(indexFiles), ifMissingDf.missing) : _.keys(indexFiles);
+            indexF = (_.size(keysPresent) > 0) ? _.pick(indexFiles, keysPresent) : undefined;
+
+            if (dataF) {
+                configurations = _.map(_.keys(dataF), function (key) {
+
+                    if (indexF && indexF[key]) {
+                        return {url: dataF[key].file, indexURL: indexF[key]}
+                    } else {
+                        return {url: dataF[key].file, indexed: false}
+                    }
+
+                });
+
+                igv.browser.loadTrackList(configurations);
+            }
+
+            if (str) {
+                this.warnWithMessage('ERROR: ' + str);
+            } else {
+                doDismiss.call(this);
+            }
+
+        }
+
+    }
+
+    function processURL(url, indexURL) {
+        var self = this,
+            _url,
+            _indexURL,
+            extension,
+            key;
+
+        _url = ('' === url) ? undefined : url;
+        _indexURL = ('' === indexURL) ? undefined : indexURL;
+
+        extension = igv.getExtension({ url: _url });
+        key = (igv.TrackFileLoad.keyToIndexExtension[ extension ]) ? extension : 'any';
+
+        if (undefined === _indexURL && false === igv.TrackFileLoad.keyToIndexExtension[key].optional) {
+            this.warnWithMessage('ERROR. A ' + extension + ' data URL requires an associated index URL.');
+        }
+        else if (undefined === _url) {
+            this.warnWithMessage('ERROR. A data URL must be entered.');
+        }
+        else if (undefined === _indexURL && true === igv.TrackFileLoad.keyToIndexExtension[key].optional) {
+            igv.browser.loadTrack({ url: _url, indexURL: undefined, indexed: false });
+            doDismiss.call(self);
+        }
+        else {
+            igv.browser.loadTrack({ url: _url, indexURL: _indexURL });
+            doDismiss.call(self);
+        }
+
     }
 
     function doDismiss() {
