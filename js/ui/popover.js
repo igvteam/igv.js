@@ -74,9 +74,7 @@ var igv = (function (igv) {
         menuItems = igv.trackMenuItemList(this, trackView);
         if (menuItems.length > 0) {
 
-            menuItems = igv.trackMenuItemListHelper(menuItems, function () {
-                self.$popover.hide();
-            });
+            menuItems = igv.trackMenuItemListHelper(menuItems, self.$popover);
 
             this.$popoverContent.empty();
             this.$popoverContent.removeClass("igv-popover-track-popup-content");
@@ -107,9 +105,7 @@ var igv = (function (igv) {
 
         if (menuItems.length > 0) {
             
-            menuItems = igv.trackMenuItemListHelper(menuItems, function () {
-                $popover.hide();
-            });
+            menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
             
             this.$popoverContent.empty();
             this.$popoverContent.removeClass("igv-popover-track-popup-content");
