@@ -774,7 +774,7 @@ var igv = (function (igv) {
             popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
 
             if (undefined === popupClickHandlerResult) {
-                if (dataList.length > 0) {
+                if (dataList && dataList.length > 0) {
                     content = formatPopoverText(dataList);
                 }
 
