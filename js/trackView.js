@@ -185,8 +185,9 @@ var igv = (function (igv) {
         if (this.track.dataRange) {
 
             $leftHandGutter.click(function (e) {
-                igv.dataRangeDialog.configureWithTrackView(self);
-                igv.dataRangeDialog.show();
+                // igv.dataRangeDialog.configureWithTrackView(self);
+                igv.dataRangeDialog.configure({ trackView: self });
+                igv.dataRangeDialog.present($(self.trackDiv));
             });
 
             $leftHandGutter.addClass('igv-clickable');

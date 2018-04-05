@@ -572,8 +572,9 @@ var igv = (function (igv) {
         $e.text('Set data range');
 
         clickHandler = function () {
-            igv.dataRangeDialog.configureWithTrackView(trackView);
-            igv.dataRangeDialog.show();
+            // igv.dataRangeDialog.configureWithTrackView(trackView);
+            igv.dataRangeDialog.configure({ trackView: trackView });
+            igv.dataRangeDialog.present($(trackView.trackDiv));
         };
 
         return {object: $e, click: clickHandler};
