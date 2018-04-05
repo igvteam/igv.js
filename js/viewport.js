@@ -237,15 +237,12 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.update = function () {
-
-        if (this.tile) {
-            this.tile.invalidate = true;
-        }
-        this.repaint();
+        
+        this.repaint(true);
 
     };
 
-    igv.Viewport.prototype.repaint = function () {
+    igv.Viewport.prototype.repaint = function (force) {
 
         var self = this,
             pixelWidth,
@@ -280,16 +277,13 @@ var igv = (function (igv) {
         refFrameStart = referenceFrame.start;
         refFrameEnd = refFrameStart + referenceFrame.toBP($(self.contentDiv).width());
 
-        // Paint existing cached image, if any, while data loads.
-        //this.paintImage(chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel);
-
         if (self.canvas && self.tile && self.tile.chr === chr && self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
             var pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
             self.canvas.style.left = pixelOffset + "px";
         }
 
 
-        if (!tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
+        if (force || !tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
             //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
             //TODO -- cached features directly (not a promise for features).
