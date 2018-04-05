@@ -148,12 +148,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.contextMenuItemList = function (config) {
 
-        if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-            return [];
-        } else {
-            return this.alignmentTrack.contextMenuItemList(config);
-        }
-
+        return this.alignmentTrack.contextMenuItemList(config);
 
     };
 
@@ -177,9 +172,9 @@ var igv = (function (igv) {
             tagLabel,
             selected;
 
-        // sort by genomic location
-        menuItems.push(sortMenuItem());
-
+        // sort by @ center line
+        //menuItems.push(sortMenuItem());
+        
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
@@ -294,7 +289,8 @@ var igv = (function (igv) {
                 viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
                 genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
 
-                self.altClick(genomicLocation, undefined, undefined);
+                self.sortOption = {sort: "NUCLEOTIDE"};
+                self.alignmentTrack.sortAlignmentRows(genomicLocation, sortOption);
 
                 if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
                     igv.browser.centerGuide.$centerGuideToggle.trigger("click");
@@ -485,28 +481,28 @@ var igv = (function (igv) {
 
             // A
             tmp = coverage.posA + coverage.negA;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posA+"+, "+coverage.negA+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
             nameValues.push({name: 'A', value: tmp});
 
 
             // C
             tmp = coverage.posC + coverage.negC;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posC+"+, "+coverage.negC+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
             nameValues.push({name: 'C', value: tmp});
 
             // G
             tmp = coverage.posG + coverage.negG;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posG+"+, "+coverage.negG+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
             nameValues.push({name: 'G', value: tmp});
 
             // T
             tmp = coverage.posT + coverage.negT;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posT+"+, "+coverage.negT+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
             nameValues.push({name: 'T', value: tmp});
 
             // N
             tmp = coverage.posN + coverage.negN;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, "+coverage.posN+"+, "+coverage.negN+"- )";
+            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
             nameValues.push({name: 'N', value: tmp});
 
         }
@@ -849,13 +845,15 @@ var igv = (function (igv) {
         var self = this;
 
         this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
-            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption);
+            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption, self.sortDirection);
         });
 
         this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-            // return rowA.score - rowB.score;
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
+
+        this.parent.trackView.update();
+        this.sortDirection = !(this.sortDirection);
 
     };
 
@@ -874,7 +872,7 @@ var igv = (function (igv) {
             clickHandler,
             list = [];
 
-        list.push({label: 'Sort by base', click: sortRows, init: undefined});
+        list.push({label: 'Sort by base', click: sortRows});
 
         var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
         if (alignment && alignment.isPaired() && alignment.isMateMapped()) {
@@ -884,10 +882,8 @@ var igv = (function (igv) {
         return list;
 
         function sortRows() {
+            self.sortOption = {sort: "NUCLEOTIDE"};
             self.sortAlignmentRows(config.genomicLocation, self.sortOption);
-            self.parent.trackView.update();
-            self.sortDirection = !(self.sortDirection);
-
         }
 
         function viewMateInSplitScreen() {
@@ -897,6 +893,7 @@ var igv = (function (igv) {
             }
         }
     };
+
 
     function parse(locusString) {
         return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
