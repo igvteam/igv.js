@@ -422,11 +422,10 @@ var igv = (function (igv) {
     /**
      * Repaint existing features (e.g. a color, resort, or display mode change).
      */
-    igv.TrackView.prototype.repaint = function () {
-        var self = this;
+    igv.TrackView.prototype.repaint = function (force) {
 
         this.viewports.forEach(function (viewport) {
-            viewport.repaint();
+            viewport.repaint(force);
         });
 
     };
