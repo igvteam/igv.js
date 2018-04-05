@@ -969,7 +969,7 @@
   overflow: hidden;
   text-overflow: ellipsis; }
 
-.igv-track-removal-dialog-container {
+.igv-generic-dialog-container {
   position: absolute;
   top: 0;
   left: 0;
@@ -989,7 +989,7 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center; }
-  .igv-track-removal-dialog-container #track-removal-dialog-header {
+  .igv-generic-dialog-container .igv-generic-dialog-header {
     width: 100%;
     height: 24px;
     cursor: move;
@@ -1004,7 +1004,7 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center; }
-    .igv-track-removal-dialog-container #track-removal-dialog-header div {
+    .igv-generic-dialog-container .igv-generic-dialog-header div {
       height: 100%;
       width: 16px;
       margin-right: 6px;
@@ -1012,9 +1012,9 @@
       line-height: 100%;
       color: #444;
       font-size: medium; }
-    .igv-track-removal-dialog-container #track-removal-dialog-header div:hover {
+    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
       cursor: pointer; }
-  .igv-track-removal-dialog-container .track-removal-dialog-one-liner {
+  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
     margin-top: 8px;
     width: 95%;
     height: 24px;
@@ -1023,14 +1023,51 @@
     text-align: left;
     padding-left: 8px;
     background-color: white; }
-  .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel {
+  .igv-generic-dialog-container .igv-generic-dialog-label-input {
+    margin-top: 8px;
+    width: 95%;
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    padding-left: 8px;
+    background-color: white;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
+      width: 30%;
+      height: 100%;
+      font-size: 16px;
+      text-align: right;
+      padding-right: 8px;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      width: 50%;
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
     width: 100%;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-around;
     align-items: center; }
-    .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel div {
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
       width: 98px;
       height: 36px;
       margin-top: 32px;
@@ -1044,18 +1081,18 @@
       border-style: solid;
       border-width: thin;
       border-radius: 4px; }
-    .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel div:first-child {
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
       margin-left: 32px;
       margin-right: 0;
       background-color: #2B81AF; }
-    .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel div:last-child {
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
       margin-left: 0;
       margin-right: 32px;
       background-color: #c4c4c4; }
-    .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel div:first-child:hover {
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
       cursor: pointer;
       background-color: #25597f; }
-    .igv-track-removal-dialog-container #track-removal-dialog-ok-cancel div:last-child:hover {
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
       cursor: pointer;
       background-color: #7e7e7e; }
 

@@ -27,6 +27,31 @@ $igv-light-grey-color: #bfbfbf;
 $igv-grey-color: #7F7F7F;
 $igv-dark-grey-color: #373737;
 
+@mixin generic-input {
+
+  input {
+    display: block;
+    height: 100%;
+    width: 100%;
+
+    padding-left: 4px;
+
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+    color: $igv-dark-grey-color;
+    text-align: left;
+
+    outline: none;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-grey-color;
+
+    background-color: white;
+  }
+
+}
+
 #igvControlDiv {
   position: relative;
 }
@@ -1060,7 +1085,8 @@ $igv-dark-grey-color: #373737;
   text-overflow: ellipsis;
 }
 
-.igv-track-removal-dialog-container {
+// generic dialog
+.igv-generic-dialog-container {
 
   position: absolute;
   top: 0;
@@ -1089,7 +1115,7 @@ $igv-dark-grey-color: #373737;
   align-items: center;
 
   // header
-  #track-removal-dialog-header {
+  .igv-generic-dialog-header {
     width: 100%;
     height: 24px;
 
@@ -1130,7 +1156,7 @@ $igv-dark-grey-color: #373737;
   }
 
   // one-liner
-  .track-removal-dialog-one-liner {
+  .igv-generic-dialog-one-liner {
     margin-top: 8px;
 
     width: 95%;
@@ -1145,7 +1171,47 @@ $igv-dark-grey-color: #373737;
     background-color: white;
   }
 
-  #track-removal-dialog-ok-cancel {
+  // labeled input
+  .igv-generic-dialog-label-input {
+    margin-top: 8px;
+
+    width: 95%;
+    height: 24px;
+
+    color: $igv-dark-grey-color;
+
+    line-height: 24px;
+    padding-left: 8px;
+
+    background-color: white;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+
+    div {
+      width: 30%;
+      height: 100%;
+
+      font-size: 16px;
+      text-align: right;
+      padding-right: 8px;
+
+      background-color: white;
+    }
+
+    @include generic-input;
+    input {
+      width: 50%;
+      font-size: 16px;
+    }
+
+  }
+
+  // ok | cancel
+  .igv-generic-dialog-ok-cancel {
 
     width: 100%;
 
