@@ -215,7 +215,7 @@ var igv = (function (igv) {
                     }
 
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
-                    self.trackView.update();
+                    self.trackView.repaint(true);
                 }
             });
         }
@@ -850,7 +850,7 @@ var igv = (function (igv) {
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
-        this.parent.trackView.update();
+        this.parent.trackView.repaint(true);
         this.sortDirection = !(this.sortDirection);
 
     };
