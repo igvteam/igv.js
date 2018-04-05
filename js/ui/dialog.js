@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.Dialog = function ($parent, constructorHelper) {
+    igv.Dialog = function ($parent) {
 
         var self = this,
             $header,
@@ -44,7 +44,7 @@ var igv = (function (igv) {
 
         this.$container.append($header[ 0 ]);
 
-        constructorHelper(this);
+        initializationHelper.call(this);
 
         this.$container.draggable({ handle:$header.get(0) });
 
@@ -54,13 +54,13 @@ var igv = (function (igv) {
 
     };
 
-    igv.Dialog.dialogConstructor = function (dialog) {
+    function initializationHelper() {
 
-        dialog.$container.append(dialog.rowOfLabel()[ 0 ]);
+        this.$container.append(this.rowOfLabel()[ 0 ]);
 
-        dialog.$container.append(dialog.rowOfInput()[ 0 ]);
+        this.$container.append(this.rowOfInput()[ 0 ]);
 
-        dialog.$container.append(dialog.rowOfOkCancel()[ 0 ]);
+        this.$container.append(this.rowOfOkCancel()[ 0 ]);
 
 
     };
