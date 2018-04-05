@@ -399,7 +399,7 @@ var igv = (function (igv) {
 
         menuItems = [];
         if (typeof viewport.trackView.track.contextMenuItemList === "function") {
-            menuItems = igv.trackMenuItemListHelper(viewport.trackView.track.contextMenuItemList(config));
+            menuItems = viewport.trackView.track.contextMenuItemList(config);
         }
 
         return menuItems;
@@ -461,10 +461,7 @@ var igv = (function (igv) {
 
         all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(igv.trackMenuItemListHelper(trackView.track.menuItemList(popover),
-                function () {
-                    popover.hide();
-                }));
+            all = menuItems.concat(trackView.track.menuItemList());
         }
 
         if (trackView.track.removable !== false) {
@@ -485,7 +482,7 @@ var igv = (function (igv) {
         return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
-    igv.trackMenuItemListHelper = function (itemList, callback) {
+    igv.trackMenuItemListHelper = function (itemList, $popover) {
 
         var list = [];
 
@@ -516,7 +513,7 @@ var igv = (function (igv) {
                 if (item.click) {
                     $e.click(function () {
                         item.click();
-                        if (typeof callback === "function") callback();
+                        $popover.hide();
                     });
                 }
 
