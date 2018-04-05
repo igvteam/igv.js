@@ -234,8 +234,6 @@ var igv = (function (igv) {
                     inputValue,
                     clickFunction;
 
-                igv.popover.hide();
-
                 if ('tag' === menuItem.key) {
 
                     labelHTMLFunction = function () {
