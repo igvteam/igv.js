@@ -1145,7 +1145,6 @@ var igv = (function (igv) {
             searchConfig = igv.browser.searchConfig,
             geneNameLoci,
             genomicState,
-
             result,
             unique,
             promises,
@@ -1165,7 +1164,6 @@ var igv = (function (igv) {
         });
 
         result = [];
-
         geneNameLoci = [];
         dictionary = {};
         // Try locus string first  (e.g.  chr1:100-200)
@@ -1253,8 +1251,7 @@ var igv = (function (igv) {
             });
 
             return orderedList;
-
-
+            // return list;
 
         }
 
