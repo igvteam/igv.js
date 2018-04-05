@@ -174,7 +174,7 @@ var igv = (function (igv) {
 
         // sort by @ center line
         //menuItems.push(sortMenuItem());
-        
+
         colorByMenuItems.push({key: 'none', label: 'track color'});
 
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
@@ -875,7 +875,7 @@ var igv = (function (igv) {
         list.push({label: 'Sort by base', click: sortRows});
 
         var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        if (alignment && alignment.isPaired() && alignment.isMateMapped()) {
+        if (alignment && !alignment.paired && alignment.isPaired() && alignment.isMateMapped()) {
             list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
         }
 
