@@ -176,7 +176,7 @@ var igv = (function (igv) {
             idx = Math.floor(Math.random() * (this.samplingDepth + this.downsampledCount - 1));
 
             if (idx < this.samplingDepth) {
-                console.log("Replace");
+                
                 // Keep the new item
                 //  idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 replacedAlignment = this.alignments[idx];   // To be replaced
