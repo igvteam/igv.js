@@ -377,7 +377,6 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for contextual (right-click) track popup menu.
-     * @param popover
      * @param viewport
      * @param genomicLocation - (bp)
      * @param xOffset - (pixels) within track extent
@@ -417,20 +416,7 @@ var igv = (function (igv) {
 
         if (trackView.track.config.type !== 'sequence') {
 
-            menuItems.push(igv.trackMenuItem(trackView, "Set track name", function () {
-                return "Track Name"
-            }, trackView.track.name, function () {
-
-                var value;
-
-                value = igv.dialog.$dialogInput.val().trim();
-                value = ('' === value || undefined === value) ? 'untitled' : value;
-
-                igv.setTrackLabel(trackView.track, value);
-
-                trackView.update();
-
-            }, undefined));
+            menuItems.push(igv.trackRenameMenuItem(trackView));
 
             menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
@@ -440,7 +426,7 @@ var igv = (function (igv) {
 
                 if (undefined !== number) {
 
-// If explicitly setting the height adust min or max, if neccessary.
+                    // If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -448,11 +434,12 @@ var igv = (function (igv) {
                         trackView.track.minHeight = number;
                     }
                     trackView.setTrackHeight(number, true, true);
-                    trackView.track.autoHeight = false;   // Explicitly setting track height turns off autoHeight
 
+                    // Explicitly setting track height turns off autoHeight
+                    trackView.track.autoHeight = false;
                 }
 
-            }, undefined));
+            }));
         }
 
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
@@ -524,32 +511,19 @@ var igv = (function (igv) {
      * @param dialogLabelHandler - dialog label creation handler
      * @param dialogInputValue
      * @param dialogClickHandler
-     * @param doAddTopBorder
      */
-    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
+    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler) {
 
         var $e,
             clickHandler;
 
         $e = $('<div>');
 
-        if (true === doAddTopBorder) {
-            $e.addClass('igv-track-menu-border-top');
-        }
-
         $e.text(menuItemLabel);
 
-
         clickHandler = function () {
-            var $element = $(trackView.trackDiv);
-
-            if ('Remove track' === menuItemLabel) {
-                igv.trackRemovalDialog.configure({name: dialogLabelHandler(), click: dialogClickHandler});
-                igv.trackRemovalDialog.present($(trackView.trackDiv));
-            } else {
-                igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-                igv.dialog.show($element);
-            }
+            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+            igv.dialog.show( $(trackView.trackDiv) );
         };
 
         return {object: $e, click: clickHandler};
@@ -596,7 +570,8 @@ var igv = (function (igv) {
     };
 
     igv.colorPickerMenuItem = function (trackView) {
-        var $e;
+        var $e,
+            clickHandler;
 
         $e = $('<div>');
         $e.text('Set track color');
@@ -606,6 +581,40 @@ var igv = (function (igv) {
         };
 
         return {object: $e, click: clickHandler};
+
+    };
+
+    igv.trackRenameMenuItem = function (trackView) {
+
+        var $e,
+            menuClickHandler;
+
+        $e = $('<div>');
+        $e.text('Set track name');
+
+        menuClickHandler = function () {
+            var dialogLabelHandler,
+                dialogClickHandler;
+
+            dialogLabelHandler = function () {
+                return "Track Name"
+            };
+
+            dialogClickHandler = function () {
+                var value;
+                value = igv.dialog.$dialogInput.val().trim();
+                value = ('' === value || undefined === value) ? 'untitled' : value;
+
+                igv.setTrackLabel(trackView.track, value);
+                trackView.update();
+            };
+
+            igv.dialog.configure(dialogLabelHandler, trackView.track.name, dialogClickHandler);
+            igv.dialog.show( $(trackView.trackDiv) );
+        };
+
+        return { object: $e, click: menuClickHandler };
+
 
     };
 
