@@ -417,7 +417,7 @@ var igv = (function (igv) {
 
         if (trackView.track.config.type !== 'sequence') {
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track name", function () {
                 return "Track Name"
             }, trackView.track.name, function () {
 
@@ -432,7 +432,7 @@ var igv = (function (igv) {
 
             }, undefined));
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
             }, trackView.trackDiv.clientHeight, function () {
 
@@ -440,7 +440,7 @@ var igv = (function (igv) {
 
                 if (undefined !== number) {
 
-                    // If explicitly setting the height adust min or max, if neccessary.
+// If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -465,14 +465,7 @@ var igv = (function (igv) {
         }
 
         if (trackView.track.removable !== false) {
-
-            all.push(
-                igv.trackMenuItem(popover, trackView, "Remove track", function () {
-                    return trackView.track.name;
-                }, undefined, function () {
-                    trackView.browser.removeTrack(trackView.track);
-                }, true)
-            );
+            all.push(igv.trackRemovalMenuItem(trackView));
         }
 
         return all;
@@ -526,7 +519,6 @@ var igv = (function (igv) {
 
     /**
      * Configure item for track "gear" menu.
-     * @param popover - passed to allow menu-item handler to close popup
      * @param trackView
      * @param menuItemLabel - menu item string
      * @param dialogLabelHandler - dialog label creation handler
@@ -534,7 +526,7 @@ var igv = (function (igv) {
      * @param dialogClickHandler
      * @param doAddTopBorder
      */
-    igv.trackMenuItem = function (popover, trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
+    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler, doAddTopBorder) {
 
         var $e,
             clickHandler;
@@ -561,6 +553,30 @@ var igv = (function (igv) {
         };
 
         return {object: $e, click: clickHandler};
+    };
+
+    igv.trackRemovalMenuItem = function (trackView) {
+
+        var $e,
+            menuClickHandler;
+
+        $e = $('<div>');
+        $e.addClass('igv-track-menu-border-top');
+        $e.text('Remove track');
+
+        menuClickHandler = function () {
+            var dialogClickHandler;
+
+            dialogClickHandler = function () {
+                trackView.browser.removeTrack(trackView.track);
+            };
+
+            igv.trackRemovalDialog.configure({ name: trackView.track.name, click: dialogClickHandler });
+            igv.trackRemovalDialog.present($(trackView.trackDiv));
+        };
+
+        return { object: $e, click: menuClickHandler };
+
     };
 
     igv.dataRangeMenuItem = function (trackView) {
