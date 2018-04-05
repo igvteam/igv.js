@@ -49270,7 +49270,7 @@ var igv = (function (igv) {
 
                 trackView.update();
 
-            }, undefined));
+            }));
 
             menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
@@ -49292,7 +49292,7 @@ var igv = (function (igv) {
 
                 }
 
-            }, undefined));
+            }));
         }
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
             menuItems.push(igv.colorPickerMenuItem(trackView))
@@ -49312,7 +49312,7 @@ var igv = (function (igv) {
                     popover.hide();
                     trackView.browser.removeTrack(trackView.track);
 // trackView.browser.removeTrackByName(trackView.track.name);
-                }, true)
+                })
             );
         }
 
