@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
     igv.BamAlignmentRow.prototype.calculateScore = function (genomicLocation, interval, sortOption, sortDirection) {
 
-        var baseScore,
+        var readBase,
             alignment,
             block;
 
@@ -82,13 +82,8 @@ var igv = (function (igv) {
 
         if ("NUCLEOTIDE" === sortOption.sort) {
 
-            if (alignment.blocks && alignment.blocks.length > 0) {
-                block = blockAtGenomicLocation(alignment.blocks, genomicLocation, interval.start);
-                if (block) {
-                    baseScore = blockScoreWithObject(block, interval);
-                }
-            }
-            return (undefined === baseScore) ? Number.MAX_VALUE : baseScore;
+            readBase = alignment.readBaseAt(genomicLocation);
+            return  calculateBaseScore(readBase, interval, genomicLocation);
 
         } else if ("STRAND" === sortOption.sort) {
 
@@ -101,123 +96,43 @@ var igv = (function (igv) {
 
         return Number.MAX_VALUE;
 
-        function blockAtGenomicLocation(blocks, genomicLocation, genomicIntervalStart) {
 
-            var result = undefined;
 
-            blocks.forEach(function (block) {
-
-                for (var i = 0, genomicOffset = block.start - genomicIntervalStart, blockLocation = block.start, blockSequenceLength = block.seq.length;
-                     i < blockSequenceLength;
-                     i++, genomicOffset++, blockLocation++) {
-
-                    if (genomicLocation === blockLocation) {
-                        result = {
-                            block: block,
-                            blockSeqIndex: i,
-                            referenceSequenceIndex: genomicOffset,
-                            location: genomicLocation
-                        };
-                    }
-
-                }
-
-            });
-
-            return result;
-        }
-
-        function blockScoreWithObject(obj, interval) {
-
-            var reference,
-                base,
+        function calculateBaseScore(base, interval, genomicLocation)  {
+            var idx,
+                reference,
                 coverage,
                 count,
                 phred;
 
-            if ("*" === obj.block.seq) {
-                return 3;
-            }
 
-            reference = interval.sequence.charAt(obj.referenceSequenceIndex);
-            base = obj.block.seq.charAt(obj.blockSeqIndex);
 
-            if ("=" === base) {
-                base = reference;
+            idx = genomicLocation - interval.start;
+            if(idx < interval.sequence.length) {
+                reference = interval.sequence.charAt(idx);
             }
+            if(!reference) return undefined;
 
             if ('N' === base) {
                 return 2;
-            } else if (reference === base) {
+            } else if (reference === base || '=' === base) {
                 return 3;
             } else if ("X" === base || reference !== base) {
 
-                coverage = interval.coverageMap.coverage[(obj.location - interval.coverageMap.bpStart)];
-
-                count = coverage["pos" + base] + coverage["neg" + base];
-                phred = (coverage.qual) ? coverage.qual : 0;
-
-                return -(count + (phred / 1000.0));
+                idx = genomicLocation - interval.coverageMap.bpStart;
+                if(idx > 0 && idx < interval.coverageMap.coverage.length) {
+                    coverage = interval.coverageMap.coverage[idx];
+                    count = coverage["pos" + base] + coverage["neg" + base];
+                    phred = (coverage.qual) ? coverage.qual : 0;
+                    return -(count + (phred / 1000.0));
+                } else {
+                    return -1;
+                }
             }
 
-            return undefined;
+            return 0;
         }
 
-        function nucleotideBlockScores(blocks) {
-
-            var result = undefined;
-
-            blocks.forEach(function (block) {
-
-                var sequence = interval.sequence,
-                    coverageMap = interval.coverageMap,
-                    reference,
-                    base,
-                    coverage,
-                    count,
-                    phred;
-
-                if ("*" === block.seq) {
-                    result = 3;
-                }
-
-                for (var i = 0, indexReferenceSequence = block.start - interval.start, bpBlockSequence = block.start, lengthBlockSequence = block.seq.length;
-                     i < lengthBlockSequence;
-                     i++, indexReferenceSequence++, bpBlockSequence++) {
-
-                    if (bpStart !== bpBlockSequence) {
-                        continue;
-                    }
-
-                    reference = sequence.charAt(indexReferenceSequence);
-                    base = block.seq.charAt(i);
-
-                    if (base === "=") {
-                        base = reference;
-                    }
-
-                    if (base === 'N') {
-                        result = 2;
-                    }
-                    else if (base === reference) {
-                        result = 3;
-                    }
-                    else if (base === "X" || base !== reference) {
-
-                        coverage = coverageMap.coverage[(bpBlockSequence - coverageMap.bpStart)];
-                        count = coverage["pos" + base] + coverage["neg" + base];
-                        phred = (coverage.qual) ? coverage.qual : 0;
-                        result = -(count + (phred / 1000.0));
-                    } else {
-                        console.log("BamAlignmentRow.caculateScore - huh?");
-                    }
-
-                } // for (i < lengthBlockSequence)
-
-            });
-
-            return result;
-        }
     };
 
     return igv;
