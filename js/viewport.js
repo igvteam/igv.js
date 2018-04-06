@@ -172,12 +172,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Viewport.prototype.resize = function () {
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
-        this.update();
-    };
-
-
     /**
      * Return a promise to adjust content height to accomodate features for current genomic state
      *
@@ -531,7 +525,20 @@ var igv = (function (igv) {
      * Called when the associated track is removed.  Do any needed cleanup here.
      */
     igv.Viewport.prototype.dispose = function () {
-        this.cachedFeatures = undefined;
+      
+        this.$viewport.off();
+        this.$viewport.empty();
+        $(this.contentDiv).off();
+        $(this.contentDiv).empty();
+        $(this.canvas).off();
+        $(this.canvas).empty();
+        if(this.popover) {
+            $(this.popover).off();
+            $(this.popover).empty();
+        }
+        Object.keys(this).forEach(function (key) {
+            this[key] = undefined;
+        })
     }
     
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
