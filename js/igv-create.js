@@ -72,21 +72,15 @@ var igv = (function (igv) {
         browser.userFeedback = new igv.UserFeedback(browser.$content);
         browser.userFeedback.hide();
 
-        // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(browser.$content);
 
-        // alert object -- singleton shared by all components
         igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
         igv.alert.hide();
 
-        // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(browser.$root);
-        igv.dialog.hide();
+        igv.dialog = new igv.InputDialog(browser.$root);
 
-        // Dialog object -- singleton shared by all components
         igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
 
-        // Dialog object -- singleton shared by all components
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
 
         // TODO fix this
