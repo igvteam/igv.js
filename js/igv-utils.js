@@ -157,8 +157,6 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (alert, $parent) {
 
-        console.error(alert);
-
         var string;
 
         string = alert.message || alert;
@@ -167,8 +165,8 @@ var igv = (function (igv) {
             string = httpMessages[string];
         }
 
-        igv.alert.$dialogLabel.text(string);
-        igv.alert.show($parent);
+        igv.alertDialog.configure({ label: string });
+        igv.alertDialog.present($parent);
     };
 
     var httpMessages = {
