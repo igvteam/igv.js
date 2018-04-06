@@ -148,6 +148,13 @@ var igv = (function (igv) {
 
     };
 
+    igv.Popover.prototype.dispose = function () {
+        this.$popover.empty();
+        this.$popoverContent.empty();
+        Object.keys(this).forEach(function (key) {
+            this[key] = undefined;
+        })
+    }
 
     function clampPopoverLocation(pageX, pageY, popover) {
 

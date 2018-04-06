@@ -49340,7 +49340,7 @@ var igv = (function (igv) {
 
         if (trackView.track.config.type !== 'sequence') {
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track name", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track name", function () {
                 return "Track Name"
             }, trackView.track.name, function () {
 
@@ -49353,9 +49353,9 @@ var igv = (function (igv) {
 
                 trackView.update();
 
-            }, undefined));
+            }));
 
-            menuItems.push(igv.trackMenuItem(popover, trackView, "Set track height", function () {
+            menuItems.push(igv.trackMenuItem(trackView, "Set track height", function () {
                 return "Track Height"
             }, trackView.trackDiv.clientHeight, function () {
 
@@ -49363,7 +49363,7 @@ var igv = (function (igv) {
 
                 if (undefined !== number) {
 
-                    // If explicitly setting the height adust min or max, if neccessary.
+// If explicitly setting the height adust min or max, if neccessary.
                     if (trackView.track.minHeight !== undefined && trackView.track.minHeight > number) {
                         trackView.track.minHeight = number;
                     }
@@ -49375,7 +49375,7 @@ var igv = (function (igv) {
 
                 }
 
-            }, undefined));
+            }));
         }
 
         if (igv.doProvideColoSwatchWidget(trackView.track)) {
@@ -49390,11 +49390,11 @@ var igv = (function (igv) {
         if (trackView.track.removable !== false) {
 
             all.push(
-                igv.trackMenuItem(popover, trackView, "Remove track", function () {
+                igv.trackMenuItem(trackView, "Remove track", function () {
                     return trackView.track.name;
                 }, undefined, function () {
                     trackView.browser.removeTrack(trackView.track);
-                }, true)
+                })
             );
         }
 
