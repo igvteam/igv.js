@@ -116,7 +116,7 @@ var igv = (function (igv) {
                 name: self.reversed ? "Forward" : "Reverse",
                 click: function () {
                     self.reversed = !self.reversed;
-                    igv.browser.update();
+                    self.trackView.repaint(true); 
                 }
             },
             {
