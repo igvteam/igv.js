@@ -257,8 +257,10 @@ var igv = (function (igv) {
                                 $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             }
 
+
                             self.trackView.repaint(true);
                         };
+
 
                         igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
                         igv.dialog.show($(self.trackView.trackDiv));
@@ -267,6 +269,7 @@ var igv = (function (igv) {
                         self.alignmentTrack.colorBy = menuItem.key;
                         self.trackView.repaint(true);
                     }
+
                 }
             };
 
