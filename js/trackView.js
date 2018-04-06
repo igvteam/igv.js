@@ -25,6 +25,9 @@
 
 
 var igv = (function (igv) {
+    
+    var dragged,
+        dragDestination;
 
     igv.TrackView = function (browser, $container, track) {
 
@@ -236,7 +239,7 @@ var igv = (function (igv) {
         self.$trackManipulationHandle.on('mousedown.trackview', function (e) {
             e.preventDefault();
             self.isMouseDown = true;
-            igv.dragged = self;
+            dragged = self;
         });
 
         self.$trackManipulationHandle.on('mouseup.trackview', function (e) {
@@ -247,26 +250,26 @@ var igv = (function (igv) {
         self.$trackManipulationHandle.on('mouseenter.trackview', function (e) {
             e.preventDefault();
             self.isMouseIn = true;
-            igv.dragDestination = self;
+            dragDestination = self;
 
-            if (undefined === igv.dragged) {
+            if (undefined === dragged) {
                 self.$trackDragScrim.show();
-            } else if (self === igv.dragged) {
+            } else if (self === dragged) {
                 self.$trackDragScrim.show();
             }
 
-            if ((igv.dragDestination && igv.dragged) && (igv.dragDestination !== igv.dragged)) {
+            if ((dragDestination && dragged) && (dragDestination !== dragged)) {
 
-                indexDestination = igv.browser.trackViews.indexOf(igv.dragDestination);
-                indexDragged = igv.browser.trackViews.indexOf(igv.dragged);
+                indexDestination = igv.browser.trackViews.indexOf(dragDestination);
+                indexDragged = igv.browser.trackViews.indexOf(dragged);
 
-                igv.browser.trackViews[indexDestination] = igv.dragged;
-                igv.browser.trackViews[indexDragged] = igv.dragDestination;
+                igv.browser.trackViews[indexDestination] = dragged;
+                igv.browser.trackViews[indexDragged] = dragDestination;
 
                 if (indexDestination < indexDragged) {
-                    $(igv.dragged.trackDiv).insertBefore($(igv.dragDestination.trackDiv));
+                    $(dragged.trackDiv).insertBefore($(dragDestination.trackDiv));
                 } else {
-                    $(igv.dragged.trackDiv).insertAfter($(igv.dragDestination.trackDiv));
+                    $(dragged.trackDiv).insertAfter($(dragDestination.trackDiv));
                 }
 
             }
@@ -276,9 +279,9 @@ var igv = (function (igv) {
         self.$trackManipulationHandle.on('mouseleave.trackview', function (e) {
             e.preventDefault();
             self.isMouseIn = undefined;
-            igv.dragDestination = undefined;
+            dragDestination = undefined;
 
-            if (self !== igv.dragged) {
+            if (self !== dragged) {
                 self.$trackDragScrim.hide();
             }
 
@@ -286,11 +289,11 @@ var igv = (function (igv) {
 
         $(document).on('mouseup.document.trackview', function (e) {
 
-            if (igv.dragged) {
-                igv.dragged.$trackDragScrim.hide();
+            if (dragged) {
+                dragged.$trackDragScrim.hide();
             }
 
-            igv.dragged = undefined;
+            dragged = undefined;
         });
 
     }
@@ -433,23 +436,43 @@ var igv = (function (igv) {
      * Do any cleanup here
      */
     igv.TrackView.prototype.dispose = function () {
-        this.$trackManipulationHandle.off('mousedown.trackview');
-        this.$trackManipulationHandle.off('mouseup.trackview');
-        this.$trackManipulationHandle.off('mouseenter.trackview');
-        this.$trackManipulationHandle.off('mouseleave.trackview');
-        $(document).off('mouseup.document.trackview');
+
+        if(this.$trackManipulationHandle) {
+            this.$trackManipulationHandle.off();
+        }
+
+        if(this.$innerScroll) {
+            this.$innerScroll.off();
+        }
+
         $(window).off("mousemove.igv");
         $(window).off("mouseup.igv");
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();
         }
-        this.track = undefined;
+
+        var track = this.track;
+        Object.keys(track).forEach(function (key) {
+            track[key] = undefined;
+        })
 
         this.viewports.forEach(function (viewport) {
             viewport.dispose();
         })
-        this.viewports = undefined;
+
+        
+        if(dragged === this) {
+            dragged = undefined;
+        }
+        
+        if(dragDestination === this) {
+            dragDestination = undefined;
+        }
+
+        Object.keys(this).forEach(function (key) {
+            this[key] = undefined;
+        })
 
 
     }
@@ -470,7 +493,7 @@ var igv = (function (igv) {
         this.$viewportContainer = $viewportContainer;
         this.viewports = viewports;
 
-        this.$innerScroll.mousedown(function (event) {
+        this.$innerScroll.on("mousedown", function (event) {
 
             event.preventDefault();
 
@@ -484,11 +507,11 @@ var igv = (function (igv) {
             event.stopPropagation();
         });
 
-        this.$innerScroll.click(function (event) {
+        this.$innerScroll.on("click", function (event) {
             event.stopPropagation();
         });
 
-        this.$outerScroll.click(function (event) {
+        this.$outerScroll.on("click", function (event) {
             moveScrollerTo(event.offsetY - self.$innerScroll.height() / 2);
             event.stopPropagation();
 
@@ -497,7 +520,6 @@ var igv = (function (igv) {
         function mouseMove(event) {
 
             event.preventDefault();
-
             moveScrollerTo(event.pageY - offY);
             event.stopPropagation();
         }
