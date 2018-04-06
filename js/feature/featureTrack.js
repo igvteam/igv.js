@@ -311,7 +311,7 @@ var igv = (function (igv) {
                     object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                     click: function () {
                         self.colorBy = colorScheme;
-                        self.trackView.update();
+                        self.trackView.repaint(true);
                     }
                 });
             });
@@ -333,7 +333,7 @@ var igv = (function (igv) {
                     click: function () {
                         igv.popover.hide();
                         self.displayMode = displayMode;
-                        self.trackView.update();
+                        self.trackView.repaint(true);
                     }
                 });
         });
@@ -371,7 +371,7 @@ var igv = (function (igv) {
 
         function setColorBy(value) {
             self.colorBy = value;
-            self.trackView.update();
+            self.trackView.repaint(true);
         }
     };
 

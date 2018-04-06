@@ -172,12 +172,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Viewport.prototype.resize = function () {
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length);
-        this.update();
-    };
-
-
     /**
      * Return a promise to adjust content height to accomodate features for current genomic state
      *
