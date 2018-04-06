@@ -42068,7 +42068,7 @@ var igv = (function (igv) {
         igv.dialog.hide();
 
         // Data Range Dialog object -- singleton shared by all components
-        igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
+        igv.dataRangeDialog = new igv.DataRangeDialogDEPRICATED(browser.$root);
         igv.dataRangeDialog.hide();
 
         // TODO fix this
@@ -51129,7 +51129,7 @@ var igv = (function (igv) {
  */
 var igv = (function (igv) {
 
-    igv.DataRangeDialog = function ($parent) {
+    igv.DataRangeDialogDEPRICATED = function ($parent) {
 
         var self = this;
 
@@ -51250,7 +51250,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.DataRangeDialog.prototype.configureWithTrackView = function (trackView) {
+    igv.DataRangeDialogDEPRICATED.prototype.configureWithTrackView = function (trackView) {
 
         var self = this,
             dataRange,
@@ -51294,12 +51294,12 @@ var igv = (function (igv) {
 
     };
 
-    igv.DataRangeDialog.prototype.hide = function () {
+    igv.DataRangeDialogDEPRICATED.prototype.hide = function () {
         this.container.offset( { left: 0, top: 0 } );
         this.container.hide();
     };
 
-    igv.DataRangeDialog.prototype.show = function () {
+    igv.DataRangeDialogDEPRICATED.prototype.show = function () {
 
         var body_scrolltop = $("body").scrollTop(),
             track_origin = $(this.trackView.trackDiv).offset(),
