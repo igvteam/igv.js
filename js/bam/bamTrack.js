@@ -175,8 +175,6 @@ var igv = (function (igv) {
         // sort by @ center line
         //menuItems.push(sortMenuItem());
 
-        colorByMenuItems.push({key: 'none', label: 'track color'});
-
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
 
         if (self.alignmentTrack.hasPairs) {
@@ -234,35 +232,44 @@ var igv = (function (igv) {
                     inputValue,
                     clickFunction;
 
-                if ('tag' === menuItem.key) {
-
-                    labelHTMLFunction = function () {
-                        return "Tag Name"
-                    };
-
-                    inputValue = self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '';
-
-                    clickFunction = function () {
-                        var tag;
-
-                        tag = igv.dialog.$dialogInput.val().trim();
-                        self.alignmentTrack.colorBy = 'tag';
-
-                        if (tag !== self.alignmentTrack.colorByTag) {
-                            self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
-                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                        }
-
-                        self.trackView.repaint(true);
-                    };
-
-                    igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
-                    igv.dialog.show($(self.trackView.trackDiv));
-
-                } else {
-                    self.alignmentTrack.colorBy = menuItem.key;
+                if (menuItem.key === self.alignmentTrack.colorBy) {
+                    self.alignmentTrack.colorBy = 'none';
                     self.trackView.repaint(true);
+                }
+                else {
+                    if ('tag' === menuItem.key) {
+
+                        labelHTMLFunction = function () {
+                            return "Tag Name"
+                        };
+
+                        inputValue = self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '';
+
+                        clickFunction = function () {
+                            var tag;
+
+                            tag = igv.dialog.$dialogInput.val().trim();
+                            self.alignmentTrack.colorBy = 'tag';
+
+                            if (tag !== self.alignmentTrack.colorByTag) {
+                                self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                                $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                            }
+
+
+                            self.trackView.repaint(true);
+                        };
+
+
+                        igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
+                        igv.dialog.show($(self.trackView.trackDiv));
+
+                    } else {
+                        self.alignmentTrack.colorBy = menuItem.key;
+                        self.trackView.repaint(true);
+                    }
+
                 }
             };
 
