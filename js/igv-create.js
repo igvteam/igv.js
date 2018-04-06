@@ -362,7 +362,8 @@ var igv = (function (igv) {
             $igv_nav_bar_left_container.append($igvLogo);
 
             // load local file
-            browser.trackFileLoad = new igv.TrackFileLoad($igv_nav_bar_left_container, browser.$root);
+            // browser.trackFileLoad = new igv.TrackFileLoad($igv_nav_bar_left_container, browser.$root);
+            browser.trackFileLoad = new igv.FileLoadWidget($igv_nav_bar_left_container, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
             } else {
