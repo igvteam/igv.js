@@ -583,7 +583,6 @@ var igv = (function (igv) {
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
                 igv.setTrackLabel(trackView.track, value);
-                trackView.update();
             };
 
             igv.dialog.configure(dialogLabelHandler, trackView.track.name, dialogClickHandler);

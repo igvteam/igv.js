@@ -175,8 +175,6 @@ var igv = (function (igv) {
         // sort by @ center line
         //menuItems.push(sortMenuItem());
 
-        //colorByMenuItems.push({key: 'none', label: 'track color'});
-
         colorByMenuItems.push({key: 'strand', label: 'read strand'});
 
         if (self.alignmentTrack.hasPairs) {
