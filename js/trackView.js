@@ -311,12 +311,12 @@ var igv = (function (igv) {
 
         this.track.autoscale = autoscale;
 
-        this.update();
+        this.repaint(true);
     };
 
     igv.TrackView.prototype.setColor = function (color) {
         this.track.color = color;
-        this.update();
+        this.repaint(true);
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
@@ -347,10 +347,9 @@ var igv = (function (igv) {
             this.controlCanvas.setAttribute('height', $(this.trackDiv).height());
         }
 
-        if (update === undefined || update === true) {
-            this.update();
+        if (this.scrollbar) {
+            this.scrollbar.update();
         }
-
     }
 
     igv.TrackView.prototype.isLoading = function () {
