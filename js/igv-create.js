@@ -74,10 +74,9 @@ var igv = (function (igv) {
 
         igv.popover = new igv.Popover(browser.$content);
 
-        igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
-        igv.alert.hide();
+        igv.alertDialog = new igv.AlertDialog(browser.$content);
 
-        igv.dialog = new igv.InputDialog(browser.$root);
+        igv.inputDialog = new igv.InputDialog(browser.$root);
 
         igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
 
@@ -569,8 +568,7 @@ var igv = (function (igv) {
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
         igv.browser.dispose();
-        $(".igv-grid-container-dialog").remove();
-        // $(".igv-grid-container-dialog").remove();
+        $(".igv-generic-dialog-container").remove();
     };
 
 
