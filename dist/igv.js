@@ -26043,11 +26043,11 @@ var igv = (function (igv) {
                         clickFunction = function () {
                             var tag;
 
-                            tag = igv.dialog.$dialogInput.val().trim();
+                            tag = igv.inputDialog.$dialogInput.val().trim();
                             self.alignmentTrack.colorBy = 'tag';
 
                             if (tag !== self.alignmentTrack.colorByTag) {
-                                self.alignmentTrack.colorByTag = igv.dialog.$dialogInput.val().trim();
+                                self.alignmentTrack.colorByTag = igv.inputDialog.$dialogInput.val().trim();
                                 self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
                                 $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             }
@@ -26057,8 +26057,8 @@ var igv = (function (igv) {
                         };
 
 
-                        igv.dialog.configure(labelHTMLFunction, inputValue, clickFunction);
-                        igv.dialog.show($(self.trackView.trackDiv));
+                        igv.inputDialog.configure(labelHTMLFunction, inputValue, clickFunction);
+                        igv.inputDialog.show($(self.trackView.trackDiv));
 
                     } else {
                         self.alignmentTrack.colorBy = menuItem.key;
@@ -42163,7 +42163,7 @@ var igv = (function (igv) {
         igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
         igv.alert.hide();
 
-        igv.dialog = new igv.InputDialog(browser.$root);
+        igv.inputDialog = new igv.InputDialog(browser.$root);
 
         igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
 
@@ -49413,8 +49413,8 @@ var igv = (function (igv) {
         $e.text(menuItemLabel);
 
         clickHandler = function () {
-            igv.dialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.dialog.show( $(trackView.trackDiv) );
+            igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+            igv.inputDialog.show( $(trackView.trackDiv) );
         };
 
         return {object: $e, click: clickHandler};
@@ -49490,14 +49490,14 @@ var igv = (function (igv) {
             dialogClickHandler = function () {
                 var value;
 
-                value = igv.dialog.$input.val().trim();
+                value = igv.inputDialog.$input.val().trim();
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
                 igv.setTrackLabel(trackView.track, value);
             };
 
-            igv.dialog.configure({ label:'Track Name', input:(trackView.track.name || 'unnamed'), click:dialogClickHandler });
-            igv.dialog.present( $(trackView.trackDiv) );
+            igv.inputDialog.configure({ label:'Track Name', input:(trackView.track.name || 'unnamed'), click:dialogClickHandler });
+            igv.inputDialog.present( $(trackView.trackDiv) );
         };
 
         return { object: $e, click: menuClickHandler };
@@ -49525,7 +49525,7 @@ var igv = (function (igv) {
 
                 var number;
 
-                number = parseFloat(igv.dialog.$input.val(), 10);
+                number = parseFloat(igv.inputDialog.$input.val(), 10);
                 if (undefined !== number) {
 
                     // If explicitly setting the height adust min or max, if neccessary.
@@ -49543,8 +49543,8 @@ var igv = (function (igv) {
 
             };
 
-            igv.dialog.configure({ label:'Track Height', input:trackView.trackDiv.clientHeight, click:dialogClickHandler });
-            igv.dialog.present( $(trackView.trackDiv) );
+            igv.inputDialog.configure({ label:'Track Height', input:trackView.trackDiv.clientHeight, click:dialogClickHandler });
+            igv.inputDialog.present( $(trackView.trackDiv) );
         };
 
         return { object: $e, click: menuClickHandler };
