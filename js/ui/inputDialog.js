@@ -58,6 +58,7 @@ var igv = (function (igv) {
         this.$input = $("<input>");
         this.$input_container.append(this.$input);
 
+
         // ok | cancel
         $buttons = $("<div>", { class:'igv-generic-dialog-ok-cancel' });
         this.$container.append($buttons);
@@ -88,7 +89,18 @@ var igv = (function (igv) {
         var self = this;
 
         this.$label.text(config.label);
+        
         this.$input.val(config.input);
+
+        this.$input.unbind();
+        this.$input.on('keyup', function (e) {
+            if (13 === e.keyCode) {
+                config.click();
+                self.$input.val(undefined);
+                self.$container.offset( { left:0, top:0 } );
+                self.$container.hide();
+            }
+        });
 
         this.$ok.unbind();
         this.$ok.on('click', function () {
@@ -99,6 +111,7 @@ var igv = (function (igv) {
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
+
     };
 
     igv.InputDialog.prototype.present = function ($parent) {
