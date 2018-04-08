@@ -42160,8 +42160,7 @@ var igv = (function (igv) {
 
         igv.popover = new igv.Popover(browser.$content);
 
-        igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
-        igv.alert.hide();
+        igv.alertDialog = new igv.AlertDialog(browser.$content);
 
         igv.inputDialog = new igv.InputDialog(browser.$root);
 
@@ -42655,8 +42654,7 @@ var igv = (function (igv) {
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
         igv.browser.dispose();
-        $(".igv-grid-container-dialog").remove();
-        // $(".igv-grid-container-dialog").remove();
+        $(".igv-generic-dialog-container").remove();
     };
 
 
@@ -44143,8 +44141,6 @@ var igv = (function (igv) {
 
     igv.presentAlert = function (alert, $parent) {
 
-        console.error(alert);
-
         var string;
 
         string = alert.message || alert;
@@ -44153,8 +44149,8 @@ var igv = (function (igv) {
             string = httpMessages[string];
         }
 
-        igv.alert.$dialogLabel.text(string);
-        igv.alert.show($parent);
+        igv.alertDialog.configure({ label: string });
+        igv.alertDialog.present($parent);
     };
 
     var httpMessages = {
@@ -50866,87 +50862,57 @@ var igv = (function (igv) {
  */
 var igv = (function (igv) {
 
-    igv.AlertDialog = function ($parent, id) {
-
+    igv.AlertDialog = function ($parent) {
         var self = this,
             $header,
-            $headerBlurb;
+            $ok_container;
 
         this.$parent = $parent;
-        this.$container = $('<div>', { "id": id, "class": "igv-grid-container-alert-dialog" });
+
+        // dialog container
+        this.$container = $("<div>", { class:'igv-generic-dialog-container' });
         $parent.append(this.$container);
+        this.$container.offset( { left:0, top:0 } );
 
-        $header = $('<div class="igv-grid-header">');
-        $headerBlurb = $('<div class="igv-grid-header-blurb">');
-        $header.append($headerBlurb);
-        igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.hide();
-        });
+        // dialog header
+        $header = $("<div>", { class:'igv-generic-dialog-header' });
         this.$container.append($header);
-
-        this.$container.append(this.alertTextContainer());
-
-        this.$container.append(this.rowOfOk());
-
-    };
-
-    igv.AlertDialog.prototype.alertTextContainer = function() {
-
-        var $rowContainer,
-            $col;
-
-        $rowContainer = $('<div class="igv-grid-rect">');
-
-        this.$dialogLabel = $('<div>', { "class": "igv-col igv-col-4-4 igv-alert-dialog-text" });
-
-        // $col = $('<div class="igv-col igv-col-4-4">');
-        // $col.append(this.$dialogLabel);
-        // $rowContainer.append($col);
-
-        $rowContainer.append(this.$dialogLabel);
-
-        return $rowContainer;
-
-    };
-
-    igv.AlertDialog.prototype.rowOfOk = function() {
-
-        var self = this,
-            $rowContainer,
-            $col;
-
-        $rowContainer = $('<div class="igv-grid-rect">');
-
-        // shim
-        $col = $('<div class="igv-col igv-col-1-4">');
-        $rowContainer.append( $col );
-
-        // ok button
-        $col = $('<div class="igv-col igv-col-2-4">');
-        this.$ok = $('<div class="igv-col-button igv-col-filler-ok-button">');
-        this.$ok.text("OK");
-
-        this.$ok.unbind();
-        this.$ok.click(function() {
-            self.hide();
+        igv.attachDialogCloseHandlerWithParent($header, function () {
+            self.$label.text('');
+            self.$container.offset( { left:0, top:0 } );
+            self.$container.hide();
         });
 
-        $col.append( this.$ok );
-        $rowContainer.append( $col );
+        // dialog label
+        this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
+        this.$container.append(this.$label);
+        self.$label.text('');
 
-        return $rowContainer;
+        // ok container
+        $ok_container = $("<div>", { class:'igv-generic-dialog-ok' });
+        this.$container.append($ok_container);
 
-    };
+        // ok
+        this.$ok = $("<div>");
+        $ok_container.append(this.$ok);
+        this.$ok.text('OK');
 
-    igv.AlertDialog.prototype.hide = function () {
+        this.$ok.on('click', function () {
+            self.$label.text('');
+            self.$container.offset( { left:0, top:0 } );
+            self.$container.hide();
+        });
 
-        if (this.$container.hasClass('igv-grid-container-dialog')) {
-            this.$container.offset( { left: 0, top: 0 } );
-        }
+        this.$container.draggable({ handle:$header.get(0) });
+
         this.$container.hide();
     };
 
-    igv.AlertDialog.prototype.show = function ($alternativeParent) {
+    igv.AlertDialog.prototype.configure = function (config) {
+        this.$label.text(config.label);
+    };
+
+    igv.AlertDialog.prototype.present = function ($alternativeParent) {
 
         var obj,
             $p;
@@ -51511,6 +51477,7 @@ var igv = (function (igv) {
         this.$input = $("<input>");
         this.$input_container.append(this.$input);
 
+
         // ok | cancel
         $buttons = $("<div>", { class:'igv-generic-dialog-ok-cancel' });
         this.$container.append($buttons);
@@ -51541,7 +51508,18 @@ var igv = (function (igv) {
         var self = this;
 
         this.$label.text(config.label);
+        
         this.$input.val(config.input);
+
+        this.$input.unbind();
+        this.$input.on('keyup', function (e) {
+            if (13 === e.keyCode) {
+                config.click();
+                self.$input.val(undefined);
+                self.$container.offset( { left:0, top:0 } );
+                self.$container.hide();
+            }
+        });
 
         this.$ok.unbind();
         this.$ok.on('click', function () {
@@ -51552,6 +51530,7 @@ var igv = (function (igv) {
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
+
     };
 
     igv.InputDialog.prototype.present = function ($parent) {
