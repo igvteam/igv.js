@@ -192,6 +192,16 @@ $igv-flw-border-radius: 2px;
 
       }
 
+      .igv-flw-local-file-name-container {
+        margin-left: 8px;
+        width: 384px;
+        height: $igv-flw-input-row-height;
+
+        line-height: $igv-flw-input-row-height;
+        text-align: left;
+        background-color: rgba(173, 255, 47, 0.5);
+      }
+
     }
 
   }
