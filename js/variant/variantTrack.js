@@ -415,7 +415,7 @@ var igv = (function (igv) {
 
                     sortCallSets(self.callSets, variant, sortDirection);
                     sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                    self.trackView.update();
+                    self.trackView.repaint(true);
                 }
             });
         }
@@ -598,7 +598,7 @@ var igv = (function (igv) {
                     } catch (err) {
                         self.callSetGroups.sort();
                     }
-                    self.trackView.update();
+                    self.trackView.repaint(true);
                 }
             })
         }
@@ -624,7 +624,7 @@ var igv = (function (igv) {
                             click: function () {
                                 sortCallSets(self.callSets, variant, sortDirection);
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                                self.trackView.update();
+                                self.trackView.repaint(true);
                             }
                         });
 
