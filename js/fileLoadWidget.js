@@ -36,6 +36,8 @@ var igv = (function (igv) {
 
         this.$parent = $widgetParent;
 
+        this.fileLoadManager = new igv.FileLoadManager();
+
         // file load navbar button
         this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
         $buttonParent.append(this.$presentationButton);
@@ -104,6 +106,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.FileLoadManager = function () {
+        this.dictionary = {};
+    };
+
     function createInputContainer($parent, config) {
         var self = this,
             $container,
@@ -124,10 +130,9 @@ var igv = (function (igv) {
         $label.text(config.dataTitle);
 
         if (true === config.doURL) {
-            $input = $('<input>', { type:'text', placeholder:'Enter data URL' });
-            $input_row.append($input);
+            createURLContainer.call(this, $input_row, 'igv-flw-data-url', false);
         } else {
-            createFileChooserContainer.call(this, $input_row, 'igv-flw-local-data-file', false);
+            createLocalFileContainer.call(this, $input_row, 'igv-flw-local-data-file', false);
         }
 
         // index
@@ -138,15 +143,30 @@ var igv = (function (igv) {
         $label.text(config.indexTitle);
 
         if (true === config.doURL) {
-            $input = $('<input>', { type:'text', placeholder:'Enter index URL' });
-            $input_row.append($input);
+            createURLContainer.call(this, $input_row, 'igv-flw-index-url', true);
         } else {
-            createFileChooserContainer.call(this, $input_row, 'igv-flw-local-index-file', true);
+            createLocalFileContainer.call(this, $input_row, 'igv-flw-local-index-file', true);
         }
 
     }
 
-    function createFileChooserContainer($parent, id, isIndexFile) {
+    function createURLContainer($parent, id, isIndexFile) {
+        var self = this,
+            $input;
+
+        $input = $('<input>', { type:'text', placeholder:(true === isIndexFile ? 'Enter index URL' : 'Enter data URL') });
+        $parent.append($input);
+
+        $input.on('change', function (e) {
+
+            self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = $(this).val();
+
+            // loadLocalFiles.call(self, e.target.files[ 0 ], isIndexFile)
+        });
+
+    }
+
+    function createLocalFileContainer($parent, id, isIndexFile) {
         var self = this,
             $file_chooser_container,
             $label,
@@ -169,7 +189,11 @@ var igv = (function (igv) {
         $file_name.hide();
 
         $input.on('change', function (e) {
+
+            self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = e.target.files[ 0 ];
+
             // loadLocalFiles.call(self, e.target.files[ 0 ], isIndexFile)
+
             $file_name.text(e.target.files[ 0 ].name);
             $file_name.show();
         });
