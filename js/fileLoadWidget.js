@@ -84,6 +84,16 @@ var igv = (function (igv) {
             };
         createInputContainer.call(this, this.$container, config);
 
+        // error message
+        this.$error_message = $("<div>", { id:"igv-flw-error-message-container" });
+        this.$container.append(this.$error_message);
+        this.$error_message.text('Hi. I am an error message.');
+        // error message - dismiss button
+        igv.attachDialogCloseHandlerWithParent(this.$error_message, function () {
+            self.$error_message.text('');
+        });
+
+
 
         // ok | cancel - container
         $div = $("<div>", { id:"igv-file-load-widget-ok-cancel" });
@@ -93,6 +103,12 @@ var igv = (function (igv) {
         this.$ok = $('<div>');
         $div.append(this.$ok);
         this.$ok.text('OK');
+        this.$ok.on('click', function () {
+            var config;
+            config = self.fileLoadManager.trackLoadConfiguration();
+            igv.browser.loadTrackList( [ config ] );
+            doDismiss.call(self);
+        });
 
         // cancel
         this.$cancel = $('<div>');
@@ -107,68 +123,143 @@ var igv = (function (igv) {
     };
 
     igv.FileLoadManager = function () {
+
         this.dictionary = {};
+
+        this.keyToIndexExtension =
+            {
+                bam: { extension: 'bai', optional: false },
+                any: { extension: 'idx', optional: true  },
+                gz: { extension: 'tbi', optional: true  }
+            };
+
+        this.indexExtensionToKey = _.invert(_.mapObject(this.keyToIndexExtension, function (val) {
+            return val.extension;
+        }));
+
+    };
+
+    function isAnIndexFile(fileOrURL) {
+        var extension;
+
+        extension = igv.getExtension({ url: fileOrURL });
+        return _.contains(_.keys(this.indexExtensionToKey), extension);
+    }
+
+    function isIndexable(fileOrURL) {
+
+        var extension;
+
+        if (true === isAnIndexFile(fileOrURL)) {
+            return false;
+        } else {
+            extension = igv.getExtension({ url: fileOrURL });
+            return (extension !== 'wig' && extension !== 'seg');
+        }
+
+    }
+
+    igv.FileLoadManager.prototype.trackLoadConfiguration = function () {
+        var extension,
+            key,
+            config;
+
+
+        config =
+            {
+                url: this.dictionary.data,
+                indexURL: this.dictionary.index || undefined
+            };
+
+        if (undefined === this.dictionary.index) {
+            config.indexed = false;
+        }
+
+        return config;
+
     };
 
     function createInputContainer($parent, config) {
-        var self = this,
-            $container,
-            $input_row,
-            $label,
-            $input;
+        var $container,
+            $input_data_row,
+            $input_index_row,
+            $label;
 
         // container
         $container = $("<div>", { class:"igv-flw-input-container" });
         $parent.append($container);
 
+
         // data
-        $input_row = $("<div>", { class:"igv-flw-input-row" });
-        $container.append($input_row);
+        $input_data_row = $("<div>", { class:"igv-flw-input-row" });
+        $container.append($input_data_row);
         // label
         $label = $("<div>", { class:"igv-flw-input-label" });
-        $input_row.append($label);
+        $input_data_row.append($label);
         $label.text(config.dataTitle);
 
         if (true === config.doURL) {
-            createURLContainer.call(this, $input_row, 'igv-flw-data-url', false);
+            createURLContainer.call(this, $input_data_row, 'igv-flw-data-url', false);
         } else {
-            createLocalFileContainer.call(this, $input_row, 'igv-flw-local-data-file', false);
+            createLocalFileContainer.call(this, $input_data_row, 'igv-flw-local-data-file', false);
         }
 
         // index
-        $input_row = $("<div>", { class:"igv-flw-input-row" });
-        $container.append($input_row);
+        $input_index_row = $("<div>", { class:"igv-flw-input-row" });
+        $container.append($input_index_row);
+        // label
         $label = $("<div>", { class:"igv-flw-input-label" });
-        $input_row.append($label);
+        $input_index_row.append($label);
         $label.text(config.indexTitle);
 
         if (true === config.doURL) {
-            createURLContainer.call(this, $input_row, 'igv-flw-index-url', true);
+            createURLContainer.call(this, $input_index_row, 'igv-flw-index-url', true);
         } else {
-            createLocalFileContainer.call(this, $input_row, 'igv-flw-local-index-file', true);
+            createLocalFileContainer.call(this, $input_index_row, 'igv-flw-local-index-file', true);
         }
 
     }
 
     function createURLContainer($parent, id, isIndexFile) {
         var self = this,
+            $data_drop_target,
             $input;
 
         $input = $('<input>', { type:'text', placeholder:(true === isIndexFile ? 'Enter index URL' : 'Enter data URL') });
         $parent.append($input);
 
         $input.on('change', function (e) {
-
             self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = $(this).val();
-
-            // loadLocalFiles.call(self, e.target.files[ 0 ], isIndexFile)
         });
+
+        $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
+        $parent.append($data_drop_target);
+        $data_drop_target.text('or drop URL');
+
+        $parent
+            .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            })
+            .on('dragover dragenter', function () {
+                $(this).addClass('igv-flw-input-row-hover-state');
+            })
+            .on('dragleave dragend drop', function () {
+                $(this).removeClass('igv-flw-input-row-hover-state');
+            })
+            .on('drop', function (e) {
+                var url;
+                url = e.originalEvent.dataTransfer.getData('text/uri-list');
+                self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = url;
+                $(this).val(url);
+            });
 
     }
 
     function createLocalFileContainer($parent, id, isIndexFile) {
         var self = this,
             $file_chooser_container,
+            $data_drop_target,
             $label,
             $input,
             $file_name;
@@ -183,29 +274,62 @@ var igv = (function (igv) {
         $input = $('<input>', { class:"igv-flw-file-chooser-input", id:id, name:id, type:'file' });
         $file_chooser_container.append($input);
 
+        $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
+        $parent.append($data_drop_target);
+        $data_drop_target.text('or drop file');
+
         $file_name = $("<div>", { class:"igv-flw-local-file-name-container" });
         $parent.append($file_name);
 
         $file_name.hide();
 
         $input.on('change', function (e) {
-
             self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = e.target.files[ 0 ];
-
-            // loadLocalFiles.call(self, e.target.files[ 0 ], isIndexFile)
-
             $file_name.text(e.target.files[ 0 ].name);
             $file_name.show();
         });
 
+        $parent
+            .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            })
+            .on('dragover dragenter', function () {
+                $(this).addClass('igv-flw-input-row-hover-state');
+            })
+            .on('dragleave dragend drop', function () {
+                $(this).removeClass('igv-flw-input-row-hover-state');
+            })
+            .on('drop', function (e) {
+                var f;
+                f = e.originalEvent.dataTransfer.files[ 0 ];
+                self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = f;
+                $file_name.text(f.name);
+                $file_name.show();
+            });
+
     }
 
-    function loadLocalFiles(file, isIndexFile) {
+    function ingestDragDropData (dataTransfer) {
+        var url,
+            file;
 
-        console.log('load ' + file.name);
+        url = dataTransfer.getData('text/uri-list');
+        file = dataTransfer.files[ 0 ];
+
+        if (file.length > 0) {
+            loadLocalFiles.call(this, file);
+        } else if ('' !== url) {
+            processURL.call(this, url, this.$index_url_input.val());
+        } else {
+            console.log('whah?');
+        }
+
     }
 
     function doDismiss() {
+        this.$container.find('input').val(undefined);
+        this.$container.find('.igv-flw-local-file-name-container').hide();
         this.$container.hide();
     }
 
