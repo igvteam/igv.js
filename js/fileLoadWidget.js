@@ -107,70 +107,72 @@ var igv = (function (igv) {
     function createInputContainer($parent, config) {
         var self = this,
             $container,
-            $div,
+            $input_row,
             $label,
-            $input,
-            $file_chooser_container,
-            $e;
+            $input;
 
         // container
         $container = $("<div>", { class:"igv-flw-input-container" });
         $parent.append($container);
 
         // data
-        $div = $("<div>", { class:"igv-flw-input-row" });
-        $container.append($div);
+        $input_row = $("<div>", { class:"igv-flw-input-row" });
+        $container.append($input_row);
         // label
         $label = $("<div>", { class:"igv-flw-input-label" });
-        $div.append($label);
+        $input_row.append($label);
         $label.text(config.dataTitle);
 
         if (true === config.doURL) {
             $input = $('<input>', { type:'text', placeholder:'Enter data URL' });
-            $div.append($input);
+            $input_row.append($input);
         } else {
-            $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
-            $div.append($file_chooser_container);
-
-            $label = $('<label>', { for:'igv-flw-local-data-file' });
-            $file_chooser_container.append($label);
-            $label.text('Choose file...');
-
-            $input = $('<input>', { class:"igv-flw-file-chooser-input", id:'igv-flw-local-data-file', name:'igv-flw-local-data-file', type:'file' });
-            $file_chooser_container.append($input);
-
-            $input.on('change', function (e) {
-                loadLocalFiles.call(self, e.target.files[ 0 ], false)
-            });
-
+            createFileChooserContainer.call(this, $input_row, 'igv-flw-local-data-file', false);
         }
 
         // index
-        $div = $("<div>", { class:"igv-flw-input-row" });
-        $container.append($div);
+        $input_row = $("<div>", { class:"igv-flw-input-row" });
+        $container.append($input_row);
         $label = $("<div>", { class:"igv-flw-input-label" });
-        $div.append($label);
+        $input_row.append($label);
         $label.text(config.indexTitle);
 
         if (true === config.doURL) {
             $input = $('<input>', { type:'text', placeholder:'Enter index URL' });
-            $div.append($input);
+            $input_row.append($input);
         } else {
-            $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
-            $div.append($file_chooser_container);
-
-            $label = $('<label>', { for:'igv-flw-local-index-file' });
-            $file_chooser_container.append($label);
-            $label.text('Choose file...');
-
-            $input = $('<input>', { class:"igv-flw-file-chooser-input", id:'igv-flw-local-index-file', name:'igv-flw-local-index-file', type:'file' });
-            $file_chooser_container.append($input);
-
-            $input.on('change', function (e) {
-                loadLocalFiles.call(self, e.target.files[ 0 ], true)
-            });
-
+            createFileChooserContainer.call(this, $input_row, 'igv-flw-local-index-file', true);
         }
+
+    }
+
+    function createFileChooserContainer($parent, id, isIndexFile) {
+        var self = this,
+            $file_chooser_container,
+            $label,
+            $input,
+            $file_name;
+
+        $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
+        $parent.append($file_chooser_container);
+
+        $label = $('<label>', { for:id });
+        $file_chooser_container.append($label);
+        $label.text('Choose file...');
+
+        $input = $('<input>', { class:"igv-flw-file-chooser-input", id:id, name:id, type:'file' });
+        $file_chooser_container.append($input);
+
+        $file_name = $("<div>", { class:"igv-flw-local-file-name-container" });
+        $parent.append($file_name);
+
+        $file_name.hide();
+
+        $input.on('change', function (e) {
+            // loadLocalFiles.call(self, e.target.files[ 0 ], isIndexFile)
+            $file_name.text(e.target.files[ 0 ].name);
+            $file_name.show();
+        });
 
     }
 
