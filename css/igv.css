@@ -269,9 +269,10 @@
 
 #igv-file-load-widget-container {
   position: absolute;
+  top: 0;
   width: 720px;
   height: 400px;
-  margin: 256px auto;
+  margin: 64px auto;
   z-index: 2048;
   font-family: "Open Sans", sans-serif;
   font-size: 16px;
@@ -395,15 +396,22 @@
     margin-top: 8px;
     width: 95%;
     height: 24px;
-    background-color: rgba(100, 149, 237, 0.26);
     padding-left: 8px;
+    color: white;
     font-size: 14px;
+    background-color: rgba(59, 92, 127, 0.5);
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
-    #igv-file-load-widget-container #igv-flw-error-message-container div {
+    #igv-file-load-widget-container #igv-flw-error-message-container div:first-child#igv-flw-error-message {
+      height: 24px;
+      width: 600px;
+      font-style: italic;
+      line-height: 24px;
+      text-align: left; }
+    #igv-file-load-widget-container #igv-flw-error-message-container div:last-child {
       height: 24px;
       width: 16px;
       margin-right: 6px;
