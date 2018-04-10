@@ -31,7 +31,7 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        this.isLog = config.isLog === undefined ? false : config.isLog;
+        this.isLog = config.isLog;
 
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
 
@@ -130,7 +130,7 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.draw = function (options) {
 
-        var myself = this,
+        var self = this,
             featureList,
             ctx,
             bpPerPixel,
@@ -163,6 +163,8 @@ var igv = (function (igv) {
         featureList = options.features;
         if (featureList) {
 
+            checkForLog(featureList);
+
             bpPerPixel = options.bpPerPixel;
             bpStart = options.bpStart;
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
@@ -171,7 +173,7 @@ var igv = (function (igv) {
             for (i = 0, len = featureList.length; i < len; i++) {
                 sample = featureList[i].sample;
                 if (!this.samples.hasOwnProperty(sample)) {
-                    this.samples[sample] = myself.sampleCount;
+                    this.samples[sample] = self.sampleCount;
                     this.sampleNames.push(sample);
                     this.sampleCount++;
                 }
@@ -184,18 +186,18 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = myself.samples[segment.sample] * sampleHeight + border;
+                y = self.samples[segment.sample] * sampleHeight + border;
 
                 value = segment.value;
-                if (!myself.isLog) {
+                if (!self.isLog) {
                     value = Math.log2(value / 2);
                 }
 
                 if (value < -0.1) {
-                    color = myself.negColorScale.getColor(value);
+                    color = self.negColorScale.getColor(value);
                 }
                 else if (value > 0.1) {
-                    color = myself.posColorScale.getColor(value);
+                    color = self.posColorScale.getColor(value);
                 }
                 else {
                     color = "white";
@@ -211,6 +213,20 @@ var igv = (function (igv) {
         }
         else {
             console.log("No feature list");
+        }
+
+
+        function checkForLog(featureList) {
+            var i;
+            if (self.isLog === undefined) {
+                self.isLog = false;
+                for (i = 0; i < featureList.length; i++) {
+                    if (featureList[i].value < 0) {
+                        self.isLog = true;
+                        return;
+                    }
+                }
+            }
         }
 
     };
