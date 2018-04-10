@@ -51,9 +51,11 @@ $igv-flw-border-radius: 2px;
 #igv-file-load-widget-container {
 
   position: absolute;
+  top: 0;
+
   width:$igv-flw-container-width;
   height: $igv-flw-container-height;
-  margin: 256px auto;
+  margin: 64px auto;
   z-index: 2048;
 
   font-family: $igv-flw-font-face;
@@ -238,10 +240,13 @@ $igv-flw-border-radius: 2px;
 
     width: 95%;
     height: 24px;
-    background-color: rgba(100, 149, 237, 0.26);
 
     padding-left: 8px;
+
+    color: white;
     font-size: 14px;
+
+    background-color: rgba(59, 92, 127, 0.5);
 
     display: flex;
     flex-flow: row;
@@ -249,8 +254,20 @@ $igv-flw-border-radius: 2px;
     justify-content: space-between;
     align-items: center;
 
+    // message container
+    div:first-child#igv-flw-error-message {
+      height: 24px;
+      width: 600px;
+
+      font-style: italic;
+      line-height: 24px;
+      text-align: left;
+
+      //background-color: coral;
+    }
+
     // close button container
-    div {
+    div:last-child {
       height: 24px;
       width: 16px;
       margin-right: 6px;
