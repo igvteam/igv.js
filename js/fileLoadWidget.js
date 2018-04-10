@@ -36,7 +36,7 @@ var igv = (function (igv) {
 
         this.$parent = $widgetParent;
 
-        this.fileLoadManager = new igv.FileLoadManager();
+        this.fileLoadManager = new igv.FileLoadManager(this);
 
         // file load navbar button
         this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
@@ -61,7 +61,6 @@ var igv = (function (igv) {
         // header
         $header = $("<div>", { id:"igv-file-load-widget-header" });
         this.$container.append($header);
-
         // header - dismiss button
         igv.attachDialogCloseHandlerWithParent($header, function () {
             doDismiss.call(self);
@@ -84,16 +83,16 @@ var igv = (function (igv) {
             };
         createInputContainer.call(this, this.$container, config);
 
-        // error message
+        // error message container
         this.$error_message = $("<div>", { id:"igv-flw-error-message-container" });
         this.$container.append(this.$error_message);
-        this.$error_message.text('Hi. I am an error message.');
-        // error message - dismiss button
+        // error message
+        this.$error_message.append($("<div>", { id:"igv-flw-error-message" }));
+        // error dismiss button
         igv.attachDialogCloseHandlerWithParent(this.$error_message, function () {
-            self.$error_message.text('');
+            self.dismissErrorMessage();
         });
-
-
+        this.dismissErrorMessage();
 
         // ok | cancel - container
         $div = $("<div>", { id:"igv-file-load-widget-ok-cancel" });
@@ -106,8 +105,11 @@ var igv = (function (igv) {
         this.$ok.on('click', function () {
             var config;
             config = self.fileLoadManager.trackLoadConfiguration();
-            igv.browser.loadTrackList( [ config ] );
-            doDismiss.call(self);
+            if (config) {
+                igv.browser.loadTrackList( [ config ] );
+                doDismiss.call(self);
+            }
+
         });
 
         // cancel
@@ -122,61 +124,14 @@ var igv = (function (igv) {
 
     };
 
-    igv.FileLoadManager = function () {
-
-        this.dictionary = {};
-
-        this.keyToIndexExtension =
-            {
-                bam: { extension: 'bai', optional: false },
-                any: { extension: 'idx', optional: true  },
-                gz: { extension: 'tbi', optional: true  }
-            };
-
-        this.indexExtensionToKey = _.invert(_.mapObject(this.keyToIndexExtension, function (val) {
-            return val.extension;
-        }));
-
+    igv.FileLoadWidget.prototype.presentErrorMessage = function(message) {
+        this.$error_message.find('#igv-flw-error-message').text(message);
+        this.$error_message.show();
     };
 
-    function isAnIndexFile(fileOrURL) {
-        var extension;
-
-        extension = igv.getExtension({ url: fileOrURL });
-        return _.contains(_.keys(this.indexExtensionToKey), extension);
-    }
-
-    function isIndexable(fileOrURL) {
-
-        var extension;
-
-        if (true === isAnIndexFile(fileOrURL)) {
-            return false;
-        } else {
-            extension = igv.getExtension({ url: fileOrURL });
-            return (extension !== 'wig' && extension !== 'seg');
-        }
-
-    }
-
-    igv.FileLoadManager.prototype.trackLoadConfiguration = function () {
-        var extension,
-            key,
-            config;
-
-
-        config =
-            {
-                url: this.dictionary.data,
-                indexURL: this.dictionary.index || undefined
-            };
-
-        if (undefined === this.dictionary.index) {
-            config.indexed = false;
-        }
-
-        return config;
-
+    igv.FileLoadWidget.prototype.dismissErrorMessage = function() {
+        this.$error_message.hide();
+        this.$error_message.find('#igv-flw-error-message').text('');
     };
 
     function createInputContainer($parent, config) {
@@ -251,7 +206,7 @@ var igv = (function (igv) {
                 var url;
                 url = e.originalEvent.dataTransfer.getData('text/uri-list');
                 self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = url;
-                $(this).val(url);
+                $input.val(url);
             });
 
     }
@@ -310,23 +265,6 @@ var igv = (function (igv) {
 
     }
 
-    function ingestDragDropData (dataTransfer) {
-        var url,
-            file;
-
-        url = dataTransfer.getData('text/uri-list');
-        file = dataTransfer.files[ 0 ];
-
-        if (file.length > 0) {
-            loadLocalFiles.call(this, file);
-        } else if ('' !== url) {
-            processURL.call(this, url, this.$index_url_input.val());
-        } else {
-            console.log('whah?');
-        }
-
-    }
-
     function doDismiss() {
         this.$container.find('input').val(undefined);
         this.$container.find('.igv-flw-local-file-name-container').hide();
@@ -346,6 +284,103 @@ var igv = (function (igv) {
         this.$container.css(obj);
 
         this.$container.show();
+    }
+
+    igv.FileLoadManager = function (fileLoadWidget) {
+
+        this.fileLoadWidget = fileLoadWidget;
+
+        this.dictionary = {};
+
+        this.keyToIndexExtension =
+            {
+                bam: { extension: 'bai', optional: false },
+                any: { extension: 'idx', optional: true  },
+                gz: { extension: 'tbi', optional: true  }
+            };
+
+        this.indexExtensionToKey = _.invert(_.mapObject(this.keyToIndexExtension, function (val) {
+            return val.extension;
+        }));
+
+    };
+
+    igv.FileLoadManager.prototype.trackLoadConfiguration = function () {
+        var extension,
+            key,
+            config,
+            _isIndexFile,
+            _isIndexable,
+            indexFileStatus;
+
+
+        if (undefined === this.dictionary.data) {
+            this.fileLoadWidget.presentErrorMessage('Error: No data file');
+            return undefined;
+        } else {
+
+            _isIndexFile = isAnIndexFile(this.dictionary.data);
+            if (true === _isIndexFile) {
+                this.fileLoadWidget.presentErrorMessage('Error: data file is in fact an index file.');
+                return undefined;
+            } else {
+
+                _isIndexable = isIndexable(this.dictionary.data);
+
+                extension = igv.getExtension({ url: this.dictionary.data });
+
+                key = (this.keyToIndexExtension[ extension ]) ? extension : 'any';
+
+                indexFileStatus = this.keyToIndexExtension[ key ];
+
+                if (true === _isIndexable && false === indexFileStatus.optional) {
+
+                    if (undefined === this.dictionary.index) {
+                        this.fileLoadWidget.presentErrorMessage('Error: index file must be provided.');
+                        return undefined;
+
+                    } else {
+                        return { url: this.dictionary.data, indexURL: this.dictionary.index }
+                    }
+
+                } else {
+
+                    config =
+                        {
+                            url: this.dictionary.data,
+                            indexURL: this.dictionary.index || undefined
+                        };
+
+                    if (undefined === this.dictionary.index) {
+                        config.indexed = false;
+                    }
+
+                    return config;
+                }
+            }
+
+        }
+
+    };
+
+    function isAnIndexFile(fileOrURL) {
+        var extension;
+
+        extension = igv.getExtension({ url: fileOrURL });
+        return _.contains(_.keys(this.indexExtensionToKey), extension);
+    }
+
+    function isIndexable(fileOrURL) {
+
+        var extension;
+
+        if (true === isAnIndexFile(fileOrURL)) {
+            return false;
+        } else {
+            extension = igv.getExtension({ url: fileOrURL });
+            return (extension !== 'wig' && extension !== 'seg');
+        }
+
     }
 
     return igv;
