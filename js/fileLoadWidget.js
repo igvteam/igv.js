@@ -42,7 +42,7 @@ var igv = (function (igv) {
         this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
         $buttonParent.append(this.$presentationButton);
 
-        this.$presentationButton.text('Load File');
+        this.$presentationButton.text('Load Track');
 
         this.$presentationButton.on('click', function () {
 
@@ -261,27 +261,28 @@ var igv = (function (igv) {
 
     }
 
+    function doPresent() {
+
+        var offset_top,
+            scroll_top;
+
+        offset_top = this.$parent.offset().top;
+        scroll_top = $('body').scrollTop();
+
+        this.$container.offset( { top: (offset_top + scroll_top) } );
+
+        this.$container.show();
+    }
+
     function doDismiss() {
+
+        // this.$container.offset( { top:0 } );
+
         this.$container.find('input').val(undefined);
         this.$container.find('.igv-flw-local-file-name-container').hide();
         this.$container.hide();
 
         this.fileLoadManager.reset();
-    }
-
-    function doPresent() {
-
-        var obj;
-
-        obj =
-            {
-                left: (this.$parent.width() - this.$container.width())/2,
-                top: (this.$parent.height() - this.$container.height())/2
-
-            };
-        this.$container.css(obj);
-
-        this.$container.show();
     }
 
     igv.FileLoadManager = function (fileLoadWidget) {
