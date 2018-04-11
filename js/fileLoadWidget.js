@@ -203,10 +203,8 @@ var igv = (function (igv) {
                 $(this).removeClass('igv-flw-input-row-hover-state');
             })
             .on('drop', function (e) {
-                var url;
-                url = e.originalEvent.dataTransfer.getData('text/uri-list');
-                self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = url;
-                $input.val(url);
+                self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
+                $input.val(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
             });
 
     }
@@ -256,10 +254,8 @@ var igv = (function (igv) {
                 $(this).removeClass('igv-flw-input-row-hover-state');
             })
             .on('drop', function (e) {
-                var f;
-                f = e.originalEvent.dataTransfer.files[ 0 ];
-                self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = f;
-                $file_name.text(f.name);
+                self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
+                $file_name.text(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
                 $file_name.show();
             });
 
@@ -269,6 +265,8 @@ var igv = (function (igv) {
         this.$container.find('input').val(undefined);
         this.$container.find('.igv-flw-local-file-name-container').hide();
         this.$container.hide();
+
+        this.fileLoadManager.reset();
     }
 
     function doPresent() {
@@ -303,6 +301,37 @@ var igv = (function (igv) {
             return val.extension;
         }));
 
+    };
+
+    igv.FileLoadManager.prototype.ingestDataTransfer = function (dataTransfer, isIndexFile) {
+        var url,
+            files;
+
+        url = dataTransfer.getData('text/uri-list');
+        files = dataTransfer.files;
+
+        if (files && files.length > 0) {
+            this.dictionary[ true === isIndexFile ? 'index' : 'data' ] = files[ 0 ];
+        } else if (url && '' !== url) {
+            this.dictionary[ true === isIndexFile ? 'index' : 'data' ] = url;
+        }
+
+    };
+
+    igv.FileLoadManager.prototype.indexName = function () {
+        return itemName(this.dictionary.index);
+    };
+
+    igv.FileLoadManager.prototype.dataName = function () {
+        return itemName(this.dictionary.data);
+    };
+
+    function itemName (item) {
+        return igv.isFilePath(item) ? item.name : item;
+    }
+
+    igv.FileLoadManager.prototype.reset = function () {
+        this.dictionary = {};
     };
 
     igv.FileLoadManager.prototype.trackLoadConfiguration = function () {
