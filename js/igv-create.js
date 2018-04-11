@@ -72,24 +72,15 @@ var igv = (function (igv) {
         browser.userFeedback = new igv.UserFeedback(browser.$content);
         browser.userFeedback.hide();
 
-        // Popover object -- singleton shared by all components
         igv.popover = new igv.Popover(browser.$content);
 
-        // alert object -- singleton shared by all components
-        igv.alert = new igv.AlertDialog(browser.$content, "igv-alert");
-        igv.alert.hide();
+        igv.alertDialog = new igv.AlertDialog(browser.$content);
 
-        // Dialog object -- singleton shared by all components
-        igv.dialog = new igv.Dialog(browser.$root);
-        igv.dialog.hide();
+        igv.inputDialog = new igv.InputDialog(browser.$root);
 
-        // Dialog object -- singleton shared by all components
         igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
-        // igv.trackRemovalDialog.hide();
 
-        // Data Range Dialog object -- singleton shared by all components
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
-        igv.dataRangeDialog.hide();
 
         // TODO fix this
         // if (!config.showNavigation) {
@@ -577,8 +568,7 @@ var igv = (function (igv) {
     igv.removeBrowser = function () {
         igv.browser.$root.remove();
         igv.browser.dispose();
-        $(".igv-grid-container-dialog").remove();
-        // $(".igv-grid-container-dialog").remove();
+        $(".igv-generic-dialog-container").remove();
     };
 
 

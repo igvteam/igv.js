@@ -63,6 +63,8 @@ var igv = (function (igv) {
 
         this.nRows = 1;  // Computed dynamically
         this.groupBy = "NONE";
+        this.filterBy = undefined;
+        this.filters = [];
     };
 
 
@@ -106,7 +108,7 @@ var igv = (function (igv) {
 
     function getCallsetsLength() {
         var length = 0,
-            callSets = this.callSets;
+            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
         Object.keys(callSets).forEach(function (key) {
             if (callSets[key]) length += callSets[key].length;
         });
@@ -148,7 +150,7 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
-        var callSets = this.callSets,
+        var callSets = (this.filterBy) ? this.filteredCallSets : this.callSets,
             nCalls = callSets ? getCallsetsLength.call(this) : 0,
             callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight),
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
@@ -206,8 +208,8 @@ var igv = (function (igv) {
 
         this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-        callSets = this.callSets;
-        callSetGroups = this.callSetGroups;
+        callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
+        callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
         nCalls = getCallsetsLength.call(this);
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
@@ -413,9 +415,12 @@ var igv = (function (igv) {
                     // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
                     //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
 
-                    sortCallSets(self.callSets, variant, sortDirection);
+                    sortCallSets(this.callSets, variant, sortDirection);
+                    if (self.filterBy) {
+                        sortCallSets(self.filteredCallSets, variant, sortDirection);
+                    }
                     sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                    self.trackView.update();
+                    self.trackView.repaint(true);
                 }
             });
         }
@@ -447,7 +452,7 @@ var igv = (function (igv) {
 
                 featureList.forEach(function (variant) {
 
-                    var row, callHeight, callSets, cs, call;
+                    var row, callHeight, callSets, callSetGroups, cs, call;
 
                     if ((variant.start <= genomicLocation + tolerance) &&
                         (variant.end > genomicLocation - tolerance)) {
@@ -469,14 +474,15 @@ var igv = (function (igv) {
                             }
                             else {
                                 // Call
-                                callSets = self.callSets;
+                                callSets = (self.filterBy) ? self.filteredCallSets : self.callSets;
+                                callSetGroups = (self.filterBy) ? self.filteredCallSetGroups : self.callSetGroups;
                                 if (callSets && variant.calls) {
                                     callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
                                     // console.log("call height: ", callHeight);
                                     // console.log("nRows: ", self.nRows);
                                     var totalCalls = 0;
-                                    for (group = 0; group < self.callSetGroups.length; group++) {
-                                        var groupName = self.callSetGroups[group];
+                                    for (group = 0; group < callSetGroups.length; group++) {
+                                        var groupName = callSetGroups[group];
                                         var groupCalls = callSets[groupName].length;
                                         if (yOffset <= self.variantBandHeight + vGap + (totalCalls + groupCalls) *
                                             (callHeight + vGap) + (group * groupGap)) {
@@ -598,7 +604,7 @@ var igv = (function (igv) {
                     } catch (err) {
                         self.callSetGroups.sort();
                     }
-                    self.trackView.update();
+                    self.trackView.repaint(true);
                 }
             })
         }
@@ -623,8 +629,11 @@ var igv = (function (igv) {
                             label: 'Sort by allele length',
                             click: function () {
                                 sortCallSets(self.callSets, variant, sortDirection);
+                                if (this.filterBy) {
+                                    sortCallSets(self.filteredCallSets, variant, sortDirection)
+                                }
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                                self.trackView.update();
+                                self.trackView.repaint(true);
                             }
                         });
 
@@ -639,43 +648,72 @@ var igv = (function (igv) {
 
     igv.VariantTrack.prototype.groupCallSets = function (attribute) {
 
-        var self = this,
-            groupedCallSets = {},
-            callSetGroups = [],
-            group, attr, key;
+        var self = this;
 
-        Object.keys(this.callSets).forEach(function (i) {
+        if (this.filterBy) {
+            var filteredCallSetResults = createGroups(attribute, this.filteredCallSets);
+            this.filteredCallSets = filteredCallSetResults[0];
+            this.filteredCallSetGroups = filteredCallSetResults[1];
+        }
+        var callSetResults = createGroups(attribute, this.callSets);
+        this.callSets = callSetResults[0];
+        this.callSetGroups = callSetResults[1];
 
-            group = self.callSets[i];
-            group.forEach(function (callSet) {
+        this.groupBy = attribute;
+        this.trackView.update();
 
-                key = 'NONE';
+        function createGroups(attribute, callSets) {
+            var groupedCallSets = {}, callSetGroups = [], group, attr, key,
+                result = [];
+            Object.keys(callSets).forEach(function (i) {
 
-                if (attribute !== 'NONE') {
-                    attr = igv.sampleInformation.getAttributes(callSet.name);
-                    if (attr && attr[attribute]) {
-                        key = attr[attribute];
+                group = callSets[i];
+                group.forEach(function (callSet) {
+
+                    key = 'NONE';
+
+                    if (attribute !== 'NONE') {
+                        attr = igv.sampleInformation.getAttributes(callSet.name);
+                        if (attr && attr[attribute]) {
+                            key = attr[attribute];
+                        }
                     }
-                }
 
-                if (!groupedCallSets.hasOwnProperty(key)) {
-                    groupedCallSets[key] = [];
-                    callSetGroups.push(key);
-                }
+                    if (!groupedCallSets.hasOwnProperty(key)) {
+                        groupedCallSets[key] = [];
+                        callSetGroups.push(key);
+                    }
 
-                groupedCallSets[key].push(callSet);
-            })
-        });
+                    groupedCallSets[key].push(callSet);
+                })
+            });
 
-        // group families in order: father, mother, then children
-        if ("familyId" === attribute) {
-            Object.keys(groupedCallSets).forEach(function (i) {
-                group = groupedCallSets[i];
-                group.sort(function (a, b) {
-                    var attrA = igv.sampleInformation.getAttributes(a.name);
-                    var attrB = igv.sampleInformation.getAttributes(b.name);
-                    if (attrA["fatherId"] === "0" && attrA["motherId"] === "0") {
-                        if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
+            // group families in order: father, mother, then children
+            if ("familyId" === attribute) {
+                Object.keys(groupedCallSets).forEach(function (i) {
+                    group = groupedCallSets[i];
+                    group.sort(function (a, b) {
+                        var attrA = igv.sampleInformation.getAttributes(a.name);
+                        var attrB = igv.sampleInformation.getAttributes(b.name);
+                        if (attrA["fatherId"] === "0" && attrA["motherId"] === "0") {
+                            if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
+                                if (attrA["sex"] === "1") {
+                                    if (attrB["sex"] === "1") {
+                                        return 0;
+                                    } else {
+                                        return -1;
+                                    }
+                                } else if (attrB["sex"] === "1") {
+                                    return 1;
+                                } else {
+                                    return parseInt(attrB["sex"]) - parseInt(attrA["sex"]);
+                                }
+                            } else {
+                                return -1;
+                            }
+                        } else if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
+                            return 1;
+                        } else {
                             if (attrA["sex"] === "1") {
                                 if (attrB["sex"] === "1") {
                                     return 0;
@@ -687,33 +725,49 @@ var igv = (function (igv) {
                             } else {
                                 return parseInt(attrB["sex"]) - parseInt(attrA["sex"]);
                             }
-                        } else {
-                            return -1;
                         }
-                    } else if (attrB["fatherId"] === "0" && attrB["motherId"] === "0") {
-                        return 1;
-                    } else {
-                        if (attrA["sex"] === "1") {
-                            if (attrB["sex"] === "1") {
-                                return 0;
-                            } else {
-                                return -1;
-                            }
-                        } else if (attrB["sex"] === "1") {
-                            return 1;
-                        } else {
-                            return parseInt(attrB["sex"]) - parseInt(attrA["sex"]);
-                        }
-                    }
+                    });
                 });
-            });
-        }
+            }
 
-        this.callSets = groupedCallSets;
-        this.callSetGroups = callSetGroups;
-        this.groupBy = attribute;
-        this.trackView.update();
+            result.push(groupedCallSets);
+            result.push(callSetGroups);
+            return result;
+        }
     };
+
+
+    igv.VariantTrack.prototype.filterByFamily = function(value) {
+        var self = this;
+        if ("" === value) {
+            self.filters = [];
+            self.filterBy = undefined;
+        } else {
+            try {
+                self.filters = value.split(",");
+                self.filterBy = "familyId";
+                self.filteredCallSets = {};
+                self.filteredCallSetGroups = [];
+                Object.keys(this.callSets).forEach(function(groupName) {
+                    var group = self.callSets[groupName];
+                    group.forEach(function(callSet) {
+                        var attrs = igv.sampleInformation.getAttributes(callSet.name);
+                        var attribute = attrs[self.filterBy];
+                        if (self.filters.indexOf(attribute) !== -1) {
+                            if (!self.filteredCallSets.hasOwnProperty(groupName)) {
+                                self.filteredCallSets[groupName] = [];
+                                self.filteredCallSetGroups.push(groupName);
+                            }
+                            self.filteredCallSets[groupName].push(callSet);
+                        }
+                    });
+                });
+            } catch (err) {
+                console.log(err);
+            }
+        }
+    };
+
 
     igv.VariantTrack.prototype.menuItemList = function () {
 
@@ -766,8 +820,56 @@ var igv = (function (igv) {
                 });
             });
 
+            menuItems = menuItems.concat(mappedAttrs);
         }
-        
+
+        if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
+            menuItems.push(igv.trackMenuItem(popover, this.trackView, "Filter by Family ID", function () {
+                return "Family IDs"
+            }, this.filters.join(","), function () {
+
+                var value;
+
+                value = igv.dialog.$dialogInput.val().trim();
+
+                if (undefined !== value) {
+                    self.filterByFamily(value);
+                    self.trackView.update();
+                }
+
+            }, true));
+        }
+
+        function groupByMarkup(buttonVal, selfVal, lut) {
+
+            if (buttonVal === selfVal) {
+                return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
+            } else {
+                return '<div><i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[buttonVal] + '</div>';
+            }
+        }
+
+        function displayModeMarkup(index, displayMode, selfDisplayMode) {
+
+            var lut,
+                chosen;
+
+            lut =
+            {
+                "COLLAPSED": "Collapse",
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand"
+            };
+
+            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
+            if (displayMode === selfDisplayMode) {
+                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
+            } else {
+                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
+            }
+
+        }
+
         return menuItems;
 
     };
