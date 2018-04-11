@@ -197,19 +197,22 @@ var igv = (function (igv) {
 
         $parent
             .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
+                var data;
                 e.preventDefault();
                 e.stopPropagation();
                 self.dismissErrorMessage();
             })
-            .on('dragover dragenter', function () {
+            .on('dragover dragenter', function (e) {
                 $(this).addClass('igv-flw-input-row-hover-state');
             })
-            .on('dragleave dragend drop', function () {
+            .on('dragleave dragend drop', function (e) {
                 $(this).removeClass('igv-flw-input-row-hover-state');
             })
             .on('drop', function (e) {
-                self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
-                $input.val(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
+                if (false === self.fileLoadManager.didDragFile(e.originalEvent.dataTransfer)) {
+                    self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
+                    $input.val(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
+                }
             });
 
     }
@@ -256,17 +259,36 @@ var igv = (function (igv) {
                 e.stopPropagation();
                 self.dismissErrorMessage();
             })
-            .on('dragover dragenter', function () {
+            .on('dragover dragenter', function (e) {
                 $(this).addClass('igv-flw-input-row-hover-state');
             })
-            .on('dragleave dragend drop', function () {
+            .on('dragleave dragend drop', function (e) {
                 $(this).removeClass('igv-flw-input-row-hover-state');
             })
             .on('drop', function (e) {
-                self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
-                $file_name.text(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
-                $file_name.show();
+                if (true === self.fileLoadManager.didDragFile(e.originalEvent.dataTransfer)) {
+                    self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
+                    $file_name.text(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
+                    $file_name.show();
+
+                }
             });
+
+    }
+
+    function echoDraggedItem (dataTransfer) {
+
+        var url,
+            files;
+
+        url = dataTransfer.getData('text/uri-list');
+        files = dataTransfer.files;
+
+        if (files && files.length > 0) {
+            console.log('file dragged');
+        } else if (url && '' !== url) {
+            console.log('url dragged');
+        }
 
     }
 
@@ -311,6 +333,14 @@ var igv = (function (igv) {
             return val.extension;
         }));
 
+    };
+
+    igv.FileLoadManager.prototype.didDragFile = function (dataTransfer) {
+        var files;
+
+        files = dataTransfer.files;
+
+        return (files && files.length > 0);
     };
 
     igv.FileLoadManager.prototype.ingestDataTransfer = function (dataTransfer, isIndexFile) {
