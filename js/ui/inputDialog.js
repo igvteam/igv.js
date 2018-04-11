@@ -1,7 +1,8 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014 Broad Institute
+ * Copyright (c) 2016-2017 The Regents of the University of California
+ * Author: Jim Robinson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -23,17 +24,13 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 4/29/15.
- */
 var igv = (function (igv) {
 
-    igv.AlertDialog = function ($parent) {
+    igv.InputDialog = function ($parent) {
         var self = this,
             $header,
-            $ok_container;
-
-        this.$parent = $parent;
+            $buttons,
+            $div;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });
@@ -44,7 +41,7 @@ var igv = (function (igv) {
         $header = $("<div>", { class:'igv-generic-dialog-header' });
         this.$container.append($header);
         igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.$label.text('');
+            self.$input.val(undefined);
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
@@ -52,19 +49,32 @@ var igv = (function (igv) {
         // dialog label
         this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
         this.$container.append(this.$label);
-        self.$label.text('');
+        this.$label.text('Unlabeled');
 
-        // ok container
-        $ok_container = $("<div>", { class:'igv-generic-dialog-ok' });
-        this.$container.append($ok_container);
+        // input container
+        this.$input_container = $("<div>", { class:'igv-generic-dialog-input'});
+        this.$container.append(this.$input_container);
+        //
+        this.$input = $("<input>");
+        this.$input_container.append(this.$input);
+
+
+        // ok | cancel
+        $buttons = $("<div>", { class:'igv-generic-dialog-ok-cancel' });
+        this.$container.append($buttons);
 
         // ok
         this.$ok = $("<div>");
-        $ok_container.append(this.$ok);
+        $buttons.append(this.$ok);
         this.$ok.text('OK');
 
-        this.$ok.on('click', function () {
-            self.$label.text('');
+        // cancel
+        this.$cancel = $("<div>");
+        $buttons.append(this.$cancel);
+        this.$cancel.text('Cancel');
+
+        this.$cancel.on('click', function () {
+            self.$input.val(undefined);
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
@@ -74,24 +84,45 @@ var igv = (function (igv) {
         this.$container.hide();
     };
 
-    igv.AlertDialog.prototype.configure = function (config) {
+    igv.InputDialog.prototype.configure = function (config) {
+
+        var self = this;
+
         this.$label.text(config.label);
+        
+        this.$input.val(config.input);
+
+        this.$input.unbind();
+        this.$input.on('keyup', function (e) {
+            if (13 === e.keyCode) {
+                config.click();
+                self.$input.val(undefined);
+                self.$container.offset( { left:0, top:0 } );
+                self.$container.hide();
+            }
+        });
+
+        this.$ok.unbind();
+        this.$ok.on('click', function () {
+
+            config.click();
+
+            self.$input.val(undefined);
+            self.$container.offset( { left:0, top:0 } );
+            self.$container.hide();
+        });
+
     };
 
-    igv.AlertDialog.prototype.present = function ($alternativeParent) {
+    igv.InputDialog.prototype.present = function ($parent) {
 
-        var obj,
-            $p;
+        var offset_top,
+            scroll_top;
 
-        $p = $alternativeParent || this.$parent;
-        obj =
-            {
-                left: ($p.width() - this.$container.width())/2,
-                top: ($p.height() - this.$container.height())/2
+        offset_top = $parent.offset().top;
+        scroll_top = $('body').scrollTop();
 
-            };
-        this.$container.css(obj);
-
+        this.$container.offset( { left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top) } );
         this.$container.show();
     };
 
