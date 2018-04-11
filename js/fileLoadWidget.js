@@ -183,6 +183,10 @@ var igv = (function (igv) {
         $input = $('<input>', { type:'text', placeholder:(true === isIndexFile ? 'Enter index URL' : 'Enter data URL') });
         $parent.append($input);
 
+        $input.on('focus', function () {
+            self.dismissErrorMessage();
+        });
+
         $input.on('change', function (e) {
             self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = $(this).val();
         });
@@ -195,6 +199,7 @@ var igv = (function (igv) {
             .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+                self.dismissErrorMessage();
             })
             .on('dragover dragenter', function () {
                 $(this).addClass('igv-flw-input-row-hover-state');
@@ -237,6 +242,9 @@ var igv = (function (igv) {
         $file_name.hide();
 
         $input.on('change', function (e) {
+
+            self.dismissErrorMessage();
+
             self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = e.target.files[ 0 ];
             $file_name.text(e.target.files[ 0 ].name);
             $file_name.show();
@@ -246,6 +254,7 @@ var igv = (function (igv) {
             .on('drag dragstart dragend dragover dragenter dragleave drop', function (e) {
                 e.preventDefault();
                 e.stopPropagation();
+                self.dismissErrorMessage();
             })
             .on('dragover dragenter', function () {
                 $(this).addClass('igv-flw-input-row-hover-state');
@@ -276,7 +285,7 @@ var igv = (function (igv) {
 
     function doDismiss() {
 
-        // this.$container.offset( { top:0 } );
+        this.dismissErrorMessage();
 
         this.$container.find('input').val(undefined);
         this.$container.find('.igv-flw-local-file-name-container').hide();
