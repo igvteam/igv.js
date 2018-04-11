@@ -388,44 +388,54 @@ var igv = (function (igv) {
             return undefined;
         } else {
 
-            _isIndexFile = isAnIndexFile(this.dictionary.data);
+            _isIndexFile = isAnIndexFile.call(this, this.dictionary.data);
             if (true === _isIndexFile) {
-                this.fileLoadWidget.presentErrorMessage('Error: data file is in fact an index file.');
+                this.fileLoadWidget.presentErrorMessage('Error: index file submitted as data file.');
                 return undefined;
             } else {
 
-                _isIndexable = isIndexable(this.dictionary.data);
-
-                extension = igv.getExtension({ url: this.dictionary.data });
-
-                key = (this.keyToIndexExtension[ extension ]) ? extension : 'any';
-
-                indexFileStatus = this.keyToIndexExtension[ key ];
-
-                if (true === _isIndexable && false === indexFileStatus.optional) {
-
-                    if (undefined === this.dictionary.index) {
-                        this.fileLoadWidget.presentErrorMessage('Error: index file must be provided.');
-                        return undefined;
-
-                    } else {
-                        return { url: this.dictionary.data, indexURL: this.dictionary.index }
-                    }
+                _isIndexFile = isAnIndexFile.call(this, this.dictionary.index);
+                if (false === _isIndexFile) {
+                    this.fileLoadWidget.presentErrorMessage('Error: index file is not valid.');
+                    return undefined;
 
                 } else {
 
-                    config =
-                        {
-                            url: this.dictionary.data,
-                            indexURL: this.dictionary.index || undefined
-                        };
+                    _isIndexable = isIndexable.call(this, this.dictionary.data);
 
-                    if (undefined === this.dictionary.index) {
-                        config.indexed = false;
+                    extension = igv.getExtension({ url: this.dictionary.data });
+
+                    key = (this.keyToIndexExtension[ extension ]) ? extension : 'any';
+
+                    indexFileStatus = this.keyToIndexExtension[ key ];
+
+                    if (true === _isIndexable && false === indexFileStatus.optional) {
+
+                        if (undefined === this.dictionary.index) {
+                            this.fileLoadWidget.presentErrorMessage('Error: index file must be provided.');
+                            return undefined;
+
+                        } else {
+                            return { url: this.dictionary.data, indexURL: this.dictionary.index }
+                        }
+
+                    } else {
+
+                        config =
+                            {
+                                url: this.dictionary.data,
+                                indexURL: this.dictionary.index || undefined
+                            };
+
+                        if (undefined === this.dictionary.index) {
+                            config.indexed = false;
+                        }
+
+                        return config;
                     }
 
-                    return config;
                 }
+
             }
 
         }
