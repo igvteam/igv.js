@@ -248,11 +248,13 @@ var igv = (function (igv) {
                         clickFunction = function () {
                             var tag;
 
+
                             tag = igv.inputDialog.$dialogInput.val().trim();
                             self.alignmentTrack.colorBy = 'tag';
 
                             if (tag !== self.alignmentTrack.colorByTag) {
                                 self.alignmentTrack.colorByTag = igv.inputDialog.$dialogInput.val().trim();
+
                                 self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
                                 $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             }
@@ -264,6 +266,7 @@ var igv = (function (igv) {
 
                         igv.inputDialog.configure(labelHTMLFunction, inputValue, clickFunction);
                         igv.inputDialog.show($(self.trackView.trackDiv));
+
 
                     } else {
                         self.alignmentTrack.colorBy = menuItem.key;
