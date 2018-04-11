@@ -369,6 +369,7 @@
           top: 6px;
           left: 16px; }
         #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label:hover {
+          cursor: pointer;
           font-weight: 400; }
         #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container input.igv-flw-file-chooser-input {
           width: 0.1px;
