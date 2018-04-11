@@ -50,13 +50,16 @@ $igv-flw-border-radius: 2px;
 
 #igv-file-load-widget-container {
 
-  position: absolute;
-  top: 0;
-
-  width:$igv-flw-container-width;
-  height: $igv-flw-container-height;
-  margin: 64px auto;
   z-index: 2048;
+
+  position: absolute;
+  width:$igv-flw-container-width;
+  top: 128px;
+  left: 0;
+  right: 0;
+  margin: auto;
+
+  height: $igv-flw-container-height;
 
   color: $igv-flw-grey-color;
   font-family: $igv-flw-font-face;
@@ -66,7 +69,6 @@ $igv-flw-border-radius: 2px;
   border-color: $igv-flw-grey-color;
   border-style: solid;
   border-width: thin;
-
 
   background-color: white;
 
@@ -199,6 +201,9 @@ $igv-flw-border-radius: 2px;
 
       // button indicating drag/drop capability
       .igv-flw-drag-drop-target {
+
+        cursor: default;
+
         margin-left: 8px;
 
         width: 120px;
@@ -217,13 +222,22 @@ $igv-flw-border-radius: 2px;
 
       // name of local file
       .igv-flw-local-file-name-container {
-        margin-left: 8px;
-        //width: 384px;
+
+        width: 220px;
         height: $igv-flw-input-row-height;
 
+        color: $igv-flw-dark-grey-color;
         line-height: $igv-flw-input-row-height;
         text-align: left;
-        //background-color: rgba(173, 255, 47, 0.5);
+        font-weight: 400;
+
+        margin-left: 8px;
+
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        //background-color: grey;
       }
 
     }
