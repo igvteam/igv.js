@@ -268,12 +268,14 @@
   background-color: transparent; }
 
 #igv-file-load-widget-container {
-  position: absolute;
-  top: 0;
-  width: 720px;
-  height: 400px;
-  margin: 64px auto;
   z-index: 2048;
+  position: absolute;
+  width: 720px;
+  top: 128px;
+  left: 0;
+  right: 0;
+  margin: auto;
+  height: 400px;
   color: #7F7F7F;
   font-family: "Open Sans", sans-serif;
   font-size: 16px;
@@ -376,6 +378,7 @@
           position: absolute;
           z-index: -1; }
       #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-drag-drop-target {
+        cursor: default;
         margin-left: 8px;
         width: 120px;
         height: calc(36px - 8px);
@@ -386,10 +389,16 @@
         border-width: thin;
         border-radius: calc(2 * 2px); }
       #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-local-file-name-container {
-        margin-left: 8px;
+        width: 220px;
         height: 36px;
+        color: #373737;
         line-height: 36px;
-        text-align: left; }
+        text-align: left;
+        font-weight: 400;
+        margin-left: 8px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis; }
     #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row-hover-state {
       background-color: #efefef;
       border-color: #7F7F7F; }
