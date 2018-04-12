@@ -99,6 +99,7 @@ var igv = (function (igv) {
 
 
         // The standard mappings
+        chrAliasTable["all"] = "all";
         this.chromosomeNames.forEach(function (name) {
             var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
             chrAliasTable[alias.toLowerCase()] = name;
