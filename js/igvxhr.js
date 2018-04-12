@@ -223,7 +223,7 @@ var igv = (function (igv) {
     igv.xhr.loadJson = function (url, options) {
 
         options = options || {};
-        
+
         var method = options.method || (options.sendData ? "POST" : "GET");
 
         if (method == "POST") options.contentType = "application/json";
@@ -420,6 +420,9 @@ var igv = (function (igv) {
         else if (url.includes("//drive.google.com")) {
             return igv.Google.driveDownloadURL(url);
         }
+        else if (url.includes("//www.broadinstitute.org/igvdata")) {
+            return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
+        }
         else {
             return url;
         }
@@ -452,7 +455,7 @@ var igv = (function (igv) {
      * Crude test for google urls.
      */
     function isGoogleURL(url) {
-        return url.includes("googleapis")  && !url.includes("urlshortener");
+        return url.includes("googleapis") && !url.includes("urlshortener");
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
