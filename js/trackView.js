@@ -343,6 +343,7 @@ var igv = (function (igv) {
             this.viewports.forEach(function (vp) {
                 vp.setContentHeight(newHeight);
                 vp.tile.invalidate = true;
+                vp.repaint(true);
             });
         }
 
