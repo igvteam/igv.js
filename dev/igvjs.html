@@ -46,6 +46,7 @@
     <script src="../js/bam/bamUtils.js"></script>
     <script src="../js/bam/bamWebserviceReader.js"></script>
     <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -69,7 +70,7 @@
     <script src="../js/feature/featureUtils.js"></script>
     <script src="../js/feature/segParser.js"></script>
     <script src="../js/feature/segTrack.js"></script>
-    <script type="text/javascript" src="../js/feature/dataWrapper.js"></script>
+    <script src="../js/feature/dataWrapper.js"></script>
 
     <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -94,10 +95,12 @@
 
     <script src="../js/ui/trackMenuPopupDialog.js"></script>
     <script src="../js/ui/dataRangeDialog.js"></script>
-    <script src="../js/ui/trackRemovalDialog.js"></script>
     <script src="../js/ui/inputDialog.js"></script>
+    <script src="../js/ui/trackRemovalDialog.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/cursorGuide.js"></script>
     <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/trackLabelControl.js"></script>
     <script src="../js/ui/userFeedback.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/popover.js"></script>
@@ -146,6 +149,7 @@
 
 </head>
 
+
 <body>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
@@ -157,7 +161,9 @@
 
         var div = document.getElementById("myDiv");
 
-        igv.createBrowser(div);
+        igv.createBrowser(div, {
+            queryParametersSupported: true
+        });
 
 
     })
