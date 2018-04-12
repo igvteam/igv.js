@@ -333,7 +333,7 @@ var igv = (function (igv) {
                     click: function () {
                         igv.popover.hide();
                         self.displayMode = displayMode;
-                        self.trackView.repaint(true);
+                        self.trackView.update();
                     }
                 });
         });
