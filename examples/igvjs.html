@@ -23,10 +23,6 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-    <h1>"Empty" page to demonstrate loading IGV sessions</h1>
-</div>
-
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
@@ -34,6 +30,7 @@
         var div = document.getElementById("myDiv");
 
         igv.createBrowser(div, {
+            genome: 'hg19',    // Default, can be overriden by query parameter
             queryParametersSupported: true
         });
 
