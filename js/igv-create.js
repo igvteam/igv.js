@@ -50,6 +50,10 @@ var igv = (function (igv) {
 
         setDefaults(config);
 
+        // Explicit parameters have priority
+        if (config.queryParametersSupported) {
+            extractQuery(config);
+        }
 
         // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
         setTrackOrder(config);
@@ -93,9 +97,10 @@ var igv = (function (igv) {
         // Load known genome table (make this optional)
 
         igv.Genome.getKnownGenomes()
+
             .then(function (genomeTable) {
                 // Potentially load a session file
-                return loadSessionFile();
+                return loadSessionFile(config.sessionURL);
             })
 
             .then(function (session) {
@@ -109,9 +114,6 @@ var igv = (function (igv) {
                 // Expand genome IDs and deal with legacy genome definition options
                 setReferenceConfiguration(config);
 
-                // Query parameter locus has precendence
-                var initialLocus = extractLocus();
-                if (initialLocus) config.locus = initialLocus;
 
                 return config;
             })
@@ -143,11 +145,11 @@ var igv = (function (igv) {
 
                 if (genomicStateList.length > 0) {
 
-                    viewportWidth = browser.viewportContainerWidth()/genomicStateList.length;
+                    viewportWidth = browser.viewportContainerWidth() / genomicStateList.length;
 
                     browser.genomicStateList = genomicStateList.map(function (gs) {
                         var obj;
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start)/viewportWidth);
+                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
                         obj = _.omit(gs, 'start', 'end');
                         return obj;
                     });
@@ -193,9 +195,9 @@ var igv = (function (igv) {
                     $('#igvKaryoDiv').hide();
                 }
 
-                browser.updateLocusSearchWidget(genomicStateList[ 0 ]);
+                browser.updateLocusSearchWidget(genomicStateList[0]);
 
-                browser.windowSizePanel.updateWithGenomicState(genomicStateList[ 0 ]);
+                browser.windowSizePanel.updateWithGenomicState(genomicStateList[0]);
 
                 if (false === config.showTrackLabels) {
                     browser.hideTrackLabels();
@@ -229,7 +231,7 @@ var igv = (function (igv) {
 
                 }
                 // whole-genome
-                else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+                else if ('all' === genomicStateList[0].locusSearchString) {
                     browser.centerGuide.disable();
                     browser.disableZoomWidget();
                 }
@@ -415,7 +417,6 @@ var igv = (function (igv) {
             browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
 
 
-
             // cursor guide | center guide | track labels
 
             $igv_nav_bar_right_container = $('<div id="igv-nav-bar-right-container">');
@@ -597,8 +598,11 @@ var igv = (function (igv) {
     }
 
 
-    function extractQuery(uri) {
-        var i1, i2, i, j, s, query, tokens;
+    function extractQuery(config) {
+
+        var i1, i2, i, j, s, query, tokens, uri, key, value;
+
+        uri = window.location.href;
 
         query = {};
         i1 = uri.indexOf("?");
@@ -606,16 +610,33 @@ var igv = (function (igv) {
 
         if (i1 >= 0) {
             if (i2 < 0) i2 = uri.length;
-
             for (i = i1 + 1; i < i2;) {
-
                 j = uri.indexOf("&", i);
                 if (j < 0) j = i2;
 
                 s = uri.substring(i, j);
                 tokens = s.split("=", 2);
+
                 if (tokens.length === 2) {
-                    query[tokens[0]] = tokens[1];
+                    key = tokens[0];
+                    value = decodeURIComponent(tokens[1]);
+
+                    if ('genome' === key) {
+
+                        config.reference = {
+                            "id": value
+                        }
+
+                    } else if ('file' === key) {
+
+                        if(!config.tracks) config.tracks = [];
+                        config.tracks.push({
+                            url: value
+                        });
+                    }
+                    else {
+                        config[key] = value;
+                    }
                 }
 
                 i = j + 1;
@@ -624,32 +645,19 @@ var igv = (function (igv) {
         return query;
     }
 
-    function loadSessionFile() {
+    function loadSessionFile(igvSession) {
 
-        var query = extractQuery(window.location.href);
-
-        if (query.hasOwnProperty("igvSessionXML")) {
-
-            var igvSession = decodeURIComponent(query["igvSessionXML"]);
-
+        if (igvSession) {
             return igv.xhr.loadString(igvSession)
                 .then(function (string) {
                     return new igv.XMLSession(string);
                 })
-
         }
         else {
             return Promise.resolve(undefined);
         }
     }
 
-    function extractLocus() {
-
-        var query = extractQuery(window.location.href),
-            loc = query["locus"];
-
-        return loc ? decodeURIComponent(loc) : undefined;
-    }
 
     return igv;
 })
