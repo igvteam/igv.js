@@ -385,46 +385,45 @@ var igv = (function (igv) {
                 return undefined;
             } else {
 
-                _isIndexFile = isAnIndexFile.call(this, this.dictionary.index);
-                if (false === _isIndexFile) {
-                    this.fileLoadWidget.presentErrorMessage('Error: index file is not valid.');
-                    return undefined;
+                if (this.dictionary.index) {
+                    _isIndexFile = isAnIndexFile.call(this, this.dictionary.index);
+                    if (false === _isIndexFile) {
+                        this.fileLoadWidget.presentErrorMessage('Error: index file is not valid.');
+                        return undefined;
+                    }
+                }
+
+                _isIndexable = isIndexable.call(this, this.dictionary.data);
+
+                extension = igv.getExtension({ url: this.dictionary.data });
+
+                key = (this.keyToIndexExtension[ extension ]) ? extension : 'any';
+
+                indexFileStatus = this.keyToIndexExtension[ key ];
+
+                if (true === _isIndexable && false === indexFileStatus.optional) {
+
+                    if (undefined === this.dictionary.index) {
+                        this.fileLoadWidget.presentErrorMessage('Error: index file must be provided.');
+                        return undefined;
+
+                    } else {
+                        return { url: this.dictionary.data, indexURL: this.dictionary.index }
+                    }
 
                 } else {
 
-                    _isIndexable = isIndexable.call(this, this.dictionary.data);
+                    config =
+                        {
+                            url: this.dictionary.data,
+                            indexURL: this.dictionary.index || undefined
+                        };
 
-                    extension = igv.getExtension({ url: this.dictionary.data });
-
-                    key = (this.keyToIndexExtension[ extension ]) ? extension : 'any';
-
-                    indexFileStatus = this.keyToIndexExtension[ key ];
-
-                    if (true === _isIndexable && false === indexFileStatus.optional) {
-
-                        if (undefined === this.dictionary.index) {
-                            this.fileLoadWidget.presentErrorMessage('Error: index file must be provided.');
-                            return undefined;
-
-                        } else {
-                            return { url: this.dictionary.data, indexURL: this.dictionary.index }
-                        }
-
-                    } else {
-
-                        config =
-                            {
-                                url: this.dictionary.data,
-                                indexURL: this.dictionary.index || undefined
-                            };
-
-                        if (undefined === this.dictionary.index) {
-                            config.indexed = false;
-                        }
-
-                        return config;
+                    if (undefined === this.dictionary.index) {
+                        config.indexed = false;
                     }
 
+                    return config;
                 }
 
             }
