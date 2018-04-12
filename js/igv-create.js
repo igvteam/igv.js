@@ -552,10 +552,6 @@ var igv = (function (igv) {
             config.pairsSupported = true;
         }
 
-        if (config.type === undefined) {
-            config.type = "IGV";
-        }
-
         if (!config.tracks) {
             config.tracks = [];
         }
@@ -621,13 +617,7 @@ var igv = (function (igv) {
                     key = tokens[0];
                     value = decodeURIComponent(tokens[1]);
 
-                    if ('genome' === key) {
-
-                        config.reference = {
-                            "id": value
-                        }
-
-                    } else if ('file' === key) {
+                    if ('file' === key) {
 
                         if (!config.tracks) config.tracks = [];
                         value.split(',').forEach(function (t) {
