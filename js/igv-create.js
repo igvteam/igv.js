@@ -629,9 +629,11 @@ var igv = (function (igv) {
 
                     } else if ('file' === key) {
 
-                        if(!config.tracks) config.tracks = [];
-                        config.tracks.push({
-                            url: value
+                        if (!config.tracks) config.tracks = [];
+                        value.split(',').forEach(function (t) {
+                            config.tracks.push({
+                                url: t
+                            })
                         });
                     }
                     else {
