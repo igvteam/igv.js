@@ -293,15 +293,6 @@ var igv = (function (igv) {
     }
 
     function doPresent() {
-
-        var offset_top,
-            scroll_top;
-
-        offset_top = this.$parent.offset().top;
-        scroll_top = $('body').scrollTop();
-
-        this.$container.offset( { top: (offset_top + scroll_top) } );
-
         this.$container.show();
     }
 
