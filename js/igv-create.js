@@ -105,15 +105,18 @@ var igv = (function (igv) {
 
             .then(function (session) {
 
+                var locus = config.locus;
+
                 if (session) {
                     config = Object.assign(config, session);
+                    if(locus) config.locus = locus;    // Restore
+
                     if (undefined === config.tracks) config.tracks = [];
                     config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
                 }
 
                 // Expand genome IDs and deal with legacy genome definition options
                 setReferenceConfiguration(config);
-
 
                 return config;
             })
@@ -638,7 +641,7 @@ var igv = (function (igv) {
         return query;
     }
 
-    function loadSessionFile(igvSession) {
+    function loadSessionFile(igvSession, locus) {
 
         if (igvSession) {
             return igv.xhr.loadString(igvSession)
