@@ -250,6 +250,7 @@ var igv = (function (igv) {
 
             self.fileLoadManager.dictionary[ true === isIndexFile ? 'index' : 'data' ] = e.target.files[ 0 ];
             $file_name.text(e.target.files[ 0 ].name);
+            $file_name.attr('title', e.target.files[ 0 ].name);
             $file_name.show();
         });
 
@@ -266,9 +267,12 @@ var igv = (function (igv) {
                 $(this).removeClass('igv-flw-input-row-hover-state');
             })
             .on('drop', function (e) {
+                var str;
                 if (true === self.fileLoadManager.didDragFile(e.originalEvent.dataTransfer)) {
                     self.fileLoadManager.ingestDataTransfer(e.originalEvent.dataTransfer, isIndexFile);
-                    $file_name.text(isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName());
+                    str = isIndexFile ? self.fileLoadManager.indexName() : self.fileLoadManager.dataName();
+                    $file_name.text(str);
+                    $file_name.attr('title', str);
                     $file_name.show();
 
                 }
