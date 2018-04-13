@@ -147,13 +147,16 @@ $igv-flw-border-radius: 2px;
 
       // label
       .igv-flw-input-label {
+
+        color: rgba(0, 0, 0, 0.76);
+        font-weight: 400;
+
         margin-left: 8px;
         width: 128px;
         height: $igv-flw-input-row-height;
 
         line-height: $igv-flw-input-row-height;
         text-align: left;
-        //background-color: rgba(173, 255, 47, 0.5);
       }
 
       // url input
