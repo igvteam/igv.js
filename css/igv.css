@@ -84,11 +84,9 @@
 #igv-file-load-widget-container {
   z-index: 2048;
   position: absolute;
-  width: 720px;
-  top: 128px;
+  top: 64px;
   left: 0;
-  right: 0;
-  margin: auto;
+  width: 720px;
   height: 400px;
   color: #7F7F7F;
   font-family: "Open Sans", sans-serif;
