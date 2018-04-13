@@ -109,5 +109,19 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('doc', ['md2html']);
+
+    grunt.task.registerTask('css-oneliner', 'One line-ify igv.css.', function () {
+
+        var ping,
+            pong;
+
+        ping = grunt.file.read('css/igv.css');
+        pong = ping.replace(/\n/g, '\\n');
+        ping = pong.replace(/"/g, '\\"');
+        pong = 'var igvcss = ' + '"' + ping + '"' + '\n';
+
+        grunt.file.write('dist/css-oneliner.js', pong);
+    });
+
 };
 
