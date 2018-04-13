@@ -63,6 +63,8 @@ var igv = (function (igv) {
             closeHandler();
         });
 
+        $generic_container.draggable({ handle: $header.get(0) });
+
         return $generic_container;
     };
 
