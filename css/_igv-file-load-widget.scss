@@ -224,7 +224,7 @@ $igv-flw-border-radius: 2px;
       // name of local file
       .igv-flw-local-file-name-container {
 
-        width: 220px;
+        width: 275px;
         height: $igv-flw-input-row-height;
 
         color: $igv-flw-dark-grey-color;
@@ -238,7 +238,7 @@ $igv-flw-border-radius: 2px;
         overflow: hidden;
         text-overflow: ellipsis;
 
-        //background-color: grey;
+        //background-color: rgba(128, 128, 128, 0.25);
       }
 
     }
