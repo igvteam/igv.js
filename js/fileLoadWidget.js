@@ -120,6 +120,10 @@ var igv = (function (igv) {
             doDismiss.call(self);
         });
 
+
+        this.$container.draggable({ handle: $header.get(0) });
+
+
         this.$container.hide();
 
     };
@@ -309,6 +313,8 @@ var igv = (function (igv) {
         this.$container.hide();
 
         this.fileLoadManager.reset();
+
+        this.$container.css({ top:'64px', left:0 });
     }
 
     igv.FileLoadManager = function (fileLoadWidget) {
