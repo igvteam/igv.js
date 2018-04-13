@@ -53,12 +53,15 @@ $igv-flw-border-radius: 2px;
   z-index: 2048;
 
   position: absolute;
-  width:$igv-flw-container-width;
-  top: 128px;
+  top: 64px;
   left: 0;
-  right: 0;
-  margin: auto;
 
+  //top: 128px;
+  //left: 0;
+  //right: 0;
+  //margin: auto;
+
+  width:$igv-flw-container-width;
   height: $igv-flw-container-height;
 
   color: $igv-flw-grey-color;
