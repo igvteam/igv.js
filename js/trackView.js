@@ -102,6 +102,7 @@ var igv = (function (igv) {
 
             igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
                 self.setColor(rgb);
+                self.$colorpicker_container.hide();
             });
 
             this.$colorpicker_container.hide();
