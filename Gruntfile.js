@@ -16,6 +16,7 @@ module.exports = function (grunt) {
         concat: {
             igv: {
                 src: [
+                    'tmp/embedCss.js',
                     'wrapper/header.js',
                     'vendor/jquery-1.12.4.js',
                     'vendor/jquery-ui.js',
@@ -59,7 +60,7 @@ module.exports = function (grunt) {
                     'css/igv.css',
                     'vendor/fa-svg-with-js.css'
                 ],
-                dest: 'dist/igv-all.css'
+                dest: 'tmp/igv-all.css'
             }
 
         },
@@ -97,7 +98,7 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'concat:css', 'copy']);
+    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv','copy']);
 
     grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
 
@@ -110,17 +111,20 @@ module.exports = function (grunt) {
 
     grunt.registerTask('doc', ['md2html']);
 
-    grunt.task.registerTask('css-oneliner', 'One line-ify igv.css.', function () {
+    grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
         var ping,
-            pong;
+            pong,
+            foo;
 
-        ping = grunt.file.read('css/igv.css');
+        ping = grunt.file.read('tmp/igv-all.css');
         pong = ping.replace(/\n/g, '\\n');
         ping = pong.replace(/"/g, '\\"');
-        pong = 'var igvcss = ' + '"' + ping + '"' + '\n';
 
-        grunt.file.write('dist/css-oneliner.js', pong);
+        foo = grunt.file.read('wrapper/embedCss.js');
+        foo = foo.replace('_CSS_', ping)
+
+        grunt.file.write('tmp/embedCss.js', foo);
     });
 
 };
