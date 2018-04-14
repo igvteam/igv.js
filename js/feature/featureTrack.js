@@ -585,7 +585,7 @@ var igv = (function (igv) {
         if ((feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
             ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
             geneFontStyle = {
-                font: '10px PT Sans',
+               // font: '10px PT Sans',
                 textAlign: 'center',
                 fillStyle: geneColor || feature.color || this.color,
                 strokeStyle: geneColor || feature.color || this.color
