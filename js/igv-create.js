@@ -223,7 +223,7 @@ var igv = (function (igv) {
                     browser.hideCenterGuide();
                 } else {
                     browser.showCenterGuide();
-                    browser.cursorGuide.setState(browser.centerGuideVisible);
+                    browser.centerGuide.setState(browser.centerGuideVisible);
                 }
 
                 // multi-locus mode
