@@ -1545,8 +1545,7 @@ var igv = (function (igv) {
             genomicState: viewport.genomicState,
             referenceFrame: viewport.genomicState.referenceFrame
         };
-
-    }
+    };
 
     igv.Browser.prototype.dispose = function () {
 
@@ -1557,13 +1556,11 @@ var igv = (function (igv) {
             tv.dispose();
         })
 
-    }
+    };
 
     function addMouseHandlers() {
 
-        var self = this,
-            lastMouseX;
-
+        var self = this;
 
         $(window).on('resize.browser', igv.throttle(function () {
             self.resize();
@@ -1597,7 +1594,7 @@ var igv = (function (igv) {
 
                 if (self.vpMouseDown.viewport.isDragging) {
 
-                    self.vpMouseDown.viewport.shiftPixels(lastMouseX - coords.x);
+                    self.vpMouseDown.viewport.shiftPixels(self.vpMouseDown.lastMouseX - coords.x);
 
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
 
@@ -1605,7 +1602,8 @@ var igv = (function (igv) {
 
                     self.fireEvent('trackdrag');
                 }
-                lastMouseX = coords.x;
+
+                self.vpMouseDown.lastMouseX = coords.x;
             }
 
         }, 10));
@@ -1630,8 +1628,7 @@ var igv = (function (igv) {
             self.vpMouseDown = undefined;
         }
 
-    };
-
+    }
 
     return igv;
 })
