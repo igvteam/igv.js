@@ -167,8 +167,11 @@
             showChromosomeWidget: true,
             showLoadFileWidget: true,
 
+            showCenterGuide: true,
+
             // locus: 'all',
-            locus: '1',
+            // locus: '1',
+            locus: '1:83,958,085-83,958,125',
             // locus: 'SLC25A3',
             // locus: 'brca1',
             // locus: 'chrX:138633329-138633330',
@@ -188,10 +191,14 @@
             tracks:
                 [
                     {
-                        url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
-                        indexed: false,
-                        name: 'Segmented CN'
+                        url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
+                        name: 'Big BigWig'
                     },
+                    // {
+                    //     url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                    //     indexed: false,
+                    //     name: 'Segmented CN'
+                    // },
                     {
                         name: "Genes",
                         type: "annotation",
