@@ -191,6 +191,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.showCenterGuide = function () {
         this.centerGuide.$container.show();
+        this.centerGuide.resize();
         this.centerGuideVisible = true;
     };
 
