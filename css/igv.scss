@@ -813,13 +813,13 @@ $igv-dark-grey-color: #373737;
 
   z-index: 128;
 
+  cursor: pointer;
 }
 
 .igv-track-label:hover,
 .igv-track-label:focus,
 .igv-track-label:active  {
-  cursor: pointer;
-  font-weight: bold;
+  background-color: rgba(0, 0, 0, 0.05);
 }
 
 // scrollbar

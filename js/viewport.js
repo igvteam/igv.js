@@ -94,6 +94,7 @@ var igv = (function (igv) {
                 description = trackView.track.description || trackView.track.name;
             }
 
+            this.$trackLabel.attr('title', trackView.track.name);
             this.$trackLabel.html(trackView.track.name);
             this.$trackLabel.click(function (e) {
                 e.stopPropagation();
