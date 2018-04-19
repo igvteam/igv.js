@@ -228,52 +228,44 @@ var igv = (function (igv) {
             $e = igv.createCheckbox(menuItem.label, showCheck);
 
             clickHandler = function () {
-                var labelHTMLFunction,
-                    inputValue,
+                var config,
                     clickFunction;
 
                 if (menuItem.key === self.alignmentTrack.colorBy) {
                     self.alignmentTrack.colorBy = 'none';
                     self.trackView.repaint(true);
-                }
-                else {
-                    if ('tag' === menuItem.key) {
+                } else if ('tag' === menuItem.key) {
 
-                        labelHTMLFunction = function () {
-                            return "Tag Name"
-                        };
+                    clickFunction = function () {
+                        var tag;
 
-                        inputValue = self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '';
+                        self.alignmentTrack.colorBy = 'tag';
 
-                        clickFunction = function () {
-                            var tag;
+                        tag = igv.inputDialog.$input.val().trim();
+                        if (tag !== self.alignmentTrack.colorByTag) {
+                            self.alignmentTrack.colorByTag = tag;
+                            self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                        }
 
-
-                            tag = igv.inputDialog.$dialogInput.val().trim();
-                            self.alignmentTrack.colorBy = 'tag';
-
-                            if (tag !== self.alignmentTrack.colorByTag) {
-                                self.alignmentTrack.colorByTag = igv.inputDialog.$dialogInput.val().trim();
-
-                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-                                $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                            }
-
-
-                            self.trackView.repaint(true);
-                        };
-
-
-                        igv.inputDialog.configure(labelHTMLFunction, inputValue, clickFunction);
-                        igv.inputDialog.show($(self.trackView.trackDiv));
-
-
-                    } else {
-                        self.alignmentTrack.colorBy = menuItem.key;
                         self.trackView.repaint(true);
-                    }
+                    };
 
+                    config =
+                        {
+                            label:'Tag Name',
+                            input: self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
+                            click: clickFunction
+                        };
+
+                    igv.inputDialog.configure(config);
+                    igv.inputDialog.present( $(self.trackView.trackDiv) );
+
+                } else {
+                    self.alignmentTrack.colorBy = menuItem.key;
+                    self.trackView.repaint(true);
                 }
+
             };
 
             return {name: undefined, object: $e, click: clickHandler, init: undefined}
