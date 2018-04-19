@@ -8,10 +8,6 @@ var igv = (function (igv) {
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
         var self = this,
-<<<<<<< HEAD
-            description,
-=======
->>>>>>> track label repair
             $spinnerContainer,
             dimen,
             $div,
