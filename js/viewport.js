@@ -7,7 +7,6 @@ var igv = (function (igv) {
 
         var self = this,
             description,
-            $trackLabel,
             $spinnerContainer,
             dimen,
             $div,
@@ -188,7 +187,6 @@ var igv = (function (igv) {
             genomicState = self.genomicState,
             referenceFrame = genomicState.referenceFrame,
             chr,
-            refFrameStart,
             chrLength;
 
         if (!viewIsReady.call(this) || !(typeof self.trackView.track.computePixelHeight === 'function') || showZoomInNotice.call(this)) {
@@ -249,8 +247,7 @@ var igv = (function (igv) {
             chr,
             refFrameStart,
             refFrameEnd,
-            drawConfiguration,
-            newCanvas;
+            drawConfiguration;
 
         if (!(viewIsReady.call(this))) {
             return;
