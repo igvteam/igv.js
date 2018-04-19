@@ -190,13 +190,13 @@ var igv = (function (igv) {
                     browser.ideoPanel.repaint();
                 }
 
-                if (true === config.showKaryo) {
-                    browser.karyoPanel = new igv.KaryoPanel($('#igvKaryoDiv'));
-                    browser.$navigation.append(browser.karyoPanel.$karyoPanelToggle);
-                    browser.karyoPanel.resize(panelWidth);
-                } else {
-                    $('#igvKaryoDiv').hide();
-                }
+                // if (true === config.showKaryo) {
+                //     browser.karyoPanel = new igv.KaryoPanel($('#igvKaryoDiv'));
+                //     browser.$navigation.append(browser.karyoPanel.$karyoPanelToggle);
+                //     browser.karyoPanel.resize(panelWidth);
+                // } else {
+                //     $('#igvKaryoDiv').hide();
+                // }
 
                 browser.updateLocusSearchWidget(genomicStateList[0]);
 
@@ -449,11 +449,11 @@ var igv = (function (igv) {
 
         }
 
-        $karyo = $('#igvKaryoDiv');
-        if (undefined === $karyo.get(0)) {
-            $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
-            $controls.append($karyo);
-        }
+        // $karyo = $('#igvKaryoDiv');
+        // if (undefined === $karyo.get(0)) {
+        //     $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
+        //     $controls.append($karyo);
+        // }
 
 
         return $controls.get(0);
