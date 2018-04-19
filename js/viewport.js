@@ -3,6 +3,8 @@
  */
 var igv = (function (igv) {
 
+    var NOT_LOADED_MESSAGE = 'Couldn\'t load track'
+
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
         var self = this,
@@ -171,10 +173,25 @@ var igv = (function (igv) {
         }
     };
 
+    igv.Viewport.prototype.showMessage = function (message) {
+        if (!this.messageDiv) {
+            this.messageDiv = document.createElement('div')
+            this.messageDiv.className = 'igv-viewport-message'
+            this.contentDiv.append(this.messageDiv)
+        }
+        this.messageDiv.textContent = message
+        this.messageDiv.style.display = ''
+    }
+
+    igv.Viewport.prototype.hideMessage = function (message) {
+        if (this.messageDiv)
+            this.messageDiv.style.display = 'none'
+    }
+
     /**
      * Return a promise to adjust content height to accomodate features for current genomic state
      *
-     * @returns {*}
+     * @returns {Promise}
      */
     igv.Viewport.prototype.adjustContentHeight = function () {
 
@@ -202,6 +219,7 @@ var igv = (function (igv) {
         bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
         self.startSpinner();
+        self.hideMessage();
 
         // console.log('get features');
         return getFeatures.call(self, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
@@ -210,8 +228,6 @@ var igv = (function (igv) {
 
                 var currentContentHeight,
                     requiredContentHeight;
-
-                self.stopSpinner();
 
                 if (features) {
 
@@ -226,6 +242,16 @@ var igv = (function (igv) {
                     return self.getContentHeight();
                 }
             })
+
+            .catch(function (error) {
+                console.error(error);
+
+                self.showMessage(NOT_LOADED_MESSAGE)
+            })
+
+            .then(/* finally */ function () {
+                self.stopSpinner();
+            });
     };
 
     igv.Viewport.prototype.update = function () {
@@ -276,8 +302,8 @@ var igv = (function (igv) {
 
         if (force || !tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
 
-            //TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
-            //TODO -- cached features directly (not a promise for features).
+            // TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
+            // TODO -- cached features directly (not a promise for features).
 
             // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
             var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
@@ -298,19 +324,17 @@ var igv = (function (igv) {
 
             self.loading = {start: bpStart, end: bpEnd};
 
-            self.startSpinner();
-
             var newCanvas, ctx;
+
+            self.startSpinner();
+            self.hideMessage();
 
             // console.log('get features');
             getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
 
                 .then(function (features) {
-                    var roiPromises;
 
                     self.loading = undefined;
-
-                    self.stopSpinner();
 
                     var devicePixelRatio = window.devicePixelRatio;
                     newCanvas = $('<canvas>').get(0);
@@ -359,30 +383,23 @@ var igv = (function (igv) {
                     }
 
                     if (igv.browser.roi) {
-                        roiPromises = [];
-                        igv.browser.roi.forEach(function (r) {
-                            roiPromises.push(r.getFeatures(referenceFrame.chrName, bpStart, bpEnd))
+                        var roiPromises = igv.browser.roi.map(function (r) {
+                            return r.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
                         });
 
                         return Promise.all(roiPromises)
+                            .then(function (roiArray) {
+                                for (var i = 0; i < roiArray.length; i++) {
+                                    drawConfiguration.features = roiArray[i];
+                                    igv.browser.roi[i].draw(drawConfiguration);
+                                }
+                            })
                     }
-                    else {
-                        return undefined;   // No regions of interest
-                    }
+                    // No regions of interest
+                    return undefined;
                 })
 
-                .then(function (roiArray) {
-
-                    if (roiArray) {
-                        var i, len;
-                        for (i = 0, len = roiArray.length; i < len; i++) {
-                            drawConfiguration.features = roiArray[i];
-                            igv.browser.roi[i].draw(drawConfiguration);
-                        }
-                    }
-                })
-
-                .then(function (ignore) {
+                .then(function () {
 
                     ctx.restore();
 
@@ -398,15 +415,14 @@ var igv = (function (igv) {
                 })
 
                 .catch(function (error) {
-
                     console.error(error);
 
-                    self.stopSpinner();
-
                     self.loading = false;
+                    self.showMessage(NOT_LOADED_MESSAGE)
+                })
 
-                    igv.presentAlert(error, undefined);
-
+                .then(/* finally */ function () {
+                    self.stopSpinner();
                 });
 
         }
@@ -447,24 +463,20 @@ var igv = (function (igv) {
 
     function getFeatures(chr, start, end, bpPerPixel) {
         var self = this;
+
         if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
             return Promise.resolve(self.cachedFeatures.features)
         }
-        else {
-            if (typeof self.trackView.track.getFeatures === "function") {
-                return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
-                    .then(function (features) {
-                        self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
-                        return features;
-                    })
-                    .catch(function (error) {
-                        console.log(error);
-                    })
-            }
-            else {
-                Promise.resolve(undefined);
-            }
+
+        if (typeof self.trackView.track.getFeatures === "function") {
+            return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
+                .then(function (features) {
+                    self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
+                    return features;
+                })
         }
+
+        return Promise.resolve(undefined);
     }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
@@ -537,7 +549,7 @@ var igv = (function (igv) {
             this[key] = undefined;
         })
     }
-    
+
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
         this.chr = chr;
         this.startBP = tileStart;
