@@ -8,7 +8,10 @@ var igv = (function (igv) {
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
         var self = this,
+<<<<<<< HEAD
             description,
+=======
+>>>>>>> track label repair
             $spinnerContainer,
             dimen,
             $div,
@@ -88,31 +91,34 @@ var igv = (function (igv) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
+            this.$trackLabel.attr('title', trackView.track.name);
+            this.$trackLabel.text(trackView.track.name);
 
-            if (typeof trackView.track.description === 'function') {
-                description = trackView.track.description();
-            } else {
-                description = trackView.track.description || trackView.track.name;
-            }
-
-            this.$trackLabel.html(trackView.track.name);
             this.$trackLabel.click(function (e) {
+                var str;
+
                 e.stopPropagation();
-                self.popover.presentContent(e.pageX, e.pageY, description);
+
+                if (typeof trackView.track.description === 'function') {
+                    str = trackView.track.description();
+                } else {
+                    str = trackView.track.name;
+                }
+                self.popover.presentContent(e.pageX, e.pageY, str);
 
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
                 e.stopPropagation();
-            })
+            });
             this.$trackLabel.mouseup(function (e) {
                 // Prevent  bubbling
                 e.stopPropagation();
-            })
+            });
             this.$trackLabel.mousemove(function (e) {
                 // Prevent  bubbling
                 e.stopPropagation();
-            })
+            });
 
             if (false === igv.browser.trackLabelsVisible) {
                 this.$trackLabel.hide();
