@@ -509,6 +509,18 @@ $igv-dark-grey-color: #373737;
   width: 100%;
 }
 
+.igv-viewport-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(0, 0, 0, 0.15);
+  font-family: $igv-default-font-face;
+  font-size: 25px;
+  font-weight: bold;
+  user-select: none;
+}
+
 .igv-whole-genome-container {
   display:flex;
   flex-flow: row;
