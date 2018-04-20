@@ -10,12 +10,8 @@
 
     <title>Examples - 1KG VCF</title>
 
-    <!-- IGV CSS -->
-    <link rel="stylesheet"  href="../dist/igv-all.css">
-
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
-
 
 </head>
 
@@ -31,15 +27,20 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var div = document.getElementById("igvDiv"),
-                options = {
-                    reference: {
+        var igv_example_1000_genomes_1kgvcf,
+            options;
+
+        options =
+            {
+                reference:
+                    {
                         id: "hg19",
                         fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
                         cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
                     },
-                    locus: "myc",
-                    tracks: [
+                locus: "myc",
+                tracks:
+                    [
                         {
                             name: "Genes",
                             type: "annotation",
@@ -51,7 +52,6 @@
                             visibilityWindow: 300000000,
                             displayMode: "EXPANDED"
                         },
-
                         {
                             name: "Phase 3 WGS variants",
                             format: "vcf",
@@ -61,8 +61,10 @@
                         }
                     ]
 
-                };
-        var browser = igv.createBrowser(div, options);
+            };
+
+        igv_example_1000_genomes_1kgvcf = document.getElementById("igvDiv");
+        var browser = igv.createBrowser(igv_example_1000_genomes_1kgvcf, options);
 
     })
 

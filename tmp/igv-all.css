@@ -352,8 +352,7 @@
       width: 34px;
       height: 16px;
       margin-left: 8px;
-      margin-right: 32px;
-    }
+      margin-right: 32px; }
     #igv-navbar #igv-nav-bar-left-container #igv-drag-and-drop-presentation-button {
       margin-right: 32px; }
     #igv-navbar #igv-nav-bar-left-container #igv-genomic-location {
@@ -482,11 +481,7 @@
   top: 0;
   left: 0;
   width: 34px;
-  height: 16px;
-  background: url(img/igv-logo.svg);
-  background-size: 34px 16px;
-  background-repeat: no-repeat;
-  background-position: 0 0; }
+  height: 16px; }
 
 .igv-search-results {
   position: absolute;
@@ -578,6 +573,17 @@
 .igv-viewport-content-div {
   position: absolute;
   width: 100%; }
+
+.igv-viewport-message {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(0, 0, 0, 0.15);
+  font-family: "Open Sans", sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+  user-select: none; }
 
 .igv-whole-genome-container {
   display: flex;
