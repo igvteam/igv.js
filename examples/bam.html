@@ -11,53 +11,45 @@
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
     <title>Integrative Genomics Viewer - BAM Example</title>
 
-    <!-- Bootstrap CSS - for demo only, NOT REQUIRED FOR IGV -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 4 - CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- IGV CSS -->
-    <link rel="stylesheet" href="../dist/igv-all.css">
+    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
-    <!-- bam.css - for demo only, NOT REQUIRED FOR IGV -->
-    <link rel="stylesheet" href="css/bam.css">
-
-    <!-- jQuery JS for Bootstrap (demo),  NOT REQUIRED FOR IGV -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-
-    <!-- Bootstrap JS - for demo only, NOT REQUIRED FOR IGV -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- Bootstrap 3 - JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
-
 
 </head>
 
 <body>
 
-<div class="jumbotron">
-
-    <div class="container">
-        <h2>IGV.js embedded in a Bootstrap page opened on a BAM file.</h2>
-    </div>
-    <!-- container -->
-
-</div>
-<!-- jumbotron -->
-
-<div class="container-fluid" id="igvDiv" style="padding:5px; border:1px solid lightgray"></div>
-
+<main role="main" class="container">
+    <h2>IGV.js embedded in a Bootstrap page opened on a BAM file.</h2>
+    <div id='igv-bam-example'></div>
+</main>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
 
-        var div = $("#igvDiv")[0],
-                options = {
-                    showNavigation: true,
-                    showRuler: true,
-                    genome: "hg19",
-                    locus: "chr8:128,747,267-128,754,546",
-                    tracks: [
+        var $igv_bam_app,
+            options;
+
+        $igv_bam_app = $('#igv-bam-example');
+
+        options =
+            {
+                showNavigation: true,
+                showRuler: true,
+                genome: "hg19",
+                locus: "chr8:128,747,267-128,754,546",
+                tracks:
+                    [
                         {
                             name: "Genes",
                             type: "annotation",
@@ -75,10 +67,9 @@
                         }
 
                     ]
-                };
+            };
 
-        igv.createBrowser(div, options);
-
+        igv.createBrowser($igv_bam_app.get(0), options);
 
     });
 
