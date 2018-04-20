@@ -40,8 +40,6 @@
         var $igv_bam_app,
             options;
 
-        $igv_bam_app = $('#igv-bam-example');
-
         options =
             {
                 showNavigation: true,
@@ -69,6 +67,7 @@
                     ]
             };
 
+        $igv_bam_app = $('#igv-bam-example');
         igv.createBrowser($igv_bam_app.get(0), options);
 
     });
