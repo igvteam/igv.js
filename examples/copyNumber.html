@@ -8,10 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
 
-    <title>IGV Example - Copy Number</title>
-
-    <!-- IGV CSS -->
-    <link rel="stylesheet" href="../dist/igv-all.css">
+    <title>Examples - Copy Number</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -20,23 +17,24 @@
 
 <body>
 
-<p>
-
 <h1>Embedded copy number browser</h1>
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="igv-example-copy-number" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
+        var igv_example_copy_number,
+            options;
 
-        var div = document.getElementById("igvDiv"),
-                options = {
-                    showNavigation: true,
-                    showRuler: true,
-                    genome: "hg19",
-                    locus: 'chr7',
-                    tracks: [
+        options =
+            {
+                showNavigation: true,
+                showRuler: true,
+                genome: "hg19",
+                locus: 'chr7',
+                tracks:
+                    [
                         {
                             url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                             indexed: false,
@@ -55,9 +53,10 @@
                             displayMode: "EXPANDED"
                         }
                     ]
-                };
+            };
 
-        igv.createBrowser(div, options);
+        igv_example_copy_number = document.getElementById("igv-example-copy-number");
+        igv.createBrowser(igv_example_copy_number, options);
 
     });
 
