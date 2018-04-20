@@ -62,7 +62,7 @@ var igv = (function (igv) {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
 
         this.nRows = 1;  // Computed dynamically
-        this.groupBy = "NONE";
+        this.groupBy = "None";
         this.filterBy = undefined;
         this.filters = [];
     };
@@ -88,8 +88,8 @@ var igv = (function (igv) {
                         }
 
                         self.callSets = {};
-                        self.callSetGroups = ['NONE'];
-                        self.callSets.NONE = header.callSets;
+                        self.callSetGroups = ['None'];
+                        self.callSets.None = header.callSets;
 
                         // header.features => file is not index, all features loaded
                         if (!header.features && 'compute' === self.visibilityWindow) {
@@ -593,7 +593,7 @@ var igv = (function (igv) {
         var menuItems = [];
         var self = this;
 
-        if (this.groupBy !== 'NONE' && igv.sampleInformation.hasAttributes()) {
+        if (this.groupBy !== 'None' && igv.sampleInformation.hasAttributes()) {
             menuItems.push({
                 label: 'Sort groups',
                 click: function () {
@@ -670,9 +670,9 @@ var igv = (function (igv) {
                 group = callSets[i];
                 group.forEach(function (callSet) {
 
-                    key = 'NONE';
+                    key = 'None';
 
-                    if (attribute !== 'NONE') {
+                    if (attribute !== 'None') {
                         attr = igv.sampleInformation.getAttributes(callSet.name);
                         if (attr && attr[attribute]) {
                             key = attr[attribute];
@@ -799,38 +799,28 @@ var igv = (function (igv) {
 
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
-            var attrs = {};
             var attributes = igv.sampleInformation.getAttributeNames();
 
+            attributes.push("None");
+
             attributes.forEach(function (attribute) {
-                var result = attribute.replace(/([A-Z])/g, " $1");
-                result = result.charAt(0).toUpperCase() + result.slice(1);
-                attrs[attribute] = result;
-            });
-
-            attributes.push("NONE");
-            attrs.NONE = 'None';
-
-            attributes.forEach( function (attr, index) {
+                // var label = attribute.replace(/([A-Z])/g, " $1");
+                var label = attribute.charAt(0).toUpperCase() + attribute.slice(1);
                 menuItems.push( {
-                    object: igv.createCheckbox(attrs[attr], attr === self.groupBy),
+                    object: igv.createCheckbox(label, attribute === self.groupBy),
                     click: function () {
-                        self.groupCallSets(attr);
+                        self.groupCallSets(attribute);
                     }
                 });
             });
-
-            menuItems = menuItems.concat(mappedAttrs);
         }
 
         if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
-            menuItems.push(igv.trackMenuItem(popover, this.trackView, "Filter by Family ID", function () {
-                return "Family IDs"
-            }, this.filters.join(","), function () {
-
+            menuItems.push(igv.trackMenuItem(this.trackView, "Filter by Family ID", "Family IDs", this.filters.join(","),
+                function () {
                 var value;
 
-                value = igv.dialog.$dialogInput.val().trim();
+                value = igv.inputDialog.$input.val().trim();
 
                 if (undefined !== value) {
                     self.filterByFamily(value);
@@ -838,36 +828,6 @@ var igv = (function (igv) {
                 }
 
             }, true));
-        }
-
-        function groupByMarkup(buttonVal, selfVal, lut) {
-
-            if (buttonVal === selfVal) {
-                return '<div><i class="fa fa-check fa-check-shim"></i>' + lut[buttonVal] + '</div>'
-            } else {
-                return '<div><i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[buttonVal] + '</div>';
-            }
-        }
-
-        function displayModeMarkup(index, displayMode, selfDisplayMode) {
-
-            var lut,
-                chosen;
-
-            lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
-
-            chosen = (0 === index) ? '<div class="igv-track-menu-border-top">' : '<div>';
-            if (displayMode === selfDisplayMode) {
-                return chosen + '<i class="fa fa-check fa-check-shim"></i>' + lut[displayMode] + '</div>'
-            } else {
-                return chosen + '<i class="fa fa-check fa-check-shim fa-check-hidden"></i>' + lut[displayMode] + '</div>';
-            }
-
         }
 
         return menuItems;

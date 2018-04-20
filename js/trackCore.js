@@ -485,22 +485,27 @@ var igv = (function (igv) {
      * Configure item for track "gear" menu.
      * @param trackView
      * @param menuItemLabel - menu item string
-     * @param dialogLabelHandler - dialog label creation handler
+     * @param dialogLabel - dialog label
      * @param dialogInputValue
      * @param dialogClickHandler
+     * @param doAddTopBorder
      */
-    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler) {
+    igv.trackMenuItem = function (trackView, menuItemLabel, dialogLabel, dialogInputValue, dialogClickHandler, doAddTopBorder) {
 
         var $e,
             clickHandler;
 
         $e = $('<div>');
 
+        if (true === doAddTopBorder) {
+            $e.addClass('igv-track-menu-border-top');
+        }
+
         $e.text(menuItemLabel);
 
         clickHandler = function () {
-            igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.inputDialog.show( $(trackView.trackDiv) );
+            igv.inputDialog.configure({label: dialogLabel, input: dialogInputValue, click: dialogClickHandler});
+            igv.inputDialog.present( $(trackView.trackDiv) );
         };
 
         return {object: $e, click: clickHandler};
