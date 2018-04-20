@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    var NOT_LOADED_MESSAGE = 'Couldn\'t load track'
+    var NOT_LOADED_MESSAGE = 'Error loading track data'
 
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
