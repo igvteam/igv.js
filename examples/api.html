@@ -9,129 +9,110 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
-    <title>Example - API</title>
+    <title>Integrative Genomics Viewer - API Example</title>
 
-    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 4 - CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- Font Awesome CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.2.0/css/font-awesome.min.css">
+    <!-- Examples CSS -->
+    <link rel="stylesheet" href="css/examples.css">
 
-    <!-- IGV CSS -->
-    <link rel="stylesheet" href="../dist/igv-all.css">
+    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
-    <!-- jQuery JS -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Bootstrap 4 - JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-    <!-- Bootstrap JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-    <!-- IGV JS-->
+    <!-- IGV JS -->
     <script src="../dist/igv.min.js"></script>
-
 
 </head>
 
-<body role="document">
+<body>
 
-<nav class="navbar navbar-inverse navbar-fixed-top">
+<nav class="navbar navbar-expand-md navbar-dark bg-dark fixed-top">
+    <a class="navbar-brand" href="#">API Example</a>
+    <div class="collapse navbar-collapse">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item dropdown">
+                <a id="igv-example-api-dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Tracks</a>
+                <ul class="dropdown-menu">
 
-    <div class="container-fluid">
-        <div class="navbar-header">
-            <a class="navbar-brand" href="#">IGV.js Example - API</a>
-        </div>
-        <div id="navbar">
-            <ul class="nav navbar-nav">
-                <li class="dropdown">
-                    <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-expanded="false">Tracks
-                        <span class="caret"></span></a>
-                    <ul class="dropdown-menu" role="menu">
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack({
+                    <li>
+                        <a href="#"
+                           onclick="igv.browser.loadTrack({
                                  url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                  isLog: true,
                                  label: 'GBM Copy # (TCGA Broad GDAC)'});">GBM Copy # (TCGA Broad GDAC))</a>
-                        </li>
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack({
+                    </li>
+
+                    <li>
+                        <a href="#"
+                           onclick="igv.browser.loadTrack({
                                  format: 'bed',
                                  url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                  indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
                                  label: 'dbSNP 137'})">dbSNP 137 (bed tabix)
-                            </a>
-                        </li>
+                        </a>
+                    </li>
 
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack(
+                    <li>
+                        <a href="#"
+                           onclick="igv.browser.loadTrack(
                                 {
                                 url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/encode/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                                 name: 'Gm12878H3k4me3'
                                 })">Encode bigwig
-                            </a>
-                        </li>
+                        </a>
+                    </li>
 
-                        <li>
-                            <a href="#"
-                               onclick="igv.browser.loadTrack(
+                    <li>
+                        <a href="#"
+                           onclick="igv.browser.loadTrack(
                                 {
                                 url:'https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
                                 label: 'HG02450'
                                 })">1KG Bam (HG02450)
-                            </a>
-                        </li>
+                        </a>
+                    </li>
 
-                    </ul>
-                </li>
-            </ul>
-        </div>
-        <!--/.nav-collapse -->
+                </ul>
+            </li>
+
+        </ul>
     </div>
-
 </nav>
+<main role="main" class="container">
+    <div class="igv-examples-container">
+        <h2>IGV.js embedded in a Bootstrap page</h2>
+        <p class="lead">This example illustrates use of the IGVJS API to dynamicallyadd tracks a dropdown menu.</p>
 
-<div class="jumbotron">
+        <div id='igv-api-example'></div>
 
-    <div class="container">
-        <h2>IGV.js API Example</h2>
-
-        <p>IGV.js embedded in a Bootstrap page. Example illustrates the use of the API to add tracks dynamically from a
-            menu.</p>
     </div>
-    <!-- container -->
 
-</div>
-<!-- jumbotron -->
-
-<div class="container-fluid" id="igvDiv" style="padding:5px; border:1px solid lightgray">
-</div>
-<!-- container -->
-
-<div class="container-fluid">
-
-    <footer>
-        <p></p>
-    </footer>
-
-</div>
-<!-- container -->
+</main>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var div = document.getElementById("igvDiv"),
-                options = {
-                    showNavigation: true,
-                    showRuler: true,
-                    locus: "chr1:155,160,475-155,184,282",
-                    reference: {
+        var igv_example_api,
+            options;
+
+        options =
+            {
+                showNavigation: true,
+                showRuler: true,
+                locus: "chr1:155,160,475-155,184,282",
+                reference:
+                    {
                         id: "hg19"
                     },
-                    tracks: [
+                tracks:
+                    [
                         {
                             name: "Genes",
                             type: "annotation",
@@ -144,9 +125,10 @@
                             displayMode: "EXPANDED"
                         }
                     ]
-                };
+            };
 
-        igv.createBrowser(div, options);
+        igv_example_api = document.getElementById('igv-api-example');
+        igv.createBrowser(igv_example_api, options);
 
     });
 

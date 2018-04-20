@@ -165,7 +165,7 @@ var igv = (function (igv) {
 
             });
 
-            containerModal[ 0 ].appendChild( igv.spinner("64px") );
+            // containerModal[ 0 ].appendChild( igv.spinner("64px") );
 
             // trigger handlers to pre-populate selects
             igv.ga4gh.providerChangeHandler();

@@ -281,15 +281,17 @@ var igv = (function (igv) {
 
     igv.setTrackLabel = function (track, label) {
 
-        var vp = _.first(track.trackView.viewports);
+        var vp;
 
         track.name = label;
-
-        vp.$viewport.find('.igv-track-label').html(track.name);
+        vp = track.trackView.viewports[ 0 ];
+        vp.$trackLabel.attr('title', track.name);
+        vp.$trackLabel.html(track.name);
 
         if (track.trackView) {
             track.trackView.repaint();
         }
+
     };
 
     igv.inferIndexPath = function (url, extension) {
