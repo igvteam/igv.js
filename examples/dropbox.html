@@ -8,10 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
 
-    <title>IGV Example - Dropbox</title>
-
-    <!-- IGV CSS -->
-    <link rel="stylesheet" href="../dist/igv-all.css">
+    <title>Examples - Dropbox</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -20,17 +17,20 @@
 
 <body>
 
-<h1>Dropbox hosted BAM file</h1>
+<main>
+    <h1>Dropbox hosted BAM file</h1>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-</div>
+    <div id="igv-examples-dropbox" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+    </div>
+
+</main>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var div = document.getElementById("myDiv"),
-                options;
+        var igv_examples_dropbox,
+            options;
 
         options = {
             showKaryo: false,
@@ -39,25 +39,27 @@
             showRuler: true,
             genome: "hg19",
             locus: "chr22:24,376,148-24,376,519",
-            tracks: [
-                {
-                    type: 'bam',
-                    url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
-                    indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
-                    label: 'Dopbox BAM'
-                },
-                {
-                    name: "Genes",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
+            tracks:
+                [
+                    {
+                        type: 'bam',
+                        url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
+                        indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
+                        label: 'Dopbox BAM'
+                    },
+                    {
+                        name: "Genes",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
 
-                }
+                    }
 
-            ]
+                ]
         };
 
-        igv.createBrowser(div, options);
+        igv_examples_dropbox = document.getElementById("igv-examples-dropbox");
+        igv.createBrowser(igv_examples_dropbox, options);
 
     })
 

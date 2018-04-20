@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 
 <html lang="en">
+
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
     <meta charset="utf-8">
@@ -8,164 +9,151 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="//www.broadinstitute.org/igv/projects/igv-web/img/favicon.ico">
-    <title>IGV Example - Google Demo</title>
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer - API Example</title>
 
-    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 4 - CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- IGV CSS -->
-    <link rel="stylesheet" href="../dist/igv-all.css">
+    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
-    <!-- jQuery JS  - bootstrap requirement (NOT REQUIRED FOR IGV) -->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!-- Bootstrap 4 - JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
-    <!-- Bootstrap JS -  for demo only, NOT REQUIRED FOR IGV -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
-
-    <!-- IGV JS-->
+    <!-- IGV JS -->
     <script src="../dist/igv.min.js"></script>
 
+    <!-- GA4GH Loader JS -->
     <script src="js/ga4ghLoader.js"></script>
 
 </head>
 
 <body>
 
-<nav class="navbar navbar-default navbar-fixed-top">
-    <div class="container-fluid">
+<!-- modal dialog -->
+<div id="setSearch" class="modal" tabindex="-1" role="dialog">
 
-        <div class="navbar-header">
-            <!--<a class="navbar-brand" href="#">IGV JS</a>-->
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title">Select Sample</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="form-inline" style="margin-bottom: 10px">
+
+                    <div class="form-group">
+                        <select id="provider" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <select id="dataset" class="form-control"></select>
+                    </div>
+
+                    <div class="form-group">
+                        <input id="setName" type="text" class="form-control" placeholder="filter"/>
+                    </div>
+
+                </div>
+
+                <div>
+                    <ul class="nav nav-tabs">
+                        <li id="READSETTab" class="active">
+                            <a>Samples</a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="searchPaneREADSET" class="tab-pane active">
+                            <ul class="list-group"></ul>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
         </div>
-
     </div>
-</nav>
 
-<div class="jumbotron">
+</div>
 
-    <div class="container-fluid">
+<main>
+
+    <div class="container-fluid" style="margin: 16px">
 
         <div style="margin-left:56px;">
             <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#setSearch">Add Tracks
             </button>
         </div>
 
-        <div class="modal" id="setSearch">
-
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Select Sample</h4>
-                    </div>
-                    <div class="modal-body">
-
-                        <div class="form-inline" style="margin-bottom: 10px">
-
-                            <div class="form-group">
-
-                                <select class="form-control" id="provider">
-                                </select>
-
-                            </div>
-
-                            <div class="form-group">
-
-                                <select class="form-control" id="dataset">
-                                </select>
-
-                            </div>
-
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="filter" id="setName"/>
-                            </div>
-
-                        </div>
-
-                        <div>
-                            <ul class="nav nav-tabs">
-                                <li class="active" id="READSETTab"><a>Samples</a></li>
-                                <!--<li                id="CALLSETTab"><a>Call sets</a></li>-->
-                            </ul>
-                            <div class="tab-content">
-                                <div class="tab-pane active" id="searchPaneREADSET">
-                                    <ul class="list-group">
-                                        <!--<img src="img/spinner.gif"/>-->
-                                    </ul>
-                                    <!--<div class="paginationContainer"></div>-->
-                                </div>
-                                <!--<div class="tab-pane" id="searchPaneCALLSET">-->
-                                <!--<div class="list-group">-->
-                                <!--&lt;!&ndash;<img src="img/spinner.gif"/>&ndash;&gt;-->
-                                <!--</div>-->
-                                <!--&lt;!&ndash;<div class="paginationContainer"></div>&ndash;&gt;-->
-                                <!--</div>-->
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="modal-footer">
-                        <!--<button type="button" class="btn btn-default" data-dismiss="modal" id="modalDoneButton" style="display: none">Done</button>-->
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
     </div>
 
+    <div id="igv-examples-google-demo">
+    </div>
 
-</div>
+</main>
 
-<div id="myDiv">
-</div>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
 
-        var div,
-                options,
-                browser;
+        var $google_demo,
+            options;
 
-        div = $("#myDiv")[0];
-        options = {
-            locus: "myc",
-            showKaryo: false,
-            showNavigation: true,
-            showRuler: true,
-            reference: {
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-            },
-            flanking: 1000,
-            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            trackDefaults: {
-                bam: {
-                    coverageThreshold: 0.2,
-                    coverageQualityWeight: true
-                }
-            },
-            palette: [
-                ["#00A0B0", "#6A4A3C", "#CC333F", "#EB6841"]
-            ],
-            tracks: [
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "bed",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                    order: Number.MAX_VALUE,
-                    visibilityWindow: 300000000,
-                    displayMode: "EXPANDED"
-                }
-            ]
-        };
+        options =
+            {
+                locus: "myc",
+                showKaryo: false,
+                showNavigation: true,
+                showRuler: true,
+                reference:
+                    {
+                        fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                        cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+                    },
+                flanking: 1000,
+                apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+                trackDefaults:
+                    {
+                        bam: {
+                            coverageThreshold: 0.2,
+                            coverageQualityWeight: true
+                        }
+                    },
+                palette:
+                    [
+                        [
+                            "#00A0B0",
+                            "#6A4A3C",
+                            "#CC333F",
+                            "#EB6841"
+                        ]
+                    ],
+                tracks:
+                    [
+                        {
+                            name: "Genes",
+                            type: "annotation",
+                            format: "bed",
+                            sourceType: "file",
+                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
+                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
+                            order: Number.MAX_VALUE,
+                            visibilityWindow: 300000000,
+                            displayMode: "EXPANDED"
+                        }
+                    ]
+            };
 
-        browser = igv.createBrowser(div, options);
+        $google_demo = $("#igv-examples-google-demo");
+        igv.createBrowser($google_demo.get(0), options);
 
         igv.ga4gh.initialize();
 
