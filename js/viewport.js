@@ -495,10 +495,6 @@ var igv = (function (igv) {
         return $(this.contentDiv).height();
     };
 
-    igv.Viewport.prototype.shiftPixels = function (pixels) {
-        this.genomicState.referenceFrame.shiftPixels(pixels, this.$viewport.width());
-    };
-
     igv.Viewport.prototype.isLoading = function () {
         return !(undefined === this.loading);
     };
