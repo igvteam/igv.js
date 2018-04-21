@@ -135,16 +135,14 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.viewportWithGenomicState = function (genomicState) {
-
-        var match;
-
-        this.viewports.forEach(function (viewport) {
+        var i, viewport;
+        for(i=0; i<this.viewports.length; i++) {
+            viewport = this.viewports[i];
             if (viewport.genomicState === genomicState) {
-                match = viewport;
+                return viewport;
             }
-        });
-
-        return match;
+        }
+        return undefined;
     };
 
     igv.TrackView.prototype.decorateViewports = function () {
