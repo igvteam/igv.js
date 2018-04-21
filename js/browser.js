@@ -1070,7 +1070,7 @@ var igv = (function (igv) {
         var self = this,
             loci;
 
-        if(string && string.trim().toLowerCase() === "all") string = "all";
+        if (string && string.trim().toLowerCase() === "all") string = "all";
 
         loci = string.split(' ');
 
@@ -1106,7 +1106,7 @@ var igv = (function (igv) {
                     panelWidth = self.viewportContainerWidth() / genomicStateList.length;
                     self.ideoPanel.buildPanels($('#igv-content-header'), panelWidth);
                 }
-                
+
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
                 self.update();
@@ -1140,9 +1140,9 @@ var igv = (function (igv) {
         // prune duplicates as the order list is built
         loci.forEach(function (locus, index) {
 
-            if (undefined === ordered[ locus ]) {
+            if (undefined === ordered[locus]) {
                 unique.push(locus);
-                ordered[ locus ] = unique.indexOf(locus);
+                ordered[locus] = unique.indexOf(locus);
             }
 
         });
@@ -1156,7 +1156,7 @@ var igv = (function (igv) {
             if (genomicState) {
                 genomicState.locusSearchString = locus;
                 result.push(genomicState);
-                dictionary[ locus ] = genomicState;
+                dictionary[locus] = genomicState;
             }
             else {
                 geneNameLoci.push(locus);
@@ -1179,7 +1179,7 @@ var igv = (function (igv) {
                     genomicState = processSearchResult(feature, locus);
                     if (genomicState) {
                         result.push(genomicState);
-                        dictionary[ locus ] = genomicState;
+                        dictionary[locus] = genomicState;
                     }
                 } else {
                     promises.push(searchPromise(locus));  // Not found, create promise to search via webservice
@@ -1199,7 +1199,7 @@ var igv = (function (igv) {
                             var genomicState = processSearchResult(response.result, response.locusSearchString);
                             if (genomicState) {
                                 result.push(genomicState);
-                                dictionary[ genomicState.locusSearchString ] = genomicState;
+                                dictionary[genomicState.locusSearchString] = genomicState;
                             }
                         });
 
@@ -1208,15 +1208,15 @@ var igv = (function (igv) {
                             var key,
                                 index;
                             key = r.locusSearchString;
-                            index = ordered[ key ];
-                            cooked[ index ] = r;
+                            index = ordered[key];
+                            cooked[index] = r;
                         });
 
                         return preserveOrder(result, dictionary, ordered);
                     });
             } else {
 
-                return Promise.resolve( preserveOrder(result, dictionary, ordered) );
+                return Promise.resolve(preserveOrder(result, dictionary, ordered));
             }
         }
 
@@ -1230,8 +1230,8 @@ var igv = (function (igv) {
                 var key,
                     index;
                 key = g.locusSearchString;
-                index = indexDictionary[ key ];
-                orderedList[ index ] = g;
+                index = indexDictionary[key];
+                orderedList[index] = g;
             });
 
             return orderedList;
@@ -1576,7 +1576,7 @@ var igv = (function (igv) {
 
         $(this.trackContainerDiv).on('mousemove', igv.throttle(function (e) {
 
-            var coords;
+            var coords, viewport, viewportWidth, referenceFrame;
 
             e.preventDefault();
 
@@ -1588,13 +1588,17 @@ var igv = (function (igv) {
 
             if (self.vpMouseDown) {
 
+                viewport = self.vpMouseDown.viewport;
+                viewportWidth = viewport.$viewport.width();
+                referenceFrame = viewport.genomicState.referenceFrame;
+
                 if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                    self.vpMouseDown.viewport.isDragging = true;
+                    viewport.isDragging = true;
                 }
 
-                if (self.vpMouseDown.viewport.isDragging) {
-
-                    self.vpMouseDown.viewport.shiftPixels(self.vpMouseDown.lastMouseX - coords.x);
+                if (viewport.isDragging) {
+                    
+                    referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
 
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
 
