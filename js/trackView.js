@@ -387,15 +387,24 @@ var igv = (function (igv) {
     igv.TrackView.prototype.update = function () {
 
         var maxContentHeight, w, h,
-            heightPromises = [],
+            updatePromises = [],
             self = this;
-
+console.log("Update");
 
         this.viewports.forEach(function (viewport) {
-            heightPromises.push(viewport.adjustContentHeight());
+            updatePromises.push(viewport.update());
         });
-        Promise.all(heightPromises)
-            .then(function (contentHeights) {
+    
+        Promise.all(updatePromises)
+         
+            .then(function (ignore) {
+
+                var contentHeights;
+console.log("Check heights");
+                contentHeights = self.viewports.map(function (vp) {
+                    return vp.getContentHeight();
+                })
+
                 maxContentHeight = contentHeights.reduce(function (accumulator, currentValue) {
                     return Math.max(accumulator, currentValue);
                 });
@@ -410,11 +419,6 @@ var igv = (function (igv) {
                 if (self.scrollbar) {
                     self.scrollbar.update();
                 }
-            })
-            .then(function () {
-                self.viewports.forEach(function (viewport) {
-                    viewport.update();
-                })
             })
     };
 
