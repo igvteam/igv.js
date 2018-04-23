@@ -187,21 +187,21 @@ var igv = (function (igv) {
                                 featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
                             }
 
+                            // Assign overlapping features to rows
+                            packFeatures(featureList, maxRows);
+
                             var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
                             self.featureCache = isQueryable ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
 
 
-                            // Assign overlapping features to rows
-                            packFeatures(featureList, maxRows);
-
                             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                             if (self.config.searchable) {
                                 addFeaturesToDB(featureList);
                             }
 
-                            return featureList;
+                            return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
                         }
                         else {
                             return undefined;
