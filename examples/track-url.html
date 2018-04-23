@@ -9,81 +9,89 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
-    <title>Integrative Genomics Viewer: 'locuschange' Event Example</title>
+    <title>IGV Examples - Locus Change</title>
 
-    <!-- Bootstrap CSS - NOT REQUIRED FOR IGV -->
-    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+    <!-- Bootstrap 4 - CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="../dist/igv-all.css">
+    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 
-    <!-- jQuery JS  - NOT REQUIRED FOR IGV -->
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-
-    <!-- Bootstrap JS -  NOT REQUIRED FOR IGV -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+    <!-- Bootstrap 4 - JS -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 
     <!-- IGV JS-->
-    <script type="text/javascript" src="../dist/igv.min.js"></script>
+    <script src="../dist/igv.min.js"></script>
 
 </head>
 
-<body role="document">
+<body>
 
-<div class="jumbotron">
-    <div class="container">
-        <h2>IGV.js <code>locuschange</code> Event Example</h2>
-        <p>In this example we want to update the page URL whenever the IGV viewer locus changes. This allows us to
-            capture an exact location in the URL so that it can be shared. To do this, we subscribe to the <code>locuschange</code>
-            event and update the page URL to match the current locus.
-        </p>
-        <h3>Try it out:</h3>
-        <ol>
-            <li>Zoom or pan the canvas in the IGV viewer.</li>
-            <li>Notice that the page URL updated to match the new locus.</li>
-            <li>Copy-paste the URL into a different browser tab - now you can easily share it with collaborators.</li>
-        </ol>
-    </div>
-</div>
+<main>
 
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-12" id="igvDiv"></div>
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>IGV.js <code>locuschange</code> Event Example</h2>
+                <p>In this example we want to update the page URL whenever the IGV viewer locus changes. This allows us to
+                    capture an exact location in the URL so that it can be shared. To do this, we subscribe to the <code>locuschange</code>
+                    event and update the page URL to match the current locus.
+                </p>
+                <h3>Try it out:</h3>
+                <ol>
+                    <li>Zoom or pan the canvas in the IGV viewer.</li>
+                    <li>Notice that the page URL updated to match the new locus.</li>
+                    <li>Copy-paste the URL into a different browser tab - now you can easily share it with collaborators.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-12" id="igvDiv"></div>
+        </div>
     </div>
-</div>
+
+</main>
 
 <script type="text/javascript">
 
     $(document).ready(function () {
+        var HASH_PREFIX,
+            currentHash,
+            locus,
+            $igv,
+            options,
+            browser;
 
-        var HASH_PREFIX = "#/locus/";
+        HASH_PREFIX = "#/locus/";
+        currentHash = window.location.hash;
+        locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
 
-        var currentHash = window.location.hash;
-        var locus = currentHash && currentHash.indexOf(HASH_PREFIX) === 0
-            ? currentHash.substr(HASH_PREFIX.length)
-            : "chr1:155,160,475-155,184,282";   // default location
-
-        var div = $("#igvDiv")[0],
-            options = {
+        options = {
             showNavigation: true,
             locus: locus,
-            reference: {
-                id: "hg19"
-            },
-            tracks: [
+            reference:
                 {
-                    name: "Genes",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
+                    id: "hg19"
+                },
+            tracks:
+                [
+                    {
+                        name: "Genes",
+                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                        order: Number.MAX_VALUE,
+                        displayMode: "EXPANDED"
 
-                }
-            ]
+                    }
+                ]
         };
 
-        var myIgvBrowser = igv.createBrowser(div, options);
-        myIgvBrowser.on('locuschange', function (referenceFrame, label) {
+        $igv = $("#igvDiv");
+        browser = igv.createBrowser($igv.get(0), options);
+        browser.on('locuschange', function (referenceFrame, label) {
             window.location.replace(HASH_PREFIX + label);
         });
 
