@@ -504,7 +504,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.repaintWithGenomicState = function (genomicState) {
 
-        var viewports;
+        var viewports, repaintPromises;
 
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
@@ -523,9 +523,15 @@ var igv = (function (igv) {
             }
         });
 
-        viewports.forEach(function (viewport) {
-            viewport.repaint();
-        });
+
+        repaintPromises = viewports.map(function (vp) {
+            return vp.repaint();
+        })
+
+        Promise.all(repaintPromises)
+            .then(function (ignore) {
+                // TODO -- adjust track height
+            })
 
     };
 
@@ -1597,7 +1603,7 @@ var igv = (function (igv) {
                 }
 
                 if (viewport.isDragging) {
-                    
+
                     referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
 
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
