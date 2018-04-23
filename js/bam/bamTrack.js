@@ -608,14 +608,16 @@ var igv = (function (igv) {
 
         if (packedAlignmentRows) {
 
-            packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, i) {
+            packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, rowIndex) {
 
-                var yRect = alignmentRowYInset + (self.alignmentRowHeight * i),
-                    alignmentHeight = self.alignmentRowHeight - 2,
+                var yRect,
+                    alignmentHeight,
                     i,
                     b,
                     alignment;
 
+                yRect = alignmentRowYInset + (self.alignmentRowHeight * rowIndex);
+                alignmentHeight = self.alignmentRowHeight - 2;
                 for (i = 0; i < alignmentRow.alignments.length; i++) {
 
                     alignment = alignmentRow.alignments[i];
@@ -674,12 +676,17 @@ var igv = (function (igv) {
 
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-            var alignmentColor = getAlignmentColor.call(self, alignment),
-                outlineColor = 'alignmentColor',
+            var alignmentColor ,
+                outlineColor,
                 lastBlockEnd,
-                blocks = alignment.blocks,
+                blocks,
                 block,
-                b;
+                b,
+                diagnosticColor;
+
+            alignmentColor = getAlignmentColor.call(self, alignment);
+            outlineColor = 'alignmentColor';
+            blocks = alignment.blocks;
 
             if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
                 return;
@@ -691,6 +698,7 @@ var igv = (function (igv) {
 
             igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
+            diagnosticColor = 'rgb(255,105,180)';
             for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
                 block = blocks[b];
@@ -715,46 +723,50 @@ var igv = (function (igv) {
 
             function drawBlock(block) {
 
-                var seqOffset = block.start - alignmentContainer.start,
-                    xBlockStart = (block.start - bpStart) / bpPerPixel,
-                    xBlockEnd = ((block.start + block.len) - bpStart) / bpPerPixel,
-                    widthBlock = Math.max(1, xBlockEnd - xBlockStart),
-                    widthArrowHead = self.alignmentRowHeight / 2.0,
-                    blockSeq = block.seq.toUpperCase(),
-                    skippedColor = self.skippedColor,
-                    deletionColor = self.deletionColor,
+                var offsetBP,
+                    blockStartPixel,
+                    blockEndPixel,
+                    blockWidthPixel,
+                    arrowHeadWidthPixel,
+                    blockSequence,
                     refChar,
                     readChar,
                     readQual,
-                    xBase,
-                    widthBase,
-                    colorBase,
-                    x,
-                    y,
-                    i,
-                    yStrokedLine = yRect + alignmentHeight / 2,
-                    len;
+                    xPixel,
+                    widthPixel,
+                    color,
+                    xListPixel,
+                    yListPixel,
+                    yStrokedLine;
 
-                if (block.gapType !== undefined && xBlockEnd !== undefined && lastBlockEnd !== undefined) {
+                offsetBP = block.start - alignmentContainer.start;
+                blockStartPixel = (block.start - bpStart) / bpPerPixel;
+                blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
+                blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
+                arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
+                blockSequence = block.seq.toUpperCase();
+                yStrokedLine = yRect + alignmentHeight / 2;
+
+                if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                     if ("D" === block.gapType) {
-                        igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, xBlockStart, yStrokedLine, {strokeStyle: deletionColor});
+                        igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.deletionColor});
                     }
                     else {
-                        igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, xBlockStart, yStrokedLine, {strokeStyle: skippedColor});
+                        igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.skippedColor});
                     }
                 }
-                lastBlockEnd = xBlockEnd;
+                lastBlockEnd = blockEndPixel;
 
                 if (true === alignment.strand && b === blocks.length - 1) {
                     // Last block on + strand
-                    x = [
-                        xBlockStart,
-                        xBlockEnd,
-                        xBlockEnd + widthArrowHead,
-                        xBlockEnd,
-                        xBlockStart,
-                        xBlockStart];
-                    y = [
+                    xListPixel = [
+                        blockStartPixel,
+                        blockEndPixel,
+                        blockEndPixel + arrowHeadWidthPixel,
+                        blockEndPixel,
+                        blockStartPixel,
+                        blockStartPixel];
+                    yListPixel = [
                         yRect,
                         yRect,
                         yRect + (alignmentHeight / 2.0),
@@ -762,26 +774,26 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect];
 
-                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
+                    igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
                     if (self.highlightedAlignmentReadNamed === alignment.readName) {
-                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: 'red'});
+                        igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: 'red'});
                     }
 
                     if (alignment.mq <= 0) {
-                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
+                        igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
                     }
                 }
                 else if (false === alignment.strand && b === 0) {
                     // First block on - strand
-                    x = [
-                        xBlockEnd,
-                        xBlockStart,
-                        xBlockStart - widthArrowHead,
-                        xBlockStart,
-                        xBlockEnd,
-                        xBlockEnd];
-                    y = [
+                    xListPixel = [
+                        blockEndPixel,
+                        blockStartPixel,
+                        blockStartPixel - arrowHeadWidthPixel,
+                        blockStartPixel,
+                        blockEndPixel,
+                        blockEndPixel];
+                    yListPixel = [
                         yRect,
                         yRect,
                         yRect + (alignmentHeight / 2.0),
@@ -789,51 +801,70 @@ var igv = (function (igv) {
                         yRect + alignmentHeight,
                         yRect];
 
-                    igv.graphics.fillPolygon(ctx, x, y, {fillStyle: alignmentColor});
+                    igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
                     if (self.highlightedAlignmentReadNamed === alignment.readName) {
-                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: 'red'});
+                        igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: 'red'});
                     }
 
                     if (alignment.mq <= 0) {
-                        igv.graphics.strokePolygon(ctx, x, y, {strokeStyle: outlineColor});
+                        igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
                     }
                 }
                 else {
-                    igv.graphics.fillRect(ctx, xBlockStart, yRect, widthBlock, alignmentHeight, {fillStyle: alignmentColor});
+                    igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor });
+
                     if (alignment.mq <= 0) {
                         ctx.save();
                         ctx.strokeStyle = outlineColor;
-                        ctx.strokeRect(xBlockStart, yRect, widthBlock, alignmentHeight);
+                        ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight);
                         ctx.restore();
                     }
                 }
                 // Only do mismatch coloring if a refseq exists to do the comparison
-                if (sequence && blockSeq !== "*") {
-                    for (i = 0, len = blockSeq.length; i < len; i++) {
+                if (sequence && blockSequence !== "*") {
+                    for (var i = 0, len = blockSequence.length; i < len; i++) {
 
-                        if (seqOffset + i < 0) continue;
+                        if (offsetBP + i < 0) continue;
 
-                        readChar = blockSeq.charAt(i);
-                        refChar = sequence.charAt(seqOffset + i);
+                        readChar = blockSequence.charAt(i);
+                        refChar = sequence.charAt(offsetBP + i);
                         if (readChar === "=") {
                             readChar = refChar;
                         }
                         if (readChar === "X" || refChar !== readChar) {
                             if (block.qual && block.qual.length > i) {
                                 readQual = block.qual[i];
-                                colorBase = shadedBaseColor(readQual, readChar, i + block.start);
+                                color = shadedBaseColor(readQual, readChar, i + block.start);
                             }
                             else {
-                                colorBase = igv.nucleotideColors[readChar];
+                                color = igv.nucleotideColors[readChar];
                             }
-                            if (colorBase) {
-                                xBase = ((block.start + i) - bpStart) / bpPerPixel;
-                                widthBase = Math.max(1, 1 / bpPerPixel);
-                                igv.graphics.fillRect(ctx, xBase, yRect, widthBase, alignmentHeight, {fillStyle: colorBase});
+                            if (color) {
+                                xPixel = ((block.start + i) - bpStart) / bpPerPixel;
+                                widthPixel = Math.max(1, 1 / bpPerPixel);
+                                renderBlockOrReadChar(ctx, bpPerPixel, {x: xPixel, y: yRect, width: widthPixel, height: alignmentHeight}, color, readChar);
                             }
                         }
                     }
+                }
+            }
+
+            function renderBlockOrReadChar(context, bpp, bbox, color, char) {
+                var threshold,
+                    center;
+
+                threshold = 1.0/10.0;
+                if (bpp <= threshold) {
+
+                    // render letter
+                    context.font = '10px sans-serif';
+                    center = bbox.x + (bbox.width/2.0);
+                    igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), 9 + bbox.y, { strokeStyle: color });
+                } else {
+
+                    // render colored block
+                    igv.graphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, { fillStyle: color });
                 }
             }
         }
