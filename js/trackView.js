@@ -25,7 +25,7 @@
 
 
 var igv = (function (igv) {
-    
+
     var dragged,
         dragDestination;
 
@@ -136,7 +136,7 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.viewportWithGenomicState = function (genomicState) {
         var i, viewport;
-        for(i=0; i<this.viewports.length; i++) {
+        for (i = 0; i < this.viewports.length; i++) {
             viewport = this.viewports[i];
             if (viewport.genomicState === genomicState) {
                 return viewport;
@@ -178,13 +178,14 @@ var igv = (function (igv) {
             $canvas;
 
         $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+        this.leftHandGutter = $leftHandGutter[0];
         $parent.append($leftHandGutter);
 
         if (this.track.dataRange) {
 
             $leftHandGutter.click(function (e) {
                 // igv.dataRangeDialog.configureWithTrackView(self);
-                igv.dataRangeDialog.configure({ trackView: self });
+                igv.dataRangeDialog.configure({trackView: self});
                 igv.dataRangeDialog.present($(self.trackDiv));
             });
 
@@ -193,13 +194,8 @@ var igv = (function (igv) {
 
         $canvas = $('<canvas class ="igv-track-control-canvas">');
         $leftHandGutter.append($canvas);
-
-        $canvas.attr('width', $leftHandGutter.outerWidth());
-        $canvas.attr('height', $leftHandGutter.outerHeight());
-
         this.controlCanvas = $canvas.get(0);
-        this.controlCtx = this.controlCanvas.getContext("2d");
-
+        resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
     }
 
     function appendRightHandGutter($parent) {
@@ -217,6 +213,29 @@ var igv = (function (igv) {
             igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self);
         });
 
+    }
+
+    function resizeControlCanvas(width, height) {
+
+        var devicePixelRatio = window.devicePixelRatio;
+
+        if (this.leftHandGutter) {
+
+            if (this.controlCanvas) {
+                $(this.controlCanvas).remove();
+            }
+
+            var $canvas = $('<canvas class ="igv-track-control-canvas">');
+            this.controlCanvas = $canvas[0];
+            $(this.leftHandGutter).append($canvas);
+
+            this.controlCanvas.height = devicePixelRatio * height;
+            this.controlCanvas.width = devicePixelRatio * width;
+            this.controlCanvas.style.height = height + "px";
+            this.controlCanvas.style.width = width + "px";
+            this.controlCtx = this.controlCanvas.getContext("2d");
+            this.controlCtx.scale(devicePixelRatio, devicePixelRatio);
+        }
     }
 
     function attachDragWidget($track, $viewportContainer) {
@@ -343,9 +362,11 @@ var igv = (function (igv) {
         }
 
 
+        resizeControlCanvas.call(this, $(this.leftHandGutter).outerWidth(), newHeight);
+
+
         if (this.track.paintAxis) {
-            $(this.controlCanvas).height(newHeight);
-            this.controlCanvas.setAttribute('height', $(this.trackDiv).height());
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
         }
 
         if (this.scrollbar) {
@@ -394,9 +415,9 @@ var igv = (function (igv) {
         this.viewports.forEach(function (viewport) {
             updatePromises.push(viewport.update());
         });
-    
+
         Promise.all(updatePromises)
-         
+
             .then(function (ignore) {
 
                 var contentHeights;
@@ -410,10 +431,10 @@ var igv = (function (igv) {
 
                 if (self.track.autoHeight) {
                     self.setTrackHeight(maxContentHeight, false);
-                } else if (self.track.paintAxis) {
-                    $(self.controlCanvas).height(maxContentHeight);
-                    self.controlCanvas.setAttribute("height", maxContentHeight);
-                    self.track.paintAxis(self.controlCtx, self.controlCanvas.width,self.controlCanvas.height);
+                }
+
+                else if (self.track.paintAxis) {
+                    self.track.paintAxis(self.controlCtx, $(self.controlCanvas).width(), $(self.controlCanvas).height());
                 }
 
                 if (self.scrollbar) {
@@ -424,7 +445,7 @@ var igv = (function (igv) {
 
     /**
      * Repaint existing features (e.g. a color, resort, or display mode change).
-     * 
+     *
      * viewport.repaint returns a promise.
      */
     igv.TrackView.prototype.repaint = function (force) {
@@ -437,7 +458,7 @@ var igv = (function (igv) {
 
         Promise.all(promises)
             .then(function (ignore) {
-              
+
             });
 
     };
@@ -447,11 +468,11 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.dispose = function () {
 
-        if(this.$trackManipulationHandle) {
+        if (this.$trackManipulationHandle) {
             this.$trackManipulationHandle.off();
         }
 
-        if(this.$innerScroll) {
+        if (this.$innerScroll) {
             this.$innerScroll.off();
         }
 
@@ -471,12 +492,12 @@ var igv = (function (igv) {
             viewport.dispose();
         })
 
-        
-        if(dragged === this) {
+
+        if (dragged === this) {
             dragged = undefined;
         }
-        
-        if(dragDestination === this) {
+
+        if (dragDestination === this) {
             dragDestination = undefined;
         }
 
