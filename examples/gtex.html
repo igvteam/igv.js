@@ -155,52 +155,25 @@
 
 <body>
 
-<div id="trackList">
-    <div onclick="igv.browser.loadTrack({
-                         type: 'eqtl',
-                         sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
-                         tissueName: 'Brain_Cerebellar_Hemisphere',
-                         name: 'Brain - Cerebellar Hemisphere',
-                         visibilityWindow: 200000
-                         })">Brain - Cerebellar Hemisphere
-    </div>
-    <div onclick="igv.browser.loadTrack({
-                         type: 'eqtl',
-                         sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
-                         tissueName: 'Thyroid',
-                         name: 'Thyroid',
-                         visibilityWindow: 200000
-                         })">Thyroid
-    </div>
-</div>
 
-
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-
-        var div,
+    document.addEventListener("DOMContentLoaded", function () {
+             var div,
                 options,
                 browser;
 
-        div = $("#myDiv")[0];
+        div =  document.getElementById("igv-div");
         options = {
             type: "GTEX",
             showNavigation: true,
-            fastaURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta',
-            cytobandURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt',
-            // locus: 'SLC25A3',
+            genome: "hg19",
             locus: 'rs28372744',
-            // locus: ['egfr', 'myc', 'pten'],
-            // locus: ['2', '4', '8'],
             flanking: 75000,
             locus: 'SLC25A3',
-            // locus: ['egfr', 'myc', 'pten'],
-            // locus: ['2', '4', '8'],
+
             search: {
                 url: "https://dev.gtexportal.org/rest/v1/reference/features/$FEATURE$",
                 resultsField: "features",
@@ -216,16 +189,23 @@
                 }
             },
             tracks: [
-                /*{
-                    featureType: 'annotation',
-                    format: 'gwasSNPS',
-                    indexed: false,
-                    color: 'rgb(100,200,200)',
-                    displayMode: 'EXPANDED',
-                    url: '//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
-                    name: 'GWAS Catalog',
-                    order: 9999
-                },*/
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex-ws',
+                    url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                    tissueName: 'Adipose_Subcutaneous',
+                    name: 'Adipose - Subcutaneous',
+                    visibilityWindow: 200000
+                },
+                {
+                    type: 'eqtl',
+                    sourceType: 'gtex-ws',
+                    url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                    tissueName: 'Thyroid',
+                    name: 'Thyroid',
+                    visibilityWindow: 200000
+                },
+
                 {
                     featureType: 'genes',
                     url: '//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed',
