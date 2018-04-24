@@ -339,7 +339,7 @@ var igv = (function (igv) {
                 vp.setContentHeight(newHeight);
                 vp.tile.invalidate = true;
             });
-            self.repaint(true);
+            this.repaint(true);
         }
 
 
