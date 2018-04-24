@@ -265,7 +265,6 @@ var igv = (function (igv) {
             currentContentHeight = $(this.contentDiv).height();
 
             if (requiredContentHeight !== currentContentHeight) {
-                console.log("required content height = " + requiredContentHeight);
                 this.setContentHeight(requiredContentHeight);
             }
         }
@@ -422,6 +421,7 @@ var igv = (function (igv) {
                                 }
                             })
                     }
+
                     // No regions of interest
                     return undefined;
                 })
@@ -522,10 +522,7 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.getContentHeight = function () {
-
-        var r = $(this.contentDiv).height();
-        console.log(r);
-        return r;
+        return $(this.contentDiv).height();
     };
 
     igv.Viewport.prototype.isLoading = function () {
