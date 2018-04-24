@@ -413,6 +413,7 @@ var igv = (function (igv) {
                 } else if (self.track.paintAxis) {
                     $(self.controlCanvas).height(maxContentHeight);
                     self.controlCanvas.setAttribute("height", maxContentHeight);
+                    self.track.paintAxis(self.controlCtx, self.controlCanvas.width,self.controlCanvas.height);
                 }
 
                 if (self.scrollbar) {
