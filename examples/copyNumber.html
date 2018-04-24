@@ -27,6 +27,7 @@
         var igvDiv,
             options;
 
+        igvDiv = document.getElementById("igv-div");
         options =
             {
                 showNavigation: true,
@@ -55,7 +56,7 @@
                     ]
             };
 
-        igvDiv = document.getElementById("igv-div");
+
         igv.createBrowser(igvDiv, options);
 
     });
