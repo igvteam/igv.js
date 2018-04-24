@@ -325,9 +325,6 @@ var igv = (function (igv) {
 
                         self.trackView.track.draw(drawConfiguration);
 
-                        if (doRenderControlCanvas(genomicState, self.trackView)) {
-                            renderControlCanvasWithTrackView(self.trackView);
-                        }
                     }
 
                     if (igv.browser.roi) {
@@ -376,23 +373,6 @@ var igv = (function (igv) {
 
         }
 
-        function renderControlCanvasWithTrackView(trackView) {
-            var buffer2;
-
-            buffer2 = document.createElement('canvas');
-            buffer2.width = trackView.controlCanvas.width;
-            buffer2.height = trackView.controlCanvas.height;
-
-            trackView.track.paintAxis(buffer2.getContext('2d'), buffer2.width, buffer2.height);
-
-            trackView.controlCtx.drawImage(buffer2, 0, 0);
-
-        }
-
-        function doRenderControlCanvas(genomicState, trackView) {
-            return ( (typeof trackView.track.paintAxis === 'function') && trackView.controlCanvas.width > 0 && trackView.controlCanvas.height > 0);
-        }
-
         function tileIsValid(chr, start, end, bpPerPixel) {
             return this.tile && !this.tile.invalidate && this.tile.containsRange(chr, start, end, bpPerPixel)
         }
@@ -413,11 +393,13 @@ var igv = (function (igv) {
     function getFeatures(chr, start, end, bpPerPixel) {
         var self = this;
 
+
         if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
             return Promise.resolve(self.cachedFeatures.features)
         }
 
         if (typeof self.trackView.track.getFeatures === "function") {
+
             return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
                 .then(function (features) {
 
