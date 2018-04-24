@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
     <title>Examples - Copy Number</title>
 
@@ -19,12 +19,12 @@
 
 <h1>Embedded copy number browser</h1>
 
-<div id="igv-example-copy-number" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igv_example_copy_number,
+        var igvDiv,
             options;
 
         options =
@@ -55,8 +55,8 @@
                     ]
             };
 
-        igv_example_copy_number = document.getElementById("igv-example-copy-number");
-        igv.createBrowser(igv_example_copy_number, options);
+        igvDiv = document.getElementById("igv-div");
+        igv.createBrowser(igvDiv, options);
 
     });
 
