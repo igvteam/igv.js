@@ -338,9 +338,10 @@ var igv = (function (igv) {
             this.viewports.forEach(function (vp) {
                 vp.setContentHeight(newHeight);
                 vp.tile.invalidate = true;
-                vp.repaint(true);
             });
+            this.repaint(true);
         }
+
 
         if (this.track.paintAxis) {
             $(this.controlCanvas).height(newHeight);
@@ -389,7 +390,6 @@ var igv = (function (igv) {
         var maxContentHeight, w, h,
             updatePromises = [],
             self = this;
-console.log("Update");
 
         this.viewports.forEach(function (viewport) {
             updatePromises.push(viewport.update());
@@ -400,7 +400,6 @@ console.log("Update");
             .then(function (ignore) {
 
                 var contentHeights;
-console.log("Check heights");
                 contentHeights = self.viewports.map(function (vp) {
                     return vp.getContentHeight();
                 })
@@ -424,12 +423,21 @@ console.log("Check heights");
 
     /**
      * Repaint existing features (e.g. a color, resort, or display mode change).
+     * 
+     * viewport.repaint returns a promise.
      */
     igv.TrackView.prototype.repaint = function (force) {
 
+        var promises = [];
+
         this.viewports.forEach(function (viewport) {
-            viewport.repaint(force);
+            promises.push(viewport.repaint(force));
         });
+
+        Promise.all(promises)
+            .then(function (ignore) {
+              
+            });
 
     };
 

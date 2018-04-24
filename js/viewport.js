@@ -190,86 +190,7 @@ var igv = (function (igv) {
             this.messageDiv.style.display = 'none'
     }
 
-    /**
-     * Return a promise to adjust content height to accomodate features for current genomic state
-     *
-     * @returns {Promise}
-     */
-    // igv.Viewport.prototype.adjustContentHeight = function () {
-    //
-    //     var self = this,
-    //         pixelWidth,
-    //         bpWidth,
-    //         bpStart,
-    //         bpEnd,
-    //         genomicState = self.genomicState,
-    //         referenceFrame = genomicState.referenceFrame,
-    //         chr,
-    //         chrLength;
-    //
-    //     if (!viewIsReady.call(this) || !(typeof self.trackView.track.computePixelHeight === 'function') || showZoomInNotice.call(this)) {
-    //         return Promise.resolve(this.getContentHeight());
-    //     }
-    //
-    //     chr = referenceFrame.chrName;
-    //
-    //     // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-    //     chrLength = igv.browser.genome.getChromosome(chr).bpLength;
-    //     pixelWidth = 3 * this.canvas.width;
-    //     bpWidth = referenceFrame.toBP(pixelWidth);
-    //     bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
-    //     bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
-    //
-    //     self.startSpinner();
-    //     self.hideMessage();
-    //
-    //     // console.log('get features');
-    //     return getFeatures.call(self, chr, bpStart, bpEnd, referenceFrame.bpPerPixel)
-    //
-    //         .then(function (features) {
-    //
-    //             var currentContentHeight,
-    //                 requiredContentHeight;
-    //
-    //             if (features) {
-    //
-    //                 // Height of content div and content canvas
-    //                 requiredContentHeight = self.trackView.track.computePixelHeight(features);
-    //                 currentContentHeight = $(self.contentDiv).height();
-    //
-    //                 if (requiredContentHeight !== currentContentHeight) {
-    //                     self.setContentHeight(requiredContentHeight);
-    //                 }
-    //
-    //                 return self.getContentHeight();
-    //             }
-    //         })
-    //
-    //         .catch(function (error) {
-    //             console.error(error);
-    //
-    //             self.showMessage(NOT_LOADED_MESSAGE)
-    //         })
-    //
-    //         .then(/* finally */ function () {
-    //             self.stopSpinner();
-    //         });
-    // };
 
-    igv.Viewport.prototype.checkContentHeight = function (features) {
-
-        var requiredContentHeight, currentContentHeight;
-
-        if (typeof this.trackView.track.computePixelHeight === 'function') {
-            requiredContentHeight = this.trackView.track.computePixelHeight(features);
-            currentContentHeight = $(this.contentDiv).height();
-
-            if (requiredContentHeight !== currentContentHeight) {
-                console.log("required content height = " + requiredContentHeight);
-                this.setContentHeight(requiredContentHeight);
-            }
-        }
-    }
 
     /**
      * Return a promise to repaint the view, forcing a replacement of the current canvas
@@ -422,6 +343,7 @@ var igv = (function (igv) {
                                 }
                             })
                     }
+
                     // No regions of interest
                     return undefined;
                 })
@@ -501,7 +423,7 @@ var igv = (function (igv) {
 
                     self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
 
-                    self.checkContentHeight(features);
+                    checkContentHeight.call(self, features);
 
                     // TODO -- autoscale
 
@@ -510,6 +432,21 @@ var igv = (function (igv) {
         }
 
         return Promise.resolve(undefined);
+    }
+
+
+    function checkContentHeight(features) {
+
+        var requiredContentHeight, currentContentHeight;
+
+        if (typeof this.trackView.track.computePixelHeight === 'function') {
+            requiredContentHeight = this.trackView.track.computePixelHeight(features);
+            currentContentHeight = $(this.contentDiv).height();
+
+            if (requiredContentHeight !== currentContentHeight) {
+                this.setContentHeight(requiredContentHeight);
+            }
+        }
     }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
@@ -522,10 +459,7 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.getContentHeight = function () {
-
-        var r = $(this.contentDiv).height();
-        console.log(r);
-        return r;
+        return $(this.contentDiv).height();
     };
 
     igv.Viewport.prototype.isLoading = function () {
