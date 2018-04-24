@@ -30,6 +30,8 @@ var igv = (function (igv) {
     var downsampleRowHeight = 5;
     var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
     var DEFAULT_TRACK_HEIGHT = 300;
+    var DEFAULT_ALIGNMENT_COLOR =  "rgb(185, 185, 185)";
+    var DEFAULT_COVERAGE_COLOR =  "rgb(150, 150, 150)"
 
     igv.BAMTrack = function (config) {
 
@@ -54,7 +56,8 @@ var igv = (function (igv) {
 
         this.pairsSupported = (undefined === config.pairsSupported);
 
-        this.color = config.color || "rgb(185, 185, 185)";
+        this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
+        this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
 
         // sort alignment rows
         this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
@@ -305,7 +308,7 @@ var igv = (function (igv) {
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
 
-        var color,
+        var baseColor,
             alpha,
             minQ = 5,   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
             maxQ = 20,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
@@ -329,12 +332,12 @@ var igv = (function (igv) {
         alpha = Math.round(alpha * 10) / 10.0;
 
         if (alpha >= 1) {
-            color = igv.nucleotideColors[nucleotide];
+            baseColor = igv.nucleotideColors[nucleotide];
         }
         else {
-            color = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
+            baseColor = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
         }
-        return color;
+        return baseColor;
     }
 
     /**
@@ -406,7 +409,7 @@ var igv = (function (igv) {
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-            igv.graphics.setProperties(ctx, {fillStyle: this.parent.color, strokeStyle: this.color});
+            igv.graphics.setProperties(ctx, {fillStyle: this.parent.coverageColor, strokeStyle: this.parent.coverageColor});
             // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
@@ -734,7 +737,7 @@ var igv = (function (igv) {
                     readQual,
                     xPixel,
                     widthPixel,
-                    color,
+                    baseColor,
                     xListPixel,
                     yListPixel,
                     yStrokedLine;
@@ -835,15 +838,15 @@ var igv = (function (igv) {
                         if (readChar === "X" || refChar !== readChar) {
                             if (block.qual && block.qual.length > i) {
                                 readQual = block.qual[i];
-                                color = shadedBaseColor(readQual, readChar, i + block.start);
+                                baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                             }
                             else {
-                                color = igv.nucleotideColors[readChar];
+                                baseColor = igv.nucleotideColors[readChar];
                             }
-                            if (color) {
+                            if (baseColor) {
                                 xPixel = ((block.start + i) - bpStart) / bpPerPixel;
                                 widthPixel = Math.max(1, 1 / bpPerPixel);
-                                renderBlockOrReadChar(ctx, bpPerPixel, {x: xPixel, y: yRect, width: widthPixel, height: alignmentHeight}, color, readChar);
+                                renderBlockOrReadChar(ctx, bpPerPixel, {x: xPixel, y: yRect, width: widthPixel, height: alignmentHeight}, baseColor, readChar);
                             }
                         }
                     }
