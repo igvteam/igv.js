@@ -145,7 +145,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrackHeight);
+        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
 
     };
 
