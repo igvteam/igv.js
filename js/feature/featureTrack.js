@@ -213,7 +213,7 @@ var igv = (function (igv) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.cachedFeatures) {
+        if (config.viewport.tile.features) {
 
             var genomicLocation = config.genomicLocation,
                 yOffset = config.y,
@@ -231,7 +231,7 @@ var igv = (function (igv) {
             ee = genomicLocation + tolerance;
             //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
-            featureList = config.viewport.cachedFeatures.features;
+            featureList = config.viewport.tile.features;
 
             if ('COLLAPSED' !== this.displayMode) {
                 row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedCallHeight) : Math.floor((yOffset - 5) / this.squishedCallHeight);
@@ -311,7 +311,7 @@ var igv = (function (igv) {
                     object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                     click: function () {
                         self.colorBy = colorScheme;
-                        self.trackView.repaint(true);
+                        self.trackView.repaintViews();
                     }
                 });
             });
@@ -333,7 +333,7 @@ var igv = (function (igv) {
                     click: function () {
                         igv.popover.hide();
                         self.displayMode = displayMode;
-                        self.trackView.update();
+                        self.trackView.repaintViews();
                     }
                 });
         });
@@ -371,7 +371,7 @@ var igv = (function (igv) {
 
         function setColorBy(value) {
             self.colorBy = value;
-            self.trackView.repaint(true);
+            self.trackView.repaintViews();
         }
     };
 
@@ -628,7 +628,7 @@ var igv = (function (igv) {
             if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
                 return;
             }
-            track.trackView.update();
+            track.trackView.repaintViews();
         }
 
         var unSubscribe = function (removedTrack) {

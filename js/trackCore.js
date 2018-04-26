@@ -288,9 +288,9 @@ var igv = (function (igv) {
         vp.$trackLabel.attr('title', track.name);
         vp.$trackLabel.html(track.name);
 
-        if (track.trackView) {
-            track.trackView.repaint();
-        }
+       // if (track.trackView) {
+       //     track.trackView.repaint();
+       // }
 
     };
 
