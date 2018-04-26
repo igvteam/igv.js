@@ -411,7 +411,7 @@ var igv = (function (igv) {
 
         igv.browser.updateLocusSearchWidget(genomicState);
 
-        igv.browser.repaintWithGenomicState(panel.genomicState)
+        igv.browser.updateViews()
 
     }
 

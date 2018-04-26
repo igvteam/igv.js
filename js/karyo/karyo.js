@@ -133,7 +133,7 @@ var igv = (function (igv) {
             }
         }
 
-        igv.browser.update();
+        igv.browser.updateViews();
     };
 
     igv.KaryoPanel.prototype.resize = function () {

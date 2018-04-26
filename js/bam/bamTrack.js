@@ -30,8 +30,8 @@ var igv = (function (igv) {
     var downsampleRowHeight = 5;
     var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
     var DEFAULT_TRACK_HEIGHT = 300;
-    var DEFAULT_ALIGNMENT_COLOR =  "rgb(185, 185, 185)";
-    var DEFAULT_COVERAGE_COLOR =  "rgb(150, 150, 150)"
+    var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
+    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 
     igv.BAMTrack = function (config) {
 
@@ -216,7 +216,7 @@ var igv = (function (igv) {
                     }
 
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
-                    self.trackView.repaint(true);
+                    self.trackView.repaintViews();
                 }
             });
         }
@@ -251,22 +251,22 @@ var igv = (function (igv) {
                             $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                         }
 
-                        self.trackView.repaint(true);
+                        self.trackView.repaintViews();
                     };
 
                     config =
-                        {
-                            label:'Tag Name',
-                            input: self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
-                            click: clickFunction
-                        };
+                    {
+                        label: 'Tag Name',
+                        input: self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
+                        click: clickFunction
+                    };
 
                     igv.inputDialog.configure(config);
-                    igv.inputDialog.present( $(self.trackView.trackDiv) );
+                    igv.inputDialog.present($(self.trackView.trackDiv));
 
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
-                    self.trackView.repaint(true);
+                    self.trackView.repaintViews();
                 }
 
             };
@@ -409,7 +409,10 @@ var igv = (function (igv) {
             x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-            igv.graphics.setProperties(ctx, {fillStyle: this.parent.coverageColor, strokeStyle: this.parent.coverageColor});
+            igv.graphics.setProperties(ctx, {
+                fillStyle: this.parent.coverageColor,
+                strokeStyle: this.parent.coverageColor
+            });
             // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
@@ -679,7 +682,7 @@ var igv = (function (igv) {
 
         function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-            var alignmentColor ,
+            var alignmentColor,
                 outlineColor,
                 lastBlockEnd,
                 blocks,
@@ -815,7 +818,7 @@ var igv = (function (igv) {
                     }
                 }
                 else {
-                    igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor });
+                    igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
 
                     if (alignment.mq <= 0) {
                         ctx.save();
@@ -846,7 +849,12 @@ var igv = (function (igv) {
                             if (baseColor) {
                                 xPixel = ((block.start + i) - bpStart) / bpPerPixel;
                                 widthPixel = Math.max(1, 1 / bpPerPixel);
-                                renderBlockOrReadChar(ctx, bpPerPixel, {x: xPixel, y: yRect, width: widthPixel, height: alignmentHeight}, baseColor, readChar);
+                                renderBlockOrReadChar(ctx, bpPerPixel, {
+                                    x: xPixel,
+                                    y: yRect,
+                                    width: widthPixel,
+                                    height: alignmentHeight
+                                }, baseColor, readChar);
                             }
                         }
                     }
@@ -857,36 +865,40 @@ var igv = (function (igv) {
                 var threshold,
                     center;
 
-                threshold = 1.0/10.0;
+                threshold = 1.0 / 10.0;
                 if (bpp <= threshold) {
 
                     // render letter
                     context.font = '10px sans-serif';
-                    center = bbox.x + (bbox.width/2.0);
-                    igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), 9 + bbox.y, { strokeStyle: color });
+                    center = bbox.x + (bbox.width / 2.0);
+                    igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), 9 + bbox.y, {strokeStyle: color});
                 } else {
 
                     // render colored block
-                    igv.graphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, { fillStyle: color });
+                    igv.graphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color});
                 }
             }
         }
 
     };
 
-    AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption) {
+    AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption, alignmentContainer) {
 
         var self = this;
 
-        this.featureSource.alignmentContainer.packedAlignmentRows.forEach(function (row) {
-            row.updateScore(genomicLocation, self.featureSource.alignmentContainer, sortOption, self.sortDirection);
+        if (alignmentContainer === null) {
+            alignmentContainer = this.featureSource.alignmentContainer;
+        }
+
+        alignmentContainer.packedAlignmentRows.forEach(function (row) {
+            row.updateScore(genomicLocation, alignmentContainer, sortOption, self.sortDirection);
         });
 
-        this.featureSource.alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
+        alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
             return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
         });
 
-        this.parent.trackView.repaint(true);
+        this.parent.trackView.repaintViews();
         this.sortDirection = !(this.sortDirection);
 
     };
@@ -917,7 +929,7 @@ var igv = (function (igv) {
 
         function sortRows() {
             self.sortOption = {sort: "NUCLEOTIDE"};
-            self.sortAlignmentRows(config.genomicLocation, self.sortOption);
+            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.tile.features);
         }
 
         function viewMateInSplitScreen() {
@@ -942,8 +954,8 @@ var igv = (function (igv) {
             packedAlignmentsIndex,
             alignmentRow, clicked, i;
 
-        packedAlignmentRows = viewport.cachedFeatures.features.packedAlignmentRows;
-        downsampledIntervals = viewport.cachedFeatures.features.downsampledIntervals;
+        packedAlignmentRows = viewport.tile.features.packedAlignmentRows;
+        downsampledIntervals = viewport.tile.features.downsampledIntervals;
 
         packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
 

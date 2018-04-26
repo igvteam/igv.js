@@ -98,7 +98,7 @@ var igv = (function (igv) {
 
         this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
 
-        this.trackView.repaint(true);
+        this.trackView.repaintViews();
     };
 
     igv.SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -315,7 +315,7 @@ var igv = (function (igv) {
                 }
                 self.sampleNames = sampleNames;
 
-                self.trackView.repaint(true);
+                self.trackView.repaintViews();
                 // self.trackView.$viewport.scrollTop(0);
 
 
