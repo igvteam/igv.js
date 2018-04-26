@@ -420,7 +420,7 @@ var igv = (function (igv) {
                         sortCallSets(self.filteredCallSets, variant, sortDirection);
                     }
                     sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                    self.trackView.repaint(true);
+                    self.trackView.repaintViews();
                 }
             });
         }
@@ -604,7 +604,7 @@ var igv = (function (igv) {
                     } catch (err) {
                         self.callSetGroups.sort();
                     }
-                    self.trackView.repaint(true);
+                    self.trackView.repaintViews();
                 }
             })
         }
@@ -633,7 +633,7 @@ var igv = (function (igv) {
                                     sortCallSets(self.filteredCallSets, variant, sortDirection)
                                 }
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                                self.trackView.repaint(true);
+                                self.trackView.repaintViews();
                             }
                         });
 
@@ -660,7 +660,7 @@ var igv = (function (igv) {
         this.callSetGroups = callSetResults[1];
 
         this.groupBy = attribute;
-        this.trackView.update();
+        this.trackView.repaintViews();
 
         function createGroups(attribute, callSets) {
             var groupedCallSets = {}, callSetGroups = [], group, attr, key,
@@ -789,7 +789,7 @@ var igv = (function (igv) {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
                         self.displayMode = displayMode;
-                        self.trackView.update();
+                        self.trackView.repaintViews();
                     }
                 });
         });
@@ -824,7 +824,7 @@ var igv = (function (igv) {
 
                     if (undefined !== value) {
                         self.filterByFamily(value);
-                        self.trackView.update();
+                        self.trackView.repaintViews();
                     }
 
                 }, true));
