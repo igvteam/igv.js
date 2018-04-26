@@ -224,7 +224,11 @@ var igv = (function (igv) {
                 if (width > threshold) {
                     // console.log('start | end '+  igv.numberFormatter(extent.start) + ' | ' + igv.numberFormatter(extent.end));
                     igv.Browser.validateLocusExtent(igv.browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName), extent);
-                    self.viewport.goto(self.viewport.genomicState.referenceFrame.chrName, extent.start, extent.end);
+                    var genomicState = self.viewport.genomicState,
+                        referenceFrame = genomicState.referenceFrame;
+                    referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
+                    referenceFrame.start = Math.round(extent.start);
+                    igv.browser.updateViews(genomicState);
                 }
 
             }

@@ -146,15 +146,6 @@ var igv = (function (igv) {
         this.canvas.setAttribute('width', this.$viewport.width());
     };
 
-    igv.Viewport.prototype.goto = function (chr, start, end) {
-
-        this.genomicState.referenceFrame.bpPerPixel = (Math.round(end) - Math.round(start)) / this.$viewport.width();
-        this.genomicState.referenceFrame.start = Math.round(start);
-
-        igv.browser.updateWithGenomicState(this.genomicState);
-
-    };
-
     //.fa5-spin {
     //    -webkit-animation: fa5-spin 2s infinite linear;
     //    animation: fa5-spin 2s infinite linear; }
@@ -191,20 +182,38 @@ var igv = (function (igv) {
     }
 
 
+    igv.Viewport.prototype.checkZoomIn = function () {
 
-    /**
-     * Return a promise to repaint the view, forcing a replacement of the current canvas
-     */
-    igv.Viewport.prototype.update = function () {
-        return this.repaint(true);
-    };
+        if (!(viewIsReady.call(this))) {
+            return false;
+        }
 
-    /**
-     * Return a promise to repaint the view
-     *
-     * @param force
-     */
-    igv.Viewport.prototype.repaint = function (force) {
+        // TODO -- show whole genome zoom in notice here
+        if (this.$zoomInNotice) {
+            if (showZoomInNotice.call(this)) {
+                if (this.canvas) {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                }
+                this.$zoomInNotice.show();
+                return false;
+            } else {
+                return true;
+            }
+        }
+
+        return true;
+    }
+
+    igv.Viewport.prototype.shift = function () {
+        var self = this;
+        var referenceFrame = self.genomicState.referenceFrame;
+        if (self.canvas && self.tile && self.tile.chr === referenceFrame.chrName && self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
+            var pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
+            self.canvas.style.left = pixelOffset + "px";
+        }
+    }
+
+    igv.Viewport.prototype.loadFeatures = function () {
 
         var self = this,
             pixelWidth,
@@ -215,167 +224,144 @@ var igv = (function (igv) {
             referenceFrame = genomicState.referenceFrame,
             chr,
             refFrameStart,
-            refFrameEnd,
             drawConfiguration;
 
-        if (!(viewIsReady.call(this))) {
-            return Promise.resolve(undefined);
-        }
-
-        // TODO -- show whole genome zoom in notice here
-        if (this.$zoomInNotice) {
-            if (showZoomInNotice.call(this)) {
-                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
-                this.$zoomInNotice.show();
-                return Promise.resolve(undefined);
-                ;
-            } else {
-                this.$zoomInNotice.hide();
-            }
-        }
-
-
         chr = referenceFrame.chrName;
-        refFrameStart = referenceFrame.start;
-        refFrameEnd = refFrameStart + referenceFrame.toBP($(self.contentDiv).width());
 
-        if (self.canvas && self.tile && self.tile.chr === chr && self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
-            var pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
-            self.canvas.style.left = pixelOffset + "px";
+        // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
+        var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+
+        pixelWidth = $(self.contentDiv).width() * 3;
+        bpWidth = pixelWidth * referenceFrame.bpPerPixel;
+        bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+        bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
+
+
+        if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
+            return Promise.resolve(undefined);
         }
 
-        if (!force && tileIsValid.call(self, chr, refFrameStart, refFrameEnd, referenceFrame.bpPerPixel)) {
-            // Done
-            return Promise.resolve(undefined);
-        } else {
+        self.loading = {start: bpStart, end: bpEnd};
 
-            // TODO -- if bpPerPixel (zoom level) changed repaint image from cached data => new optional track method to return
-            // TODO -- cached features directly (not a promise for features).
+        self.startSpinner();
 
-            // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-            var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+        // console.log('get features');
+        return getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, self)
 
-            pixelWidth = $(self.contentDiv).width() * 3;
-            bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-            bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
-            bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
+            .then(function (features) {
 
-            // Adjust pixel width in case bounds were clamped
-            pixelWidth = +((bpEnd - bpStart) / referenceFrame.bpPerPixel);
+                self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features);
+                return self.tile;
+            })
 
-            if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
-                return Promise.resolve(undefined);
-            }
+            .catch(function (error) {
+                console.error(error);
+                self.loading = false;
+                self.showMessage(NOT_LOADED_MESSAGE)
+            })
 
-            self.loading = {start: bpStart, end: bpEnd};
+            .then(/* finally */ function (tile) {
+                self.loading = undefined;
+                self.stopSpinner();
+                return tile;
+            });
+    }
 
-            var newCanvas, ctx;
+    /**
+     *
+     * @param force
+     */
+    igv.Viewport.prototype.repaint = function (tile) {
 
-            self.startSpinner();
-            self.hideMessage();
+        var self = this,
+            pixelWidth, bpStart, bpEnd, bpPerPixel, features, genomicState, referenceFrame, drawConfiguration,
+            newCanvas, ctx, pixelHeight, devicePixelRatio, pixelOffset;
 
-            // console.log('get features');
-            return getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel)
+        self.hideMessage();
 
-                .then(function (features) {
+        if(!tile) tile = this.tile;
 
-                    var pixelHeight, devicePixelRatio;
+        genomicState = this.genomicState;
+        referenceFrame = this.genomicState.referenceFrame;
+        bpStart = tile.startBP;
+        bpEnd = tile.endBP;
+        bpPerPixel = tile.bpPerPixel;
+        features = tile.features;
 
-                    self.loading = undefined;
+        pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        pixelHeight = self.getContentHeight();
+        devicePixelRatio = window.devicePixelRatio;
+        newCanvas = $('<canvas>').get(0);
+        newCanvas.style.width = pixelWidth + "px";
+        newCanvas.style.height = pixelHeight + "px";
+        newCanvas.width = devicePixelRatio * pixelWidth;
+        newCanvas.height = devicePixelRatio * pixelHeight;
+        ctx = newCanvas.getContext("2d");
+        ctx.scale(devicePixelRatio, devicePixelRatio);
 
-                    pixelHeight = self.getContentHeight();
-                    devicePixelRatio = window.devicePixelRatio;
-                    newCanvas = $('<canvas>').get(0);
-                    newCanvas.style.width = pixelWidth + "px";
-                    newCanvas.style.height = pixelHeight + "px";
-                    newCanvas.width = devicePixelRatio * pixelWidth;
-                    newCanvas.height = devicePixelRatio * pixelHeight;
-                    ctx = newCanvas.getContext("2d");
-                    ctx.scale(devicePixelRatio, devicePixelRatio);
-
-                    var pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
-                    newCanvas.style.position = 'absolute';
-                    newCanvas.style.left = pixelOffset + "px";
-                    newCanvas.style.top = self.canvas.style.top + "px";
+        pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+        newCanvas.style.position = 'absolute';
+        newCanvas.style.left = pixelOffset + "px";
+        newCanvas.style.top = self.canvas.style.top + "px";
 
 
-                    drawConfiguration =
-                    {
-                        features: features,
-                        context: ctx,
-                        pixelWidth: pixelWidth,
-                        pixelHeight: pixelHeight,
-                        bpStart: bpStart,
-                        bpEnd: bpEnd,
-                        bpPerPixel: referenceFrame.bpPerPixel,
-                        referenceFrame: referenceFrame,
-                        genomicState: genomicState,
-                        selection: self.selection,
-                        viewport: self,
-                        viewportWidth: self.$viewport.width(),
-                        viewportContainerX: genomicState.referenceFrame.toPixels(genomicState.referenceFrame.start - bpStart),
-                        viewportContainerWidth: igv.browser.viewportContainerWidth()
-                    };
+        drawConfiguration =
+        {
+            features: features,
+            context: ctx,
+            pixelWidth: pixelWidth,
+            pixelHeight: pixelHeight,
+            bpStart: bpStart,
+            bpEnd: bpEnd,
+            bpPerPixel: bpPerPixel,
+            referenceFrame: referenceFrame,
+            genomicState: genomicState,
+            selection: self.selection,
+            viewport: self,
+            viewportWidth: self.$viewport.width(),
+            viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
+            viewportContainerWidth: igv.browser.viewportContainerWidth()
+        };
 
-                    ctx.save();
+        ctx.save();
 
-                    if (features) {
+        if (features) {
 
-                        drawConfiguration.features = features;
+            drawConfiguration.features = features;
 
-                        self.trackView.track.draw(drawConfiguration);
+            self.trackView.track.draw(drawConfiguration);
 
+        }
+
+        if (igv.browser.roi) {
+            var roiPromises = igv.browser.roi.map(function (r) {
+                return r.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
+            });
+
+            Promise.all(roiPromises)
+                .then(function (roiArray) {
+                    for (var i = 0; i < roiArray.length; i++) {
+                        drawConfiguration.features = roiArray[i];
+                        igv.browser.roi[i].draw(drawConfiguration);
                     }
-
-                    if (igv.browser.roi) {
-                        var roiPromises = igv.browser.roi.map(function (r) {
-                            return r.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
-                        });
-
-                        return Promise.all(roiPromises)
-                            .then(function (roiArray) {
-                                for (var i = 0; i < roiArray.length; i++) {
-                                    drawConfiguration.features = roiArray[i];
-                                    igv.browser.roi[i].draw(drawConfiguration);
-                                }
-                            })
-                    }
-
-                    // No regions of interest
-                    return undefined;
                 })
-
-                .then(function () {
-
-                    ctx.restore();
-
-                    self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
-
-                    if (self.canvas) {
-                        $(self.canvas).remove();
-                    }
-
-                    self.canvas = newCanvas;
-                    self.ctx = ctx;
-                    $(self.contentDiv).append(newCanvas);
-                })
-
                 .catch(function (error) {
                     console.error(error);
-
                     self.loading = false;
-                    self.showMessage(NOT_LOADED_MESSAGE)
+                    alert("ERROR DRAWING REGIONS OF INTEREST");
                 })
-
-                .then(/* finally */ function () {
-                    self.stopSpinner();
-                });
-
         }
 
-        function tileIsValid(chr, start, end, bpPerPixel) {
-            return this.tile && !this.tile.invalidate && this.tile.containsRange(chr, start, end, bpPerPixel)
+        ctx.restore();
+
+        if (self.canvas) {
+            $(self.canvas).remove();
         }
+
+        self.canvas = newCanvas;
+        self.ctx = ctx;
+        $(self.contentDiv).append(newCanvas);
+
     };
 
 
@@ -390,46 +376,6 @@ var igv = (function (igv) {
         return igv.browser && igv.browser.genomicStateList && this.genomicState.referenceFrame;
     }
 
-    function getFeatures(chr, start, end, bpPerPixel) {
-        var self = this;
-
-
-        if (self.cachedFeatures && self.cachedFeatures.containsRange(chr, start, end, bpPerPixel)) {
-            return Promise.resolve(self.cachedFeatures.features)
-        }
-
-        if (typeof self.trackView.track.getFeatures === "function") {
-
-            return self.trackView.track.getFeatures(chr, start, end, bpPerPixel)
-                .then(function (features) {
-
-                    self.cachedFeatures = new CachedFeatures(chr, start, end, bpPerPixel, features);
-
-                    checkContentHeight.call(self, features);
-
-                    // TODO -- autoscale
-
-                    return features;
-                })
-        }
-
-        return Promise.resolve(undefined);
-    }
-
-
-    function checkContentHeight(features) {
-
-        var requiredContentHeight, currentContentHeight;
-
-        if (typeof this.trackView.track.computePixelHeight === 'function') {
-            requiredContentHeight = this.trackView.track.computePixelHeight(features);
-            currentContentHeight = $(this.contentDiv).height();
-
-            if (requiredContentHeight !== currentContentHeight) {
-                this.setContentHeight(requiredContentHeight);
-            }
-        }
-    }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
@@ -497,12 +443,12 @@ var igv = (function (igv) {
         })
     }
 
-    var Tile = function (chr, tileStart, tileEnd, bpPerPixel, image) {
+    var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features) {
         this.chr = chr;
         this.startBP = tileStart;
         this.endBP = tileEnd;
         this.bpPerPixel = bpPerPixel;
-        this.image = image;
+        this.features = features;
     };
 
     Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
@@ -511,18 +457,6 @@ var igv = (function (igv) {
 
     Tile.prototype.overlapsRange = function (chr, start, end) {
         return this.chr === chr && end >= this.startBP && start <= this.endBP;
-    };
-
-    var CachedFeatures = function (chr, tileStart, tileEnd, bpPerPixel, features) {
-        this.chr = chr;
-        this.startBP = tileStart;
-        this.endBP = tileEnd;
-        this.bpPerPixel = bpPerPixel;
-        this.features = features;
-    };
-
-    CachedFeatures.prototype.containsRange = function (chr, start, end, bpPerPixel) {
-        return this.bpPerPixel === bpPerPixel && start >= this.startBP && end <= this.endBP && chr === this.chr;
     };
 
     function addMouseHandlers() {
@@ -764,6 +698,48 @@ var igv = (function (igv) {
 
 
         }
+    }
+
+    function getFeatures(chr, start, end, bpPerPixel) {
+
+        var self = this,
+            track;
+
+        track = self.trackView.track;
+
+        if (self.tile && self.tile.containsRange(chr, start, end, bpPerPixel)) {
+            return Promise.resolve(self.tile.features);
+        }
+        else if (typeof track.getFeatures === "function") {
+
+            return track.getFeatures(chr, start, end, bpPerPixel)
+
+                .then(function (features) {
+
+                    self.cachedFeatures = features;      // TODO -- associate with "tile"
+
+                    checkContentHeight();
+
+                    return features;
+
+                    // TODO -- move to viewport
+                    function checkContentHeight() {
+                        var requiredContentHeight, currentContentHeight;
+                        if (typeof track.computePixelHeight === 'function') {
+                            requiredContentHeight = track.computePixelHeight(features);
+                            currentContentHeight = $(self.contentDiv).height();
+                            if (requiredContentHeight !== currentContentHeight) {
+                                self.setContentHeight(requiredContentHeight);
+                            }
+                        }
+                    }
+                })
+        }
+        else {
+            return Promise.resolve(undefined);
+        }
+
+
     }
 
 

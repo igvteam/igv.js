@@ -290,7 +290,7 @@ var igv = (function (igv) {
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
-        trackView.update();
+        trackView.updateViews();
     };
 
     igv.Browser.prototype.reorderTracks = function () {
@@ -492,99 +492,31 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.repaint = function () {
+    igv.Browser.prototype.updateViews = function (genomicState) {
 
-        if (this.ideoPanel) this.ideoPanel.repaint();
-        if (this.karyoPanel) this.karyoPanel.repaint();
-        if (this.centerGuide) this.centerGuide.repaint();
-        trackView.forEach(function (trackView) {
-            trackView.repaint();
-        })
-    };
-
-    igv.Browser.prototype.repaintWithGenomicState = function (genomicState) {
-
-        var viewports, repaintPromises;
-
-        if (this.karyoPanel) {
-            this.karyoPanel.repaint();
+        if(!genomicState) {
+            genomicState = this.genomicStateList[0];
         }
 
-        if (this.ideoPanel) {
-            this.ideoPanel.repaintPanelWithGenomicState(genomicState);
-        }
+        this.updateLocusSearchWidget(genomicState);
 
-        viewports = [];
-        this.trackViews.forEach(function (trackView) {
-            var viewport;
-            viewport = trackView.viewportWithGenomicState(genomicState);
-            if (viewport) {
-                viewports.push(viewport);
-            }
-        });
-
-
-        repaintPromises = viewports.map(function (vp) {
-            return vp.repaint();
-        })
-
-        Promise.all(repaintPromises)
-            .then(function (ignore) {
-                // TODO -- adjust track height
-            })
-
-    };
-
-    igv.Browser.prototype.update = function () {
-
-        this.updateLocusSearchWidget(this.genomicStateList[0]);
-
-        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
-
-        if (this.ideoPanel) this.ideoPanel.repaint();
-        if (this.karyoPanel) this.karyoPanel.repaint();
-        if (this.centerGuide) this.centerGuide.repaint();
-
-        this.trackViews.forEach(function (trackView) {
-            trackView.update();
-        })
-
-
-    };
-
-    igv.Browser.prototype.updateWithGenomicState = function (genomicState) {
-
-        var viewports;
-
-        igv.browser.updateLocusSearchWidget(this.genomicStateList[0]);
         this.windowSizePanel.updateWithGenomicState(genomicState);
 
         if (this.ideoPanel) {
-            this.ideoPanel.repaintPanelWithGenomicState(genomicState);
+            this.ideoPanel.repaint();
         }
-
         if (this.karyoPanel) {
             this.karyoPanel.repaint();
         }
-
-        viewports = [];
-        this.trackViews.forEach(function (trackView) {
-            var viewport;
-            viewport = trackView.viewportWithGenomicState(genomicState);
-            if (viewport) {
-                viewports.push(viewport);
-            }
-        });
-
-        viewports.forEach(function (viewport) {
-            viewport.update();
-        });
-
         if (this.centerGuide) {
             this.centerGuide.repaint();
         }
 
+        this.trackViews.forEach(function (trackView) {
+            trackView.updateViews();
+        })
     };
+    
 
     igv.Browser.prototype.loadInProgress = function () {
 
@@ -758,7 +690,7 @@ var igv = (function (igv) {
 
         referenceFrame.start = start;
 
-        this.update();
+        this.updateViews();
 
     };
 
@@ -793,12 +725,12 @@ var igv = (function (igv) {
 
         if (viewport) {
             func.call(self, viewport.genomicState, centerBP, viewport.$viewport.width());
-            self.updateWithGenomicState(viewport.genomicState);
+            self.updateViews(viewport.genomicState);
         } else {
             anyViewport = this.trackViews[0].viewports[0];
             this.genomicStateList.forEach(function (genomicState) {
                 func.call(self, genomicState, centerBP, anyViewport.$viewport.width());
-                self.updateWithGenomicState(genomicState);
+                self.updateViews(genomicState);
             });
         }
 
@@ -1115,7 +1047,7 @@ var igv = (function (igv) {
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
-                self.update();
+                self.updateViews();
             })
             .catch(function (error) {
                 igv.presentAlert(error);
@@ -1608,7 +1540,7 @@ var igv = (function (igv) {
 
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
 
-                    self.repaintWithGenomicState(self.vpMouseDown.genomicState);
+                    self.updateViews();
 
                     self.fireEvent('trackdrag');
                 }

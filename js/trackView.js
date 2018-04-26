@@ -37,13 +37,13 @@ var igv = (function (igv) {
             config;
 
         this.browser = browser;
+        this.track = track;
+        track.trackView = this;
 
         $track = $('<div class="igv-track-div">');
         this.trackDiv = $track.get(0);
         $container.append($track);
 
-        this.track = track;
-        track.trackView = this;
 
         if (this.track instanceof igv.RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
@@ -113,9 +113,8 @@ var igv = (function (igv) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
-            // TODO - Handle replacement for contentDiv. Use height calculating closure?
-            this.scrollbar = new igv.TrackScrollbar($viewportContainer, viewports);
-            // this.scrollbar.update();
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
+
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
 
@@ -130,7 +129,7 @@ var igv = (function (igv) {
 
         this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
-
+        
         this.decorateViewports();
     };
 
@@ -328,13 +327,12 @@ var igv = (function (igv) {
         }
 
         this.track.autoscale = autoscale;
-
-        this.repaint(true);
+        this.repaintViews();
     };
 
     igv.TrackView.prototype.setColor = function (color) {
         this.track.color = color;
-        this.repaint(true);
+        this.repaintViews(true);
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
@@ -358,7 +356,7 @@ var igv = (function (igv) {
                 vp.setContentHeight(newHeight);
                 vp.tile.invalidate = true;
             });
-            this.repaint(true);
+            this.repaintViews();
         }
 
 
@@ -389,8 +387,8 @@ var igv = (function (igv) {
     };
 
     igv.TrackView.prototype.resize = function () {
-        var width;
 
+        var width;
 
         width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
 
@@ -399,69 +397,90 @@ var igv = (function (igv) {
             viewport.setWidth(width);
         });
 
-        this.update();
+        this.updateViews(true);
 
     };
 
-    /**
-     * Call update when the content of the track has changed,  e.g. by loading or changing location.
-     */
-    igv.TrackView.prototype.update = function () {
-
-        var maxContentHeight, w, h,
-            updatePromises = [],
-            self = this;
-
+    igv.TrackView.prototype.repaintViews = function () {
         this.viewports.forEach(function (viewport) {
-            updatePromises.push(viewport.update());
-        });
-
-        Promise.all(updatePromises)
-
-            .then(function (ignore) {
-
-                var contentHeights;
-                contentHeights = self.viewports.map(function (vp) {
-                    return vp.getContentHeight();
-                })
-
-                maxContentHeight = contentHeights.reduce(function (accumulator, currentValue) {
-                    return Math.max(accumulator, currentValue);
-                });
-
-                if (self.track.autoHeight) {
-                    self.setTrackHeight(maxContentHeight, false);
-                }
-
-                else if (self.track.paintAxis) {
-                    self.track.paintAxis(self.controlCtx, $(self.controlCanvas).width(), $(self.controlCanvas).height());
-                }
-
-                if (self.scrollbar) {
-                    self.scrollbar.update();
-                }
-            })
-    };
-
+            viewport.repaint();
+        })
+    }
+    
     /**
      * Repaint existing features (e.g. a color, resort, or display mode change).
      *
      * viewport.repaint returns a promise.
      */
-    igv.TrackView.prototype.repaint = function (force) {
+    igv.TrackView.prototype.updateViews = function (force) {
 
-        var promises = [];
+        if (!(igv.browser && igv.browser.genomicStateList)) return;
+
+        var self = this,
+            promises = [],
+            rpV;
 
         this.viewports.forEach(function (viewport) {
-            promises.push(viewport.repaint(force));
+           viewport.shift();
         });
 
+        // List of viewports that need reloading
+        rpV = this.viewports.filter(function (viewport) {
+            var referenceFrame, chr, start, end, bpPerPixel;
+            referenceFrame = viewport.genomicState.referenceFrame;
+            chr = referenceFrame.chrName;
+            start = referenceFrame.start;
+            end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+            bpPerPixel = referenceFrame.bpPerPixel;
+
+            return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
+        });
+
+
+        rpV.forEach(function (vp) {
+            promises.push(vp.loadFeatures());
+        })
+
         Promise.all(promises)
+          
+            .then(function (tiles) {
+                
+                // TODO -- autoscale here.
+                
+                var i, len;
+                len = tiles.length;
+                for(i=0; i<len; i++) {
+                    rpV[i].repaint(tiles[i]);
+                }
+            })
             .then(function (ignore) {
-
+                adjustTrackHeight.call(self);
             });
-
     };
+
+
+    function adjustTrackHeight() {
+        var maxHeight = maxContentHeight(this.viewports);
+        if (this.track.autoHeight) {
+            this.setTrackHeight(maxHeight, false);
+        }
+        else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+        }
+        if (this.scrollbar) {
+            this.scrollbar.update();
+        }
+    }
+
+    function maxContentHeight(viewports) {
+        var height = 0;
+        viewports.forEach(function (viewport) {
+            var hgt = viewport.getContentHeight();
+            height = Math.max(hgt, height);
+        });
+
+        return height;
+    }
 
     /**
      * Do any cleanup here
@@ -505,16 +524,15 @@ var igv = (function (igv) {
             this[key] = undefined;
         })
 
-
     }
 
-    igv.TrackScrollbar = function ($viewportContainer, viewports) {
+    function TrackScrollbar($viewportContainer, viewports) {
 
         var self = this,
             offY,
             contentDivHeight;
 
-        contentDivHeight = maxContentHeightWithViewports(viewports);
+        contentDivHeight = maxContentHeight(viewports);
 
         this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
         this.$innerScroll = $('<div>');
@@ -573,7 +591,7 @@ var igv = (function (igv) {
 
             newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
 
-            contentDivHeight = maxContentHeightWithViewports(viewports);
+            contentDivHeight = maxContentHeight(viewports);
 
             contentTop = -Math.round(newTop * ( contentDivHeight / self.$viewportContainer.height() ));
 
@@ -586,7 +604,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackScrollbar.prototype.update = function () {
+    TrackScrollbar.prototype.update = function () {
 
         var viewportContainerHeight,
             contentHeight,
@@ -594,7 +612,7 @@ var igv = (function (igv) {
 
         viewportContainerHeight = this.$viewportContainer.height();
 
-        contentHeight = maxContentHeightWithViewports(this.viewports);
+        contentHeight = maxContentHeight(this.viewports);
 
         newInnerHeight = Math.round((viewportContainerHeight / contentHeight) * viewportContainerHeight);
 
@@ -606,15 +624,7 @@ var igv = (function (igv) {
         }
     };
 
-    function maxContentHeightWithViewports(viewports) {
-        var height = 0;
-        viewports.forEach(function (viewport) {
-            var hgt = $(viewport.contentDiv).height();
-            height = Math.max(hgt, height);
-        });
 
-        return height;
-    }
 
     return igv;
 
