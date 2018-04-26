@@ -96,7 +96,7 @@ var igv = (function (igv) {
 
         // Load known genome table (make this optional)
 
-        igv.Genome.getKnownGenomes()
+        return igv.Genome.getKnownGenomes()
 
             .then(function (genomeTable) {
                 // Potentially load a session file
@@ -239,13 +239,16 @@ var igv = (function (igv) {
                     browser.disableZoomWidget();
                 }
 
+                console.log('createBrowser - Genome.getKnownGenomes - return browser');
+                return browser;
+
             })
             .catch(function (error) {
                 igv.presentAlert(error, undefined);
                 console.log(error);
             });
 
-        return browser;
+        // return browser;
 
     };
 
