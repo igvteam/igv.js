@@ -64,7 +64,7 @@ var igv = (function (igv) {
         var height = icon[1];
         var data = icon[4];
 
-        color = color || "currentColor"
+        color = color || "currentColor";
 
         return '<svg ' +
             'class="svg-inline--fa5" ' +

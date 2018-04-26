@@ -38,8 +38,8 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, config) {
 
-        var $header,
-            browser;
+        var browser,
+            promise;
 
         if (igv.browser) {
             //console.log("Attempt to create 2 browsers.");
@@ -67,8 +67,8 @@ var igv = (function (igv) {
         browser.$content = $('<div class="igv-content-div">');
         browser.$root.append(browser.$content);
 
-        $header = $('<div id="igv-content-header">');
-        browser.$content.append($header);
+        browser.$contentHeader = $('<div id="igv-content-header">');
+        browser.$content.append(browser.$contentHeader);
 
         browser.$content.append(browser.trackContainerDiv);
 
@@ -88,13 +88,18 @@ var igv = (function (igv) {
 
         // TODO fix this
         // if (!config.showNavigation) {
-        //     $header.append($('<div id="igv-logo-nonav">'));
+        //     browser.$contentHeader.append($('<div id="igv-logo-nonav">'));
         // }
 
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        // Load known genome table (make this optional)
+        promise = doPromiseChain(browser, config);
+        return (config.promisified && true === config.promisified) ? promise : browser;
+
+    };
+
+    function doPromiseChain (browser, config) {
 
         return igv.Genome.getKnownGenomes()
 
@@ -186,7 +191,7 @@ var igv = (function (igv) {
 
                 if (true === config.showIdeogram) {
                     panelWidth = browser.viewportContainerWidth() / genomicStateList.length;
-                    browser.ideoPanel = new igv.IdeoPanel($header, panelWidth);
+                    browser.ideoPanel = new igv.IdeoPanel(browser.$contentHeader, panelWidth);
                     browser.ideoPanel.repaint();
                 }
 
@@ -239,8 +244,10 @@ var igv = (function (igv) {
                     browser.disableZoomWidget();
                 }
 
-                console.log('createBrowser - Genome.getKnownGenomes - return browser');
-                return browser;
+                if (true === config.promisified) {
+                    console.log('doPromiseChain - return browser');
+                    return browser;
+                }
 
             })
             .catch(function (error) {
@@ -248,9 +255,7 @@ var igv = (function (igv) {
                 console.log(error);
             });
 
-        // return browser;
-
-    };
+    }
 
     //@deprecated -- user setGoogleApiKey
     igv.setApiKey = function (key) {

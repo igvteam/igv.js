@@ -24,20 +24,74 @@ var modal_table_example = (function (modal_table_example) {
 
     modal_table_example.init = function ($container) {
 
-        var options,
-            config,
-            browser,
-            columnFormat,
-            encodeDatasource,
-            loadTracks;
+        igv
+            .createBrowser($container.get(0), igvConfigurator())
+            .then(function (browser) {
 
-        options =
+                var columnFormat,
+                    encodeDatasource,
+                    loadTracks,
+                    $encode_list_item_button,
+                    encodeTableConfig,
+                    $encodeModal;
+
+                columnFormat =
+                    [
+                        {    'Assembly': '10%' },
+                        {   'Cell Type': '10%' },
+                        {      'Target': '10%' },
+                        {  'Assay Type': '20%' },
+                        { 'Output Type': '20%' },
+                        {         'Lab': '20%' }
+
+                    ];
+
+                encodeDatasource = new igv.EncodeDataSource(columnFormat);
+
+                loadTracks = function (configurationList) {
+                    browser.loadTrackList(configurationList);
+                };
+
+                $encodeModal = $('#igv-app-encode-modal');
+                $encode_list_item_button = $('#igv-encode-list-item-button');
+                encodeTableConfig =
+                    {
+                        $modal:$encodeModal,
+                        $modalBody:$encodeModal.find('.modal-body'),
+                        $modalTopCloseButton: $encodeModal.find('#igv-app-encode-modal-top-close-button'),
+                        $modalBottomCloseButton: $encodeModal.find('#igv-app-encode-modal-bottom-close-button'),
+                        $modalGoButton: $encodeModal.find('#igv-app-encode-modal-go-button'),
+                        datasource: encodeDatasource,
+                        browserHandler: loadTracks,
+                        willRetrieveData: function () {
+                            $encode_list_item_button.addClass('modal-table-example-disabled-button');
+                            $encode_list_item_button.text('Configuring ENCODE table...');
+                        },
+                        didRetrieveData: function () {
+                            $encode_list_item_button.removeClass('modal-table-example-disabled-button');
+                            $encode_list_item_button.text('Load Tracks from ENCODE...');
+                        }
+                    };
+
+                modal_table_example.encodeTable = new igv.ModalTable(encodeTableConfig);
+
+                modal_table_example.encodeTable.loadData(browser.genome.id);
+
+            });
+
+    };
+
+    function igvConfigurator() {
+        var configuration;
+
+        configuration =
             {
-                encodeEnabled:true,
+                promisified:true,
                 minimumBases: 6,
                 showIdeogram: true,
                 showRuler: true,
-                locus: 'brca1',
+                locus: 'myc',
+                // locus: 'brca1',
                 // locus: 'SLC25A3',
                 // locus: 'rs28372744',
                 // locus: ['egfr', 'myc', 'pten'],
@@ -78,38 +132,9 @@ var modal_table_example = (function (modal_table_example) {
                     ]
             };
 
-        browser = igv.createBrowser($container.get(0), options);
+        return configuration;
+    }
 
-        columnFormat =
-            [
-                {    'Assembly': '10%' },
-                {   'Cell Type': '10%' },
-                {      'Target': '10%' },
-                {  'Assay Type': '20%' },
-                { 'Output Type': '20%' },
-                {         'Lab': '20%' }
-
-            ];
-
-        encodeDatasource = new igv.EncodeDataSource(columnFormat);
-
-        loadTracks = function (configurationList) {
-          browser.loadTrackList(configurationList);
-        };
-        config =
-            {
-                $modal:$('#encodeModal'),
-                $modalBody:$('#mte-modal-body'),
-                $modalTopCloseButton: $('#encodeModalTopCloseButton'),
-                $modalBottomCloseButton: $('#encodeModalBottomCloseButton'),
-                $modalGoButton: $('#encodeModalGoButton'),
-                datasource: encodeDatasource,
-                browserHandler: loadTracks
-            };
-
-        browser.encodeTable = new igv.ModalTable(config);
-
-    };
 
     return modal_table_example;
 
