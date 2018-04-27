@@ -136,7 +136,7 @@ var igv = (function (igv) {
                 browser.genome = genome;
                 browser.genome.id = config.reference.id;
                 browser.chromosomeSelectWidget.update(browser.genome);
-                return browser.getGenomicStateList(getInitialLocus(config))
+                return browser.createGenomicStateList(getInitialLocus(config))
             })
             .then(function (genomicStateList) {
 
