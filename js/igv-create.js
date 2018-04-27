@@ -133,19 +133,11 @@ var igv = (function (igv) {
             })
 
             .then(function (genome) {
-
                 browser.genome = genome;
                 browser.genome.id = config.reference.id;
-
-                if (true === config.encodeEnabled) {
-                    browser.encodeTable.loadData(config.reference.id, undefined, undefined, undefined);
-                }
-
                 browser.chromosomeSelectWidget.update(browser.genome);
-
                 return browser.getGenomicStateList(getInitialLocus(config))
             })
-
             .then(function (genomicStateList) {
 
                 var viewportWidth,
@@ -500,8 +492,8 @@ var igv = (function (igv) {
 
     function setDefaults(config) {
 
-        if (undefined === config.encodeEnabled) {
-            config.encodeEnabled = false;
+        if (undefined === config.promisified) {
+            config.promisified = false;
         }
 
         if (undefined === config.showLoadFileWidget) {
