@@ -145,8 +145,12 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
-
+        if(igv.browser.isMultiLocus()) {
+                ctx.clearRect(0, 0, pixelWidth, pixelHeight);
+        }
+        else {
+            this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
+        }
     };
 
     igv.BAMTrack.prototype.contextMenuItemList = function (config) {

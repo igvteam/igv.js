@@ -140,7 +140,6 @@ var igv = (function (igv) {
             featureValueMinimum,
             featureValueMaximum,
             featureValueRange,
-            defaultRange,
             baselineColor;
 
 

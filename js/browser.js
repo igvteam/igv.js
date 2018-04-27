@@ -116,6 +116,10 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
+    igv.Browser.prototype.isMultiLocus = function () {
+        return this.genomicStateList && this.genomicStateList.length > 1;
+    }
+    
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
@@ -1012,7 +1016,7 @@ var igv = (function (igv) {
 
         loci = string.split(' ');
 
-        this.getGenomicStateList(loci)
+        this.createGenomicStateList(loci)
 
             .then(function (genomicStateList) {
                 var viewportWidth;
@@ -1061,7 +1065,7 @@ var igv = (function (igv) {
      *
      * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
      */
-    igv.Browser.prototype.getGenomicStateList = function (loci) {
+    igv.Browser.prototype.createGenomicStateList = function (loci) {
 
         var self = this,
             searchConfig = igv.browser.searchConfig,
