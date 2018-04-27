@@ -434,15 +434,15 @@ var igv = (function (igv) {
         var genomicLocation = config.genomicLocation,
             xOffset = config.x,
             yOffset = config.y,
-            referenceFrame = config.viewport.genomicState.referenceFrame;
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            featureList = config.viewport.tile.features;
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (this.featureSource.featureCache) {
+        if (featureList) {
 
             var chr = referenceFrame.chrName,
                 tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
                 vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
                 groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
                 popupData = [],
