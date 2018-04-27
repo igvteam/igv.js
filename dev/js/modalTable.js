@@ -45,7 +45,8 @@ var igv = (function (igv) {
         this.$spinner = $('<div>');
         this.$table.append(this.$spinner);
 
-        // this.$spinner.append($('<i class="fa fa-lg fa-spinner fa-spin"></i>'));
+        this.$faSpinner = igv.createIcon("spinner");
+        this.$spinner.append(this.$faSpinner);
     };
 
     function teardownModalDOM(configuration) {
@@ -87,8 +88,19 @@ var igv = (function (igv) {
         return result.length > 0 ? result : undefined;
     }
 
-    igv.ModalTable.prototype.willRetrieveData = function () {
+    igv.ModalTable.prototype.startSpinner = function () {
+        this.$faSpinner.addClass("fa5-spin");
         this.$spinner.show();
+    };
+
+    igv.ModalTable.prototype.stopSpinner = function () {
+        this.$spinner.hide();
+        this.$faSpinner.addClass("fa5-spin");
+    };
+
+
+    igv.ModalTable.prototype.willRetrieveData = function () {
+        this.startSpinner();
         this.config.willRetrieveData();
     };
 
@@ -100,7 +112,7 @@ var igv = (function (igv) {
     igv.ModalTable.prototype.didFailToRetrieveData = function () {
         $('#hic-encode-loading').hide();
         $('#hic-encode-modal-button').show();
-        this.$spinner.hide();
+        this.stopSpinner();
         this.buildTable(false);
     };
 
@@ -139,12 +151,11 @@ var igv = (function (igv) {
                 if (true === self.doBuildTable) {
 
                     console.log('building table ...');
-                    // self.$spinner.show();
 
                     self.tableWithDataAndColumns(self.datasource.tableData(self.datasource.data), self.datasource.tableColumns());
 
                     console.log('... done building table');
-                    self.$spinner.hide();
+                    self.stopSpinner();
 
                     self.doBuildTable = false;
                 }
@@ -184,8 +195,7 @@ var igv = (function (igv) {
 
         var config;
 
-        this.$spinner.hide();
-
+        this.stopSpinner();
         config =
             {
                 data: tableData,
