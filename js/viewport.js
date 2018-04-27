@@ -280,6 +280,7 @@ var igv = (function (igv) {
         self.hideMessage();
 
         if(!tile) tile = this.tile;
+        if(!tile) return;
 
         genomicState = this.genomicState;
         referenceFrame = this.genomicState.referenceFrame;

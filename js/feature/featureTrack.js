@@ -338,41 +338,6 @@ var igv = (function (igv) {
                 });
         });
 
-
-        return menuItems;
-
-    };
-
-
-    igv.FeatureTrack.prototype.contextMenuItemList = function (config) {
-
-        if (this.render === renderSnp) {
-
-            var menuItems = [], self = this;
-
-            menuItems.push({
-                label: 'Color by function',
-                click: function () {
-                    setColorBy('function');
-                }
-            });
-            menuItems.push({
-                label: 'Color by class',
-                click: function () {
-                    setColorBy('class');
-                }
-            });
-
-            return menuItems;
-
-        } else {
-            return [];
-        }
-
-        function setColorBy(value) {
-            self.colorBy = value;
-            self.trackView.repaintViews();
-        }
     };
 
 

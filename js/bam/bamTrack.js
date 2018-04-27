@@ -472,7 +472,7 @@ var igv = (function (igv) {
             xOffset = config.x,
             yOffset = config.y,
             referenceFrame = config.viewport.genomicState.referenceFrame,
-            coverageMap = this.featureSource.alignmentContainer.coverageMap,
+            coverageMap = config.viewport.tile.features.coverageMap,
             coverageMapIndex,
             coverage,
             nameValues = [],
