@@ -95,7 +95,7 @@ var igv = (function (igv) {
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
         promise = doPromiseChain(browser, config);
-        return (config.promisified && true === config.promisified) ? promise : browser;
+        return true === config.promisified ? promise : browser;
 
     };
 
