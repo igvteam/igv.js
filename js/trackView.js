@@ -129,7 +129,7 @@ var igv = (function (igv) {
 
         this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
-        
+
         this.decorateViewports();
     };
 
@@ -401,57 +401,77 @@ var igv = (function (igv) {
 
     };
 
+    /**
+     * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
+     * e.g. color, sort order, etc, but do not change the genomic state.
+     */
     igv.TrackView.prototype.repaintViews = function () {
         this.viewports.forEach(function (viewport) {
             viewport.repaint();
         })
     }
-    
+
     /**
-     * Repaint existing features (e.g. a color, resort, or display mode change).
-     *
-     * viewport.repaint returns a promise.
+     * Update viewports to reflect current genomic state, possibly loading additional data.
      */
     igv.TrackView.prototype.updateViews = function (force) {
 
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
-        var self = this,
-            promises = [],
-            rpV;
+        var self = this, promises, rpV;
+
 
         this.viewports.forEach(function (viewport) {
-           viewport.shift();
+            viewport.shift();
         });
 
         // List of viewports that need reloading
         rpV = this.viewports.filter(function (viewport) {
-            var referenceFrame, chr, start, end, bpPerPixel;
+            var bpPerPixel, referenceFrame, chr, start, end;
             referenceFrame = viewport.genomicState.referenceFrame;
             chr = referenceFrame.chrName;
             start = referenceFrame.start;
             end = start + referenceFrame.toBP($(viewport.contentDiv).width());
             bpPerPixel = referenceFrame.bpPerPixel;
-
             return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
         });
 
+        promises = rpV.map(function (vp) {
+            return vp.loadFeatures();
+        });
 
-        rpV.forEach(function (vp) {
-            promises.push(vp.loadFeatures());
-        })
 
         Promise.all(promises)
-          
+
             .then(function (tiles) {
-                
+
                 // TODO -- autoscale here.
-                
-                var i, len;
-                len = tiles.length;
-                for(i=0; i<len; i++) {
-                    rpV[i].repaint(tiles[i]);
+                if ('numeric' === self.track.featureType && (self.track.autoscale || self.track.dataRange === undefined)) {
+
+                    var allFeatures = [];
+                    self.viewports.forEach(function (vp) {
+                        var referenceFrame, chr, start, end, cache;
+                        referenceFrame = vp.genomicState.referenceFrame;
+                        chr = referenceFrame.chrName;
+                        start = referenceFrame.start;
+                        end = start + referenceFrame.toBP($(vp.contentDiv).width());
+
+                        cache = new igv.FeatureCache(vp.tile.features);
+
+                        allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                    });
+                    self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
+                    self.viewports.forEach(function (vp) {
+                        vp.repaint();
+                    })
                 }
+                else {
+                    rpV.forEach(function (vp) {
+                        vp.repaint();
+                    })
+                }
+
+
             })
             .then(function (ignore) {
                 adjustTrackHeight.call(self);
@@ -460,6 +480,7 @@ var igv = (function (igv) {
 
 
     function adjustTrackHeight() {
+
         var maxHeight = maxContentHeight(this.viewports);
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
@@ -623,7 +644,6 @@ var igv = (function (igv) {
             this.$outerScroll.hide();
         }
     };
-
 
 
     return igv;
