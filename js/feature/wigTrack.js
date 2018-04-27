@@ -30,6 +30,7 @@ var igv = (function (igv) {
 
     igv.WIGTrack = function (config) {
 
+        this.featureType = 'numeric';
         this.config = config;
         this.url = config.url;
 
@@ -153,16 +154,10 @@ var igv = (function (igv) {
 
         if (features && features.length > 0) {
 
-            if (self.autoscale || self.dataRange === undefined) {
-                var s = autoscale(features);
-                featureValueMinimum = self.config.min || s.min;      // If min is explicitly set use it
-                featureValueMaximum = s.max;
-
-            }
-            else {
+           
                 featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
                 featureValueMaximum = self.dataRange.max;
-            }
+       
 
             if (undefined === self.dataRange) {
                 self.dataRange = {};
@@ -286,19 +281,7 @@ var igv = (function (igv) {
         this.trackView = undefined;
     }
 
-    function autoscale(features) {
-        var min = 0,
-            max = -Number.MAX_VALUE;
 
-        features.forEach(function (f) {
-            if (!Number.isNaN(f.value)) {
-                min = Math.min(min, f.value);
-                max = Math.max(max, f.value);
-            }
-        });
-
-        return {min: min, max: max};
-    }
 
     function signsDiffer(a, b) {
         return (a > 0 && b < 0 || a < 0 && b > 0);
@@ -376,6 +359,22 @@ var igv = (function (igv) {
         function delta(feature, position) {
             return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
         }
+    }
+
+
+    // Static function
+    igv.WIGTrack.autoscale = function (features) {
+        var min = 0,
+            max = -Number.MAX_VALUE;
+
+        features.forEach(function (f) {
+            if (!Number.isNaN(f.value)) {
+                min = Math.min(min, f.value);
+                max = Math.max(max, f.value);
+            }
+        });
+
+        return {min: min, max: max};
     }
 
     return igv;
