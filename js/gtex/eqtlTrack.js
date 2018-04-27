@@ -233,11 +233,11 @@ var igv = (function (igv) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (this.featureSource.featureCache) {
+        if (config.viewport.tile.features) {
 
             var chr = referenceFrame.chrName,
                 tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
-                featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
+                featureList = config.viewport.tile.features,
                 dotSize = this.dotSize,
                 tissue = this.name;
 
