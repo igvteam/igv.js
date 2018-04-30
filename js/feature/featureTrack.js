@@ -338,6 +338,8 @@ var igv = (function (igv) {
                 });
         });
 
+        return menuItems;
+
     };
 
 
