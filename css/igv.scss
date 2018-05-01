@@ -5,6 +5,7 @@
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
+$igv-navbar-height: 32px;
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
 $igv-navbar-button-height: 18px;
@@ -135,7 +136,7 @@ $igv-dark-grey-color: #373737;
   position: relative;
   top: 0;
   left: 0;
-  height: 32px;
+  height: $igv-navbar-height;
   width: 100%;
 
   border-style: solid;
@@ -176,6 +177,23 @@ $igv-dark-grey-color: #373737;
     // drag & drop file upload button
     #igv-drag-and-drop-presentation-button {
       margin-right: 32px;
+    }
+
+    #igv-current_genome {
+
+      height: $igv-navbar-height;
+      //width: calc(2 * #{$igv-navbar-height});
+
+      margin-right: 16px;
+
+      color: #444;
+      font-family: $igv-default-font-face;
+      font-size: small;
+      font-weight: 400;
+      line-height: $igv-navbar-height;
+      text-align: center;
+
+      //background-color: rgba(0, 191, 255, 0.51);
     }
 
     // chromosome select widget | chromosome select widget | locus goto | search icon | window size

@@ -355,6 +355,15 @@
       margin-right: 32px; }
     #igv-navbar #igv-nav-bar-left-container #igv-drag-and-drop-presentation-button {
       margin-right: 32px; }
+    #igv-navbar #igv-nav-bar-left-container #igv-current_genome {
+      height: 32px;
+      margin-right: 16px;
+      color: #444;
+      font-family: "Open Sans", sans-serif;
+      font-size: small;
+      font-weight: 400;
+      line-height: 32px;
+      text-align: center; }
     #igv-navbar #igv-nav-bar-left-container #igv-genomic-location {
       display: flex;
       flex-flow: row;
@@ -868,16 +877,16 @@
   border-right-width: thin; }
 
 .igv-center-guide-wide {
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
   border-left-color: rgba(127, 127, 127, 0.51);
   border-right-color: rgba(127, 127, 127, 0.51); }
 
 .igv-center-guide-thin {
   left: 50%;
   width: 1px;
-  background-color: rgba(0, 0, 0, 0);
+  background-color: transparent;
   border-left-color: rgba(127, 127, 127, 0.51);
-  border-right-color: rgba(0, 0, 0, 0);
+  border-right-color: transparent;
   /*background-color: rgba(127, 127, 127, 0.51);*/
   /*border-left-color: rgba(0,0,0,0);*/
   /*border-right-color: rgba(0,0,0,0);*/ }
