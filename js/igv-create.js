@@ -136,6 +136,10 @@ var igv = (function (igv) {
                 browser.genome = genome;
                 browser.genome.id = config.reference.id;
                 browser.chromosomeSelectWidget.update(browser.genome);
+
+                browser.$current_genome.text(browser.genome.id/*'abcde%%fghij'*/);
+                browser.$current_genome.attr('title', browser.genome.id);
+
                 return browser.createGenomicStateList(getInitialLocus(config))
             })
             .then(function (genomicStateList) {
@@ -339,6 +343,7 @@ var igv = (function (igv) {
         var $div,
             $igv_nav_bar_left_container,
             $igv_nav_bar_right_container,
+            $current_genome,
             $genomic_location,
             $locus_size_group,
             $toggle_button_container,
@@ -369,7 +374,6 @@ var igv = (function (igv) {
             $igv_nav_bar_left_container.append(logoDiv);
 
             // load local file
-            // browser.trackFileLoad = new igv.TrackFileLoad($igv_nav_bar_left_container, browser.$root);
             browser.trackFileLoad = new igv.FileLoadWidget($igv_nav_bar_left_container, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
@@ -377,6 +381,12 @@ var igv = (function (igv) {
                 browser.trackFileLoad.$presentationButton.hide();
             }
 
+            // current genome
+            browser.$current_genome = $('<div>', { id:'igv-current_genome' });
+            $igv_nav_bar_left_container.append(browser.$current_genome);
+            browser.$current_genome.text('');
+
+            //
             $genomic_location = $('<div id="igv-genomic-location">');
             $igv_nav_bar_left_container.append($genomic_location);
 
