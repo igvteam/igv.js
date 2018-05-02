@@ -48,9 +48,9 @@ var igv = (function (igv) {
             this.$presentationButton.on('click', function () {
 
                 if (self.$container.is(':visible')) {
-                    doDismiss.call(self);
+                    self.dismiss();
                 } else {
-                    doPresent.call(self);
+                    self.present();
                 }
 
             });
@@ -65,7 +65,7 @@ var igv = (function (igv) {
         this.$container.append($header);
         // header - dismiss button
         igv.attachDialogCloseHandlerWithParent($header, function () {
-            doDismiss.call(self);
+            self.dismiss();
         });
 
         // local data/index
@@ -109,7 +109,7 @@ var igv = (function (igv) {
             obj = self.fileLoadManager.trackLoadConfiguration();
             if (config) {
                 igv.browser.loadTrackList( [ config ] );
-                doDismiss.call(self);
+                self.dismiss();
             }
 
         });
@@ -119,7 +119,7 @@ var igv = (function (igv) {
         $div.append(this.$cancel);
         this.$cancel.text('Cancel');
         this.$cancel.on('click', function () {
-            doDismiss.call(self);
+            self.dismiss();
         });
 
 
@@ -302,11 +302,11 @@ var igv = (function (igv) {
 
     }
 
-    function doPresent() {
+    igv.FileLoadWidget.prototype.present = function () {
         this.$container.show();
-    }
+    };
 
-    function doDismiss() {
+    igv.FileLoadWidget.prototype.dismiss = function () {
 
         this.dismissErrorMessage();
 
@@ -317,7 +317,7 @@ var igv = (function (igv) {
         this.fileLoadManager.reset();
 
         this.$container.css({ top:'64px', left:0 });
-    }
+    };
 
     igv.FileLoadManager = function (fileLoadWidget) {
 
