@@ -328,7 +328,8 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var $div,
+        var fileLoadWidgetConfig,
+            $div,
             $igv_nav_bar_left_container,
             $igv_nav_bar_right_container,
             $current_genome,
@@ -362,12 +363,22 @@ var igv = (function (igv) {
             $igv_nav_bar_left_container.append(logoDiv);
 
             // load local file
+<<<<<<< HEAD
             browser.trackFileLoad = new igv.FileLoadWidget($igv_nav_bar_left_container, browser.$root);
             if (true === config.showLoadFileWidget) {
                 browser.trackFileLoad.$presentationButton.show();
             } else {
                 browser.trackFileLoad.$presentationButton.hide();
             }
+=======
+            fileLoadWidgetConfig =
+                {
+                    hidden: config.fileLoadWidget.hidden,
+                    $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
+                    $buttonParent: $igv_nav_bar_left_container
+                };
+            browser.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
+>>>>>>> fileLoadWidget. Use config
 
             // current genome
             browser.$current_genome = $('<div>', {id: 'igv-current_genome'});
