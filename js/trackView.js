@@ -419,7 +419,7 @@ var igv = (function (igv) {
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
         var self = this, promises, rpV, autoscale, groupAutoscale;
-        
+
         autoscale = 'numeric' === self.track.featureType && (self.track.autoscale || self.track.dataRange === undefined);
 
         this.viewports.forEach(function (viewport) {
@@ -436,7 +436,7 @@ var igv = (function (igv) {
         Promise.all(promises)
 
             .then(function (tiles) {
-                
+
                 if (autoscale) {
                     var allFeatures = [];
                     self.viewports.forEach(function (vp) {
@@ -455,7 +455,7 @@ var igv = (function (igv) {
 
             })
             .then(function (ignore) {
-              
+
                 // Must repaint all viewports if autoscaling
                 if (autoscale || self.track.autoscaleGroup) {
                     self.viewports.forEach(function (vp) {
@@ -517,13 +517,19 @@ var igv = (function (igv) {
 
         // List of viewports that need reloading
         rpV = this.viewports.filter(function (viewport) {
-            var bpPerPixel, referenceFrame, chr, start, end;
-            referenceFrame = viewport.genomicState.referenceFrame;
-            chr = referenceFrame.chrName;
-            start = referenceFrame.start;
-            end = start + referenceFrame.toBP($(viewport.contentDiv).width());
-            bpPerPixel = referenceFrame.bpPerPixel;
-            return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
+
+            if (!viewport.checkZoomIn()) {
+                return false;
+            }
+            else {
+                var bpPerPixel, referenceFrame, chr, start, end;
+                referenceFrame = viewport.genomicState.referenceFrame;
+                chr = referenceFrame.chrName;
+                start = referenceFrame.start;
+                end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+                bpPerPixel = referenceFrame.bpPerPixel;
+                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
+            }
         });
 
         return rpV;

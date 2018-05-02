@@ -116,6 +116,25 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
+    igv.Browser.prototype.loadGenome = function (config) {
+
+        var self = this;
+
+        return igv.Genome.loadGenome(config)
+
+            .then(function (genome) {
+
+                self.genome = genome;
+                self.genome.id = config.id;
+                self.chromosomeSelectWidget.update(genome);
+                self.$current_genome.text(genome.id/*'abcde%%fghij'*/);
+                self.$current_genome.attr('title', genome.id);
+                
+                return genome;
+              
+            })
+    }
+
     igv.Browser.prototype.isMultiLocus = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
     }
@@ -292,6 +311,7 @@ var igv = (function (igv) {
         this.trackViews.push(trackView);
         this.reorderTracks();
         if (!track.autoscaleGroup) {
+            // Group autoscale groups will get updated later (as a group)
             trackView.updateViews();
         }
     };
@@ -503,7 +523,7 @@ var igv = (function (igv) {
         if (!genomicState) {
             genomicState = this.genomicStateList[0];
         }
-        if(!views) {
+        if (!views) {
             views = this.trackViews;
         }
 

@@ -528,8 +528,7 @@ var igv = (function (igv) {
             boxX, boxX1,    // label should be centered between these two x-coordinates
             labelX, labelY,
             textFitsInBox,
-            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined,    // <= for juicebox
-            selection = options.selection;
+            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;    // <= for juicebox
 
         // feature outside of viewable window
         if (featureX1 < windowX || featureX > windowX1) {
@@ -566,10 +565,8 @@ var igv = (function (igv) {
             labelX = boxX + ((boxX1 - boxX) / 2);
             labelY = getFeatureLabelY(featureY, transform);
 
-            // TODO: This is for compatibility with JuiceboxJS. The transform param is currently
-            // TODO: not supported.
+            // TODO: This is for compatibility with JuiceboxJS. 
             if (options.labelTransform) {
-
                 ctx.save();
                 options.labelTransform(ctx, labelX);
                 igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
