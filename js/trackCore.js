@@ -258,6 +258,8 @@ var igv = (function (igv) {
 
         track.order = config.order;
         track.color = config.color || igv.browser.constants.defaultColor || "rgb(0,0,150)";
+        
+        track.autoscaleGroup = config.autoscaleGroup;
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 

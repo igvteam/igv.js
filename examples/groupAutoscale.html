@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>Examples - Group Autoscale</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+
+<body>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+
+</div>
+
+<script type="text/javascript">
+
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var igvDiv,
+                options;
+
+        igvDiv = document.getElementById("igv-div");
+
+        options = {
+            locus: ['myc'],
+            reference: {
+                id: "hg19",
+            },
+
+            tracks: [
+                {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                    label: 'GM12878 H3K4me3',
+                    color: 'rgb(200,0,0)',
+                    autoscaleGroup: '1'
+                },
+                {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig',
+                    label: 'GM12878 H3K4me3',
+                    color: 'rgb(0,0,150)',
+                    autoscaleGroup: '1'
+                },
+                {
+                    url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig',
+                    label: 'rgb(GM12878 H3K4me3)',
+                    color: 'rgb(0,150,0)',
+                    autoscaleGroup: '1'
+                },
+                {
+                    name: "Genes",
+                    autoHeight: true,
+                    searchable: false,
+                    type: "annotation",
+                    format: "gtf",
+                    sourceType: "file",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+                    visibilityWindow: 10000000,
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
+                }
+            ]
+        };
+
+        igv.createBrowser(igvDiv, options);
+
+    })
+
+</script>
+
+</body>
+
+</html>
