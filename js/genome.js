@@ -25,59 +25,6 @@
 
 var igv = (function (igv) {
 
-    igv.genomeIdLUT = function (string) {
-
-        var lut =
-        {
-            dm3: 'dm3',
-            mm10: 'mm10',
-            hg19: 'hg19',
-            hg38: 'GRCh38'
-        };
-
-        return lut[string];
-    };
-
-    igv.loadGenome = function (reference) {
-
-        var cytobandUrl = reference.cytobandURL,
-            cytobands,
-            aliasURL = reference.aliasURL,
-            chrNames,
-            chromosomes = {},
-            sequence;
-
-        sequence = new igv.FastaSequence(reference);
-
-        return sequence.init().then(function () {
-
-            var order = 0;
-
-            chrNames = sequence.chromosomeNames;
-            chromosomes = sequence.chromosomes;
-
-        }).then(function (ignore) {
-            if (cytobandUrl) {
-                return loadCytobands(cytobandUrl, sequence.config);
-            } else {
-                return undefined
-            }
-        }).then(function (c) {
-
-            cytobands = c;
-
-            if (aliasURL) {
-                return loadAliases(aliasURL, sequence.config);
-            }
-            else {
-                return undefined;
-            }
-        }).then(function (aliases) {
-            return new igv.Genome(reference.id, sequence, cytobands, aliases);
-
-        })
-    }
-
 
     igv.Genome = function (id, sequence, ideograms, aliases) {
 
@@ -136,6 +83,51 @@ var igv = (function (igv) {
         this.chrAliasTable = chrAliasTable;
 
     }
+
+    igv.Genome.loadGenome = function (reference) {
+
+        var cytobandUrl = reference.cytobandURL,
+            cytobands,
+            aliasURL = reference.aliasURL,
+            chrNames,
+            chromosomes = {},
+            sequence;
+
+        sequence = new igv.FastaSequence(reference);
+
+        return sequence.init()
+            
+            .then(function () {
+
+                var order = 0;
+
+                chrNames = sequence.chromosomeNames;
+                chromosomes = sequence.chromosomes;
+
+            })
+            .then(function (ignore) {
+                if (cytobandUrl) {
+                    return loadCytobands(cytobandUrl, sequence.config);
+                } else {
+                    return undefined
+                }
+            })
+            .then(function (c) {
+
+                cytobands = c;
+
+                if (aliasURL) {
+                    return loadAliases(aliasURL, sequence.config);
+                }
+                else {
+                    return undefined;
+                }
+            })
+            .then(function (aliases) {
+                return new igv.Genome(reference.id, sequence, cytobands, aliases);
+            })
+    }
+
 
     igv.Genome.prototype.getChromosomeName = function (str) {
         var chr = this.chrAliasTable[str.toLowerCase()];

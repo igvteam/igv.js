@@ -73,16 +73,19 @@ var igv = (function (igv) {
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         var self = this;
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
+
             .then(function (alignmentContainer) {
 
-                if (undefined === self.minFragmentLength) {
-                    self.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
+                if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
+                    if (undefined === self.minFragmentLength) {
+                        self.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
+                    }
+                    if (undefined === self.maxFragmentLength) {
+                        self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
+                    }
                 }
-                if (undefined === self.maxFragmentLength) {
-                    self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
-                }
-
                 return alignmentContainer;
+
             });
     };
 
@@ -145,8 +148,8 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        if(igv.browser.isMultiLocus()) {
-                ctx.clearRect(0, 0, pixelWidth, pixelHeight);
+        if (igv.browser.isMultiLocus()) {
+            ctx.clearRect(0, 0, pixelWidth, pixelHeight);
         }
         else {
             this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);

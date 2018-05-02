@@ -30,6 +30,20 @@
 
 var igv = (function (igv) {
 
+
+    var genomeIdLUT = function (string) {
+
+        var lut =
+        {
+            dm3: 'dm3',
+            mm10: 'mm10',
+            hg19: 'hg19',
+            hg38: 'GRCh38'
+        };
+
+        return lut[string];
+    };
+    
     igv.ModalTable = function (config) {
 
         this.config = config;
@@ -121,7 +135,7 @@ var igv = (function (igv) {
 
         this.willRetrieveData();
 
-        assembly = igv.genomeIdLUT( genomeId);
+        assembly = genomeIdLUT( genomeId);
         this.datasource
             .retrieveData(assembly)
             .then(function (data) {
