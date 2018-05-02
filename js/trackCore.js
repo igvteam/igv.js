@@ -522,14 +522,7 @@ var igv = (function (igv) {
         $e.text('Remove track');
 
         menuClickHandler = function () {
-            var dialogClickHandler;
-
-            dialogClickHandler = function () {
-                trackView.browser.removeTrack(trackView.track);
-            };
-
-            igv.trackRemovalDialog.configure({ name: trackView.track.name, click: dialogClickHandler });
-            igv.trackRemovalDialog.present($(trackView.trackDiv));
+            trackView.browser.removeTrack(trackView.track);
         };
 
         return { object: $e, click: menuClickHandler };
