@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
 
-    var igvjs_version = "beta";
+    var igvjs_version = "@VERSION";
     igv.version = igvjs_version;
 
     /**
@@ -99,7 +99,7 @@ var igv = (function (igv) {
 
     };
 
-    function doPromiseChain (browser, config) {
+    function doPromiseChain(browser, config) {
 
         return igv.Genome.getKnownGenomes()
 
@@ -128,20 +128,14 @@ var igv = (function (igv) {
 
             .then(function (config) {
 
-                return igv.loadGenome(config.reference);
-
+                return browser.loadGenome(config.reference)
             })
 
             .then(function (genome) {
-                browser.genome = genome;
-                browser.genome.id = config.reference.id;
-                browser.chromosomeSelectWidget.update(browser.genome);
 
-                browser.$current_genome.text(browser.genome.id/*'abcde%%fghij'*/);
-                browser.$current_genome.attr('title', browser.genome.id);
-
-                return browser.createGenomicStateList(getInitialLocus(config))
+                return browser.createGenomicStateList(getInitialLocus(config, genome));
             })
+            
             .then(function (genomicStateList) {
 
                 var viewportWidth,
@@ -244,8 +238,8 @@ var igv = (function (igv) {
                     console.log('doPromiseChain - return browser');
                     return browser;
                 }
-
             })
+
             .catch(function (error) {
                 igv.presentAlert(error, undefined);
                 console.log(error);
@@ -382,7 +376,7 @@ var igv = (function (igv) {
             }
 
             // current genome
-            browser.$current_genome = $('<div>', { id:'igv-current_genome' });
+            browser.$current_genome = $('<div>', {id: 'igv-current_genome'});
             $igv_nav_bar_left_container.append(browser.$current_genome);
             browser.$current_genome.text('');
 
@@ -587,7 +581,7 @@ var igv = (function (igv) {
     };
 
 
-    function getInitialLocus(config) {
+    function getInitialLocus(config, genome) {
 
         var loci = [];
 
@@ -600,11 +594,11 @@ var igv = (function (igv) {
             }
         }
         else {
-            if (igv.browser.genome.hasOwnProperty("all")) {
+            if (genome.chromosomes.hasOwnProperty("all")) {
                 loci.push("all");
             }
             else {
-                loci.push(igv.browser.genome.chromosomeNames[0]);
+                loci.push(genome.chromosomeNames[0]);
             }
         }
 

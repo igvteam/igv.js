@@ -222,9 +222,7 @@ var igv = (function (igv) {
             bpEnd,
             genomicState = self.genomicState,
             referenceFrame = genomicState.referenceFrame,
-            chr,
-            refFrameStart,
-            drawConfiguration;
+            chr;
 
         chr = referenceFrame.chrName;
 
