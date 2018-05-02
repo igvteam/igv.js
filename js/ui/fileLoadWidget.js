@@ -28,35 +28,37 @@
  * Created by dat on 4/8/18.
  */
 var igv = (function (igv) {
-    igv.FileLoadWidget = function ($buttonParent, $widgetParent) {
+    igv.FileLoadWidget = function (config) {
         var self = this,
-            config,
+            obj,
             $header,
             $div;
 
-        this.$parent = $widgetParent;
+        this.$parent = config.$widgetParent;
 
         this.fileLoadManager = new igv.FileLoadManager(this);
 
         // file load navbar button
-        this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
-        $buttonParent.append(this.$presentationButton);
+        if (false === config.hidden) {
+            this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
+            config.$buttonParent.append(this.$presentationButton);
 
-        this.$presentationButton.text('Load Track');
+            this.$presentationButton.text('Load Track');
 
-        this.$presentationButton.on('click', function () {
+            this.$presentationButton.on('click', function () {
 
-            if (self.$container.is(':visible')) {
-                doDismiss.call(self);
-            } else {
-                doPresent.call(self);
-            }
+                if (self.$container.is(':visible')) {
+                    doDismiss.call(self);
+                } else {
+                    doPresent.call(self);
+                }
 
-        });
+            });
+        }
 
         // file load widget
         this.$container = $("<div>", { id:"igv-file-load-widget-container" });
-        $widgetParent.append(this.$container);
+        this.$parent.append(this.$container);
 
         // header
         $header = $("<div>", { id:"igv-file-load-widget-header" });
@@ -67,21 +69,21 @@ var igv = (function (igv) {
         });
 
         // local data/index
-        config =
+        obj =
             {
                 dataTitle: 'Local data file',
                 indexTitle: 'Local index file'
             };
-        createInputContainer.call(this, this.$container, config);
+        createInputContainer.call(this, this.$container, obj);
 
         // url data/index
-        config =
+        obj =
             {
                 doURL: true,
                 dataTitle: 'Data URL',
                 indexTitle: 'Index URL'
             };
-        createInputContainer.call(this, this.$container, config);
+        createInputContainer.call(this, this.$container, obj);
 
         // error message container
         this.$error_message = $("<div>", { id:"igv-flw-error-message-container" });
@@ -104,7 +106,7 @@ var igv = (function (igv) {
         this.$ok.text('OK');
         this.$ok.on('click', function () {
             var config;
-            config = self.fileLoadManager.trackLoadConfiguration();
+            obj = self.fileLoadManager.trackLoadConfiguration();
             if (config) {
                 igv.browser.loadTrackList( [ config ] );
                 doDismiss.call(self);
