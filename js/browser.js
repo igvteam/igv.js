@@ -119,7 +119,7 @@ var igv = (function (igv) {
     igv.Browser.prototype.isMultiLocus = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
     }
-    
+
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
@@ -210,14 +210,25 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadTrackList = function (configList) {
 
         var self = this,
-            loadedTracks = [];
+            loadedTracks = [],
+            groupAutoscaleViews;
 
         configList.forEach(function (config) {
             var track = self.loadTrack(config);
             if (track) {
                 loadedTracks.push(track);
+
             }
         });
+
+        groupAutoscaleViews = this.trackViews.filter(function (trackView) {
+            return trackView.track.autoscaleGroup
+        })
+
+        if (groupAutoscaleViews.length > 0) {
+            this.updateViews(this.genomicStateList[0], groupAutoscaleViews);
+        }
+
 
         return loadedTracks;
     };
@@ -227,8 +238,7 @@ var igv = (function (igv) {
         var self = this,
             settings,
             property,
-            newTrack,
-            featureSource;
+            newTrack;
 
         igv.inferTrackTypes(config);
 
@@ -256,21 +266,9 @@ var igv = (function (igv) {
             newTrack.order = this.trackViews.length;
         }
 
-        // If defined, attempt to load the file header before adding the track.  This will catch some errors early
-        if (typeof newTrack.getFileHeader === "function") {
-            newTrack.getFileHeader()
-                .then(function (header) {
-                    self.addTrack(newTrack);
-                })
-                .catch(function (error) {
-                    igv.presentAlert(error);
-                });
-        } else {
-            self.addTrack(newTrack);
-        }
+        self.addTrack(newTrack);
 
         return newTrack;
-
     };
 
     /**
@@ -290,11 +288,12 @@ var igv = (function (igv) {
     igv.Browser.prototype.addTrack = function (track) {
 
         var trackView;
-
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
         this.reorderTracks();
-        trackView.updateViews();
+        if (!track.autoscaleGroup) {
+            trackView.updateViews();
+        }
     };
 
     igv.Browser.prototype.reorderTracks = function () {
@@ -496,10 +495,16 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.updateViews = function (genomicState) {
+    igv.Browser.prototype.updateViews = function (genomicState, views) {
 
-        if(!genomicState) {
+        var self = this,
+            groupAutoscaleTracks, otherTracks;
+
+        if (!genomicState) {
             genomicState = this.genomicStateList[0];
+        }
+        if(!views) {
+            views = this.trackViews;
         }
 
         this.updateLocusSearchWidget(genomicState);
@@ -516,11 +521,59 @@ var igv = (function (igv) {
             this.centerGuide.repaint();
         }
 
-        this.trackViews.forEach(function (trackView) {
+        // Group autoscale
+        groupAutoscaleTracks = {};
+        otherTracks = [];
+        views.forEach(function (trackView) {
+            var group = trackView.track.autoscaleGroup;
+            if (group) {
+                var l = groupAutoscaleTracks[group];
+                if (!l) {
+                    l = [];
+                    groupAutoscaleTracks[group] = l;
+                }
+                l.push(trackView);
+            }
+            else {
+                otherTracks.push(trackView);
+            }
+        })
+
+        Object.keys(groupAutoscaleTracks).forEach(function (group) {
+
+            var groupTrackViews, promises;
+
+            groupTrackViews = groupAutoscaleTracks[group];
+            promises = [];
+
+            groupTrackViews.forEach(function (trackView) {
+                promises.push(trackView.getInViewFeatures());
+            });
+
+            Promise.all(promises)
+
+                .then(function (featureArray) {
+
+                    var allFeatures = [], dataRange;
+
+                    featureArray.forEach(function (features) {
+                        allFeatures = allFeatures.concat(features);
+                    })
+                    dataRange = igv.WIGTrack.autoscale(allFeatures);
+
+                    groupTrackViews.forEach(function (trackView) {
+                        trackView.track.dataRange = dataRange;
+                        trackView.track.autoscale = false;
+                        trackView.updateViews();
+                    })
+                })
+        })
+
+        otherTracks.forEach(function (trackView) {
             trackView.updateViews();
         })
     };
-    
+
 
     igv.Browser.prototype.loadInProgress = function () {
 
@@ -1436,7 +1489,7 @@ var igv = (function (igv) {
         }
     };
 
-    // EVENTS 
+    // EVENTS
 
     igv.Browser.prototype.on = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {

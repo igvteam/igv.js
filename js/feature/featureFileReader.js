@@ -60,27 +60,31 @@ var igv = (function (igv) {
     };
 
     /**
-     *
+     * Return a promise to load features for the genomic interval
      * @param chr
      * @param start
      * @param end
      */
     igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
 
-        if (this.index) {
-            return this.loadFeaturesWithIndex(chr, start, end);
-        } else if (this.dataURI) {
-            return this.loadFeaturesFromDataURI();
-        } else {
-            return this.loadFeaturesNoIndex()
-        }
+        var self = this;
+
+        return self.getIndex()
+            .then(function (index) {
+                if (index) {
+                    return self.loadFeaturesWithIndex(chr, start, end);
+                } else if (self.dataURI) {
+                    return self.loadFeaturesFromDataURI();
+                } else {
+                    return self.loadFeaturesNoIndex()
+                }
+            });
     };
 
     igv.FeatureFileReader.prototype.readHeader = function () {
 
         var self = this;
-
-
+        
         if (self.header) {
             return Promise.resolve(self.header);
         } else {
