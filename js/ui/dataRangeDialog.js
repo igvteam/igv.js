@@ -117,29 +117,48 @@ var igv = (function (igv) {
         this.$minimum_input.val(min);
         this.$maximum_input.val(max);
 
+        this.$minimum_input.unbind();
+        this.$minimum_input.on('keyup', function (e) {
+            if (13 === e.keyCode) {
+                processResults.call(self, config);
+            }
+        });
+
+        this.$maximum_input.unbind();
+        this.$maximum_input.on('keyup', function (e) {
+            if (13 === e.keyCode) {
+                processResults.call(self, config);
+            }
+        });
 
         this.$ok.unbind();
         this.$ok.on('click', function () {
-
-            min = parseFloat(self.$minimum_input.val());
-            max = parseFloat(self.$maximum_input.val());
-            if(isNaN(min) || isNaN(max)) {
-                igv.presentAlert("Must input numeric values", undefined);
-            } else {
-
-                if (true === config.trackView.track.autoscale) {
-                    $('#datarange-autoscale').trigger('click');
-                }
-
-                config.trackView.setDataRange(min, max, false);
-            }
-
-            self.$minimum_input.val(undefined);
-            self.$maximum_input.val(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
+            processResults.call(self, config);
         });
     };
+
+    function processResults (config) {
+        var min,
+            max;
+
+        min = parseFloat(this.$minimum_input.val());
+        max = parseFloat(this.$maximum_input.val());
+        if(isNaN(min) || isNaN(max)) {
+            igv.presentAlert("Must input numeric values", undefined);
+        } else {
+
+            if (true === config.trackView.track.autoscale) {
+                $('#datarange-autoscale').trigger('click');
+            }
+
+            config.trackView.setDataRange(min, max, false);
+        }
+
+        this.$minimum_input.val(undefined);
+        this.$maximum_input.val(undefined);
+        this.$container.offset( { left:0, top:0 } );
+        this.$container.hide();
+    }
 
     igv.DataRangeDialog.prototype.present = function ($parent) {
 
