@@ -114,7 +114,7 @@ var igv = (function (igv) {
 
         function extractTrackAttributes(track, config) {
 
-            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction, visWindow, indexed;
+            var color, height, autoScale, altColor, dataRange, dataRangeCltn, windowFunction, visWindow, indexed, autoscaleGroup;
 
             config.name = track.getAttribute("name");
             color = track.getAttribute("color");
@@ -132,6 +132,10 @@ var igv = (function (igv) {
             autoScale = track.getAttribute("autoScale");
             if (autoScale) {
                 config.autoScale = (autoScale === "true");
+            }
+            autoscaleGroup = track.getAttribute("autoscaleGroup");
+            if (autoscaleGroup) {
+                config.autoscaleGroup = autoscaleGroup;
             }
             windowFunction = track.getAttribute("windowFunction");
             if (windowFunction) {
