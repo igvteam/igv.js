@@ -418,12 +418,102 @@ var igv = (function (igv) {
 
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
-        var self = this, promises, rpV;
-
+        var self = this, promises, rpV, autoscale, groupAutoscale;
+        
+        autoscale = 'numeric' === self.track.featureType && (self.track.autoscale || self.track.dataRange === undefined);
 
         this.viewports.forEach(function (viewport) {
             viewport.shift();
         });
+
+        // List of viewports that need reloading
+        rpV = viewportsToReload.call(this, force);
+
+        promises = rpV.map(function (vp) {
+            return vp.loadFeatures();
+        });
+
+        Promise.all(promises)
+
+            .then(function (tiles) {
+                
+                if (autoscale) {
+                    var allFeatures = [];
+                    self.viewports.forEach(function (vp) {
+                        var referenceFrame, chr, start, end, cache;
+                        referenceFrame = vp.genomicState.referenceFrame;
+                        chr = referenceFrame.chrName;
+                        start = referenceFrame.start;
+                        end = start + referenceFrame.toBP($(vp.contentDiv).width());
+
+                        cache = new igv.FeatureCache(vp.tile.features);
+                        allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                    });
+                    self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
+                }
+
+
+            })
+            .then(function (ignore) {
+              
+                // Must repaint all viewports if autoscaling
+                if (autoscale || self.track.autoscaleGroup) {
+                    self.viewports.forEach(function (vp) {
+                        vp.repaint();
+                    })
+                }
+                else {
+                    rpV.forEach(function (vp) {
+                        vp.repaint();
+                    })
+                }
+            })
+
+            .then(function (ignore) {
+                adjustTrackHeight.call(self);
+            });
+    };
+
+    /**
+     * Return a promise to get all in-view features.  Used for group autoscaling.
+     */
+    igv.TrackView.prototype.getInViewFeatures = function (force) {
+
+        if (!(igv.browser && igv.browser.genomicStateList)) {
+            return Promise.resolve([]);
+        }
+
+        var self = this, promises, rpV;
+
+        // List of viewports that need reloading
+        rpV = viewportsToReload.call(this, force);
+
+        promises = rpV.map(function (vp) {
+            return vp.loadFeatures();
+        });
+
+        return Promise.all(promises)
+
+            .then(function (tiles) {
+                var allFeatures = [];
+                self.viewports.forEach(function (vp) {
+                    var referenceFrame, chr, start, end, cache;
+                    referenceFrame = vp.genomicState.referenceFrame;
+                    chr = referenceFrame.chrName;
+                    start = referenceFrame.start;
+                    end = start + referenceFrame.toBP($(vp.contentDiv).width());
+                    cache = new igv.FeatureCache(vp.tile.features);
+                    allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                });
+                return allFeatures;
+            })
+
+    };
+
+
+    function viewportsToReload(force) {
+
+        var rpV;
 
         // List of viewports that need reloading
         rpV = this.viewports.filter(function (viewport) {
@@ -436,47 +526,9 @@ var igv = (function (igv) {
             return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel))
         });
 
-        promises = rpV.map(function (vp) {
-            return vp.loadFeatures();
-        });
+        return rpV;
 
-
-        Promise.all(promises)
-
-            .then(function (tiles) {
-
-                // TODO -- autoscale here.
-                if ('numeric' === self.track.featureType && (self.track.autoscale || self.track.dataRange === undefined)) {
-
-                    var allFeatures = [];
-                    self.viewports.forEach(function (vp) {
-                        var referenceFrame, chr, start, end, cache;
-                        referenceFrame = vp.genomicState.referenceFrame;
-                        chr = referenceFrame.chrName;
-                        start = referenceFrame.start;
-                        end = start + referenceFrame.toBP($(vp.contentDiv).width());
-
-                        cache = new igv.FeatureCache(vp.tile.features);
-
-                        allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
-                    });
-                    self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
-                    self.viewports.forEach(function (vp) {
-                        vp.repaint();
-                    })
-                }
-                else {
-                    rpV.forEach(function (vp) {
-                        vp.repaint();
-                    })
-                }
-
-
-            })
-            .then(function (ignore) {
-                adjustTrackHeight.call(self);
-            });
-    };
+    }
 
 
     function adjustTrackHeight() {
