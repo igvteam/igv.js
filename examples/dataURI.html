@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>Examples - Data URIs</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h1>Examples use of data URIs</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+        var igvDiv,
+                options;
+
+        igvDiv = document.getElementById("igv-div");
+        options =
+        {
+            reference:
+            {
+                fastaURL: "resources/finspector.fa",
+                indexed: false,
+                cytobandURL: "resources/cytoband.txt"
+            },
+            tracks: [
+                {
+                    label: "Annotations",
+                    url: "resources/finspector.bed",
+                    displayMode: "SQUISHED",
+                    indexed: false,
+                    type: "annotation",
+                    format: "bed"
+                },
+
+                {
+                    url: "resources/finspector.star.sortedByCoord.out.bam",
+                    label: "SupportingReadsBam",
+                    height: 100,
+                    indexed: false,
+                    type: "alignment"
+                }
+            ]
+        };
+
+
+        igv.createBrowser(igvDiv, options);
+
+    });
+
+</script>
+
+</body>
+
+</html>
