@@ -143,15 +143,8 @@ var igv = (function (igv) {
 
                 if (genomicStateList.length > 0) {
 
-                    viewportWidth = browser.viewportContainerWidth() / genomicStateList.length;
-
-                    browser.genomicStateList = genomicStateList.map(function (gs) {
-                        var obj;
-                        gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
-                        obj = _.omit(gs, 'start', 'end');
-                        return obj;
-                    });
-
+                    browser.genomicStateList = genomicStateList;
+                    
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
                         browser.addTrack(browser.rulerTrack);
