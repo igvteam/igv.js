@@ -81,18 +81,25 @@
       cursor: pointer;
       color: #0f0f0f; }
 
-#igv-file-load-widget-container {
+.igv-file-load-widget-container-igvjs-position {
   z-index: 2048;
   position: absolute;
   top: 64px;
   left: 0;
-  width: 720px;
   height: 400px;
+  border-color: #7F7F7F; }
+
+.igv-file-load-widget-container-embed-position {
+  position: relative;
+  height: calc(0.65 * 400px);
+  border-color: transparent; }
+
+#igv-file-load-widget-container {
+  width: 720px;
   color: #7F7F7F;
   font-family: "Open Sans", sans-serif;
   font-size: 16px;
   font-weight: 200;
-  border-color: #7F7F7F;
   border-style: solid;
   border-width: thin;
   background-color: white;

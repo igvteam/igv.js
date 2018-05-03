@@ -341,7 +341,9 @@ var igv = (function (igv) {
             $karyo,
             $navigation,
             $searchContainer,
-            $faSearch;
+            $faSearch,
+            isEmbedded,
+            isHidden;
 
         $controls = $('<div id="igvControlDiv">');
 
@@ -362,14 +364,27 @@ var igv = (function (igv) {
             logoDiv.append(logoSvg);
             $igv_nav_bar_left_container.append(logoDiv);
 
-            // load local file
-            fileLoadWidgetConfig =
-                {
-                    hidden: config.fileLoadWidget.hidden,
-                    $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
-                    $buttonParent: $igv_nav_bar_left_container
-                };
-            browser.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
+            if (config.fileLoadWidget) {
+
+                isHidden = (undefined === config.fileLoadWidget.hidden) ? true : config.fileLoadWidget.hidden;
+
+                if (false === isHidden) {
+
+                    isEmbedded = (undefined === config.fileLoadWidget.embed) ? false : config.fileLoadWidget.embed;
+
+                    // load local file
+                    fileLoadWidgetConfig =
+                        {
+                            embed: isEmbedded,
+                            $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
+                            $buttonParent: isEmbedded ? undefined : $igv_nav_bar_left_container
+                        };
+
+                    browser.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
+
+                }
+
+            }
 
             // current genome
             browser.$current_genome = $('<div>', {id: 'igv-current_genome'});

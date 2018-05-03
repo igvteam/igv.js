@@ -48,28 +48,36 @@ $igv-flw-border-radius: 2px;
 
 }
 
-#igv-file-load-widget-container {
-
+.igv-file-load-widget-container-igvjs-position {
   z-index: 2048;
-
   position: absolute;
   top: 64px;
   left: 0;
 
-  //top: 128px;
-  //left: 0;
-  //right: 0;
-  //margin: auto;
+  height: $igv-flw-container-height;
+
+  border-color: $igv-flw-grey-color;
+
+}
+
+.igv-file-load-widget-container-embed-position {
+  position: relative;
+
+  height: calc(0.65 * #{$igv-flw-container-height});
+
+  border-color: transparent;
+
+}
+
+#igv-file-load-widget-container {
 
   width:$igv-flw-container-width;
-  height: $igv-flw-container-height;
 
   color: $igv-flw-grey-color;
   font-family: $igv-flw-font-face;
   font-size: 16px;
   font-weight: 200;
 
-  border-color: $igv-flw-grey-color;
   border-style: solid;
   border-width: thin;
 
