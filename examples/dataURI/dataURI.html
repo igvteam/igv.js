@@ -11,7 +11,7 @@
     <title>Examples - Data URIs</title>
 
     <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
+    <script src="../../dist/igv.min.js"></script>
 
 </head>
 
@@ -32,14 +32,14 @@
         {
             reference:
             {
-                fastaURL: "resources/finspector.fa",
+                fastaURL: "data/finspector.fa",
                 indexed: false,
-                cytobandURL: "resources/cytoband.txt"
+                cytobandURL: "data/cytoband.txt"
             },
             tracks: [
                 {
                     label: "Annotations",
-                    url: "resources/finspector.bed",
+                    url: "data/finspector.bed",
                     displayMode: "SQUISHED",
                     indexed: false,
                     type: "annotation",
@@ -47,7 +47,7 @@
                 },
 
                 {
-                    url: "resources/finspector.star.sortedByCoord.out.bam",
+                    url: "data/finspector.star.sortedByCoord.out.bam",
                     label: "SupportingReadsBam",
                     height: 100,
                     indexed: false,
