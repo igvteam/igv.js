@@ -511,10 +511,6 @@ var igv = (function (igv) {
             config.promisified = false;
         }
 
-        if (undefined === config.showLoadFileWidget) {
-            config.showLoadFileWidget = false;
-        }
-
         if (undefined === config.minimumBases) {
             config.minimumBases = 40;
         }
