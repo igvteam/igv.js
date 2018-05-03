@@ -171,7 +171,14 @@
 	         "url": "https://s3.amazonaws.com/igv.org.genomes/danRer10/refGene.txt.gz",
 	         "indexed": "false"
 	         }]
-	      })'>Zebrafish (GRCZ10/danRer10)
+	      })
+	        .then(function (genome) {
+	           console.log("Genome loaded: " + genome.id);
+	        })
+	        .catch(function (error) {
+	             alert(error);
+	       })'
+             }>Zebrafish (GRCZ10/danRer10)
         </div>
 
     </div>
