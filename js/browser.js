@@ -124,12 +124,18 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
+                var genomeChange = self.genome && (self.genome.id != config.id);
+
                 self.genome = genome;
                 self.genome.id = config.id;
                 self.chromosomeSelectWidget.update(genome);
                 self.$current_genome.text(genome.id/*'abcde%%fghij'*/);
                 self.$current_genome.attr('title', genome.id);
-                
+
+                if(genomeChange) {
+                    self.search('all');
+                }
+
                 return genome;
               
             })
@@ -1092,7 +1098,6 @@ var igv = (function (igv) {
         this.createGenomicStateList(loci)
 
             .then(function (genomicStateList) {
-                var viewportWidth;
 
                 if (genomicStateList.length > 0) {
 
@@ -1110,6 +1115,7 @@ var igv = (function (igv) {
 
             })
             .then(function (genomicStateList) {
+
                 var panelWidth;
 
                 if (self.ideoPanel) {
