@@ -34,12 +34,13 @@ var igv = (function (igv) {
             $header,
             $div;
 
+        this.config = config;
         this.$parent = config.$widgetParent;
 
         this.fileLoadManager = new igv.FileLoadManager(this);
 
         // file load navbar button
-        if (false === config.hidden) {
+        if (false === config.embed) {
             this.$presentationButton = $("<div>", { id:"igv-drag-and-drop-presentation-button", class:'igv-nav-bar-button' });
             config.$buttonParent.append(this.$presentationButton);
 
@@ -57,16 +58,20 @@ var igv = (function (igv) {
         }
 
         // file load widget
-        this.$container = $("<div>", { id:"igv-file-load-widget-container" });
+        this.$container = $('<div>', { id:'igv-file-load-widget-container', class: config.embed ? 'igv-file-load-widget-container-embed-position' : 'igv-file-load-widget-container-igvjs-position' });
         this.$parent.append(this.$container);
 
-        // header
-        $header = $("<div>", { id:"igv-file-load-widget-header" });
-        this.$container.append($header);
-        // header - dismiss button
-        igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.dismiss();
-        });
+        if (false === config.embed) {
+
+            // header
+            $header = $("<div>", { id:"igv-file-load-widget-header" });
+            this.$container.append($header);
+            // header - dismiss button
+            igv.attachDialogCloseHandlerWithParent($header, function () {
+                self.dismiss();
+            });
+
+        }
 
         // local data/index
         obj =
@@ -96,37 +101,44 @@ var igv = (function (igv) {
         });
         this.dismissErrorMessage();
 
-        // ok | cancel - container
-        $div = $("<div>", { id:"igv-file-load-widget-ok-cancel" });
-        this.$container.append($div);
+        if (false === config.embed) {
 
-        // ok
-        this.$ok = $('<div>');
-        $div.append(this.$ok);
-        this.$ok.text('OK');
-        this.$ok.on('click', function () {
-            var config;
-            obj = self.fileLoadManager.trackLoadConfiguration();
-            if (config) {
-                igv.browser.loadTrackList( [ config ] );
+            // ok | cancel - container
+            $div = $("<div>", { id:"igv-file-load-widget-ok-cancel" });
+            this.$container.append($div);
+
+            // ok
+            this.$ok = $('<div>');
+            $div.append(this.$ok);
+            this.$ok.text('OK');
+            this.$ok.on('click', function () {
+                self.okHandler();
+            });
+
+            // cancel
+            this.$cancel = $('<div>');
+            $div.append(this.$cancel);
+            this.$cancel.text('Cancel');
+            this.$cancel.on('click', function () {
                 self.dismiss();
-            }
+            });
 
-        });
+            this.$container.draggable({ handle: $header.get(0) });
 
-        // cancel
-        this.$cancel = $('<div>');
-        $div.append(this.$cancel);
-        this.$cancel.text('Cancel');
-        this.$cancel.on('click', function () {
-            self.dismiss();
-        });
+            this.$container.hide();
 
+        }
 
-        this.$container.draggable({ handle: $header.get(0) });
+    };
 
+    igv.FileLoadWidget.prototype.okHandler = function () {
 
-        this.$container.hide();
+        var obj;
+        obj = this.fileLoadManager.trackLoadConfiguration();
+        if (obj) {
+            igv.browser.loadTrackList( [ obj ] );
+            this.dismiss();
+        }
 
     };
 
@@ -312,11 +324,17 @@ var igv = (function (igv) {
 
         this.$container.find('input').val(undefined);
         this.$container.find('.igv-flw-local-file-name-container').hide();
-        this.$container.hide();
+
+        if (false === this.config.embed) {
+            this.$container.hide();
+        }
 
         this.fileLoadManager.reset();
 
-        this.$container.css({ top:'64px', left:0 });
+        if (false === this.config.embed) {
+            this.$container.css({ top:'64px', left:0 });
+        }
+
     };
 
     igv.FileLoadManager = function (fileLoadWidget) {
