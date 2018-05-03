@@ -135,7 +135,7 @@ var igv = (function (igv) {
 
                 return browser.createGenomicStateList(getInitialLocus(config, genome));
             })
-            
+
             .then(function (genomicStateList) {
 
                 var viewportWidth,
@@ -144,7 +144,7 @@ var igv = (function (igv) {
                 if (genomicStateList.length > 0) {
 
                     browser.genomicStateList = genomicStateList;
-                    
+
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
                         browser.addTrack(browser.rulerTrack);
@@ -169,6 +169,7 @@ var igv = (function (igv) {
                 }
 
             })
+            
             .then(function (genomicStateList) {
                 var panelWidth;
 
