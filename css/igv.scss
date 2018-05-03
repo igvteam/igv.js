@@ -5,6 +5,7 @@
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
+$igv-navbar-font-size: 12px;
 $igv-navbar-height: 32px;
 $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
@@ -182,13 +183,12 @@ $igv-dark-grey-color: #373737;
     #igv-current_genome {
 
       height: $igv-navbar-height;
-      //width: calc(2 * #{$igv-navbar-height});
 
       margin-right: 16px;
 
       color: #444;
       font-family: $igv-default-font-face;
-      font-size: small;
+      font-size: $igv-navbar-font-size;
       font-weight: 400;
       line-height: $igv-navbar-height;
       text-align: center;
@@ -218,7 +218,7 @@ $igv-dark-grey-color: #373737;
           outline: none;
 
           font-family: $igv-default-font-face;
-          font-size: small;
+          font-size: $igv-navbar-font-size;
           font-weight: 400;
           color: #444;
 
@@ -258,7 +258,7 @@ $igv-dark-grey-color: #373737;
             text-align: left;
 
             font-family: $igv-default-font-face;
-            font-size: small;
+            font-size: $igv-navbar-font-size;
             font-weight: 400;
             color: #444;
 
@@ -290,7 +290,7 @@ $igv-dark-grey-color: #373737;
           margin-left: 4px;
 
           font-family: $igv-default-font-face;
-          font-size: 14px;
+          font-size: $igv-navbar-font-size;
           font-weight: 400;
           color: #444;
         }
