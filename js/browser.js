@@ -133,6 +133,7 @@ var igv = (function (igv) {
                 self.$current_genome.attr('title', genome.id);
 
                 if(genomeChange) {
+                    self.removeAllTracks();
                     self.search('all');
                 }
 
@@ -376,13 +377,20 @@ var igv = (function (igv) {
      * API function
      */
     igv.Browser.prototype.removeAllTracks = function () {
-        var self = this;
+        var self = this,
+            newTrackViews = [];
+        
         this.trackViews.forEach(function (tv) {
-            self.trackContainerDiv.removeChild(tv.trackDiv);
-            self.fireEvent('trackremoved', [tv.track]);
-            tv.dispose();
+            if(tv.track.removable !== false) {
+                self.trackContainerDiv.removeChild(tv.trackDiv);
+                self.fireEvent('trackremoved', [tv.track]);
+                tv.dispose();
+            } else {
+                newTrackViews.push(tv);
+            }
         });
-        this.trackViews = [];
+        this.trackViews = newTrackViews;
+        
     }
 
     /**

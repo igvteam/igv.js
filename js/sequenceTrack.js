@@ -26,6 +26,9 @@
 var igv = (function (igv) {
 
     igv.SequenceTrack = function (config) {
+
+        this.removable = false;
+        
         this.config = config;
         this.name = "";
         this.id = "sequence";

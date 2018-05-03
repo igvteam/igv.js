@@ -35,6 +35,7 @@ var igv = (function (igv) {
         this.order = -Number.MAX_VALUE;
         this.supportsWholeGenome = true;
         this.rulerSweepers = [];
+        this.removable = false;
 
     };
 
