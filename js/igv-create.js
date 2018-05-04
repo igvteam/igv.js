@@ -127,23 +127,16 @@ var igv = (function (igv) {
             })
 
             .then(function (config) {
-
                 return browser.loadGenome(config.reference)
             })
 
             .then(function (genome) {
 
-                return browser.createGenomicStateList(getInitialLocus(config, genome));
-            })
-
-            .then(function (genomicStateList) {
-
                 var viewportWidth,
                     errorString;
 
-                if (genomicStateList.length > 0) {
+                if (browser.genomicStateList.length > 0) {
 
-                    browser.genomicStateList = genomicStateList;
 
                     if (config.showRuler) {
                         browser.rulerTrack = new igv.RulerTrack();
@@ -588,29 +581,6 @@ var igv = (function (igv) {
     };
 
 
-    function getInitialLocus(config, genome) {
-
-        var loci = [];
-
-        if (config.locus) {
-            if (Array.isArray(config.locus)) {
-                loci = config.locus;
-
-            } else {
-                loci.push(config.locus);
-            }
-        }
-        else {
-            if (genome.chromosomes.hasOwnProperty("all")) {
-                loci.push("all");
-            }
-            else {
-                loci.push(genome.chromosomeNames[0]);
-            }
-        }
-
-        return loci;
-    }
 
 
     function extractQuery(config) {

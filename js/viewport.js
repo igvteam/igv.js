@@ -197,6 +197,7 @@ var igv = (function (igv) {
                 this.$zoomInNotice.show();
                 return false;
             } else {
+                this.$zoomInNotice.hide();
                 return true;
             }
         }
