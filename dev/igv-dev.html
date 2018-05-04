@@ -355,20 +355,10 @@
             showRuler: true,
             // locus: 'all',
             // locus: '1',
-            // locus: 'SLC25A3',
-            // locus: 'brca1',
             // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
-            locus: 'chr8:37,315,544-37,315,709',
-            // locus: ['myc'],
-            // locus: ['myc', 'egfr'],
-            // locus: ['1', '2'],
-            // locus: ['2', '4', '8'],
-            reference: {
-                id: "hg19",
-                //      fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                //      cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-            },
+            locus: 'myc',
+            genome : "hg19",
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
@@ -376,21 +366,22 @@
                 {
                     url: 'http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
                     label: 'HG02450'
-                },
-                {
-
-                    name: "Genes",
-                    autoHeight: true,
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
                 }
+//                ,
+//                {
+//
+//                    name: "Genes",
+//                    autoHeight: true,
+//                    searchable: false,
+//                    type: "annotation",
+//                    format: "gtf",
+//                    sourceType: "file",
+//                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+//                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+//                    visibilityWindow: 10000000,
+//                    order: Number.MAX_VALUE,
+//                    displayMode: "EXPANDED"
+//                }
             ]
         };
 
