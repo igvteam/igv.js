@@ -118,13 +118,22 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadGenome = function (config) {
 
-        var self = this;
+        var self = this,
+            genomeChange;
+
+        // A bit of a hack -- config can be either an object or json.  This only matters for the boolean indexed property
+        if (config.tracks) {
+            config.tracks.forEach(function (t) {
+                if (t.indexed && typeof t.indexed === 'string') t.indexed = t.indexed === 'true';
+                if (t.order && typeof t.order === 'string') t.order = parseFloat(t.order);
+            });
+        }
 
         return igv.Genome.loadGenome(config)
 
             .then(function (genome) {
 
-                var genomeChange = self.genome && (self.genome.id != config.id);
+                genomeChange = self.genome && (self.genome.id != config.id);
 
                 self.genome = genome;
                 self.genome.id = config.id;
@@ -132,14 +141,55 @@ var igv = (function (igv) {
                 self.$current_genome.text(genome.id/*'abcde%%fghij'*/);
                 self.$current_genome.attr('title', genome.id);
 
-                if(genomeChange) {
+                if (genomeChange) {
                     self.removeAllTracks();
-                    self.search('all');
                 }
 
                 return genome;
-              
+
             })
+            .then(function (genome) {
+                if (genomeChange) {
+                    return self.search('all');
+                } else {
+                    return self.createGenomicStateList(getInitialLocus(config, genome));
+                }
+
+            })
+            .then(function (genomicStateList) {
+                self.genomicStateList = genomicStateList;
+                if (config.tracks) {
+                    self.loadTrackList(config.tracks);
+                }
+            })
+            .then(function (ignore) {
+                return self.genome;
+            })
+
+
+        function getInitialLocus(config, genome) {
+
+            var loci = [];
+
+            if (config.locus) {
+                if (Array.isArray(config.locus)) {
+                    loci = config.locus;
+
+                } else {
+                    loci.push(config.locus);
+                }
+            }
+            else {
+                if (genome.chromosomes.hasOwnProperty("all")) {
+                    loci.push("all");
+                }
+                else {
+                    loci.push(genome.chromosomeNames[0]);
+                }
+            }
+
+            return loci;
+        }
     }
 
     igv.Browser.prototype.isMultiLocus = function () {
@@ -379,9 +429,9 @@ var igv = (function (igv) {
     igv.Browser.prototype.removeAllTracks = function () {
         var self = this,
             newTrackViews = [];
-        
+
         this.trackViews.forEach(function (tv) {
-            if(tv.track.removable !== false) {
+            if (tv.track.removable !== false) {
                 self.trackContainerDiv.removeChild(tv.trackDiv);
                 self.fireEvent('trackremoved', [tv.track]);
                 tv.dispose();
@@ -390,7 +440,7 @@ var igv = (function (igv) {
             }
         });
         this.trackViews = newTrackViews;
-        
+
     }
 
     /**
@@ -1103,7 +1153,7 @@ var igv = (function (igv) {
 
         loci = string.split(' ');
 
-        this.createGenomicStateList(loci)
+        return this.createGenomicStateList(loci)
 
             .then(function (genomicStateList) {
 
@@ -1135,6 +1185,8 @@ var igv = (function (igv) {
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
                 self.updateViews();
+
+                return genomicStateList;
             })
             .catch(function (error) {
                 igv.presentAlert(error);
@@ -1153,7 +1205,7 @@ var igv = (function (igv) {
         var self = this, searchConfig, geneNameLoci, genomicState, result, unique, promises, ordered, dictionary;
 
         searchConfig = igv.browser.searchConfig,
-        ordered = {};
+            ordered = {};
         unique = [];
 
         // prune duplicates as the order list is built
