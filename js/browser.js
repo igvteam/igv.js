@@ -151,10 +151,7 @@ var igv = (function (igv) {
             .then(function (genome) {
                 if (genomeChange) {
                     return self.search('all');
-                } else {
-                    return self.createGenomicStateList(getInitialLocus(config, genome));
-                }
-
+                } 
             })
             .then(function (genomicStateList) {
                 self.genomicStateList = genomicStateList;
@@ -166,30 +163,6 @@ var igv = (function (igv) {
                 return self.genome;
             })
 
-
-        function getInitialLocus(config, genome) {
-
-            var loci = [];
-
-            if (config.locus) {
-                if (Array.isArray(config.locus)) {
-                    loci = config.locus;
-
-                } else {
-                    loci.push(config.locus);
-                }
-            }
-            else {
-                if (genome.chromosomes.hasOwnProperty("all")) {
-                    loci.push("all");
-                }
-                else {
-                    loci.push(genome.chromosomeNames[0]);
-                }
-            }
-
-            return loci;
-        }
     }
 
     igv.Browser.prototype.isMultiLocus = function () {

@@ -129,11 +129,15 @@ var igv = (function (igv) {
             .then(function (config) {
                 return browser.loadGenome(config.reference)
             })
-
             .then(function (genome) {
+                return browser.createGenomicStateList(getInitialLocus(config, genome));
+            })
+            .then(function (genomicStateList) {
 
                 var viewportWidth,
                     errorString;
+
+                browser.genomicStateList = genomicStateList;
 
                 if (browser.genomicStateList.length > 0) {
 
@@ -162,7 +166,7 @@ var igv = (function (igv) {
                 }
 
             })
-            
+
             .then(function (genomicStateList) {
                 var panelWidth;
 
@@ -232,6 +236,30 @@ var igv = (function (igv) {
                 console.log(error);
             });
 
+
+        function getInitialLocus(config, genome) {
+
+            var loci = [];
+
+            if (config.locus) {
+                if (Array.isArray(config.locus)) {
+                    loci = config.locus;
+
+                } else {
+                    loci.push(config.locus);
+                }
+            }
+            else {
+                if (genome.chromosomes.hasOwnProperty("all")) {
+                    loci.push("all");
+                }
+                else {
+                    loci.push(genome.chromosomeNames[0]);
+                }
+            }
+
+            return loci;
+        }
     }
 
     //@deprecated -- user setGoogleApiKey
@@ -367,11 +395,11 @@ var igv = (function (igv) {
 
                     // load local file
                     fileLoadWidgetConfig =
-                        {
-                            embed: isEmbedded,
-                            $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
-                            $buttonParent: isEmbedded ? undefined : $igv_nav_bar_left_container
-                        };
+                    {
+                        embed: isEmbedded,
+                        $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
+                        $buttonParent: isEmbedded ? undefined : $igv_nav_bar_left_container
+                    };
 
                     browser.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
 
@@ -579,8 +607,6 @@ var igv = (function (igv) {
         igv.browser.dispose();
         $(".igv-generic-dialog-container").remove();
     };
-
-
 
 
     function extractQuery(config) {
