@@ -129,7 +129,7 @@ var igv = (function (igv) {
             });
         }
 
-        return igv.Genome.loadGenome(config)
+        return igv.GenomeUtils.loadGenome(config)
 
             .then(function (genome) {
 
@@ -151,15 +151,15 @@ var igv = (function (igv) {
             .then(function (genome) {
                 if (genomeChange) {
                     return self.search('all');
-                } 
-            })
-            .then(function (genomicStateList) {
-                self.genomicStateList = genomicStateList;
-                if (config.tracks) {
-                    self.loadTrackList(config.tracks);
                 }
             })
+
             .then(function (ignore) {
+
+                if (genomeChange) {
+                    self.loadTrackList(config.tracks);
+                }
+
                 return self.genome;
             })
 
@@ -1609,6 +1609,12 @@ var igv = (function (igv) {
         })
 
     };
+    
+    igv.Browser.prototype.serialize = function () {
+        
+        
+        
+    }
 
     function addMouseHandlers() {
 

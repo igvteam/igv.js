@@ -25,8 +25,77 @@
 
 var igv = (function (igv) {
 
+    var KNOWN_GENOMES;
 
-    igv.Genome = function (id, sequence, ideograms, aliases) {
+    igv.GenomeUtils = {
+        loadGenome: function (reference) {
+
+            var cytobandUrl = reference.cytobandURL,
+                cytobands,
+                aliasURL = reference.aliasURL,
+                chrNames,
+                chromosomes = {},
+                sequence;
+
+            sequence = new igv.FastaSequence(reference);
+
+            return sequence.init()
+
+                .then(function () {
+
+                    chrNames = sequence.chromosomeNames;
+                    chromosomes = sequence.chromosomes;
+
+                })
+                .then(function (ignore) {
+                    if (cytobandUrl) {
+                        return loadCytobands(cytobandUrl, sequence.config);
+                    } else {
+                        return undefined
+                    }
+                })
+                .then(function (c) {
+
+                    cytobands = c;
+
+                    if (aliasURL) {
+                        return loadAliases(aliasURL, sequence.config);
+                    }
+                    else {
+                        return undefined;
+                    }
+                })
+                .then(function (aliases) {
+                    return new Genome(reference.id, sequence, cytobands, aliases);
+                })
+        },
+
+        getKnownGenomes: function () {
+
+            if (KNOWN_GENOMES) {
+                return Promise.resolve(KNOWN_GENOMES)
+            }
+            else {
+                return igv.xhr.loadJson("https://s3.amazonaws.com/igv.org.genomes/genomes.json", {})
+                    .then(function (jsonArray) {
+
+                        var table = {};
+
+                        jsonArray.forEach(function (json) {
+                            table[json.id] = json;
+                        });
+
+                        KNOWN_GENOMES = table;
+
+                        return table;
+                    })
+
+            }
+        }
+    };
+
+
+    Genome = function (id, sequence, ideograms, aliases) {
 
         this.id = id;
         this.sequence = sequence;
@@ -84,66 +153,26 @@ var igv = (function (igv) {
 
     }
 
-    igv.Genome.loadGenome = function (reference) {
+    Genome.prototype.toJSON = function () {
 
-        var cytobandUrl = reference.cytobandURL,
-            cytobands,
-            aliasURL = reference.aliasURL,
-            chrNames,
-            chromosomes = {},
-            sequence;
 
-        sequence = new igv.FastaSequence(reference);
-
-        return sequence.init()
-            
-            .then(function () {
-
-                var order = 0;
-
-                chrNames = sequence.chromosomeNames;
-                chromosomes = sequence.chromosomes;
-
-            })
-            .then(function (ignore) {
-                if (cytobandUrl) {
-                    return loadCytobands(cytobandUrl, sequence.config);
-                } else {
-                    return undefined
-                }
-            })
-            .then(function (c) {
-
-                cytobands = c;
-
-                if (aliasURL) {
-                    return loadAliases(aliasURL, sequence.config);
-                }
-                else {
-                    return undefined;
-                }
-            })
-            .then(function (aliases) {
-                return new igv.Genome(reference.id, sequence, cytobands, aliases);
-            })
     }
 
-
-    igv.Genome.prototype.getChromosomeName = function (str) {
+    Genome.prototype.getChromosomeName = function (str) {
         var chr = this.chrAliasTable[str.toLowerCase()];
         return chr ? chr : str;
     }
 
-    igv.Genome.prototype.getChromosome = function (chr) {
+    Genome.prototype.getChromosome = function (chr) {
         chr = this.getChromosomeName(chr);
         return this.chromosomes[chr];
     }
 
-    igv.Genome.prototype.getCytobands = function (chr) {
+    Genome.prototype.getCytobands = function (chr) {
         return this.ideograms ? this.ideograms[chr] : null;
     }
 
-    igv.Genome.prototype.getLongestChromosome = function () {
+    Genome.prototype.getLongestChromosome = function () {
 
         var longestChr,
             key,
@@ -159,7 +188,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.Genome.prototype.getChromosomes = function () {
+    Genome.prototype.getChromosomes = function () {
         return this.chromosomes;
     }
 
@@ -167,7 +196,7 @@ var igv = (function (igv) {
      * Return the genome coordinate in kb for the give chromosome and position.
      * NOTE: This might return undefined if the chr is filtered from whole genome view.
      */
-    igv.Genome.prototype.getGenomeCoordinate = function (chr, bp) {
+    Genome.prototype.getGenomeCoordinate = function (chr, bp) {
 
         var offset = this.getCumulativeOffset(chr);
         if (offset === undefined) return undefined;
@@ -178,7 +207,7 @@ var igv = (function (igv) {
     /**
      * Return the chromosome and coordinate in bp for the given genome coordinate
      */
-    igv.Genome.prototype.getChromosomeCoordinate = function (genomeCoordinate) {
+    Genome.prototype.getChromosomeCoordinate = function (genomeCoordinate) {
 
         var self = this,
             lastChr,
@@ -212,7 +241,7 @@ var igv = (function (igv) {
      * Return the offset in genome coordinates (kb) of the start of the given chromosome
      * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
      */
-    igv.Genome.prototype.getCumulativeOffset = function (chr) {
+    Genome.prototype.getCumulativeOffset = function (chr) {
 
         var self = this,
             queryChr = this.getChromosomeName(chr);
@@ -238,7 +267,7 @@ var igv = (function (igv) {
     /**
      * Return the genome length in kb
      */
-    igv.Genome.prototype.getGenomeLength = function () {
+    Genome.prototype.getGenomeLength = function () {
         var lastChr, offset;
         lastChr = _.last(this.wgChromosomeNames);
         return this.getCumulativeOffset(lastChr) + this.getChromosome(lastChr).bpLength;
@@ -419,30 +448,6 @@ var igv = (function (igv) {
 
     }
 
-
-    igv.Genome.getKnownGenomes = function () {
-
-        if (igv.Genome.KnownGenomes) {
-            return Promise.resolve(igv.Genome.KnownGenomes)
-        }
-        else {
-            return igv.xhr.loadJson("https://s3.amazonaws.com/igv.org.genomes/genomes.json", {})
-                .then(function (jsonArray) {
-
-                    var table = {};
-
-                    jsonArray.forEach(function (json) {
-                        table[json.id] = json;
-                    });
-
-                    igv.Genome.KnownGenomes = table;
-
-                    return table;
-                })
-
-        }
-
-    }
 
     return igv;
 

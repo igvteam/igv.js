@@ -95,16 +95,20 @@ var igv = (function (igv) {
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
         promise = doPromiseChain(browser, config);
+
         return true === config.promisified ? promise : browser;
 
     };
 
     function doPromiseChain(browser, config) {
 
-        return igv.Genome.getKnownGenomes()
+        var knownGenomes;
+
+        return igv.GenomeUtils.getKnownGenomes()
 
             .then(function (genomeTable) {
                 // Potentially load a session file
+                knownGenomes = genomeTable;
                 return loadSessionFile(config.sessionURL);
             })
 
@@ -121,9 +125,8 @@ var igv = (function (igv) {
                 }
 
                 // Expand genome IDs and deal with legacy genome definition options
-                setReferenceConfiguration(config);
+                return setReferenceConfiguration(config);
 
-                return config;
             })
 
             .then(function (config) {
@@ -133,11 +136,16 @@ var igv = (function (igv) {
                 return browser.createGenomicStateList(getInitialLocus(config, genome));
             })
             .then(function (genomicStateList) {
+                browser.genomicStateList = genomicStateList;
+                if (config.reference.tracks) {
+                    browser.loadTrackList(config.reference.tracks);
+                }
+            })
+            .then(function (ignore) {
 
                 var viewportWidth,
                     errorString;
 
-                browser.genomicStateList = genomicStateList;
 
                 if (browser.genomicStateList.length > 0) {
 
@@ -296,23 +304,33 @@ var igv = (function (igv) {
 
     function setReferenceConfiguration(conf) {
 
+        var genomeID;
+
         if (conf.genome) {
+            genomeID = conf.genome;
             conf.reference = expandGenome(conf.genome);
         }
-        else if (conf.fastaURL) {   // legacy property
-            conf.reference = {
-                fastaURL: conf.fastaURL,
-                cytobandURL: conf.cytobandURL
-            }
-        }
         else if (conf.reference && conf.reference.id !== undefined && conf.reference.fastaURL === undefined) {
+            genomeID = conf.reference.id;
             conf.reference = expandGenome(conf.reference.id);
         }
 
-        if (!(conf.reference && conf.reference.fastaURL)) {
-            //alert("Fatal error:  reference must be defined");
-            igv.presentAlert("Fatal error:  reference must be defined", undefined);
-            throw new Error("Fatal error:  reference must be defined");
+
+        if (genomeID) {
+            return igv.GenomeUtils.getKnownGenomes()
+                .then(function (knownGenomes) {
+                    conf.reference = knownGenomes[genomeID];
+                    if (!conf.reference)igv.presentAlert("Uknown genome id: " + genomeID, undefined);
+                    return conf;
+                })
+        }
+        else {
+            if (!(conf.reference && conf.reference.fastaURL)) {
+                //alert("Fatal error:  reference must be defined");
+                igv.presentAlert("Fatal error:  reference must be defined", undefined);
+                throw new Error("Fatal error:  reference must be defined");
+            }
+            return Promise.resolve(conf);
         }
 
 
@@ -324,11 +342,7 @@ var igv = (function (igv) {
          */
         function expandGenome(genomeId) {
 
-            var reference = igv.Genome.KnownGenomes[genomeId];
 
-            if (!reference)igv.presentAlert("Uknown genome id: " + genomeId, undefined);
-
-            return reference;
         }
 
     }
@@ -633,7 +647,7 @@ var igv = (function (igv) {
                     value = decodeURIComponent(tokens[1]);
 
                     if ('file' === key) {
-
+                        // IGV desktop style file parameter
                         if (!config.tracks) config.tracks = [];
                         value.split(',').forEach(function (t) {
                             config.tracks.push({
