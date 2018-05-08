@@ -93,10 +93,10 @@ var igv = (function (igv) {
         createInputContainer.call(this, this.$container, obj);
 
         // error message container
-        this.$error_message = $("<div>", { id:"igv-flw-error-message-container" });
+        this.$error_message = $("<div>", { class:"igv-flw-error-message-container" });
         this.$container.append(this.$error_message);
         // error message
-        this.$error_message.append($("<div>", { id:"igv-flw-error-message" }));
+        this.$error_message.append($("<div>", { class:"igv-flw-error-message" }));
         // error dismiss button
         igv.attachDialogCloseHandlerWithParent(this.$error_message, function () {
             self.dismissErrorMessage();
@@ -106,7 +106,7 @@ var igv = (function (igv) {
         if (false === config.embed) {
 
             // ok | cancel - container
-            $div = $("<div>", { id:"igv-file-load-widget-ok-cancel" });
+            $div = $("<div>", { class:"igv-file-load-widget-ok-cancel" });
             this.$container.append($div);
 
             // ok
@@ -145,13 +145,13 @@ var igv = (function (igv) {
     };
 
     igv.FileLoadWidget.prototype.presentErrorMessage = function(message) {
-        this.$error_message.find('#igv-flw-error-message').text(message);
+        this.$error_message.find('.igv-flw-error-message').text(message);
         this.$error_message.show();
     };
 
     igv.FileLoadWidget.prototype.dismissErrorMessage = function() {
         this.$error_message.hide();
-        this.$error_message.find('#igv-flw-error-message').text('');
+        this.$error_message.find('.igv-flw-error-message').text('');
     };
 
     function createInputContainer($parent, config) {

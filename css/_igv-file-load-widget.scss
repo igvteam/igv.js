@@ -264,7 +264,7 @@ $igv-flw-border-radius: 2px;
 
   }
 
-  #igv-flw-error-message-container {
+  .igv-flw-error-message-container {
 
     margin-top: 8px;
 
@@ -285,7 +285,7 @@ $igv-flw-border-radius: 2px;
     align-items: center;
 
     // message container
-    div:first-child#igv-flw-error-message {
+    div:first-child.igv-flw-error-message {
       height: 24px;
       width: 600px;
 
@@ -315,7 +315,7 @@ $igv-flw-border-radius: 2px;
   }
 
   // ok | cancel
-  #igv-file-load-widget-ok-cancel {
+  .igv-file-load-widget-ok-cancel {
 
     width: 100%;
     height: $igv-flw-button-height;

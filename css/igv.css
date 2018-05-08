@@ -224,7 +224,7 @@
     .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row-hover-state {
       background-color: #efefef;
       border-color: #7F7F7F; }
-  .igv-file-load-widget-container #igv-flw-error-message-container {
+  .igv-file-load-widget-container .igv-flw-error-message-container {
     margin-top: 8px;
     width: 95%;
     height: 24px;
@@ -237,22 +237,22 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
-    .igv-file-load-widget-container #igv-flw-error-message-container div:first-child#igv-flw-error-message {
+    .igv-file-load-widget-container .igv-flw-error-message-container div:first-child.igv-flw-error-message {
       height: 24px;
       width: 600px;
       font-style: italic;
       line-height: 24px;
       text-align: left; }
-    .igv-file-load-widget-container #igv-flw-error-message-container div:last-child {
+    .igv-file-load-widget-container .igv-flw-error-message-container div:last-child {
       height: 24px;
       width: 16px;
       margin-right: 6px;
       text-align: center;
       line-height: 24px;
       color: #373737; }
-    .igv-file-load-widget-container #igv-flw-error-message-container div:hover {
+    .igv-file-load-widget-container .igv-flw-error-message-container div:hover {
       cursor: pointer; }
-  .igv-file-load-widget-container #igv-file-load-widget-ok-cancel {
+  .igv-file-load-widget-container .igv-file-load-widget-ok-cancel {
     width: 100%;
     height: 28px;
     margin-top: 32px;
@@ -263,7 +263,7 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center; }
-    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div {
+    .igv-file-load-widget-container .igv-file-load-widget-ok-cancel div {
       width: 75px;
       height: 28px;
       line-height: 28px;
@@ -273,15 +273,15 @@
       border-width: thin;
       border-radius: 2px;
       margin-right: 16px; }
-    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child {
+    .igv-file-load-widget-container .igv-file-load-widget-ok-cancel div:first-child {
       background-color: #5ea4e0; }
-    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child:hover {
+    .igv-file-load-widget-container .igv-file-load-widget-ok-cancel div:first-child:hover {
       cursor: pointer;
       background-color: #3b5c7f; }
-    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child {
+    .igv-file-load-widget-container .igv-file-load-widget-ok-cancel div:last-child {
       margin-right: 22px;
       background-color: #c4c4c4; }
-    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child:hover {
+    .igv-file-load-widget-container .igv-file-load-widget-ok-cancel div:last-child:hover {
       cursor: pointer;
       background-color: #7f7f7f; }
 
