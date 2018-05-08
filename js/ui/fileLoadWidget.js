@@ -32,7 +32,8 @@ var igv = (function (igv) {
         var self = this,
             obj,
             $header,
-            $div;
+            $div,
+            classes;
 
         this.config = config;
         this.$parent = config.$widgetParent;
@@ -58,7 +59,8 @@ var igv = (function (igv) {
         }
 
         // file load widget
-        this.$container = $('<div>', { id:'igv-file-load-widget-container', class: config.embed ? 'igv-file-load-widget-container-embed-position' : 'igv-file-load-widget-container-igvjs-position' });
+        classes = 'igv-file-load-widget-container' + ' ' + (config.embed ? 'igv-file-load-widget-container-embed-position' : 'igv-file-load-widget-container-igvjs-position');
+        this.$container = $('<div>', { class: classes });
         this.$parent.append(this.$container);
 
         if (false === config.embed) {

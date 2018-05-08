@@ -94,7 +94,7 @@
   height: calc(0.65 * 400px);
   border-color: transparent; }
 
-#igv-file-load-widget-container {
+.igv-file-load-widget-container {
   width: 720px;
   color: #7F7F7F;
   font-family: "Open Sans", sans-serif;
@@ -108,7 +108,7 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center; }
-  #igv-file-load-widget-container #igv-file-load-widget-header {
+  .igv-file-load-widget-container #igv-file-load-widget-header {
     width: 100%;
     height: 24px;
     background-color: #bfbfbf;
@@ -117,16 +117,16 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center; }
-    #igv-file-load-widget-container #igv-file-load-widget-header div {
+    .igv-file-load-widget-container #igv-file-load-widget-header div {
       height: 24px;
       width: 16px;
       margin-right: 6px;
       text-align: center;
       line-height: 24px;
       color: #373737; }
-    #igv-file-load-widget-container #igv-file-load-widget-header div:hover {
+    .igv-file-load-widget-container #igv-file-load-widget-header div:hover {
       cursor: pointer; }
-  #igv-file-load-widget-container .igv-flw-input-container {
+  .igv-file-load-widget-container .igv-flw-input-container {
     width: 95%;
     margin-top: 24px;
     margin-bottom: 0;
@@ -135,7 +135,7 @@
     flex-wrap: nowrap;
     justify-content: flex-start;
     align-items: center; }
-    #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row {
+    .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row {
       height: 36px;
       width: 100%;
       margin-top: 8px;
@@ -150,7 +150,7 @@
       border-style: solid;
       border-width: thin;
       border-radius: calc(2 * 2px); }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-input-label {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-input-label {
         color: rgba(0, 0, 0, 0.76);
         font-weight: 400;
         margin-left: 8px;
@@ -158,7 +158,7 @@
         height: 36px;
         line-height: 36px;
         text-align: left; }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row input {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row input {
         display: block;
         height: 100%;
         width: 100%;
@@ -173,10 +173,10 @@
         border-width: thin;
         border-color: #7F7F7F;
         background-color: white; }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row input {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row input {
         width: 410px;
         height: calc(36px - 12px); }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container {
         position: relative;
         display: block;
         width: 130px;
@@ -185,21 +185,21 @@
         border-style: solid;
         border-width: thin;
         border-radius: calc(2 * 2px); }
-        #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label {
+        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label {
           position: relative;
           top: 6px;
           left: 16px; }
-        #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label:hover {
+        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label:hover {
           cursor: pointer;
           font-weight: 400; }
-        #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container input.igv-flw-file-chooser-input {
+        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container input.igv-flw-file-chooser-input {
           width: 0.1px;
           height: 0.1px;
           opacity: 0;
           overflow: hidden;
           position: absolute;
           z-index: -1; }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-drag-drop-target {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-drag-drop-target {
         cursor: default;
         margin-left: 8px;
         width: 120px;
@@ -210,7 +210,7 @@
         border-style: dashed;
         border-width: thin;
         border-radius: calc(2 * 2px); }
-      #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-local-file-name-container {
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-local-file-name-container {
         width: 275px;
         height: 36px;
         color: #373737;
@@ -221,10 +221,10 @@
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis; }
-    #igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row-hover-state {
+    .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row-hover-state {
       background-color: #efefef;
       border-color: #7F7F7F; }
-  #igv-file-load-widget-container #igv-flw-error-message-container {
+  .igv-file-load-widget-container #igv-flw-error-message-container {
     margin-top: 8px;
     width: 95%;
     height: 24px;
@@ -237,22 +237,22 @@
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
-    #igv-file-load-widget-container #igv-flw-error-message-container div:first-child#igv-flw-error-message {
+    .igv-file-load-widget-container #igv-flw-error-message-container div:first-child#igv-flw-error-message {
       height: 24px;
       width: 600px;
       font-style: italic;
       line-height: 24px;
       text-align: left; }
-    #igv-file-load-widget-container #igv-flw-error-message-container div:last-child {
+    .igv-file-load-widget-container #igv-flw-error-message-container div:last-child {
       height: 24px;
       width: 16px;
       margin-right: 6px;
       text-align: center;
       line-height: 24px;
       color: #373737; }
-    #igv-file-load-widget-container #igv-flw-error-message-container div:hover {
+    .igv-file-load-widget-container #igv-flw-error-message-container div:hover {
       cursor: pointer; }
-  #igv-file-load-widget-container #igv-file-load-widget-ok-cancel {
+  .igv-file-load-widget-container #igv-file-load-widget-ok-cancel {
     width: 100%;
     height: 28px;
     margin-top: 32px;
@@ -263,7 +263,7 @@
     flex-wrap: nowrap;
     justify-content: flex-end;
     align-items: center; }
-    #igv-file-load-widget-container #igv-file-load-widget-ok-cancel div {
+    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div {
       width: 75px;
       height: 28px;
       line-height: 28px;
@@ -273,15 +273,15 @@
       border-width: thin;
       border-radius: 2px;
       margin-right: 16px; }
-    #igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child {
+    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child {
       background-color: #5ea4e0; }
-    #igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child:hover {
+    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:first-child:hover {
       cursor: pointer;
       background-color: #3b5c7f; }
-    #igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child {
+    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child {
       margin-right: 22px;
       background-color: #c4c4c4; }
-    #igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child:hover {
+    .igv-file-load-widget-container #igv-file-load-widget-ok-cancel div:last-child:hover {
       cursor: pointer;
       background-color: #7f7f7f; }
 
