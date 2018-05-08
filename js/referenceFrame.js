@@ -31,7 +31,7 @@ var igv = (function (igv) {
     igv.ReferenceFrame = function (chrName, start, end, bpPerPixel) {
         this.chrName = chrName;
         this.start = start;
-        this.end = end;
+        this.end = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
         this.bpPerPixel = bpPerPixel;
     };
 
