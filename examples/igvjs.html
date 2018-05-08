@@ -11,7 +11,7 @@
     <title>IGV Examples - Load Session</title>
 
     <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
+    <script type="application/javascript" src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -28,7 +28,6 @@
         var div = document.getElementById("myDiv");
 
         igv.createBrowser(div, {
-            genome: 'hg19',    // Default, can be overriden by query parameter
             queryParametersSupported: true
         });
 

@@ -118,10 +118,9 @@ var igv = (function (igv) {
 
                 if (session) {
                     config = Object.assign(config, session);
-                    if (locus) config.locus = locus;    // Restore
-
-                    if (undefined === config.tracks) config.tracks = [];
-                    config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
+                    if (locus) {
+                        config.locus = locus;  // Restore possible override by session
+                    }
                 }
 
                 // Expand genome IDs and deal with legacy genome definition options
@@ -666,16 +665,23 @@ var igv = (function (igv) {
         return query;
     }
 
-    function loadSessionFile(igvSession, locus) {
+    function loadSessionFile(igvSession) {
 
-        if (igvSession) {
+        if (igvSession && igvSession.startsWith("blob:")) {
+            var json = igv.Browser.uncompressSession(igvSession.substring(5));
+            return JSON.parse(json);
+        }
+        else if (igvSession && igvSession.endsWith(".xml")) {
             return igv.xhr.loadString(igvSession)
                 .then(function (string) {
                     return new igv.XMLSession(string);
                 })
         }
+        else if (igvSession && igvSession.endsWith(".json")) {
+            return igv.xhr.loadJson(igvSession);
+        }
         else {
-            return Promise.resolve(undefined);
+            return Promise.resolve(undefined)
         }
     }
 
