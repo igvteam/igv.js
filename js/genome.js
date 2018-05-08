@@ -28,16 +28,15 @@ var igv = (function (igv) {
     var KNOWN_GENOMES;
 
     igv.GenomeUtils = {
-        loadGenome: function (reference) {
 
-            var cytobandUrl = reference.cytobandURL,
-                cytobands,
-                aliasURL = reference.aliasURL,
-                chrNames,
-                chromosomes = {},
-                sequence;
+        loadGenome: function (config) {
 
-            sequence = new igv.FastaSequence(reference);
+            var cytobandUrl, cytobands, aliasURL, chrNames, chromosomes, sequence;
+
+            cytobandUrl = config.cytobandURL;
+            aliasURL = config.aliasURL;
+            chromosomes = {};
+            sequence = new igv.FastaSequence(config);
 
             return sequence.init()
 
@@ -66,7 +65,7 @@ var igv = (function (igv) {
                     }
                 })
                 .then(function (aliases) {
-                    return new Genome(reference.id, sequence, cytobands, aliases);
+                    return new Genome(config, sequence, cytobands, aliases);
                 })
         },
 
@@ -95,9 +94,10 @@ var igv = (function (igv) {
     };
 
 
-    Genome = function (id, sequence, ideograms, aliases) {
+    Genome = function (config, sequence, ideograms, aliases) {
 
-        this.id = id;
+        this.config = config;
+        this.id = config.id;
         this.sequence = sequence;
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
@@ -152,10 +152,10 @@ var igv = (function (igv) {
         this.chrAliasTable = chrAliasTable;
 
     }
-
+    
     Genome.prototype.toJSON = function () {
 
-
+        return Object.assign({}, this.config, {tracks: undefined});
     }
 
     Genome.prototype.getChromosomeName = function (str) {

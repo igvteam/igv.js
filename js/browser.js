@@ -1609,12 +1609,77 @@ var igv = (function (igv) {
         })
 
     };
-    
-    igv.Browser.prototype.serialize = function () {
-        
-        
-        
+
+    igv.Browser.prototype.toJSON = function () {
+
+        var json = {
+            "reference": this.genome.toJSON()
+        }
+
+        // Use rulerTrack to get current loci.   This is really obtuse and fragile
+        var locus = [];
+        this.rulerTrack.trackView.viewports.forEach(function (viewport) {
+            locus.push(viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width()));
+
+        })
+        json["locus"] = locus;
+
+
+        var trackJson = [];
+        this.trackViews.forEach(function (tv) {
+
+            var track = tv.track;
+
+            if(track.config) {
+                trackJson.push(track.config);
+            }
+        });
+
+        json["tracks"] = trackJson;
+
+        return JSON.stringify(json);
+
     }
+
+    igv.Browser.prototype.compressedSession = function () {
+
+        var json, bytes, deflate, compressedBytes, compressedString, enc;
+
+        json = this.toJSON();
+        bytes = [];
+        for (var i = 0; i < json.length; i++) {
+            bytes.push(json.charCodeAt(i));
+        }
+        compressedBytes = new Zlib.RawDeflate(bytes).compress();            // UInt8Arry
+        compressedString = String.fromCharCode.apply(null, compressedBytes);      // Convert to string
+        enc = btoa(compressedString);
+        enc = enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/\=/g, '-');   // URL safe
+
+        //console.log(json);
+        //console.log(enc);
+        
+        return enc;
+    }
+
+    igv.Browser.uncompressSession = function (enc) {
+
+        var compressedString, compressedBytes, bytes, decompressedString, json, i;
+
+        enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
+
+        compressedString = atob(enc);
+        compressedBytes = [];
+        for (i = 0; i < compressedString.length; i++) {
+            compressedBytes.push(compressedString.charCodeAt(i));
+        }
+        bytes = new Zlib.RawInflate(compressedBytes).decompress();
+        json = String.fromCharCode.apply(null, bytes);
+
+        return json;
+
+
+    }
+
 
     function addMouseHandlers() {
 
