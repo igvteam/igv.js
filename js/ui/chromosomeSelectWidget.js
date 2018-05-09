@@ -48,14 +48,11 @@ var igv = (function (igv) {
 
         list = genome.chromosomeNames.slice();
         list.unshift('all');
-        _.each(list, function (name) {
+        list.forEach(function (name) {
             var $o;
 
             $o = $('<option>', { 'value':name });
             self.$select.append($o);
-
-            // $o.prop('selected', (1 === r));
-
             $o.text(name);
         });
 
