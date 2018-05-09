@@ -121,7 +121,7 @@ var igv = (function (igv) {
         var self = this,
             genomeChange;
 
-        // A bit of a hack -- config can be either an object or json.  This only matters for the boolean indexed property
+        // Backward compatibility hack -- some early genome json definitions used strings for all property values
         if (config.tracks) {
             config.tracks.forEach(function (t) {
                 if (t.indexed && typeof t.indexed === 'string') t.indexed = t.indexed === 'true';
@@ -1631,7 +1631,7 @@ var igv = (function (igv) {
 
             var track = tv.track;
 
-            if(track.config) {
+            if (track.config) {
                 trackJson.push(track.config);
             }
         });
@@ -1658,7 +1658,7 @@ var igv = (function (igv) {
 
         //console.log(json);
         //console.log(enc);
-        
+
         return enc;
     }
 
