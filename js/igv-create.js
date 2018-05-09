@@ -233,7 +233,6 @@ var igv = (function (igv) {
                 }
 
                 if (true === config.promisified) {
-                    console.log('doPromiseChain - return browser');
                     return browser;
                 }
             })
