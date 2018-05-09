@@ -133,12 +133,12 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
-                genomeChange = self.genome && (self.genome.id != config.id);
+                genomeChange = self.genome && (self.genome.id !== config.id);
 
                 self.genome = genome;
                 self.genome.id = config.id;
                 self.chromosomeSelectWidget.update(genome);
-                self.$current_genome.text(genome.id/*'abcde%%fghij'*/);
+                self.$current_genome.text(genome.id);
                 self.$current_genome.attr('title', genome.id);
 
                 if (genomeChange) {
@@ -151,23 +151,24 @@ var igv = (function (igv) {
             .then(function (genome) {
                 if (genomeChange) {
                     return self.search('all');
+                } else {
+                    return undefined;
                 }
             })
-
             .then(function (ignore) {
 
-                if (genomeChange) {
+                if (config.tracks && genomeChange) {
                     self.loadTrackList(config.tracks);
                 }
 
                 return self.genome;
             })
 
-    }
+    };
 
     igv.Browser.prototype.isMultiLocus = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
-    }
+    };
 
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
