@@ -137,9 +137,10 @@ var igv = (function (igv) {
 
                 self.genome = genome;
                 self.genome.id = config.id;
+
+                self.$current_genome.text(genome.id || '');
+                self.$current_genome.attr('title', genome.id || '');
                 self.chromosomeSelectWidget.update(genome);
-                self.$current_genome.text(genome.id);
-                self.$current_genome.attr('title', genome.id);
 
                 if (genomeChange) {
                     self.removeAllTracks();
