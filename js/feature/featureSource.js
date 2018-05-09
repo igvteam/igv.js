@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
+    var queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
+
     /**
      * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
      *
@@ -46,23 +48,29 @@ var igv = (function (igv) {
         } else if (config.type === "eqtl") {
             if (config.sourceType === "gtex-ws") {
                 this.reader = new igv.GtexReader(config);
+                this.queryable = true;
             }
             else {
                 this.reader = new igv.GtexFileReader(config);
             }
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
+            this.queryable = true;
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new igv.UCSCServiceReader(config.source);
+            this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new igv.CustomServiceReader(config.source);
+            this.queryable = true;
         }
         else {
             // Default for all sorts of ascii tab-delimited file formts
             this.reader = new igv.FeatureFileReader(config);
         }
         this.visibilityWindow = config.visibilityWindow;
-
+        
+        this.queryable = this.queryable || queryableFormats.has(config.format);
+        
     };
 
     igv.FeatureSource.prototype.getFileHeader = function () {
@@ -190,7 +198,7 @@ var igv = (function (igv) {
                             // Assign overlapping features to rows
                             packFeatures(featureList, maxRows);
 
-                            var isQueryable = self.reader.indexed || self.config.sourceType !== "file";
+                            var isQueryable = self.queryable || self.reader.indexed;
                             self.featureCache = isQueryable ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
