@@ -304,7 +304,7 @@ var igv = (function (igv) {
                     fileReader.readAsArrayBuffer(localfile);
                 }
                 else {
-                    fileReader.readAsBinaryString(blob);
+                    fileReader.readAsBinaryString(localfile);
                 }
             }
 

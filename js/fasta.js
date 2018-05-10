@@ -31,7 +31,7 @@ var igv = (function (igv) {
 
     igv.FastaSequence = function (reference) {
 
-        if (reference.fastaURL.startsWith('data:')) {
+        if (typeof reference.fastaURL === 'string' && reference.fastaURL.startsWith('data:')) {
             this.file = decodeDataUri(reference.fastaURL);
             this.indexed = false;  // dataURI is by definition not indexed
             this.isDataURI = true;
