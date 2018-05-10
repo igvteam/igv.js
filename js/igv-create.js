@@ -94,13 +94,14 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        promise = browser.loadSession(config.sessionURL, config);
+        promise = doPromiseChain(browser,config);
 
         if (config.promisified) {
 
             return promise;
+
         } else {
-            
+
             promise
                 .then(function (browser) {
                     console.log("igv browser ready");
@@ -116,6 +117,49 @@ var igv = (function (igv) {
 
     function doPromiseChain(browser, config) {
 
+        return browser.loadSession(config.sessionURL, config)
+
+            .then(function (ignore) {
+
+                if (false === config.showTrackLabels) {
+                    browser.hideTrackLabels();
+                } else {
+                    browser.showTrackLabels();
+                    if (browser.trackLabelControl) {
+                        browser.trackLabelControl.setState(self.trackLabelsVisible);
+                    }
+
+                }
+
+                if (false === config.showCursorTrackingGuide) {
+                    browser.hideCursorGuide();
+                } else {
+                    browser.showCursorGuide();
+                    browser.cursorGuide.setState(self.cursorGuideVisible);
+                }
+
+                if (false === config.showCenterGuide) {
+                    browser.hideCenterGuide();
+                } else {
+                    browser.showCenterGuide();
+                    browser.centerGuide.setState(self.centerGuideVisible);
+                }
+
+                // multi-locus mode
+                if (browser.genomicStateList.length > 1) {
+
+                    // TODO: This is temporary until implement multi-locus center guides
+                    browser.centerGuide.disable();
+
+                }
+                // whole-genome
+                else if ('all' === browser.genomicStateList[0].locusSearchString) {
+                    browser.centerGuide.disable();
+                    browser.disableZoomWidget();
+                }
+
+                return browser;
+            })
 
     }
 
