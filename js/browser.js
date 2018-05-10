@@ -173,6 +173,8 @@ var igv = (function (igv) {
 
         if (!config) config = {};
 
+        self.removeAllTracks();
+
         return igv.GenomeUtils.getKnownGenomes()
 
             .then(function (genomeTable) {
@@ -206,22 +208,16 @@ var igv = (function (igv) {
             .then(function (genome) {
                 return self.createGenomicStateList(getInitialLocus(config, genome));
             })
+
             .then(function (genomicStateList) {
+
+                var errorString;
+
                 self.genomicStateList = genomicStateList;
-                if (config.reference.tracks) {
-                    self.loadTrackList(config.reference.tracks);
-                }
-            })
-            .then(function (ignore) {
-
-                var viewportWidth,
-                    errorString;
-
 
                 if (self.genomicStateList.length > 0) {
 
-
-                    if (config.showRuler) {
+                    if (!self.rulerTrack && config.showRuler) {
                         self.rulerTrack = new igv.RulerTrack();
                         self.addTrack(self.rulerTrack);
                     }
@@ -233,10 +229,6 @@ var igv = (function (igv) {
                         });
                     }
 
-                    if (config.tracks) {
-                        self.loadTrackList(config.tracks);
-                    }
-
                     return self.genomicStateList;
 
                 } else {
@@ -246,59 +238,35 @@ var igv = (function (igv) {
 
             })
 
-            .then(function (genomicStateList) {
+            .then(function (ignore) {
+
+                var trackConfigs = [];
+                if(config.reference.tracks) {
+                    trackConfigs = trackConfigs.concat(config.reference.tracks);
+                }
+                if(config.tracks) {
+                    trackConfigs = trackConfigs.concat(config.tracks);
+                }
+                return self.loadTrackList(trackConfigs);
+
+            })
+
+            .then(function (ignore) {
+
                 var panelWidth;
 
                 if (true === config.showIdeogram) {
-                    panelWidth = self.viewportContainerWidth() / genomicStateList.length;
+                    panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
                     self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth);
                     self.ideoPanel.repaint();
                 }
 
-                self.updateLocusSearchWidget(genomicStateList[0]);
+                self.updateLocusSearchWidget(self.genomicStateList[0]);
 
-                self.windowSizePanel.updateWithGenomicState(genomicStateList[0]);
+                self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
 
-                if (false === config.showTrackLabels) {
-                    self.hideTrackLabels();
-                } else {
-                    self.showTrackLabels();
-                    if (self.trackLabelControl) {
-                        self.trackLabelControl.setState(self.trackLabelsVisible);
-                    }
+                self.updateViews();
 
-                }
-
-                if (false === config.showCursorTrackingGuide) {
-                    self.hideCursorGuide();
-                } else {
-                    self.showCursorGuide();
-                    self.cursorGuide.setState(self.cursorGuideVisible);
-                }
-
-                if (false === config.showCenterGuide) {
-                    self.hideCenterGuide();
-                } else {
-                    self.showCenterGuide();
-                    self.centerGuide.setState(self.centerGuideVisible);
-                }
-
-                // multi-locus mode
-                if (genomicStateList.length > 1) {
-
-                    // TODO: This is temporary until implement multi-locus center guides
-                    self.centerGuide.disable();
-
-                }
-                // whole-genome
-                else if ('all' === genomicStateList[0].locusSearchString) {
-                    self.centerGuide.disable();
-                    self.disableZoomWidget();
-                }
-
-                if (true === config.promisified) {
-                    return self;
-                }
             })
 
             .catch(function (error) {
