@@ -38,7 +38,7 @@ var igv = (function (igv) {
         if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
-             return load.call(this, url, options);
+            return load.call(this, url, options);
         }
 
     };
@@ -243,19 +243,18 @@ var igv = (function (igv) {
 
         if (method == "POST") options.contentType = "application/json";
 
-        return new Promise(function (fullfill, reject) {
+        return igv.xhr.load(url, options)
 
-            load.call(this, url, options)
-                .then(function (result) {
-                    if (result) {
-                        fullfill(JSON.parse(result));
-                    }
-                    else {
-                        fullfill(result);
-                    }
-                })
-                .catch(reject);
-        })
+            .then(function (result) {
+
+                if (result) {
+                    return JSON.parse(result);
+                }
+                else {
+                    return result;
+                }
+            })
+
     };
 
     igv.xhr.loadString = function (path, options) {
@@ -294,13 +293,13 @@ var igv = (function (igv) {
             if (options.range) {
                 rangeEnd = options.range.start + options.range.size - 1;
                 blob = localfile.slice(options.range.start, rangeEnd + 1);
-                if("arraybuffer" === options.responseType) {
+                if ("arraybuffer" === options.responseType) {
                     fileReader.readAsArrayBuffer(blob);
                 } else {
                     fileReader.readAsBinaryString(blob);
                 }
             } else {
-                if("arraybuffer" === options.responseType) {
+                if ("arraybuffer" === options.responseType) {
                     fileReader.readAsArrayBuffer(localfile);
                 }
                 else {
