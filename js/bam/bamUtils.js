@@ -408,7 +408,12 @@ var igv = (function (igv) {
 
         setReaderDefaults: function (reader, config) {
 
-            reader.filter = config.filter || new igv.BamFilter();
+            reader.filter =  new igv.BamFilter(config.filter);
+
+            if(config.readgroup) {
+                reader.filter.readgroups =  new Set([config.readgroup]);
+            }
+
 
             reader.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
             reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
