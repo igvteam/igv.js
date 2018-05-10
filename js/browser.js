@@ -167,6 +167,222 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.loadSession = function (sessionURL, config) {
+
+        var self = this;
+
+        if (!config) config = {};
+
+        return igv.GenomeUtils.getKnownGenomes()
+
+            .then(function (genomeTable) {
+
+                if (sessionURL) {
+                    return loadSessionFile(sessionURL);
+                } else {
+                    return undefined;
+                }
+            })
+
+            .then(function (session) {
+
+                var locus = config.locus;
+
+                if (session) {
+                    config = Object.assign(config, session);
+                    if (locus) {
+                        config.locus = locus;  // Restore possible override by session
+                    }
+                }
+
+                // Expand genome IDs and deal with legacy genome definition options
+                return expandReference(config);
+
+            })
+
+            .then(function (config) {
+                return self.loadGenome(config.reference)
+            })
+            .then(function (genome) {
+                return self.createGenomicStateList(getInitialLocus(config, genome));
+            })
+            .then(function (genomicStateList) {
+                self.genomicStateList = genomicStateList;
+                if (config.reference.tracks) {
+                    self.loadTrackList(config.reference.tracks);
+                }
+            })
+            .then(function (ignore) {
+
+                var viewportWidth,
+                    errorString;
+
+
+                if (self.genomicStateList.length > 0) {
+
+
+                    if (config.showRuler) {
+                        self.rulerTrack = new igv.RulerTrack();
+                        self.addTrack(self.rulerTrack);
+                    }
+
+                    if (config.roi) {
+                        self.roi = [];
+                        config.roi.forEach(function (r) {
+                            self.roi.push(new igv.ROI(r));
+                        });
+                    }
+
+                    if (config.tracks) {
+                        self.loadTrackList(config.tracks);
+                    }
+
+                    return self.genomicStateList;
+
+                } else {
+                    errorString = 'Unrecognized locus ' + config.locus;
+                    igv.presentAlert(errorString, undefined);
+                }
+
+            })
+
+            .then(function (genomicStateList) {
+                var panelWidth;
+
+                if (true === config.showIdeogram) {
+                    panelWidth = self.viewportContainerWidth() / genomicStateList.length;
+                    self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth);
+                    self.ideoPanel.repaint();
+                }
+
+                self.updateLocusSearchWidget(genomicStateList[0]);
+
+                self.windowSizePanel.updateWithGenomicState(genomicStateList[0]);
+
+                if (false === config.showTrackLabels) {
+                    self.hideTrackLabels();
+                } else {
+                    self.showTrackLabels();
+                    if (self.trackLabelControl) {
+                        self.trackLabelControl.setState(self.trackLabelsVisible);
+                    }
+
+                }
+
+                if (false === config.showCursorTrackingGuide) {
+                    self.hideCursorGuide();
+                } else {
+                    self.showCursorGuide();
+                    self.cursorGuide.setState(self.cursorGuideVisible);
+                }
+
+                if (false === config.showCenterGuide) {
+                    self.hideCenterGuide();
+                } else {
+                    self.showCenterGuide();
+                    self.centerGuide.setState(self.centerGuideVisible);
+                }
+
+                // multi-locus mode
+                if (genomicStateList.length > 1) {
+
+                    // TODO: This is temporary until implement multi-locus center guides
+                    self.centerGuide.disable();
+
+                }
+                // whole-genome
+                else if ('all' === genomicStateList[0].locusSearchString) {
+                    self.centerGuide.disable();
+                    self.disableZoomWidget();
+                }
+
+                if (true === config.promisified) {
+                    return self;
+                }
+            })
+
+            .catch(function (error) {
+                igv.presentAlert(error, undefined);
+                console.log(error);
+            });
+
+
+        function getInitialLocus(config, genome) {
+
+            var loci = [];
+
+            if (config.locus) {
+                if (Array.isArray(config.locus)) {
+                    loci = config.locus;
+
+                } else {
+                    loci.push(config.locus);
+                }
+            }
+            else {
+                if (genome.chromosomes.hasOwnProperty("all")) {
+                    loci.push("all");
+                }
+                else {
+                    loci.push(genome.chromosomeNames[0]);
+                }
+            }
+
+            return loci;
+        }
+
+
+        function loadSessionFile(urlOrFile) {
+
+            var filename;
+
+            filename = (typeof urlOrFile === 'string' ? urlOrFile : urlOrFile.name);
+
+            if (filename.startsWith("blob:")) {
+                var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
+                return JSON.parse(json);
+            }
+            else if (filename.endsWith(".xml")) {
+                return igv.xhr.loadString(urlOrFile)
+                    .then(function (string) {
+                        return new igv.XMLSession(string);
+                    })
+            }
+            else if (filename.endsWith(".json")) {
+                return igv.xhr.loadJson(urlOrFile);
+            } else {
+                return Promise.resolve(undefined);
+            }
+
+        }
+
+
+        function expandReference(conf) {
+
+            var genomeID;
+
+            if (conf.genome) {
+                genomeID = conf.genome;
+            }
+            else if (conf.reference && conf.reference.id !== undefined && conf.reference.fastaURL === undefined) {
+                genomeID = conf.reference.id;
+            }
+
+            if (genomeID) {
+                return igv.GenomeUtils.getKnownGenomes()
+                    .then(function (knownGenomes) {
+                        conf.reference = knownGenomes[genomeID];
+                        if (!conf.reference)igv.presentAlert("Uknown genome id: " + genomeID, undefined);
+                        return conf;
+                    })
+            }
+            else {
+                return Promise.resolve(conf);
+            }
+
+        }
+    }
+
     igv.Browser.prototype.isMultiLocus = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
     };
