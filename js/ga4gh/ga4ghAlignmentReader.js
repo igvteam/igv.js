@@ -59,7 +59,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.filter = config.filter || new igv.BamFilter();
+        this.filter = new igv.BamFilter(config.filter);
         this.readGroupSetIds = config.readGroupSetIds;
         this.authKey = config.authKey;   // Might be undefined or nill
 
