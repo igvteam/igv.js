@@ -560,27 +560,6 @@ var igv = (function (igv) {
         return query;
     }
 
-    function loadSessionFile(igvSession) {
-
-        if (igvSession && igvSession.startsWith("blob:")) {
-            var json = igv.Browser.uncompressSession(igvSession.substring(5));
-            return JSON.parse(json);
-        }
-        else if (igvSession && igvSession.endsWith(".xml")) {
-            return igv.xhr.loadString(igvSession)
-                .then(function (string) {
-                    return new igv.XMLSession(string);
-                })
-        }
-        else if (igvSession && igvSession.endsWith(".json")) {
-            return igv.xhr.loadJson(igvSession);
-        }
-        else {
-            return Promise.resolve(undefined)
-        }
-    }
-
-
     function logo() {
 
         return $(
