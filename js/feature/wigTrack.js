@@ -68,7 +68,16 @@ var igv = (function (igv) {
     };
 
     igv.WIGTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-        return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+
+        var self = this;
+
+        return this.getFileHeader()
+
+            .then(function (header) {
+
+                return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+
+            });
     };
 
     igv.WIGTrack.prototype.menuItemList = function () {
@@ -105,21 +114,28 @@ var igv = (function (igv) {
 
         if (typeof self.featureSource.getFileHeader === "function") {
 
-            return self.featureSource.getFileHeader()
-                .then(function (header) {
+            if (self.header) {
+                return Promise.resolve(self.header);
+            }
+            else {
+                return self.featureSource.getFileHeader()
+                    .then(function (header) {
 
-                    if (header) {
-                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                        if (header.name && !self.config.name) {
-                            self.name = header.name;
+                        if (header) {
+                            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                            if (header.name && !self.config.name) {
+                                self.name = header.name;
+                            }
+                            if (header.color && !self.config.color) {
+                                self.color = "rgb(" + header.color + ")";
+                            }
                         }
-                        if (header.color && !self.config.color) {
-                            self.color = "rgb(" + header.color + ")";
-                        }
-                    }
-                    return header;
-
-                })
+                        self.header = header;
+                        
+                        return header;
+                        
+                    })
+            }
         }
         else {
             return Promise.resolve(null);

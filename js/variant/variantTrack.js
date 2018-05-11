@@ -69,36 +69,43 @@ var igv = (function (igv) {
 
 
     igv.VariantTrack.prototype.getFileHeader = function () {
+
         var self = this;
 
         if (typeof self.featureSource.getFileHeader === "function") {
 
-            return self.featureSource.getFileHeader()
+            if (self.header) {
+                return Promise.resolve(self.header);
+            }
+            else {
+                return self.featureSource.getFileHeader()
 
-                .then(function (header) {
+                    .then(function (header) {
 
-                    if (header) {
+                        if (header) {
 
-                        // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                        if (header.name && !self.config.name) {
-                            self.name = header.name;
+                            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                            if (header.name && !self.config.name) {
+                                self.name = header.name;
+                            }
+                            if (header.color && !self.config.color) {
+                                self.color = "rgb(" + header.color + ")";
+                            }
+
+                            self.callSets = {};
+                            self.callSetGroups = ['None'];
+                            self.callSets.None = header.callSets;
+
+                            // header.features => file is not index, all features loaded
+                            if (!header.features && 'compute' === self.visibilityWindow) {
+                                computeVisibilityWindow.call(self);
+                            }
                         }
-                        if (header.color && !self.config.color) {
-                            self.color = "rgb(" + header.color + ")";
-                        }
+                        self.header = header;
+                        return header;
 
-                        self.callSets = {};
-                        self.callSetGroups = ['None'];
-                        self.callSets.None = header.callSets;
-
-                        // header.features => file is not index, all features loaded
-                        if (!header.features && 'compute' === self.visibilityWindow) {
-                            computeVisibilityWindow.call(self);
-                        }
-                    }
-                    return header;
-
-                })
+                    })
+            }
         }
         else {
             return Promise.resolve(null);
@@ -137,7 +144,13 @@ var igv = (function (igv) {
     }
 
     igv.VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        return this.featureSource.getFeatures(chr, bpStart, bpEnd);
+
+        var self = this;
+        
+        return this.getFileHeader()
+            .then(function (header) {
+                return self.featureSource.getFeatures(chr, bpStart, bpEnd);
+            });
     }
 
 
@@ -156,7 +169,7 @@ var igv = (function (igv) {
             vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
             groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
             groupsLength = Object.keys(callSets).length,
-            groupSpace = (groupsLength-1) * groupGap,
+            groupSpace = (groupsLength - 1) * groupGap,
             nRows,
             h;
 
@@ -621,7 +634,7 @@ var igv = (function (igv) {
             featureList.forEach(function (variant) {
 
 
-                if ((variant.start <= genomicLocation + tolerance) &&  (variant.end > genomicLocation - tolerance)) {
+                if ((variant.start <= genomicLocation + tolerance) && (variant.end > genomicLocation - tolerance)) {
 
                     if ('str' === variant.type) {
 
@@ -737,7 +750,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.VariantTrack.prototype.filterByFamily = function(value) {
+    igv.VariantTrack.prototype.filterByFamily = function (value) {
         var self = this;
         if ("" === value) {
             self.filters = [];
@@ -748,9 +761,9 @@ var igv = (function (igv) {
                 self.filterBy = "familyId";
                 self.filteredCallSets = {};
                 self.filteredCallSetGroups = [];
-                Object.keys(this.callSets).forEach(function(groupName) {
+                Object.keys(this.callSets).forEach(function (groupName) {
                     var group = self.callSets[groupName];
-                    group.forEach(function(callSet) {
+                    group.forEach(function (callSet) {
                         var attrs = igv.sampleInformation.getAttributes(callSet.name);
                         var attribute = attrs[self.filterBy];
                         if (self.filters.indexOf(attribute) !== -1) {
@@ -806,7 +819,7 @@ var igv = (function (igv) {
             attributes.forEach(function (attribute) {
                 // var label = attribute.replace(/([A-Z])/g, " $1");
                 var label = attribute.charAt(0).toUpperCase() + attribute.slice(1);
-                menuItems.push( {
+                menuItems.push({
                     object: igv.createCheckbox(label, attribute === self.groupBy),
                     click: function () {
                         self.groupCallSets(attribute);
