@@ -287,7 +287,7 @@ var igv = (function (igv) {
 
             if (filename.startsWith("blob:")) {
                 var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
-                return JSON.parse(json);
+                return Promise.resolve(JSON.parse(json));
             }
             else if (filename.endsWith(".xml")) {
                 return igv.xhr.loadString(urlOrFile)
