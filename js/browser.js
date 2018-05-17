@@ -347,9 +347,9 @@ var igv = (function (igv) {
             else if (conf.genome) {
                 genomeID = conf.genome;
             }
-            else if (conf.reference && conf.reference.id !== undefined && conf.reference.fastaURL === undefined) {
+            else if (conf.id !== undefined && conf.fastaURL === undefined) {
                 // Backward compatibility
-                genomeID = conf.reference.id;
+                genomeID = conf.id;
             }
 
             if (genomeID) {
