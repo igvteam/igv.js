@@ -130,6 +130,8 @@ CanvasRenderingContext2D.prototype.eqTriangle = function (side, cx, cy) {
 }
 
 
+// String polyfill
+
 if (typeof String.prototype.startsWith === "undefined") {
     String.prototype.startsWith = function (aString) {
         if (this.length < aString.length) {
@@ -161,7 +163,7 @@ if (typeof String.prototype.includes === "undefined") {
 
 if (typeof String.prototype.splitLines === "undefined") {
     Object.defineProperty(String.prototype, 'splitLines', {value: function() {
-        return this.split(/\r\n|\n|\r/gm);
+        return this.split(/\n|\r\n|\r/g);
     }, enumerable: false, configurable: false})
 }
 

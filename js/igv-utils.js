@@ -257,6 +257,13 @@ var igv = (function (igv) {
         }
     };
 
+    igv.splitLines  = function (string) {
+
+        var result = string.split(/\n|\r\n|\r/g);
+        return result;
+    }
+
+
     igv.domElementRectAsString = function (element) {
         return " x " + element.clientLeft + " y " + element.clientTop + " w " + element.clientWidth + " h " + element.clientHeight;
     };
