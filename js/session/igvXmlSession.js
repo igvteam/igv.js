@@ -30,13 +30,13 @@
  */
 
 var igv = (function (igv) {
-/*
-    var stringAttributes = ["name"],
-        colorAttributes = ["color", "altColor"],
-        intAttributes = ["height", "featureVisibilityWindow"],
-        booleanAttributes = ["autoScale"];*/
+    /*
+     var stringAttributes = ["name"],
+     colorAttributes = ["color", "altColor"],
+     intAttributes = ["height", "featureVisibilityWindow"],
+     booleanAttributes = ["autoScale"];*/
 
-    igv.XMLSession = function (xmlString) {
+    igv.XMLSession = function (xmlString, knownGenomes) {
 
         var self = this, parser, xmlDoc, elements;
 
@@ -146,7 +146,7 @@ var igv = (function (igv) {
                 config.visibilityWindow = visWindow;
             }
             indexed = track.getAttribute("indexed");
-            if(indexed) {
+            if (indexed) {
                 config.indexed = (indexed === "true");
             }
 
@@ -174,21 +174,21 @@ var igv = (function (igv) {
             locus = session.getAttribute("locus");
             ucscID = session.getAttribute("ucscID");
 
-            if (igv.Genome.KnownGenomes.hasOwnProperty(genome)) {
-                self.reference = {
-                    id: genome
-                }
+            if (knownGenomes.hasOwnProperty(genome)) {
+                self.genome = genome;
+
             } else {
                 self.reference = {
                     fastaURL: genome
+                }
+                if (ucscID) {
+                    self.reference.id = ucscID;
                 }
             }
             if (locus) {
                 self.locus = locus;
             }
-            if(ucscID) {
-                self.reference.id = ucscID;
-            }
+
         }
 
 
