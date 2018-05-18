@@ -283,6 +283,7 @@
         <div onclick="igv.browser.loadTrack({
             type: 'bed',
             url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
+            indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
             name: 'dbSNP 137',
             visibilityWindow: 200000
         })">dbSNP 137 (bed tabix)
@@ -360,7 +361,10 @@
             // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
             locus: 'myc',
-            genome : "hg19",
+           // genome : "hg19",
+            reference: {
+                id: "hg19"
+            },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
 
