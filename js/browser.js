@@ -116,34 +116,39 @@ var igv = (function (igv) {
         return igv.Browser.knownFileExtensions.has(extension);
     };
 
-
-    igv.Browser.loadSessionFile = function (urlOrFile) {
-
-        var filename;
-
-        if (!urlOrFile) {
-            return Promise.resolve(undefined);
-        }
-
-        filename = (typeof urlOrFile === 'string' ? urlOrFile : urlOrFile.name);
-
-        if (filename.startsWith("blob:")) {
-            var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
-            return JSON.parse(json);
-        }
-        else if (filename.endsWith(".xml")) {
-            return igv.xhr.loadString(urlOrFile)
-                .then(function (string) {
-                    return new igv.XMLSession(string);
-                })
-        }
-        else if (filename.endsWith(".json")) {
-            return igv.xhr.loadJson(urlOrFile);
-        } else {
-            return Promise.resolve(undefined);
-        }
-
-    }
+    //
+    //  igv.Browser.loadSessionFile = function (urlOrFile) {
+    //
+    //     var filename, knownGenomes;
+    //
+    //     if (!urlOrFile) {
+    //         return Promise.resolve(undefined);
+    //     }
+    //
+    //     filename = (typeof urlOrFile === 'string' ? urlOrFile : urlOrFile.name);
+    //
+    //     if (filename.startsWith("blob:")) {
+    //         var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
+    //         return JSON.parse(json);
+    //     }
+    //     else if (filename.endsWith(".xml")) {
+    //         return igv.GenomeUtils.getKnownGenomes()
+    //             .then(function (g) {
+    //                 knownGenomes = g;
+    //                 return igv.xhr.loadString(urlOrFile)
+    //             })
+    //
+    //             .then(function (string) {
+    //                 return new igv.XMLSession(string, knownGenomes);
+    //             })
+    //     }
+    //     else if (filename.endsWith(".json")) {
+    //         return igv.xhr.loadJson(urlOrFile);
+    //     } else {
+    //         return Promise.resolve(undefined);
+    //     }
+    //
+    // }
 
     /**
      * Load a session
@@ -241,9 +246,10 @@ var igv = (function (igv) {
 
                 self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
 
-
             })
-
+            .then(function (ignore) {
+                self.updateViews();
+            })
             .catch(function (error) {
                 igv.presentAlert(error, undefined);
                 console.log(error);
@@ -277,7 +283,7 @@ var igv = (function (igv) {
 
         function loadSessionFile(urlOrFile) {
 
-            var filename;
+            var filename, knownGenomes;
 
             if (!urlOrFile) {
                 return Promise.resolve(undefined);
@@ -290,9 +296,13 @@ var igv = (function (igv) {
                 return Promise.resolve(JSON.parse(json));
             }
             else if (filename.endsWith(".xml")) {
-                return igv.xhr.loadString(urlOrFile)
+                return igv.GenomeUtils.getKnownGenomes()
+                    .then(function (g) {
+                        knownGenomes = g;
+                        return igv.xhr.loadString(urlOrFile)
+                    })
                     .then(function (string) {
-                        return new igv.XMLSession(string);
+                        return new igv.XMLSession(string, knownGenomes);
                     })
             }
             else if (filename.endsWith(".json")) {
