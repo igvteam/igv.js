@@ -316,24 +316,24 @@ var igv = (function (igv) {
         return new Promise(function (fullfill, reject) {
 
             var fileReader = new FileReader();
+            var compression;
+
+            if (options.bgz) {
+                compression = BGZF;
+            } else if (localfile.name.endsWith(".gz")) {
+                compression = GZIP;
+            } else {
+                compression = NONE;
+            }
 
             fileReader.onload = function (e) {
 
-                var compression,
-                    result;
-
-                if (options.bgz) {
-                    compression = BGZF;
-                } else if (localfile.name.endsWith(".gz")) {
-                    compression = GZIP;
-                } else {
-                    compression = NONE;
-                }
-
-                result = arrayBufferToString(fileReader.result, compression);
-
-                fullfill(result);
-
+               if(compression === NONE) {
+                   return fullfill(fileReader.result);
+               }
+                else {
+                   return fullfill(arrayBufferToString(fileReader.result, compression));
+               }
             };
 
             fileReader.onerror = function (e) {
@@ -341,7 +341,12 @@ var igv = (function (igv) {
                 reject(null, fileReader);
             };
 
-            fileReader.readAsArrayBuffer(localfile);
+            if(compression === NONE) {
+                fileReader.readAsText(localfile);
+            }
+            else {
+                fileReader.readAsArrayBuffer(localfile);
+            }
 
         });
 
@@ -452,11 +457,8 @@ var igv = (function (igv) {
             plain = new Uint8Array(arraybuffer);
         }
 
-        var result = "";
-        for (var i = 0, len = plain.length; i < len; i++) {
-            result = result + String.fromCharCode(plain[i]);
-        }
-        return result;
+        return new TextDecoder().decode(plain);
+        
     };
 
     /**
