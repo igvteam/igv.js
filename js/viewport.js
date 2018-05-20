@@ -3,7 +3,7 @@
  */
 var igv = (function (igv) {
 
-    var NOT_LOADED_MESSAGE = 'Error loading track data'
+    var NOT_LOADED_MESSAGE = 'Error loading track data';
 
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
@@ -87,8 +87,12 @@ var igv = (function (igv) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
-            this.$trackLabel.attr('title', trackView.track.name);
-            this.$trackLabel.text(trackView.track.name);
+
+            igv.setTrackLabel(this.$trackLabel, trackView.track, trackView.track.name);
+
+            if (false === igv.browser.trackLabelsVisible) {
+                this.$trackLabel.hide();
+            }
 
             this.$trackLabel.click(function (e) {
                 var str;
@@ -116,9 +120,6 @@ var igv = (function (igv) {
                 e.stopPropagation();
             });
 
-            if (false === igv.browser.trackLabelsVisible) {
-                this.$trackLabel.hide();
-            }
 
         }
 
@@ -413,8 +414,9 @@ var igv = (function (igv) {
         exportCanvas.height = imageData.height;
         exportCtx.putImageData(imageData, 0, 0);
 
-        filename = this.trackView.track.name + ".png";
-        data = exportCanvas.toDataURL("image/png")
+        // filename = this.trackView.track.name + ".png";
+        filename = this.$trackLabel.text() + ".png";
+        data = exportCanvas.toDataURL("image/png");
         a = document.createElement('a');
         a.href = data;
         a.download = filename || "image.png";
