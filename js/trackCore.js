@@ -258,7 +258,7 @@ var igv = (function (igv) {
 
         track.order = config.order;
         track.color = config.color || igv.browser.constants.defaultColor || "rgb(0,0,150)";
-        
+
         track.autoscaleGroup = config.autoscaleGroup;
 
         track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
@@ -281,19 +281,27 @@ var igv = (function (igv) {
 
     };
 
-    igv.setTrackLabel = function (track, label) {
+    igv.setTrackLabel = function ($label, track, label) {
 
-        var vp;
+        var vp,
+            txt;
 
         track.name = label;
+
+        $label.empty();
+        $label.html(track.name);
+        txt = $label.text();
+        $label.attr('title', txt);
+    };
+
+    igv.getTrackLabelText = function (track) {
+        var vp,
+            txt;
+
         vp = track.trackView.viewports[ 0 ];
-        vp.$trackLabel.attr('title', track.name);
-        vp.$trackLabel.html(track.name);
+        txt = vp.$trackLabel.text();
 
-       // if (track.trackView) {
-       //     track.trackView.repaint();
-       // }
-
+        return txt;
     };
 
     igv.inferIndexPath = function (url, extension) {
@@ -503,7 +511,7 @@ var igv = (function (igv) {
         $e.text(menuItemLabel);
 
         clickHandler = function () {
-          
+
             igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
             igv.inputDialog.show( $(trackView.trackDiv) );
 
@@ -580,10 +588,10 @@ var igv = (function (igv) {
 
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
-                igv.setTrackLabel(trackView.track, value);
+                igv.setTrackLabel(trackView.viewports[ 0 ].$trackLabel, trackView.track, value);
             };
 
-            igv.inputDialog.configure({ label:'Track Name', input:(trackView.track.name || 'unnamed'), click:dialogClickHandler });
+            igv.inputDialog.configure({ label:'Track Name', input:(igv.getTrackLabelText(trackView.track) || 'unnamed'), click:dialogClickHandler });
             igv.inputDialog.present( $(trackView.trackDiv) );
 
         };
