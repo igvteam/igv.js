@@ -179,16 +179,15 @@
     }
 
     $(document).ready(function () {
-        var div,
-                options;
+        var options;
 
-        div = $("#myDiv")[0];
         options = {
-            genome: "hg19",
-
+            showRuler: true,
+            showChromosomeWidget: true,
+            genome: "hg19"
         };
 
-        igv.createBrowser(div, options);
+        igv.createBrowser($('#myDiv').get(0), options);
 
     })
 
