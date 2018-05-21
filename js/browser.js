@@ -1374,7 +1374,7 @@ var igv = (function (igv) {
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
-                //self.updateViews();
+                self.updateViews();
 
                 return genomicStateList;
             })
