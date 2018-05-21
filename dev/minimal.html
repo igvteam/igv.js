@@ -7,8 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Dev</title>
-
+    <title>IGV - Dev - Minimal</title>
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css">
@@ -31,6 +30,9 @@
 
     <!-- IGV JS -->
     <script src="../js/igv-icons.js"></script>
+    <script src="../js/session/igvXmlSession.js"></script>
+    <script src="../js/feature/mergedTrack.js"></script>
+
 
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
@@ -46,6 +48,7 @@
     <script src="../js/bam/bamUtils.js"></script>
     <script src="../js/bam/bamWebserviceReader.js"></script>
     <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -93,9 +96,9 @@
     <script src="../js/tdf/tdfSource.js"></script>
 
     <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
     <script src="../js/ui/inputDialog.js"></script>
     <script src="../js/ui/trackRemovalDialog.js"></script>
-    <script src="../js/ui/dataRangeDialog.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/cursorGuide.js"></script>
     <script src="../js/ui/centerGuide.js"></script>
@@ -150,7 +153,7 @@
 
 <body>
 
-<div id="myDiv">
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 </div>
 
 <script type="text/javascript">
@@ -161,54 +164,19 @@
 
         div = $("#myDiv")[0];
         options = {
-
-            showIdeogram: true,
             showRuler: true,
             showChromosomeWidget: true,
-            showCenterGuide: true,
             // locus: 'all',
             // locus: '1',
-            // locus: '1:83,958,085-83,958,125',
-            // locus: 'SLC25A3',
-            // locus: 'brca1',
             // locus: 'chrX:138633329-138633330',
             // locus: ['egfr', 'pten', 'SLC25A3', 'myc'],
-            // locus: 'chr8:128,748,263-128,748,621',
-            locus: ['myc'],
-            // locus: ['egfr', 'myc', 'egfr'],
-            // locus: ['egfr', 'egfr'],
-            // locus: ['egfr', 'myc', 'chr2:32,924,785-39,881,979', 'egfr'],
-            reference:
-                {
-                    id: "hg19"
-                },
+            locus: 'myc',
+            // genome : "hg19",
+            reference: {
+                id: "hg19"
+            },
             flanking: 1000,
             apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-
-            tracks:
-                [
-                    {
-                        url: 'https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig',
-                        name: 'Big BigWig'
-                    },
-                    // {
-                    //     url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
-                    //     indexed: false,
-                    //     name: 'Segmented CN'
-                    // },
-                    {
-                        name: "Genes",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                        order: Number.MAX_VALUE,
-                        visibilityWindow: 300000000,
-                        displayMode: "EXPANDED",
-                        autoHeight: true
-                    }
-                ]
         };
 
         igv.createBrowser(div, options);
