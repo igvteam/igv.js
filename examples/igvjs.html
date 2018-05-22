@@ -27,9 +27,15 @@
 
         var div = document.getElementById("myDiv");
 
-        igv.createBrowser(div, {
-            queryParametersSupported: true
-        });
+        igv
+                .createBrowser(div, {
+                    genome: "hg19",
+                    queryParametersSupported: true,
+                    promisified: true
+                })
+                .then(function (browser) {
+                    console.log("Browser ready");
+                })
 
 
     })
