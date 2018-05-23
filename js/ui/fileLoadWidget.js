@@ -138,8 +138,17 @@ var igv = (function (igv) {
         var obj;
         obj = this.fileLoadManager.trackLoadConfiguration();
         if (obj) {
-            igv.browser.loadTrackList( [ obj ] );
             this.dismiss();
+            extractName(obj)
+                .then(function (name) {
+                    obj.name = name;
+                    igv.browser.loadTrackList( [ obj ] );
+                })
+                .catch(function (error) {
+                    // Ignore errors extracting the name
+                    console.error(error);
+                    igv.browser.loadTrackList( [ obj ] );
+                })
         }
 
     };
@@ -482,6 +491,79 @@ var igv = (function (igv) {
             return (extension !== 'wig' && extension !== 'seg');
         }
 
+    }
+
+    /**
+     * Return a promise to extract the name of the dataset.  The promise is neccessacary because
+     * google drive urls require a call to the API
+     *
+     * @returns Promise for the name
+     */
+    function extractName(config) {
+
+        var tmp, id, endPoint, apiKey;
+
+        if (config.name === undefined && typeof config.url === "string" && config.url.includes("drive.google.com")) {
+            tmp = extractQuery(config.url);
+            id = tmp["id"];
+            endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
+            if (apiKey) endPoint += "?key=" + apiKey;
+
+            return igv.Google.getDriveFileInfo(config.url)
+                .then(function (json) {
+                    return json.originalFilename;
+                })
+        } else {
+            if (config.name === undefined) {
+                return Promise.resolve(hic.extractFilename(config.url));
+            } else {
+                return Promise.resolve(config.name);
+            }
+        }
+    }
+
+    function extractFilename (urlOrFile) {
+        var idx,
+            str;
+
+        if (igv.isFilePath(urlOrFile)) {
+            return urlOrFile.name;
+        }
+        else {
+
+            str = urlOrFile.split('?').shift();
+            idx = urlOrFile.lastIndexOf("/");
+
+            return idx > 0 ? str.substring(idx + 1) : str;
+        }
+    };
+
+
+    function extractQuery (uri) {
+        var i1, i2, i, j, s, query, tokens;
+
+        query = {};
+        i1 = uri.indexOf("?");
+        i2 = uri.lastIndexOf("#");
+
+        if (i1 >= 0) {
+            if (i2 < 0) i2 = uri.length;
+
+            for (i = i1 + 1; i < i2;) {
+
+                j = uri.indexOf("&", i);
+                if (j < 0) j = i2;
+
+                s = uri.substring(i, j);
+                tokens = s.split("=", 2);
+                if (tokens.length === 2) {
+                    query[tokens[0]] = tokens[1];
+                }
+
+                i = j + 1;
+            }
+        }
+        return query;
     }
 
     return igv;
