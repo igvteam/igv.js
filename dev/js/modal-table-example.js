@@ -27,13 +27,15 @@ var modal_table_example = (function (modal_table_example) {
         igv
             .createBrowser($container.get(0), igvConfigurator())
             .then(function (browser) {
-
                 var columnFormat,
                     encodeDatasource,
                     loadTracks,
                     $encode_list_item_button,
                     encodeTableConfig,
                     $encodeModal;
+
+                return;
+
 
                 columnFormat =
                     [
@@ -86,7 +88,8 @@ var modal_table_example = (function (modal_table_example) {
 
         configuration =
             {
-                promisified:true,
+                promisified: true,
+                showChromosomeWidget: true,
                 minimumBases: 6,
                 showIdeogram: true,
                 showRuler: true,
