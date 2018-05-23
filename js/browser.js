@@ -170,7 +170,9 @@ var igv = (function (igv) {
             .then(function (session) {
 
                 // Merge session json with config object
-                if (session) Object.assign(config, session);
+                if (session) {
+                    Object.assign(config, session);
+                }
 
                 return config;
 
