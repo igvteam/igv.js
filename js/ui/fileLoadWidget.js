@@ -515,7 +515,7 @@ var igv = (function (igv) {
                 })
         } else {
             if (config.name === undefined) {
-                return Promise.resolve(hic.extractFilename(config.url));
+                return Promise.resolve(extractFilename(config.url));
             } else {
                 return Promise.resolve(config.name);
             }
