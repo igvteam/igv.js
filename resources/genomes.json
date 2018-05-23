@@ -1,64 +1,68 @@
 [
   {
-    "id": "hg38",
-    "name": "Human (GRCh38/hg38)",
-    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
-    "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz",
-    "tracks": [
-      {
-        "name": "Refseq Genes",
-        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/refGene.txt.gz",
-        "order": 1000000,
-        "indexed": false
-      }
-    ]
+	"id": "hg38",
+	"name": "Human (GRCh38/hg38)",
+	"fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+	"indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+	"cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz",
+	"tracks": [
+	  {
+		"name": "Refseq Genes",
+		"format": "refgene",
+		"url": "https://s3.amazonaws.com/igv.org.genomes/hg38/refGene.sorted.txt.gz",
+		"indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/refGene.sorted.txt.gz.tbi",
+		"visibilityWindow": -1,
+		"order": 1000000
+	  }
+	]
   },
   {
-    "id": "hg19",
-    "name": "Human (CRCh37/hg19)",
-    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
-    "tracks": [
-      {
-        "name": "Refseq Genes",
-        "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.txt.gz",
-        "order": 1000000,
-        "indexed": false
-      }
-    ]
+	"id": "hg19",
+	"name": "Human (CRCh37/hg19)",
+	"fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+	"indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+	"cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+	"tracks": [
+	  {
+		"name": "Refseq Genes",
+		"format": "refgene",
+		"url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz",
+		"indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi",
+		"visibilityWindow": -1,
+		"order": 1000000
+	  }
+	]
   },
   {
-    "id": "mm10",
-    "name": "Mouse (GRCm38/mm10)",
-    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
-    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai",
-    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz",
-    "order": 1000000,
-    "tracks": [
-      {
-        "name": "Refseq Genes",
-        "url": "https://s3.amazonaws.com/igv.org.genomes/mm10/refGene.txt.gz",
-        "order": 1000000,
-        "indexed": false
-      }
-    ]
+	"id": "mm10",
+	"name": "Mouse (GRCm38/mm10)",
+	"fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
+	"indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa.fai",
+	"cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/mm10/cytoBandIdeo.txt.gz",
+	"order": 1000000,
+	"tracks": [
+	  {
+		"name": "Refseq Genes",
+		"url": "https://s3.amazonaws.com/igv.org.genomes/mm10/refGene.txt.gz",
+		"order": 1000000,
+		"indexed": false
+	  }
+	]
   },
   {
-    "id": "danRer10",
-    "name": "Zebrafish (GRCZ10/danRer10)",
-    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/danRer10/danRer10.fa",
-    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/danRer10/danRer10.fa.fai",
-    "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/danRer10/cytoBandIdeo.txt.gz",
-    "order": 1000000,
-    "tracks": [
-      {
-        "name": "Refseq Genes",
-        "url": "https://s3.amazonaws.com/igv.org.genomes/danRer10/refGene.txt.gz",
-        "order": 1000000,
-        "indexed": false
-      }
-    ]
+	"id": "danRer10",
+	"name": "Zebrafish (GRCZ10/danRer10)",
+	"fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/danRer10/danRer10.fa",
+	"indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/danRer10/danRer10.fa.fai",
+	"cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/danRer10/cytoBandIdeo.txt.gz",
+	"order": 1000000,
+	"tracks": [
+	  {
+		"name": "Refseq Genes",
+		"url": "https://s3.amazonaws.com/igv.org.genomes/danRer10/refGene.txt.gz",
+		"order": 1000000,
+		"indexed": false
+	  }
+	]
   }
 ]
