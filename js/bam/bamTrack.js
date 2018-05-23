@@ -223,7 +223,7 @@ var igv = (function (igv) {
                     }
 
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
-                    self.trackView.repaintViews();
+                    self.trackView.updateViews(true);
                 }
             });
         }
