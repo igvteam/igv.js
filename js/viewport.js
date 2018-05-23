@@ -189,7 +189,6 @@ var igv = (function (igv) {
             return false;
         }
 
-        // TODO -- show whole genome zoom in notice here
         if (this.$zoomInNotice) {
             if (showZoomInNotice.call(this)) {
                 if (this.canvas) {
