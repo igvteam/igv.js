@@ -180,56 +180,21 @@ var igv = (function (igv) {
 
             .then(function (config) {
 
-                return self.loadGenome(config.reference || config.genome)
+                return self.loadGenome(config.reference || config.genome, config.locus)
 
             })
             .then(function (genome) {
 
-                self.genome = genome;
-
-                 return self.search(getInitialLocus(config, genome), true);
-
-            })
-
-            .then(function (genomicStateList) {
-
-                var errorString;
-
-                self.genomicStateList = genomicStateList;
-
-                if (self.genomicStateList.length > 0) {
-
-                    if (!self.rulerTrack && config.showRuler) {
-                        self.rulerTrack = new igv.RulerTrack();
-                        self.addTrack(self.rulerTrack);
-                    }
-
-                    if (config.roi) {
-                        self.roi = [];
-                        config.roi.forEach(function (r) {
-                            self.roi.push(new igv.ROI(r));
-                        });
-                    }
-
-                    return self.genomicStateList;
-
-                } else {
-                    errorString = 'Unrecognized locus ' + config.locus;
-                    igv.presentAlert(errorString, undefined);
+                if (config.roi) {
+                    self.roi = [];
+                    config.roi.forEach(function (r) {
+                        self.roi.push(new igv.ROI(r));
+                    });
                 }
 
-            })
-
-            .then(function (ignore) {
-
-                var trackConfigs = [];
-                if (self.genome.config.tracks) {
-                    trackConfigs = trackConfigs.concat(self.genome.config.tracks);
-                }
                 if (config.tracks) {
-                    trackConfigs = trackConfigs.concat(config.tracks);
+                    return self.loadTrackList(config.tracks);
                 }
-                return self.loadTrackList(trackConfigs);
 
             })
 
@@ -255,32 +220,6 @@ var igv = (function (igv) {
                 igv.presentAlert(error, undefined);
                 console.log(error);
             });
-
-
-        function getInitialLocus(config, genome) {
-
-            var loci = [];
-
-            if (config.locus) {
-                if (Array.isArray(config.locus)) {
-                    loci = config.locus.join(' ');
-
-                } else {
-                    loci = config.locus;
-                }
-            }
-            else {
-                if (genome.chromosomes.hasOwnProperty("all")) {
-                    loci = "all";
-                }
-                else {
-                    loci = genome.chromosomeNames[0];
-                }
-            }
-
-            return loci;
-        }
-
 
         function loadSessionFile(urlOrFile) {
 
@@ -316,14 +255,17 @@ var igv = (function (igv) {
 
     }
 
-    igv.Browser.prototype.loadGenome = function (genomeConfig) {
+    igv.Browser.prototype.loadGenome = function (idOrConfig, initialLocus) {
 
         var self = this,
-            genomeChange;
+            genomeChange,
+            genomeConfig;
 
-        return expandReference(genomeConfig)
+        return expandReference(idOrConfig)
 
             .then(function (config) {
+
+                genomeConfig = config;
 
                 return igv.GenomeUtils.loadGenome(config);
             })
@@ -344,6 +286,44 @@ var igv = (function (igv) {
 
                 return genome;
 
+            })
+            .then(function (genome) {
+
+                self.genome = genome;
+
+                return self.search(getInitialLocus(initialLocus, genome), true);
+
+            })
+
+            .then(function (genomicStateList) {
+
+                var errorString;
+
+                self.genomicStateList = genomicStateList;
+
+                if (self.genomicStateList.length > 0) {
+
+                    if (!self.rulerTrack) { //} && config.showRuler) {
+                        self.rulerTrack = new igv.RulerTrack();
+                        self.addTrack(self.rulerTrack);
+                    }
+
+                } else {
+                    errorString = 'Unrecognized locus ' + config.locus;
+                    igv.presentAlert(errorString, undefined);
+                }
+
+                if (genomeConfig.tracks) {
+                    return self.loadTrackList(genomeConfig.tracks);
+                } else {
+                    return [];
+                }
+            })
+            .then(function (ignore) {
+
+                self.resize();    // Force recomputation and repaint
+
+                return self.genome;
             })
 
 
@@ -378,6 +358,30 @@ var igv = (function (igv) {
             else {
                 return Promise.resolve(conf);
             }
+        }
+
+        function getInitialLocus(locus, genome) {
+
+            var loci = [];
+
+            if (locus) {
+                if (Array.isArray(locus)) {
+                    loci = locus.join(' ');
+
+                } else {
+                    loci = locus;
+                }
+            }
+            else {
+                if (genome.chromosomes.hasOwnProperty("all")) {
+                    loci = "all";
+                }
+                else {
+                    loci = genome.chromosomeNames[0];
+                }
+            }
+
+            return loci;
         }
     };
 
@@ -1375,7 +1379,7 @@ var igv = (function (igv) {
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
-                if(!init) {
+                if (!init) {
                     self.updateViews();
                 }
 
