@@ -541,7 +541,7 @@ var igv = (function (igv) {
                 loci,
                 chr;
 
-            if (3 === e.which || self.isDragging || mouseDownX === undefined) {
+            if (3 === e.which || e.ctrlKey || self.isDragging || mouseDownX === undefined) {
                 return;
             }
 
