@@ -187,8 +187,7 @@ var igv = (function (igv) {
 
                 self.genome = genome;
 
-                return self.search(getInitialLocus(config, genome));
-                // return self.createGenomicStateList(getInitialLocus(config, genome));
+                 return self.search(getInitialLocus(config, genome), true);
 
             })
 
@@ -1336,7 +1335,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.search = function (string) {
+    igv.Browser.prototype.search = function (string, init) {
 
         var self = this,
             loci;
@@ -1376,7 +1375,9 @@ var igv = (function (igv) {
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
 
-                // self.updateViews();
+                if(!init) {
+                    self.updateViews();
+                }
 
                 return genomicStateList;
             })
