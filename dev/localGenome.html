@@ -156,12 +156,16 @@
 
 <div>
     <label>Fasta file: <input id="fasta" type="file"/></label>
-</div>
-<div>
     <label>Index file: <input id="index" type="file"/></label>
-</div>
-<div>
     <button onclick="submitGenome()">Load genome</button>
+</div>
+
+<div>
+    <select id="select" onchange="selectGenome()">
+        <option value="hg19">hg19</option>
+        <option value="danRer10">danRer10</option>
+    </select>
+
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
@@ -175,12 +179,18 @@
         var fasta = document.getElementById('fasta').files[0];
         var index = document.getElementById('index').files[0];
 
-
         igv.browser.loadGenome({
             fastaURL: fasta,
             indexURL: index
         });
+    }
 
+    function selectGenome() {
+        console.log(document.getElementById("select").value);
+        igv.browser.loadGenome(document.getElementById("select").value)
+                .then(function (genome) {
+                   console.log("genome " + genome.id + " loaded");
+                })
     }
 
     $(document).ready(function () {
@@ -189,8 +199,7 @@
 
         div = $("#myDiv")[0];
         options = {
-            genome: "hg19",
-
+            genome: "hg19"
         };
 
         igv.createBrowser(div, options);
