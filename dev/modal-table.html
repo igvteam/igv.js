@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer - API Example</title>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
+
+    <!-- Dev CSS -->
+    <link rel="stylesheet" type="text/css" href="css/dev.css">
+
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
+
+    <!-- Bootstrap 4 CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+
+    <!-- Bootstrap-Select CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0/css/bootstrap-select.css" />
+
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.16/css/dataTables.bootstrap4.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/scroller/1.4.4/css/scroller.bootstrap4.min.css"/>
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/1.2.5/css/select.bootstrap4.min.css"/>
+
+    <!-- Modal Table Example CSS -->
+    <link rel="stylesheet" href="css/modal-table-example.css" />
+
+    <!-- Bootstrap 4 and dependancies JS: jQuery | Popper -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.0/umd/popper.min.js" integrity="sha384-cs/chFZiN24E4KMATLdqdvsezGxaGsi4hLGOzlXwp5UZB1LY//20VyM2taTB4QvJ" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/js/bootstrap.min.js" integrity="sha384-uefMccjFJAIv6A+rW+L4AHf99KvxDjWSu1z9VI8SKNVmz4sk7buKt/6v9KI65qnm" crossorigin="anonymous"></script>
+
+    <!-- Bootstrap-Select JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.0/js/bootstrap-select.js"></script>
+
+    <!-- Datatables JS -->
+    <script src="https://cdn.datatables.net/1.10.16/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.16/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.datatables.net/scroller/1.4.4/js/dataTables.scroller.min.js"></script>
+    <script src="https://cdn.datatables.net/select/1.2.5/js/dataTables.select.min.js"></script>
+
+    <!-- Vendor JS -->
+    <script src="../vendor/jquery-1.12.4.js"></script>
+    <script src="../vendor/jquery-ui.js"></script>
+    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/promise.js"></script>
+
+    <script src="../vendor/zlib_and_gzip.js"></script>
+    <script src="../vendor/inflate.js"></script>
+
+    <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+    <script src="../js/session/igvXmlSession.js"></script>
+    <script src="../js/feature/mergedTrack.js"></script>
+
+    <script src="../js/bam/coverageMap.js"></script>
+    <script src="../js/bam/bamReader.js"></script>
+    <script src="../js/bam/bamReaderNonIndexed.js"></script>
+    <script src="../js/bam/bgzf.js"></script>
+    <script src="../js/bam/bamSource.js"></script>
+    <script src="../js/bam/bamTrack.js"></script>
+    <script src="../js/bam/bamAlignment.js"></script>
+    <script src="../js/bam/bamAlignmentRow.js"></script>
+    <script src="../js/bam/bamIndex.js"></script>
+    <script src="../js/bam/alignmentContainer.js"></script>
+    <script src="../js/bam/pairedAlignment.js"></script>
+    <script src="../js/bam/bamUtils.js"></script>
+    <script src="../js/bam/bamWebserviceReader.js"></script>
+    <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
+
+    <script src="../js/bigQuery/ccp.js"></script>
+
+    <script src="../js/bigwig/bufferedReader.js"></script>
+    <script src="../js/bigwig/bwReader.js"></script>
+    <script src="../js/bigwig/bwSource.js"></script>
+
+    <script src="../js/encode/encodeDataSource.js"></script>
+
+    <script src="../js/feature/featureCache.js"></script>
+    <script src="../js/feature/gffHelper.js"></script>
+    <script src="../js/feature/featureSource.js"></script>
+    <script src="../js/feature/featureParsers.js"></script>
+    <script src="../js/feature/tribble.js"></script>
+    <script src="../js/feature/featureFileReader.js"></script>
+    <script src="../js/feature/customServiceReader.js"></script>
+    <script src="../js/feature/aneuSource.js"></script>
+    <script src="../js/feature/aneuTrack.js"></script>
+    <script src="../js/feature/featureTrack.js"></script>
+    <script src="../js/feature/wigTrack.js"></script>
+    <script src="../js/feature/featureUtils.js"></script>
+    <script src="../js/feature/segParser.js"></script>
+    <script src="../js/feature/segTrack.js"></script>
+    <script src="../js/feature/dataWrapper.js"></script>
+
+    <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script src="../js/ga4gh/googleUtils.js"></script>
+
+    <script src="../js/gtex/eqtlTrack.js"></script>
+    <script src="../js/gtex/gtexFileReader.js"></script>
+    <script src="../js/gtex/gtexReader.js"></script>
+    <script src="../js/gtex/gtex.js"></script>
+    <script src="../js/gtex/immvarReader.js"></script>
+
+    <script src="../js/gwas/t2dVariantSource.js"></script>
+    <script src="../js/gwas/gwasTrack.js"></script>
+
+    <script src="../js/karyo/karyo.js"></script>
+
+    <script src="../js/oauth/google.js"></script>
+
+    <script src="../js/tdf/tdfReader.js"></script>
+    <script src="../js/tdf/tdfSource.js"></script>
+
+    <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
+    <script src="../js/ui/inputDialog.js"></script>
+    <script src="../js/ui/trackRemovalDialog.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/cursorGuide.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/trackLabelControl.js"></script>
+    <script src="../js/ui/userFeedback.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/popover.js"></script>
+    <script src="../js/ui/chromosomeSelectWidget.js"></script>
+
+    <script src="../js/variant/vcfParser.js"></script>
+    <script src="../js/variant/variant.js"></script>
+    <script src="../js/variant/variantTrack.js"></script>
+
+    <script src="../js/sampleInformation.js"></script>
+    <script src="../js/igv-create.js"></script>
+    <script src="../js/browser.js"></script>
+    <script src="../js/ideogram.js"></script>
+    <script src="../js/windowSizePanel.js"></script>
+    <script src="../js/referenceFrame.js"></script>
+    <script src="../js/igv-canvas.js"></script>
+    <script src="../js/genome.js"></script>
+    <script src="../js/trackView.js"></script>
+    <script src="../js/viewport.js"></script>
+
+    <script src="../js/rulerTrack.js"></script>
+    <script src="../js/rulerSweeper.js"></script>
+
+    <script src="../js/igv-math.js"></script>
+    <script src="../js/igv-color.js"></script>
+    <script src="../js/igv-utils.js"></script>
+    <script src="../js/parseUtils.js"></script>
+    <script src="../js/fasta.js"></script>
+    <script src="../js/sequenceTrack.js"></script>
+
+    <script src="../js/igv-exts.js"></script>
+    <script src="../js/igvxhr.js"></script>
+    <script src="../js/binary.js"></script>
+
+    <script src="../js/intervalTree.js"></script>
+
+    <script src="../js/trackCore.js"></script>
+    <script src="../js/ui/fileLoadWidget.js"></script>
+
+    <script src="../js/set.js"></script>
+
+    <script src="../js/roi.js"></script>
+    <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
+
+
+    <!-- Modal Table Example JS -->
+    <script src="js/modalTable.js"></script>
+    <script src="js/modal-table-example.js"></script>
+
+</head>
+
+<body>
+
+<div id="igv-app-encode-modal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="igv-app-encode-modal-label" aria-hidden="true">
+
+    <div class="modal-dialog modal-lg" role="document">
+
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4  id="igv-app-encode-modal-label" class="modal-title">ENCODE</h4>
+
+                <button id="igv-app-encode-modal-top-close-button" type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+
+            </div>
+
+            <div class="modal-body">
+            </div>
+
+            <div class="modal-footer">
+                <button id="igv-app-encode-modal-bottom-close-button" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button id="igv-app-encode-modal-go-button" type="button" class="btn btn-secondary" data-dismiss="modal">Go</button>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<div class="container-fluid">
+
+    <!-- Modal presentation buttons -->
+    <div class="row">
+
+        <!-- ENCODE Table Dropdown -->
+        <div class="col-md-4">
+
+            <div class="dropdown">
+
+                <button class="btn btn-default dropdown-toggle" type="button" id="igv-track-dropdown-button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    Tracks
+                </button>
+
+                <div class="dropdown-menu" aria-labelledby="igv-track-dropdown-button">
+                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#igv-app-encode-modal" id="igv-encode-list-item-button">Tracks</a>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- App container -->
+    <div class="row">
+        <div class="col-md-12">
+            <div id="igv-app-container">
+            </div>
+        </div>
+    </div>
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+        modal_table_example.init($('#igv-app-container'));
+    });
+
+</script>
+
+</body>
+
+</html>
