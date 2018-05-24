@@ -320,18 +320,23 @@ var igv = (function (igv) {
 
         if (min !== undefined) {
             this.track.dataRange.min = min;
+            this.track.config.min = min;
         }
 
         if (max !== undefined) {
             this.track.dataRange.max = max;
+            this.track.config.max = max;
         }
 
         this.track.autoscale = autoscale;
+        this.track.config.autoScale = autoscale;
+        
         this.repaintViews();
     };
 
     igv.TrackView.prototype.setColor = function (color) {
         this.track.color = color;
+        this.track.config.color = color;
         this.repaintViews(true);
     };
 
@@ -348,6 +353,8 @@ var igv = (function (igv) {
         }
 
         this.track.height = newHeight;
+        this.track.config.height = newHeight;
+        
         $(this.trackDiv).height(newHeight);
 
         // If the track does not manage its own content height set it here
