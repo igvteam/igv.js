@@ -342,6 +342,7 @@ var igv = (function (igv) {
                     click: function () {
                         igv.popover.hide();
                         self.displayMode = displayMode;
+                        self.config.displayMode = displayMode;
                         self.trackView.repaintViews();
                     }
                 });

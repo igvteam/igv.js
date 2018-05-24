@@ -287,6 +287,7 @@ var igv = (function (igv) {
             txt;
 
         track.name = label;
+        track.config.name = label;
 
         $label.empty();
         $label.html(track.name);
