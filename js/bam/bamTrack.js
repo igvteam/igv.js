@@ -222,6 +222,7 @@ var igv = (function (igv) {
                         $fa.addClass('igv-fa-check-hidden');
                     }
 
+                    self.config.viewAsPairs = self.viewAsPairs;
                     self.featureSource.setViewAsPairs(self.viewAsPairs);
                     self.trackView.updateViews(true);
                 }
@@ -243,17 +244,22 @@ var igv = (function (igv) {
 
                 if (menuItem.key === self.alignmentTrack.colorBy) {
                     self.alignmentTrack.colorBy = 'none';
+                    self.config.colorBy = 'none';
                     self.trackView.repaint(true);
+
                 } else if ('tag' === menuItem.key) {
 
                     clickFunction = function () {
                         var tag;
 
                         self.alignmentTrack.colorBy = 'tag';
+                        self.config.colorBy = 'tag';
 
                         tag = igv.inputDialog.$input.val().trim();
                         if (tag !== self.alignmentTrack.colorByTag) {
                             self.alignmentTrack.colorByTag = tag;
+                            self.config.colorByTag = tag;
+
                             self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
                             $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                         }
@@ -273,6 +279,8 @@ var igv = (function (igv) {
 
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
+                    self.config.colorBy = menuItem.key;
+
                     self.trackView.repaintViews();
                 }
 

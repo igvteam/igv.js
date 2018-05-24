@@ -1837,9 +1837,11 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.toJSON = function () {
 
-        var json = {
+        var json, trackJson, order;
+
+        json = {
             "reference": this.genome.toJSON()
-        }
+        };
 
         // Use rulerTrack to get current loci.   This is really obtuse and fragile
         var locus = [];
@@ -1850,12 +1852,14 @@ var igv = (function (igv) {
         json["locus"] = locus;
 
 
-        var trackJson = [];
+        trackJson = [];
+        order = 0;
         this.trackViews.forEach(function (tv) {
 
             var track = tv.track;
 
             if (track.config) {
+                track.config.order = order++;
                 trackJson.push(track.config);
             }
         });
