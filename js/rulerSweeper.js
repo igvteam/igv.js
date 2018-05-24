@@ -77,7 +77,8 @@ var igv = (function (igv) {
         igv.browser.genome.wgChromosomeNames.forEach(function (name) {
             var chr,
                 w,
-                percentage;
+                percentage,
+                shortName;
 
             chr = igv.browser.genome.getChromosome(name);
 
@@ -95,7 +96,8 @@ var igv = (function (igv) {
                 $e = $('<span>');
                 $div.append($e);
 
-                $e.text(name);
+                shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+                $e.text(shortName);
 
                 $div.on('click', function (e) {
                     var locusString,
