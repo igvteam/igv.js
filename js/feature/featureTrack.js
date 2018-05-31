@@ -125,11 +125,11 @@ var igv = (function (igv) {
     };
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-        
+
         var self = this;
-        
+
         return this.getFileHeader()
-            
+
             .then(function (header) {
                 return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
             });
@@ -224,21 +224,18 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (config.viewport.tile.features) {
 
-            var genomicLocation = config.genomicLocation ,
-                yOffset = config.y,
-                referenceFrame = config.viewport.genomicState.referenceFrame,
-                tolerance,
-                featureList,
-                row,
-                popupData,
-                ss,
-                ee;
+            var genomicLocation, yOffset, referenceFrame, tolerance, featureList, row, data, ss, ee, hits;
 
-            // We need some tolerance around genomicLocation, start with +/- 2 pixels
-            // Feature coordinates are 0-based, genomic location 1-based => subtract 1
+            data = [];
+
+            genomicLocation = config.genomicLocation;
+            yOffset = config.y;
+            referenceFrame = config.viewport.genomicState.referenceFrame;
+
+            // We need some tolerance around genomicLocation
             tolerance = 2 * referenceFrame.bpPerPixel;
-            ss = genomicLocation - tolerance - 1;
-            ee = genomicLocation + tolerance - 1;
+            ss = genomicLocation - 2 * referenceFrame.bpPerPixel;
+            ee = genomicLocation + 3 * referenceFrame.bpPerPixel;
             //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             featureList = config.viewport.tile.features;
@@ -249,43 +246,30 @@ var igv = (function (igv) {
 
             if (featureList && featureList.length > 0) {
 
-                // filtered = _.filter(featureList, function (ff) {
-                //     return ff.end >= ss && ff.start <= ee;
-                // });
-                //
-                // mapped = _.map(filtered, function (f) {
-                //     return f.row;
-                // });
-                //
-                // str = mapped.join(' ');
+                hits = featureList.filter(function (feature) {
+                    return (feature.end >= ss && feature.start <= ee) &&
+                        (row === undefined || feature.row === undefined || row === feature.row);
+                })
 
-                popupData = [];
-                featureList.forEach(function (feature) {
+                hits.forEach(function (feature) {
                     var featureData;
 
-                    if (feature.end >= ss && feature.start <= ee) {
-
-                        // console.log('row ' + row + ' feature-rows ' + str + ' features ' + _.size(featureList));
-
-                        if (row === undefined || feature.row === undefined || row === feature.row) {
-
-                            if (feature.popupData) {
-                                featureData = feature.popupData(genomicLocation);
-                            } else {
-                                featureData = extractPopupData(feature);
-                            }
-                            if (featureData) {
-                                if (popupData.length > 0) {
-                                    popupData.push("<HR>");
-                                }
-                                Array.prototype.push.apply(popupData, featureData);
-                            }
-
-                        }
+                    if (feature.popupData) {
+                        featureData = feature.popupData(genomicLocation);
+                    } else {
+                        featureData = extractPopupData(feature);
                     }
+                    if (featureData) {
+                        if (data.length > 0) {
+                            data.push("<HR>");
+                        }
+                        Array.prototype.push.apply(data, featureData);
+                    }
+
+
                 });
 
-                return popupData;
+                return data;
             }
 
         }
@@ -327,7 +311,7 @@ var igv = (function (igv) {
             });
         }
 
-        menuItems.push({ object: $('<div class="igv-track-menu-border-top">') });
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
         ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
             var lut =
@@ -394,13 +378,15 @@ var igv = (function (igv) {
      * @returns {{px: number, px1: number, pw: number, h: number, py: number}}
      */
     function calculateFeatureCoordinates(feature, bpStart, xScale) {
-        var px = Math.round((feature.start - bpStart) / xScale),
-            px1 = Math.round((feature.end - bpStart) / xScale),
+        var px = (feature.start - bpStart) / xScale,
+            px1 = (feature.end - bpStart) / xScale,
+            //px = Math.round((feature.start - bpStart) / xScale),
+            //px1 = Math.round((feature.end - bpStart) / xScale),
             pw = px1 - px;
 
         if (pw < 3) {
             pw = 3;
-            px -= 1;
+            px -= 1.5;
         }
 
         return {
@@ -562,7 +548,7 @@ var igv = (function (igv) {
         if ((feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
             ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
             geneFontStyle = {
-               // font: '10px PT Sans',
+                // font: '10px PT Sans',
                 textAlign: 'center',
                 fillStyle: geneColor || feature.color || this.color,
                 strokeStyle: geneColor || feature.color || this.color
