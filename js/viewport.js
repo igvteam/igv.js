@@ -623,7 +623,7 @@ var igv = (function (igv) {
                 xOrigin;
 
             viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
-            genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
+            genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));  //Math.floor
 
             if (undefined === genomicLocation || null === viewport.tile) {
                 return undefined;
