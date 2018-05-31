@@ -224,7 +224,7 @@ var igv = (function (igv) {
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
         if (config.viewport.tile.features) {
 
-            var genomicLocation = config.genomicLocation,
+            var genomicLocation = config.genomicLocation ,
                 yOffset = config.y,
                 referenceFrame = config.viewport.genomicState.referenceFrame,
                 tolerance,
@@ -235,9 +235,10 @@ var igv = (function (igv) {
                 ee;
 
             // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            // Feature coordinates are 0-based, genomic location 1-based => subtract 1
             tolerance = 2 * referenceFrame.bpPerPixel;
-            ss = genomicLocation - tolerance;
-            ee = genomicLocation + tolerance;
+            ss = genomicLocation - tolerance - 1;
+            ee = genomicLocation + tolerance - 1;
             //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             featureList = config.viewport.tile.features;
