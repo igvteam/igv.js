@@ -166,6 +166,8 @@ $igv-dark-grey-color: #373737;
     justify-content: space-between;
     align-items: center;
 
+    height: $igv-navbar-height;
+
     // igv logo
     #igv-logo {
       width: 34px;
@@ -205,15 +207,18 @@ $igv-dark-grey-color: #373737;
       justify-content: space-between;
       align-items: center;
 
-      //width: 430px;
+      height: $igv-navbar-height;
 
       // chromosome select widget
       #igv-chromosome-select-widget-container {
-        height: 90%;
         width: 96px;
         margin-right: 4px;
 
+        height: 70%;
+
         select {
+
+          display: block;
 
           outline: none;
 
@@ -234,9 +239,10 @@ $igv-dark-grey-color: #373737;
         justify-content: space-between;
         align-items: center;
 
+        height: 75%;
+
         // locus goto | search icon
         #igv-search-container {
-          height: 90%;
           width: 260px;
 
           display: flex;
@@ -248,7 +254,6 @@ $igv-dark-grey-color: #373737;
           // locus goto
           input {
             display: block;
-            height: 20px;
             width: 85%;
 
             padding-left: 8px;

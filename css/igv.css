@@ -354,7 +354,8 @@
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
-    align-items: center; }
+    align-items: center;
+    height: 32px; }
     #igv-navbar #igv-nav-bar-left-container #igv-logo {
       width: 34px;
       height: 16px;
@@ -376,12 +377,14 @@
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
-      align-items: center; }
+      align-items: center;
+      height: 32px; }
       #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-chromosome-select-widget-container {
-        height: 90%;
         width: 96px;
-        margin-right: 4px; }
+        margin-right: 4px;
+        height: 70%; }
         #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-chromosome-select-widget-container select {
+          display: block;
           outline: none;
           font-family: "Open Sans", sans-serif;
           font-size: 12px;
@@ -394,9 +397,9 @@
         flex-flow: row;
         flex-wrap: nowrap;
         justify-content: space-between;
-        align-items: center; }
+        align-items: center;
+        height: 75%; }
         #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container {
-          height: 90%;
           width: 260px;
           display: flex;
           flex-flow: row;
@@ -405,7 +408,6 @@
           align-items: center; }
           #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container input {
             display: block;
-            height: 20px;
             width: 85%;
             padding-left: 8px;
             margin-right: 8px;
