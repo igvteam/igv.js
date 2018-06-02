@@ -133,10 +133,7 @@ var igv = (function (igv) {
 
         function inferFileFormat(config) {
 
-            var path,
-                fn,
-                idx,
-                ext;
+            var path;
 
             if (config.format) {
                 config.format = config.format.toLowerCase();
@@ -144,46 +141,8 @@ var igv = (function (igv) {
             }
 
             path = igv.isFilePath(config.url) ? config.url.name : config.url;
-            fn = path.toLowerCase();
 
-            // Special case -- UCSC refgene files
-            if (fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
-                config.format = "refgene";
-                return;
-            }
-
-
-            //Strip parameters -- handle local files later
-            idx = fn.indexOf("?");
-            if (idx > 0) {
-                fn = fn.substr(0, idx);
-            }
-
-            //Strip aux extensions .gz, .tab, and .txt
-            if (fn.endsWith(".gz")) {
-                fn = fn.substr(0, fn.length - 3);
-            }
-
-            if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
-                fn = fn.substr(0, fn.length - 4);
-            }
-
-
-            idx = fn.lastIndexOf(".");
-            ext = idx < 0 ? fn : fn.substr(idx + 1);
-
-            switch (ext.toLowerCase()) {
-                case "bw":
-                    config.format = "bigwig";
-                    break;
-                case "bb":
-                    config.format = "bigbed";
-
-                default:
-                    if (knownFileExtensions.has(ext)) {
-                        config.format = ext;
-                    }
-            }
+            config.format = igv.inferFileFormat(path);
         }
 
         function inferTrackType(config) {
@@ -230,6 +189,55 @@ var igv = (function (igv) {
             inferTrackType(config);
         }
 
+
+    };
+
+    igv.inferFileFormat = function (fn) {
+
+        var idx, ext;
+
+        fn = fn.toLowerCase();
+
+        // Special case -- UCSC refgene files
+        if (fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
+            return "refgene";
+            return;
+        }
+
+
+        //Strip parameters -- handle local files later
+        idx = fn.indexOf("?");
+        if (idx > 0) {
+            fn = fn.substr(0, idx);
+        }
+
+        //Strip aux extensions .gz, .tab, and .txt
+        if (fn.endsWith(".gz")) {
+            fn = fn.substr(0, fn.length - 3);
+        }
+
+        if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+            fn = fn.substr(0, fn.length - 4);
+        }
+
+
+        idx = fn.lastIndexOf(".");
+        ext = idx < 0 ? fn : fn.substr(idx + 1);
+
+        switch (ext) {
+            case "bw":
+                return "bigwig";
+            case "bb":
+                return "bigbed";
+
+            default:
+                if (knownFileExtensions.has(ext)) {
+                    return ext;
+                }
+                else {
+                    return undefined;
+                }
+        }
 
     };
 
@@ -299,7 +307,7 @@ var igv = (function (igv) {
         var vp,
             txt;
 
-        vp = track.trackView.viewports[ 0 ];
+        vp = track.trackView.viewports[0];
         txt = vp.$trackLabel.text();
 
         return txt;
@@ -514,7 +522,7 @@ var igv = (function (igv) {
         clickHandler = function () {
 
             igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.inputDialog.show( $(trackView.trackDiv) );
+            igv.inputDialog.show($(trackView.trackDiv));
 
         };
 
@@ -534,7 +542,7 @@ var igv = (function (igv) {
             trackView.browser.removeTrack(trackView.track);
         };
 
-        return { object: $e, click: menuClickHandler };
+        return {object: $e, click: menuClickHandler};
 
     };
 
@@ -548,7 +556,7 @@ var igv = (function (igv) {
 
         clickHandler = function () {
             // igv.dataRangeDialog.configureWithTrackView(trackView);
-            igv.dataRangeDialog.configure({ trackView: trackView });
+            igv.dataRangeDialog.configure({trackView: trackView});
             igv.dataRangeDialog.present($(trackView.trackDiv));
         };
 
@@ -589,15 +597,19 @@ var igv = (function (igv) {
 
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
-                igv.setTrackLabel(trackView.viewports[ 0 ].$trackLabel, trackView.track, value);
+                igv.setTrackLabel(trackView.viewports[0].$trackLabel, trackView.track, value);
             };
 
-            igv.inputDialog.configure({ label:'Track Name', input:(igv.getTrackLabelText(trackView.track) || 'unnamed'), click:dialogClickHandler });
-            igv.inputDialog.present( $(trackView.trackDiv) );
+            igv.inputDialog.configure({
+                label: 'Track Name',
+                input: (igv.getTrackLabelText(trackView.track) || 'unnamed'),
+                click: dialogClickHandler
+            });
+            igv.inputDialog.present($(trackView.trackDiv));
 
         };
 
-        return { object: $e, click: menuClickHandler };
+        return {object: $e, click: menuClickHandler};
 
 
     };
@@ -642,12 +654,16 @@ var igv = (function (igv) {
             };
 
 
-            igv.inputDialog.configure({ label:'Track Height', input:trackView.trackDiv.clientHeight, click:dialogClickHandler });
-            igv.inputDialog.present( $(trackView.trackDiv) );
+            igv.inputDialog.configure({
+                label: 'Track Height',
+                input: trackView.trackDiv.clientHeight,
+                click: dialogClickHandler
+            });
+            igv.inputDialog.present($(trackView.trackDiv));
 
         };
 
-        return { object: $e, click: menuClickHandler };
+        return {object: $e, click: menuClickHandler};
 
 
     };
