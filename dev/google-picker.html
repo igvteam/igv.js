@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
+    <title>Google Picker Example</title>
+
+    <script type="text/javascript">
+
+        // The Browser API key obtained from the Google API Console.
+        var developerKey = 'AIzaSyBoqQcYKfBaH_Ws17D6Nl_1Y29Sj7SY3ZE';
+
+        // The Client ID obtained from the Google API Console. Replace with your own Client ID.
+        var clientId = '923031236522-6pgi1r75i94eqlqf9ne0cfjhuqmse2hh.apps.googleusercontent.com';
+
+        // Replace with your own project number from console.developers.google.com.
+        // See "Project number" under "IAM & Admin" > "Settings"
+        var appId = "923031236522";
+
+        // google.picker.​ViewId.PHOTOS
+        // var scope = 'https://www.googleapis.com/auth/photos';
+
+        // google.picker.ViewId.DOCS
+        var scope = ['https://www.googleapis.com/auth/drive.readonly'];
+
+        var pickerApiLoaded = false;
+        var oauthToken;
+
+        // Use the API Loader script to load google.picker and gapi.auth.
+        function onApiLoad() {
+            gapi.load('auth2', onAuthApiLoad);
+            gapi.load('picker', onPickerApiLoad);
+        }
+
+        function onAuthApiLoad() {
+            var authBtn = document.getElementById('auth');
+            authBtn.disabled = false;
+            authBtn.addEventListener('click', function() {
+                gapi.auth2.authorize({
+                    client_id: clientId,
+                    scope: scope
+                }, handleAuthResult);
+            });
+        }
+
+        function onPickerApiLoad() {
+            pickerApiLoaded = true;
+            //createPicker();
+        }
+
+        function handleAuthResult(authResult) {
+            if (authResult && !authResult.error) {
+                oauthToken = authResult.access_token;
+                //createPicker();
+            }
+        }
+
+        // Create and render a Picker object for picking user Photos.
+        function createPicker() {
+            var view,
+                    picker;
+
+            if (pickerApiLoaded && oauthToken) {
+
+                view = new google.picker.View(google.picker.ViewId.DOCS);
+
+                picker = new google.picker
+                        .PickerBuilder()
+                        .setAppId(appId)
+                        .setOAuthToken(oauthToken)
+                        .addView(view)
+                        .setDeveloperKey(developerKey)
+                        .setCallback(pickerCallback)
+                        .build();
+
+                picker.setVisible(true);
+            }
+        }
+
+        // A simple callback implementation.
+        function pickerCallback(data) {
+            var url,
+                    doc,
+                    message;
+
+            url = 'nothing';
+            if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
+                doc = data[google.picker.Response.DOCUMENTS][0];
+                url = doc[google.picker.Document.URL];
+            }
+            message = 'You picked: ' + url;
+            document.getElementById('result').innerHTML = message;
+        }
+    </script>
+
+</head>
+
+<body>
+
+<button type="button" id="auth" disabled>Authenticate</button>
+<button type="button" id="loadButton" onclick="createPicker()">Open </button>
+
+<div id="result"></div>
+
+
+<!-- The Google API Loader script. -->
+<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+
+</body>
+</html>
