@@ -16,8 +16,8 @@ module.exports = function (grunt) {
         concat: {
             igv: {
                 src: [
-                    'tmp/embedCss.js',
                     'wrapper/header.js',
+                    'tmp/embedCss.js',
                     'vendor/jquery-1.12.4.js',
                     'vendor/jquery-ui.js',
                     'vendor/underscore.js',
