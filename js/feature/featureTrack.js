@@ -233,9 +233,9 @@ var igv = (function (igv) {
             referenceFrame = config.viewport.genomicState.referenceFrame;
 
             // We need some tolerance around genomicLocation
-            tolerance = 2 * referenceFrame.bpPerPixel;
-            ss = genomicLocation - 2 * referenceFrame.bpPerPixel;
-            ee = genomicLocation + 3 * referenceFrame.bpPerPixel;
+            tolerance = 3 * referenceFrame.bpPerPixel;
+            ss = genomicLocation - tolerance;
+            ee = genomicLocation + tolerance;
             //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
             featureList = config.viewport.tile.features;
