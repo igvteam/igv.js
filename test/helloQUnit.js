@@ -3,9 +3,9 @@
  */
 function helloQUnitTests() {
 
-    test( "A Passing QUnit Test", 1, function() {
+    QUnit.test( "A Passing QUnit Test", function() {
         var value = "hello";
-        equal( value, "hello");
+        assert.equal( value, "hello");
     });
 
 //    test( "A Failing QUnit Test", 1, function() {
