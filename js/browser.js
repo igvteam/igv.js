@@ -968,66 +968,6 @@ var igv = (function (igv) {
         return this.config.minimumBases;
     };
 
-    igv.Browser.prototype.goto = function (chrName, start, end) {
-
-        var genomicState,
-            viewportWidth,
-            referenceFrame,
-            width,
-            maxBpPerPixel;
-
-        // Translate chr to official name
-        if (undefined === this.genome) {
-            console.log('Missing genome - bailing ...');
-            return;
-        }
-
-        genomicState = this.genomicStateList[0];
-        genomicState.chromosome = this.genome.getChromosome(chrName);
-        viewportWidth = igv.browser.viewportContainerWidth() / this.genomicStateList.length;
-
-        referenceFrame = genomicState.referenceFrame;
-        referenceFrame.chrName = genomicState.chromosome.name;
-
-        // If end is undefined,  interpret start as the new center, otherwise compute scale.
-        if (undefined === end) {
-            width = Math.round(viewportWidth * referenceFrame.bpPerPixel / 2);
-            start = Math.max(0, start - width);
-        } else {
-            referenceFrame.bpPerPixel = (end - start) / viewportWidth;
-            referenceFrame.end = end;      // Remember in case bpPerPixel needs re-computed.
-        }
-
-        if (!genomicState.chromosome) {
-
-            if (console && console.log) {
-                console.log("Could not find chromsome " + referenceFrame.chrName);
-            }
-        } else {
-
-            if (!genomicState.chromosome.bpLength) {
-                genomicState.chromosome.bpLength = 1;
-            }
-
-            maxBpPerPixel = genomicState.chromosome.bpLength / viewportWidth;
-            if (referenceFrame.bpPerPixel > maxBpPerPixel) {
-                referenceFrame.bpPerPixel = maxBpPerPixel;
-            }
-
-            if (undefined === end) {
-                end = start + viewportWidth * referenceFrame.bpPerPixel;
-            }
-
-            if (genomicState.chromosome && end > genomicState.chromosome.bpLength) {
-                start -= (end - genomicState.chromosome.bpLength);
-            }
-        }
-
-        referenceFrame.start = start;
-
-        this.updateViews();
-
-    };
 
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
@@ -1339,6 +1279,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.goto = function (chrName, start, end) {
+        return this.search(chrName + ":" + start + "-" + end);
+    };
+
     igv.Browser.prototype.search = function (string, init) {
 
         var self = this,
@@ -1348,7 +1292,7 @@ var igv = (function (igv) {
 
         loci = string.split(' ');
 
-        return createGenomicStateList.call(this, loci)
+        return createGenomicStateList(loci)
 
             .then(function (genomicStateList) {
 
@@ -1399,7 +1343,7 @@ var igv = (function (igv) {
          */
         function createGenomicStateList(loci) {
 
-            var self = this, searchConfig, geneNameLoci, genomicState, result, unique, promises, ordered, dictionary;
+            var searchConfig, geneNameLoci, genomicState, result, unique, promises, ordered, dictionary;
 
             searchConfig = igv.browser.searchConfig,
                 ordered = {};
@@ -1420,6 +1364,7 @@ var igv = (function (igv) {
             // Try locus string first  (e.g.  chr1:100-200)
             unique.forEach(function (locus) {
                 genomicState = isLocusChrNameStartEnd(locus, self.genome);
+
                 if (genomicState) {
                     genomicState.locusSearchString = locus;
                     result.push(genomicState);
@@ -1440,13 +1385,19 @@ var igv = (function (igv) {
                 // Try local feature cache first.  This is created from feature tracks tagged "searchable"
                 promises = [];
                 geneNameLoci.forEach(function (locus) {
-                    var feature,
-                        genomicState;
+                    var feature, genomicState, chromosome;
 
                     feature = self.featureDB[locus.toLowerCase()];
                     if (feature) {
-                        genomicState = processSearchResult(feature, locus);
-                        if (genomicState) {
+                        chromosome = self.genome.getChromosome(feature.chr);
+                        if(chromosome) {
+                            genomicState = {
+                                chromosome: chromosome,
+                                start: feature.start,
+                                end: feature.end,
+                                locusSearchString: locus
+                            }
+                            igv.Browser.validateLocusExtent(genomicState.chromosome, genomicState);
                             result.push(genomicState);
                             dictionary[locus] = genomicState;
                         }
@@ -1605,12 +1556,7 @@ var igv = (function (igv) {
 
             function isLocusChrNameStartEnd(locus, genome) {
 
-                var a,
-                    b,
-                    numeric,
-                    chr,
-                    chromosome,
-                    locusObject;
+                var a, b, numeric, chr, chromosome, locusObject;
 
                 locusObject = {};
                 a = locus.split(':');
@@ -1618,7 +1564,7 @@ var igv = (function (igv) {
                 chr = a[0];
                 chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
                 if (!chromosome) {
-                    return false;          // Unknown chromosome
+                    return undefined;          // Unknown chromosome
                 }
                 locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
                 locusObject.start = 0;
@@ -1629,17 +1575,17 @@ var igv = (function (igv) {
                     return locusObject;
                 } else {
 
-                    b = _.last(a).split('-');
+                    b = a[1].split('-');
 
                     if (b.length > 2) {
-                        return false;                 // Not a locus string
+                        return undefined;                 // Not a locus string
                     } else {
 
                         locusObject.start = locusObject.end = undefined;
 
                         numeric = b[0].replace(/\,/g, '');
                         if (isNaN(numeric)) {
-                            return false;
+                            return undefined;
                         }
 
                         locusObject.start = parseInt(numeric, 10) - 1;
