@@ -86,13 +86,13 @@
   position: absolute;
   top: 64px;
   left: 0;
-  height: 400px;
-  border-color: #7F7F7F; }
+  border-color: #7F7F7F;
+  padding-bottom: 20px; }
 
 .igv-file-load-widget-container-embed-position {
   position: relative;
-  height: calc(0.65 * 400px);
-  border-color: transparent; }
+  border-color: transparent;
+  padding-bottom: 20px; }
 
 .igv-file-load-widget-container {
   width: 720px;
