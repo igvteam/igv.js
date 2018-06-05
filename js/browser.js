@@ -1717,6 +1717,33 @@ var igv = (function (igv) {
         }
     };
 
+    igv.Browser.prototype.createFileLoadWidget = function (config, host, $buttonParent) {
+
+        var isHidden,
+            isEmbedded,
+            fileLoadWidgetConfig;
+
+        isHidden = (undefined === config.hidden) ? true : config.hidden;
+
+        if (false === isHidden) {
+
+            isEmbedded = (undefined === config.embed) ? false : config.embed;
+
+            // load local file
+            fileLoadWidgetConfig =
+                {
+                    mode: config.mode,
+                    embed: isEmbedded,
+                    $widgetParent: config.$widgetParent || host.$root,
+                    $buttonParent: isEmbedded ? undefined : $buttonParent
+                };
+
+            host.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
+
+        }
+
+    };
+
     // EVENTS
 
     igv.Browser.prototype.on = function (eventName, fn) {
