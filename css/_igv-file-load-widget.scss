@@ -54,19 +54,19 @@ $igv-flw-border-radius: 2px;
   top: 64px;
   left: 0;
 
-  height: $igv-flw-container-height;
+  //height: $igv-flw-container-height;
 
   border-color: $igv-flw-grey-color;
-
+  padding-bottom: 20px;
 }
 
 .igv-file-load-widget-container-embed-position {
   position: relative;
 
-  height: calc(0.65 * #{$igv-flw-container-height});
+  //height: calc(0.65 * #{$igv-flw-container-height});
 
   border-color: transparent;
-
+  padding-bottom: 20px;
 }
 
 .igv-file-load-widget-container {

@@ -304,6 +304,7 @@ var igv = (function (igv) {
                     // load local file
                     fileLoadWidgetConfig =
                     {
+                        mode: config.fileLoadWidget.mode,
                         embed: isEmbedded,
                         $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
                         $buttonParent: isEmbedded ? undefined : $igv_nav_bar_left_container
