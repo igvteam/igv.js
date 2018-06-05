@@ -68,7 +68,7 @@ var igv = (function (igv) {
         if (false === config.embed) {
 
             // header
-            $header = $("<div>", { id:"igv-file-load-widget-header" });
+            $header = $("<div>", { class:"igv-file-load-widget-header" });
             this.$container.append($header);
             // header - dismiss button
             igv.attachDialogCloseHandlerWithParent($header, function () {
