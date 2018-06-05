@@ -257,11 +257,9 @@ var igv = (function (igv) {
 
     function createStandardControls(browser, config) {
 
-        var fileLoadWidgetConfig,
-            $div,
+        var $div,
             $igv_nav_bar_left_container,
             $igv_nav_bar_right_container,
-            $current_genome,
             $genomic_location,
             $locus_size_group,
             $toggle_button_container,
@@ -270,9 +268,7 @@ var igv = (function (igv) {
             $karyo,
             $navigation,
             $searchContainer,
-            $faSearch,
-            isEmbedded,
-            isHidden;
+            $faSearch;
 
         $controls = $('<div id="igvControlDiv">');
 
@@ -293,27 +289,9 @@ var igv = (function (igv) {
             logoDiv.append(logoSvg);
             $igv_nav_bar_left_container.append(logoDiv);
 
+            // file load widget
             if (config.fileLoadWidget) {
-
-                isHidden = (undefined === config.fileLoadWidget.hidden) ? true : config.fileLoadWidget.hidden;
-
-                if (false === isHidden) {
-
-                    isEmbedded = (undefined === config.fileLoadWidget.embed) ? false : config.fileLoadWidget.embed;
-
-                    // load local file
-                    fileLoadWidgetConfig =
-                    {
-                        mode: config.fileLoadWidget.mode,
-                        embed: isEmbedded,
-                        $widgetParent: config.fileLoadWidget.$widgetParent || browser.$root,
-                        $buttonParent: isEmbedded ? undefined : $igv_nav_bar_left_container
-                    };
-
-                    browser.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
-
-                }
-
+                browser.createFileLoadWidget(config.fileLoadWidget, browser, $igv_nav_bar_left_container);
             }
 
             // current genome
