@@ -1717,7 +1717,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.createFileLoadWidget = function (config, host, $buttonParent) {
+    igv.Browser.prototype.createFileLoadWidget = function (config, host, $parent, $buttonParent) {
 
         var isHidden,
             isEmbedded,
@@ -1734,11 +1734,11 @@ var igv = (function (igv) {
                 {
                     mode: config.mode,
                     embed: isEmbedded,
-                    $widgetParent: config.$widgetParent || host.$root,
+                    $widgetParent: config.$widgetParent || $parent,
                     $buttonParent: isEmbedded ? undefined : $buttonParent
                 };
 
-            host.trackFileLoad = new igv.FileLoadWidget(fileLoadWidgetConfig);
+            host = new igv.FileLoadWidget(fileLoadWidgetConfig);
 
         }
 

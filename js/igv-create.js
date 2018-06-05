@@ -291,7 +291,7 @@ var igv = (function (igv) {
 
             // file load widget
             if (config.fileLoadWidget) {
-                browser.createFileLoadWidget(config.fileLoadWidget, browser, $igv_nav_bar_left_container);
+                browser.createFileLoadWidget(config.fileLoadWidget, browser.trackFileLoad, browser.$root, $igv_nav_bar_left_container);
             }
 
             // current genome
