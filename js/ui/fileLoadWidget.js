@@ -33,7 +33,9 @@ var igv = (function (igv) {
             obj,
             $header,
             $div,
-            classes;
+            classes,
+            hasURLContainer,
+            hasLocalFileContainer;
 
         this.config = config;
         this.$parent = config.$widgetParent;
@@ -75,22 +77,31 @@ var igv = (function (igv) {
 
         }
 
-        // local data/index
-        obj =
-            {
-                dataTitle: 'Local data file',
-                indexTitle: 'Local index file'
-            };
-        createInputContainer.call(this, this.$container, obj);
 
-        // url data/index
-        obj =
-            {
-                doURL: true,
-                dataTitle: 'Data URL',
-                indexTitle: 'Index URL'
-            };
-        createInputContainer.call(this, this.$container, obj);
+        hasLocalFileContainer = config.mode ? 'localFile' === config.mode : true;
+
+        if (hasLocalFileContainer) {
+            // local data/index
+            obj =
+                {
+                    dataTitle: 'Local data file',
+                    indexTitle: 'Local index file'
+                };
+            createInputContainer.call(this, this.$container, obj);
+        }
+
+        hasURLContainer = config.mode ? 'url' === config.mode : true;
+
+        if (hasURLContainer) {
+            // url data/index
+            obj =
+                {
+                    doURL: true,
+                    dataTitle: 'Data URL',
+                    indexTitle: 'Index URL'
+                };
+            createInputContainer.call(this, this.$container, obj);
+        }
 
         // error message container
         this.$error_message = $("<div>", { class:"igv-flw-error-message-container" });
