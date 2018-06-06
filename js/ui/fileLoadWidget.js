@@ -174,6 +174,33 @@ var igv = (function (igv) {
         this.$error_message.find('.igv-flw-error-message').text('');
     };
 
+    igv.FileLoadWidget.prototype.present = function () {
+        this.$container.show();
+    };
+
+    igv.FileLoadWidget.prototype.dismiss = function () {
+
+        this.dismissErrorMessage();
+
+        this.$container.find('input').val(undefined);
+        this.$container.find('.igv-flw-local-file-name-container').hide();
+
+        if (false === this.config.embed) {
+            this.$container.hide();
+        }
+
+        this.fileLoadManager.reset();
+
+        if (false === this.config.embed) {
+            this.$container.css({ top:'64px', left:0 });
+        }
+
+    };
+
+    igv.FileLoadWidget.prototype.customizeLayout = function (customizer) {
+        customizer(this.$container);
+    };
+
     function createInputContainer($parent, config) {
         var $container,
             $input_data_row,
@@ -336,29 +363,6 @@ var igv = (function (igv) {
 
     }
 
-    igv.FileLoadWidget.prototype.present = function () {
-        this.$container.show();
-    };
-
-    igv.FileLoadWidget.prototype.dismiss = function () {
-
-        this.dismissErrorMessage();
-
-        this.$container.find('input').val(undefined);
-        this.$container.find('.igv-flw-local-file-name-container').hide();
-
-        if (false === this.config.embed) {
-            this.$container.hide();
-        }
-
-        this.fileLoadManager.reset();
-
-        if (false === this.config.embed) {
-            this.$container.css({ top:'64px', left:0 });
-        }
-
-    };
-
     igv.FileLoadManager = function (fileLoadWidget) {
 
         this.fileLoadWidget = fileLoadWidget;
@@ -408,10 +412,6 @@ var igv = (function (igv) {
     igv.FileLoadManager.prototype.dataName = function () {
         return itemName(this.dictionary.data);
     };
-
-    function itemName (item) {
-        return igv.isFilePath(item) ? item.name : item;
-    }
 
     igv.FileLoadManager.prototype.reset = function () {
         this.dictionary = {};
@@ -491,6 +491,10 @@ var igv = (function (igv) {
         return _.contains(_.keys(this.indexExtensionToKey), extension);
     }
 
+    function itemName (item) {
+        return igv.isFilePath(item) ? item.name : item;
+    }
+
     function isIndexable(fileOrURL) {
 
         var extension;
@@ -547,8 +551,7 @@ var igv = (function (igv) {
 
             return idx > 0 ? str.substring(idx + 1) : str;
         }
-    };
-
+    }
 
     function extractQuery (uri) {
         var i1, i2, i, j, s, query, tokens;
