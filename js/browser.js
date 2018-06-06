@@ -107,13 +107,13 @@ var igv = (function (igv) {
         }
     }
 
-    igv.Browser.hasKnownFileExtension = function (config) {
+    igv.hasKnownFileExtension = function (config) {
         var extension = igv.getExtension(config);
 
         if (undefined === extension) {
             return false;
         }
-        return igv.Browser.knownFileExtensions.has(extension);
+        return igv.knownFileExtensions.has(extension);
     };
 
     //
