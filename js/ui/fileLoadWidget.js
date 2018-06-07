@@ -84,8 +84,8 @@ var igv = (function (igv) {
             // local data/index
             obj =
                 {
-                    dataTitle: 'Local data file',
-                    indexTitle: 'Local index file'
+                    dataTitle: 'Data file',
+                    indexTitle: 'Index file'
                 };
             createInputContainer.call(this, this.$container, obj);
         }
