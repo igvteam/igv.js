@@ -162,6 +162,7 @@ var igv = (function (igv) {
                 })
         }
 
+        return obj;
     };
 
     igv.FileLoadWidget.prototype.presentErrorMessage = function(message) {
