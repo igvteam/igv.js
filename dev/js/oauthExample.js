@@ -94,12 +94,13 @@ function createPicker() {
 
 // A simple callback implementation.
 function pickerCallback(data) {
-    var url, doc, name, format;
+    var url, doc, name, format, id, downloadURL;
 
     if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
         doc = data[google.picker.Response.DOCUMENTS][0];
         url = doc[google.picker.Document.URL];
         name = doc[google.picker.Document.NAME];
+        id = doc[google.picker.Document.ID];
 
         format = igv.inferFileFormat(name);
 
@@ -107,8 +108,11 @@ function pickerCallback(data) {
             alert("Unrecognized file format: " + name);
         }
         else {
+
+            downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
+
             igv.browser.loadTrack({
-                url: url,
+                url: downloadURL,
                 name: name,
                 format: format
             })
