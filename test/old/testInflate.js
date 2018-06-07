@@ -1,21 +1,24 @@
 function runInflateTests() {
 
+    console.log('before module')
 
     module("ZLib");
     var numberOfAssertions = 3;
-    asyncTest("Inflate", numberOfAssertions, function () {
+    QUnit.asyncTest("Inflate", numberOfAssertions, function (assert) {
         console.log("Inflate test");
         var url = "../test/data/misc/inflateTest.gz";
+
+        console.log(igvxhr);
 
         igvxhr.loadArrayBuffer(url).then(function (data) {
 
             var inflate = new Zlib.Gunzip(new Uint8Array(data));
-            ok(inflate);
+            assert.ok(inflate);
             var plain = inflate.decompress();
-            ok(plain);
+            assert.ok(plain);
 
             var str = String.fromCharCode.apply(null, plain);
-            ok(str.startsWith("Lorem ipsum dolor sit"));
+            assert.ok(str.startsWith("Lorem ipsum dolor sit"));
 
             start();
         });

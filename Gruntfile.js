@@ -9,6 +9,23 @@ module.exports = function (grunt) {
             all: ['test/**/*.html']
         },
 
+          qunit_puppeteer: {
+            test: {
+              options: {
+                headless: false,
+                traceSettings: {
+                  outputConsole: true,
+                  outputAllAssertions: true
+                },
+                viewport: {
+                  width: 1920,
+                  height: 1080
+                },
+                qunitPage: "http://localhost/igv.js/test/helloQUnit.html"
+              }
+            }
+          },
+
         connect: {
             uses_defaults: {}
         },
@@ -94,6 +111,8 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-qunit-puppeteer');
+
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
@@ -110,6 +129,8 @@ module.exports = function (grunt) {
     });
 
     grunt.registerTask('doc', ['md2html']);
+
+    grunt.registerTask('doTestChrome', ['qunit_puppeteer:test']);
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
