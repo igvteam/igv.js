@@ -1717,7 +1717,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.createFileLoadWidget = function (config, $parent, $buttonParent) {
+    igv.Browser.prototype.createFileLoadWidget = function (config, fileLoadManager, $parent, $buttonParent) {
 
         var isHidden,
             isEmbedded,
@@ -1738,7 +1738,7 @@ var igv = (function (igv) {
                     $buttonParent: isEmbedded ? undefined : $buttonParent
                 };
 
-            return new igv.FileLoadWidget(fileLoadWidgetConfig)
+            return new igv.FileLoadWidget(fileLoadWidgetConfig, fileLoadManager)
         }
 
     };
