@@ -49,29 +49,22 @@ $igv-flw-border-radius: 2px;
 }
 
 .igv-file-load-widget-container-igvjs-position {
-  z-index: 2048;
   position: absolute;
   top: 64px;
   left: 0;
-
-  //height: $igv-flw-container-height;
-
   border-color: $igv-flw-grey-color;
-  padding-bottom: 20px;
+  z-index: 2048;
 }
 
 .igv-file-load-widget-container-embed-position {
   position: relative;
-
-  //height: calc(0.65 * #{$igv-flw-container-height});
-
   border-color: transparent;
-  padding-bottom: 20px;
 }
 
 .igv-file-load-widget-container {
 
   width:$igv-flw-container-width;
+  padding-bottom: 20px;
 
   color: $igv-flw-grey-color;
   font-family: $igv-flw-font-face;
