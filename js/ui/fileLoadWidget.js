@@ -28,7 +28,7 @@
  * Created by dat on 4/8/18.
  */
 var igv = (function (igv) {
-    igv.FileLoadWidget = function (config) {
+    igv.FileLoadWidget = function (config, fileLoadManager) {
         var self = this,
             obj,
             $header,
@@ -40,7 +40,8 @@ var igv = (function (igv) {
         this.config = config;
         this.$parent = config.$widgetParent;
 
-        this.fileLoadManager = new igv.FileLoadManager(this);
+        this.fileLoadManager = fileLoadManager;
+        this.fileLoadManager.fileLoadWidget = this;
 
         // file load navbar button
         if (false === config.embed) {
@@ -368,9 +369,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.FileLoadManager = function (fileLoadWidget) {
-
-        this.fileLoadWidget = fileLoadWidget;
+    igv.FileLoadManager = function () {
 
         this.dictionary = {};
 
