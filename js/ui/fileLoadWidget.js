@@ -301,11 +301,11 @@ var igv = (function (igv) {
         $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
         $parent.append($file_chooser_container);
 
-        $label = $('<label>'/*, { for:id }*/);
+        $label = $('<label>', { for:id });
         $file_chooser_container.append($label);
         $label.text('Choose file...');
 
-        $input = $('<input>', { class:"igv-flw-file-chooser-input", /*id:id,*/ name:id, type:'file' });
+        $input = $('<input>', { class:"igv-flw-file-chooser-input", id:id, name:id, type:'file' });
         $file_chooser_container.append($input);
 
         $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
