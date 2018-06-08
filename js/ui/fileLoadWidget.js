@@ -125,7 +125,11 @@ var igv = (function (igv) {
             $div.append(this.$ok);
             this.$ok.text('OK');
             this.$ok.on('click', function () {
-                self.okHandler();
+
+                if (self.okHandler()) {
+                    self.dismiss();
+                }
+
             });
 
             // cancel
@@ -149,7 +153,7 @@ var igv = (function (igv) {
         var obj;
         obj = this.fileLoadManager.trackLoadConfiguration();
         if (obj) {
-            this.dismiss();
+            // this.dismiss();
             extractName(obj)
                 .then(function (name) {
                     obj.name = name;
