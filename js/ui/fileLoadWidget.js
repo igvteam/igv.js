@@ -296,16 +296,19 @@ var igv = (function (igv) {
             $data_drop_target,
             $label,
             $input,
-            $file_name;
+            $file_name,
+            str;
 
         $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
         $parent.append($file_chooser_container);
 
-        $label = $('<label>', { for:id });
+        str = id + igv.guid();
+
+        $label = $('<label>', { for:str });
         $file_chooser_container.append($label);
         $label.text('Choose file...');
 
-        $input = $('<input>', { class:"igv-flw-file-chooser-input", id:id, name:id, type:'file' });
+        $input = $('<input>', { class:"igv-flw-file-chooser-input", id:str, name:str, type:'file' });
         $file_chooser_container.append($input);
 
         $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
