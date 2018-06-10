@@ -53,17 +53,18 @@ $igv-flw-border-radius: 2px;
   top: 64px;
   left: 0;
   border-color: $igv-flw-grey-color;
+  width:$igv-flw-container-width;
   z-index: 2048;
 }
 
 .igv-file-load-widget-container-embed-position {
   position: relative;
   border-color: transparent;
+  width:100%;
 }
 
 .igv-file-load-widget-container {
 
-  width:$igv-flw-container-width;
   padding-bottom: 20px;
 
   color: $igv-flw-grey-color;
