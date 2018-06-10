@@ -86,14 +86,15 @@
   top: 64px;
   left: 0;
   border-color: #7F7F7F;
+  width: 720px;
   z-index: 2048; }
 
 .igv-file-load-widget-container-embed-position {
   position: relative;
-  border-color: transparent; }
+  border-color: transparent;
+  width: 100%; }
 
 .igv-file-load-widget-container {
-  width: 720px;
   padding-bottom: 20px;
   color: #7F7F7F;
   font-family: "Open Sans", sans-serif;
