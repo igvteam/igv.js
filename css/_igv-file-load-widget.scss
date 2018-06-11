@@ -60,7 +60,8 @@ $igv-flw-border-radius: 2px;
 .igv-file-load-widget-container-embed-position {
   position: relative;
   border-color: transparent;
-  width:100%;
+  //width:100%;
+  width:$igv-flw-container-width;
 }
 
 .igv-file-load-widget-container {
