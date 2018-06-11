@@ -11,14 +11,12 @@ function initClient() {
 
         .then(function (properties) {
 
-            var foo = {
+            return gapi.client.init({
                 'clientId': properties["client_id"],
                 'scope': scope
-
-            };
-
-            return gapi.client.init(foo);
+            });
         })
+
         .then(function () {
 
             gapi.signin2.render('signInButton', {
@@ -37,21 +35,8 @@ function initClient() {
 
             div = $("#myDiv")[0];
             options = {
-
                 genome: "hg19",
-                locus: 'myc',
-                apiKey: igv.Google.properties["api_key"],
-                fileLoadWidget: {
-                    hidden: false,
-                    embed: false
-                },
-                tracks: [
-                    {
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                        name: "Genes",
-                        order: 10000
-                    }
-                ]
+                apiKey: igv.Google.properties["api_key"]
             };
 
             browser = igv.createBrowser(div, options);
@@ -66,8 +51,21 @@ function initClient() {
 
     function updateSigninStatus(isSignedIn) {
 
-        var user = gapi.auth2.getAuthInstance().currentUser.get();
-        igv.setGoogleOauthToken(user.getAuthResponse().access_token);
+        if(isSignedIn) {
+            $("#signInButton").hide();
+
+            var user = gapi.auth2.getAuthInstance().currentUser.get();
+            var profile = user.getBasicProfile();
+            var username = profile.getName();    
+            $("#logoutLink").html(username);
+            $("#logoutLink").show();
+
+            igv.setGoogleOauthToken(user.getAuthResponse().access_token);
+        }
+        else {
+            $("#logoutLink").hide();
+
+        }
     }
 
 }
@@ -134,8 +132,6 @@ function createPicker() {
                 .then(function (user) {
 
                     var authResponse = user.getAuthResponse();
-                    var profile = user.getBasicProfile();
-                    var username = profile.getName();          // TODO -- display username along with sign-out button
 
                     igv.setGoogleOauthToken(authResponse["access_token"]);
 
