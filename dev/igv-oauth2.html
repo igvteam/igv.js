@@ -6,6 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
+    <meta name="google-signin-client_id"
+          content="661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com">
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
@@ -90,8 +92,6 @@
 
     <script src="../js/karyo/karyo.js"></script>
 
-    <script src="../js/oauth/google.js"></script>
-
     <script src="../js/tdf/tdfReader.js"></script>
     <script src="../js/tdf/tdfSource.js"></script>
 
@@ -160,9 +160,11 @@
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
-    <div id="signInButton" style="display:none;" class="g-signin2" data-onsuccess="handleSignInClick"></div>
+
+    <div id="signInButton"></div>
+
     <div>
-        <button id="googlePickerButton" onclick="createPicker()">Google Drive</button>
+        <button id="googlePickerButton" disabled onclick="createPicker()">Google Drive</button>
     </div>
 
     <p></p>
@@ -207,9 +209,12 @@
 
         gapi.load('client:auth2', initClient);
 
-        gapi.load('picker', onPickerApiLoad);
+        gapi.load('picker', function () {
+            document.getElementById("googlePickerButton").disabled=false;
+        });
 
     });
+
 
 </script>
 
