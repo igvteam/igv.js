@@ -211,7 +211,6 @@
         border-width: thin;
         border-radius: calc(2 * 2px); }
       .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-local-file-name-container {
-        max-width: 256px;
         height: 36px;
         color: #373737;
         line-height: 36px;

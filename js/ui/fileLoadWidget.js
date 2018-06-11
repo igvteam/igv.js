@@ -315,9 +315,9 @@ var igv = (function (igv) {
         $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
         $parent.append($data_drop_target);
         $data_drop_target.text('or drop file');
-        if (true === doEmbed) {
+        // if (true === doEmbed) {
             $data_drop_target.hide();
-        }
+        // }
 
         $file_name = $("<div>", { class:"igv-flw-local-file-name-container" });
         $parent.append($file_name);
