@@ -106,8 +106,30 @@ var igv = (function (igv) {
                 endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
 
             return igv.xhr.loadJson(endPoint, igv.buildOptions({}));
+        },
+
+        loadGoogleProperties: function (propertiesURL) {
+
+            return igv.xhr.loadArrayBuffer(propertiesURL)
+                .then(function (arrayBuffer) {
+                    var inflate, plain, str;
+
+                    inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+                    plain = inflate.decompress();
+                    str = String.fromCharCode.apply(null, plain);
+                    igv.Google.properties = JSON.parse(str);
+
+                    return igv.Google.properties;
+
+                })
         }
     }
+
+
+    igv.oauth = {
+        google: {}
+    };
+
 
     function getGoogleDriveFileID(link) {
 
@@ -121,7 +143,7 @@ var igv = (function (igv) {
                 return link.substring(i1, i2)
             }
             else if (i1 > 0) {
-                 return link.substring(i1);
+                return link.substring(i1);
             }
 
         }
