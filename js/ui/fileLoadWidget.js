@@ -86,7 +86,8 @@ var igv = (function (igv) {
             obj =
                 {
                     dataTitle: 'Data file',
-                    indexTitle: 'Index file'
+                    indexTitle: 'Index file',
+                    doEmbed: config.embed || false
                 };
             createInputContainer.call(this, this.$container, obj);
         }
@@ -229,7 +230,7 @@ var igv = (function (igv) {
         if (true === config.doURL) {
             createURLContainer.call(this, $input_data_row, 'igv-flw-data-url', false);
         } else {
-            createLocalFileContainer.call(this, $input_data_row, 'igv-flw-local-data-file', false);
+            createLocalFileContainer.call(this, $input_data_row, 'igv-flw-local-data-file', false, config.doEmbed);
         }
 
         // index
@@ -243,7 +244,7 @@ var igv = (function (igv) {
         if (true === config.doURL) {
             createURLContainer.call(this, $input_index_row, 'igv-flw-index-url', true);
         } else {
-            createLocalFileContainer.call(this, $input_index_row, 'igv-flw-local-index-file', true);
+            createLocalFileContainer.call(this, $input_index_row, 'igv-flw-local-index-file', true, config.doEmbed);
         }
 
     }
@@ -290,7 +291,7 @@ var igv = (function (igv) {
 
     }
 
-    function createLocalFileContainer($parent, id, isIndexFile) {
+    function createLocalFileContainer($parent, id, isIndexFile, doEmbed) {
         var self = this,
             $file_chooser_container,
             $data_drop_target,
@@ -314,6 +315,9 @@ var igv = (function (igv) {
         $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
         $parent.append($data_drop_target);
         $data_drop_target.text('or drop file');
+        if (true === doEmbed) {
+            $data_drop_target.hide();
+        }
 
         $file_name = $("<div>", { class:"igv-flw-local-file-name-container" });
         $parent.append($file_name);
