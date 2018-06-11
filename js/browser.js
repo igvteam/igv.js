@@ -480,29 +480,35 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadTrackList = function (configList) {
 
         var self = this,
-            loadedTracks = [],
-            groupAutoscaleViews;
+            groupAutoscaleViews,
+            promises;
 
+        promises = [];
         configList.forEach(function (config) {
-            var track = self.loadTrack(config);
-            if (track) {
-                loadedTracks.push(track);
-
-            }
+            promises.push(self.loadTrack(config));
         });
 
-        groupAutoscaleViews = this.trackViews.filter(function (trackView) {
-            return trackView.track.autoscaleGroup
-        })
+        return Promise.all(promises)
+            .then(function (loadedTracks) {
 
-        if (groupAutoscaleViews.length > 0) {
-            this.updateViews(this.genomicStateList[0], groupAutoscaleViews);
-        }
+                groupAutoscaleViews = self.trackViews.filter(function (trackView) {
+                    return trackView.track.autoscaleGroup
+                })
 
+                if (groupAutoscaleViews.length > 0) {
+                    this.updateViews(self.genomicStateList[0], groupAutoscaleViews);
+                }
 
-        return loadedTracks;
+                return loadedTracks;
+            })
     };
 
+    /**
+     * Return a promise to load a track
+     *
+     * @param config
+     * @returns {*}
+     */
     igv.Browser.prototype.loadTrack = function (config) {
 
         var self = this,
@@ -510,36 +516,75 @@ var igv = (function (igv) {
             property,
             newTrack;
 
-        igv.inferTrackTypes(config);
+        return resolveTrackProperties(config)
 
-        // Set defaults if specified
-        if (this.trackDefaults && config.type) {
-            settings = this.trackDefaults[config.type];
-            if (settings) {
-                for (property in settings) {
-                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                        config[property] = settings[property];
+            .then(function (config) {
+                igv.inferTrackTypes(config);
+
+                // Set defaults if specified
+                if (self.trackDefaults && config.type) {
+                    settings = self.trackDefaults[config.type];
+                    if (settings) {
+                        for (property in settings) {
+                            if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                                config[property] = settings[property];
+                            }
+                        }
                     }
                 }
+
+                newTrack = igv.createTrack(config);
+
+                if (undefined === newTrack) {
+                    igv.presentAlert("Unknown file type: " + config.url, undefined);
+                    return newTrack;
+                }
+
+                // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+                if (undefined === newTrack.order) {
+                    newTrack.order = self.trackViews.length;
+                }
+
+                self.addTrack(newTrack);
+
+                return newTrack;
+            })
+
+        function resolveTrackProperties(config) {
+            if (typeof config.url === 'string' && config.url.startsWith("https://drive.google.com")) {
+
+                return igv.Google.getDriveFileInfo(config.url)
+
+                    .then(function (json) {
+                        var format;
+
+                        if (!config.name) {
+                            config.name = json.originalFileName;
+                        }
+                        if (!config.format) {
+                            config.format = igv.inferFileFormat(config.name);
+                        }
+                        if(!config.format) {
+                            igv.presentAlert("Unknown file format: " + config.format);
+                        }
+
+                        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
+
+                        if(config.indexURL) {
+                            config.indexURL = igv.Google.driveDownloadURL(config.indexURL);
+                        }
+
+                        return config;
+                    })
+
+
+            }
+            else {
+                return Promise.resolve(config);
             }
         }
-
-        newTrack = igv.createTrack(config);
-
-        if (undefined === newTrack) {
-            igv.presentAlert("Unknown file type: " + config.url, undefined);
-            return newTrack;
-        }
-
-        // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
-        if (undefined === newTrack.order) {
-            newTrack.order = this.trackViews.length;
-        }
-
-        self.addTrack(newTrack);
-
-        return newTrack;
     };
+
 
     /**
      * Add a new track.  Each track is associated with the following DOM elements
@@ -1390,7 +1435,7 @@ var igv = (function (igv) {
                     feature = self.featureDB[locus.toLowerCase()];
                     if (feature) {
                         chromosome = self.genome.getChromosome(feature.chr);
-                        if(chromosome) {
+                        if (chromosome) {
                             genomicState = {
                                 chromosome: chromosome,
                                 start: feature.start,

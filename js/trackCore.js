@@ -58,6 +58,11 @@ var igv = (function (igv) {
 
     igv.knownFileExtensions = new Set(list);
 
+    /**
+     * Return a custom format object with the given name.
+     * @param name
+     * @returns {*}
+     */
     igv.getFormat = function (name) {
 
         if (undefined === igv.browser || undefined === igv.browser.formats) {

@@ -1,109 +1,194 @@
 <!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html lang="en">
 <head>
-    <meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-    <title>Google Picker Example</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="google-signin-client_id"
+          content="661332306814-8nt29308rppg325bkq372vli8nm3na14.apps.googleusercontent.com">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Dev</title>
 
-    <script type="text/javascript">
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css">
 
-        // The Browser API key obtained from the Google API Console.
-        var developerKey = 'AIzaSyBoqQcYKfBaH_Ws17D6Nl_1Y29Sj7SY3ZE';
+    <!-- Dev CSS -->
+    <link rel="stylesheet" type="text/css" href="css/dev.css">
 
-        // The Client ID obtained from the Google API Console. Replace with your own Client ID.
-        var clientId = '923031236522-6pgi1r75i94eqlqf9ne0cfjhuqmse2hh.apps.googleusercontent.com';
+    <!-- Vendor CSS -->
+    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
-        // Replace with your own project number from console.developers.google.com.
-        // See "Project number" under "IAM & Admin" > "Settings"
-        var appId = "923031236522";
+    <!-- Vendor JS -->
+    <script src="../vendor/jquery-1.12.4.js"></script>
+    <script src="../vendor/jquery-ui.js"></script>
+    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/underscore.js"></script>
+    <script src="../vendor/promise.js"></script>
 
-        // google.picker.​ViewId.PHOTOS
-        // var scope = 'https://www.googleapis.com/auth/photos';
+    <script src="../vendor/zlib_and_gzip.js"></script>
+    <script src="../vendor/inflate.js"></script>
 
-        // google.picker.ViewId.DOCS
-        var scope = ['https://www.googleapis.com/auth/drive.readonly'];
+    <!-- IGV JS -->
+    <script src="../js/igv-icons.js"></script>
+    <script src="../js/session/igvXmlSession.js"></script>
+    <script src="../js/feature/mergedTrack.js"></script>
 
-        var pickerApiLoaded = false;
-        var oauthToken;
 
-        // Use the API Loader script to load google.picker and gapi.auth.
-        function onApiLoad() {
-            gapi.load('auth2', onAuthApiLoad);
-            gapi.load('picker', onPickerApiLoad);
-        }
+    <script src="../js/bam/coverageMap.js"></script>
+    <script src="../js/bam/bamReader.js"></script>
+    <script src="../js/bam/bamReaderNonIndexed.js"></script>
+    <script src="../js/bam/bgzf.js"></script>
+    <script src="../js/bam/bamSource.js"></script>
+    <script src="../js/bam/bamTrack.js"></script>
+    <script src="../js/bam/bamAlignment.js"></script>
+    <script src="../js/bam/bamAlignmentRow.js"></script>
+    <script src="../js/bam/bamIndex.js"></script>
+    <script src="../js/bam/alignmentContainer.js"></script>
+    <script src="../js/bam/pairedAlignment.js"></script>
+    <script src="../js/bam/bamUtils.js"></script>
+    <script src="../js/bam/bamWebserviceReader.js"></script>
+    <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
 
-        function onAuthApiLoad() {
-            var authBtn = document.getElementById('auth');
-            authBtn.disabled = false;
-            authBtn.addEventListener('click', function() {
-                gapi.auth2.authorize({
-                    client_id: clientId,
-                    scope: scope
-                }, handleAuthResult);
-            });
-        }
+    <script src="../js/bigQuery/ccp.js"></script>
 
-        function onPickerApiLoad() {
-            pickerApiLoaded = true;
-            //createPicker();
-        }
+    <script src="../js/bigwig/bufferedReader.js"></script>
+    <script src="../js/bigwig/bwReader.js"></script>
+    <script src="../js/bigwig/bwSource.js"></script>
 
-        function handleAuthResult(authResult) {
-            if (authResult && !authResult.error) {
-                oauthToken = authResult.access_token;
-                //createPicker();
-            }
-        }
+    <script src="../js/encode/encodeDataSource.js"></script>
 
-        // Create and render a Picker object for picking user Photos.
-        function createPicker() {
-            var view,
-                    picker;
+    <script src="../js/feature/featureCache.js"></script>
+    <script src="../js/feature/gffHelper.js"></script>
+    <script src="../js/feature/featureSource.js"></script>
+    <script src="../js/feature/featureParsers.js"></script>
+    <script src="../js/feature/tribble.js"></script>
+    <script src="../js/feature/featureFileReader.js"></script>
+    <script src="../js/feature/customServiceReader.js"></script>
+    <script src="../js/feature/aneuSource.js"></script>
+    <script src="../js/feature/aneuTrack.js"></script>
+    <script src="../js/feature/featureTrack.js"></script>
+    <script src="../js/feature/wigTrack.js"></script>
+    <script src="../js/feature/featureUtils.js"></script>
+    <script src="../js/feature/segParser.js"></script>
+    <script src="../js/feature/segTrack.js"></script>
+    <script src="../js/feature/dataWrapper.js"></script>
 
-            if (pickerApiLoaded && oauthToken) {
+    <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
+    <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
+    <script src="../js/ga4gh/ga4ghHelper.js"></script>
+    <script src="../js/ga4gh/googleUtils.js"></script>
 
-                view = new google.picker.View(google.picker.ViewId.DOCS);
+    <script src="../js/gtex/eqtlTrack.js"></script>
+    <script src="../js/gtex/gtexFileReader.js"></script>
+    <script src="../js/gtex/gtexReader.js"></script>
+    <script src="../js/gtex/gtex.js"></script>
+    <script src="../js/gtex/immvarReader.js"></script>
 
-                picker = new google.picker
-                        .PickerBuilder()
-                        .setAppId(appId)
-                        .setOAuthToken(oauthToken)
-                        .addView(view)
-                        .setDeveloperKey(developerKey)
-                        .setCallback(pickerCallback)
-                        .build();
+    <script src="../js/gwas/t2dVariantSource.js"></script>
+    <script src="../js/gwas/gwasTrack.js"></script>
 
-                picker.setVisible(true);
-            }
-        }
+    <script src="../js/karyo/karyo.js"></script>
 
-        // A simple callback implementation.
-        function pickerCallback(data) {
-            var url,
-                    doc,
-                    message;
+    <script src="../js/tdf/tdfReader.js"></script>
+    <script src="../js/tdf/tdfSource.js"></script>
 
-            url = 'nothing';
-            if (data[google.picker.Response.ACTION] === google.picker.Action.PICKED) {
-                doc = data[google.picker.Response.DOCUMENTS][0];
-                url = doc[google.picker.Document.URL];
-            }
-            message = 'You picked: ' + url;
-            document.getElementById('result').innerHTML = message;
-        }
-    </script>
+    <script src="../js/ui/trackMenuPopupDialog.js"></script>
+    <script src="../js/ui/dataRangeDialog.js"></script>
+    <script src="../js/ui/inputDialog.js"></script>
+    <script src="../js/ui/trackRemovalDialog.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/cursorGuide.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
+    <script src="../js/ui/trackLabelControl.js"></script>
+    <script src="../js/ui/userFeedback.js"></script>
+    <script src="../js/ui/alertDialog.js"></script>
+    <script src="../js/ui/popover.js"></script>
+    <script src="../js/ui/chromosomeSelectWidget.js"></script>
+
+    <script src="../js/variant/vcfParser.js"></script>
+    <script src="../js/variant/variant.js"></script>
+    <script src="../js/variant/variantTrack.js"></script>
+
+    <script src="../js/sampleInformation.js"></script>
+    <script src="../js/igv-create.js"></script>
+    <script src="../js/browser.js"></script>
+    <script src="../js/ideogram.js"></script>
+    <script src="../js/windowSizePanel.js"></script>
+    <script src="../js/referenceFrame.js"></script>
+    <script src="../js/igv-canvas.js"></script>
+    <script src="../js/genome.js"></script>
+    <script src="../js/trackView.js"></script>
+    <script src="../js/viewport.js"></script>
+
+    <script src="../js/rulerTrack.js"></script>
+    <script src="../js/rulerSweeper.js"></script>
+
+    <script src="../js/igv-math.js"></script>
+    <script src="../js/igv-color.js"></script>
+    <script src="../js/igv-utils.js"></script>
+    <script src="../js/parseUtils.js"></script>
+    <script src="../js/fasta.js"></script>
+    <script src="../js/sequenceTrack.js"></script>
+
+    <script src="../js/igv-exts.js"></script>
+    <script src="../js/igvxhr.js"></script>
+    <script src="../js/binary.js"></script>
+
+    <script src="../js/intervalTree.js"></script>
+
+    <script src="../js/trackCore.js"></script>
+    <script src="../js/ui/fileLoadWidget.js"></script>
+
+    <script src="../js/set.js"></script>
+
+    <script src="../js/roi.js"></script>
+    <script src="../js/roiSource.js"></script>
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
+
+    <script src="js/googlePicker.js"></script>
+
+    <script src="https://apis.google.com/js/platform.js"></script>
+
 
 </head>
 
 <body>
 
-<button type="button" id="auth" disabled>Authenticate</button>
-<button type="button" id="loadButton" onclick="createPicker()">Open </button>
-
-<div id="result"></div>
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 
-<!-- The Google API Loader script. -->
-<script type="text/javascript" src="https://apis.google.com/js/api.js?onload=onApiLoad"></script>
+    <div id="signInButton"></div>
+    <a href = "" id="logoutLink" style="display:none" onclick="signOut()"></a>
+    <p></p>
+    <div>
+        <button id="googlePickerButton" disabled onclick="createPicker()">Google Drive</button>
+    </div>
+
+
+
+
+</div>
+
+<script type="text/javascript">
+
+    $(document).ready(function () {
+
+        gapi.load('client:auth2', initClient);
+
+        gapi.load('picker', function () {
+            document.getElementById("googlePickerButton").disabled=false;
+        });
+
+    });
+
+
+</script>
+
 
 </body>
+
 </html>

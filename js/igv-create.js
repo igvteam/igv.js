@@ -182,6 +182,10 @@ var igv = (function (igv) {
         igv.oauth.google.access_token = token;
     }
 
+    igv.getGoogleOauthToken = function () {
+        return igv.oauth.google.access_token;
+    }
+
     function setTrackOrder(conf) {
 
         var trackOrder = 1;
