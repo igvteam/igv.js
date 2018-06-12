@@ -73,54 +73,56 @@ var igv = (function (igv) {
 
     };
 
-    igv.createTrack = function (conf) {
+    igv.createTrack = function (config) {
 
-        var type = (undefined === conf.type) ? 'unknown_type' : conf.type.toLowerCase();
+        var type, track;
+        
+        type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
 
         switch (type) {
-
+            
             case "gwas":
-                return new igv.GWASTrack(conf);
+                return new igv.GWASTrack(config);
                 break;
 
             case "annotation":
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(conf);
+                return new igv.FeatureTrack(config);
                 break;
 
             case "variant":
-                return new igv.VariantTrack(conf);
+                return new igv.VariantTrack(config);
                 break;
 
             case "alignment":
-                return new igv.BAMTrack(conf);
+                return new igv.BAMTrack(config);
                 break;
 
             case "data":  // deprecated
             case "wig":
-                return new igv.WIGTrack(conf);
+                return new igv.WIGTrack(config);
                 break;
 
             case "sequence":
-                return new igv.SequenceTrack(conf);
+                return new igv.SequenceTrack(config);
                 break;
 
             case "eqtl":
-                return new igv.EqtlTrack(conf);
+                return new igv.EqtlTrack(config);
                 break;
 
             case "seg":
-                return new igv.SegTrack(conf);
+                return new igv.SegTrack(config);
                 break;
 
             case "aneu":
-                return new igv.AneuTrack(conf);
+                return new igv.AneuTrack(config);
                 break;
 
             case "merged":
-                return new igv.MergedTrack(conf);
+                return new igv.MergedTrack(config);
 
             default:
                 return undefined;

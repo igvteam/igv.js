@@ -174,7 +174,7 @@ var igv = (function (igv) {
             this.contentDiv.append(this.messageDiv)
         }
         this.messageDiv.textContent = message
-        this.messageDiv.style.display = ''
+        this.messageDiv.style.display = 'inline-block'
     }
 
     igv.Viewport.prototype.hideMessage = function (message) {
