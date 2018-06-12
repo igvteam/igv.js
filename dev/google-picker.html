@@ -158,17 +158,19 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<div id="myDiv" style="padding-top: 10px;padding-bottom: 20px; height: auto">
 
-
-    <div id="signInButton"></div>
-    <a href = "" id="logoutLink" style="display:none" onclick="signOut()"></a>
-    <p></p>
+    <!--<div id="signInButton"></div>-->
+    <div id="switchUserLink"></div>
+    <br/>
     <div>
         <button id="googlePickerButton" disabled onclick="createPicker()">Google Drive</button>
     </div>
-
-
+    <br/>
+    <div>
+        <button id="bookmarkButton" onclick="bookmark()">Bookmark</button>
+    </div>
+    <br/>
 
 
 </div>
@@ -180,7 +182,7 @@
         gapi.load('client:auth2', initClient);
 
         gapi.load('picker', function () {
-            document.getElementById("googlePickerButton").disabled=false;
+            document.getElementById("googlePickerButton").disabled = false;
         });
 
     });

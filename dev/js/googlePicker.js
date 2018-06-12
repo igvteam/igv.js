@@ -19,24 +19,13 @@ function initClient() {
 
         .then(function () {
 
-            gapi.signin2.render('signInButton', {
-                'scope': scope,
-                'width': 120,
-                'height': 30,
-                'longtitle': false,
-                'theme': 'dark',
-                'onsuccess': handleSignInClick,
-                'onfailure': function (error) {
-                    console.log(error)
-                }
-            });
-
             var div, options, browser;
 
             div = $("#myDiv")[0];
             options = {
                 genome: "hg19",
-                apiKey: igv.Google.properties["api_key"]
+                apiKey: igv.Google.properties["api_key"],
+                queryParametersSupported: true
             };
 
             browser = igv.createBrowser(div, options);
@@ -44,41 +33,28 @@ function initClient() {
             gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
         })
 
-
-    function handleSignInClick(event) {
-        // Nothing to do
-    }
+    //
+    // function handleSignInClick(event) {
+    //     // Nothing to do
+    // }
 
     function updateSigninStatus(isSignedIn) {
 
-        if(isSignedIn) {
-            $("#signInButton").hide();
+        if (isSignedIn) {
+            //$("#signInButton").hide();
 
             var user = gapi.auth2.getAuthInstance().currentUser.get();
             var profile = user.getBasicProfile();
-            var username = profile.getName();    
-            $("#logoutLink").html(username);
-            $("#logoutLink").show();
-
-            igv.setGoogleOauthToken(user.getAuthResponse().access_token);
-        }
-        else {
-            $("#logoutLink").hide();
+            var username = profile.getName();
+            $("#switchUserLink").html("Logged in as: " + username);
 
         }
+
     }
 
 }
 
 
-function signOut() {
-
-    var auth2 = gapi.auth2.getAuthInstance();
-    auth2.signOut().then(function () {
-        igv.setGoogleOauthToken(undefined);
-        console.log('User signed out.');
-    });
-}
 
 // Create and render a Picker object for picking files.
 function createPicker() {
@@ -117,28 +93,32 @@ function createPicker() {
         if (igv.oauth.google.access_token) {
             return Promise.resolve(igv.oauth.google.access_token);
         } else {
-            var scope, options;
-
-            scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
-
-            options = new gapi.auth2.SigninOptionsBuilder();
-            //options.setAppPackageName('com.example.app');
-            //options.setFetchBasicProfile(true);
-            options.setPrompt('select_account');
-            options.setScope(scope);
-
-            return gapi.auth2.getAuthInstance().signIn(options)
-
-                .then(function (user) {
-
-                    var authResponse = user.getAuthResponse();
-
-                    igv.setGoogleOauthToken(authResponse["access_token"]);
-
-                    return authResponse["access_token"];
-                })
+            return signIn();
         }
+    }
 
+
+    function signIn() {
+
+        var scope, options;
+
+        scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+
+        options = new gapi.auth2.SigninOptionsBuilder();
+        //options.setAppPackageName('com.example.app');
+        options.setPrompt('select_account');
+        options.setScope(scope);
+
+        return gapi.auth2.getAuthInstance().signIn(options)
+
+            .then(function (user) {
+
+                var authResponse = user.getAuthResponse();
+
+                igv.setGoogleOauthToken(authResponse["access_token"]);
+
+                return authResponse["access_token"];
+            })
     }
 
     function pickerCallback(data) {
@@ -168,7 +148,20 @@ function createPicker() {
         }
 
     }
+}
 
+function bookmark() {
+
+    var surl,
+        path,
+        idx;
+
+    path = window.location.href.slice();
+    idx = path.indexOf("?");
+
+    surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + igv.browser.compressedSession();
+
+    window.history.pushState({}, "IGV", surl);
 }
 
 
