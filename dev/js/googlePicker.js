@@ -141,6 +141,7 @@ function createPicker() {
 
                 igv.browser.loadTrack({
                     url: downloadURL,
+                    filename: name,
                     name: name,
                     format: format
                 })

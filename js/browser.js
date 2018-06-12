@@ -551,26 +551,22 @@ var igv = (function (igv) {
             })
 
         function resolveTrackProperties(config) {
+
             if (typeof config.url === 'string' && config.url.startsWith("https://drive.google.com")) {
 
                 return igv.Google.getDriveFileInfo(config.url)
 
                     .then(function (json) {
-                        var format;
-
-                        if (!config.name) {
-                            config.name = json.originalFileName;
-                        }
-                        if (!config.format) {
-                            config.format = igv.inferFileFormat(config.name);
-                        }
-                        if(!config.format) {
-                            igv.presentAlert("Unknown file format: " + config.format);
-                        }
 
                         config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
 
-                        if(config.indexURL) {
+                        if (!config.filename) {
+                            config.filename = json.originalFileName;
+                        }
+                        if (!config.format) {
+                            config.format = igv.inferFileFormat(config.filename);
+                        }
+                        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
                             config.indexURL = igv.Google.driveDownloadURL(config.indexURL);
                         }
 
@@ -580,10 +576,15 @@ var igv = (function (igv) {
 
             }
             else {
+                if(config.filename) {
+                    config.filename = config.filename || igv.getFilename(config.url);
+                }
                 return Promise.resolve(config);
             }
+
+
         }
-    };
+    }
 
 
     /**
@@ -1776,12 +1777,12 @@ var igv = (function (igv) {
 
             // load local file
             fileLoadWidgetConfig =
-                {
-                    mode: config.mode,
-                    embed: isEmbedded,
-                    $widgetParent: config.$widgetParent || $parent,
-                    $buttonParent: isEmbedded ? undefined : $buttonParent
-                };
+            {
+                mode: config.mode,
+                embed: isEmbedded,
+                $widgetParent: config.$widgetParent || $parent,
+                $buttonParent: isEmbedded ? undefined : $buttonParent
+            };
 
             return new igv.FileLoadWidget(fileLoadWidgetConfig, fileLoadManager)
         }

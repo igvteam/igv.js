@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     igv.Google = {
 
+        fileInfoCache: {},
+
         // Crude test, this is conservative, nothing bad happens for a false positive
         isGoogleURL: function (url) {
             return url.includes("googleapis");
