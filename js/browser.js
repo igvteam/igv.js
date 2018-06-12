@@ -229,7 +229,7 @@ var igv = (function (igv) {
                 return Promise.resolve(undefined);
             }
 
-            filename = (typeof urlOrFile === 'string' ? urlOrFile : urlOrFile.name);
+            filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
 
             if (filename.startsWith("blob:")) {
                 var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
