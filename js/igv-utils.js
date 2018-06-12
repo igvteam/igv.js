@@ -126,8 +126,29 @@ var igv = (function (igv) {
         return index < 0 ? filename : filename.substr(1 + index);
     };
 
+    /**
+     * Return the filename from the path.   Example
+     *   https://foo.com/bar.bed?param=2   => bar.bed
+     * @param path
+     */
+    igv.getFilename = function (path) {
+
+        var index, filename;
+
+        index = path.lastIndexOf("/");
+        filename = index < 0 ? path : path.substr(index+1);
+
+        //Strip parameters -- handle local files later
+        index = filename.indexOf("?");
+        if (index > 0) {
+            filename = filename.substr(0, index);
+        }
+
+        return filename;
+    }
+
     igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
-        var str = (fileOrURL instanceof File) ? fileOrURL.name : fileOrURL;
+        var str = (fileOrURL instanceof File) ? fileOrURL.name : igv.getFilename(fileOrURL);
         return str.toLowerCase().endsWith( suffix )
     };
 
