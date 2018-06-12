@@ -158,8 +158,24 @@ var igv = (function (igv) {
                         else {
                             fullfill(xhr.response);
                         }
-                    }
-                    else {
+                    } else if (gapi && (xhr.status === 404 || xhr.status == 403 && isGoogleURL(url)) && !options.retries) {
+
+                        options.retries = 1;
+
+                        return getAccessToken()
+                            .then(function (accessToken) {
+                                options.oauthToken = accessToken;
+                                igv.xhr.load(url, options)
+                                    .then(function (response) {
+                                        fullfill(response);
+                                    })
+                                    .catch(function (error) {
+                                        console.error(error);
+                                        throw error;
+                                    })
+                            })
+
+                    } else {
 
                         //
                         if (xhr.status === 416) {
@@ -328,12 +344,12 @@ var igv = (function (igv) {
 
             fileReader.onload = function (e) {
 
-               if(compression === NONE) {
-                   return fullfill(fileReader.result);
-               }
+                if (compression === NONE) {
+                    return fullfill(fileReader.result);
+                }
                 else {
-                   return fullfill(arrayBufferToString(fileReader.result, compression));
-               }
+                    return fullfill(arrayBufferToString(fileReader.result, compression));
+                }
             };
 
             fileReader.onerror = function (e) {
@@ -341,7 +357,7 @@ var igv = (function (igv) {
                 reject(null, fileReader);
             };
 
-            if(compression === NONE) {
+            if (compression === NONE) {
                 fileReader.readAsText(localfile);
             }
             else {
@@ -360,10 +376,7 @@ var igv = (function (igv) {
 
         if (options === undefined) options = {};
 
-        // Strip parameters from path
-        // TODO -- handle local files with ?
-        idx = url.indexOf("?");
-        fn = idx > 0 ? url.substring(0, idx) : url;
+        fn = options.filename || igv.getFilename(url);
 
         if (options.bgz) {
             compression = BGZF;
@@ -383,6 +396,15 @@ var igv = (function (igv) {
                     return arrayBufferToString(data, compression);
                 })
         }
+
+
+        function getFilename(url, options) {
+            
+            if(options.filename) {
+                return Promise.resolve(options.filename);
+            }
+        }
+        
     }
 
     function isCrossDomain(url) {
@@ -458,7 +480,7 @@ var igv = (function (igv) {
         }
 
         return new TextDecoder().decode(plain);
-        
+
     };
 
     /**
@@ -477,6 +499,35 @@ var igv = (function (igv) {
         }).catch(function (error) {
             console.log(error);
         });
+    }
+
+    function getAccessToken() {
+
+        if (igv.oauth.google.access_token) {
+            return Promise.resolve(igv.oauth.google.access_token);
+        } else {
+            var scope, options;
+
+            scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+
+            options = new gapi.auth2.SigninOptionsBuilder();
+            //options.setAppPackageName('com.example.app');
+            //options.setFetchBasicProfile(true);
+            options.setPrompt('select_account');
+            options.setScope(scope);
+
+            return gapi.auth2.getAuthInstance().signIn(options)
+
+                .then(function (user) {
+
+                    var authResponse = user.getAuthResponse();
+
+                    igv.setGoogleOauthToken(authResponse["access_token"]);
+
+                    return authResponse["access_token"];
+                })
+        }
+
     }
 
 
