@@ -50,11 +50,10 @@ var igv = (function (igv) {
 
         this.maxRows = config.maxRows;
 
-        if (config.url &&
+        if (config.filename &&
             (
-                igv.filenameOrURLHasSuffix(config.url, '.bigbed') || igv.filenameOrURLHasSuffix(config.url, '.bb')
-                ||
-                igv.filenameOrURLHasSuffix(config.url, '.bigwig') || igv.filenameOrURLHasSuffix(config.url, '.bw')
+                igv.filenameOrURLHasSuffix(config.filename, '.bigbed') || igv.filenameOrURLHasSuffix(config.filename, '.bb') ||
+                igv.filenameOrURLHasSuffix(config.filename, '.bigwig') || igv.filenameOrURLHasSuffix(config.filename, '.bw')
             )
         ) {
             this.featureSource = new igv.BWSource(config);

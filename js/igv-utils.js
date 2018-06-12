@@ -33,7 +33,7 @@ var igv = (function (igv) {
             $header,
             $fa;
 
-        $generic_container = $('<div>', { class:'igv-generic-container' });
+        $generic_container = $('<div>', {class: 'igv-generic-container'});
         $parent.append($generic_container);
 
         // width
@@ -48,7 +48,7 @@ var igv = (function (igv) {
 
         // height
         if (config && config.classes) {
-            $generic_container.addClass( config.classes.join(' ') );
+            $generic_container.addClass(config.classes.join(' '));
         }
 
         // header
@@ -63,7 +63,7 @@ var igv = (function (igv) {
             closeHandler();
         });
 
-        $generic_container.draggable({ handle: $header.get(0) });
+        $generic_container.draggable({handle: $header.get(0)});
 
         return $generic_container;
     };
@@ -82,7 +82,7 @@ var igv = (function (igv) {
 
             $handle.on('mousemove', move);
 
-            window.addEventListener('mouseup', function() {
+            window.addEventListener('mouseup', function () {
                 $handle.off('mousemove');
             }, false);
 
@@ -91,7 +91,10 @@ var igv = (function (igv) {
                 e.preventDefault();
                 e.stopPropagation();
 
-                $target.css({ left:(self.initX + e.clientX - self.mousePressX), top:(self.initY + e.clientY - self.mousePressY) });
+                $target.css({
+                    left: (self.initX + e.clientX - self.mousePressX),
+                    top: (self.initY + e.clientY - self.mousePressY)
+                });
             }
         });
     };
@@ -135,21 +138,26 @@ var igv = (function (igv) {
 
         var index, filename;
 
-        index = path.lastIndexOf("/");
-        filename = index < 0 ? path : path.substr(index+1);
-
-        //Strip parameters -- handle local files later
-        index = filename.indexOf("?");
-        if (index > 0) {
-            filename = filename.substr(0, index);
+        if (path instanceof File) {
+            return path.name;
         }
+        else {
+            index = path.lastIndexOf("/");
+            filename = index < 0 ? path : path.substr(index + 1);
 
-        return filename;
+            //Strip parameters -- handle local files later
+            index = filename.indexOf("?");
+            if (index > 0) {
+                filename = filename.substr(0, index);
+            }
+
+            return filename;
+        }
     }
 
-    igv.filenameOrURLHasSuffix = function  (fileOrURL, suffix) {
+    igv.filenameOrURLHasSuffix = function (fileOrURL, suffix) {
         var str = (fileOrURL instanceof File) ? fileOrURL.name : igv.getFilename(fileOrURL);
-        return str.toLowerCase().endsWith( suffix )
+        return str.toLowerCase().endsWith(suffix)
     };
 
     igv.isFilePath = function (path) {
@@ -184,11 +192,11 @@ var igv = (function (igv) {
 
         string = alert.message || alert;
 
-        if(httpMessages.hasOwnProperty(string)) {
+        if (httpMessages.hasOwnProperty(string)) {
             string = httpMessages[string];
         }
 
-        igv.alertDialog.configure({ label: string });
+        igv.alertDialog.configure({label: string});
         igv.alertDialog.present($parent);
     };
 
@@ -278,7 +286,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.splitLines  = function (string) {
+    igv.splitLines = function (string) {
 
         var result = string.split(/\n|\r\n|\r/g);
         return result;
@@ -328,14 +336,14 @@ var igv = (function (igv) {
             denom = 1e3;
             units = " kb";
 
-            value = raw/denom;
+            value = raw / denom;
             floored = Math.floor(value);
             return igv.numberFormatter(floored) + units;
         } else {
             return igv.numberFormatter(raw) + " bp";
         }
 
-        value = raw/denom;
+        value = raw / denom;
         floored = Math.floor(value);
 
         return floored.toString() + units;
@@ -383,13 +391,12 @@ var igv = (function (igv) {
         return {x: posx, y: posy}
     };
 
-    igv.pageCoordinates = function(e) {
+    igv.pageCoordinates = function (e) {
         var eFixed;
         // Sets pageX and pageY for browsers that don't support them
         eFixed = $.event.fix(e);
-        return {x:  eFixed.pageX, y: eFixed.pageY}
+        return {x: eFixed.pageX, y: eFixed.pageY}
     }
-
 
 
     igv.throttle = function (fn, threshhold, scope) {
@@ -548,12 +555,13 @@ var igv = (function (igv) {
         }
     };
 
-    igv.buildOptions = function(config, options) {
+    igv.buildOptions = function (config, options) {
 
         var defaultOptions = {
             oauthToken: config.oauthToken,
             headers: config.headers,
-            withCredentials: config.withCredentials
+            withCredentials: config.withCredentials,
+            filename: config.filename
         };
 
         return Object.assign(defaultOptions, options);
