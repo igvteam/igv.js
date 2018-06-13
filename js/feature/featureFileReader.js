@@ -171,6 +171,9 @@ var igv = (function (igv) {
                 }
                 return self.parser.parseFeatures(data);   // <= PARSING DONE HERE
             })
+            .catch(function (error) {
+                console.error(error);
+            })
 
     };
 
