@@ -121,6 +121,11 @@ function createPicker() {
             })
     }
 
+    function switchUser() {
+        bookmark();
+        signIn();
+    }
+
     function pickerCallback(data) {
         var url, doc, name, format, id, downloadURL;
 
