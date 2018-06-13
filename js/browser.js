@@ -576,9 +576,10 @@ var igv = (function (igv) {
 
             }
             else {
-                if(config.filename) {
-                    config.filename = config.filename || igv.getFilename(config.url);
+                if(config.url && !config.filename) {
+                    config.filename = igv.getFilename(config.url);
                 }
+
                 return Promise.resolve(config);
             }
 
