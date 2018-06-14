@@ -415,7 +415,10 @@ var igv = (function (igv) {
     igv.TrackView.prototype.repaintViews = function () {
         this.viewports.forEach(function (viewport) {
             viewport.repaint();
-        })
+        });
+        if (this.track.paintAxis) {
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+        }
     }
 
     /**
