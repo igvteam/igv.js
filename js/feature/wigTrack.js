@@ -131,9 +131,9 @@ var igv = (function (igv) {
                             }
                         }
                         self.header = header;
-                        
+
                         return header;
-                        
+
                     })
             }
         }
@@ -145,48 +145,38 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.draw = function (options) {
 
-        var self = this,
-            features = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            featureValueMinimum,
-            featureValueMaximum,
-            featureValueRange,
-            baselineColor;
+        var self = this, features, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd,
+            featureValueMinimum, featureValueMaximum, featureValueRange, baselineColor;
 
+        features = options.features;
+        ctx = options.context;
+        bpPerPixel = options.bpPerPixel;
+        bpStart = options.bpStart;
+        pixelWidth = options.pixelWidth;
+        pixelHeight = options.pixelHeight;
+        bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-        // Temp hack
         if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
             baselineColor = igv.Color.addAlpha(self.color, 0.1);
         }
 
-
         if (features && features.length > 0) {
 
+            if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
-            featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
+            featureValueMinimum = self.dataRange.min;
             featureValueMaximum = self.dataRange.max;
-
-
-            if (undefined === self.dataRange) {
-                self.dataRange = {};
-            }
-
-            self.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
-            self.dataRange.max = featureValueMaximum;
 
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
             if (featureValueMaximum > featureValueMinimum) {
+
                 featureValueRange = featureValueMaximum - featureValueMinimum;
+
                 features.forEach(renderFeature);
 
                 // If the track includes negative values draw a baseline
-                if (featureValueMinimum < 0) {
+                if (featureValueMaximum > 0 && featureValueMinimum < 0) {
                     var alpha = ctx.lineWidth;
                     ctx.lineWidth = 5;
                     var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
@@ -198,15 +188,9 @@ var igv = (function (igv) {
         }
 
 
-        function renderFeature(feature, index, featureList) {
+        function renderFeature(feature) {
 
-            var yUnitless,
-                heightUnitLess,
-                x,
-                y,
-                width,
-                color,
-                rectEnd;
+            var yUnitless, y, yb, y2, heightUnitLess, x, width, color, rectEnd;
 
             if (feature.end < bpStart) return;
             if (feature.start > bpEnd) return;
@@ -215,31 +199,21 @@ var igv = (function (igv) {
             rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             width = Math.max(1, rectEnd - x);
 
-            //height = ((feature.value - featureValueMinimum) / featureValueRange) * pixelHeight;
-            //rectBaseline = pixelHeight - height;
-            //canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+            y = (featureValueMaximum - feature.value) / (featureValueRange);
 
-            if (signsDiffer(featureValueMinimum, featureValueMaximum)) {
-
-                if (feature.value < 0) {
-                    yUnitless = featureValueMaximum / featureValueRange;
-                    heightUnitLess = -feature.value / featureValueRange;
-                } else {
-                    yUnitless = ((featureValueMaximum - feature.value) / featureValueRange);
-                    heightUnitLess = feature.value / featureValueRange;
-                }
-
-            }
-            else if (featureValueMinimum < 0) {
-                yUnitless = 0;
-                heightUnitLess = -feature.value / featureValueRange;
-            }
-            else {
-                yUnitless = 1.0 - feature.value / featureValueRange;
-                heightUnitLess = feature.value / featureValueRange;
+            if (featureValueMinimum > 0) {
+                yb = 1;
+            } else if (featureValueMaximum < 0) {
+                yb = 0;
+            } else {
+                yb = featureValueMaximum / featureValueRange;
             }
 
-            //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
+            yUnitless = Math.min(y, yb);
+            y2 = Math.max(y, yb);
+            heightUnitLess = y2 - yUnitless;
+
+            if (yUnitless >= 1 || y2 <= 0) return;      //  Value < minimum
 
             color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
 
@@ -383,15 +357,29 @@ var igv = (function (igv) {
 
     // Static function
     igv.WIGTrack.autoscale = function (features) {
-        var min = 0,
+        var min, max;
+
+        if (features.length > 0) {
+            min = Number.MAX_VALUE;
             max = -Number.MAX_VALUE;
 
-        features.forEach(function (f) {
-            if (!Number.isNaN(f.value)) {
-                min = Math.min(min, f.value);
-                max = Math.max(max, f.value);
-            }
-        });
+            features.forEach(function (f) {
+                if (!Number.isNaN(f.value)) {
+                    min = Math.min(min, f.value);
+                    max = Math.max(max, f.value);
+                }
+            });
+
+            // Insure we have a zero baseline
+            if (max > 0) min = Math.min(0, min);
+            if (max < 0) max = 0;
+        }
+        else {
+            // No features -- default
+            min = 0;
+            max = 100;
+        }
+
 
         return {min: min, max: max};
     }
