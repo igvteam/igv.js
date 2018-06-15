@@ -609,11 +609,13 @@ var igv = (function (igv) {
 
         var trackView;
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
+        this.trackViews.push(trackView);
+        this.reorderTracks();
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
             trackView.updateViews();
         }
-        
+
     };
 
     igv.Browser.prototype.reorderTracks = function () {
