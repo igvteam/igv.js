@@ -386,7 +386,13 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.isLoading = function () {
-        return !(undefined === this.loading);
+
+        if (false === this.loading) {
+            return false;
+        } else {
+            return true;
+        }
+        // return !(undefined === this.loading);
     };
 
     igv.Viewport.prototype.saveImage = function () {
