@@ -489,6 +489,7 @@ var igv = (function (igv) {
         });
 
         return Promise.all(promises)
+
             .then(function (loadedTracks) {
 
                 groupAutoscaleViews = self.trackViews.filter(function (trackView) {
@@ -519,6 +520,7 @@ var igv = (function (igv) {
         return resolveTrackProperties(config)
 
             .then(function (config) {
+
                 igv.inferTrackTypes(config);
 
                 // Set defaults if specified
@@ -549,6 +551,7 @@ var igv = (function (igv) {
 
                 return newTrack;
             })
+
 
         function resolveTrackProperties(config) {
 
@@ -606,12 +609,11 @@ var igv = (function (igv) {
 
         var trackView;
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
-        this.trackViews.push(trackView);
-        this.reorderTracks();
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
             trackView.updateViews();
         }
+        
     };
 
     igv.Browser.prototype.reorderTracks = function () {

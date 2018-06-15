@@ -330,7 +330,7 @@ var igv = (function (igv) {
 
         this.track.autoscale = autoscale;
         this.track.config.autoScale = autoscale;
-        
+
         this.repaintViews();
     };
 
@@ -354,7 +354,7 @@ var igv = (function (igv) {
 
         this.track.height = newHeight;
         this.track.config.height = newHeight;
-        
+
         $(this.trackDiv).height(newHeight);
 
         // If the track does not manage its own content height set it here
@@ -481,7 +481,13 @@ var igv = (function (igv) {
 
             .then(function (ignore) {
                 adjustTrackHeight.call(self);
-            });
+            })
+            
+            .catch(function (error) {
+                console.error(error);
+                // TODO -- inform user,  remove track
+            })
+
     };
 
     /**
@@ -507,7 +513,7 @@ var igv = (function (igv) {
             .then(function (tiles) {
                 var allFeatures = [];
                 self.viewports.forEach(function (vp) {
-                    if(vp.tile && vp.tile.features) {
+                    if (vp.tile && vp.tile.features) {
                         var referenceFrame, chr, start, end, cache;
                         referenceFrame = vp.genomicState.referenceFrame;
                         chr = referenceFrame.chrName;
