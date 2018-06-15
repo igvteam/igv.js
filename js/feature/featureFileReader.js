@@ -171,10 +171,9 @@ var igv = (function (igv) {
                 }
                 return self.parser.parseFeatures(data);   // <= PARSING DONE HERE
             })
-            .catch(function (error) {
-                console.error(error);
-            })
-
+            // .catch(function(error) {
+            //     console.log(error);
+            // })
     };
 
     igv.FeatureFileReader.prototype.loadFeaturesWithIndex = function (chr, start, end) {
