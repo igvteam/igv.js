@@ -310,10 +310,8 @@ var igv = (function (igv) {
                 })
                 .catch(function (error) {
                     self.indexed = false;
-                    if (error.message === '404' && self.config.indexURL === undefined) {
+                    if (self.config.indexURL !== undefined) {
                         igv.presentAlert("Index file not found.  Check track configuration", undefined)
-                    } else {
-                        throw error;
                     }
                 });
         } else {
