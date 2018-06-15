@@ -248,22 +248,19 @@ var igv = (function (igv) {
         return getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, self)
 
             .then(function (features) {
-
+                self.hideMessage();
                 self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features);
+                self.loading = false;
+                self.stopSpinner();
                 return self.tile;
             })
 
             .catch(function (error) {
-                console.error(error);
+                self.showMessage(NOT_LOADED_MESSAGE);
                 self.loading = false;
-                self.showMessage(NOT_LOADED_MESSAGE)
-            })
-
-            .then(/* finally */ function (tile) {
-                self.loading = undefined;
                 self.stopSpinner();
-                return tile;
-            });
+                throw error;
+            })
     }
 
     /**
@@ -275,8 +272,6 @@ var igv = (function (igv) {
         var self = this,
             pixelWidth, bpStart, bpEnd, bpPerPixel, features, genomicState, referenceFrame, drawConfiguration,
             newCanvas, ctx, pixelHeight, devicePixelRatio, pixelOffset;
-
-        self.hideMessage();
 
         if(!tile) tile = this.tile;
         if(!tile) return;

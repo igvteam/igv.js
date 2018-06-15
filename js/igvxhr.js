@@ -170,7 +170,8 @@ var igv = (function (igv) {
                                         fullfill(response);
                                     })
                                     .catch(function (error) {
-                                        reject(error);
+                                        if(reject) reject(error);
+                                        else throw(error);
                                     })
                             })
 
