@@ -273,8 +273,8 @@ var igv = (function (igv) {
             pixelWidth, bpStart, bpEnd, bpPerPixel, features, genomicState, referenceFrame, drawConfiguration,
             newCanvas, ctx, pixelHeight, devicePixelRatio, pixelOffset;
 
-        if(!tile) tile = this.tile;
-        if(!tile) return;
+        if (!tile) tile = this.tile;
+        if (!tile) return;
 
         genomicState = this.genomicState;
         referenceFrame = this.genomicState.referenceFrame;
@@ -386,13 +386,7 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.isLoading = function () {
-
-        if (false === this.loading) {
-            return false;
-        } else {
-            return true;
-        }
-        // return !(undefined === this.loading);
+        return this.loading;
     };
 
     igv.Viewport.prototype.saveImage = function () {

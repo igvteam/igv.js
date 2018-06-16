@@ -579,7 +579,7 @@ var igv = (function (igv) {
 
             }
             else {
-                if(config.url && !config.filename) {
+                if (config.url && !config.filename) {
                     config.filename = igv.getFilename(config.url);
                 }
 
@@ -695,6 +695,7 @@ var igv = (function (igv) {
      * @returns {Array}  tracks with given property value.  e.g. findTracks("type", "annotation")
      */
     igv.Browser.prototype.findTracks = function (property, value) {
+
         var tracks = [];
         this.trackViews.forEach(function (trackView) {
             if (value === trackView.track[property]) {
@@ -905,17 +906,11 @@ var igv = (function (igv) {
 
 
     igv.Browser.prototype.loadInProgress = function () {
-
-        var anyTrackViewIsLoading;
-
-        anyTrackViewIsLoading = false;
-        _.each(this.trackViews, function (t) {
-            if (false === anyTrackViewIsLoading) {
-                anyTrackViewIsLoading = t.isLoading();
-            }
-        });
-
-        return anyTrackViewIsLoading;
+        var i;
+        for (i = 0; i < this.trackViews.length; i++) {
+            if (this.trackViews[i].isLoading()) return true;
+        }
+        return false;
     };
 
     igv.Browser.prototype.updateLocusSearchWidget = function (genomicState) {
