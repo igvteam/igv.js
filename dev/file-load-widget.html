@@ -157,15 +157,10 @@
         var options;
 
         options = {
-
-            showIdeogram: true,
-            showRuler: true,
             fileLoadWidget:
                 {
                     hidden: false,
-                    embed: false,
-                    // mode: 'url',
-                    // mode: 'localFile'
+                    embed: false
                 },
 
             locus: [ 'myc' ],
@@ -174,23 +169,7 @@
                     id: "hg19"
                 },
             flanking: 1000,
-            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-
-            tracks:
-                [
-                    {
-                        name: "Genes",
-                        type: "annotation",
-                        format: "bed",
-                        sourceType: "file",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                        order: Number.MAX_VALUE,
-                        visibilityWindow: 300000000,
-                        displayMode: "EXPANDED",
-                        autoHeight: true
-                    }
-                ]
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0'
         };
 
         igv.createBrowser($("#myDiv").get(0), options);

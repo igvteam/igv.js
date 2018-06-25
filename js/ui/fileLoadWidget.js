@@ -158,7 +158,7 @@ var igv = (function (igv) {
             // this.dismiss();
             extractName(obj)
                 .then(function (name) {
-                    obj.name = name;
+                    obj.filename = obj.name = name;
                     igv.browser.loadTrackList( [ obj ] );
                 })
                 .catch(function (error) {
