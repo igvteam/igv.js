@@ -448,8 +448,10 @@ var igv = (function (igv) {
                         start = referenceFrame.start;
                         end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
-                        cache = new igv.FeatureCache(vp.tile.features);
-                        allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                        if (vp.tile && vp.tile.features) {
+                            cache = new igv.FeatureCache(vp.tile.features);
+                            allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                        }
                     });
                     self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
                 }
@@ -474,7 +476,7 @@ var igv = (function (igv) {
             .then(function (ignore) {
                 adjustTrackHeight.call(self);
             })
-            
+
             .catch(function (error) {
                 console.error(error);
                 // TODO -- inform user,  remove track
