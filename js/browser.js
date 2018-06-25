@@ -1778,6 +1778,8 @@ var igv = (function (igv) {
             // load local file
             fileLoadWidgetConfig =
             {
+                dataTitle: config.dataTitle || 'Data',
+                indexTitle: config.indexTitle || 'Index',
                 mode: config.mode,
                 embed: isEmbedded,
                 $widgetParent: config.$widgetParent || $parent,
