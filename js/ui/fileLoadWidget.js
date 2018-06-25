@@ -85,9 +85,9 @@ var igv = (function (igv) {
             // local data/index
             obj =
                 {
-                    dataTitle: 'Data file',
-                    indexTitle: 'Index file',
-                    doEmbed: config.embed || false
+                    doURL: false,
+                    dataTitle: config.dataTitle + ' file',
+                    indexTitle: config.indexTitle + ' file'
                 };
             createInputContainer.call(this, this.$container, obj);
         }
@@ -99,8 +99,8 @@ var igv = (function (igv) {
             obj =
                 {
                     doURL: true,
-                    dataTitle: 'Data URL',
-                    indexTitle: 'Index URL'
+                    dataTitle: config.dataTitle + ' URL',
+                    indexTitle: config.indexTitle + ' URL'
                 };
             createInputContainer.call(this, this.$container, obj);
         }
