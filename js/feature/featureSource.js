@@ -68,9 +68,9 @@ var igv = (function (igv) {
             this.reader = new igv.FeatureFileReader(config);
         }
         this.visibilityWindow = config.visibilityWindow;
-        
+
         this.queryable = this.queryable || queryableFormats.has(config.format);
-        
+
     };
 
     igv.FeatureSource.prototype.getFileHeader = function () {
@@ -152,42 +152,42 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
-
-
-        var genomicInterval,
-            featureCache,
-            maxRows,
-            str,
-            queryChr;
+        var self = this,
+            genomicInterval, maxRows, str, queryChr, isQueryable;
 
         queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
         genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
-        featureCache = self.featureCache;
         maxRows = self.config.maxRows || 500;
         str = chr.toLowerCase();
+        isQueryable = self.queryable || self.reader.indexed;
 
-        if ("all" === str) {
 
-            if (featureCache && featureCache.range === undefined) {      // range === undefined => cache contains all features
-                return Promise.resolve(getWGFeatures(featureCache.allFeatures()));
+        return getFeatureCache()
+            .then(function (featureCache) {
+
+                if ("all" === str) {
+                    if(isQueryable) {
+                        return [];
+                    }
+                    else {
+                        return getWGFeatures(featureCache.allFeatures());
+                    }
+                }
+                else {
+                    return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+                }
+
+            })
+
+
+        function getFeatureCache() {
+            if(self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
+                return Promise.resolve(self.featureCache);
             }
             else {
-                return Promise.resolve(null);
-            }
-        }
+                return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
-        else if (featureCache &&  featureCache.containsRange(genomicInterval)) {
-            return Promise.resolve(self.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
-        }
-
-        else {
-
-            return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-
-                .then(
-
-                    function (featureList) {
+                    .then(function (featureList) {
 
                         if (featureList) {
 
@@ -198,24 +198,25 @@ var igv = (function (igv) {
                             // Assign overlapping features to rows
                             packFeatures(featureList, maxRows);
 
-                            var isQueryable = self.queryable || self.reader.indexed;
+                            // Note - replacing previous cache with new one
                             self.featureCache = isQueryable ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
-                                new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                                new igv.FeatureCache(featureList);
 
 
                             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                             if (self.config.searchable) {
                                 addFeaturesToDB(featureList);
                             }
-
-                            return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
                         }
                         else {
-                            return undefined;
+                            self.featureCache = new igv.FeatureCache();     // Empty cache
                         }
 
+                        return self.featureCache;
+
                     })
+            }
         }
 
     };
