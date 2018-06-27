@@ -193,6 +193,7 @@
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color {
           color: #737373; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color-hover {
+          cursor: pointer;
           color: white; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container input.igv-flw-file-chooser-input {
           width: 0.1px;
