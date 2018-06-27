@@ -179,8 +179,10 @@ $igv-flw-border-radius: 2px;
 
       // local file chooser
       .igv-flw-file-chooser-container {
-        position: relative;
-        display: block;
+        display: flex;
+        flex-flow: row;
+        justify-content: center;
+        align-items: center;
 
         width: 130px;
         height: calc(#{$igv-flw-input-row-height} - 8px);
@@ -193,9 +195,8 @@ $igv-flw-border-radius: 2px;
         background-color: $igv-flw-modal-button-background-color;
 
         label {
-          position: relative;
-          top:6px;
-          left:16px;
+          display: block;
+          margin: unset;
         }
 
         label.igv-flw-label-color {

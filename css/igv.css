@@ -177,8 +177,10 @@
         width: 410px;
         height: calc(36px - 12px); }
       .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container {
-        position: relative;
-        display: block;
+        display: flex;
+        flex-flow: row;
+        justify-content: center;
+        align-items: center;
         width: 130px;
         height: calc(36px - 8px);
         border-color: #737373;
@@ -187,9 +189,8 @@
         border-radius: calc(2 * 2px);
         background-color: #F3F3F3; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label {
-          position: relative;
-          top: 6px;
-          left: 16px; }
+          display: block;
+          margin: unset; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color {
           color: #737373; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color-hover {
