@@ -181,17 +181,19 @@
         display: block;
         width: 130px;
         height: calc(36px - 8px);
-        border-color: #7F7F7F;
+        border-color: #737373;
         border-style: solid;
         border-width: thin;
-        border-radius: calc(2 * 2px); }
+        border-radius: calc(2 * 2px);
+        background-color: #F3F3F3; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label {
           position: relative;
           top: 6px;
           left: 16px; }
-        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label:hover {
-          cursor: pointer;
-          font-weight: 400; }
+        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color {
+          color: #737373; }
+        .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container label.igv-flw-label-color-hover {
+          color: white; }
         .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container input.igv-flw-file-chooser-input {
           width: 0.1px;
           height: 0.1px;
@@ -199,6 +201,9 @@
           overflow: hidden;
           position: absolute;
           z-index: -1; }
+      .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-file-chooser-container:hover {
+        cursor: pointer;
+        background-color: #737373; }
       .igv-file-load-widget-container .igv-flw-input-container .igv-flw-input-row .igv-flw-drag-drop-target {
         cursor: default;
         margin-left: 8px;

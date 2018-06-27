@@ -306,6 +306,7 @@ var igv = (function (igv) {
         $file_chooser_container = $("<div>", { class:"igv-flw-file-chooser-container" });
         $parent.append($file_chooser_container);
 
+
         str = id + igv.guid();
 
         $label = $('<label>', { for:str });
@@ -318,6 +319,17 @@ var igv = (function (igv) {
         $data_drop_target = $("<div>", { class:"igv-flw-drag-drop-target" });
         $parent.append($data_drop_target);
         $data_drop_target.text('or drop file');
+
+        $file_chooser_container.hover(
+            function() {
+                $label.removeClass('igv-flw-label-color');
+                $label.addClass('igv-flw-label-color-hover');
+            }, function() {
+                $label.removeClass('igv-flw-label-color-hover');
+                $label.addClass('igv-flw-label-color');
+            }
+        );
+
 
         // TODO: Eventually discard this?
         $data_drop_target.hide();
