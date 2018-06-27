@@ -58,7 +58,7 @@ function initClient() {
 
 // Create and render a Picker object for picking files.
 function createPicker() {
-    var view, accessToken;
+    var view, view2, accessToken;
 
     getAccessToken()
 
@@ -66,15 +66,24 @@ function createPicker() {
 
             if (accessToken) {
 
-                view = new google.picker.View(google.picker.ViewId.DOCS);
+                view = new google.picker.DocsView(google.picker.ViewId.DOCS);
+                view.setIncludeFolders(true)
+
+                view2 = new google.picker.DocsView(google.picker.ViewId.DOCS);
+                view2.setEnableTeamDrives(true);
+                view2.setIncludeFolders(true)
+
+
 
                 picker = new google.picker
                     .PickerBuilder()
                     .setAppId(igv.Google.properties["project_number"])
                     .setOAuthToken(igv.oauth.google.access_token)
                     .addView(view)
+                    .addView(view2)
                     .setDeveloperKey(igv.Google.properties["developer_key"])
                     .setCallback(pickerCallback)
+                    .enableFeature(google.picker.Feature.SUPPORT_TEAM_DRIVES)
                     .build();
 
                 picker.setVisible(true);
