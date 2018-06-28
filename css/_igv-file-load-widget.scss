@@ -6,10 +6,7 @@ $igv-flw-dark-grey-color: #373737;
 $igv-flw-label-font-color: #242424;
 $igv-flw-outline-grey-color: #7c7c7c;
 
-$igv-flw-modal-button-background-color: #F3F3F3;
-$igv-flw-modal-button-background-hover-color: #737373;
-
-$igv-flw-modal-button-label-hover-color: white;
+$igv-flw-modal-button-dark-color: #6c757c;
 
 $igv-flw-button-ok-color: #5ea4e0;
 $igv-flw-button-ok-hover-color: #3b5c7f;
@@ -159,7 +156,8 @@ $igv-flw-border-radius: 2px;
       // label
       .igv-flw-input-label {
 
-        color: rgba(0, 0, 0, 0.76);
+        //color: rgba(0, 0, 0, 0.76);
+        color: $igv-flw-modal-button-dark-color;
         font-weight: 400;
 
         margin-left: 8px;
@@ -187,12 +185,12 @@ $igv-flw-border-radius: 2px;
         width: 130px;
         height: calc(#{$igv-flw-input-row-height} - 8px);
 
-        border-color: $igv-flw-modal-button-background-hover-color;
+        border-color: $igv-flw-modal-button-dark-color;
         border-style: solid;
         border-width: thin;
         border-radius: calc(2 * #{$igv-flw-border-radius});
 
-        background-color: $igv-flw-modal-button-background-color;
+        background-color: white;
 
         label {
           display: block;
@@ -200,7 +198,7 @@ $igv-flw-border-radius: 2px;
         }
 
         label.igv-flw-label-color {
-          color: $igv-flw-modal-button-background-hover-color;
+          color: $igv-flw-modal-button-dark-color;
         }
 
         label.igv-flw-label-color-hover {
@@ -221,7 +219,7 @@ $igv-flw-border-radius: 2px;
 
       .igv-flw-file-chooser-container:hover {
         cursor: pointer;
-        background-color: $igv-flw-modal-button-background-hover-color;
+        background-color: $igv-flw-modal-button-dark-color;
       }
 
       // button indicating drag/drop capability
@@ -356,22 +354,22 @@ $igv-flw-border-radius: 2px;
     }
 
     div:first-child {
-      background-color: $igv-flw-button-ok-color;
-    }
-
-    div:first-child:hover {
-      cursor: pointer;
-      background-color: $igv-flw-button-ok-hover-color;
-    }
-
-    div:last-child {
       margin-right: 22px;
       background-color: $igv-flw-button-cancel-color;
     }
 
-    div:last-child:hover {
+    div:first-child:hover {
       cursor: pointer;
       background-color: $igv-flw-button-cancel-hover-color;
+    }
+
+    div:last-child {
+      background-color: $igv-flw-button-ok-color;
+    }
+
+    div:last-child:hover {
+      cursor: pointer;
+      background-color: $igv-flw-button-ok-hover-color;
     }
 
   }
