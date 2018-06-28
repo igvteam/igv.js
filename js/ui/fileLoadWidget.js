@@ -311,7 +311,7 @@ var igv = (function (igv) {
 
         $label = $('<label>', { for:str });
         $file_chooser_container.append($label);
-        $label.text('Choose file...');
+        $label.text('Choose file');
 
         $input = $('<input>', { class:"igv-flw-file-chooser-input", id:str, name:str, type:'file' });
         $file_chooser_container.append($input);
