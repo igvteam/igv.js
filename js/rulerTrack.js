@@ -47,7 +47,7 @@ var igv = (function (igv) {
             str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
 
             // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
-            viewport.$rulerLabel.text( str );
+            viewport.$rulerLabel.text(str);
         });
 
     };
@@ -97,7 +97,12 @@ var igv = (function (igv) {
             tickHeight;
 
         key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
-        rulerSweeper = this.rulerSweepers[ key ];
+        rulerSweeper = this.rulerSweepers[key];
+        if (!rulerSweeper) {
+            console.log("No rulerSweeper for key: " + key);
+            return;
+        }
+
 
         $viewportContent = $(rulerSweeper.viewport.contentDiv);
 
@@ -160,7 +165,7 @@ var igv = (function (igv) {
             }
 
             str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
-            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText( str ).width));
+            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
 
             numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
 
@@ -200,7 +205,7 @@ var igv = (function (igv) {
             floored;
 
         // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.majorTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
@@ -218,7 +223,7 @@ var igv = (function (igv) {
         }
 
         // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.halfTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
