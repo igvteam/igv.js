@@ -535,9 +535,8 @@ var igv = (function (igv) {
                     else {
                         config[key] = value;
                     }
+                    i = j + 1;
                 }
-
-                i = j + 1;
             }
         }
         return query;
