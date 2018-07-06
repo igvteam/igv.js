@@ -53,7 +53,8 @@ var igv = (function (igv) {
             "tdf",
             "refgene",
             "genepred",
-            "genepredext"
+            "genepredext",
+            "bedpe"
         ];
 
     igv.knownFileExtensions = new Set(list);
@@ -123,6 +124,9 @@ var igv = (function (igv) {
 
             case "merged":
                 return new igv.MergedTrack(config);
+
+            case "interaction":
+                return new igv.InteractionTrack(config);
 
             default:
                 return undefined;

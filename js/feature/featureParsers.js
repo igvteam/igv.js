@@ -40,7 +40,7 @@ var igv = (function (igv) {
     var gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
 
     /**
-     * A factory function.  Return a parser for the given file format.
+     * Return a parser for the given file format.
      */
     igv.FeatureParser = function (format, decode, config) {
 
@@ -55,76 +55,82 @@ var igv = (function (igv) {
         if (decode) {
             this.decode = decode;
         }
+        else {
 
-        switch (this.format) {
-            case "narrowpeak":
-            case "broadpeak":
-            case "peaks":
-                this.decode = decodePeak;
-                this.delimiter = /\s+/;
-                break;
-            case "bedgraph":
-                this.decode = decodeBedGraph;
-                this.delimiter = /\s+/;
-                break;
-            case "wig":
-                this.decode = decodeWig;
-                this.delimiter = /\s+/;
-                break;
-            case "gff3" :
-            case "gff" :
-            case "gtf" :
-                this.decode = decodeGFF;
-                this.delimiter = "\t";
-                break;
-            case "aneu":
-                this.decode = decodeAneu;
-                this.delimiter = "\t";
-                break;
-            case "fusionjuncspan":
-                // bhaas, needed for FusionInspector view
-                this.decode = decodeFusionJuncSpan;
-                this.delimiter = /\s+/;
-                break;
-            case "gtexgwas":
-                this.skipRows = 1;
-                this.decode = decodeGtexGWAS;
-                this.delimiter = "\t";
-                break;
-            case "refflat":
-                this.decode = decodeReflat;
-                this.delimiter = /\s+/;
-                break;
-            case "genepred":
-                this.decode = decodeGenePred;
-                this.delimiter = /\s+/;
-                break;
-            case "genepredext":
-                this.decode = decodeGenePredExt;
-                this.delimiter = /\s+/;
-                break;
-            case "refgene":
-                this.decode = decodeGenePredExt;
-                this.delimiter = /\s+/;
-                this.shift = 1;
-                break;
-            case "bed":
-                this.decode = decodeBed;
-                this.delimiter = config.delimiter || /\s+/;
-            default:
-
-                customFormat = igv.getFormat(format);
-                if (customFormat !== undefined) {
-                    this.decode = decodeCustom;
-                    this.format = customFormat;
-                    this.delimiter = customFormat.delimiter || "\t";
-                }
-
-                else {
-                    this.decode = decodeBed;
+            switch (this.format) {
+                case "narrowpeak":
+                case "broadpeak":
+                case "peaks":
+                    this.decode = decodePeak;
                     this.delimiter = /\s+/;
-                }
+                    break;
+                case "bedgraph":
+                    this.decode = decodeBedGraph;
+                    this.delimiter = /\s+/;
+                    break;
+                case "wig":
+                    this.decode = decodeWig;
+                    this.delimiter = /\s+/;
+                    break;
+                case "gff3" :
+                case "gff" :
+                case "gtf" :
+                    this.decode = decodeGFF;
+                    this.delimiter = "\t";
+                    break;
+                case "aneu":
+                    this.decode = decodeAneu;
+                    this.delimiter = "\t";
+                    break;
+                case "fusionjuncspan":
+                    // bhaas, needed for FusionInspector view
+                    this.decode = decodeFusionJuncSpan;
+                    this.delimiter = /\s+/;
+                    break;
+                case "gtexgwas":
+                    this.skipRows = 1;
+                    this.decode = decodeGtexGWAS;
+                    this.delimiter = "\t";
+                    break;
+                case "refflat":
+                    this.decode = decodeReflat;
+                    this.delimiter = /\s+/;
+                    break;
+                case "genepred":
+                    this.decode = decodeGenePred;
+                    this.delimiter = /\s+/;
+                    break;
+                case "genepredext":
+                    this.decode = decodeGenePredExt;
+                    this.delimiter = /\s+/;
+                    break;
+                case "refgene":
+                    this.decode = decodeGenePredExt;
+                    this.delimiter = /\s+/;
+                    this.shift = 1;
+                    break;
+                case "bed":
+                    this.decode = decodeBed;
+                    this.delimiter = config.delimiter || /\s+/;
+                    break;
+                case "bedpe":
+                    this.decode = decodeBedPE;
+                    this.delimiter = /\s+/;
+                    break;
+                default:
 
+                    customFormat = igv.getFormat(format);
+                    if (customFormat !== undefined) {
+                        this.decode = decodeCustom;
+                        this.format = customFormat;
+                        this.delimiter = customFormat.delimiter || "\t";
+                    }
+
+                    else {
+                        this.decode = decodeBed;
+                        this.delimiter = /\s+/;
+                    }
+            }
         }
 
     };
@@ -792,6 +798,37 @@ var igv = (function (igv) {
         };
     }
 
+    function decodeBedPE(tokens, ignore) {
+
+        if (tokens.length < 6) {
+            console.log("Skipping line: " + nextLine);
+            return undefined;
+        }
+
+        var feature = {
+            chr1: tokens[0],
+            start1: Number.parseInt(tokens[1]),
+            end1: Number.parseInt(tokens[2]),
+            chr2: tokens[3],
+            start2: Number.parseInt(tokens[4]),
+            end2: Number.parseInt(tokens[5])
+        }
+
+        if (tokens.length > 6) {
+            feature.name = tokens[6];
+        }
+
+        if (tokens.length > 7) {
+            feature.score = tokens[7];
+        }
+
+        feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
+        feature.start = Math.min(feature.start1, feature.start2);
+        feature.end = Math.max(feature.end1, feature.end2);
+
+        return feature;
+    }
+
     /**
      * Decode the "standard" UCSC bed format
      * @param tokens
@@ -824,8 +861,6 @@ var igv = (function (igv) {
         return feature;
 
     }
-
-
 
 
     return igv;
