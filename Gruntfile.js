@@ -77,14 +77,6 @@ module.exports = function (grunt) {
             }
         },
 
-        copy: {
-            img: {
-                expand: true,
-                cwd: 'css/img',
-                src: '**',
-                dest: 'dist/img'
-            }
-        }
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
