@@ -376,26 +376,21 @@ $igv-dark-grey-color: #373737;
   font-weight: 200;
 
   color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
   background-color: $igv-navbar-toggle-light-color;
 
+  border-color: $igv-navbar-toggle-dark-dark;
   border-style: solid;
   border-width: thin;
   border-radius: 10px;
 }
 
 .igv-nav-bar-button-clicked {
-  cursor: pointer;
   color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
   background-color: $igv-navbar-toggle-dark-dark;
 }
 
 .igv-nav-bar-button:hover {
   cursor: pointer;
-  color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
 }
 
 // TODO: figure out what to do with this
