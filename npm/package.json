@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": $VERSION,
+  "version": VERSION,
   "description": "Genomics visualization package",
   "main": "igv.min.js",
   "scripts": {
