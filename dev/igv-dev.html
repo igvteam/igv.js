@@ -74,6 +74,7 @@
     <script src="../js/feature/segParser.js"></script>
     <script src="../js/feature/segTrack.js"></script>
     <script src="../js/feature/dataWrapper.js"></script>
+    <script src="../js/bedpe/interactionTrack.js"></script>
 
     <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -157,6 +158,14 @@
     <h3>Example tracks - click to load</h3>
 
     <div id="trackList">
+
+        <div onclick="igv.browser.loadTrack({
+                            url: '../test/data/bedpe/hg19_myc.bedpe',
+                            type: 'interaction',
+                            format: 'bedpe',
+                            name: 'MYC Interactions'
+                        })"> MYC Interactions
+        </div>
 
         <div onclick="igv.browser.loadTrack({
                             url: '../test/data/bed/dhsGE05.bed',
