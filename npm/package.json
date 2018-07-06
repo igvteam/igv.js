@@ -1,7 +1,7 @@
 {
   "name": "igv",
   "version": VERSION,
-  "description": "Genomics visualization package",
+  "description": "NPM wrapper for igv.js, a genomics visualization component.  Official release.",
   "main": "igv.min.js",
   "scripts": {
     "test": "echo \"Error: no tests defined\" && exit 1"
