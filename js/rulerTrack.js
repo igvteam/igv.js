@@ -89,17 +89,13 @@ var igv = (function (igv) {
             $viewportContent,
             pixelWidthBP,
             tick,
-            label,
             shim,
-            center,
-            size,
-            rect,
             tickHeight;
 
         key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
         rulerSweeper = this.rulerSweepers[key];
         if (!rulerSweeper) {
-            console.log("No rulerSweeper for key: " + key);
+            //console.log("No rulerSweeper for key: " + key);
             return;
         }
 
@@ -141,8 +137,7 @@ var igv = (function (igv) {
                 majorUnit,
                 unitMultiplier,
                 numberOfMajorTicks,
-                str,
-                labelWidthBP;
+                str;
 
             if (pixelWidthBP < 10) {
                 set.call(this, 1, "bp", 1);
@@ -184,9 +179,6 @@ var igv = (function (igv) {
             this.majorUnit = majorUnit;
 
             this.halfTick = majorTick / 2;
-            this.quarterTick = majorTick / 4;
-
-            this.minorTick = majorTick / 10.0;
 
             this.unitMultiplier = unitMultiplier;
         }
