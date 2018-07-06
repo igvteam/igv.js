@@ -481,23 +481,18 @@
   font-size: 11px;
   font-weight: 200;
   color: #737373;
-  border-color: #737373;
   background-color: #f3f3f3;
+  border-color: #737373;
   border-style: solid;
   border-width: thin;
   border-radius: 10px; }
 
 .igv-nav-bar-button-clicked {
-  cursor: pointer;
   color: white;
-  border-color: #737373;
   background-color: #737373; }
 
 .igv-nav-bar-button:hover {
-  cursor: pointer;
-  color: white;
-  border-color: #737373;
-  background-color: #737373; }
+  cursor: pointer; }
 
 #igv-logo-nonav {
   margin-left: 4px;

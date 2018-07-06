@@ -122,7 +122,7 @@ var igv = (function (igv) {
                 } else {
                     browser.showTrackLabels();
                     if (browser.trackLabelControl) {
-                        browser.trackLabelControl.setState(self.trackLabelsVisible);
+                        browser.trackLabelControl.setState(browser.trackLabelsVisible);
                     }
 
                 }
@@ -131,14 +131,14 @@ var igv = (function (igv) {
                     browser.hideCursorGuide();
                 } else {
                     browser.showCursorGuide();
-                    browser.cursorGuide.setState(self.cursorGuideVisible);
+                    browser.cursorGuide.setState(browser.cursorGuideVisible);
                 }
 
                 if (false === config.showCenterGuide) {
                     browser.hideCenterGuide();
                 } else {
                     browser.showCenterGuide();
-                    browser.centerGuide.setState(self.centerGuideVisible);
+                    browser.centerGuide.setState(browser.centerGuideVisible);
                 }
 
                 // multi-locus mode
