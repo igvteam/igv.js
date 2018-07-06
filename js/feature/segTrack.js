@@ -240,8 +240,11 @@ var igv = (function (igv) {
      */
     igv.SegTrack.prototype.computePixelHeight = function (features) {
 
-        var sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight,
-            i, len, sample;
+        var sampleHeight, i, len, sample;
+
+        if(!features) return 0;
+
+        sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
 
         for (i = 0, len = features.length; i < len; i++) {
             sample = features[i].sample;
