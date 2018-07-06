@@ -42,8 +42,8 @@ var igv = (function (igv) {
         this.labelDisplayMode = config.labelDisplayMode;
 
         this.variantHeight = config.variantHeight || this.height;
-        this.squishedCallHeight = config.squishedCallHeight || 15;
-        this.expandedCallHeight = config.expandedCallHeight || 30;
+        this.squishedRowHeight = config.squishedRowHeight || 15;
+        this.expandedRowHeight = config.expandedRowHeight || 30;
 
         this.featureHeight = config.featureHeight || 14;
 
@@ -146,7 +146,7 @@ var igv = (function (igv) {
         var height;
 
         if (this.displayMode === "COLLAPSED") {
-            return this.variantHeight;
+            return this.expandedRowHeight;
         }
         else {
             var maxRow = 0;
@@ -160,7 +160,7 @@ var igv = (function (igv) {
                 });
             }
 
-            height = Math.max(this.variantHeight, (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight));
+            height = (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
             return height;
 
         }
@@ -240,7 +240,7 @@ var igv = (function (igv) {
             featureList = config.viewport.tile.features;
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedCallHeight) : Math.floor((yOffset - 5) / this.squishedCallHeight);
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedRowHeight) : Math.floor((yOffset - 5) / this.squishedRowHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -430,9 +430,9 @@ var igv = (function (igv) {
 
         if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
             h = this.featureHeight / 2;
-            py = this.squishedCallHeight * feature.row + 2;
+            py = this.squishedRowHeight * feature.row + 2;
         } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
-            py = this.expandedCallHeight * feature.row + 5;
+            py = this.expandedRowHeight * feature.row + 5;
         } else {  // collapsed
             py = 5;
         }
@@ -648,7 +648,7 @@ var igv = (function (igv) {
         var coord = calculateFeatureCoordinates(feature, bpStart, xScale),
             py = 5, h = 10; // defaults borrowed from renderFeature above
 
-        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedCallHeight : this.expandedCallHeight;
+        var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
 
         // console.log("row height = " + rowHeight);
 

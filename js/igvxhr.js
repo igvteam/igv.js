@@ -158,22 +158,34 @@ var igv = (function (igv) {
                         else {
                             fullfill(xhr.response);
                         }
-                    } else if ((typeof gapi !== "undefined") && ((xhr.status === 404 || xhr.status == 403)  && isGoogleURL(url)) && !options.retries) {
+                    } else if ((typeof gapi !== "undefined") && ((xhr.status === 404 || xhr.status == 403) && isGoogleURL(url)) && !options.retries) {
 
                         options.retries = 1;
 
                         return getAccessToken()
+
                             .then(function (accessToken) {
-                                options.oauthToken = accessToken;
-                                igv.xhr.load(url, options)
-                                    .then(function (response) {
-                                        fullfill(response);
-                                    })
-                                    .catch(function (error) {
-                                        if(reject) reject(error);
-                                        else throw(error);
-                                    })
+
+                                if (accessToken) {
+
+                                    options.oauthToken = accessToken;
+
+                                    igv.xhr.load(url, options)
+                                        .then(function (response) {
+                                            fullfill(response);
+                                        })
+                                        .catch(function (error) {
+                                            if (reject) reject(error);
+                                            else throw(error);
+                                        })
+                                }
+                                else {
+                                    if (reject) reject(error);
+                                    else throw(error);
+                                }
+
                             })
+
 
                     } else {
 
@@ -399,12 +411,12 @@ var igv = (function (igv) {
 
 
         function getFilename(url, options) {
-            
-            if(options.filename) {
+
+            if (options.filename) {
                 return Promise.resolve(options.filename);
             }
         }
-        
+
     }
 
     function isCrossDomain(url) {
@@ -501,10 +513,14 @@ var igv = (function (igv) {
         });
     }
 
+    var loginTried = false;
+
     function getAccessToken() {
 
-        if (igv.oauth.google.access_token) {
+        if (igv.oauth.google.access_token || loginTried) {
+
             return Promise.resolve(igv.oauth.google.access_token);
+
         } else {
             var scope, options;
 
@@ -515,6 +531,8 @@ var igv = (function (igv) {
             //options.setFetchBasicProfile(true);
             options.setPrompt('select_account');
             options.setScope(scope);
+
+            loginTried = true;
 
             return gapi.auth2.getAuthInstance().signIn(options)
 
