@@ -1,0 +1,24 @@
+{
+  "name": "igv",
+  "version": $VERSION,
+  "description": "Genomics visualization package",
+  "main": "igv.min.js",
+  "scripts": {
+    "test": "echo \"Error: no tests defined\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igvteam/igv.js.git"
+  },
+  "keywords": [
+    "IGV",
+    "genomics",
+    "visualization"
+  ],
+  "author": "Jim Robinson <igv-team@broadinstitute.org> (https://igv.org)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/igvteam/igv.js/issues"
+  },
+  "homepage": "https://igv.org"
+}
