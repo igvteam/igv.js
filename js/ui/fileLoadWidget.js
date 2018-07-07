@@ -544,7 +544,7 @@ var igv = (function (igv) {
 
         var tmp, id, endPoint, apiKey;
 
-        if (config.name === undefined && typeof config.url === "string" && config.url.includes("drive.google.com")) {
+        if (config.name === undefined && igv.isString(config.url) && config.url.includes("drive.google.com")) {
             tmp = extractQuery(config.url);
             id = tmp["id"];
             endPoint = "https://www.googleapis.com/drive/v2/files/" + id;

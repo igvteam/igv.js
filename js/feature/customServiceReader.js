@@ -61,20 +61,36 @@ var igv = (function (igv) {
             }
         }
 
-        return igv.xhr.load(url, self.config).then(function (data) {
+        return igv.xhr.load(url, self.config)
+            
+            .then(function (data) {
 
-            if (data) {
+                if (data) {
 
-                var results = (typeof self.config.parser === "function") ? self.config.parser(data) : data;
+                    if (typeof self.config.parser === "function") {
+                        return self.config.parser(data);
+                    }
+                    else if (igv.isString(data)) {
+                        // TODO -- make this explict in config (returnType="json", "xml", etc)
+                        try {
+                            return JSON.parse(data);
+                        } catch (e) {
+                            // Apparently not json, just return data
 
-                return results;
+                            return data;
+                        }
+                    }
+                    else {
+                        return data;
+                    }
 
-            }
-            else {
-                return null;
-            }
 
-        })
+                }
+                else {
+                    return null;
+                }
+
+            })
     }
 
 

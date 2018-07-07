@@ -261,6 +261,16 @@ var igv = (function (igv) {
             genomeChange,
             genomeConfig;
 
+        // idOrConfig might be json
+        if(igv.isString(idOrConfig) && idOrConfig.startsWith("{")) {
+            try {
+                idOrConfig = JSON.parse(idOrConfig);
+            } catch (e) {
+                console.error(e);
+                // Apparently its not json,  just continue
+            }
+        }
+
         return expandReference(idOrConfig)
 
             .then(function (config) {
@@ -332,7 +342,7 @@ var igv = (function (igv) {
 
             var genomeID;
 
-            if (typeof conf === 'string') {
+            if (igv.isString(conf)) {
                 genomeID = conf;
             }
             else if (conf.genome) {
@@ -497,7 +507,7 @@ var igv = (function (igv) {
                 })
 
                 if (groupAutoscaleViews.length > 0) {
-                    this.updateViews(self.genomicStateList[0], groupAutoscaleViews);
+                    self.updateViews(self.genomicStateList[0], groupAutoscaleViews);
                 }
 
                 return loadedTracks;
@@ -512,14 +522,20 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.loadTrack = function (config) {
 
-        var self = this,
-            settings,
-            property,
-            newTrack;
+        var self = this;
+
+        // config might be json
+        if(igv.isString(config)) {
+            config = JSON.parse(config);
+        }
 
         return resolveTrackProperties(config)
 
             .then(function (config) {
+
+                var settings,
+                    property,
+                    newTrack;
 
                 igv.inferTrackTypes(config);
 
@@ -1925,7 +1941,17 @@ var igv = (function (igv) {
         json = String.fromCharCode.apply(null, bytes);
 
         return json;
+    }
 
+    igv.Browser.prototype.sessionURL = function () {
+            var surl, path, idx;
+
+            path = window.location.href.slice();
+            idx = path.indexOf("?");
+
+            surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
+
+            return surl;
 
     }
 
