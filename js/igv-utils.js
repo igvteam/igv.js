@@ -567,6 +567,15 @@ var igv = (function (igv) {
         return Object.assign(defaultOptions, options);
     };
 
+    /**
+     * Covers string literals and String objects
+     * @param x
+     * @returns {boolean}
+     */
+    igv.isString = function (x) {
+        return typeof x === "string" || x instanceof String
+    }
+
     return igv;
 
 })(igv || {});

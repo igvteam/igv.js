@@ -120,7 +120,7 @@ var igv = (function (igv) {
                     plain = inflate.decompress();
                     str = String.fromCharCode.apply(null, plain);
                     igv.Google.properties = JSON.parse(str);
-
+                    igv.setGoogleApiKey(igv.Google.properties["api_key"]);
                     return igv.Google.properties;
 
                 })
