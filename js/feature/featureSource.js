@@ -152,11 +152,9 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this,
-            genomicInterval, maxRows, str, queryChr, isQueryable;
+        var self = this, maxRows, str, queryChr, isQueryable;
 
         queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
-        genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
         maxRows = self.config.maxRows || 500;
         str = chr.toLowerCase();
         isQueryable = self.queryable || self.reader.indexed;
@@ -181,10 +179,33 @@ var igv = (function (igv) {
 
 
         function getFeatureCache() {
+            var genomicInterval;
+
+            genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
+
             if(self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
                 return Promise.resolve(self.featureCache);
             }
             else {
+
+                // If a visibility window is defined, expand query interval
+
+                if(self.visibilityWindow != undefined) {
+                    if(self.visibilityWindow <= 0) {
+                        // Whole chromosome
+                        bpStart = 0;
+                        bpEnd = Number.MAX_VALUE;
+                    }
+                    else {
+                        if(self.visibilityWindow > (bpEnd - bpStart)) {
+                            bpStart = Math.max(0, (bpStart + bpEnd - self.visibilityWindow) / 2);
+                            bpEnd = bpStart + self.visibilityWindow;
+                        }
+                    }
+                    genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
+                }
+
+
                 return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
                     .then(function (featureList) {
