@@ -167,9 +167,7 @@
         div = $("#myDiv")[0];
         options = {
             locus: ['myc'],
-            reference: {
-                id: "hg19",
-            },
+            genome: "hg19",
 
             tracks: [
                 {
@@ -189,20 +187,6 @@
                     label: 'rgb(GM12878 H3K4me3)',
                     color: 'rgb(0,150,0)',
                     autoscaleGroup: '1'
-                },
-                {
-
-                    name: "Genes",
-                    autoHeight: true,
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
                 }
             ]
         };

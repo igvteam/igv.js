@@ -86,12 +86,8 @@ var igv = (function (igv) {
 
         igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
 
-        // TODO fix this
-        // if (!config.showNavigation) {
-        //     browser.$contentHeader.append($('<div id="igv-logo-nonav">'));
-        // }
+        if (config.apiKey) igv.setGoogleApiKey(config.apiKey);
 
-        if (config.apiKey) igv.setApiKey(config.apiKey);
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
         promise = doPromiseChain(browser,config);
