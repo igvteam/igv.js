@@ -100,6 +100,7 @@ var igv = (function (igv) {
             }
             else {
                 return self.featureSource.getFileHeader()
+
                     .then(function (header) {
 
                         if (header) {
@@ -110,8 +111,12 @@ var igv = (function (igv) {
                             if (header.color && !self.config.color) {
                                 self.color = "rgb(" + header.color + ")";
                             }
+                            self.header = header;
                         }
-                        self.header = header;
+                        else {
+                            self.header = {};
+                        }
+
 
                         return header;
 

@@ -88,12 +88,15 @@ var igv = (function (igv) {
         if (self.header) {
             return Promise.resolve(self.header);
         } else {
+
             return self.getIndex()
+
                 .then(function (index) {
 
                     var options,
                         success;
                     if (self.dataURI) {
+
                         return self.loadFeaturesFromDataURI(self.dataURI)
                             .then(function (features) {
                                 var header = self.header || {};
