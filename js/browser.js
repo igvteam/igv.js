@@ -1892,7 +1892,15 @@ var igv = (function (igv) {
         order = 0;
         this.trackViews.forEach(function (tv) {
 
-            var track = tv.track;
+            var track, config;
+            
+            track = tv.track;
+            if(typeof track.getConfig === "function") {
+                config = track.getConfig();
+            }
+            else {
+                config = track.config;
+            }
 
             if (track.config) {
                 track.config.order = order++;

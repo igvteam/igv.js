@@ -86,26 +86,23 @@ var igv = (function (igv) {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
         }
 
-        if (igv.doProvideColoSwatchWidget(this.track)) {
+        // Create color picker.
+        config =
+        {
+            // width = (29 * swatch-width) + border-width + border-width
+            width: ((29 * 24) + 1 + 1),
+            classes: ['igv-position-absolute']
+        };
 
-            config =
-            {
-                // width = (29 * swatch-width) + border-width + border-width
-                width: ((29 * 24) + 1 + 1),
-                classes: ['igv-position-absolute']
-            };
+        this.$colorpicker_container = igv.genericContainer($track, config, function () {
+            self.$colorpicker_container.toggle();
+        });
 
+        igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+            self.setColor(rgb);
+        });
 
-            this.$colorpicker_container = igv.genericContainer($track, config, function () {
-                self.$colorpicker_container.toggle();
-            });
-
-            igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
-                self.setColor(rgb);
-            });
-
-            this.$colorpicker_container.hide();
-        }
+        this.$colorpicker_container.hide();
 
     };
 
