@@ -28,32 +28,6 @@
  * Created by jrobinso on 7/5/18.
  */
 
-
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 var igv = (function (igv) {
 
 
@@ -64,19 +38,33 @@ var igv = (function (igv) {
         this.theta = config.theta || Math.PI / 4;
         this.sinTheta = Math.sin(this.theta);
         this.cosTheta = Math.cos(this.theta);
-        //  this.direction;
-        this.lineThickness = 1;
 
-        this.height = config.height || 200;
 
+        this.height = config.height || 250;
         this.autoHeight = true;
 
-        this.arcDirection = 1;
+        this.arcDirection = (config.arcDirection === undefined ? true : config.arcDirection);       // true for up, false for down
+        this.lineThickness = config.lineThicknes || 2;
+        this.color = config.color || "rgb(180,25,137)"
 
         this.supportsWholeGenome = false;
 
-
     };
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    igv.InteractionTrack.prototype.getConfig = function () {
+
+        var config = this.config || {};
+        config.arcDirection = this.arcDirection;
+        config.lineThicknes = this.lineThickness;
+        config.color = this.color;
+        return config;
+
+    }
 
 
     igv.InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
@@ -120,6 +108,9 @@ var igv = (function (igv) {
         pixelWidth = options.pixelWidth;
         pixelHeight = options.pixelHeight;
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        ctx.strokeStyle = self.color;
+        ctx.lineWidth = self.lineThickness;
 
         featureList = options.features;
         if (featureList) {
@@ -170,7 +161,7 @@ var igv = (function (igv) {
 
 
 
-            if (direction === 1 || direction === true) {
+            if (direction) {
                 // UP
                 var trackBaseLine = self.height;
                 yc = trackBaseLine + b;
@@ -192,20 +183,28 @@ var igv = (function (igv) {
     };
 
 
-    // igv.InteractionTrack.prototype.menuItemList = function () {
-    //
-    //     var self = this;
-    //
-    //     return [
-    //         {
-    //             name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
-    //             click: function () {
-    //                 self.toggleSampleHeight();
-    //             }
-    //         }
-    //     ];
-    //
-    // };
+    igv.InteractionTrack.prototype.menuItemList = function () {
+
+        var self = this;
+
+        return [
+            {
+                name: "Toggle arc direction",
+                click: function () {
+                    self.arcDirection = !self.arcDirection;
+                    self.trackView.repaintViews();
+                }
+            },
+            {
+                name: "Set track color",
+                click: function () {
+                    self.trackView.$colorpicker_container.toggle();
+                }
+            }
+
+        ];
+
+    };
     //
     //
     //

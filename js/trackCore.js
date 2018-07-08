@@ -77,11 +77,11 @@ var igv = (function (igv) {
     igv.createTrack = function (config) {
 
         var type, track;
-        
+
         type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
 
         switch (type) {
-            
+
             case "gwas":
                 return new igv.GWASTrack(config);
                 break;
@@ -203,6 +203,9 @@ var igv = (function (igv) {
                         break;
                     case "bam":
                         config.type = "alignment";
+                        break;
+                    case "bedpe":
+                        config.type = "interaction";
                         break;
                     default:
                         config.type = "annotation";
@@ -469,31 +472,29 @@ var igv = (function (igv) {
      */
     igv.trackMenuItemList = function (popover, trackView) {
 
-        var menuItems = [],
-            all;
+        var menuItems = [];
 
         if (trackView.track.config.type !== 'sequence') {
             menuItems.push(igv.trackRenameMenuItem(trackView));
             menuItems.push(igv.trackHeightMenuItem(trackView));
         }
 
-        if (igv.doProvideColoSwatchWidget(trackView.track)) {
+        if (doProvideColoSwatchWidget(trackView.track)) {
             menuItems.push(igv.colorPickerMenuItem(trackView))
         }
 
-        all = [];
         if (trackView.track.menuItemList) {
-            all = menuItems.concat(trackView.track.menuItemList());
+            menuItems = menuItems.concat(trackView.track.menuItemList());
         }
 
         if (trackView.track.removable !== false) {
-            all.push(igv.trackRemovalMenuItem(trackView));
+            menuItems.push(igv.trackRemovalMenuItem(trackView));
         }
 
-        return all;
+        return menuItems;
     };
 
-    igv.doProvideColoSwatchWidget = function (track) {
+    function doProvideColoSwatchWidget(track) {
         return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
     };
 
