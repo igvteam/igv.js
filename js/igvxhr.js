@@ -522,28 +522,34 @@ var igv = (function (igv) {
             return Promise.resolve(igv.oauth.google.access_token);
 
         } else {
-            var scope, options;
+            var scope, options, authInstance;
 
-            scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+            authInstance = gapi.auth2.getAuthInstance();
+            if (!authInstance) {
+                igv.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+                return undefined;
+            }
+            else {
+                scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
 
-            options = new gapi.auth2.SigninOptionsBuilder();
-            //options.setAppPackageName('com.example.app');
-            //options.setFetchBasicProfile(true);
-            options.setPrompt('select_account');
-            options.setScope(scope);
+                options = new gapi.auth2.SigninOptionsBuilder();
+                options.setPrompt('select_account');
+                options.setScope(scope);
 
-            loginTried = true;
+                loginTried = true;
 
-            return gapi.auth2.getAuthInstance().signIn(options)
 
-                .then(function (user) {
+                return gapi.auth2.getAuthInstance().signIn(options)
 
-                    var authResponse = user.getAuthResponse();
+                    .then(function (user) {
 
-                    igv.setGoogleOauthToken(authResponse["access_token"]);
+                        var authResponse = user.getAuthResponse();
 
-                    return authResponse["access_token"];
-                })
+                        igv.setGoogleOauthToken(authResponse["access_token"]);
+
+                        return authResponse["access_token"];
+                    })
+            }
         }
 
     }
