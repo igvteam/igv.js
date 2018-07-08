@@ -9,8 +9,8 @@
   },
   {
     "type": "bed",
-    "url": "../test/data/bed/gencode.v18.collapsed.bed",
-    "indexURL": "../test/data/bed/gencode.v18.collapsed.bed.idx",
+    "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+    "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
     "name": "Bed - Tribble Index"
   },
   {
@@ -28,7 +28,7 @@
     "visibilityWindow": 10000000
   },
   {
-    "url": "../test/data/bedpe/hg19_myc.bedpe",
+    "url": "https://s3.amazonaws.com/igv.org.test/data/hg19_myc.bedpe",
     "type": "interaction",
     "format": "bedpe",
     "name": "MYC Interactions"
