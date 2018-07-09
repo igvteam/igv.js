@@ -171,7 +171,7 @@ $igv-dark-grey-color: #373737;
     // igv logo
     #igv-logo {
       width: 34px;
-      height: 16px;
+      height: $igv-navbar-height;
 
       margin-left: 8px;
       margin-right: 32px;

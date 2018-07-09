@@ -285,7 +285,7 @@ var igv = (function (igv) {
             logoDiv = $('<div id="igv-logo">');
             var logoSvg = logo();
             logoSvg.css("width", "34px");
-            logoSvg.css("height", "16px");
+            logoSvg.css("height", "32px");
             logoDiv.append(logoSvg);
             $igv_nav_bar_left_container.append(logoDiv);
 
