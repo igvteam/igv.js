@@ -166,24 +166,20 @@ var igv = (function (igv) {
 
                             .then(function (accessToken) {
 
-                                if (accessToken) {
+                                options.oauthToken = accessToken;
 
-                                    options.oauthToken = accessToken;
-
-                                    igv.xhr.load(url, options)
-                                        .then(function (response) {
-                                            fullfill(response);
-                                        })
-                                        .catch(function (error) {
-                                            if (reject) reject(error);
-                                            else throw(error);
-                                        })
-                                }
-                                else {
-                                    if (reject) reject(error);
-                                    else throw(error);
-                                }
-
+                                igv.xhr.load(url, options)
+                                    .then(function (response) {
+                                        fullfill(response);
+                                    })
+                                    .catch(function (error) {
+                                        if (reject) {
+                                            reject(error);
+                                        }
+                                        else {
+                                            throw(error);
+                                        }
+                                    })
                             })
 
 
