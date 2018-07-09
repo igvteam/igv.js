@@ -1968,9 +1968,9 @@ var igv = (function (igv) {
 
         var self = this;
 
-        $(window).on('resize.browser', igv.throttle(function () {
+        $(window).on('resize.browser', function () {
             self.resize();
-        }, 10));
+        });
 
         $(document).on('click.browser', function (e) {
             var target = e.target;
@@ -1980,7 +1980,7 @@ var igv = (function (igv) {
             }
         });
 
-        $(this.trackContainerDiv).on('mousemove', igv.throttle(function (e) {
+        $(this.trackContainerDiv).on('mousemove',function (e) {
 
             var coords, viewport, viewportWidth, referenceFrame;
 
@@ -2016,7 +2016,7 @@ var igv = (function (igv) {
                 self.vpMouseDown.lastMouseX = coords.x;
             }
 
-        }, 10));
+        });
 
         $(this.trackContainerDiv).on('mouseleave', function (e) {
             mouseUpOrLeave(e);
