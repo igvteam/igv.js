@@ -373,6 +373,7 @@
     #igv-navbar #igv-nav-bar-left-container #igv-current_genome {
       height: 32px;
       margin-right: 16px;
+      user-select: none;
       color: #444;
       font-family: "Open Sans", sans-serif;
       font-size: 12px;
@@ -436,6 +437,7 @@
               font-size: 18px; }
         #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-windowsizepanel-content-div {
           margin-left: 4px;
+          user-select: none;
           font-family: "Open Sans", sans-serif;
           font-size: 12px;
           font-weight: 400;
@@ -460,6 +462,7 @@
         margin-left: 0;
         margin-right: 0; }
     #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget {
+      user-select: none;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -475,6 +478,7 @@
   height: 18px;
   min-width: 96px;
   text-transform: capitalize;
+  user-select: none;
   line-height: 18px;
   text-align: center;
   font-family: "Open Sans", sans-serif;
