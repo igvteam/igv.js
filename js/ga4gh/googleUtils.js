@@ -99,13 +99,13 @@ var igv = (function (igv) {
 
             var id = getGoogleDriveFileID(link);
 
-            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media" : link;
+            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&supportsTeamDrives=true" : link;
         },
 
         getDriveFileInfo: function (googleDriveURL) {
 
             var id = getGoogleDriveFileID(googleDriveURL),
-                endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
+                endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
 
             return igv.xhr.loadJson(endPoint, igv.buildOptions({}));
         },
