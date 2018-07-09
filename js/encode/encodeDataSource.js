@@ -89,36 +89,43 @@ var igv = (function (igv) {
             var cellType,
                 target,
                 filtered,
-                mapped;
+                mapped,
+                assayType;
 
-            cellType = record["biosample_term_name"] || '';
-
-            target = record.target ? record.target.label : '';
+            cellType = record.biosample_term_name;
+            assayType = record.assay_term_name;
+            target = record.target ? record.target.label : undefined;
 
             filtered = _.filter(record.files, function (file) {
                 return fileFormat === file.file_format && assembly === file.assembly;
             });
 
-            mapped = _.map(filtered, function (file) {
+            mapped = filtered.map(function (file) {
 
                 var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
                     techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
-                    name = cellType + " " + target;
+                    name = cellType || "";
 
+                if(target) {
+                    name += " " + target;
+                }
+                if(assayType && assayType.toLowerCase() !=="chip-seq") {
+                    name += " " + assayType;
+                }
                 if (bioRep) {
                     name += " " + bioRep;
                 }
 
                 if (techRep) {
-                    name += (bioRep ? ":" : "0:") + techRep;
+                    name += (bioRep ? ":" : " 0:") + techRep;
                 }
 
                 return {
                     "Assembly": file.assembly,
                     "ExperimentID": record['@id'],
-                    "Cell Type": cellType,
+                    "Cell Type": cellType || '',
                     "Assay Type": record.assay_term_name,
-                    "Target": target,
+                    "Target": target || '',
                     "Lab": record.lab ? record.lab.title : "",
                     "Format": file.file_format,
                     "Output Type": file.output_type,
@@ -150,7 +157,7 @@ var igv = (function (igv) {
             tt1,
             tt2;
 
-        aa1 = a['Assembly' ]; aa2 = b['Assembly' ];
+        aa1 = a['Assay Type' ]; aa2 = b['Assay Type' ];
         cc1 = a['Cell Type']; cc2 = b['Cell Type'];
         tt1 = a['Target'   ]; tt2 = b['Target'   ];
 
