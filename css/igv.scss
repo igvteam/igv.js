@@ -188,6 +188,8 @@ $igv-dark-grey-color: #373737;
 
       margin-right: 16px;
 
+      user-select: none;
+
       color: #444;
       font-family: $igv-default-font-face;
       font-size: $igv-navbar-font-size;
@@ -294,6 +296,8 @@ $igv-dark-grey-color: #373737;
         #igv-windowsizepanel-content-div {
           margin-left: 4px;
 
+          user-select: none;
+
           font-family: $igv-default-font-face;
           font-size: $igv-navbar-font-size;
           font-weight: 400;
@@ -340,6 +344,8 @@ $igv-dark-grey-color: #373737;
     // nav bar - zoom
     #igv-zoom-widget {
 
+      user-select: none;
+
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -368,6 +374,8 @@ $igv-dark-grey-color: #373737;
   height: $igv-navbar-button-height;
   min-width: $igv-navbar-button-width;
   text-transform: capitalize;
+
+  user-select: none;
 
   line-height: $igv-navbar-button-height;
   text-align: center;
