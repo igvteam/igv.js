@@ -542,17 +542,15 @@ var igv = (function (igv) {
      */
     function extractName(config) {
 
-        var tmp, id, endPoint, apiKey;
+        var tmp, id, endPoint;
 
         if (config.name === undefined && igv.isString(config.url) && config.url.includes("drive.google.com")) {
             tmp = extractQuery(config.url);
             id = tmp["id"];
-            endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
-            if (apiKey) endPoint += "?key=" + apiKey;
-
+            
             return igv.Google.getDriveFileInfo(config.url)
                 .then(function (json) {
-                    return json.originalFilename;
+                    return json.originalFilename || json.name;
                 })
         } else {
             if (config.name === undefined) {

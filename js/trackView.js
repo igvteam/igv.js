@@ -358,7 +358,7 @@ var igv = (function (igv) {
         if (typeof this.track.computePixelHeight !== "function") {
             this.viewports.forEach(function (vp) {
                 vp.setContentHeight(newHeight);
-                vp.tile.invalidate = true;
+                if(vp.tile) vp.tile.invalidate = true;
             });
             this.repaintViews();
         }
