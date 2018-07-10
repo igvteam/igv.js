@@ -185,7 +185,7 @@
     "id": "BroadHiSeqX_b37/NA12878"
   },
   {
-    "HEADING": "IGV Flask Server"
+    "HEADING": "IGV Flask Server (http:// protocol only)"
   },
   {
     "name": "Known Genes (UCSC service)",
@@ -193,7 +193,7 @@
     "displayMode": "EXPANDED",
     "sourceType": "ucscservice",
     "source": {
-      "url": "http://localhost:5000/ucsc?db=hg19",
+      "url": "http://igv-load-balancer-25126049.us-east-1.elb.amazonaws.com/ucsc?db=hg19",
       "method": "GET",
       "tableName": "knownGene"
     }
@@ -205,7 +205,7 @@
     "sourceType": "ucscservice",
     "visibilityWindow": 1000000,
     "source": {
-      "url": "http://localhost:5000/ucsc?db=hg19",
+      "url": "http://igv-load-balancer-25126049.us-east-1.elb.amazonaws.com/ucsc?db=hg19",
       "method": "GET",
       "tableName": "snp141"
     }
