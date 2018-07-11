@@ -246,7 +246,7 @@ var igv = (function (igv) {
                         self.sequences[currentChr] = currentSeq;
                         self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
                     }
-                    currentChr = nextLine.substr(1).split("\\s+")[0];
+                    currentChr = nextLine.substr(1).split(/(\s+)/)[0];
                     currentSeq = "";
                 }
                 else {
