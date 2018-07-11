@@ -262,7 +262,7 @@ var igv = (function (igv) {
             genomeConfig;
 
         // idOrConfig might be json
-        if(igv.isString(idOrConfig) && idOrConfig.startsWith("{")) {
+        if (igv.isString(idOrConfig) && idOrConfig.startsWith("{")) {
             try {
                 idOrConfig = JSON.parse(idOrConfig);
             } catch (e) {
@@ -383,12 +383,7 @@ var igv = (function (igv) {
                 }
             }
             else {
-                if (genome.chromosomes.hasOwnProperty("all")) {
-                    loci = "all";
-                }
-                else {
-                    loci = genome.chromosomeNames[0];
-                }
+                loci = genome.getHomeChromosomeName();
             }
 
             return loci;
@@ -525,7 +520,7 @@ var igv = (function (igv) {
         var self = this;
 
         // config might be json
-        if(igv.isString(config)) {
+        if (igv.isString(config)) {
             config = JSON.parse(config);
         }
 
@@ -1865,9 +1860,9 @@ var igv = (function (igv) {
         this.trackViews.forEach(function (tv) {
 
             var track, config;
-            
+
             track = tv.track;
-            if(typeof track.getConfig === "function") {
+            if (typeof track.getConfig === "function") {
                 config = track.getConfig();
             }
             else {
@@ -1924,14 +1919,14 @@ var igv = (function (igv) {
     }
 
     igv.Browser.prototype.sessionURL = function () {
-            var surl, path, idx;
+        var surl, path, idx;
 
-            path = window.location.href.slice();
-            idx = path.indexOf("?");
+        path = window.location.href.slice();
+        idx = path.indexOf("?");
 
-            surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
+        surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
 
-            return surl;
+        return surl;
 
     }
 
@@ -1952,7 +1947,7 @@ var igv = (function (igv) {
             }
         });
 
-        $(this.trackContainerDiv).on('mousemove',function (e) {
+        $(this.trackContainerDiv).on('mousemove', function (e) {
 
             var coords, viewport, viewportWidth, referenceFrame;
 
