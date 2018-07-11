@@ -199,15 +199,27 @@
 	}
   },
   {
-	"name": "SNP 141 (UCSC service)",
+	"name": "SNP 141 (hg19)",
 	"type": "snp",
 	"displayMode": "EXPANDED",
 	"sourceType": "ucscservice",
-	"visibilityWindow": 1000000,
+	"visibilityWindow": 10000,
 	"source": {
 	  "url": "https://data.broadinstitute.org/igv/projects/php/ucsc.php?db=hg19",
 	  "method": "GET",
 	  "tableName": "snp141"
+	}
+  },
+  {
+	"name": "SNP 150 (hg38)",
+	"type": "snp",
+	"displayMode": "EXPANDED",
+	"sourceType": "ucscservice",
+	"visibilityWindow": 10000,
+	"source": {
+	  "url": "https://data.broadinstitute.org/igv/projects/php/ucsc.php?db=hg38",
+	  "method": "GET",
+	  "tableName": "snp150"
 	}
   },
   {
