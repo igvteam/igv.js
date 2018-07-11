@@ -103,7 +103,11 @@ var igv = (function (igv) {
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
 
-        constructWG(this);
+        if(sequence.chromosomes.length > 1) {
+            constructWG(this);
+        } else {
+            this.wgChromosomeNames = [sequence.chromosomeNames[0]];
+        }
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
@@ -156,6 +160,15 @@ var igv = (function (igv) {
     Genome.prototype.toJSON = function () {
 
         return Object.assign({}, this.config, {tracks: undefined});
+    }
+
+    Genome.prototype.getHomeChromosomeName = function () {
+        if (this.chromosomes.hasOwnProperty("all")) {
+            return "all";
+        }
+        else {
+            return this.chromosomeNames[0];
+        }
     }
 
     Genome.prototype.getChromosomeName = function (str) {
