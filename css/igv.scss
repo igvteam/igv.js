@@ -1,7 +1,6 @@
 
 @import "igv-colorpicker";
 @import "igv-generic-container";
-@import "igv-file-load-widget";
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
@@ -12,6 +11,17 @@ $igv-navbar-toggle-dark-dark: #737373;
 $igv-navbar-button-height: 18px;
 $igv-navbar-button-width: 96px;
 $igv-navbar-button-font-size: 11px;
+
+$igv-button-width: 75px;
+$igv-button-height: 28px;
+
+$igv-button-border-radius: 2px;
+
+$igv-button-ok-color: #5ea4e0;
+$igv-button-ok-hover-color: #3b5c7f;
+
+$igv-button-cancel-color: #c4c4c4;
+$igv-button-cancel-hover-color: #7f7f7f;
 
 $igv-border-color: #bfbfbf;
 
@@ -1266,7 +1276,7 @@ $igv-dark-grey-color: #373737;
   .igv-generic-dialog-ok-cancel {
 
     width: 100%;
-    height: $igv-flw-button-height;
+    height: $igv-button-height;
 
     display: flex;
     flex-flow: row;
@@ -1282,39 +1292,39 @@ $igv-dark-grey-color: #373737;
       font-size: 14px;
       font-weight: 200;
 
-      width: $igv-flw-button-width;
-      height: $igv-flw-button-height;
+      width: $igv-button-width;
+      height: $igv-button-height;
 
-      line-height: $igv-flw-button-height;
+      line-height: $igv-button-height;
       text-align: center;
 
       border-color: transparent;
       border-style: solid;
       border-width: thin;
-      border-radius: $igv-flw-border-radius;
+      border-radius: $igv-button-border-radius;
 
     }
 
     div:first-child {
       margin-left: 32px;
       margin-right: 0;
-      background-color: $igv-flw-button-ok-color;
+      background-color: $igv-button-ok-color;
     }
 
     div:last-child {
       margin-left: 0;
       margin-right: 32px;
-      background-color: $igv-flw-button-cancel-color;
+      background-color: $igv-button-cancel-color;
     }
 
     div:first-child:hover {
       cursor: pointer;
-      background-color: $igv-flw-button-ok-hover-color;
+      background-color: $igv-button-ok-hover-color;
     }
 
     div:last-child:hover {
       cursor: pointer;
-      background-color: $igv-flw-button-cancel-hover-color;
+      background-color: $igv-button-cancel-hover-color;
     }
 
   }

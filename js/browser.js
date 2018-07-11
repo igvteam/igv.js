@@ -1779,34 +1779,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.prototype.createFileLoadWidget = function (config, fileLoadManager, $parent, $buttonParent) {
-
-        var isHidden,
-            isEmbedded,
-            fileLoadWidgetConfig;
-
-        isHidden = (undefined === config.hidden) ? true : config.hidden;
-
-        if (false === isHidden) {
-
-            isEmbedded = (undefined === config.embed) ? false : config.embed;
-
-            // load local file
-            fileLoadWidgetConfig =
-            {
-                dataTitle: config.dataTitle || 'Data',
-                indexTitle: config.indexTitle || 'Index',
-                mode: config.mode,
-                embed: isEmbedded,
-                $widgetParent: config.$widgetParent || $parent,
-                $buttonParent: isEmbedded ? undefined : $buttonParent
-            };
-
-            return new igv.FileLoadWidget(fileLoadWidgetConfig, fileLoadManager)
-        }
-
-    };
-
     // EVENTS
 
     igv.Browser.prototype.on = function (eventName, fn) {

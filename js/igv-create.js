@@ -289,11 +289,6 @@ var igv = (function (igv) {
             logoDiv.append(logoSvg);
             $igv_nav_bar_left_container.append(logoDiv);
 
-            // file load widget
-            if (config.fileLoadWidget) {
-                browser.trackFileLoad = browser.createFileLoadWidget(config.fileLoadWidget, new igv.FileLoadManager(), browser.$root, $igv_nav_bar_left_container);
-            }
-
             // current genome
             browser.$current_genome = $('<div>', {id: 'igv-current_genome'});
             $igv_nav_bar_left_container.append(browser.$current_genome);
