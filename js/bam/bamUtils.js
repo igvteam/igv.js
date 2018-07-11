@@ -214,12 +214,14 @@ var igv = (function (igv) {
                 pos = readInt(ba, offset + 8);
 
                 if (refID < 0) {
+                    offset = blockEnd;
                     continue;   // unmapped read
                 }
                 else if (chrIdx && (refID > chrIdx || pos > max)) {
                     return;    // off right edge, we're done
                 }
                 else if (chrIdx && (refID < chrIdx)) {
+                    offset = blockEnd;
                     continue;   // to left of start, not sure this is possible
                 }
 
