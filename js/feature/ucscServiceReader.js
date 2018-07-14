@@ -38,9 +38,11 @@ var igv = (function (igv) {
             .then(function (data) {
                 if (data) {
                     data.forEach(function (sample) {
-                        if (sample.hasOwnProperty('exonStarts') && sample.hasOwnProperty('exonEnds') && sample.hasOwnProperty('exonCount')
-                            && sample.hasOwnProperty('cdsStart') && sample.hasOwnProperty('cdsEnd')) {
-
+                        if (sample.hasOwnProperty('exonStarts') && 
+                            sample.hasOwnProperty('exonEnds') && 
+                            sample.hasOwnProperty('exonCount') && 
+                            sample.hasOwnProperty('cdsStart') && 
+                            sample.hasOwnProperty('cdsEnd')) {
                             addExons(sample);
                         }
                     });
