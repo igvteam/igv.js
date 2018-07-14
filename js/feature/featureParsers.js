@@ -147,7 +147,20 @@ var igv = (function (igv) {
         while (line = dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track")) {
-                    header = parseTrackLine(line);
+                    let h  = parseTrackLine(line);
+                    if(header) {
+                        Object.assign(header, h);
+                    } else {
+                        header = h;
+                    }
+
+                } else if (line.startsWith("#columns")) {
+                    let h  = parseColumnsDirective(line);
+                    if(header) {
+                        Object.assign(header, h);
+                    } else {
+                        header = h;
+                    }
                 }
                 else if (line.startsWith("##gff-version 3")) {
                     this.format = "gff3";
@@ -159,6 +172,9 @@ var igv = (function (igv) {
                 break;
             }
         }
+
+        this.header = header;    // Directives might be needed for parsing lines
+
         return header;
     };
 
@@ -279,6 +295,30 @@ var igv = (function (igv) {
             }
 
         });
+
+        return properties;
+    }
+
+    function parseColumnsDirective(line) {
+
+        let properties = {};
+        let t1 = line.split(/\s+/);
+
+        if (t1.length === 2) {
+
+            let t2 = t1[1].split(";");
+
+            t2.forEach(function (keyValue) {
+
+                let t = keyValue.split("=");
+
+                if (t[0] === "color") {
+                    properties.colorColumn = Number.parseInt(t[1]) - 1;
+                } else if (t[0] ==="thickness") {
+                    properties.thicknessColumn = Number.parseInt(t[1]) - 1;
+                }
+            })
+        }
 
         return properties;
     }
@@ -823,8 +863,28 @@ var igv = (function (igv) {
         }
 
         feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
+
+        // Start and end for the feature as a whole.  This needs revisited for interchr features
         feature.start = Math.min(feature.start1, feature.start2);
         feature.end = Math.max(feature.end1, feature.end2);
+
+        // Midpoints
+        let m1 = (feature.start1 + feature.end1) / 2;
+        let m2 = (feature.start2 + feature.end2) / 2;
+        feature.m1 = (m1 < m2) ? m1 : m2;
+        feature.m2 = (m1 < m2) ? m2 : m1;
+        
+        // Optional extra columns
+        if(this.header) {
+            let thicknessColumn = this.header.thicknessColumn;
+            let colorColumn = this.header.colorColumn;
+            if(colorColumn && colorColumn < tokens.length) {
+                feature.color = igv.Color.createColorString(tokens[colorColumn])
+            }
+            if(thicknessColumn && thicknessColumn < tokens.length) {
+                feature.thickness = tokens[thicknessColumn];
+            }
+        }
 
         return feature;
     }

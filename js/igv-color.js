@@ -276,7 +276,7 @@ var igv = (function (igv) {
             if (token.includes(",")) {
                 return token.startsWith("rgb") ? token : "rgb(" + token + ")";
             } else {
-                return undefined;
+                return token;
             }
         }
     };

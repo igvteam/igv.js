@@ -384,8 +384,8 @@ var igv = (function (igv) {
     function calculateFeatureCoordinates(feature, bpStart, xScale) {
         var px = (feature.start - bpStart) / xScale,
             px1 = (feature.end - bpStart) / xScale,
-            //px = Math.round((feature.start - bpStart) / xScale),
-            //px1 = Math.round((feature.end - bpStart) / xScale),
+        //px = Math.round((feature.start - bpStart) / xScale),
+        //px1 = Math.round((feature.end - bpStart) / xScale),
             pw = px1 - px;
 
         if (pw < 3) {
@@ -704,6 +704,14 @@ var igv = (function (igv) {
 
     }
 
+    // SNP constants
+    const codingNonSynonSet = new Set(['nonsense', 'missense', 'stop-loss', 'frameshift', 'cds-indel']);
+    const codingSynonSet = new Set(['coding-synon']);
+    const spliceSiteSet = new Set(['splice-3', 'splice-5']);
+    const untranslatedSet = new Set(['untranslated-5', 'untranslated-3']);
+    const locusSet = new Set(['near-gene-3', 'near-gene-5']);
+    const intronSet = new Set(['intron']);
+
     /**
      *
      * @param snp
@@ -734,15 +742,10 @@ var igv = (function (igv) {
         // Coloring functions, convert a value to a priority
 
         function colorByFunc(theFunc) {
+            var priorities;
             var funcArray = theFunc.split(',');
             // possible func values
-            var codingNonSynonSet = new Set(['nonsense', 'missense', 'stop-loss', 'frameshift', 'cds-indel']),
-                codingSynonSet = new Set(['coding-synon']),
-                spliceSiteSet = new Set(['splice-3', 'splice-5']),
-                untranslatedSet = new Set(['untranslated-5', 'untranslated-3']),
-                priorities;
-            // locusSet = new Set(['near-gene-3', 'near-gene-5']);
-            // intronSet = new Set(['intron']);
+
 
             priorities = funcArray.map(function (func) {
                 if (codingNonSynonSet.has(func) || spliceSiteSet.has(func)) {
