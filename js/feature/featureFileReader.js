@@ -124,6 +124,12 @@ var igv = (function (igv) {
                             })
                     }
                 })
+                .then(function (header) {
+                    if(header && self.parser) {
+                        self.parser.header = header;
+                    }
+                    return header;
+                })
         }
 
     };
@@ -174,9 +180,7 @@ var igv = (function (igv) {
                 }
                 return self.parser.parseFeatures(data);   // <= PARSING DONE HERE
             })
-            // .catch(function(error) {
-            //     console.log(error);
-            // })
+
     };
 
     igv.FeatureFileReader.prototype.loadFeaturesWithIndex = function (chr, start, end) {
