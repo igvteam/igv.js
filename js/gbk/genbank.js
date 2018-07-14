@@ -282,8 +282,7 @@ var igv = (function (igv) {
 
         lociArray.forEach(function (loci) {
 
-            let []
-            tmp = loci.split("..");
+            let  tmp = loci.split("..");
 
             let exonStart = 0;    // - (isNegative ? 0 : 1);
 
