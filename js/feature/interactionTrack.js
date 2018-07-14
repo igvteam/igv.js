@@ -30,7 +30,6 @@
 
 var igv = (function (igv) {
 
-
     igv.InteractionTrack = function (config) {
 
         igv.configTrack(this, config);
@@ -43,11 +42,13 @@ var igv = (function (igv) {
         this.height = config.height || 250;
         this.autoHeight = true;
 
-        this.arcDirection = (config.arcDirection === undefined ? true : config.arcDirection);       // true for up, false for down
-        this.lineThickness = config.lineThicknes || 2;
+        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation);       // true for up, false for down
+        this.thickness = config.thickness || 2;
         this.color = config.color || "rgb(180,25,137)"
 
         this.supportsWholeGenome = false;
+
+        this.colorAlphaCache = {};
 
     };
 
@@ -59,8 +60,8 @@ var igv = (function (igv) {
     igv.InteractionTrack.prototype.getConfig = function () {
 
         var config = this.config || {};
-        config.arcDirection = this.arcDirection;
-        config.lineThicknes = this.lineThickness;
+        config.arcOrientation = this.arcOrientation;
+        config.thickness = this.thickness;
         config.color = this.color;
         return config;
 
@@ -84,7 +85,8 @@ var igv = (function (igv) {
                 .then(function (data) {
 
                     var parser = new igv.FeatureParser("bedpe");
-                    //self.header = parser.parseHeader(data);
+
+                    var header = parser.parseHeader(data);
 
                     var features = parser.parseFeatures(data);
 
@@ -92,7 +94,7 @@ var igv = (function (igv) {
 
                     // TODO -- whole genome features here.
 
-                    return features;
+                    return self.featureCache.queryFeatures(chr, bpStart, bpEnd);
 
                 })
         }
@@ -100,86 +102,91 @@ var igv = (function (igv) {
 
     igv.InteractionTrack.prototype.draw = function (options) {
 
-        var self = this,
-            featureList, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight,
-            bpEnd, segment, len, i, px, px1, xScale;
+        const self = this;
 
-        ctx = options.context;
-        pixelWidth = options.pixelWidth;
-        pixelHeight = options.pixelHeight;
+        const ctx = options.context;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const viewportWidth = options.viewportWidth;
+        const bpPerPixel = options.bpPerPixel;
+        const bpStart = options.bpStart;
+        const xScale = bpPerPixel;
+
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        ctx.strokeStyle = self.color;
-        ctx.lineWidth = self.lineThickness;
+        const featureList = options.features;
 
-        featureList = options.features;
         if (featureList) {
 
+            // Autoscale theta
+            autoscale();
 
-            bpPerPixel = options.bpPerPixel;
-            bpStart = options.bpStart;
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-            xScale = bpPerPixel;
+            featureList.forEach(function (feature) {
+
+                let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
+                let direction = self.arcOrientation;
+                
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+
+                const a = w / 2;
+                const r = a / self.sinTheta;
+                const b = self.cosTheta * r;
+                const xc = pixelStart + a;
+
+                let yc, startAngle, endAngle;
+                if (direction) {
+                    // UP
+                    var trackBaseLine = self.height;
+                    yc = trackBaseLine + b;
+                    startAngle = Math.PI + Math.PI / 2 - self.theta;
+                    endAngle = Math.PI + Math.PI / 2 + self.theta;
+
+                } else {
+                    // DOWN
+                    yc = -b;
+                    startAngle = Math.PI / 2 - self.theta;
+                    endAngle = Math.PI / 2 + self.theta;
+                }
+
+                let color = feature.color || self.color;
+                if (color && w > viewportWidth) {
+                    color = getAlphaColor.call(self, color, "0.1");
+                }
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = feature.thickness || self.thicknewss || 1;
+
+                ctx.beginPath();
+                ctx.arc(xc, yc, r, startAngle, endAngle, false);
+                ctx.stroke();
 
 
-            for (i = 0, len = featureList.length; i < len; i++) {
-
-                segment = featureList[i];
-
-                if (segment.end < bpStart) continue;
-                if (segment.start > bpEnd) break;
-
-                px = Math.round((segment.start - bpStart) / xScale);
-                px1 = Math.round((segment.end - bpStart) / xScale);
-
-                drawArc.call(this, ctx, px1, px, this.arcDirection);
-
-            }
+            })
         }
 
 
-        function drawArc(ctx, x1, x2, direction) {
-
-            var pixelStart, pixelEnd, w, a, r, b, xc, yc, startAngle, endAngle;
-
-            pixelStart = Math.min(x1, x2);
-            pixelEnd = Math.max(x1, x2);
-
-            //if(lineThickness > 1) g.setStroke(new BasicStroke(lineThickness));
-
-            w = (pixelEnd - pixelStart);
-            if (w < 3) {
-                w = 3;
-                pixelStart--;
+        function autoscale() {
+            let max = 0;
+            featureList.forEach(function (feature) {
+                let pixelStart = (feature.start - bpStart) / xScale
+                let pixelEnd = (feature.end - bpStart) / xScale;
+                if (pixelEnd >= 0 && pixelStart <= pixelWidth) {
+                    max = Math.max(max, pixelEnd - pixelStart);
+                }
+            });
+            let a = Math.min(pixelWidth, max) / 2;
+            if (max > 0) {
+                let coa = pixelHeight / a;
+                self.theta = estimateTheta(coa);
+                self.sinTheta = Math.sin(self.theta);
+                self.cosTheta = Math.cos(self.theta);
             }
-
-            a = w / 2;
-            r = a / self.sinTheta;
-            b = self.cosTheta * r;
-
-            xc = pixelStart + a;
-
-
-
-            if (direction) {
-                // UP
-                var trackBaseLine = self.height;
-                yc = trackBaseLine + b;
-                startAngle = Math.PI + Math.PI / 2 - self.theta;
-                endAngle = Math.PI + Math.PI / 2 + self.theta;
-
-            } else {
-                // DOWN
-                yc = -b;
-                startAngle = Math.PI / 2 - self.theta;
-                endAngle = Math.PI / 2 + self.theta;
-            }
-
-            ctx.beginPath();
-            ctx.arc(xc, yc, r, startAngle, endAngle, false);
-            ctx.stroke();
         }
-
     };
 
 
@@ -191,7 +198,7 @@ var igv = (function (igv) {
             {
                 name: "Toggle arc direction",
                 click: function () {
-                    self.arcDirection = !self.arcDirection;
+                    self.arcOrientation = !self.arcOrientation;
                     self.trackView.repaintViews();
                 }
             },
@@ -209,7 +216,7 @@ var igv = (function (igv) {
     //
     //
     // igv.InteractionTrack.prototype.popupData = function (config) {
-    //    
+    //
     //     return null;
     // };
 
@@ -238,6 +245,44 @@ var igv = (function (igv) {
     //     return [{label: 'Sort by value',  click: clickHandler, init: undefined}];
     //
     // };
+
+
+    /**
+     * Estimate theta given the ratio of track height to 1/2 the feature width (coa).  This relationship is approximately linear.
+     */
+
+
+    function estimateTheta(x) {
+        let coa = [0.01570925532366355, 0.15838444032453644, 0.3249196962329063, 0.5095254494944288, 0.7265425280053609, 0.9999999999999999];
+        let theta = [0.031415926535897934, 0.3141592653589793, 0.6283185307179586, 0.9424777960769379, 1.2566370614359172, 1.5707963267948966];
+        let idx;
+
+        for (idx = 0; idx < coa.length; idx++) {
+            if (coa[idx] > x) {
+                break;
+            }
+        }
+
+        let left = idx == 0 ? 0 : coa[idx - 1];
+        let right = idx < coa.length ? coa[idx] : 1;
+        let r = (x - left) / (right - left);
+
+        let thetaLeft = idx == 0 ? 0 : theta[idx - 1];
+        let thetaRight = idx < theta.length ? theta[idx] : Math.PI / 2;
+
+        return thetaLeft + r * (thetaRight - thetaLeft);
+
+    }
+
+    function getAlphaColor(color, alpha) {
+
+        let c = this.colorAlphaCache[color];
+        if (!c) {
+            c = igv.Color.addAlpha(color, alpha);
+            this.colorAlphaCache[color] = c;
+        }
+        return c;
+    }
 
 
     return igv;
