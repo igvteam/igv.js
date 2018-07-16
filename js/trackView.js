@@ -417,9 +417,10 @@ var igv = (function (igv) {
 
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
-        var self = this, promises, rpV, autoscale, groupAutoscale;
+        let self = this, promises, rpV, autoscale, groupAutoscale;
 
-        autoscale = 'numeric' === self.track.featureType && (self.track.autoscale || self.track.dataRange === undefined);
+        let setInitialScale =
+            'numeric' === self.track.featureType && !self.track.autoscale && self.track.dataRange === undefined;
 
         this.viewports.forEach(function (viewport) {
             viewport.shift();
@@ -436,7 +437,8 @@ var igv = (function (igv) {
 
             .then(function (tiles) {
 
-                if (autoscale) {
+                if (self.track.autoscale || setInitialScale) {
+
                     var allFeatures = [];
                     self.viewports.forEach(function (vp) {
                         var referenceFrame, chr, start, end, cache;
@@ -446,8 +448,13 @@ var igv = (function (igv) {
                         end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
                         if (vp.tile && vp.tile.features) {
-                            cache = new igv.FeatureCache(vp.tile.features);
-                            allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                            if(self.track.autoscale) {
+                                cache = new igv.FeatureCache(vp.tile.features);
+                                allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                            }
+                            else {
+                                allFeatures = allFeatures.concat(vp.tile.features);
+                            }
                         }
                     });
                     self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
