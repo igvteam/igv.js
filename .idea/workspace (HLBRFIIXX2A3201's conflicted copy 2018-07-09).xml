@@ -1,0 +1,1999 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="d15dde4b-57d1-45f4-9937-c75f15cbbccf" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/feature/featureTrack.js" afterPath="$PROJECT_DIR$/js/feature/featureTrack.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/feature/segTrack.js" afterPath="$PROJECT_DIR$/js/feature/segTrack.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/igvxhr.js" afterPath="$PROJECT_DIR$/js/igvxhr.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/rulerTrack.js" afterPath="$PROJECT_DIR$/js/rulerTrack.js" />
+    </list>
+    <ignored path="igv-web.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <ignored path="$PROJECT_DIR$/out/" />
+    <ignored path=".idea/dataSources.local.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager" flattened_view="true" show_ignored="false" />
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="igv-web" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
+      <file leaf-file-name="googlePicker.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dev/js/googlePicker.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1890">
+              <caret line="128" column="6" selection-start-line="128" selection-start-column="6" selection-end-line="128" selection-end-column="6" />
+              <folding>
+                <element signature="n#!!doc;n#initClient#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="google-picker.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dev/google-picker.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1965">
+              <caret line="131" column="42" selection-start-line="131" selection-start-column="42" selection-end-line="131" selection-end-column="42" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igv-oauth2.html" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/dev/igv-oauth2.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="0">
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igvjs.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dev/igvjs.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2310">
+              <caret line="154" column="63" selection-start-line="154" selection-start-column="16" selection-end-line="154" selection-end-column="76" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igvxhr.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/igvxhr.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="7695">
+              <caret line="536" column="5" selection-start-line="536" selection-start-column="5" selection-end-line="536" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="genomes.json" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/resources/genomes.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="255">
+              <caret line="17" column="1" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igv-dev.html" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dev/igv-dev.html">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="5400">
+              <caret line="360" column="14" selection-start-line="360" selection-start-column="14" selection-end-line="360" selection-end-column="14" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igv-create.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/igv-create.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="7710">
+              <caret line="537" column="0" selection-start-line="537" selection-start-column="0" selection-end-line="537" selection-end-column="0" />
+              <folding>
+                <marker date="1530300060000" expanded="true" signature="1256:1483" ph="/** Create an igv.browser instance.  This object defines the public API for interacting with the genome browser. ...*/" />
+                <marker date="1530300060000" expanded="true" signature="1537:3776" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="1608:1712" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="1882:1927" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3025:3173" ph="//..." />
+                <marker date="1530300060000" expanded="true" signature="3385:3426" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3432:3769" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3496:3569" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3611:3729" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3824:5373" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3926:5365" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="3983:4049" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4055:4282" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4155:4263" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4346:4412" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4418:4559" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4615:4681" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4687:4828" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="4923:5084" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5199:5318" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5453:5499" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5542:5588" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5676:5730" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5779:5833" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5877:5930" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="5965:6222" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6022:6215" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6073:6203" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6122:6189" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6269:7593" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6320:6423" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6533:6648" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6673:7000" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="6774:6989" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="7014:7377" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="7078:7325" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="7388:7532" ph="/** Expands ucsc type genome identifiers to genome object. ...*/" />
+                <marker date="1530300060000" expanded="true" signature="7573:7586" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="7635:8067" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="7671:7801" ph="//..." />
+                <marker date="1530300060000" expanded="true" signature="7877:8060" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="8122:12828" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="8556:12572" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="9209:9388" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="9970:10051" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="10057:10138" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="10671:10733" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="10922:10997" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="11061:11474" ph="//..." />
+                <marker date="1530300060000" expanded="true" signature="12358:12470" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="12582:12787" ph="//..." />
+                <marker date="1530300060000" expanded="true" signature="12872:13621" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13328:13370" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13571:13612" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13656:15551" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13705:13756" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13805:13854" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="13903:13954" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14020:14088" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14148:14211" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14269:14329" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14381:14436" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14493:14552" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14604:14658" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14704:14753" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14802:14853" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="14904:14957" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15003:15051" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15100:15151" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15196:15243" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15294:15347" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15377:15420" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15455:15544" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15589:15716" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15754:16941" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="15964:16913" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16045:16903" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16249:16857" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16388:16746" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16576:16722" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16625:16695" ph="{...}" />
+                <marker date="1530300060000" expanded="true" signature="16772:16840" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="igv.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/dist/igv.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="449535">
+              <caret line="29970" column="4" selection-start-line="29970" selection-start-column="4" selection-end-line="29970" selection-end-column="4" />
+              <folding>
+                <marker date="1530218339000" expanded="true" signature="1196542:1196551" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1196640:1196651" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1196725:1196735" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1196803:1196814" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1196949:1196958" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1197021:1197032" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1197092:1197102" ph="..." />
+                <marker date="1530218339000" expanded="true" signature="1197179:1197190" ph="..." />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="featureFileReader.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/feature/featureFileReader.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1425">
+              <caret line="118" column="55" selection-start-line="118" selection-start-column="55" selection-end-line="118" selection-end-column="55" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+        <option value="HTML File" />
+        <option value="JavaScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GradleLocalSettings">
+    <option name="externalProjectsViewState">
+      <projects_view />
+    </option>
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/wrapper/header.js" />
+        <option value="chrome-extension://ahaelfnkipignejmfmlhelglhcfbfpne/js/jquery-1.8.1.min.js" />
+        <option value="apis.google.com/js/platform.js" />
+        <option value="$PROJECT_DIR$/js/oauth/google.js" />
+        <option value="$PROJECT_DIR$/dev/bam.html" />
+        <option value="$PROJECT_DIR$/dev/clinvar.html" />
+        <option value="$PROJECT_DIR$/dev/copyNumber.html" />
+        <option value="$PROJECT_DIR$/dev/dataURI.html" />
+        <option value="$PROJECT_DIR$/dev/file-load-widget.html" />
+        <option value="$PROJECT_DIR$/dev/genome.html" />
+        <option value="$PROJECT_DIR$/dev/groupAutoscale.html" />
+        <option value="$PROJECT_DIR$/dev/gtex.html" />
+        <option value="$PROJECT_DIR$/dev/igv-multi-locus.html" />
+        <option value="$PROJECT_DIR$/dev/igv-thenable-create-browser.html" />
+        <option value="$PROJECT_DIR$/dev/igvjs.html" />
+        <option value="$PROJECT_DIR$/dev/igvjs_viewer_report.html" />
+        <option value="$PROJECT_DIR$/dev/localGenome.html" />
+        <option value="$PROJECT_DIR$/dev/localSession.html" />
+        <option value="$PROJECT_DIR$/dev/minimal.html" />
+        <option value="$PROJECT_DIR$/dev/mm10.html" />
+        <option value="$PROJECT_DIR$/dev/modal-table.html" />
+        <option value="$PROJECT_DIR$/dev/nonIndexedFasta.html" />
+        <option value="$PROJECT_DIR$/dev/roi.html" />
+        <option value="$PROJECT_DIR$/dev/shardedBams.html" />
+        <option value="$PROJECT_DIR$/dev/shared-js.html" />
+        <option value="$PROJECT_DIR$/dev/tabs.html" />
+        <option value="$PROJECT_DIR$/dev/tair10.html" />
+        <option value="$PROJECT_DIR$/dev/testVcf2.html" />
+        <option value="$PROJECT_DIR$/dev/zv9.html" />
+        <option value="$PROJECT_DIR$/dev/igv-oauth2.html" />
+        <option value="$PROJECT_DIR$/dev/js/oauthExample.js" />
+        <option value="$PROJECT_DIR$/js/ga4gh/googleUtils.js" />
+        <option value="$PROJECT_DIR$/js/trackCore.js" />
+        <option value="$PROJECT_DIR$/js/igv-utils.js" />
+        <option value="$PROJECT_DIR$/dev/dropbox.html" />
+        <option value="$PROJECT_DIR$/js/feature/wigTrack.js" />
+        <option value="$PROJECT_DIR$/js/feature/featureFileReader.js" />
+        <option value="$PROJECT_DIR$/dist/igv.js" />
+        <option value="$PROJECT_DIR$/js/browser.js" />
+        <option value="$PROJECT_DIR$/js/viewport.js" />
+        <option value="$PROJECT_DIR$/dev/igv-dev.html" />
+        <option value="$PROJECT_DIR$/js/feature/featureSource.js" />
+        <option value="$PROJECT_DIR$/js/trackView.js" />
+        <option value="$PROJECT_DIR$/js/feature/segTrack.js" />
+        <option value="$PROJECT_DIR$/js/feature/featureTrack.js" />
+        <option value="$PROJECT_DIR$/js/rulerTrack.js" />
+        <option value="$PROJECT_DIR$/js/igvxhr.js" />
+        <option value="$PROJECT_DIR$/resources/genomes.json" />
+        <option value="$PROJECT_DIR$/js/igv-create.js" />
+        <option value="$PROJECT_DIR$/dev/js/googlePicker.js" />
+        <option value="$PROJECT_DIR$/dev/google-picker.html" />
+      </list>
+    </option>
+  </component>
+  <component name="JsBuildToolGruntFileManager" detection-done="true" sorting="DEFINITION_ORDER">
+    <gruntfile path="$PROJECT_DIR$/Gruntfile.js" />
+  </component>
+  <component name="JsBuildToolPackageJson" detection-done="true" sorting="DEFINITION_ORDER" />
+  <component name="JsGulpfileManager">
+    <detection-done>true</detection-done>
+    <sorting>DEFINITION_ORDER</sorting>
+  </component>
+  <component name="PhpServers">
+    <servers />
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" backward_compatibility_performed="true" />
+  <component name="ProjectFrameBounds">
+    <option name="y" value="72" />
+    <option name="width" value="1440" />
+    <option name="height" value="877" />
+  </component>
+  <component name="ProjectInspectionProfilesVisibleTreeState">
+    <entry key="Project Default">
+      <profile-state>
+        <expanded-state>
+          <State>
+            <id />
+          </State>
+          <State>
+            <id>JavaScript</id>
+          </State>
+        </expanded-state>
+        <selected-state>
+          <State>
+            <id>JavaScript</id>
+          </State>
+        </selected-state>
+      </profile-state>
+    </entry>
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="false">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectReloadState">
+    <option name="STATE" value="1" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="ProjectPane" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="ProjectPane">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv.js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv.js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="resources" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv.js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv.js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dev" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv-web" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="igv.js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="dev" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="js" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+      </pane>
+      <pane id="Scope" />
+      <pane id="Scratches" />
+      <pane id="PackagesPane" />
+    </panes>
+  </component>
+  <component name="PropertiesComponent">
+    <property name="aspect.path.notification.shown" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="js-jscs-nodeInterpreter" value="/usr/local/bin/node" />
+    <property name="js.last.introduce.type" value="VAR" />
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../webservices" />
+    <property name="settings.editor.selected.configurable" value="watcher.settings" />
+    <property name="settings.editor.splitter.proportion" value="0.2" />
+    <property name="list.type.of.created.stylesheet" value="CSS" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/examples/resources" />
+      <recent name="$PROJECT_DIR$/vendor" />
+      <recent name="$PROJECT_DIR$/dev" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/vendor/zlib" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/examples/dataURI/data" />
+      <recent name="$PROJECT_DIR$/examples/dataURI" />
+      <recent name="$PROJECT_DIR$/examples/resources" />
+      <recent name="$PROJECT_DIR$/dev" />
+      <recent name="$PROJECT_DIR$/wrapper" />
+    </key>
+  </component>
+  <component name="RunManager" selected="JavaScript Debug.igv-oauth2.html">
+    <configuration default="false" name="google-picker.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost/igv-web/dev/google-picker.html">
+      <method />
+    </configuration>
+    <configuration default="false" name="igv-dev.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/igv-web/dev/igv-dev.html">
+      <method />
+    </configuration>
+    <configuration default="false" name="google-picker.html (1)" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/igv-web/dev/google-picker.html">
+      <method />
+    </configuration>
+    <configuration default="false" name="igv-oauth2.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/igv-web/dev/igv-oauth2.html">
+      <method />
+    </configuration>
+    <configuration default="false" name="google-drive.html" type="JavascriptDebugType" factoryName="JavaScript Debug" temporary="true" nameIsGenerated="true" uri="http://localhost:63342/igv-web/dev/google-drive.html">
+      <method />
+    </configuration>
+    <configuration default="true" type="#org.jetbrains.idea.devkit.run.PluginConfigurationType" factoryName="Plugin">
+      <module name="" />
+      <option name="VM_PARAMETERS" value="-Xmx512m -Xms256m -XX:MaxPermSize=250m -ea" />
+      <option name="PROGRAM_PARAMETERS" />
+      <method />
+    </configuration>
+    <configuration default="true" type="AndroidRunConfigurationType" factoryName="Android Application">
+      <module name="" />
+      <option name="DEPLOY" value="true" />
+      <option name="ARTIFACT_NAME" value="" />
+      <option name="PM_INSTALL_OPTIONS" value="" />
+      <option name="ACTIVITY_EXTRA_FLAGS" value="" />
+      <option name="MODE" value="default_activity" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="DEEP_LINK" value="" />
+      <option name="ACTIVITY_CLASS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="AndroidTestRunConfigurationType" factoryName="Android Tests">
+      <module name="" />
+      <option name="TESTING_TYPE" value="0" />
+      <option name="INSTRUMENTATION_RUNNER_CLASS" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="PACKAGE_NAME" value="" />
+      <option name="EXTRA_OPTIONS" value="" />
+      <option name="TARGET_SELECTION_MODE" value="SHOW_DIALOG" />
+      <option name="PREFERRED_AVD" value="" />
+      <option name="CLEAR_LOGCAT" value="false" />
+      <option name="SHOW_LOGCAT_AUTOMATICALLY" value="true" />
+      <option name="SKIP_NOOP_APK_INSTALLATIONS" value="true" />
+      <option name="FORCE_STOP_RUNNING_APP" value="true" />
+      <option name="USE_LAST_SELECTED_DEVICE" value="false" />
+      <option name="PREFERRED_AVD" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <module />
+      <method />
+    </configuration>
+    <configuration default="true" type="Application" factoryName="Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="ArquillianJUnit" factoryName="">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="ArquillianTestNG" factoryName="">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="arquillianRunConfiguration">
+        <value>
+          <option name="containerStateName" value="" />
+        </value>
+      </option>
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="CucumberJavaRunConfigurationType" factoryName="Cucumber java">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="myFilePath" />
+      <option name="GLUE" />
+      <option name="myNameFilter" />
+      <option name="myGeneratedName" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="DjangoTestsConfigurationType" factoryName="Django tests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="TARGET" value="" />
+      <option name="SETTINGS_FILE" value="" />
+      <option name="CUSTOM_SETTINGS" value="false" />
+      <option name="USE_OPTIONS" value="false" />
+      <option name="OPTIONS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="FlashRunConfigurationType" factoryName="Flash App">
+      <option name="BCName" value="" />
+      <option name="IOSSimulatorSdkPath" value="" />
+      <option name="adlOptions" value="" />
+      <option name="airProgramParameters" value="" />
+      <option name="appDescriptorForEmulator" value="Android" />
+      <option name="debugTransport" value="USB" />
+      <option name="debuggerSdkRaw" value="BC SDK" />
+      <option name="emulator" value="NexusOne" />
+      <option name="emulatorAdlOptions" value="" />
+      <option name="fastPackaging" value="true" />
+      <option name="fullScreenHeight" value="0" />
+      <option name="fullScreenWidth" value="0" />
+      <option name="launchUrl" value="false" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/Applications/Flash Player Debugger.app" />
+        </LauncherParameters>
+      </option>
+      <option name="mobileRunTarget" value="Emulator" />
+      <option name="moduleName" value="" />
+      <option name="overriddenMainClass" value="" />
+      <option name="overriddenOutputFileName" value="" />
+      <option name="overrideMainClass" value="false" />
+      <option name="runTrusted" value="true" />
+      <option name="screenDpi" value="0" />
+      <option name="screenHeight" value="0" />
+      <option name="screenWidth" value="0" />
+      <option name="url" value="http://" />
+      <option name="usbDebugPort" value="7936" />
+      <method />
+    </configuration>
+    <configuration default="true" type="FlexUnitRunConfigurationType" factoryName="FlexUnit" appDescriptorForEmulator="Android" class_name="" emulatorAdlOptions="" method_name="" package_name="" scope="Class">
+      <option name="BCName" value="" />
+      <option name="launcherParameters">
+        <LauncherParameters>
+          <option name="browser" value="a7bb68e0-33c0-4d6f-a81a-aac1fdb870c8" />
+          <option name="launcherType" value="OSDefault" />
+          <option name="newPlayerInstance" value="false" />
+          <option name="playerPath" value="/Applications/Flash Player Debugger.app" />
+        </LauncherParameters>
+      </option>
+      <option name="moduleName" value="" />
+      <option name="trusted" value="true" />
+      <method />
+    </configuration>
+    <configuration default="true" type="GradleRunConfiguration" factoryName="Gradle">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list />
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <method />
+    </configuration>
+    <configuration default="true" type="GrailsRunConfigurationType" factoryName="Grails">
+      <setting name="vmparams" value="" />
+      <setting name="cmdLine" value="run-app" />
+      <setting name="passParentEnv" value="true" />
+      <setting name="launchBrowser" value="true" />
+      <setting name="depsClasspath" value="false" />
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnit" factoryName="JUnit">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="JUnitTestDiscovery" factoryName="JUnit Test Discovery" changeList="All">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="TEST_OBJECT" value="class" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <envs />
+      <patterns />
+      <method />
+    </configuration>
+    <configuration default="true" type="JarApplication" factoryName="JAR Application">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="Java Scratch" factoryName="Java Scratch">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="SCRATCH_FILE_ID" value="0" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="ENABLE_SWING_INSPECTOR" value="false" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="JavascriptDebugType" factoryName="JavaScript Debug">
+      <method />
+    </configuration>
+    <configuration default="true" type="JetRunConfigurationType" factoryName="Kotlin">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="VM_PARAMETERS" />
+      <option name="PROGRAM_PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <module name="igv-web" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="KotlinStandaloneScriptRunConfigurationType" factoryName="Kotlin script">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <option name="filePath" />
+      <option name="vmParameters" />
+      <option name="alternativeJrePath" />
+      <option name="programParameters" />
+      <option name="passParentEnvs" value="true" />
+      <option name="workingDirectory" />
+      <option name="isAlternativeJrePathEnabled" value="false" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyBehaveRunConfigurationType" factoryName="Behave">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PyLettuceRunConfigurationType" factoryName="Lettuce">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="ADDITIONAL_ARGS" value="" />
+      <method />
+    </configuration>
+    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="Remote" factoryName="Remote">
+      <option name="USE_SOCKET_TRANSPORT" value="true" />
+      <option name="SERVER_MODE" value="false" />
+      <option name="SHMEM_ADDRESS" value="javadebug" />
+      <option name="HOST" value="localhost" />
+      <option name="PORT" value="5005" />
+      <method />
+    </configuration>
+    <configuration default="true" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="TestNG" factoryName="TestNG">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" value="-ea" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" value="$MODULE_DIR$" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="TestNGTestDiscovery" factoryName="TestNG Test Discovery" changeList="All">
+      <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea" />
+      <module name="" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
+      <option name="SUITE_NAME" />
+      <option name="PACKAGE_NAME" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="METHOD_NAME" />
+      <option name="GROUP_NAME" />
+      <option name="TEST_OBJECT" value="CLASS" />
+      <option name="VM_PARAMETERS" />
+      <option name="PARAMETERS" />
+      <option name="WORKING_DIRECTORY" />
+      <option name="OUTPUT_DIRECTORY" />
+      <option name="ANNOTATION_TYPE" />
+      <option name="ENV_VARIABLES" />
+      <option name="PASS_PARENT_ENVS" value="true" />
+      <option name="TEST_SEARCH_SCOPE">
+        <value defaultName="singleModule" />
+      </option>
+      <option name="USE_DEFAULT_REPORTERS" value="false" />
+      <option name="PROPERTIES_FILE" />
+      <envs />
+      <properties />
+      <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Tox" factoryName="Tox">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <module name="igv-web" />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.gulp" factoryName="Gulp.js">
+      <node-interpreter>project</node-interpreter>
+      <node-options />
+      <gulpfile />
+      <tasks />
+      <arguments />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="js.build_tools.npm" factoryName="npm">
+      <command value="run-script" />
+      <scripts />
+      <node-interpreter value="project" />
+      <envs />
+      <method />
+    </configuration>
+    <configuration default="true" type="osgi.bnd.run" factoryName="Run Launcher">
+      <method />
+    </configuration>
+    <configuration default="true" type="osgi.bnd.run" factoryName="Test Launcher (JUnit)">
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Attests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Doctests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Nosetests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="Unittests">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="PUREUNITTEST" value="true" />
+      <option name="PARAMS" value="" />
+      <option name="USE_PARAM" value="false" />
+      <method />
+    </configuration>
+    <configuration default="true" type="tests" factoryName="py.test">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="igv-web" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" enabled="false" sample_coverage="true" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="" />
+      <option name="CLASS_NAME" value="" />
+      <option name="METHOD_NAME" value="" />
+      <option name="FOLDER_NAME" value="" />
+      <option name="TEST_TYPE" value="TEST_SCRIPT" />
+      <option name="PATTERN" value="" />
+      <option name="USE_PATTERN" value="false" />
+      <option name="testToRun" value="" />
+      <option name="keywords" value="" />
+      <option name="params" value="" />
+      <option name="USE_PARAM" value="false" />
+      <option name="USE_KEYWORD" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner.html" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/igvjs.html?igvSessionXML=..%2Ftest.xml&amp;locus=15%3A63%2C588%2C066-72%2C426%2C258">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner.html (1)" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/benner2.html">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner2.html" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/igvjs.html?igvSessionXML=..%2Ftest2.xml&amp;locus=15%3A63%2C588%2C066-72%2C426%2C258">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner4.html" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/igvjs.html?igvSessionXML=..%2Ftest4.xml&amp;locus=15%3A63%2C588%2C066-72%2C426%2C258">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner5.html" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/igvjs.html?igvSessionXML=..%2Ftest5.xml&amp;locus=15%3A63%2C588%2C066-72%2C426%2C258">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="benner_with_locus" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/benner.html?igvSessionXML=..%2Ftest.xml&amp;locus=8%3A127%2C732%2C958-127%2C740%2C324">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="bam.html" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost/igv-web/dev/bam.html">
+      <mapping url="http://localhost/igv-web" local-file="$PROJECT_DIR$" />
+      <method />
+    </configuration>
+    <configuration default="false" name="igv-dev.html-session" type="JavascriptDebugType" factoryName="JavaScript Debug" singleton="false" uri="http://localhost:63342/igv-web/dev/igvjs.html?sessionURL=blob:rZTRj5pAEMb_FbNPbcotrBRR3q6m6V1i78Ge6UNzaRYYYFPYpbvLqWf8328W0ZypadNETYjOznzM_OaDHdFQgAaZAUl2ROQkIVXJZsQjkjcYI3ddw.Xo3Xw5r8LYd2fv8bDgxvLVcuHSrW1N4vsmpLzhL0rytaGZanxRPtNUK54LaaywnQWqdOmXIFUDxjfwu5frL7QXRGEhc9hcXRivAsWzrVUpl_mV9J3cJ5SjdmPJ3iO1yjpDkh8kqzRLWBR5bBJ7cTi5Of6ehlPy5BGrefbLZe6I3baOMmp2_RI8onQOmiQ3jMazeDILWfhxOhmHLIrhQxhM996OdLoe.sf2WRAEQ2v0j1HaihsI_Zxb7j_csnEcT33YYO5PXotSNiDtMU4b3raQ0_vFYvX1_uGWpmtO559XtM.n44CN8ctoypuzPcmurk9dByffDKqjvhoLnoURqaiF3X7HWrXGlBuGcaM6ncHjAUMhapdbKN1wi_8P9xoYnTrGUAWirDAjDPCOmXoGzUt4dFjvhpMoOCflNu0wXNosLrwnxKVUlluhpDlsOE._ydY3smVhTHs7pUiofLls1KvJU5s6u_4dDeRv0JyU37CJEE3DN0u1RqtFQc9jWM4SCnTc6AtIMFhxTuni84Bz0OMD0PeO7w1X7rx_ADI4wNkRPwMgbDIpeG3gH9OgGqq70H9N9LR_BQ--">
+      <method />
+    </configuration>
+    <list size="13">
+      <item index="0" class="java.lang.String" itemvalue="JavaScript Debug.benner.html" />
+      <item index="1" class="java.lang.String" itemvalue="JavaScript Debug.benner.html (1)" />
+      <item index="2" class="java.lang.String" itemvalue="JavaScript Debug.benner2.html" />
+      <item index="3" class="java.lang.String" itemvalue="JavaScript Debug.benner4.html" />
+      <item index="4" class="java.lang.String" itemvalue="JavaScript Debug.benner5.html" />
+      <item index="5" class="java.lang.String" itemvalue="JavaScript Debug.benner_with_locus" />
+      <item index="6" class="java.lang.String" itemvalue="JavaScript Debug.bam.html" />
+      <item index="7" class="java.lang.String" itemvalue="JavaScript Debug.igv-dev.html-session" />
+      <item index="8" class="java.lang.String" itemvalue="JavaScript Debug.google-picker.html" />
+      <item index="9" class="java.lang.String" itemvalue="JavaScript Debug.igv-dev.html" />
+      <item index="10" class="java.lang.String" itemvalue="JavaScript Debug.google-picker.html (1)" />
+      <item index="11" class="java.lang.String" itemvalue="JavaScript Debug.igv-oauth2.html" />
+      <item index="12" class="java.lang.String" itemvalue="JavaScript Debug.google-drive.html" />
+    </list>
+    <recent_temporary>
+      <list size="5">
+        <item index="0" class="java.lang.String" itemvalue="JavaScript Debug.igv-oauth2.html" />
+        <item index="1" class="java.lang.String" itemvalue="JavaScript Debug.google-picker.html (1)" />
+        <item index="2" class="java.lang.String" itemvalue="JavaScript Debug.google-drive.html" />
+        <item index="3" class="java.lang.String" itemvalue="JavaScript Debug.google-picker.html" />
+        <item index="4" class="java.lang.String" itemvalue="JavaScript Debug.igv-dev.html" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="StructureViewFactory">
+    <option name="ACTIVE_ACTIONS" value=",ALPHA_COMPARATOR" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d15dde4b-57d1-45f4-9937-c75f15cbbccf" name="Default" comment="" />
+      <created>1495681875026</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1495681875026</updated>
+      <workItem from="1495681876315" duration="2052000" />
+      <workItem from="1495737007314" duration="29000" />
+      <workItem from="1495737057996" duration="3797000" />
+      <workItem from="1495775979594" duration="4000" />
+      <workItem from="1495777397083" duration="2419000" />
+      <workItem from="1495827200389" duration="597000" />
+      <workItem from="1495845405823" duration="950000" />
+      <workItem from="1495857424214" duration="3420000" />
+      <workItem from="1495988654231" duration="2000" />
+      <workItem from="1495988687242" duration="10000" />
+      <workItem from="1496248187592" duration="619000" />
+      <workItem from="1496328492113" duration="511000" />
+      <workItem from="1496550678529" duration="1393000" />
+      <workItem from="1496696647452" duration="3178000" />
+      <workItem from="1496725335640" duration="598000" />
+      <workItem from="1496785097401" duration="320000" />
+      <workItem from="1496860687479" duration="1488000" />
+      <workItem from="1496892640730" duration="1745000" />
+      <workItem from="1497045364029" duration="1222000" />
+      <workItem from="1497066016926" duration="602000" />
+      <workItem from="1497306032539" duration="627000" />
+      <workItem from="1497462260308" duration="501000" />
+      <workItem from="1497572189287" duration="3847000" />
+      <workItem from="1498103606868" duration="3333000" />
+      <workItem from="1498519229497" duration="659000" />
+      <workItem from="1498539872193" duration="5175000" />
+      <workItem from="1498608095943" duration="1145000" />
+      <workItem from="1498625625960" duration="701000" />
+      <workItem from="1498680402838" duration="24615000" />
+      <workItem from="1498756599007" duration="1199000" />
+      <workItem from="1498764853370" duration="1008000" />
+      <workItem from="1498770137552" duration="1619000" />
+      <workItem from="1499105179305" duration="1484000" />
+      <workItem from="1499269853347" duration="1303000" />
+      <workItem from="1499287934357" duration="3571000" />
+      <workItem from="1499355932339" duration="6703000" />
+      <workItem from="1499705050138" duration="658000" />
+      <workItem from="1499803294158" duration="157000" />
+      <workItem from="1499803458652" duration="810000" />
+      <workItem from="1499804285022" duration="164000" />
+      <workItem from="1499804457241" duration="682000" />
+      <workItem from="1499805147834" duration="82000" />
+      <workItem from="1499805237239" duration="1363000" />
+      <workItem from="1499808875874" duration="328000" />
+      <workItem from="1499809209462" duration="193000" />
+      <workItem from="1499809408987" duration="64000" />
+      <workItem from="1499809482084" duration="3014000" />
+      <workItem from="1499832511437" duration="18000" />
+      <workItem from="1499888588635" duration="1227000" />
+      <workItem from="1499998966347" duration="641000" />
+      <workItem from="1500008557729" duration="598000" />
+      <workItem from="1500657931969" duration="597000" />
+      <workItem from="1500867178848" duration="648000" />
+      <workItem from="1500927932577" duration="2122000" />
+      <workItem from="1500939154195" duration="508000" />
+      <workItem from="1500939843285" duration="494000" />
+      <workItem from="1500954832694" duration="602000" />
+      <workItem from="1501003861790" duration="6249000" />
+      <workItem from="1501041904874" duration="1997000" />
+      <workItem from="1501096708538" duration="3015000" />
+      <workItem from="1501111882584" duration="40000" />
+      <workItem from="1501170880947" duration="1794000" />
+      <workItem from="1501211913610" duration="2434000" />
+      <workItem from="1501348092692" duration="1938000" />
+      <workItem from="1501517606518" duration="29789000" />
+      <workItem from="1502128200277" duration="4429000" />
+      <workItem from="1502300301340" duration="1102000" />
+      <workItem from="1502315963378" duration="3695000" />
+      <workItem from="1502817841517" duration="1129000" />
+      <workItem from="1502905268154" duration="2869000" />
+      <workItem from="1502991576734" duration="336000" />
+      <workItem from="1503096841930" duration="598000" />
+      <workItem from="1503329036198" duration="324000" />
+      <workItem from="1503934396072" duration="1207000" />
+      <workItem from="1504010950445" duration="1175000" />
+      <workItem from="1504015261485" duration="4484000" />
+      <workItem from="1504470089253" duration="607000" />
+      <workItem from="1504625843710" duration="92000" />
+      <workItem from="1504639799356" duration="717000" />
+      <workItem from="1504666070406" duration="600000" />
+      <workItem from="1504718757451" duration="1889000" />
+      <workItem from="1504724544193" duration="5181000" />
+      <workItem from="1504758166127" duration="451000" />
+      <workItem from="1504815800180" duration="5000" />
+      <workItem from="1504822740130" duration="1069000" />
+      <workItem from="1505019060513" duration="779000" />
+      <workItem from="1505152245301" duration="3576000" />
+      <workItem from="1505195533371" duration="2330000" />
+      <workItem from="1505240459617" duration="535000" />
+      <workItem from="1505241352642" duration="11000" />
+      <workItem from="1505241431980" duration="11000" />
+      <workItem from="1505268972848" duration="8139000" />
+      <workItem from="1505367969319" duration="2616000" />
+      <workItem from="1505405228461" duration="9937000" />
+      <workItem from="1505489969741" duration="4049000" />
+      <workItem from="1505522935303" duration="9000" />
+      <workItem from="1505620453217" duration="3472000" />
+      <workItem from="1505855953791" duration="245000" />
+      <workItem from="1505872297723" duration="8000" />
+      <workItem from="1505872316831" duration="29000" />
+      <workItem from="1505880323221" duration="4312000" />
+      <workItem from="1505932850665" duration="600000" />
+      <workItem from="1505934259760" duration="9522000" />
+      <workItem from="1506051563531" duration="7591000" />
+      <workItem from="1506205039161" duration="23179000" />
+      <workItem from="1506318111308" duration="1348000" />
+      <workItem from="1506361821335" duration="6802000" />
+      <workItem from="1506400741882" duration="4377000" />
+      <workItem from="1506448184349" duration="6594000" />
+      <workItem from="1506481359467" duration="10037000" />
+      <workItem from="1506615956469" duration="6799000" />
+      <workItem from="1506625582493" duration="5822000" />
+      <workItem from="1506653955324" duration="3161000" />
+      <workItem from="1506739733120" duration="4601000" />
+      <workItem from="1506792676616" duration="7084000" />
+      <workItem from="1506954333541" duration="896000" />
+      <workItem from="1506967001452" duration="2030000" />
+      <workItem from="1507012304612" duration="5286000" />
+      <workItem from="1507138882241" duration="596000" />
+      <workItem from="1507177267883" duration="1968000" />
+      <workItem from="1507521036164" duration="1356000" />
+      <workItem from="1507574246120" duration="5753000" />
+      <workItem from="1507605115819" duration="4602000" />
+      <workItem from="1507748807846" duration="410000" />
+      <workItem from="1507775604628" duration="286000" />
+      <workItem from="1507775942770" duration="6000" />
+      <workItem from="1507826385206" duration="598000" />
+      <workItem from="1507863369989" duration="894000" />
+      <workItem from="1507933122719" duration="1421000" />
+      <workItem from="1508177892577" duration="101000" />
+      <workItem from="1508178405950" duration="612000" />
+      <workItem from="1508182316025" duration="9048000" />
+      <workItem from="1508262512364" duration="345000" />
+      <workItem from="1508263405583" duration="889000" />
+      <workItem from="1508430219584" duration="7582000" />
+      <workItem from="1508781502951" duration="5442000" />
+      <workItem from="1508811236076" duration="4974000" />
+      <workItem from="1508956555449" duration="5375000" />
+      <workItem from="1509035589636" duration="3110000" />
+      <workItem from="1509073624392" duration="84883000" />
+      <workItem from="1509474213592" duration="595000" />
+      <workItem from="1509501564054" duration="7955000" />
+      <workItem from="1509561337913" duration="6501000" />
+      <workItem from="1509592633963" duration="14798000" />
+      <workItem from="1509753160777" duration="12692000" />
+      <workItem from="1509856725794" duration="9260000" />
+      <workItem from="1509994524300" duration="4227000" />
+      <workItem from="1510027553212" duration="1702000" />
+      <workItem from="1510037475843" duration="30907000" />
+      <workItem from="1510168633077" duration="5957000" />
+      <workItem from="1510179492527" duration="3653000" />
+      <workItem from="1510197905275" duration="3368000" />
+      <workItem from="1510248136491" duration="1914000" />
+      <workItem from="1510286754133" duration="691000" />
+      <workItem from="1510376318285" duration="12918000" />
+      <workItem from="1510591309889" duration="6237000" />
+      <workItem from="1510892196042" duration="3973000" />
+      <workItem from="1510973954530" duration="4645000" />
+      <workItem from="1511159493647" duration="15631000" />
+      <workItem from="1511289263460" duration="825000" />
+      <workItem from="1511290785530" duration="3320000" />
+      <workItem from="1511320057773" duration="1168000" />
+      <workItem from="1511321308948" duration="1350000" />
+      <workItem from="1511499175120" duration="4837000" />
+      <workItem from="1511551554455" duration="4586000" />
+      <workItem from="1511608480870" duration="6157000" />
+      <workItem from="1511852203943" duration="4322000" />
+      <workItem from="1511884790581" duration="68000" />
+      <workItem from="1511896800902" duration="4983000" />
+      <workItem from="1511922721397" duration="2000" />
+      <workItem from="1511927457654" duration="598000" />
+      <workItem from="1511936600368" duration="2400000" />
+      <workItem from="1511979130921" duration="5168000" />
+      <workItem from="1512092874710" duration="296000" />
+      <workItem from="1512425283227" duration="605000" />
+      <workItem from="1512427491317" duration="753000" />
+      <workItem from="1512452752024" duration="2169000" />
+      <workItem from="1512522924942" duration="5947000" />
+      <workItem from="1512596121313" duration="4767000" />
+      <workItem from="1512602096511" duration="1183000" />
+      <workItem from="1512619121212" duration="637000" />
+      <workItem from="1512619761311" duration="263000" />
+      <workItem from="1512620025723" duration="160000" />
+      <workItem from="1512620187853" duration="4196000" />
+      <workItem from="1512668927322" duration="7572000" />
+      <workItem from="1512710234215" duration="13964000" />
+      <workItem from="1512954313342" duration="5535000" />
+      <workItem from="1512961556422" duration="3080000" />
+      <workItem from="1513018569645" duration="6945000" />
+      <workItem from="1513053460843" duration="2518000" />
+      <workItem from="1513098921271" duration="9652000" />
+      <workItem from="1513219302247" duration="236000" />
+      <workItem from="1513219544236" duration="3672000" />
+      <workItem from="1513266657018" duration="614000" />
+      <workItem from="1513272713648" duration="9231000" />
+      <workItem from="1513304058311" duration="19504000" />
+      <workItem from="1513703439910" duration="594000" />
+      <workItem from="1513705795997" duration="598000" />
+      <workItem from="1513729811592" duration="1366000" />
+      <workItem from="1513795968324" duration="2125000" />
+      <workItem from="1513907151392" duration="597000" />
+      <workItem from="1514998812305" duration="4838000" />
+      <workItem from="1515047967173" duration="1538000" />
+      <workItem from="1515092112617" duration="3132000" />
+      <workItem from="1515122412679" duration="1488000" />
+      <workItem from="1515186700502" duration="116000" />
+      <workItem from="1515366072182" duration="1311000" />
+      <workItem from="1515468784430" duration="1288000" />
+      <workItem from="1515614517740" duration="2093000" />
+      <workItem from="1515643535165" duration="4000" />
+      <workItem from="1515643624898" duration="49000" />
+      <workItem from="1515644246955" duration="1248000" />
+      <workItem from="1515693546957" duration="746000" />
+      <workItem from="1515718180147" duration="1768000" />
+      <workItem from="1515726263873" duration="104000" />
+      <workItem from="1515726469923" duration="702000" />
+      <workItem from="1515776434272" duration="6407000" />
+      <workItem from="1516128595729" duration="2305000" />
+      <workItem from="1516168814043" duration="19000" />
+      <workItem from="1516168993894" duration="1191000" />
+      <workItem from="1516216650588" duration="1047000" />
+      <workItem from="1516380563553" duration="598000" />
+      <workItem from="1516381257387" duration="87000" />
+      <workItem from="1516387559132" duration="91000" />
+      <workItem from="1516409456093" duration="620000" />
+      <workItem from="1516422057999" duration="507000" />
+      <workItem from="1516511133405" duration="1059000" />
+      <workItem from="1516732662915" duration="687000" />
+      <workItem from="1516778828063" duration="1497000" />
+      <workItem from="1516902756849" duration="596000" />
+      <workItem from="1517261515064" duration="598000" />
+      <workItem from="1517505617912" duration="2056000" />
+      <workItem from="1517814905127" duration="1095000" />
+      <workItem from="1517856106098" duration="588000" />
+      <workItem from="1517900613066" duration="796000" />
+      <workItem from="1518033276540" duration="601000" />
+      <workItem from="1518113267572" duration="2739000" />
+      <workItem from="1518120346217" duration="646000" />
+      <workItem from="1518149589162" duration="9629000" />
+      <workItem from="1518586118610" duration="1556000" />
+      <workItem from="1518771240605" duration="10277000" />
+      <workItem from="1519101121608" duration="1052000" />
+      <workItem from="1519152877215" duration="6758000" />
+      <workItem from="1519194019637" duration="6255000" />
+      <workItem from="1519321594641" duration="2369000" />
+      <workItem from="1519325586001" duration="7647000" />
+      <workItem from="1519360082328" duration="21725000" />
+      <workItem from="1519752504695" duration="443000" />
+      <workItem from="1519874718965" duration="3082000" />
+      <workItem from="1519931697881" duration="457000" />
+      <workItem from="1519936350920" duration="3956000" />
+      <workItem from="1520017376732" duration="598000" />
+      <workItem from="1520226758912" duration="1215000" />
+      <workItem from="1520273402918" duration="3317000" />
+      <workItem from="1520369805239" duration="8563000" />
+      <workItem from="1520398933763" duration="4864000" />
+      <workItem from="1520449224251" duration="2210000" />
+      <workItem from="1520453070668" duration="1865000" />
+      <workItem from="1520625132083" duration="50367000" />
+      <workItem from="1520962786380" duration="7746000" />
+      <workItem from="1521049201218" duration="6894000" />
+      <workItem from="1521131047507" duration="9955000" />
+      <workItem from="1521165599646" duration="13093000" />
+      <workItem from="1521234747221" duration="3620000" />
+      <workItem from="1521483239836" duration="3256000" />
+      <workItem from="1521600424297" duration="4997000" />
+      <workItem from="1521696417216" duration="2814000" />
+      <workItem from="1521737466953" duration="3003000" />
+      <workItem from="1521761666731" duration="7378000" />
+      <workItem from="1521779666681" duration="84248000" />
+      <workItem from="1522691678349" duration="3083000" />
+      <workItem from="1522715470492" duration="135000" />
+      <workItem from="1522730956867" duration="4844000" />
+      <workItem from="1522882014252" duration="8641000" />
+      <workItem from="1522987121513" duration="5071000" />
+      <workItem from="1522994647080" duration="3276000" />
+      <workItem from="1523307169873" duration="326000" />
+      <workItem from="1523309576543" duration="4221000" />
+      <workItem from="1523422573814" duration="12124000" />
+      <workItem from="1523637941283" duration="12942000" />
+      <workItem from="1524105537412" duration="1206000" />
+      <workItem from="1524158287235" duration="24000" />
+      <workItem from="1524160057060" duration="6708000" />
+      <workItem from="1524264659903" duration="1534000" />
+      <workItem from="1524268255792" duration="8220000" />
+      <workItem from="1524506223427" duration="3196000" />
+      <workItem from="1524530742561" duration="45715000" />
+      <workItem from="1524761779257" duration="9911000" />
+      <workItem from="1524800185868" duration="9128000" />
+      <workItem from="1525111965023" duration="4474000" />
+      <workItem from="1525282907511" duration="8213000" />
+      <workItem from="1525316876938" duration="2037000" />
+      <workItem from="1525365353100" duration="12145000" />
+      <workItem from="1525969709083" duration="1579000" />
+      <workItem from="1525981844904" duration="9299000" />
+      <workItem from="1526013285428" duration="16347000" />
+      <workItem from="1526491260017" duration="2232000" />
+      <workItem from="1526652953035" duration="6711000" />
+      <workItem from="1526679227518" duration="776000" />
+      <workItem from="1526769028071" duration="6000" />
+      <workItem from="1526781500777" duration="598000" />
+      <workItem from="1527001514324" duration="5784000" />
+      <workItem from="1527048743386" duration="7846000" />
+      <workItem from="1527091505672" duration="12786000" />
+      <workItem from="1527469356022" duration="3313000" />
+      <workItem from="1527766571095" duration="16468000" />
+      <workItem from="1527908032569" duration="9954000" />
+      <workItem from="1528121903409" duration="3215000" />
+      <workItem from="1528137596477" duration="39000" />
+      <workItem from="1528142226559" duration="3947000" />
+      <workItem from="1528223791100" duration="10250000" />
+      <workItem from="1528599945025" duration="5158000" />
+      <workItem from="1528679135580" duration="50780000" />
+      <workItem from="1528991053880" duration="7854000" />
+      <workItem from="1529013211854" duration="709000" />
+      <workItem from="1529015924511" duration="4236000" />
+      <workItem from="1529152174936" duration="2493000" />
+      <workItem from="1529944745074" duration="5071000" />
+      <workItem from="1530036907957" duration="3877000" />
+      <workItem from="1530121191755" duration="4317000" />
+      <workItem from="1530208676725" duration="6568000" />
+      <workItem from="1530239123248" duration="1718000" />
+      <workItem from="1530299396664" duration="1105000" />
+      <workItem from="1530399133656" duration="539000" />
+      <workItem from="1530513188556" duration="20000" />
+      <workItem from="1530554425784" duration="599000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="1505593000" />
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="0" y="72" width="1440" height="877" extended-state="0" />
+    <editor active="false" />
+    <layout>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5032051" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.21959943" sideWeight="0.73218143" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Grunt " active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1875" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25069445" sideWeight="0.26781857" order="2" side_tool="true" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3865684" sideWeight="0.49679488" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287858" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="JProfiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.43473125" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+    <layout-to-restore>
+      <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="SLIDING" type="SLIDING" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32967034" sideWeight="0.5032051" order="7" side_tool="true" content_ui="tabs" />
+      <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Tool" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.1875" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="UI Designer" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.370068" sideWeight="0.49679488" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287858" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Palette&#9;" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Capture Analysis" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25069445" sideWeight="0.73218143" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Grunt " active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="5" side_tool="true" content_ui="tabs" />
+      <window_info id="JProfiler" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="11" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.5714286" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.25069445" sideWeight="0.26781857" order="6" side_tool="true" content_ui="tabs" />
+    </layout-to-restore>
+  </component>
+  <component name="Vcs.Log.UiProperties">
+    <option name="RECENTLY_FILTERED_USER_GROUPS">
+      <collection />
+    </option>
+    <option name="RECENTLY_FILTERED_BRANCH_GROUPS">
+      <collection />
+    </option>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="javascript">
+          <url>file://$PROJECT_DIR$/js/igv-utils.js</url>
+          <line>190</line>
+          <option name="timeStamp" value="1251" />
+        </line-breakpoint>
+      </breakpoints>
+      <breakpoints-dialog>
+        <breakpoints-dialog />
+      </breakpoints-dialog>
+      <option name="time" value="1253" />
+    </breakpoint-manager>
+    <watches-manager />
+  </component>
+  <component name="antWorkspaceConfiguration">
+    <option name="IS_AUTOSCROLL_TO_SOURCE" value="false" />
+    <option name="FILTER_TARGETS" value="false" />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/dev/google-drive.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-270">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/groupAutoscale.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80">
+          <caret line="92" column="0" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/gtex.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="80">
+          <caret line="92" column="0" selection-start-line="92" selection-start-column="0" selection-end-line="92" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/htsget-dnanexus.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/igv-bootstrap-tab.html" />
+    <entry file="file://$PROJECT_DIR$/dev/htsget-sanger.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/immvar.html" />
+    <entry file="file://$PROJECT_DIR$/dev/minimal.html" />
+    <entry file="file://$PROJECT_DIR$/dev/igvjs_viewer_report.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="502">
+          <caret line="201" column="0" selection-start-line="201" selection-start-column="0" selection-end-line="201" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/str-dev.html" />
+    <entry file="file://$PROJECT_DIR$/dev/shardedBams.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1039">
+          <caret line="88" column="0" selection-start-line="88" selection-start-column="0" selection-end-line="88" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/testVcf2.html" />
+    <entry file="file://$PROJECT_DIR$/dev/test.xml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/whole-genome.html" />
+    <entry file="file://$PROJECT_DIR$/dev/zv9.html" />
+    <entry file="file://$PROJECT_DIR$/dev/ucsc-dev.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="217">
+          <caret line="39" column="11" selection-start-line="39" selection-start-column="11" selection-end-line="39" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/dropbox.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2505">
+          <caret line="167" column="27" selection-start-line="167" selection-start-column="27" selection-end-line="167" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/mergedTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="405">
+          <caret line="51" column="29" selection-start-line="51" selection-start-column="29" selection-end-line="51" selection-end-column="29" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/trackCore.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="780">
+          <caret line="75" column="4" selection-start-line="75" selection-start-column="4" selection-end-line="75" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/file-load-widget.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2355">
+          <caret line="157" column="0" selection-start-line="157" selection-start-column="0" selection-end-line="157" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/vendor/jquery-1.12.4.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="72810">
+          <caret line="4866" column="20" selection-start-line="4866" selection-start-column="20" selection-end-line="4866" selection-end-column="20" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/bam/bamIndex.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="18" column="4" selection-start-line="18" selection-start-column="4" selection-end-line="18" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/browser.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="13305">
+          <caret line="910" column="0" selection-start-line="910" selection-start-column="0" selection-end-line="910" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/viewport.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="487">
+          <caret line="255" column="0" selection-start-line="255" selection-start-column="0" selection-end-line="255" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/featureCache.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="195">
+          <caret line="36" column="27" selection-start-line="36" selection-start-column="27" selection-end-line="36" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/bigwig/bwReader.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-1545">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/wigTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4905">
+          <caret line="350" column="0" selection-start-line="350" selection-start-column="0" selection-end-line="350" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/bigwig/bwSource.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-405">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/bam/bamTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1590">
+          <caret line="129" column="27" selection-start-line="129" selection-start-column="27" selection-end-line="129" selection-end-column="27" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/featureTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2310">
+          <caret line="177" column="46" selection-start-line="177" selection-start-column="46" selection-end-line="177" selection-end-column="46" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/variant/variantTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2085">
+          <caret line="163" column="31" selection-start-line="163" selection-start-column="31" selection-end-line="163" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/ui/alertDialog.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/ui/userFeedback.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/featureSource.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2340">
+          <caret line="179" column="0" selection-start-line="179" selection-start-column="0" selection-end-line="179" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/trackView.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="6450">
+          <caret line="453" column="23" selection-start-line="453" selection-start-column="23" selection-end-line="453" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/igv-utils.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2535">
+          <caret line="192" column="23" selection-start-line="192" selection-start-column="23" selection-end-line="192" selection-end-column="23" />
+          <folding>
+            <marker date="1530300055000" expanded="true" signature="1271:1386" ph="{...}" />
+            <marker date="1530300055000" expanded="true" signature="15989:15999" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/copyNumber.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="375">
+          <caret line="25" column="19" selection-start-line="25" selection-start-column="19" selection-end-line="25" selection-end-column="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/segTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="225">
+          <caret line="38" column="8" selection-start-line="38" selection-start-column="8" selection-end-line="38" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/fasta.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/rulerTrack.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2385">
+          <caret line="182" column="0" selection-start-line="182" selection-start-column="0" selection-end-line="182" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/hic/hicReader.js" />
+    <entry file="file://$PROJECT_DIR$/dev/js/googlePicker.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1890">
+          <caret line="128" column="6" selection-start-line="128" selection-start-column="6" selection-end-line="128" selection-end-column="6" />
+          <folding>
+            <element signature="n#!!doc;n#initClient#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/google-picker.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1965">
+          <caret line="131" column="42" selection-start-line="131" selection-start-column="42" selection-end-line="131" selection-end-column="42" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/igv-oauth2.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/igvjs.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2310">
+          <caret line="154" column="63" selection-start-line="154" selection-start-column="16" selection-end-line="154" selection-end-column="76" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/igvxhr.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7695">
+          <caret line="536" column="5" selection-start-line="536" selection-start-column="5" selection-end-line="536" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/resources/genomes.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="255">
+          <caret line="17" column="1" selection-start-line="17" selection-start-column="1" selection-end-line="17" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dev/igv-dev.html">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="5400">
+          <caret line="360" column="14" selection-start-line="360" selection-start-column="14" selection-end-line="360" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/igv-create.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7710">
+          <caret line="537" column="0" selection-start-line="537" selection-start-column="0" selection-end-line="537" selection-end-column="0" />
+          <folding>
+            <marker date="1530300060000" expanded="true" signature="1256:1483" ph="/** Create an igv.browser instance.  This object defines the public API for interacting with the genome browser. ...*/" />
+            <marker date="1530300060000" expanded="true" signature="1537:3776" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="1608:1712" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="1882:1927" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3025:3173" ph="//..." />
+            <marker date="1530300060000" expanded="true" signature="3385:3426" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3432:3769" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3496:3569" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3611:3729" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3824:5373" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3926:5365" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="3983:4049" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4055:4282" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4155:4263" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4346:4412" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4418:4559" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4615:4681" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4687:4828" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="4923:5084" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5199:5318" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5453:5499" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5542:5588" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5676:5730" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5779:5833" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5877:5930" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="5965:6222" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6022:6215" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6073:6203" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6122:6189" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6269:7593" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6320:6423" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6533:6648" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6673:7000" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="6774:6989" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="7014:7377" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="7078:7325" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="7388:7532" ph="/** Expands ucsc type genome identifiers to genome object. ...*/" />
+            <marker date="1530300060000" expanded="true" signature="7573:7586" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="7635:8067" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="7671:7801" ph="//..." />
+            <marker date="1530300060000" expanded="true" signature="7877:8060" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="8122:12828" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="8556:12572" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="9209:9388" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="9970:10051" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="10057:10138" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="10671:10733" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="10922:10997" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="11061:11474" ph="//..." />
+            <marker date="1530300060000" expanded="true" signature="12358:12470" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="12582:12787" ph="//..." />
+            <marker date="1530300060000" expanded="true" signature="12872:13621" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13328:13370" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13571:13612" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13656:15551" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13705:13756" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13805:13854" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="13903:13954" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14020:14088" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14148:14211" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14269:14329" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14381:14436" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14493:14552" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14604:14658" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14704:14753" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14802:14853" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="14904:14957" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15003:15051" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15100:15151" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15196:15243" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15294:15347" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15377:15420" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15455:15544" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15589:15716" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15754:16941" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="15964:16913" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16045:16903" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16249:16857" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16388:16746" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16576:16722" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16625:16695" ph="{...}" />
+            <marker date="1530300060000" expanded="true" signature="16772:16840" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/dist/igv.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="449535">
+          <caret line="29970" column="4" selection-start-line="29970" selection-start-column="4" selection-end-line="29970" selection-end-column="4" />
+          <folding>
+            <marker date="1530218339000" expanded="true" signature="1196542:1196551" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1196640:1196651" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1196725:1196735" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1196803:1196814" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1196949:1196958" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1197021:1197032" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1197092:1197102" ph="..." />
+            <marker date="1530218339000" expanded="true" signature="1197179:1197190" ph="..." />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/feature/featureFileReader.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1425">
+          <caret line="118" column="55" selection-start-line="118" selection-start-column="55" selection-end-line="118" selection-end-column="55" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
