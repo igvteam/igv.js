@@ -51,7 +51,7 @@ var igv = (function (igv) {
             this.featureSource = new igv.FeatureSource(config);
         }
 
-        this.autoscale = config.autoscale;
+        this.autoscale = config.autoscale || config.max === undefined;
         if (config.max !== undefined) {
             this.dataRange = {
                 min: config.min || 0,

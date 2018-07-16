@@ -417,14 +417,18 @@ var igv = (function (igv) {
 
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
-        let self = this, promises, rpV, autoscale, groupAutoscale;
-
-        let setInitialScale =
-            'numeric' === self.track.featureType && !self.track.autoscale && self.track.dataRange === undefined;
+        let self = this, promises, rpV, groupAutoscale;
 
         this.viewports.forEach(function (viewport) {
             viewport.shift();
         });
+
+        let isDragging = this.viewports.some(function (vp) { return vp.isDragging});
+
+        // if('numeric' === self.track.featureType && self.track.dataRange === undefined) {
+        //     self.track.autoscale = true;
+        // }
+
 
         // List of viewports that need reloading
         rpV = viewportsToReload.call(this, force);
@@ -437,7 +441,7 @@ var igv = (function (igv) {
 
             .then(function (tiles) {
 
-                if (self.track.autoscale || setInitialScale) {
+                if (!isDragging && self.track.autoscale) {
 
                     var allFeatures = [];
                     self.viewports.forEach(function (vp) {
@@ -465,7 +469,7 @@ var igv = (function (igv) {
             .then(function (ignore) {
 
                 // Must repaint all viewports if autoscaling
-                if (autoscale || self.track.autoscaleGroup) {
+                if (!isDragging && (self.track.autoscale || self.track.autoscaleGroup)) {
                     self.viewports.forEach(function (vp) {
                         vp.repaint();
                     })

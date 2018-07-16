@@ -862,57 +862,65 @@ var igv = (function (igv) {
             this.centerGuide.repaint();
         }
 
-        // Group autoscale
-        groupAutoscaleTracks = {};
-        otherTracks = [];
-        views.forEach(function (trackView) {
-            var group = trackView.track.autoscaleGroup;
-            if (group) {
-                var l = groupAutoscaleTracks[group];
-                if (!l) {
-                    l = [];
-                    groupAutoscaleTracks[group] = l;
+        // Don't autoscale while dragging.
+        if(self.isDragging) {
+            views.forEach(function (trackView) {
+                trackView.updateViews();
+            })
+        }
+        else {
+            // Group autoscale
+            groupAutoscaleTracks = {};
+            otherTracks = [];
+            views.forEach(function (trackView) {
+                var group = trackView.track.autoscaleGroup;
+                if (group) {
+                    var l = groupAutoscaleTracks[group];
+                    if (!l) {
+                        l = [];
+                        groupAutoscaleTracks[group] = l;
+                    }
+                    l.push(trackView);
                 }
-                l.push(trackView);
-            }
-            else {
-                otherTracks.push(trackView);
-            }
-        })
+                else {
+                    otherTracks.push(trackView);
+                }
+            })
 
-        Object.keys(groupAutoscaleTracks).forEach(function (group) {
+            Object.keys(groupAutoscaleTracks).forEach(function (group) {
 
-            var groupTrackViews, promises;
+                var groupTrackViews, promises;
 
-            groupTrackViews = groupAutoscaleTracks[group];
-            promises = [];
+                groupTrackViews = groupAutoscaleTracks[group];
+                promises = [];
 
-            groupTrackViews.forEach(function (trackView) {
-                promises.push(trackView.getInViewFeatures());
-            });
+                groupTrackViews.forEach(function (trackView) {
+                    promises.push(trackView.getInViewFeatures());
+                });
 
-            Promise.all(promises)
+                Promise.all(promises)
 
-                .then(function (featureArray) {
+                    .then(function (featureArray) {
 
-                    var allFeatures = [], dataRange;
+                        var allFeatures = [], dataRange;
 
-                    featureArray.forEach(function (features) {
-                        allFeatures = allFeatures.concat(features);
+                        featureArray.forEach(function (features) {
+                            allFeatures = allFeatures.concat(features);
+                        })
+                        dataRange = igv.WIGTrack.autoscale(allFeatures);
+
+                        groupTrackViews.forEach(function (trackView) {
+                            trackView.track.dataRange = dataRange;
+                            trackView.track.autoscale = false;
+                            trackView.updateViews();
+                        })
                     })
-                    dataRange = igv.WIGTrack.autoscale(allFeatures);
+            })
 
-                    groupTrackViews.forEach(function (trackView) {
-                        trackView.track.dataRange = dataRange;
-                        trackView.track.autoscale = false;
-                        trackView.updateViews();
-                    })
-                })
-        })
-
-        otherTracks.forEach(function (trackView) {
-            trackView.updateViews();
-        })
+            otherTracks.forEach(function (trackView) {
+                trackView.updateViews();
+            })
+        }
     };
 
 
@@ -1966,6 +1974,7 @@ var igv = (function (igv) {
                 referenceFrame = viewport.genomicState.referenceFrame;
 
                 if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
+                    self.isDragging = true;
                     viewport.isDragging = true;
                 }
 
@@ -1999,8 +2008,11 @@ var igv = (function (igv) {
             e.preventDefault();
 
             if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
-                self.fireEvent('trackdragend');
                 self.vpMouseDown.viewport.isDragging = false;
+                self.isDragging = false;
+                self.updateViews();
+                self.fireEvent('trackdragend');
+
             }
             self.vpMouseDown = undefined;
         }
