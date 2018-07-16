@@ -1869,9 +1869,9 @@ var igv = (function (igv) {
                 config = track.config;
             }
 
-            if (track.config) {
-                track.config.order = order++;
-                trackJson.push(track.config);
+            if (config) {
+                config.order = order++;
+                trackJson.push(config);
             }
         });
 
