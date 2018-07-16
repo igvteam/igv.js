@@ -100,6 +100,7 @@ var igv = (function (igv) {
                     $fa.addClass('igv-fa-check-hidden');
                 }
 
+                self.config.autoscale = self.autoscale;
                 self.trackView.setDataRange(undefined, undefined, self.autoscale);
             }
         });
@@ -380,8 +381,18 @@ var igv = (function (igv) {
             max = 100;
         }
 
-
         return {min: min, max: max};
+    }
+
+    igv.WIGTrack.prototype.getConfig = function () {
+
+        let config = this.config;
+        if(!config.autoscale && this.dataRange) {
+            config.min = this.dataRange.min;
+            config.max = this.dataRange.max;
+        }
+        return config;
+
     }
 
     return igv;
