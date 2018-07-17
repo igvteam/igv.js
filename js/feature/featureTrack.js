@@ -320,12 +320,14 @@ var igv = (function (igv) {
                     return x.af - y.af
                 });
 
-                let ref = b.length - 1
-                let alt = b.length - 2;
-                let l = "<a target='_blank' " +
-                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + b[ref].a + "_" + b[alt].a + "'>Cravat</a>";
-                data.push("<hr/>");
-                data.push(l);
+                let ref = b[b.length - 1].a
+                for(let i=b.length - 2; i>=0; i--) {
+                    let alt = b[i].a;
+                    let l = "<a target='_blank' " +
+                        "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                    data.push("<hr/>");
+                    data.push(l);
+                }
             }
         }
 
