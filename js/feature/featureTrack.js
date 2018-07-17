@@ -287,14 +287,48 @@ var igv = (function (igv) {
      * @returns {Array}
      */
     function extractPopupData(feature) {
-        var data = [];
+        let data = [];
+        let alleles, alleleFreqs;
+
         for (var property in feature) {
+
             if (feature.hasOwnProperty(property) &&
                 "chr" !== property && "start" !== property && "end" !== property && "row" !== property &&
                 igv.isStringOrNumber(feature[property])) {
                 data.push({name: property, value: feature[property]});
+
+                if (property === "alleles") {
+                    alleles = feature[property];
+                } else if (property === "alleleFreqs") {
+                    alleleFreqs = feature[property];
+                }
             }
         }
+
+
+        if (alleles && alleleFreqs) {
+            if (alleles.endsWith(",")) alleles = alleles.substr(0, alleles.length - 1);
+            if (alleleFreqs.endsWith(",")) alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+            let a = alleles.split(",");
+            let af = alleleFreqs.split(",");
+            if (af.length > 1) {
+                let b = [];
+                for (let i = 0; i < af.length; i++) {
+                    b.push({a: a[i], af: Number.parseFloat(af[i])});
+                }
+                b.sort(function (x, y) {
+                    return x.af - y.af
+                });
+
+                let ref = b.length - 1
+                let alt = b.length - 2;
+                let l = "<a target='_blank' " +
+                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + b[ref].a + "_" + b[alt].a + "'>Cravat</a>";
+                data.push("<hr/>");
+                data.push(l);
+            }
+        }
+
         return data;
     }
 
@@ -566,7 +600,7 @@ var igv = (function (igv) {
             labelX = boxX + ((boxX1 - boxX) / 2);
             labelY = getFeatureLabelY(featureY, transform);
 
-            // TODO: This is for compatibility with JuiceboxJS. 
+            // TODO: This is for compatibility with JuiceboxJS.
             if (options.labelTransform) {
                 ctx.save();
                 options.labelTransform(ctx, labelX);
