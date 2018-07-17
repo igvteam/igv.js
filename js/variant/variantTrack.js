@@ -146,7 +146,7 @@ var igv = (function (igv) {
     igv.VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         var self = this;
-        
+
         return this.getFileHeader()
             .then(function (header) {
                 return self.featureSource.getFeatures(chr, bpStart, bpEnd);
@@ -530,6 +530,8 @@ var igv = (function (igv) {
     function extractPopupData(call, variant) {
 
         var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
+        let cravatLinks = [];
+        popupData = [];
 
         if ('str' === variant.type) {
 
@@ -550,20 +552,27 @@ var igv = (function (igv) {
                 }
             }
         } else {
-
             // Not STR
-
+            let ref = variant.referenceBases;
             call.genotype.forEach(function (i) {
                 if (i === 0) {
                     gt += variant.referenceBases;
                 }
                 else {
-                    gt += variant.alternateBases[i - 1];
+                    let alt = variant.alternateBases[i - 1];
+                    gt += alt;
+
+                    if(alt.length === 1 && alt !== ref) {
+                        let l = "<a target='_blank' " +
+                            "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>CRAVAT " + ref + "->" + alt + "</a>";
+                        cravatLinks.push(l);
+                    }
                 }
             });
         }
 
-        popupData = [];
+
+
 
         if (call.callSetName !== undefined) {
             popupData.push({name: 'Name', value: call.callSetName});
@@ -598,6 +607,11 @@ var igv = (function (igv) {
         infoKeys.forEach(function (key) {
             popupData.push({name: key, value: call.info[key]});
         });
+
+        if(cravatLinks.length > 0) {
+            popupData.push("<HR/>");
+            popupData = popupData.concat(cravatLinks);
+        }
 
         return popupData;
     }
