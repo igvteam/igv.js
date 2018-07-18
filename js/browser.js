@@ -165,6 +165,8 @@ var igv = (function (igv) {
 
         self.removeAllTracks();
 
+        igv.TrackView.DisableUpdates = true;
+
         return loadSessionFile(sessionURL)
 
             .then(function (session) {
@@ -214,6 +216,7 @@ var igv = (function (igv) {
 
             })
             .then(function (ignore) {
+                igv.TrackView.DisableUpdates = false;
                 self.updateViews();
             })
             .catch(function (error) {
