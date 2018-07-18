@@ -72,7 +72,7 @@ var igv = (function (igv) {
             chrIdx1,
             chrIdx2,
             bufferedReader = new igv.BufferedReader(self.config);
-
+        
         return self.getZoomHeaders()
 
             .then(function (zoomLevelHeaders) {
@@ -578,7 +578,7 @@ var igv = (function (igv) {
     function overlaps(item, chrIdx1, startBase, chrIdx2, endBase) {
 
         if (!item) {
-            console.log("null item");
+            console.log("null item for " + chrIdx1 + " " + startBase + " " + endBase);
             return false;
         }
 

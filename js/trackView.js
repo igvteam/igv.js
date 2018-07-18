@@ -358,7 +358,7 @@ var igv = (function (igv) {
         if (typeof this.track.computePixelHeight !== "function") {
             this.viewports.forEach(function (vp) {
                 vp.setContentHeight(newHeight);
-                if(vp.tile) vp.tile.invalidate = true;
+                if (vp.tile) vp.tile.invalidate = true;
             });
             this.repaintViews();
         }
@@ -410,6 +410,19 @@ var igv = (function (igv) {
         }
     }
 
+
+    /**
+     * Functional code to execute a series of promises (actually promise factories) sequntially.
+     * Credit: Joel Thoms  https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
+     *
+     * @param funcs
+     */
+    const promiseSerial = funcs =>
+        funcs.reduce((promise, func) =>
+                promise.then(result => func().then(Array.prototype.concat.bind(result))),
+            Promise.resolve([]))
+
+
     /**
      * Update viewports to reflect current genomic state, possibly loading additional data.
      */
@@ -417,28 +430,28 @@ var igv = (function (igv) {
 
         if (!(igv.browser && igv.browser.genomicStateList)) return;
 
+        if (igv.TrackView.DisableUpdates) return;
+
         let self = this, promises, rpV, groupAutoscale;
 
         this.viewports.forEach(function (viewport) {
             viewport.shift();
         });
 
-        let isDragging = this.viewports.some(function (vp) { return vp.isDragging});
-
-        // if('numeric' === self.track.featureType && self.track.dataRange === undefined) {
-        //     self.track.autoscale = true;
-        // }
-
+        let isDragging = this.viewports.some(function (vp) {
+            return vp.isDragging
+        });
 
         // List of viewports that need reloading
         rpV = viewportsToReload.call(this, force);
 
         promises = rpV.map(function (vp) {
-            return vp.loadFeatures();
+            return function () {
+                return vp.loadFeatures();
+            }
         });
 
-        Promise.all(promises)
-
+        promiseSerial(promises)
             .then(function (tiles) {
 
                 if (!isDragging && self.track.autoscale) {
@@ -452,7 +465,7 @@ var igv = (function (igv) {
                         end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
                         if (vp.tile && vp.tile.features) {
-                            if(self.track.autoscale) {
+                            if (self.track.autoscale) {
                                 cache = new igv.FeatureCache(vp.tile.features);
                                 allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
                             }
