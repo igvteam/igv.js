@@ -52,7 +52,7 @@ var igv = (function (igv) {
         }
 
         this.autoscale = config.autoscale || config.max === undefined;
-        if (config.max !== undefined) {
+        if(!this.autoscale) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
@@ -385,7 +385,10 @@ var igv = (function (igv) {
     igv.WIGTrack.prototype.getConfig = function () {
 
         let config = this.config;
-        if(!config.autoscale && this.dataRange) {
+
+        config.autoscale = this.autoscale;
+
+        if(!this.autoscale && this.dataRange) {
             config.min = this.dataRange.min;
             config.max = this.dataRange.max;
         }
