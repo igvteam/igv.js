@@ -177,10 +177,13 @@ var igv = (function (igv) {
             isFirst,
             tagDict;
 
+        // Consert genomic location to int
+        genomicLocation = Math.floor(genomicLocation);
+
         if (this.insertions) {
             for (var i = 0; i < this.insertions.length; i += 1) {
                 var ins_start = this.insertions[i].start;
-                if (genomicLocation == ins_start || genomicLocation == ins_start - 1) {
+                if (genomicLocation === ins_start || genomicLocation === ins_start - 1) {
                     nameValues.push({name: 'Insertion', value: this.insertions[i].seq});
                     nameValues.push({name: 'Location', value: ins_start});
                     return nameValues;
