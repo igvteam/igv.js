@@ -72,7 +72,7 @@ var igv = (function (igv) {
             chrIdx1,
             chrIdx2,
             bufferedReader = new igv.BufferedReader(self.config);
-        
+
         return self.getZoomHeaders()
 
             .then(function (zoomLevelHeaders) {
@@ -314,8 +314,11 @@ var igv = (function (igv) {
         }
         else {
             rpTree = new RPTree(offset, self.contentLength, self.config, self.littleEndian);
-            self.rpTreeCache[offset] = rpTree;
-            return rpTree.load();
+            return rpTree.load()
+                .then(function () {
+                    self.rpTreeCache[offset] = rpTree;
+                    return rpTree;
+                })
         }
     }
 

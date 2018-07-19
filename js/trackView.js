@@ -445,13 +445,19 @@ var igv = (function (igv) {
         // List of viewports that need reloading
         rpV = viewportsToReload.call(this, force);
 
+        // promises = rpV.map(function (vp) {
+        //     return function () {
+        //         return vp.loadFeatures();
+        //     }
+        // });
+        // promiseSerial(promises)
+        //
+        //
         promises = rpV.map(function (vp) {
-            return function () {
-                return vp.loadFeatures();
-            }
-        });
+            return vp.loadFeatures();
+        })
 
-        promiseSerial(promises)
+        Promise.all(promises)
             .then(function (tiles) {
 
                 if (!isDragging && self.track.autoscale) {
