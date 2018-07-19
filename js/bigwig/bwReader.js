@@ -253,6 +253,7 @@ var igv = (function (igv) {
             var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
             return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+
                 .then(function (data) {
 
                     var nZooms = self.header.nZoomLevels,
