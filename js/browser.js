@@ -217,7 +217,8 @@ var igv = (function (igv) {
             })
             .then(function (ignore) {
                 igv.TrackView.DisableUpdates = false;
-                self.updateViews();
+                // Resize is called to address minor alignment problems with multi-locus view.
+                self.resize();
             })
             .catch(function (error) {
                 igv.presentAlert(error, undefined);
