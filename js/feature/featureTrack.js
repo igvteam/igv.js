@@ -27,28 +27,17 @@ var igv = (function (igv) {
 
     igv.FeatureTrack = function (config) {
 
-        if (config.height === undefined) {
-            config.height = 50;
-        }
+        // Set defaults
+        igv.configTrack(this, config);
+
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
         if (config.maxRows === undefined) {
             config.maxRows = 500;
         }
-
-        // tracklurl gets set to the url here (the data uri)
-        igv.configTrack(this, config);
+        this.maxRows = config.maxRows;
 
         this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-
-        this.variantHeight = config.variantHeight || this.height;
-        this.squishedRowHeight = config.squishedRowHeight || 15;
-        this.expandedRowHeight = config.expandedRowHeight || 30;
-
-        this.featureHeight = config.featureHeight || 14;
-
-
-        this.maxRows = config.maxRows;
 
         if (config.filename &&
             (
@@ -61,17 +50,36 @@ var igv = (function (igv) {
             this.featureSource = new igv.FeatureSource(config);
         }
 
+        // Set default heights
+        this.autoHeight = config.autoHeight;
+        this.margin = config.margin === undefined ? 10 : config.margin;
+
+        this.featureHeight = config.featureHeight || 14;
+
+        if ("FusionJuncSpan" === config.type) {
+            this.squishedRowHeight = config.squishedRowHeight || 50;
+            this.expandedRowHeight = config.expandedRowHeight || 50;
+            this.height = 50;
+        }
+        else if ('snp' === config.type) {
+            this.expandedRowHeight = config.expandedRowHeight || 10;
+            this.squishedRowHeight = config.squishedRowHeight || 5;
+            this.height = config.height || 30;
+        }
+        else {
+            this.squishedRowHeight = config.squishedRowHeight || 15;
+            this.expandedRowHeight = config.expandedRowHeight || 30;
+            this.height = config.height || 50;
+        }
+
+
+
+
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
-        } else if ("variant" === config.type) {
-            this.render = renderVariant;
-            this.homvarColor = "rgb(17,248,254)";
-            this.hetvarColor = "rgb(34,12,253)";
         } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
-            this.height = config.height || 50;
-            this.autoHeight = false;
         }
         else if ('snp' === config.type) {
             this.render = renderSnp;
@@ -82,7 +90,6 @@ var igv = (function (igv) {
         else {
             this.render = renderFeature;
             this.arrowSpacing = 30;
-
             // adjust label positions to make sure they're always visible
             monitorTrackDrag(this);
         }
@@ -148,13 +155,14 @@ var igv = (function (igv) {
      * @returns {*}
      */
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
+
         var height;
 
         if (this.displayMode === "COLLAPSED") {
-            return this.expandedRowHeight;
+            return this.margin + this.expandedRowHeight;
         }
         else {
-            var maxRow = 0;
+            let maxRow = 0;
             if (features && (typeof features.forEach === "function")) {
                 features.forEach(function (feature) {
 
@@ -165,7 +173,7 @@ var igv = (function (igv) {
                 });
             }
 
-            height = (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
+            height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
             return height;
 
         }
@@ -222,19 +230,19 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.FeatureTrack.prototype.popupData = function (config) {
+    igv.FeatureTrack.prototype.popupData = function (args) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.tile.features) {
+        if (args.viewport.tile.features) {
 
             var genomicLocation, yOffset, referenceFrame, tolerance, featureList, row, data, ss, ee, hits;
 
             data = [];
 
-            genomicLocation = config.genomicLocation;
-            yOffset = config.y;
-            referenceFrame = config.viewport.genomicState.referenceFrame;
+            genomicLocation = args.genomicLocation;
+            yOffset = args.y - this.margin;
+            referenceFrame = args.viewport.genomicState.referenceFrame;
 
             // We need some tolerance around genomicLocation
             tolerance = 3 * referenceFrame.bpPerPixel;
@@ -242,10 +250,10 @@ var igv = (function (igv) {
             ee = genomicLocation + tolerance;
             //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
-            featureList = config.viewport.tile.features;
+            featureList = args.viewport.tile.features;
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 2) / this.expandedRowHeight) : Math.floor((yOffset - 5) / this.squishedRowHeight);
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight );
             }
 
             if (featureList && featureList.length > 0) {
@@ -378,6 +386,7 @@ var igv = (function (igv) {
                         igv.popover.hide();
                         self.displayMode = displayMode;
                         self.config.displayMode = displayMode;
+                        self.trackView.checkContentHeight();
                         self.trackView.repaintViews();
                     }
                 });
@@ -419,6 +428,34 @@ var igv = (function (igv) {
      */
     igv.FeatureTrack.prototype.dispose = function () {
         this.trackView = undefined;
+    }
+
+
+
+
+    /**
+     * Monitors track drag events, updates label position to ensure that they're always visible.
+     * @param track
+     */
+    function monitorTrackDrag(track) {
+        var onDragEnd = function () {
+            if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
+                return;
+            }
+            track.trackView.repaintViews();
+        }
+
+        var unSubscribe = function (removedTrack) {
+            if (igv.browser.un && track === removedTrack) {
+                igv.browser.un('trackdrag', onDragEnd);
+                igv.browser.un('trackremoved', unSubscribe);
+            }
+        };
+
+        if (igv.browser.on) {
+            igv.browser.on('trackdragend', onDragEnd);
+            igv.browser.on('trackremoved', unSubscribe);
+        }
     }
 
     /**
@@ -464,7 +501,6 @@ var igv = (function (igv) {
             step = this.arrowSpacing,
             color = this.color;
 
-
         if (this.config.colorBy) {
             var colorByValue = feature[this.config.colorBy.field];
             if (colorByValue) {
@@ -475,17 +511,16 @@ var igv = (function (igv) {
             color = feature.color;
         }
 
-
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
         if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
             h = this.featureHeight / 2;
-            py = this.squishedRowHeight * feature.row + 2;
+            py = this.margin + this.squishedRowHeight * feature.row;
         } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
-            py = this.expandedRowHeight * feature.row + 5;
+            py = this.margin + this.expandedRowHeight * feature.row;
         } else {  // collapsed
-            py = 5;
+            py = this.margin;
         }
 
         cy = py + h / 2;
@@ -552,6 +587,7 @@ var igv = (function (igv) {
                 }
             }
         }
+
         windowX = Math.round(options.viewportContainerX);
         windowX1 = windowX + options.viewportContainerWidth / (igv.browser.genomicStateList.length || 1);
 
@@ -626,65 +662,10 @@ var igv = (function (igv) {
         }
     }
 
+
     function getFeatureLabelY(featureY, transform) {
         return transform ? featureY + 20 : featureY + 25;
     }
-
-    /**
-     * Monitors track drag events, updates label position to ensure that they're always visible.
-     * @param track
-     */
-    function monitorTrackDrag(track) {
-        var onDragEnd = function () {
-            if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
-                return;
-            }
-            track.trackView.repaintViews();
-        }
-
-        var unSubscribe = function (removedTrack) {
-            if (igv.browser.un && track === removedTrack) {
-                igv.browser.un('trackdrag', onDragEnd);
-                igv.browser.un('trackremoved', unSubscribe);
-            }
-        };
-
-        if (igv.browser.on) {
-            igv.browser.on('trackdragend', onDragEnd);
-            igv.browser.on('trackremoved', unSubscribe);
-        }
-    }
-
-    /**
-     *
-     * @param variant
-     * @param bpStart  genomic location of the left edge of the current canvas
-     * @param xScale  scale in base-pairs per pixel
-     * @param pixelHeight  pixel height of the current canvas
-     * @param ctx  the canvas 2d context
-     */
-    function renderVariant(variant, bpStart, xScale, pixelHeight, ctx) {
-
-        var coord = calculateFeatureCoordinates(variant, bpStart, xScale),
-            py = 20,
-            h = 10,
-            style;
-
-        switch (variant.genotype) {
-            case "HOMVAR":
-                style = this.homvarColor;
-                break;
-            case "HETVAR":
-                style = this.hetvarColor;
-                break;
-            default:
-                style = this.color;
-        }
-
-        ctx.fillStyle = style;
-        ctx.fillRect(coord.px, py, coord.pw, h);
-    }
-
 
     /**
      *
@@ -697,17 +678,17 @@ var igv = (function (igv) {
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
         var coord = calculateFeatureCoordinates(feature, bpStart, xScale),
-            py = 5, h = 10; // defaults borrowed from renderFeature above
+            py = 0, h = 10; // defaults borrowed from renderFeature above
 
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
 
         // console.log("row height = " + rowHeight);
 
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
-            py = rowHeight * feature.row;
+            py = this.margin + rowHeight * feature.row;
         }
         else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
-            py = rowHeight * feature.row;
+            py = this.margin + rowHeight * feature.row;
         }
 
         var cy = py + 0.5 * rowHeight;
@@ -769,10 +750,12 @@ var igv = (function (igv) {
     function renderSnp(snp, bpStart, xScale, pixelHeight, ctx) {
 
         var coord = calculateFeatureCoordinates(snp, bpStart, xScale),
-            py = 20,
-            h = 10,
+            py = this.margin,
+            h,
             colorArrLength = this.snpColors.length,
             colorPriority;
+
+        h = this.displayMode === "squished" ? this.squishedRowHeight : this.expandedRowHeight;
 
         switch (this.colorBy) {
             case 'function':

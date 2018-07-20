@@ -714,30 +714,33 @@ var igv = (function (igv) {
 
                     self.cachedFeatures = features;      // TODO -- associate with "tile"
 
-                    checkContentHeight();
+                    self.checkContentHeight();
 
                     return features;
 
-                    // TODO -- move to viewport
-                    function checkContentHeight() {
-                        var requiredContentHeight, currentContentHeight;
-                        if (typeof track.computePixelHeight === 'function') {
-                            requiredContentHeight = track.computePixelHeight(features);
-                            currentContentHeight = $(self.contentDiv).height();
-                            if (requiredContentHeight !== currentContentHeight) {
-                                self.setContentHeight(requiredContentHeight);
-                            }
-                        }
-                    }
                 })
         }
         else {
             return Promise.resolve(undefined);
         }
-
-
     }
 
+    igv.Viewport.prototype.checkContentHeight = function () {
+
+        let track = this.trackView.track;
+
+        if (typeof track.computePixelHeight === 'function') {
+            let features = this.cachedFeatures;
+
+            if (features) {
+                let requiredContentHeight = track.computePixelHeight(features);
+                let currentContentHeight = $(this.contentDiv).height();
+                if (requiredContentHeight !== currentContentHeight) {
+                    this.setContentHeight(requiredContentHeight);
+                }
+            }
+        }
+    }
 
     return igv;
 

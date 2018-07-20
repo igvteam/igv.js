@@ -219,6 +219,7 @@
     "displayMode": "EXPANDED",
     "sourceType": "ucscservice",
     "visibilityWindow": 10000,
+    "height": 30,
     "source": {
       "url": "https://data.igv.org/ucsc?db=hg19",
       "method": "GET",
@@ -231,6 +232,7 @@
     "displayMode": "EXPANDED",
     "sourceType": "ucscservice",
     "visibilityWindow": 10000,
+    "height": 30,
     "source": {
       "url": "https://data.igv.org/ucsc?db=hg38",
       "method": "GET",
