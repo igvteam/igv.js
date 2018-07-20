@@ -316,8 +316,8 @@ var igv = (function (igv) {
         if (config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
 
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        track.minHeight = config.minHeight || Math.min(50, track.height);
-        track.maxHeight = config.maxHeight || Math.max(500, track.height);
+        track.minHeight = config.minHeight || Math.min(25, track.height);
+        track.maxHeight = config.maxHeight || Math.max(1000, track.height);
 
         if (config.visibilityWindow) {
             track.visibilityWindow = config.visibilityWindow;
