@@ -179,11 +179,16 @@ var igv = (function (igv) {
 
 
         function getFeatureCache() {
+
             var genomicInterval;
 
-            genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
+            let intervalStart = bpStart;
+            let intervalEnd = bpEnd;
+
+            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
             if(self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
+
                 return Promise.resolve(self.featureCache);
             }
             else {
@@ -193,16 +198,16 @@ var igv = (function (igv) {
                 if(self.visibilityWindow != undefined) {
                     if(self.visibilityWindow <= 0) {
                         // Whole chromosome
-                        bpStart = 0;
-                        bpEnd = Number.MAX_VALUE;
+                        intervalStart = 0;
+                        intervalEnd = Number.MAX_VALUE;
                     }
                     else {
                         if(self.visibilityWindow > (bpEnd - bpStart)) {
-                            bpStart = Math.max(0, (bpStart + bpEnd - self.visibilityWindow) / 2);
-                            bpEnd = bpStart + self.visibilityWindow;
+                            intervalStart = Math.max(0, (bpStart + bpEnd - self.visibilityWindow) / 2);
+                            intervalEnd = bpStart + self.visibilityWindow;
                         }
                     }
-                    genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
+                    genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
                 }
 
 
