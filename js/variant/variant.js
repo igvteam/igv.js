@@ -266,18 +266,19 @@ var igv = (function (igv) {
 
         if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
             let ref = this.referenceBases;
-            let altArray = this.alternateBases.split(",");
-            fiels.push("<hr/>");
-            for (let i = 0; i < altArray.length; i++) {
-                let alt = this.alternateBases[i];
-                if (alt.length === 1) {
-                    let l = "<a target='_blank' " +
-                        "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
-                    fields.push(l);
+            if (ref.length === 1) {
+                let altArray = this.alternateBases.split(",");
+                fields.push("<hr/>");
+                for (let i = 0; i < altArray.length; i++) {
+                    let alt = this.alternateBases[i];
+                    if (alt.length === 1) {
+                        let l = "<a target='_blank' " +
+                            "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                        fields.push(l);
+                    }
                 }
             }
         }
-
 
         return fields;
 

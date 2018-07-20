@@ -31,6 +31,7 @@
 var igv = (function (igv) {
 
     var DEFAULT_VISIBILITY_WINDOW = 100000;
+    var MAX_PIXEL_HEIGHT = 30000;
     var sortDirection = "ASC";
     var strColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"];
 
@@ -172,6 +173,14 @@ var igv = (function (igv) {
             groupSpace = (groupsLength - 1) * groupGap,
             nRows,
             h;
+
+        // Adjust call height if required for max canvas size.  This is a hack, real solution is to draw canvas
+        // sections as needed.
+        if (nCalls > 0) {
+            let maxCallHeight = MAX_PIXEL_HEIGHT / nCalls;
+            this.squishedCallHeight = Math.min(this.squishedCallHeight, maxCallHeight);
+            this.expandedCallHeight = Math.min(this.expandedCallHeight, maxCallHeight);
+        }
 
 
         if (this.displayMode === "COLLAPSED") {
@@ -562,7 +571,7 @@ var igv = (function (igv) {
                     let alt = variant.alternateBases[i - 1];
                     gt += alt;
 
-                    if(alt.length === 1 && alt !== ref) {
+                    if (ref.length === 1 && alt.length === 1 && alt !== ref) {
                         let l = "<a target='_blank' " +
                             "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>CRAVAT " + ref + "->" + alt + "</a>";
                         cravatLinks.push(l);
@@ -570,8 +579,6 @@ var igv = (function (igv) {
                 }
             });
         }
-
-
 
 
         if (call.callSetName !== undefined) {
@@ -608,7 +615,7 @@ var igv = (function (igv) {
             popupData.push({name: key, value: call.info[key]});
         });
 
-        if(cravatLinks.length > 0) {
+        if (cravatLinks.length > 0) {
             popupData.push("<HR/>");
             popupData = popupData.concat(cravatLinks);
         }
