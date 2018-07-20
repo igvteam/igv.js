@@ -575,6 +575,12 @@ var igv = (function (igv) {
 
     }
 
+    igv.TrackView.prototype.checkContentHeight = function () {
+        this.viewports.forEach(function (vp) {
+            vp.checkContentHeight();
+        })
+        adjustTrackHeight.call(this);
+    }
 
     function adjustTrackHeight() {
 
