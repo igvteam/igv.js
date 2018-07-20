@@ -36,7 +36,7 @@ var igv = (function (igv) {
         }
         this.maxRows = config.maxRows;
 
-        this.displayMode = config.displayMode || "COLLAPSED";    // COLLAPSED | EXPANDED | SQUISHED
+        this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
         if (config.filename &&
@@ -69,7 +69,7 @@ var igv = (function (igv) {
         else {
             this.squishedRowHeight = config.squishedRowHeight || 15;
             this.expandedRowHeight = config.expandedRowHeight || 30;
-            this.height = config.height || 50;
+            this.height = config.height || this.margin + 2 * this.expandedRowHeight;
         }
 
 
