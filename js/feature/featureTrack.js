@@ -305,33 +305,43 @@ var igv = (function (igv) {
             }
         }
 
-
         if (alleles && alleleFreqs) {
-            if (alleles.endsWith(",")) alleles = alleles.substr(0, alleles.length - 1);
-            if (alleleFreqs.endsWith(",")) alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
-            let a = alleles.split(",");
-            let af = alleleFreqs.split(",");
-            if (af.length > 1) {
-                let b = [];
-                for (let i = 0; i < af.length; i++) {
-                    b.push({a: a[i], af: Number.parseFloat(af[i])});
-                }
-                b.sort(function (x, y) {
-                    return x.af - y.af
-                });
-
-                let ref = b[b.length - 1].a
-                for(let i=b.length - 2; i>=0; i--) {
-                    let alt = b[i].a;
-                    let l = "<a target='_blank' " +
-                        "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
-                    data.push("<hr/>");
-                    data.push(l);
-                }
-            }
+            addCravatLinks(alleles, alleleFreqs, data);
         }
 
         return data;
+
+
+        function addCravatLinks(alleles, alleleFreqs, data) {
+            if (alleles && alleleFreqs) {
+                if (alleles.endsWith(",")) alleles = alleles.substr(0, alleles.length - 1);
+                if (alleleFreqs.endsWith(",")) alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+                let a = alleles.split(",");
+                let af = alleleFreqs.split(",");
+                if (af.length > 1) {
+                    let b = [];
+                    for (let i = 0; i < af.length; i++) {
+                        b.push({a: a[i], af: Number.parseFloat(af[i])});
+                    }
+                    b.sort(function (x, y) {
+                        return x.af - y.af
+                    });
+
+                    let ref = b[b.length - 1].a;
+                    if (ref.length === 1) {
+                        for (let i = b.length - 2; i >= 0; i--) {
+                            let alt = b[i].a;
+                            if (alt.length === 1) {
+                                let l = "<a target='_blank' " +
+                                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                                data.push("<hr/>");
+                                data.push(l);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     igv.FeatureTrack.prototype.menuItemList = function () {
