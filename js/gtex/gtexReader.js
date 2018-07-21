@@ -40,6 +40,7 @@ var igv = (function (igv) {
         this.url = config.url;
         this.tissueName = config.tissueName;
         this.indexed = true;
+        this.datasetId = config.datasetId || "gtex_v7"
     };
 
     //{
@@ -55,17 +56,32 @@ var igv = (function (igv) {
     //        "start": 158310846,
     //        "tissueName": "Thyroid"
     //    },
+    // "singleTissueEqtl": [
+    //     {
+    //         "beta": 0.388922,
+    //         "chromosome": "12",
+    //         "gencodeId": "ENSG00000245017.2",
+    //         "geneSymbol": "RP11-181C3.1",
+    //         "geneSymbolUpper": "RP11-181C3.1",
+    //         "pValue": 5.76253e-06,
+    //         "release": "v7",
+    //         "snpId": "rs10860345",
+    //         "start": 98972466,
+    //         "tissueName": "Adrenal_Gland",
+    //         "variantId": "12_98972466_T_C_b37"
+    //     }
     //
     // http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
 
         igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
-            var self=this,
+            let self=this,
                 queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
                 queryStart = Math.floor(bpStart),
                 queryEnd = Math.ceil(bpEnd),
+                datasetId = this.datasetId,
                 queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                    "&tissueName=" + this.tissueName;
+                    "&tissueName=" + this.tissueName + "&datasetId=" + datasetId;
 
             return new Promise(function (fulfill, reject) {
 
@@ -84,12 +100,13 @@ var igv = (function (igv) {
 
                         json.singleTissueEqtl.forEach(function (eqtl) {
                             eqtl.chr = "chr" + eqtl.chromosome;
-                            eqtl.position = eqtl.start;
-                            eqtl.start = eqtl.start - 1;
+                            eqtl.position = eqtl.pos;
+                            eqtl.start = eqtl.pos - 1;
+                            eqtl.end = eqtl.start + 1;
                             eqtl.snp = eqtl.snpId;
                             eqtl.geneName = eqtl.geneSymbol;
                             eqtl.geneId = eqtl.gencodeId;
-                            eqtl.end = eqtl.start;
+
                         });
 
                         fulfill(json.singleTissueEqtl);
