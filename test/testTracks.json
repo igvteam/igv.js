@@ -34,10 +34,12 @@
     "name": "GM12878 Loops (bedpe)"
   },
   {
-    "url": "../test/data/bed/finspector.bed",
+    "HEADING": "Trinity Fusion"
+  },
+  {
+    "url": "../test/data/misc/FusionJuncSpan.tabular",
     "type": "FusionJuncSpan",
-    "format": "bed",
-    "name": "Fusion Inspector (chr1"
+    "name": "Fusion Inspector (chr1, chr2)"
   },
   {
     "HEADING": "SEG"
@@ -267,5 +269,16 @@
     "alignmentFile": "/home/ec2-user/test/data/cram_with_crai_index.cram",
     "referenceFile": "/home/ec2-user/test/data/hg19mini.fa",
     "label": "CRAM file"
+  },
+  {
+    "HEADING": "GTEX"
+  },
+  {
+    "type": "eqtl",
+    "sourceType": "gtex-ws",
+    "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
+    "tissueName": "Adrenal_Gland",
+    "name": "Adrenal Gland",
+    "visibilityWindow": 1000000
   }
 ]
