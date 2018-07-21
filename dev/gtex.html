@@ -155,20 +155,29 @@
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev',
                          tissueName: 'Brain_Cerebellar_Hemisphere',
                          name: 'Brain - Cerebellar Hemisphere',
-                         visibilityWindow: 200000
+                         visibilityWindow: 1000000
                          })">Brain - Cerebellar Hemisphere
     </div>
     <div onclick="igv.browser.loadTrack({
                          type: 'eqtl',
                          sourceType: 'gtex-ws',
-                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation',
+                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev',
                          tissueName: 'Thyroid',
                          name: 'Thyroid',
-                         visibilityWindow: 200000
+                         visibilityWindow: 1000000
                          })">Thyroid
+    </div>
+    <div onclick="igv.browser.loadTrack({
+                         type: 'eqtl',
+                         sourceType: 'gtex-ws',
+                         url: 'https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev',
+                         tissueName: 'Adrenal_Gland',
+                         name: 'Adrenal Gland',
+                         visibilityWindow: 1000000
+                         })">Adrenal Gland
     </div>
 </div>
 
@@ -186,22 +195,9 @@
         div = $("#myDiv")[0];
         options = {
             type: "GTEX",
-            showNavigation: true,
-            fastaURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta',
-            cytobandURL: 'https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt',
-            // locus: 'SLC25A3',
-            locus: 'rs28372744',
-            // locus: ['egfr', 'myc', 'pten'],
-            // locus: ['2', '4', '8'],
+            genome: "hg19",
+            locus: "chr12:98,912,403-99,070,778",
             flanking: 75000,
-            locus: 'SLC25A3',
-            // locus: ['egfr', 'myc', 'pten'],
-            // locus: ['2', '4', '8'],
-            search: {
-                url: "https://dev.gtexportal.org/rest/v1/reference/features/$FEATURE$",
-                resultsField: "features",
-                geneField: "geneSymbol"
-            },
             formats: {
                 gwasSNPS: {
                     coords: 0,
@@ -222,17 +218,6 @@
                     name: 'GWAS Catalog',
                     order: 9999
                 },*/
-                {
-                    featureType: 'genes',
-                    url: '//s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed',
-                    name: 'Genes',
-                    order: 10000,
-                    displayMode: 'EXPANDED',
-                    height: 100,
-                    autoHeight: true,
-                    removable: false,
-                    labelDisplayMode: 'SLANT'
-                }
             ]
         };
 
