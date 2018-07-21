@@ -59,7 +59,7 @@ var igv = (function (igv) {
         if ("FusionJuncSpan" === config.type) {
             this.squishedRowHeight = config.squishedRowHeight || 50;
             this.expandedRowHeight = config.expandedRowHeight || 50;
-            this.height = 50;
+            this.height = config.height || this.margin + 2 * this.expandedRowHeight;
         }
         else if ('snp' === config.type) {
             this.expandedRowHeight = config.expandedRowHeight || 10;
@@ -71,8 +71,6 @@ var igv = (function (igv) {
             this.expandedRowHeight = config.expandedRowHeight || 30;
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
         }
-
-
 
 
         // Set the render function.  This can optionally be passed in the config
@@ -677,13 +675,12 @@ var igv = (function (igv) {
      */
     function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
 
-        var coord = calculateFeatureCoordinates(feature, bpStart, xScale),
-            py = 0, h = 10; // defaults borrowed from renderFeature above
-
+        var py;
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
 
-        // console.log("row height = " + rowHeight);
-
+        if(this.display === "COLLAPSED") {
+            py = this.margin;
+        }
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
             py = this.margin + rowHeight * feature.row;
         }
@@ -694,8 +691,6 @@ var igv = (function (igv) {
         var cy = py + 0.5 * rowHeight;
         var top_y = cy - 0.5 * rowHeight;
         var bottom_y = cy + 0.5 * rowHeight;
-
-        //igv.Canvas.strokeLine.call(ctx, coord.px, cy, coord.px1, cy); // center line for introns
 
         // draw the junction arc
         var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
@@ -727,8 +722,6 @@ var igv = (function (igv) {
             ctx.strokeStyle = 'purple';
             ctx.stroke();
         }
-
-
     }
 
     // SNP constants
