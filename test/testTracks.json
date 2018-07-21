@@ -34,6 +34,12 @@
     "name": "GM12878 Loops (bedpe)"
   },
   {
+    "url": "../test/data/bed/finspector.bed",
+    "type": "FusionJuncSpan",
+    "format": "bed",
+    "name": "Fusion Inspector (chr1"
+  },
+  {
     "HEADING": "SEG"
   },
   {

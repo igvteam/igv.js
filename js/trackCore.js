@@ -163,7 +163,7 @@ var igv = (function (igv) {
                 config.type = "gwas";
             }
 
-            else if ("FusionJuncSpan" === config.type) {
+            else if ("FusionJuncSpan" === config.type && !config.format) {
                 config.format = "fusionjuncspan";
             }
         }
