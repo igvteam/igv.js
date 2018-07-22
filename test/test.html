@@ -10,6 +10,7 @@
 
     <title>Test tracks</title>
 
+    <script src="js/test.js"></script>
     <script src="../dist/igv.js"></script>
 
     <style>
@@ -70,7 +71,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        createTrackList(document.getElementById('trackList'))
+        igvtest.createTrackList(document.getElementById('trackList'))
                 .then(function (igore) {
                     return igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
                 })
@@ -90,52 +91,6 @@
 
                 })
     });
-
-    function createTrackList(div) {
-
-
-        return igv.xhr.loadJson("testTracks.json")
-
-                .then(function (tracks) {
-
-                    tracks.forEach(function (track) {
-
-                        var trackDiv, name;
-
-                        if (track.HEADING) {
-                            div.insertAdjacentHTML("beforeend",
-                                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                                    + track.HEADING + "</div>");
-                        }
-                        else {
-                            trackDiv = document.createElement('div');
-                            trackDiv.innerHTML = track.name;
-                            trackDiv.addEventListener('click', function (event) {
-
-                                // Convert to json to insure we can load json representations (not strictly neccessary).
-                                var json = JSON.stringify(track);
-
-                                igv.browser.loadTrack(json);
-                            });
-
-                            div.appendChild(trackDiv);
-                        }
-
-                    })
-
-                    return (tracks);
-
-                })
-    }
-
-
-    function findTracks(property, value) {
-        var tracks = igv.browser.findTracks(property, value);
-        tracks.forEach(function (track) {
-            console.log(track.name);
-            track.sortSamples("8", 124512906, 124512945, "DESC");
-        })
-    }
 
 
     function bookmark() {
