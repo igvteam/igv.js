@@ -77,7 +77,7 @@ var igv = (function (igv) {
                 chromosomeField: options.search.chromosomeField || "chromosome",
                 startField: options.search.startField || "start",
                 endField: options.search.endField || "end",
-                geneField: options.search.geneField || "geneSymbol",
+                geneField: options.search.geneField || "gene",
                 snpField: options.search.snpField || "snp",
                 resultsField: options.search.resultsField
             }
@@ -101,7 +101,9 @@ var igv = (function (igv) {
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
-                endField: "end"
+                endField: "end",
+                geneField: "gene",
+                snpField: "snp"
 
             }
         }
