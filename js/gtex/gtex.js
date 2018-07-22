@@ -90,6 +90,20 @@ var igv = (function (igv) {
     brewer.push("rgb(204, 235, 197");
     brewer.push("rgb(255, 237, 111");
 
+    igv.GtexUtils = {
+
+        getTissueInfo: function(datasetId) {
+
+            datasetId = datasetId || "gtex_v7";
+
+            let url = "https://gtexportal.org/rest/v1/dataset/tissueInfo?format=json&datasetId=" + datasetId;
+
+            return igv.xhr.loadJson(url, {})
+        }
+
+
+    }
+
 
     return igv;
 

@@ -27,8 +27,7 @@ var igv = (function (igv) {
 
 
     igv.EqtlTrack = function (config) {
-
-
+        
         var url = config.url,
             label = config.name;
 
@@ -53,6 +52,8 @@ var igv = (function (igv) {
         this.visibilityWindow = config.visibilityWindow;
 
         this.featureSource = new igv.FeatureSource(config);
+        
+        igv.GtexUtils.gtexLoaded = true;
 
     };
 
