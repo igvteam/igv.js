@@ -621,7 +621,7 @@ var igv = (function (igv) {
             boxX1 = Math.min(featureX1, windowX1);
         }
 
-        if (genomicState.selection && "genes" === this.config.type && feature.name !== undefined) {
+        if (genomicState.selection && igv.GtexUtils.gtexLoaded && feature.name !== undefined) {
             // TODO -- for gtex, figure out a better way to do this
             geneColor = genomicState.selection.colorForGene(feature.name);
         }
