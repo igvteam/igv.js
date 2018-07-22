@@ -17,6 +17,8 @@
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
+    <script src="js/dev.js"></script>
+
     <!-- Vendor JS -->
     <script src="../vendor/jquery-1.12.4.js"></script>
     <script src="../vendor/jquery-ui.js"></script>
@@ -159,6 +161,8 @@
 
 <div id="trackList"></div>
 
+
+
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
@@ -166,11 +170,11 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        createTrackList(document.getElementById('trackList'))
+        igvdev.createTrackList(document.getElementById('trackList'))
+
                 .then(function (igore) {
                     return igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
                 })
-
                 .then(function (google) {
 
                     const igvDiv = document.getElementById("igvDiv");
@@ -179,7 +183,13 @@
                         locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
-                        queryParametersSupported: true
+                        queryParametersSupported: true,
+                        search: {
+                            url: "https://gtexportal.org/rest/v1/reference/featuresDev/$FEATURE$?format=json&datasetId=gtex_v7",
+                            resultsField: "features",
+                            geneField: "geneSymbol",
+                            snpField: 'snpId'
+                        },
                     };
 
                     igv.createBrowser(igvDiv, options);
@@ -187,42 +197,7 @@
                 })
     });
 
-    function createTrackList(div) {
 
-
-        return igv.xhr.loadJson("../test/testTracks.json")
-
-                .then(function (tracks) {
-
-                    tracks.forEach(function (track) {
-
-                        var trackDiv, name;
-
-                        if (track.HEADING) {
-                            div.insertAdjacentHTML("beforeend",
-                                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                                    + track.HEADING + "</div>");
-                        }
-                        else {
-                            trackDiv = document.createElement('div');
-                            trackDiv.innerHTML = track.name;
-                            trackDiv.addEventListener('click', function (event) {
-
-                                // Convert to json to insure we can load json representations (not strictly neccessary).
-                                var json = JSON.stringify(track);
-
-                                igv.browser.loadTrack(json);
-                            });
-
-                            div.appendChild(trackDiv);
-                        }
-
-                    })
-
-                    return (tracks);
-
-                })
-    }
 
 
     function findTracks(property, value) {

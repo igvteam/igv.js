@@ -1,6 +1,6 @@
 [
   {
-    "HEADING": "BED / BedPE / GTF"
+    "HEADING": "BED / GTF"
   },
   {
     "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
@@ -26,6 +26,9 @@
     "name": "Gencode v24 (gtf)",
     "format": "gtf",
     "visibilityWindow": 10000000
+  },
+  {
+    "HEADING": "BedPE"
   },
   {
     "url": "https://s3.amazonaws.com/igv.org.test/data/gm12878_loops.bedpe.gz",
@@ -269,16 +272,5 @@
     "alignmentFile": "/home/ec2-user/test/data/cram_with_crai_index.cram",
     "referenceFile": "/home/ec2-user/test/data/hg19mini.fa",
     "label": "CRAM file"
-  },
-  {
-    "HEADING": "GTEX"
-  },
-  {
-    "type": "eqtl",
-    "sourceType": "gtex-ws",
-    "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
-    "tissueName": "Adrenal_Gland",
-    "name": "Adrenal Gland",
-    "visibilityWindow": 1000000
   }
 ]
