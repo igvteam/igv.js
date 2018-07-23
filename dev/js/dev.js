@@ -54,6 +54,7 @@ var igvdev = {
                             "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
                             "tissueName": ti.tissueId,
                             "name": ti.tissueName,
+                            "datasetId": "gtex_v7",
                             "visibilityWindow": 1000000
                         };
 
