@@ -103,7 +103,7 @@ var igv = (function (igv) {
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
 
-        if(sequence.chromosomes.length > 1) {
+        if(Object.keys(sequence.chromosomes).length > 1) {
             constructWG(this);
         } else {
             this.wgChromosomeNames = [sequence.chromosomeNames[0]];
