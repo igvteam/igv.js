@@ -396,13 +396,6 @@ var igv = (function (igv) {
             feature.exons = exons;
         }
 
-        feature.popupData = function () {
-            var data = [];
-            if (feature.name) data.push({name: "Name", value: feature.name});
-            if ("+" === feature.strand || "-" === feature.strand) data.push({name: "Strand", value: feature.strand});
-            return data;
-        };
-
         return feature;
 
     }
@@ -440,10 +433,6 @@ var igv = (function (igv) {
         }
 
         feature.exons = exons;
-
-        feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
-        };
 
         return feature;
 
@@ -483,10 +472,6 @@ var igv = (function (igv) {
 
         feature.exons = exons;
 
-        feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
-        };
-
         return feature;
 
     }
@@ -523,10 +508,6 @@ var igv = (function (igv) {
         }
 
         feature.exons = exons;
-
-        feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
-        };
 
         return feature;
 
@@ -623,10 +604,6 @@ var igv = (function (igv) {
         }
 
 
-        feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
-        };
-
         return feature;
 
     }
@@ -706,10 +683,6 @@ var igv = (function (igv) {
         feature.start = min_coord;
         feature.end = max_coord;
 
-
-        feature.popupData = function () {
-            return [{name: "Name", value: feature.name}];
-        };
 
         return feature;
 
