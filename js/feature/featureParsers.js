@@ -114,8 +114,20 @@ var igv = (function (igv) {
                     this.delimiter = config.delimiter || /\s+/;
                     break;
                 case "bedpe":
-                    this.decode = decodeBedPE;
+                    this.skipRows = 1;
+                    this.decode = decodeBedpe;
                     this.delimiter = /\s+/;
+                    break;
+                case "bedpe-domain":
+                    this.decode = decodeBedpeDomain;
+                    this.headerLine = true;
+                    this.delimiter = /\s+/;
+                    break;
+                case "bedpe-loop":
+                    this.decode = decodeBedpe;
+                    this.delimiter = /\s+/;
+                    this.skipRows = 1;
+                    this.header = {colorColumn: 7};
                     break;
                 default:
 
@@ -147,16 +159,16 @@ var igv = (function (igv) {
         while (line = dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track")) {
-                    let h  = parseTrackLine(line);
-                    if(header) {
+                    let h = parseTrackLine(line);
+                    if (header) {
                         Object.assign(header, h);
                     } else {
                         header = h;
                     }
 
                 } else if (line.startsWith("#columns")) {
-                    let h  = parseColumnsDirective(line);
-                    if(header) {
+                    let h = parseColumnsDirective(line);
+                    if (header) {
                         Object.assign(header, h);
                     } else {
                         header = h;
@@ -314,7 +326,7 @@ var igv = (function (igv) {
 
                 if (t[0] === "color") {
                     properties.colorColumn = Number.parseInt(t[1]) - 1;
-                } else if (t[0] ==="thickness") {
+                } else if (t[0] === "thickness") {
                     properties.thicknessColumn = Number.parseInt(t[1]) - 1;
                 }
             })
@@ -394,6 +406,18 @@ var igv = (function (igv) {
             }
 
             feature.exons = exons;
+        }
+
+        // Optional extra columns
+        if (this.header) {
+            let thicknessColumn = this.header.thicknessColumn;
+            let colorColumn = this.header.colorColumn;
+            if (colorColumn && colorColumn < tokens.length) {
+                feature.color = igv.Color.createColorString(tokens[colorColumn])
+            }
+            if (thicknessColumn && thicknessColumn < tokens.length) {
+                feature.thickness = tokens[thicknessColumn];
+            }
         }
 
         return feature;
@@ -551,6 +575,14 @@ var igv = (function (igv) {
         end = parseInt(tokens[2]);
 
         value = parseFloat(tokens[3]);
+
+        // Optional extra columns
+        if (this.header) {
+            let colorColumn = this.header.colorColumn;
+            if (colorColumn && colorColumn < tokens.length) {
+                feature.color = igv.Color.createColorString(tokens[colorColumn])
+            }
+        }
 
         return {chr: chr, start: start, end: end, value: value};
     }
@@ -811,7 +843,7 @@ var igv = (function (igv) {
         };
     }
 
-    function decodeBedPE(tokens, ignore) {
+    function decodeBedpe(tokens, ignore) {
 
         if (tokens.length < 6) {
             console.log("Skipping line: " + nextLine);
@@ -846,21 +878,40 @@ var igv = (function (igv) {
         let m2 = (feature.start2 + feature.end2) / 2;
         feature.m1 = (m1 < m2) ? m1 : m2;
         feature.m2 = (m1 < m2) ? m2 : m1;
-        
+
         // Optional extra columns
-        if(this.header) {
+        if (this.header) {
             let thicknessColumn = this.header.thicknessColumn;
             let colorColumn = this.header.colorColumn;
-            if(colorColumn && colorColumn < tokens.length) {
+            if (colorColumn && colorColumn < tokens.length) {
                 feature.color = igv.Color.createColorString(tokens[colorColumn])
             }
-            if(thicknessColumn && thicknessColumn < tokens.length) {
+            if (thicknessColumn && thicknessColumn < tokens.length) {
                 feature.thickness = tokens[thicknessColumn];
             }
         }
 
         return feature;
     }
+
+    /**
+     * Special decoder for Hic Domain files.   In these files feature1 == feature2, they are really bed records.
+     * @param tokens
+     * @param ignore
+     * @returns {*}
+     */
+    function decodeBedpeDomain(tokens, ignore) {
+
+        return {
+            chr: tokens[0],
+            start: Number.parseInt(tokens[1]),
+            end: Number.parseInt(tokens[2]),
+            color: igv.Color.createColorString(tokens[6]),
+            score: Number.parseFloat(tokens[7])
+        };
+    }
+
+
 
     /**
      * Decode the "standard" UCSC bed format

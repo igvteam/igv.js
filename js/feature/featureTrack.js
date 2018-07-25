@@ -293,14 +293,17 @@ var igv = (function (igv) {
      * @returns {Array}
      */
     function extractPopupData(feature) {
+
+        const filteredProperties = new Set(['chr', 'start', 'end', 'row', 'color']);
         let data = [];
         let alleles, alleleFreqs;
 
         for (var property in feature) {
 
             if (feature.hasOwnProperty(property) &&
-                "chr" !== property && "start" !== property && "end" !== property && "row" !== property &&
+                !filteredProperties.has(property) &&
                 igv.isStringOrNumber(feature[property])) {
+
                 data.push({name: property, value: feature[property]});
 
                 if (property === "alleles") {
