@@ -213,7 +213,7 @@ var igv = (function (igv) {
 
         });
 
-        return _.map(rows, function (row) {
+        return rows.map(function (row) {
             return _.mapObject(row, function (val) {
                 return (undefined === val || '' === val) ? '-' : val;
             });
@@ -291,16 +291,25 @@ var igv = (function (igv) {
     };
 
     igv.EncodeDataSource.prototype.dataAtRowIndex = function (data, index) {
-        var row,
-            obj;
 
-        row = data[index];
 
-        obj =
+        let row = data[index];
+        let format = getFormat(row);
+
+        let type;
+        if(format === 'bedpe-domain') {
+            type = 'annotation';
+        } else if(format === 'bedpe-loop') {
+            type = 'interaction';
+        }
+
+        let obj =
         {
             url: row['url'],
             color: encodeAntibodyColor(row['Target']),
-            name: row['Name']
+            name: row['Name'],
+            format: format,
+            type: type
         };
 
         return obj;
@@ -330,7 +339,18 @@ var igv = (function (igv) {
             }
 
             return colors[key];
+        }
 
+        function getFormat(row) {
+
+            let format = row['Format'],
+                outputType = row['Output Type'];
+
+            if(format === 'bedpe' && outputType && outputType.includes('domain')) {
+                return 'bedpe-domain';
+            } else {
+                return format;
+            }
         }
     };
 
