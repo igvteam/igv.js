@@ -29,31 +29,99 @@
  */
 var igv = (function (igv) {
 
-    igv.EncodeDataSource = function (columnFormat) {
+    igv.EncodeDataSource = function (columnFormat, fileFormats) {
         this.columnFormat = columnFormat;
+        this.fileFormats = new Set(fileFormats);
     };
 
     igv.EncodeDataSource.prototype.retrieveData = function (genomeID) {
 
         var self = this,
-            fileFormat,
             assembly;
 
-        fileFormat = 'bigWig';
         assembly = genomeID;
 
+        let url = "https://s3.amazonaws.com/igv.org.app/encode/" + assembly + ".txt.gz";
+
         return igv.xhr
-            .loadJson(urlString(assembly, fileFormat), {})
-            .then(function(json){
-                return parseJSONData(json, assembly, fileFormat);
-            })
+
+            .loadString(url, {})
             .then(function (data) {
-                data.sort(encodeSort);
-                return Promise.resolve(data);
+                return parseTabData(data, assembly, self.fileFormats);
+            })
+            .then(function (records) {
+                records.sort(encodeSort);
+                return Promise.resolve(records);
             });
+
+        // .loadJson(urlString(assembly), {})
+        // .then(function(json){
+        //     return parseJSONData(json, assembly, self.fileFormats);
+        // })
+        // .then(function (data) {
+        //     data.sort(encodeSort);
+        //     return Promise.resolve(data);
+        // });
     };
 
-    function urlString (assembly, fileFormat) {
+    function parseTabData(data) {
+
+        if (!data) return null;
+
+        var dataWrapper,
+            line;
+
+        dataWrapper = igv.getDataWrapper(data);
+        
+        let records = [];
+
+        dataWrapper.nextLine();  // Skip header
+        while (line = dataWrapper.nextLine()) {
+
+            let tokens = line.split("\t");
+            let record = {
+                "Assembly": tokens[1],
+                "ExperimentID": tokens[0],
+                "Cell Type": tokens[2],
+                "Assay Type": tokens[3],
+                "Target": tokens[4],
+                "Lab": tokens,
+                "Format": tokens[8],
+                "Output Type": tokens[7],
+                "Lab": tokens[9],
+                "url": "https://www.encodeproject.org" + tokens[10],
+                "Bio Rep": tokens[5],
+                "Tech Rep": tokens[6]
+            };
+            constructName(record);
+            
+            records.push(record);
+        }
+        
+        return records;
+    }
+
+    function constructName(record) {
+
+        let name = record["Cell Type"] || "";
+
+        if (record["Target"]) {
+            name += " " + record["Target"];
+        }
+        if (record["Assay Type"].toLowerCase() !== "chip-seq") {
+            name += " " + record["Assay Type"];
+        }
+        if (record["Bio Rep"]) {
+            name += " " + record["Bio Rep"];
+        }
+        if (record["Tech Rep"]) {
+            name += (record["Bio Rep"] ? ":" : " 0:") + record["Tech Rep"];
+        }
+        record["Name"] = name;
+
+    }
+
+    function urlString(assembly, fileFormat) {
 
         var str;
 
@@ -63,7 +131,7 @@ var igv = (function (igv) {
         str = "https://www.encodeproject.org/search/?" +
             "type=experiment&" +
             "assembly=" + assembly + "&" +
-            "files.file_format=" + fileFormat + "&" +
+            //"files.file_format=" + fileFormat + "&" +
             "format=json&" +
             "field=lab.title&" +
             "field=biosample_term_name&" +
@@ -80,11 +148,11 @@ var igv = (function (igv) {
         return str;
     }
 
-    function parseJSONData(json, assembly, fileFormat) {
-        var rows;
+    function parseJSONData(json, assembly, fileFormats) {
 
-        rows = [];
-        _.each(json["@graph"], function (record) {
+        let rows = [];
+
+        json["@graph"].forEach(function (record) {
 
             var cellType,
                 target,
@@ -95,49 +163,53 @@ var igv = (function (igv) {
             cellType = record.biosample_term_name;
             assayType = record.assay_term_name;
             target = record.target ? record.target.label : undefined;
+            let id = record["@id"];
 
-            filtered = _.filter(record.files, function (file) {
-                return fileFormat === file.file_format && assembly === file.assembly;
-            });
+            if (record.files) {
+                filtered = record.files.filter(function (file) {
+                    return assembly === file.assembly && (!fileFormats || fileFormats.has(file.file_format));
+                });
 
-            mapped = filtered.map(function (file) {
+                mapped = filtered.map(function (file) {
 
-                var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
-                    techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
-                    name = cellType || "";
+                    var bioRep = file.replicate ? file.replicate.bioligcal_replicate_number : undefined,
+                        techRep = file.replicate ? file.replicate.technical_replicate_number : undefined,
+                        name = cellType || "";
 
-                if(target) {
-                    name += " " + target;
-                }
-                if(assayType && assayType.toLowerCase() !=="chip-seq") {
-                    name += " " + assayType;
-                }
-                if (bioRep) {
-                    name += " " + bioRep;
-                }
+                    if (target) {
+                        name += " " + target;
+                    }
+                    if (assayType && assayType.toLowerCase() !== "chip-seq") {
+                        name += " " + assayType;
+                    }
+                    if (bioRep) {
+                        name += " " + bioRep;
+                    }
 
-                if (techRep) {
-                    name += (bioRep ? ":" : " 0:") + techRep;
-                }
+                    if (techRep) {
+                        name += (bioRep ? ":" : " 0:") + techRep;
+                    }
 
-                return {
-                    "Assembly": file.assembly,
-                    "ExperimentID": record['@id'],
-                    "Cell Type": cellType || '',
-                    "Assay Type": record.assay_term_name,
-                    "Target": target || '',
-                    "Lab": record.lab ? record.lab.title : "",
-                    "Format": file.file_format,
-                    "Output Type": file.output_type,
-                    "url": "https://www.encodeproject.org" + file.href,
-                    "Bio Rep": bioRep,
-                    "Tech Rep": techRep,
-                    "Name": name
-                };
+                    return {
+                        "Assembly": file.assembly,
+                        "ExperimentID": record['@id'],
+                        "Cell Type": cellType || '',
+                        "Assay Type": record.assay_term_name,
+                        "Target": target || '',
+                        "Lab": record.lab ? record.lab.title : "",
+                        "Format": file.file_format,
+                        "Output Type": file.output_type,
+                        "url": "https://www.encodeproject.org" + file.href,
+                        "Bio Rep": bioRep,
+                        "Tech Rep": techRep,
+                        "Name": name
+                    };
 
-            });
+                });
+            }
 
             Array.prototype.push.apply(rows, mapped);
+
 
         });
 
@@ -157,9 +229,12 @@ var igv = (function (igv) {
             tt1,
             tt2;
 
-        aa1 = a['Assay Type' ]; aa2 = b['Assay Type' ];
-        cc1 = a['Cell Type']; cc2 = b['Cell Type'];
-        tt1 = a['Target'   ]; tt2 = b['Target'   ];
+        aa1 = a['Assay Type'];
+        aa2 = b['Assay Type'];
+        cc1 = a['Cell Type'];
+        cc2 = b['Cell Type'];
+        tt1 = a['Target'];
+        tt2 = b['Target'];
 
         if (aa1 === aa2) {
             if (cc1 === cc2) {
@@ -209,7 +284,7 @@ var igv = (function (igv) {
 
             key = _.first(_.keys(obj));
             val = _.first(_.values(obj));
-            return { title: key, width: val }
+            return {title: key, width: val}
         });
 
         return columns;
@@ -219,34 +294,34 @@ var igv = (function (igv) {
         var row,
             obj;
 
-        row =  data[ index ];
+        row = data[index];
 
         obj =
-            {
-                url: row[ 'url' ],
-                color: encodeAntibodyColor(row[ 'Target' ]),
-                name: row['Name']
-            };
+        {
+            url: row['url'],
+            color: encodeAntibodyColor(row['Target']),
+            name: row['Name']
+        };
 
         return obj;
 
-        function encodeAntibodyColor (antibody) {
+        function encodeAntibodyColor(antibody) {
 
             var colors,
                 key;
 
             colors =
-                {
-                    DEFAULT: "rgb(3, 116, 178)",
-                    H3K27AC: "rgb(200, 0, 0)",
-                    H3K27ME3: "rgb(130, 0, 4)",
-                    H3K36ME3: "rgb(0, 0, 150)",
-                    H3K4ME1: "rgb(0, 150, 0)",
-                    H3K4ME2: "rgb(0, 150, 0)",
-                    H3K4ME3: "rgb(0, 150, 0)",
-                    H3K9AC: "rgb(100, 0, 0)",
-                    H3K9ME1: "rgb(100, 0, 0)"
-                };
+            {
+                DEFAULT: "rgb(3, 116, 178)",
+                H3K27AC: "rgb(200, 0, 0)",
+                H3K27ME3: "rgb(130, 0, 4)",
+                H3K36ME3: "rgb(0, 0, 150)",
+                H3K4ME1: "rgb(0, 150, 0)",
+                H3K4ME2: "rgb(0, 150, 0)",
+                H3K4ME3: "rgb(0, 150, 0)",
+                H3K9AC: "rgb(100, 0, 0)",
+                H3K9ME1: "rgb(100, 0, 0)"
+            };
 
             if (undefined === antibody || '' === antibody || '-' === antibody) {
                 key = 'DEFAULT';
@@ -254,7 +329,7 @@ var igv = (function (igv) {
                 key = antibody.toUpperCase();
             }
 
-            return colors[ key ];
+            return colors[key];
 
         }
     };
