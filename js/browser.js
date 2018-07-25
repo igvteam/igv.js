@@ -237,7 +237,7 @@ var igv = (function (igv) {
 
             filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
 
-            if (filename.startsWith("blob:")) {
+            if (filename.startsWith("blob:") || filename.startsWith("data:")) {
                 var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
                 return Promise.resolve(JSON.parse(json));
             }
@@ -1938,7 +1938,7 @@ var igv = (function (igv) {
         path = window.location.href.slice();
         idx = path.indexOf("?");
 
-        surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
+        surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=data:" + this.compressedSession();
 
         return surl;
 
