@@ -568,6 +568,56 @@ var igv = (function (igv) {
 
                 return newTrack;
             })
+            .then(function (newTrack) {
+                return postInit(newTrack)
+            })
+
+        function resolveTrackProperties(config) {
+
+            if (typeof config.url === 'string' && config.url.startsWith("https://drive.google.com")) {
+
+                return igv.Google.getDriveFileInfo(config.url)
+
+                    .then(function (json) {
+
+                        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
+
+                        if (!config.filename) {
+                            config.filename = json.originalFileName;
+                        }
+                        if (!config.format) {
+                            config.format = igv.inferFileFormat(config.filename);
+                        }
+                        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
+                            config.indexURL = igv.Google.driveDownloadURL(config.indexURL);
+                        }
+
+                        return config;
+                    })
+
+
+            }
+            else {
+                if (config.url && !config.filename) {
+                    config.filename = igv.getFilename(config.url);
+                }
+
+                return Promise.resolve(config);
+            }
+
+
+        }
+
+        function postInit(track) {
+
+            if(typeof track.postInit === 'function') {
+                return track.postInit();
+            }
+            else {
+                return Promise.resolve(track);
+            }
+
+        }
 
 
         function resolveTrackProperties(config) {

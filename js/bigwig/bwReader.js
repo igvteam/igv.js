@@ -296,7 +296,7 @@ var igv = (function (igv) {
 
                     //Finally total data count
                     binaryParser.position = self.header.fullDataOffset - startOffset;
-                    self.dataCount = binaryParser.getInt();
+                    self.header.dataCount = binaryParser.getInt();
 
                     return self.header;
 
