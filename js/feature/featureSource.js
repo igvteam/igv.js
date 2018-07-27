@@ -150,7 +150,7 @@ var igv = (function (igv) {
      * @param bpPerPixel
      */
 
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
         var self = this, maxRows, str, queryChr, isQueryable;
 
@@ -195,16 +195,16 @@ var igv = (function (igv) {
 
                 // If a visibility window is defined, expand query interval
 
-                if(self.visibilityWindow != undefined) {
-                    if(self.visibilityWindow <= 0) {
+                if(visibilityWindow != undefined) {
+                    if(visibilityWindow <= 0) {
                         // Whole chromosome
                         intervalStart = 0;
                         intervalEnd = Number.MAX_VALUE;
                     }
                     else {
-                        if(self.visibilityWindow > (bpEnd - bpStart)) {
-                            intervalStart = Math.max(0, (bpStart + bpEnd - self.visibilityWindow) / 2);
-                            intervalEnd = bpStart + self.visibilityWindow;
+                        if(visibilityWindow > (bpEnd - bpStart)) {
+                            intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
+                            intervalEnd = bpStart + visibilityWindow;
                         }
                     }
                     genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);

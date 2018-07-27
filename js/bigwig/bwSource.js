@@ -56,6 +56,31 @@ var igv = (function (igv) {
         else {
             return undefined;
         }
+    }
+
+    igv.BWSource.prototype.defaultVisibilityWindow = function () {
+
+        if (this.reader.type === 'bigwig') {
+            return Promise.resolve(undefined);
+        }
+        else {
+            let genomeSize = getGenomeLength();
+            return this.reader.loadHeader()
+                .then(function (header) {
+                    // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
+                    return 1000 * (genomeSize / header.dataCount);
+                })
+        }
+
+
+        function getGenomeLength() {
+            if (igv.browser && igv.browser.genome) {
+                return igv.browser.genome.getGenomeLength();
+            }
+            else {
+                return 3088286401;
+            }
+        }
 
     }
 

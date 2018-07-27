@@ -139,9 +139,6 @@ var igv = (function (igv) {
             this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
         }
 
-        this.featureSource.visibilityWindow = this.visibilityWindow;
-
-
     }
 
     igv.VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
