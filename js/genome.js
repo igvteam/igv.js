@@ -103,7 +103,7 @@ var igv = (function (igv) {
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
 
-        if(Object.keys(sequence.chromosomes).length > 1) {
+        if (Object.keys(sequence.chromosomes).length > 1) {
             constructWG(this);
         } else {
             this.wgChromosomeNames = [sequence.chromosomeNames[0]];
@@ -156,7 +156,7 @@ var igv = (function (igv) {
         this.chrAliasTable = chrAliasTable;
 
     }
-    
+
     Genome.prototype.toJSON = function () {
 
         return Object.assign({}, this.config, {tracks: undefined});
@@ -278,12 +278,21 @@ var igv = (function (igv) {
     }
 
     /**
-     * Return the genome length in kb
+     * Return the nominal genome length, this is the length of the main chromosomes (no scaffolds, etc).
      */
     Genome.prototype.getGenomeLength = function () {
-        var lastChr, offset;
-        lastChr = _.last(this.wgChromosomeNames);
-        return this.getCumulativeOffset(lastChr) + this.getChromosome(lastChr).bpLength;
+
+        let self = this;
+
+        if (!this.bpLength) {
+            let bpLength = 0;
+            self.wgChromosomeNames.forEach(function (cname) {
+                let c = self.chromosomes[cname];
+                bpLength += c.bpLength;
+            });
+            this.bpLength = bpLength;
+        }
+        return this.bpLength;
     }
 
     igv.Chromosome = function (name, order, bpLength) {

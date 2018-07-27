@@ -35,7 +35,6 @@ var igv = (function (igv) {
         this.config = config || {};
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
         this.reader = new igv.FeatureFileReader(config);
-        this.visibilityWindow = config.visibilityWindow;
     };
 
     igv.ROISource.prototype.getRegions = function (chr, bpStart, bpEnd) {

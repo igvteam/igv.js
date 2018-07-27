@@ -39,13 +39,9 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        if (config.filename &&
-            (
-                igv.filenameOrURLHasSuffix(config.filename, '.bigbed') || igv.filenameOrURLHasSuffix(config.filename, '.bb') ||
-                igv.filenameOrURLHasSuffix(config.filename, '.bigwig') || igv.filenameOrURLHasSuffix(config.filename, '.bw')
-            )
-        ) {
+        if (config.format === 'bigwig' || config.format === 'bigbed') {
             this.featureSource = new igv.BWSource(config);
+
         } else {
             this.featureSource = new igv.FeatureSource(config);
         }
@@ -94,6 +90,24 @@ var igv = (function (igv) {
 
     };
 
+    igv.FeatureTrack.prototype.postInit = function () {
+
+        let self = this;
+
+        if (this.config.format === 'bigbed' && this.visibilityWindow === undefined) {
+
+            return this.featureSource.defaultVisibilityWindow()
+                .then(function (visibilityWindow) {
+                    self.visibilityWindow = visibilityWindow;
+                    return self;
+                })
+        }
+        else {
+            return Promise.resolve(self);
+        }
+
+    }
+
     igv.FeatureTrack.prototype.getFileHeader = function () {
 
         var self = this;
@@ -140,7 +154,7 @@ var igv = (function (igv) {
         return this.getFileHeader()
 
             .then(function (header) {
-                return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
+                return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.visibilityWindow);
             });
     };
 
@@ -251,7 +265,7 @@ var igv = (function (igv) {
             featureList = args.viewport.tile.features;
 
             if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight );
+                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
             }
 
             if (featureList && featureList.length > 0) {
@@ -300,8 +314,7 @@ var igv = (function (igv) {
 
         for (var property in feature) {
 
-            if (feature.hasOwnProperty(property) &&
-                !filteredProperties.has(property) &&
+            if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
                 igv.isStringOrNumber(feature[property])) {
 
                 data.push({name: property, value: feature[property]});
@@ -430,8 +443,6 @@ var igv = (function (igv) {
     igv.FeatureTrack.prototype.dispose = function () {
         this.trackView = undefined;
     }
-
-
 
 
     /**
@@ -681,7 +692,7 @@ var igv = (function (igv) {
         var py;
         var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
 
-        if(this.display === "COLLAPSED") {
+        if (this.display === "COLLAPSED") {
             py = this.margin;
         }
         if (this.displayMode === "SQUISHED" && feature.row != undefined) {
