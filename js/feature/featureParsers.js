@@ -211,7 +211,10 @@ var igv = (function (igv) {
         i = 0;
 
         while (line = dataWrapper.nextLine()) {
-            if (i < this.skipRows) continue;
+
+            i++;
+
+            if (i <= this.skipRows) continue;
 
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
@@ -245,7 +248,6 @@ var igv = (function (igv) {
                 }
                 cnt++;
             }
-            i++;
         }
 
         return allFeatures;
