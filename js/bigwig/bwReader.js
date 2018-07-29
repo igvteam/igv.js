@@ -770,7 +770,7 @@ var igv = (function (igv) {
                 exons = [];
 
                 for (var i = 0; i < exonCount; i++) {
-                    eStart = start + parseInt(exonStarts[i]);
+                    eStart = chromStart + parseInt(exonStarts[i]);
                     eEnd = eStart + parseInt(exonSizes[i]);
                     exons.push({start: eStart, end: eEnd});
                 }
