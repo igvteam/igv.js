@@ -1,5 +1,82 @@
 [
   {
+    "HEADING": "Platinum Genomes (BAM)"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam.bai",
+    "name": "NA12877"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+    "name": "NA12878"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+    "name": "NA12889"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
+    "name": "NA12890"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+    "name": "NA12891"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam.bai",
+    "name": "NA12892"
+  },
+  {
+    "HEADING": "BAM"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+    "height": 500,
+    "autoHeight": false,
+    "viewAsPairs": false,
+    "name": "Google Storage BAM (NA12877)"
+  },
+  {
+    "type": "alignment",
+    "format": "bam",
+    "url": "https://drive.google.com/open?id=0B-lleX9c2pZFZVZyVTdkSFZ2cm8",
+    "indexURL": "https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing",
+    "name": "Google Drive BAM (GSTT1)"
+  },
+  {
+    "name": "Sharded Bam",
+    "type": "alignment",
+    "sourceType": "shardedBam",
+    "sources": {
+      "sequences": [
+        "21",
+        "22"
+      ],
+      "url": "gs://igv-bam-test/mock/recalibrated.$CHR.bam",
+      "indexURL": "gs://igv-bam-test/mock/recalibrated.$CHR.bam.bai"
+    }
+  },
+  {
     "HEADING": "BED / GTF"
   },
   {
@@ -65,9 +142,8 @@
     "name": "ctcf bigwig"
   },
   {
-    "url": "https://www.encodeproject.org/files/ENCFF002ADR/@@download/ENCFF002ADR.bigBed",
-    "name": "ENCFF002ADR",
-    "visibilityWindow": 2000000,
+    "url": "https://www.encodeproject.org/files/ENCFF522RNT/@@download/ENCFF522RNT.bigBed",
+    "name": "ENCODE BigBed",
     "height": 50,
     "autoHeight": false
   },
@@ -97,38 +173,6 @@
     "expandedCallHeight": 4,
     "displayMode": "squished",
     "visibilityWindow": 1000
-  },
-  {
-    "HEADING": "BAM"
-  },
-  {
-    "sourceType": "gcs",
-    "type": "alignment",
-    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
-    "height": 500,
-    "autoHeight": false,
-    "viewAsPairs": false,
-    "name": "Google Storage BAM (NA12877)"
-  },
-  {
-    "type": "alignment",
-    "format": "bam",
-    "url": "https://drive.google.com/open?id=0B-lleX9c2pZFZVZyVTdkSFZ2cm8",
-    "indexURL": "https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing",
-    "name": "Google Drive BAM (GSTT1)"
-  },
-  {
-    "name": "Sharded Bam",
-    "type": "alignment",
-    "sourceType": "shardedBam",
-    "sources": {
-      "sequences": [
-        "21",
-        "22"
-      ],
-      "url": "gs://igv-bam-test/mock/recalibrated.$CHR.bam",
-      "indexURL": "gs://igv-bam-test/mock/recalibrated.$CHR.bam.bai"
-    }
   },
   {
     "HEADING": "GA4GH"

@@ -55,7 +55,7 @@
     <script src="../js/bigwig/bwReader.js"></script>
     <script src="../js/bigwig/bwSource.js"></script>
 
-    <script src="../js/encode/encodeDataSource.js"></script>
+
 
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
@@ -196,6 +196,15 @@
                                 })">GCS bam
     </a>
 
+    <p></p>
+
+    <a href="#" onclick="igv.browser.loadTrack(   {
+    url: 'gs://genomics-public-data/platinum-genomes/platinum-genomes/bam/NA12877_S1.bam',
+    indexURL: 'gs://genomics-public-data/platinum-genomes/platinum-genomes/bam/NA12877_S1.bam.bai',
+    name: 'NA12877',
+    format: 'bam'
+    })">Platninum bam</a>
+
 
 </div>
 
@@ -206,7 +215,7 @@
         gapi.load('client:auth2', initClient);
 
         gapi.load('picker', function () {
-            document.getElementById("googlePickerButton").disabled=false;
+            document.getElementById("googlePickerButton").disabled = false;
         });
 
     });
