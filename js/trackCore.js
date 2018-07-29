@@ -205,6 +205,7 @@ var igv = (function (igv) {
                         config.type = "alignment";
                         break;
                     case "bedpe":
+                    case "bedpe-loop":
                         config.type = "interaction";
                         break;
                     default:

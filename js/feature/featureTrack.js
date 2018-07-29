@@ -39,7 +39,8 @@ var igv = (function (igv) {
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        if (config.format === 'bigwig' || config.format === 'bigbed') {
+        let format = config.format.toLowerCase();
+        if (format === 'bigwig' || format === 'bigbed') {
             this.featureSource = new igv.BWSource(config);
 
         } else {
@@ -92,9 +93,10 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.postInit = function () {
 
-        let self = this;
+        let self = this,
+            format = this.config.format.toLowerCase();
 
-        if (this.config.format === 'bigbed' && this.visibilityWindow === undefined) {
+        if (format === 'bigbed' && this.visibilityWindow === undefined) {
 
             return this.featureSource.defaultVisibilityWindow()
                 .then(function (visibilityWindow) {

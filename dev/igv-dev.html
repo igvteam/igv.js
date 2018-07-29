@@ -57,7 +57,7 @@
     <script src="../js/bigwig/bwReader.js"></script>
     <script src="../js/bigwig/bwSource.js"></script>
 
-    <script src="../js/encode/encodeDataSource.js"></script>
+
 
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
@@ -183,13 +183,14 @@
                        // locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
-                        queryParametersSupported: true,
-                        search: {
-                            url: "https://gtexportal.org/rest/v1/reference/featuresDev/$FEATURE$?format=json&datasetId=gtex_v7",
-                            resultsField: "features",
-                            geneField: "geneSymbol",
-                            snpField: 'snpId'
-                        },
+                        queryParametersSupported: true
+//  GTEX search service.  Uncomment to test.
+//                        search: {
+//                            url: "https://gtexportal.org/rest/v1/reference/featuresDev/$FEATURE$?format=json&datasetId=gtex_v7",
+//                            resultsField: "features",
+//                            geneField: "geneSymbol",
+//                            snpField: 'snpId'
+//                        },
                     };
 
                     igv.createBrowser(igvDiv, options);
