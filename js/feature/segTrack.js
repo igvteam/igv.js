@@ -107,26 +107,27 @@ var igv = (function (igv) {
 
 
         // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
-        if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
-
-            return self.featureSource.reader.allSamples()
-
-                .then(function (samples) {
-
-                    samples.forEach(function (sample) {
-                        self.samples[sample] = self.sampleCount;
-                        self.sampleNames.push(sample);
-                        self.sampleCount++;
-                    })
-
-                    return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-                });
-        }
-        else {
+        // if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
+        //
+        //     return self.featureSource.reader.allSamples()
+        //
+        //         .then(function (samples) {
+        //
+        //             samples.forEach(function (sample) {
+        //                 self.samples[sample] = self.sampleCount;
+        //                 self.sampleNames.push(sample);
+        //                 self.sampleCount++;
+        //             })
+        //
+        //             return self.featureSource.getFeatures(chr, bpStart, bpEnd);
+        //         });
+        // }
+        // else {
             return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-        }
+       // }
 
     };
+
 
     igv.SegTrack.prototype.draw = function (options) {
 
@@ -337,15 +338,12 @@ var igv = (function (igv) {
             row,
             items;
 
+        items = [];
         row = Math.floor(yOffset / sampleHeight);
 
         if (row < this.sampleNames.length) {
 
             sampleName = this.sampleNames[row];
-
-            items = [
-                {name: "Sample", value: sampleName}
-            ];
 
             // We use the featureCache property rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
@@ -354,15 +352,25 @@ var igv = (function (igv) {
                 var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
                 featureList.forEach(function (f) {
                     if (f.sample === sampleName) {
-                        items.push({name: "Value", value: f.value});
+                        extractPopupData(f, items);
                     }
                 });
             }
 
-            return items;
+
         }
 
-        return null;
+        return items;
+
+        function extractPopupData(feature, data) {
+            const filteredProperties = new Set(['row', 'color']);
+            Object.keys(feature).forEach(function (property) {
+                if (!filteredProperties.has(property) &&
+                    igv.isStringOrNumber(feature[property])) {
+                    data.push({name: property, value: feature[property]});
+                }
+            });
+        }
     };
 
     igv.SegTrack.prototype.contextMenuItemList = function (config) {

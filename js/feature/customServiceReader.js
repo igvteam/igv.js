@@ -33,6 +33,7 @@ var igv = (function (igv) {
 
 
     igv.CustomServiceReader = function (config) {
+
         this.config = config;
 
         this.supportsWholeGenome = true;
@@ -66,7 +67,6 @@ var igv = (function (igv) {
             .then(function (data) {
 
                 if (data) {
-
                     if (typeof self.config.parser === "function") {
                         return self.config.parser(data);
                     }
@@ -76,19 +76,30 @@ var igv = (function (igv) {
                             return JSON.parse(data);
                         } catch (e) {
                             // Apparently not json, just return data
-
                             return data;
                         }
                     }
                     else {
                         return data;
                     }
-
-
                 }
                 else {
-                    return null;
+                    return [];
                 }
+            })
+            .then(function (features) {
+
+                if(self.config.mappings) {
+
+                    let mappingKeys = Object.keys(self.config.mappings);
+                    features.forEach(function (f) {
+                        mappingKeys.forEach(function (key) {
+                            f[key] = f[self.config.mappings[key]];
+                        });
+                    });
+                }
+
+                return features;
 
             })
     }
