@@ -316,9 +316,7 @@ var igv = (function (igv) {
         track.minHeight = config.minHeight || Math.min(25, track.height);
         track.maxHeight = config.maxHeight || Math.max(1000, track.height);
 
-        if (config.visibilityWindow) {
-            track.visibilityWindow = config.visibilityWindow;
-        }
+        track.visibilityWindow = config.visibilityWindow;
 
         if (track.type === undefined) {
             track.type = config.type;
@@ -472,6 +470,7 @@ var igv = (function (igv) {
         var menuItems = [];
 
         if (trackView.track.config.type !== 'sequence') {
+            menuItems.push(igv.visibilityWindowMenuItem(trackView));
             menuItems.push(igv.trackRenameMenuItem(trackView));
             menuItems.push(igv.trackHeightMenuItem(trackView));
         }
@@ -562,6 +561,44 @@ var igv = (function (igv) {
         };
 
         return {object: $e, click: clickHandler};
+    };
+
+    igv.visibilityWindowMenuItem = function (trackView) {
+
+        var $e,
+            menuClickHandler;
+
+        menuClickHandler = function () {
+
+            var dialogClickHandler;
+
+            dialogClickHandler = function () {
+                var value;
+
+                value = igv.inputDialog.$input.val().trim();
+
+                if('' === value || undefined === value){
+                    value = -1;
+                }
+
+                trackView.track.visibilityWindow = value;
+            };
+
+            igv.inputDialog.configure({
+                label: 'Visibility Window',
+                input: (trackView.track.visibilityWindow),
+                click: dialogClickHandler
+            });
+            igv.inputDialog.present($(trackView.trackDiv));
+
+        };
+
+        $e = $('<div>');
+        $e.text('Set visibility window');
+
+        return {object: $e, click: menuClickHandler};
+
+
     };
 
     igv.trackRemovalMenuItem = function (trackView) {
@@ -701,6 +738,10 @@ var igv = (function (igv) {
         return {object: $e, click: menuClickHandler};
 
 
+    };
+
+    igv.hasVisibilityWindow = function (trackOrFeatureSource) {
+        return !(-1 === trackOrFeatureSource.visibilityWindow);
     };
 
     return igv;
