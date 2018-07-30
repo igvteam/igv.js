@@ -310,7 +310,7 @@ var igv = (function (igv) {
      */
     function extractPopupData(feature) {
 
-        const filteredProperties = new Set(['chr', 'start', 'end', 'row', 'color']);
+        const filteredProperties = new Set(['row', 'color']);
         let data = [];
         let alleles, alleleFreqs;
 

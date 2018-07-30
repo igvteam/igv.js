@@ -41,18 +41,24 @@ var igv = (function (igv) {
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
-        if (config.sourceType === "ga4gh") {
+        if(config.features && Array.isArray(config.features)) {
+
+            let features = config.features;
+            if(config.mappings) {
+                mapProperties(features, config.mappings)
+            }
+            this.queryable = false;
+            this.featureCache = new igv.FeatureCache(features);
+        }
+        else if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config);
+            this.queryable = true;
         } else if (config.sourceType === "immvar") {
             this.reader = new igv.ImmVarReader(config);
-        } else if (config.type === "eqtl") {
-            if (config.sourceType === "gtex-ws") {
+            this.queryable = true;
+        } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
                 this.reader = new igv.GtexReader(config);
                 this.queryable = true;
-            }
-            else {
-                this.reader = new igv.GtexFileReader(config);
-            }
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
             this.queryable = true;
@@ -61,17 +67,28 @@ var igv = (function (igv) {
             this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new igv.CustomServiceReader(config.source);
-            this.queryable = true;
+            this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
         }
         else {
-            // Default for all sorts of ascii tab-delimited file formts
             this.reader = new igv.FeatureFileReader(config);
+            if(config.queryable != undefined) {
+                this.queryable = config.queryable
+            } else if (queryableFormats.has(config.format)) {
+                this.queryable = true;
+            }
+            else {
+                // Leav undefined -- will defer until we know if reader has an index
+            }
         }
+        
+        
         this.visibilityWindow = config.visibilityWindow;
 
-        this.queryable = this.queryable || queryableFormats.has(config.format);
+
+
 
     };
+
 
     igv.FeatureSource.prototype.getFileHeader = function () {
 
@@ -152,16 +169,19 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-        var self = this, maxRows, str, queryChr, isQueryable;
+        var self = this, maxRows, str, queryChr;
 
         queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
         maxRows = self.config.maxRows || 500;
         str = chr.toLowerCase();
-        isQueryable = self.queryable || self.reader.indexed;
+
 
 
         return getFeatureCache()
+
             .then(function (featureCache) {
+
+                let isQueryable = self.queryable;
 
                 if ("all" === str) {
                     if(isQueryable) {
@@ -215,6 +235,8 @@ var igv = (function (igv) {
 
                     .then(function (featureList) {
 
+                        if(self.queryable === undefined) self.queryable = self.reader.indexed;
+                        
                         if (featureList) {
 
                             if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
@@ -225,7 +247,7 @@ var igv = (function (igv) {
                             packFeatures(featureList, maxRows);
 
                             // Note - replacing previous cache with new one
-                            self.featureCache = isQueryable ?
+                            self.featureCache = self.queryable ?
                                 new igv.FeatureCache(featureList, genomicInterval) :
                                 new igv.FeatureCache(featureList);
 
@@ -314,7 +336,6 @@ var igv = (function (igv) {
         }
     }
 
-
     // TODO -- filter by pixel size
     function getWGFeatures(features) {
 
@@ -344,8 +365,17 @@ var igv = (function (igv) {
             }
         });
 
-
         return wgFeatures;
+    }
+
+
+    function mapProperties(features, mappings) {
+        let mappingKeys = Object.keys(mappings);
+        features.forEach(function (f) {
+            mappingKeys.forEach(function (key) {
+                f[key] = f[mappings[key]];
+            });
+        });
     }
 
     return igv;
