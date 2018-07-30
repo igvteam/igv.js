@@ -68,7 +68,7 @@ var cBio = {
                                 trackDiv.textContent = name;
                                 trackDiv.addEventListener('click', function (event) {
 
-                                    let gtexTrack = {
+                                    let trackJson = {
                                         "name": name,
                                         "type": "seg",
                                         "displayMode": "EXPANDED",
@@ -78,15 +78,17 @@ var cBio = {
                                             "method": "POST",
                                             "contentType": "application/json",
                                             "body": body,
+                                            "queryable": false,
+                                            "isLog": true,
                                             "mappings": {
                                                 "chr": "chromosome",
                                                 "value": "segmentMean",
-                                                "sample": "sampleId"
-                                            },
-                                            "queryable": false
-                                        }
+                                                "sampleKey": "uniqueSampleKey"
+                                            }
+                                        },
+
                                     }
-                                    igv.browser.loadTrack(gtexTrack);
+                                    igv.browser.loadTrack(trackJson);
 
                                 });
 
@@ -100,6 +102,21 @@ var cBio = {
             })
 
     }
-
-
 }
+
+
+// Example json
+
+// Copy number
+// {
+//     "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+//     "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+//     "patientId": "TCGA-OR-A5J2",
+//     "start": 3218610,
+//     "end": 4749076,
+//     "segmentMean": -0.2239,
+//     "studyId": "acc_tcga",
+//     "sampleId": "TCGA-OR-A5J2-01",
+//     "chromosome": "1",
+//     "numberOfProbes": 958
+// }

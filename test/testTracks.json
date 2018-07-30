@@ -215,18 +215,6 @@
     "HEADING": "cBIO - http only"
   },
   {
-    "name": "cBio Seg",
-    "type": "seg",
-    "displayMode": "EXPANDED",
-    "sourceType": "custom",
-    "source": {
-      "url": "http://www.cbioportal.org/beta/api-legacy/copynumbersegments",
-      "method": "POST",
-      "contentType": "application/x-www-form-urlencoded",
-      "body": "cancerStudyId=acc_tcga&sampleIds=TCGA-OR-A5J1-01,TCGA-OR-A5K3-01"
-    }
-  },
-  {
     "name": "cBio 2.0 Seg",
     "type": "seg",
     "displayMode": "EXPANDED",
@@ -236,9 +224,11 @@
       "method": "POST",
       "contentType": "application/json",
       "body": "[ { \"sampleId\": \"TCGA-OR-A5J2-01\", \"studyId\": \"acc_tcga\" }]",
+      "isLog": true,
       "mappings": {
         "chr": "chromosome",
-        "value": "segmentMean"
+        "value": "segmentMean",
+        "sampleKey": "uniqueSampleKey"
       },
       "queryable": false
     }
@@ -249,7 +239,8 @@
     "displayMode": "EXPANDED",
     "mappings": {
       "chr": "chromosome",
-      "value": "segmentMean"
+      "value": "segmentMean",
+      "sampleKey": "uniqueSampleKey"
     },
     "features": [
       {
