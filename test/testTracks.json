@@ -212,7 +212,7 @@
     "name": "Ga4gh variants - single call set"
   },
   {
-    "HEADING": "cBIO"
+    "HEADING": "cBIO - http only"
   },
   {
     "name": "cBio Seg",
@@ -223,8 +223,60 @@
       "url": "http://www.cbioportal.org/beta/api-legacy/copynumbersegments",
       "method": "POST",
       "contentType": "application/x-www-form-urlencoded",
-      "body": "cancerStudyId=acc_tcga&chromosome=$CHR&sampleIds=TCGA-OR-A5J1-01,TCGA-OR-A5K3-01"
+      "body": "cancerStudyId=acc_tcga&sampleIds=TCGA-OR-A5J1-01,TCGA-OR-A5K3-01"
     }
+  },
+  {
+    "name": "cBio 2.0 Seg",
+    "type": "seg",
+    "displayMode": "EXPANDED",
+    "sourceType": "custom",
+    "source": {
+      "url": "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
+      "method": "POST",
+      "contentType": "application/json",
+      "body": "[ { \"sampleId\": \"TCGA-OR-A5J2-01\", \"studyId\": \"acc_tcga\" }]",
+      "mappings": {
+        "chr": "chromosome",
+        "value": "segmentMean"
+      },
+      "queryable": false
+    }
+  },
+  {
+    "name": "cBio 2.0 - specify features",
+    "type": "seg",
+    "displayMode": "EXPANDED",
+    "mappings": {
+      "chr": "chromosome",
+      "value": "segmentMean"
+    },
+    "features": [
+      {
+        "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+        "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+        "patientId": "TCGA-OR-A5J2",
+        "start": 3218610,
+        "end": 4749076,
+        "segmentMean": -0.2239,
+        "studyId": "acc_tcga",
+        "sampleId": "TCGA-OR-A5J2-01",
+        "chromosome": "1",
+        "numberOfProbes": 958
+      },
+      {
+        "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+        "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+        "patientId": "TCGA-OR-A5J2",
+        "start": 4750119,
+        "end": 11347492,
+        "segmentMean": -0.8391,
+        "studyId": "acc_tcga",
+        "sampleId": "TCGA-OR-A5J2-01",
+        "chromosome": "1",
+        "numberOfProbes": 3544
+      }
+    ]
   },
   {
     "HEADING": "HTSGET"
