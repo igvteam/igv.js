@@ -80,12 +80,8 @@ var igv = (function (igv) {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
-        
-        
+
         this.visibilityWindow = config.visibilityWindow;
-
-
-
 
     };
 
@@ -215,7 +211,7 @@ var igv = (function (igv) {
 
                 // If a visibility window is defined, expand query interval
 
-                if(visibilityWindow != undefined) {
+                if(-1 !== visibilityWindow) {
                     if(visibilityWindow <= 0) {
                         // Whole chromosome
                         intervalStart = 0;
