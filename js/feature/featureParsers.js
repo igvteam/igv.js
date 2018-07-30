@@ -78,10 +78,6 @@ var igv = (function (igv) {
                     this.decode = decodeGFF;
                     this.delimiter = "\t";
                     break;
-                case "aneu":
-                    this.decode = decodeAneu;
-                    this.delimiter = "\t";
-                    break;
                 case "fusionjuncspan":
                     // bhaas, needed for FusionInspector view
                     this.decode = decodeFusionJuncSpan;
@@ -616,30 +612,6 @@ var igv = (function (igv) {
         else {
             return decodeBedGraph(tokens);
         }
-    }
-
-    function decodeAneu(tokens, ignore) {
-
-        var chr, start, end, feature;
-
-
-        if (tokens.length < 4) return null;
-
-        // console.log("Decoding aneu.tokens="+JSON.stringify(tokens));
-        chr = tokens[1];
-        start = parseInt(tokens[2]);
-        end = tokens.length > 3 ? parseInt(tokens[3]) : start + 1;
-
-        feature = {chr: chr, start: start, end: end};
-
-        if (tokens.length > 4) {
-            feature.score = parseFloat(tokens[4]);
-            feature.value = feature.score;
-        }
-
-
-        return feature;
-
     }
 
     function decodeFusionJuncSpan(tokens, ignore) {

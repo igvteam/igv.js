@@ -36,7 +36,8 @@
 var igv = (function (igv) {
 
     var maxFeatureCount = Number.MAX_VALUE,    // For future use,  controls downsampling
-        sampleColumn = 0,
+        sampleIdColumn = 0,
+        sampleKeyColumn = 0,
         chrColumn = 1,
         startColumn = 2,
         endColumn = 3;
@@ -91,7 +92,8 @@ var igv = (function (igv) {
             if (tokens.length > dataColumn) {
 
                 allFeatures.push({
-                    sample: tokens[sampleColumn],
+                    sampleId: tokens[sampleIdColumn],
+                    sampleName: tokens[sampleKeyColumn],
                     chr: tokens[chrColumn],
                     start: parseInt(tokens[startColumn]),
                     end: parseInt(tokens[endColumn]),
