@@ -83,7 +83,8 @@ var cBio = {
                                             "mappings": {
                                                 "chr": "chromosome",
                                                 "value": "segmentMean",
-                                                "sampleKey": "uniqueSampleKey"
+                                                "sampleKey": "uniqueSampleKey",
+                                                "sample": "sampleId"
                                             }
                                         },
 
