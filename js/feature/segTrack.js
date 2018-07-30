@@ -345,7 +345,9 @@ var igv = (function (igv) {
         return items;
 
         function extractPopupData(feature, data) {
-            const filteredProperties = new Set(['row', 'color', 'uniqueSampleKey', 'uniquePatientKey']);
+
+            const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
+
             Object.keys(feature).forEach(function (property) {
                 if (!filteredProperties.has(property) &&
                     igv.isStringOrNumber(feature[property])) {
