@@ -585,7 +585,7 @@ var igv = (function (igv) {
             };
 
             igv.inputDialog.configure({
-                label: 'Visibility Window',
+                label: 'Threshold',
                 input: (trackView.track.visibilityWindow),
                 click: dialogClickHandler
             });
@@ -594,7 +594,7 @@ var igv = (function (igv) {
         };
 
         $e = $('<div>');
-        $e.text('Set visibility window');
+        $e.text('Set Threshold');
 
         return {object: $e, click: menuClickHandler};
 
