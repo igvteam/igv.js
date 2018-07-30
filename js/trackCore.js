@@ -39,7 +39,6 @@ var igv = (function (igv) {
             "gff3",
             "gff",
             "gtf",
-            "aneu",
             "fusionjuncspan",
             "refflat",
             "seg",
@@ -116,10 +115,6 @@ var igv = (function (igv) {
 
             case "seg":
                 return new igv.SegTrack(config);
-                break;
-
-            case "aneu":
-                return new igv.AneuTrack(config);
                 break;
 
             case "merged":
@@ -291,6 +286,7 @@ var igv = (function (igv) {
     igv.configTrack = function (track, config) {
 
         track.config = config;
+       
         track.url = config.url;
 
         config.name = config.name || config.label;   // synonym for name, label is deprecated

@@ -66,9 +66,7 @@ var igv = (function (igv) {
                 }
             );
 
-        this.sampleCount = 0;
-        this.samples = {};
-        this.sampleNames = [];
+        this.sampleKeys = [];
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
@@ -113,9 +111,9 @@ var igv = (function (igv) {
         //
         //         .then(function (samples) {
         //
-        //             samples.forEach(function (sample) {
-        //                 self.samples[sample] = self.sampleCount;
-        //                 self.sampleNames.push(sample);
+        //             samples.forEach(function (sampleKey) {
+        //                 self.samples[sampleKey] = self.sampleCount;
+        //                 self.sampleKeys.push(sampleKey);
         //                 self.sampleCount++;
         //             })
         //
@@ -131,27 +129,8 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.draw = function (options) {
 
-        var self = this,
-            featureList,
-            ctx,
-            bpPerPixel,
-            bpStart,
-            pixelWidth,
-            pixelHeight,
-            bpEnd,
-            segment,
-            len,
-            sample,
-            i,
-            y,
-            color,
-            value,
-            px,
-            px1,
-            pw,
-            xScale,
-            sampleHeight,
-            border;
+        var self = this,  featureList, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd, segment, len, sampleKey,
+            i, y, color, value, px, px1, pw, xScale, sampleHeight, border;
 
         sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
         border = ("SQUISHED" === this.displayMode) ? 0 : 1;
@@ -162,9 +141,17 @@ var igv = (function (igv) {
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         featureList = options.features;
+
+        // Create a map for fast id -> row lookup
+        let samples = {};
+        this.sampleKeys.forEach(function (id, index) {
+            samples[id] = index;
+        })
+
+
         if (featureList) {
 
-            checkForLog(featureList);
+            if (self.isLog === undefined) checkForLog(featureList);
 
             bpPerPixel = options.bpPerPixel;
             bpStart = options.bpStart;
@@ -172,11 +159,10 @@ var igv = (function (igv) {
             xScale = bpPerPixel;
 
             for (i = 0, len = featureList.length; i < len; i++) {
-                sample = featureList[i].sample;
-                if (!this.samples.hasOwnProperty(sample)) {
-                    this.samples[sample] = self.sampleCount;
-                    this.sampleNames.push(sample);
-                    this.sampleCount++;
+                sampleKey = featureList[i].sampleKey;
+                if (!samples.hasOwnProperty(sampleKey)) {
+                    this.sampleKeys.push(sampleKey);
+                    samples[sampleKey] = this.sampleKeys.length;
                 }
             }
 
@@ -187,7 +173,7 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
-                y = self.samples[segment.sample] * sampleHeight + border;
+                y = samples[segment.sampleKey] * sampleHeight + border;
 
                 value = segment.value;
                 if (!self.isLog) {
@@ -241,22 +227,24 @@ var igv = (function (igv) {
      */
     igv.SegTrack.prototype.computePixelHeight = function (features) {
 
-        var sampleHeight, i, len, sample;
+        var sampleHeight, i, len, sampleKey;
 
         if(!features) return 0;
 
         sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
 
+        // Create a map for fast id -> row lookup
+        let samples = new Set(this.sampleKeys);
+
         for (i = 0, len = features.length; i < len; i++) {
-            sample = features[i].sample;
-            if (!this.samples.hasOwnProperty(sample)) {
-                this.samples[sample] = this.sampleCount;
-                this.sampleNames.push(sample);
-                this.sampleCount++;
+            sampleKey = features[i].sampleKey;
+            if (!samples.has(sampleKey)) {
+                samples.add(sampleKey);
+                this.sampleKeys.push(sampleKey);
             }
         }
 
-        return this.sampleCount * sampleHeight;
+        return this.sampleKeys.length * sampleHeight;
     };
 
     /**
@@ -276,7 +264,7 @@ var igv = (function (igv) {
                     f,
                     i,
                     s,
-                    sampleNames,
+                    sampleKeys,
                     scores = {},
                     bpLength = bpEnd - bpStart + 1;
 
@@ -292,15 +280,14 @@ var igv = (function (igv) {
                     max = Math.min(bpEnd, segment.end);
                     f = (max - min) / bpLength;
 
-                    s = scores[segment.sample];
+                    s = scores[segment.sampleKey];
                     if (!s) s = 0;
-                    scores[segment.sample] = s + f * segment.value;
+                    scores[segment.sampleKey] = s + f * segment.value;
 
                 }
 
                 // Now sort sample names by score
-                sampleNames = Object.keys(self.samples);
-                sampleNames.sort(function (a, b) {
+                self.sampleKeys.sort(function (a, b) {
 
                     var s1 = scores[a];
                     var s2 = scores[b];
@@ -313,11 +300,6 @@ var igv = (function (igv) {
 
                 });
 
-                // Finally update sample hash
-                for (i = 0; i < sampleNames.length; i++) {
-                    self.samples[sampleNames[i]] = i;
-                }
-                self.sampleNames = sampleNames;
 
                 self.trackView.repaintViews();
                 // self.trackView.$viewport.scrollTop(0);
@@ -334,16 +316,16 @@ var igv = (function (igv) {
             yOffset = config.y,
             referenceFrame = config.viewport.genomicState.referenceFrame,
             sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight,
-            sampleName,
+            sampleKey,
             row,
             items;
 
         items = [];
         row = Math.floor(yOffset / sampleHeight);
 
-        if (row < this.sampleNames.length) {
+        if (row < this.sampleKeys.length) {
 
-            sampleName = this.sampleNames[row];
+            sampleKey = this.sampleKeys[row];
 
             // We use the featureCache property rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
@@ -351,7 +333,7 @@ var igv = (function (igv) {
                 var chr = referenceFrame.chrName;  // TODO -- this should be passed in
                 var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
                 featureList.forEach(function (f) {
-                    if (f.sample === sampleName) {
+                    if (f.sampleKey === sampleKey) {
                         extractPopupData(f, items);
                     }
                 });
@@ -363,7 +345,7 @@ var igv = (function (igv) {
         return items;
 
         function extractPopupData(feature, data) {
-            const filteredProperties = new Set(['row', 'color']);
+            const filteredProperties = new Set(['row', 'color', 'uniqueSampleKey', 'uniquePatientKey']);
             Object.keys(feature).forEach(function (property) {
                 if (!filteredProperties.has(property) &&
                     igv.isStringOrNumber(feature[property])) {
