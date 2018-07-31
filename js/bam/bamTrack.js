@@ -481,19 +481,15 @@ var igv = (function (igv) {
 
     CoverageTrack.prototype.popupData = function (config) {
 
-        var genomicLocation = config.genomicLocation,
-            xOffset = config.x,
-            yOffset = config.y,
+        let features = config.viewport.getCachedFeatures();
+        if(!features || features.length === 0) return;
+
+        let genomicLocation = config.genomicLocation,
             referenceFrame = config.viewport.genomicState.referenceFrame,
-            coverageMap = config.viewport.tile.features.coverageMap,
-            coverageMapIndex,
-            coverage,
+            coverageMap = features.coverageMap,
             nameValues = [],
-            tmp;
-
-
-        coverageMapIndex = genomicLocation - coverageMap.bpStart;
-        coverage = coverageMap.coverage[coverageMapIndex];
+            coverageMapIndex = genomicLocation - coverageMap.bpStart,
+            coverage = coverageMap.coverage[coverageMapIndex];
 
         if (coverage) {
 
@@ -503,7 +499,7 @@ var igv = (function (igv) {
             nameValues.push({name: 'Total Count', value: coverage.total});
 
             // A
-            tmp = coverage.posA + coverage.negA;
+            let tmp = coverage.posA + coverage.negA;
             if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
             nameValues.push({name: 'A', value: tmp});
 
@@ -945,8 +941,9 @@ var igv = (function (igv) {
         return list;
 
         function sortRows() {
+            if (!config.viewport.tile) return;
             self.sortOption = {sort: "NUCLEOTIDE"};
-            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.tile.features);
+            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.getCachedFeatures());
         }
 
         function viewMateInSplitScreen() {
@@ -966,26 +963,23 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
-        var packedAlignmentRows,
-            downsampledIntervals,
-            packedAlignmentsIndex,
-            alignmentRow, clicked, i;
+        let features = viewport.getCachedFeatures();
+        if(!features || features.length === 0) return;
 
-        packedAlignmentRows = viewport.tile.features.packedAlignmentRows;
-        downsampledIntervals = viewport.tile.features.downsampledIntervals;
-
-        packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
+        let packedAlignmentRows = features.packedAlignmentRows;
+        let downsampledIntervals = features.downsampledIntervals;
+        let packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
 
         if (packedAlignmentsIndex < 0) {
-            for (i = 0; i < downsampledIntervals.length; i++) {
+            for (let i = 0; i < downsampledIntervals.length; i++) {
                 if (downsampledIntervals[i].start <= genomicLocation && (downsampledIntervals[i].end >= genomicLocation)) {
                     return downsampledIntervals[i];
                 }
             }
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
-            alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            clicked = alignmentRow.alignments.filter(function (alignment) {
+            let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            let clicked = alignmentRow.alignments.filter(function (alignment) {
                 return (genomicLocation >= alignment.start && genomicLocation <= (alignment.start + alignment.lengthOnRef));
             });
 
