@@ -109,10 +109,10 @@ var igv = (function (igv) {
                     this.shift = 1;
                     break;
                 case "aed":
-                this.decode = decodeAed;
-                this.delimiter = "\t";
-                break;
-            case "bed":
+                    this.decode = decodeAed;
+                    this.delimiter = "\t";
+                    break;
+                case "bed":
                     this.decode = decodeBed;
                     this.delimiter = config.delimiter || /\s+/;
                     break;
