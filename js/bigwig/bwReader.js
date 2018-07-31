@@ -522,6 +522,14 @@ var igv = (function (igv) {
         var chromToId = {};
         var idToChrom = [];
 
+        this.header = {
+            magic: magic,
+            blockSize: blockSize,
+            keySize: keySize,
+            valSize: valSize,
+            itemCount: itemCount,
+            reserved: reserved
+        };
         this.chromToID = chromToId;
         this.idToChrom = idToChrom;
 
