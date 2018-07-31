@@ -246,61 +246,53 @@ var igv = (function (igv) {
      */
     igv.FeatureTrack.prototype.popupData = function (args) {
 
-        // We use the featureCache property rather than method to avoid async load.  If the
+        let features = args.viewport.getCachedFeatures();
+        if (!features || features.length === 0) return [];
+
+        // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (args.viewport.tile.features) {
 
-            var genomicLocation, yOffset, referenceFrame, tolerance, featureList, row, data, ss, ee, hits;
+        let genomicLocation = args.genomicLocation;
+        let yOffset = args.y - this.margin;
+        let referenceFrame = args.viewport.genomicState.referenceFrame;
 
-            data = [];
+        // We need some tolerance around genomicLocation
+        let tolerance = 3 * referenceFrame.bpPerPixel;
+        let ss = genomicLocation - tolerance;
+        let ee = genomicLocation + tolerance;
+        //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
-            genomicLocation = args.genomicLocation;
-            yOffset = args.y - this.margin;
-            referenceFrame = args.viewport.genomicState.referenceFrame;
-
-            // We need some tolerance around genomicLocation
-            tolerance = 3 * referenceFrame.bpPerPixel;
-            ss = genomicLocation - tolerance;
-            ee = genomicLocation + tolerance;
-            //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
-
-            featureList = args.viewport.tile.features;
-
-            if ('COLLAPSED' !== this.displayMode) {
-                row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
-            }
-
-            if (featureList && featureList.length > 0) {
-
-                hits = featureList.filter(function (feature) {
-                    return (feature.end >= ss && feature.start <= ee) &&
-                        (row === undefined || feature.row === undefined || row === feature.row);
-                })
-
-                hits.forEach(function (feature) {
-                    var featureData;
-
-                    if (feature.popupData) {
-                        featureData = feature.popupData(genomicLocation);
-                    } else {
-                        featureData = extractPopupData(feature);
-                    }
-                    if (featureData) {
-                        if (data.length > 0) {
-                            data.push("<HR>");
-                        }
-                        Array.prototype.push.apply(data, featureData);
-                    }
-
-
-                });
-
-                return data;
-            }
-
+        let row;
+        if ('COLLAPSED' !== this.displayMode) {
+            row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
         }
 
-        return null;
+
+        hits = features.filter(function (feature) {
+            return (feature.end >= ss && feature.start <= ee) &&
+                (row === undefined || feature.row === undefined || row === feature.row);
+        })
+
+        let data = [];
+        hits.forEach(function (feature) {
+            let featureData;
+
+            if (feature.popupData) {
+                featureData = feature.popupData(genomicLocation);
+            } else {
+                featureData = extractPopupData(feature);
+            }
+            if (featureData) {
+                if (data.length > 0) {
+                    data.push("<HR>");
+                }
+                Array.prototype.push.apply(data, featureData);
+            }
+        });
+
+        return data;
+
+
     };
 
     /**
