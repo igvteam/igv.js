@@ -292,7 +292,6 @@ var igv = (function (igv) {
     igv.configTrack = function (track, config) {
 
         track.config = config;
-
         track.url = config.url;
 
         config.name = config.name || config.label;   // synonym for name, label is deprecated
