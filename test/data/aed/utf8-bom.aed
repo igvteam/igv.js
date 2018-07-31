@@ -1,0 +1,10 @@
+﻿bio:sequence(aed:String)	bio:start(aed:Integer)	bio:end(aed:Integer)	aed:name(aed:String)	aed:value(aed:String)	aed:category(aed:String)	style:color(aed:Color)	omim:geneTitle(aed:String)	omim:phenoMapKey(aed:Integer)	omim:geneSymbol(aed:String)	aed:modifiedBy(aed:String)	omim:id(aed:String)	aed:modified(aed:DateTime)	affx:materialModifiedBy(aed:String)	aed:note(aed:String)	omim:disorder(aed:String)	omim:geneSymbolList(aed:String)	affx:materialModified(aed:DateTime)	Category(aed:String)	bio:strand(bio:Strand)	bio:cdsMax(aed:Integer)	bio:cdsMin(aed:Integer)	refseq:accessionNumber(aed:String)	refseq:geneName(aed:String)	aed:counter(aed:Integer)
+			namespace:refseq(aed:URI)	http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/RefSeq/																				
+			namespace:affx(aed:URI)	http://affymetrix.com/ontology/																				
+			namespace:omim(aed:URI)	http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/omim/																				
+			affx:ucscGenomeVersion(aed:String)	hg19																				
+			aed:application(aed:String)	ChAS Browser 3.1.1.27 (r9436)																				
+			aed:created(aed:DateTime)	2016-03-04T13:07:43.241-06:00																				
+			aed:modified(aed:DateTime)	2017-09-20T13:19:24.898-05:00																				
+chr1	3569128	3652765	TP73			"rgb(255,0,0)"	TUMOR PROTEIN p73; TP73	1	 TP73	user	601990	2016-03-07T09:05:35.910-06:00	user	"Sample geneThis is an example of a multi-line property containing empty rows.We also have text ""in double quotes"".The values in this file were hand-crafted to test the parser, they might not correspond to actual AED file values created by ChAS"			2016-03-07T09:05:35.910-06:00	Test1	+	3652765	3569128	NG_017035.2	Homo sapiens tumor protein p73 (TP73)	1
+chr2	97481990	97501121	CNNM3			"rgb(0,204,0)"	Cyclin M3	0	CNNM3	user	607804	2016-05-11T11:17:47.852-05:00	user	"Test unicode:∞☃(infinity snowman)"		"CNNM3, ACDP3"	2016-05-11T11:17:47.852-05:00		+					

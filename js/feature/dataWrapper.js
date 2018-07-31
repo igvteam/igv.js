@@ -59,6 +59,28 @@ var igv = (function (igv) {
         }
     }
 
+    // For use in applications where whitespace carries meaning
+    // Returns "" for an empty row (not undefined like nextLine), since this is needed in AED
+    StringDataWrapper.prototype.nextLineNoTrim = function () {
+        var start = this.ptr,
+            idx = this.data.indexOf('\n', start),
+            data = this.data;
+
+        if (idx > 0) {
+            this.ptr = idx + 1;   // Advance pointer for next line
+            if(idx > start && data.charAt(idx-1) === '\r') {
+                // Trim CR manually in CR/LF sequence
+                return data.substring(start, idx - 1);
+            }
+            return data.substring(start, idx);
+        }
+        else {
+            var length = data.length;
+            this.ptr = length;
+            // Return undefined only at the very end of the data
+            return (start >= length) ? undefined : data.substring(start);
+        }
+    }
 
     var ByteArrayDataWrapper = function (array) {
         this.data = array;
@@ -83,6 +105,9 @@ var igv = (function (igv) {
         this.ptr = i + 1;
         return result;
     }
+
+    // The ByteArrayDataWrapper does not do any trimming by default, can reuse the function
+    ByteArrayDataWrapper.prototype.nextLineNoTrim = ByteArrayDataWrapper.prototype.nextLine;
 
 
     return igv;

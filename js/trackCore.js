@@ -42,6 +42,7 @@ var igv = (function (igv) {
             "fusionjuncspan",
             "refflat",
             "seg",
+            "aed",
             "bed",
             "vcf",
             "bb",
@@ -160,6 +161,11 @@ var igv = (function (igv) {
 
             else if ("FusionJuncSpan" === config.type && !config.format) {
                 config.format = "fusionjuncspan";
+            }
+
+            else if ("aed" === config.type) {
+                config.type = "annotation";
+                config.format = config.format || "aed";
             }
         }
 
@@ -286,7 +292,7 @@ var igv = (function (igv) {
     igv.configTrack = function (track, config) {
 
         track.config = config;
-       
+
         track.url = config.url;
 
         config.name = config.name || config.label;   // synonym for name, label is deprecated
