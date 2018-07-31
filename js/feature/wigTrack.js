@@ -52,13 +52,13 @@ var igv = (function (igv) {
         }
 
         this.autoscale = config.autoscale || config.max === undefined;
-        if(!this.autoscale) {
+        if (!this.autoscale) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
-        } 
-        
+        }
+
         this.windowFunction = config.windowFunction || "mean";
 
         this.paintAxis = igv.paintAxis;
@@ -160,7 +160,7 @@ var igv = (function (igv) {
         }
 
         if (features && features.length > 0) {
-            
+
             if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
             featureValueMinimum = self.dataRange.min;
@@ -226,44 +226,36 @@ var igv = (function (igv) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.tile.features) {
 
-            var genomicLocation = config.genomicLocation,
+        let features = config.viewport.getCachedFeatures();
 
-                referenceFrame = config.viewport.genomicState.referenceFrame,
-                tolerance,
-                featureList,
-                popupData,
-                selectedFeature,
-                posString;
+        if (features && features.length > 0) {
 
-            featureList = config.viewport.tile.features;
+            let genomicLocation = config.genomicLocation;
+            let referenceFrame = config.viewport.genomicState.referenceFrame;
+            let popupData = [];
 
-            if (featureList.length > 0) {
+            // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            let tolerance = 2 * referenceFrame.bpPerPixel;
+            let selectedFeature = binarySearch(features, genomicLocation, tolerance);
 
-                popupData = [];
-
-                // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                tolerance = 2 * referenceFrame.bpPerPixel;
-                selectedFeature = binarySearch(featureList, genomicLocation, tolerance);
-
-                if (selectedFeature) {
-                    posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                        igv.numberFormatter(selectedFeature.start + 1)
-                        : igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end);
-                    popupData.push({name: "Position:", value: posString});
-                    popupData.push({
-                        name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                        value: igv.numberFormatter(selectedFeature.value)
-                    });
-                }
-
-                return popupData;
+            if (selectedFeature) {
+                let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
+                    igv.numberFormatter(selectedFeature.start + 1)
+                    : igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end);
+                popupData.push({name: "Position:", value: posString});
+                popupData.push({
+                    name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+                    value: igv.numberFormatter(selectedFeature.value)
+                });
             }
+
+            return popupData;
+
 
         }
         else {
-            return null;
+            return [];
         }
     }
 
@@ -388,7 +380,7 @@ var igv = (function (igv) {
 
         config.autoscale = this.autoscale;
 
-        if(!this.autoscale && this.dataRange) {
+        if (!this.autoscale && this.dataRange) {
             config.min = this.dataRange.min;
             config.max = this.dataRange.max;
         }

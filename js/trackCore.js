@@ -472,10 +472,11 @@ var igv = (function (igv) {
      */
     igv.trackMenuItemList = function (popover, trackView) {
 
-        var menuItems = [];
+        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant']);
+
+        let menuItems = [];
 
         if (trackView.track.config.type !== 'sequence') {
-            menuItems.push(igv.visibilityWindowMenuItem(trackView));
             menuItems.push(igv.trackRenameMenuItem(trackView));
             menuItems.push(igv.trackHeightMenuItem(trackView));
         }
@@ -488,7 +489,13 @@ var igv = (function (igv) {
             menuItems = menuItems.concat(trackView.track.menuItemList());
         }
 
+        if(vizWindowTypes.has(trackView.track.config.type)) {
+            menuItems.push('<hr/>');
+            menuItems.push(igv.visibilityWindowMenuItem(trackView));
+        }
+
         if (trackView.track.removable !== false) {
+            menuItems.push('<hr/>');
             menuItems.push(igv.trackRemovalMenuItem(trackView));
         }
 
@@ -590,7 +597,7 @@ var igv = (function (igv) {
             };
 
             igv.inputDialog.configure({
-                label: 'Threshold',
+                label: 'Visibility Window',
                 input: (trackView.track.visibilityWindow),
                 click: dialogClickHandler
             });
@@ -599,7 +606,7 @@ var igv = (function (igv) {
         };
 
         $e = $('<div>');
-        $e.text('Set Threshold');
+        $e.text('Set visibility window');
 
         return {object: $e, click: menuClickHandler};
 

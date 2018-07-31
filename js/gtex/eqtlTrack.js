@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
 
     igv.EqtlTrack = function (config) {
-        
+
         var url = config.url,
             label = config.name;
 
@@ -52,7 +52,7 @@ var igv = (function (igv) {
         this.visibilityWindow = config.visibilityWindow;
 
         this.featureSource = new igv.FeatureSource(config);
-        
+
         igv.GtexUtils.gtexLoaded = true;
 
     };
@@ -69,11 +69,11 @@ var igv = (function (igv) {
         };
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-        
+
         // Determine a tick spacing such that there is at least 10 pixels between ticks
-        
+
         var n = Math.ceil((this.maxLogP - this.minLogP) * 10 / pixelHeight);
-        
+
 
         for (var p = 4; p <= track.maxLogP; p += n) {
 
@@ -93,7 +93,7 @@ var igv = (function (igv) {
 
             igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
 
-            if(y1 > 8) {
+            if (y1 > 8) {
                 igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
             } // Offset numbers down by 2 pixels;
         }
@@ -128,15 +128,15 @@ var igv = (function (igv) {
         if (ctx) {
 
             var len = featureList.length;
-            
+
             ctx.save();
-            
+
             self.maxLogP = autoscale(featureList, bpStart, bpEnd);
-            
+
             // Draw in two passes, with "selected" eqtls drawn last
             drawEqtls(false);
             drawEqtls(true);
-            
+
             ctx.restore();
 
         }
@@ -152,7 +152,7 @@ var igv = (function (igv) {
                 })
 
             return igv.Math.percentile(values, self.percentile);
-            
+
         }
 
         function drawEqtls(drawSelected) {
@@ -193,7 +193,7 @@ var igv = (function (igv) {
                     var mLogP = -Math.log(eqtl[self.pValueField]) / Math.LN10;
                     if (mLogP >= self.minLogP) {
 
-                        if(mLogP > self.maxLogP) {
+                        if (mLogP > self.maxLogP) {
                             mLogP = self.maxLogP;
                             capped = true;
                         } else {
@@ -226,49 +226,42 @@ var igv = (function (igv) {
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
     igv.EqtlTrack.prototype.popupData = function (config) {
-    
-        var genomicLocation = config.genomicLocation,
+
+        let features = config.viewport.getCachedFeatures();
+        if (!features || features.length === 0) return [];
+
+        let genomicLocation = config.genomicLocation,
             xOffset = config.x,
             yOffset = config.y,
-            referenceFrame = config.viewport.genomicState.referenceFrame;
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
+            dotSize = this.dotSize,
+            tissue = this.name,
+            popupData = [];
+        
+        features.forEach(function (feature) {
+            if (feature.end >= genomicLocation - tolerance &&
+                feature.start <= genomicLocation + tolerance &&
+                feature.py - yOffset < 2 * dotSize) {
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.tile.features) {
+                if (popupData.length > 0) {
+                    popupData.push("<hr>");
+                }
 
-            var chr = referenceFrame.chrName,
-                tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
-                featureList = config.viewport.tile.features,
-                dotSize = this.dotSize,
-                tissue = this.name;
+                popupData.push(
+                    {name: "snp id", value: feature.snp},
+                    {name: "gene id", value: feature.geneId},
+                    {name: "gene name", value: feature.geneName},
+                    {name: "p value", value: feature.pValue},
+                    {name: "tissue", value: tissue});
 
-            if (featureList && featureList.length > 0) {
-
-
-                var popupData = [];
-                featureList.forEach(function (feature) {
-                    if (feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance &&
-                        feature.py - yOffset < 2 * dotSize) {
-
-                        if (popupData.length > 0) {
-                            popupData.push("<hr>");
-                        }
-
-                        popupData.push(
-                            {name: "snp id", value: feature.snp},
-                            {name: "gene id", value: feature.geneId},
-                            {name: "gene name", value: feature.geneName},
-                            {name: "p value", value: feature.pValue},
-                            {name: "tissue", value: tissue});
-
-                    }
-                });
-                return popupData;
             }
-        }
+        });
+        return popupData;
+
+
     }
-    
+
 
     return igv;
 

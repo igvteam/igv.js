@@ -450,81 +450,76 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.popupData = function (config) {
 
-        var genomicLocation = config.genomicLocation,
+        let featureList = config.viewport.getCachedFeatures();
+        if (!featureList || featureList.length === 0) return [];
+
+        let self = this,
+            genomicLocation = config.genomicLocation,
             xOffset = config.x,
             yOffset = config.y,
             referenceFrame = config.viewport.genomicState.referenceFrame,
-            featureList = config.viewport.tile.features;
+            tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
+            groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
+            popupData = [],
+            group;
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (featureList) {
+        featureList.forEach(function (variant) {
 
-            var chr = referenceFrame.chrName,
-                tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
-                groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
-                popupData = [],
-                self = this, group;
+            var row, callHeight, callSets, callSetGroups, cs, call;
 
-            if (featureList && featureList.length > 0) {
+            if ((variant.start <= genomicLocation + tolerance) &&
+                (variant.end > genomicLocation - tolerance)) {
 
-                featureList.forEach(function (variant) {
+                if (popupData.length > 0) {
+                    popupData.push('<HR>')
+                }
 
-                    var row, callHeight, callSets, callSetGroups, cs, call;
-
-                    if ((variant.start <= genomicLocation + tolerance) &&
-                        (variant.end > genomicLocation - tolerance)) {
-
-                        if (popupData.length > 0) {
-                            popupData.push('<HR>')
+                if ("COLLAPSED" == self.displayMode) {
+                    Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, self.type));
+                }
+                else {
+                    if (yOffset <= self.variantBandHeight) {
+                        // Variant
+                        row = (Math.floor)((yOffset - 10 ) / (self.variantHeight + vGap));
+                        if (variant.row === row) {
+                            Array.prototype.push.apply(popupData, variant.popupData(genomicLocation), self.type);
                         }
-
-                        if ("COLLAPSED" == self.displayMode) {
-                            Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, self.type));
-                        }
-                        else {
-                            if (yOffset <= self.variantBandHeight) {
-                                // Variant
-                                row = (Math.floor)((yOffset - 10 ) / (self.variantHeight + vGap));
-                                if (variant.row === row) {
-                                    Array.prototype.push.apply(popupData, variant.popupData(genomicLocation), self.type);
+                    }
+                    else {
+                        // Call
+                        callSets = (self.filterBy) ? self.filteredCallSets : self.callSets;
+                        callSetGroups = (self.filterBy) ? self.filteredCallSetGroups : self.callSetGroups;
+                        if (callSets && variant.calls) {
+                            callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
+                            // console.log("call height: ", callHeight);
+                            // console.log("nRows: ", self.nRows);
+                            var totalCalls = 0;
+                            for (group = 0; group < callSetGroups.length; group++) {
+                                var groupName = callSetGroups[group];
+                                var groupCalls = callSets[groupName].length;
+                                if (yOffset <= self.variantBandHeight + vGap + (totalCalls + groupCalls) *
+                                    (callHeight + vGap) + (group * groupGap)) {
+                                    row = Math.floor((yOffset - (self.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
+                                        + (group * groupGap))) / (callHeight + vGap));
+                                    break;
                                 }
+                                totalCalls += groupCalls;
                             }
-                            else {
-                                // Call
-                                callSets = (self.filterBy) ? self.filteredCallSets : self.callSets;
-                                callSetGroups = (self.filterBy) ? self.filteredCallSetGroups : self.callSetGroups;
-                                if (callSets && variant.calls) {
-                                    callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
-                                    // console.log("call height: ", callHeight);
-                                    // console.log("nRows: ", self.nRows);
-                                    var totalCalls = 0;
-                                    for (group = 0; group < callSetGroups.length; group++) {
-                                        var groupName = callSetGroups[group];
-                                        var groupCalls = callSets[groupName].length;
-                                        if (yOffset <= self.variantBandHeight + vGap + (totalCalls + groupCalls) *
-                                            (callHeight + vGap) + (group * groupGap)) {
-                                            row = Math.floor((yOffset - (self.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
-                                                + (group * groupGap))) / (callHeight + vGap));
-                                            break;
-                                        }
-                                        totalCalls += groupCalls;
-                                    }
-                                    // row = Math.floor((yOffset - self.variantBandHeight - vGap - i*groupGap) / (callHeight + vGap));
-                                    if (row >= 0) {
-                                        cs = callSets[groupName][row];
-                                        call = variant.calls[cs.id];
-                                        Array.prototype.push.apply(popupData, extractPopupData(call, variant));
-                                    }
-                                }
+                            // row = Math.floor((yOffset - self.variantBandHeight - vGap - i*groupGap) / (callHeight + vGap));
+                            if (row >= 0) {
+                                cs = callSets[groupName][row];
+                                call = variant.calls[cs.id];
+                                Array.prototype.push.apply(popupData, extractPopupData(call, variant));
                             }
                         }
                     }
-                });
+                }
             }
-            return popupData;
-        }
+        });
+
+        return popupData;
+
     };
 
     /**
