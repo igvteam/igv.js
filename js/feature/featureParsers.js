@@ -310,10 +310,10 @@ var igv = (function (igv) {
             }
 
             if (format === "aed") {
-                // Store information about the aed header in the parser itself
-                if (i === 0) {
+                if (!this.aed) {
+                    // Store information about the aed header in the parser itself
+                    // This is done only once - on the first row
                     this.aed = parseAedHeaderRow(tokens);
-                    i++;
                     continue;
                 }
             }
