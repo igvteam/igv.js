@@ -438,6 +438,10 @@ var igv = (function (igv) {
             this[key] = undefined;
         })
     }
+    
+    igv.Viewport.prototype.getCachedFeatures = function () {
+        return this.tile ? this.tile.features : [];
+    }
 
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features) {
         this.chr = chr;
