@@ -396,20 +396,17 @@ var igv = (function (igv) {
             };
 
             menuItems.push(
-             {
-                object: igv.createCheckbox( lut[displayMode] ,displayMode=== self.displayMode),
-            click:
-
-        function () {
-            igv.popover.hide();
-            self.displayMode = displayMode;
-                self.config.displayMode = displayMode;
-  self.trackView.checkContentHeight();
-         self .trackView.repaintViews();
-
-            }
+                {
+                    object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        igv.popover.hide();
+                        self.displayMode = displayMode;
+                        self.config.displayMode = displayMode;
+                        self.trackView.checkContentHeight();
+                        self.trackView.repaintViews();
+                    }
                 });
-            });
+        });
 
         return menuItems;
 
