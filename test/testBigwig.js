@@ -95,7 +95,7 @@ function runBigwigTests() {
 
 
             // Total data count -- note this is the # of "sections", not the # of data points.  Verified with grep
-            equal(6857, bwReader.dataCount);
+            equal(6857, bwReader.header.dataCount);
 
             var type = bwReader.type;
             equal("BigWig", type);
