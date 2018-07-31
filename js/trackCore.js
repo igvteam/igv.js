@@ -594,6 +594,7 @@ var igv = (function (igv) {
                 }
 
                 trackView.track.visibilityWindow = value;
+                trackView.updateViews();
             };
 
             igv.inputDialog.configure({
