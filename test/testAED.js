@@ -19,7 +19,7 @@ function runAedTests() {
         }
     };
 
-    asyncTest("UTF8 with BOM", function () {
+    asyncTest("AED - UTF8 with BOM", function () {
 
         var chr = "chr1",
             bpStart = 0,
