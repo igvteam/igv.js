@@ -39,6 +39,9 @@ var igv = (function (igv) {
 
     var gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
 
+    var aedRegexpNoNamespace = new RegExp("([^:]*)\\(([^)]*)\\)"); // name(type) for AED parsing (namespace undefined)
+    var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespace:name(type) for AED parsing
+
     /**
      * Return a parser for the given file format.
      */
@@ -105,7 +108,11 @@ var igv = (function (igv) {
                     this.delimiter = /\s+/;
                     this.shift = 1;
                     break;
-                case "bed":
+                case "aed":
+                this.decode = decodeAed;
+                this.delimiter = "\t";
+                break;
+            case "bed":
                     this.decode = decodeBed;
                     this.delimiter = config.delimiter || /\s+/;
                     break;
@@ -201,12 +208,79 @@ var igv = (function (igv) {
             j,
             decode = this.decode,
             format = this.format,
-            delimiter = this.delimiter || "\t";
+            delimiter = this.delimiter || "\t",
+            nextLine;
+
+        // Double quoted strings can contain newlines in AED
+        // "" is an escape for a ".
+        // Parse all this, clean it up, split into tokens in a custom way
+        function readTokensAed () {
+            var tokens = [],
+                token = "",
+                quotedString = false,
+                n,
+                c;
+
+            while (line || line === '') {
+                for (n = 0; n < line.length; n++) {
+                    c = line.charAt(n);
+                    if (c === delimiter) {
+                        if (!quotedString) {
+                            tokens.push(token);
+                            token = "";
+                        }
+                        else {
+                            token += c;
+                        }
+                    }
+                    else if (c === "\"") {
+                        // Look ahead to the next character
+                        if (n + 1 < line.length && line.charAt(n + 1) === "\"") {
+                            if (quotedString) {
+                                // Turn "" into a single " in the output string
+                                token += "\"";
+                            }
+                            else {
+                                // "" on its own means empty string, ignore
+                            }
+                            // Skip the next double quote
+                            n++;
+                        }
+                        else {
+                            // We know the next character is NOT a double quote, flip our state
+                            quotedString = !quotedString;
+                        }
+                    }
+                    else {
+                        token += c;
+                    }
+                }
+                // We are at the end of the line
+                if (quotedString) {
+                    token += '\n'; // Add newline to the token
+                    line = nextLine(); // Keep going
+                }
+                else {
+                    // We can end the loop
+                    break;
+                }
+            }
+            // Push the last token
+            tokens.push(token);
+            return tokens;
+        }
 
         dataWrapper = igv.getDataWrapper(data);
+        if (format === 'aed') {
+            nextLine = dataWrapper.nextLineNoTrim.bind(dataWrapper);
+        }
+        else {
+            nextLine = dataWrapper.nextLine.bind(dataWrapper);
+        }
+
         i = 0;
 
-        while (line = dataWrapper.nextLine()) {
+        while (line = nextLine()) {
 
             i++;
 
@@ -224,9 +298,24 @@ var igv = (function (igv) {
                 continue;
             }
 
-            tokens = line.split(delimiter);
+            if (format !== "aed" || line.indexOf("\"") === -1) {
+                tokens = line.split(delimiter);
+            }
+            else {
+                tokens = readTokensAed();
+            }
+
             if (tokens.length < 1) {
                 continue;
+            }
+
+            if (format === "aed") {
+                // Store information about the aed header in the parser itself
+                if (i === 0) {
+                    this.aed = parseAedHeaderRow(tokens);
+                    i++;
+                    continue;
+                }
             }
 
             feature = decode.call(this, tokens, wig);
@@ -268,7 +357,76 @@ var igv = (function (igv) {
             cc = tokens[1].split("=")[1],
             span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
         return {format: "variableStep", chrom: cc, span: span}
+    }
 
+    function parseAedToken(value) {
+        // Example: refseq:accessionNumber(aed:String)
+        // refseq - namespace, will be declared later
+        // accessionNumber - name of the field
+        // aed:String - type of the field
+        // The namespace part may be missing
+        var match = aedRegexpNamespace.exec(value);
+        if (match) {
+            return {
+                namespace: match[1],
+                name: match[2],
+                type: match[3]
+            }
+        }
+
+        match = aedRegexpNoNamespace.exec(value);
+        if (match) {
+            return {
+                namespace: '?',
+                name: match[1],
+                type: match[2]
+            }
+        }
+        else {
+            throw new Error("Error parsing the header row of AED file - column not in ns:name(ns:type) format");
+        }
+    }
+
+    function parseAedHeaderRow(tokens) {
+        // First row of AED file defines column names
+        // Each header item is an aed token - see parseAedToken
+        var aed,
+            k,
+            token,
+            aedToken;
+
+        // Initialize aed section to be filled in
+        aed = {
+            columns: [ // Information about the namespace, name and type of each column
+                // Example entry:
+                // { namespace: 'bio', name: 'start', type: 'aed:Integer' }
+            ],
+            metadata: { // Metadata about the entire AED file
+                // Example:
+                // {
+                //    aed: {
+                //       application: { value: "CHaS Browser 3.3.0.139 (r10838)", type: "aed:String" },
+                //       created: { value: "2018-01-02T10:20:30.123+01:00", type: "aed:DateTime" },
+                //       modified: { value: "2018-03-04T11:22:33.456+01:00", type: "aed:DateTime" },
+                //    }
+                //    affx: {
+                //       ucscGenomeVersion: { value: "hg19", type: "aed:String" }
+                //    },
+                //    namespace: {
+                //       omim: { value: "http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/omim/", type: "aed:URI" },
+                //       affx: { value: "http://affymetrix.com/ontology/", type: "aed:URI" },
+                //       refseq: { value: "http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/RefSeq/", type: "aed:URI" }
+                //    }
+                // }
+            }
+        };
+        for (k = 0; k < tokens.length; k++) {
+            token = tokens[k];
+            aedToken = parseAedToken(token);
+            aed.columns.push(aedToken);
+        }
+
+        return aed;
     }
 
     function parseTrackLine(line) {
@@ -815,6 +973,155 @@ var igv = (function (igv) {
             }
 
         };
+    }
+
+    /**
+     * AED file feature.
+     *
+     * @param aed link to the AED file object containing file-level metadata and column descriptors
+     * @param allColumns All columns as parsed from the AED
+     *
+     * Other values are parsed one by one
+     */
+    function AedFeature(aed, allColumns) {
+        var token, aedColumn, aedColumns = aed.columns;
+
+        // Link to AED file (for metadata)
+        this.aed = aed;
+
+        // Unparsed columns from AED file
+        this.allColumns = allColumns;
+
+        // Prepare space for the parsed values
+        this.chr = null;
+        this.start = null;
+        this.end = null;
+        this.score = 1000;
+        this.strand = '.';
+        this.cdStart = null;
+        this.cdEnd = null;
+        this.name = null;
+        this.color = null;
+
+        for (i = 0; i < allColumns.length; i++) {
+            token = allColumns[i];
+            if (!token) {
+                // Skip empty fields
+                continue;
+            }
+            aedColumn = aedColumns[i];
+            if (aedColumn.type === 'aed:Integer') {
+                token = parseInt(token);
+            }
+            if (aedColumn.namespace === 'bio') {
+                if (aedColumn.name === 'sequence') {
+                    this.chr = token;
+                }
+                else if (aedColumn.name === 'start') {
+                    this.start = token;
+                }
+                else if (aedColumn.name === 'end') {
+                    this.end = token;
+                }
+                else if (aedColumn.name === 'cdsMin') {
+                    this.cdStart = token;
+                }
+                else if (aedColumn.name === 'cdsMax') {
+                    this.cdEnd = token;
+                }
+                else if (aedColumn.name === 'strand') {
+                    this.strand = token;
+                }
+            }
+            else if (aedColumn.namespace === 'aed') {
+                if (aedColumn.name === 'name') {
+                    this.name = token;
+                }
+            }
+            else if (aedColumn.namespace === 'style') {
+                if (aedColumn.name === 'color') {
+                    this.color = igv.Color.createColorString(token);
+                }
+            }
+        }
+    }
+
+    AedFeature.prototype.popupData = function () {
+        var data = [],
+            aed = this.aed;
+        // Just dump everything we have for now
+        for (var i = 0; i < this.allColumns.length; i++) {
+            var featureValue = this.allColumns[i];
+            var name = aed.columns[i].name;
+            // Skip columns that are not interesting - you know the sequence, and you can see color
+            if (name !== 'sequence' && name !== 'color') {
+                if (featureValue) {
+                    data.push({ name: name, value: featureValue });
+                }
+            }
+        }
+        return data;
+    };
+
+    /**
+     * Decode the AED file format
+     * @param tokens
+     * @param ignore
+     * @returns decoded feature, or null if this is not a valid record
+     */
+    function decodeAed(tokens, ignore) {
+        var name, value, token,
+            nonEmptyTokens = 0,
+            aedColumns = this.aed.columns,
+            aedColumn,
+            aedKey,
+            i;
+
+        // Each aed row must match the exact number of columns or we skip it
+        if (tokens.length !== aedColumns.length) {
+            console.log('Corrupted AED file row: ' + tokens.join(','));
+            return undefined;
+        }
+
+        for (i = 0; i < tokens.length; i++) {
+            aedColumn = aedColumns[i];
+            token = tokens[i];
+            if (token !== '') {
+                nonEmptyTokens++;
+            }
+            if (aedColumn.name === 'name' && aedColumn.namespace === 'aed') {
+                name = token;
+            }
+            else if (aedColumn.name === 'value' && aedColumn.namespace === 'aed') {
+                value = token;
+            }
+        }
+
+        if (nonEmptyTokens === 2 && name && value) {
+            // Special row that defines metadata for the entire file
+            aedKey = parseAedToken(name);
+            // Store in the metadata section
+            if (!this.aed.metadata[aedKey.namespace]) {
+                this.aed.metadata[aedKey.namespace] = {};
+            }
+            if (!this.aed.metadata[aedKey.namespace][aedKey.name]) {
+                this.aed.metadata[aedKey.namespace][aedKey.name] = {
+                    type: aedKey.type,
+                    value: value
+                };
+            }
+            // Ignore this value
+            return undefined;
+        }
+
+        var feature = new AedFeature(this.aed, tokens);
+
+        if (!feature.chr || !feature.start || !feature.end) {
+            console.log('Cannot parse feature: ' + tokens.join(','));
+            return undefined;
+        }
+
+        return feature;
     }
 
     function decodeBedpe(tokens, ignore) {
