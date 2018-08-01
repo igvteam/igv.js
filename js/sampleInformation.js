@@ -51,7 +51,7 @@ var igv = (function (igv) {
 
                 .then(function (data) {
 
-                    var lines = data.splitLines();
+                    var lines = igv.splitLines(data);
 
                     lines.forEach(function (line) {
                         var line_arr = line.split(' ');

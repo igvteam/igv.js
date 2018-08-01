@@ -171,7 +171,7 @@ var igv = (function (igv) {
             } else {
                 igv.xhr.load(self.indexFile, igv.buildOptions(self.config))
                     .then(function (data) {
-                        var lines = data.splitLines();
+                        var lines = igv.splitLines(data);
                         var len = lines.length;
                         var lineNo = 0;
 
@@ -226,7 +226,7 @@ var igv = (function (igv) {
             self.chromosomes = {};
             self.sequences = {};
 
-            var lines = data.splitLines(),
+            var lines = igv.splitLines(data),
                 len = lines.length,
                 lineNo = 0,
                 nextLine,
