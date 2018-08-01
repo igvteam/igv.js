@@ -104,10 +104,7 @@
 
     $(document).ready(function () {
 
-        var $google_demo,
-            options;
-
-        options =
+        const options =
             {
                 locus: "myc",
                 showKaryo: false,
@@ -152,10 +149,14 @@
                     ]
             };
 
-        $google_demo = $("#igv-examples-google-demo");
-        igv.createBrowser($google_demo.get(0), options);
+        const $google_demo = $("#igv-examples-google-demo");
 
-        igv.ga4gh.initialize();
+        igv.createBrowser($google_demo.get(0), options)
+                .then(function (browser) {
+                    igv.ga4gh.initialize()
+                })
+
+
 
     });
 

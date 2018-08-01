@@ -193,7 +193,10 @@
 //                        },
                     };
 
-                    igv.createBrowser(igvDiv, options);
+                    igv.createBrowser(igvDiv, options)
+                            .then(function (browser) {
+                                console.log("Browser created " + browser);
+                            })
 
                 })
     });

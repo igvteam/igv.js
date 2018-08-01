@@ -2,11 +2,9 @@ import igv from '../../dist/igv.es6.min.js'
 
 (function () {
 
-    var igvDiv,
-        options;
+    const igvDiv = document.getElementById("igv-div");
 
-    igvDiv = document.getElementById("igv-div");
-    options =
+    const options =
     {
         showNavigation: true,
         showRuler: true,
@@ -34,6 +32,11 @@ import igv from '../../dist/igv.es6.min.js'
     };
 
 
-    igv.createBrowser(igvDiv, options);
+    igv.createBrowser(igvDiv, options)
+
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
 
 })()
