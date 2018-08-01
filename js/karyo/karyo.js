@@ -425,7 +425,7 @@ var igv = (function (igv) {
                                     }
                                     bufferCtx.fillStyle = "rgb(220, 150, 100)";
                                     bufferCtx.strokeStyle = "rgb(150, 0, 0)";
-                                    bufferCtx.polygon(xC, yC, 1, 0);
+                                    igv.graphics.polygon(bufferCtx, xC, yC, 1, 0);
                                 } else {
                                     dy = endy - starty;
                                     bufferCtx.fillStyle = getCytobandColor(cytobands[i]);
@@ -444,7 +444,7 @@ var igv = (function (igv) {
                 bufferCtx.strokeStyle = "darkgray";
 
                 r = ideogramWidth / 2;
-                bufferCtx.roundRect(ideogramLeft, top - r / 2, ideogramWidth, lastPY - top + r, ideogramWidth / 2, 0, 1);
+                igv.graphics.roundRect(bufferCtx, ideogramLeft, top - r / 2, ideogramWidth, lastPY - top + r, ideogramWidth / 2, 0, 1);
 
                 bufferCtx.font = "bold 10px Arial";
                 bufferCtx.fillStyle = "rgb(0, 0, 0)";

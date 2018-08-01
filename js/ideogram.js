@@ -296,7 +296,7 @@ var igv = (function (igv) {
 
                 // round rect clipping path
                 ctx.beginPath();
-                ctx.roundRect(shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
+                igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
                 ctx.clip();
 
                 for (i = 0; i < cytobands.length; i++) {
@@ -325,7 +325,7 @@ var igv = (function (igv) {
 
                         ctx.fillStyle = "rgb(150, 0, 0)";
                         ctx.strokeStyle = "rgb(150, 0, 0)";
-                        ctx.polygon(xC, yC, 1, 0);
+                        igv.graphics.polygon(ctx, xC, yC, 1, 0);
                     } else {
 
                         ctx.fillStyle = getCytobandColor(stainColors, cytoband);
@@ -336,7 +336,7 @@ var igv = (function (igv) {
 
             // round rect border
             ctx.strokeStyle = igv.Color.greyScale(41);
-            ctx.roundRect(shim2, shim2 + ideogramTop, width - 2*shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
+            igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2*shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
         }
 
         function getCytobandColor(colors, data) {
