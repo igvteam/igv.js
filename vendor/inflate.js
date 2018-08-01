@@ -410,7 +410,7 @@ Inflate.prototype.inflateInit = function(z, w){
     this.blocks = null;
 
     // handle undocumented nowrap option (no zlib header or check)
-    nowrap = 0;
+    let nowrap = 0;
     if(w < 0){
       w = - w;
       nowrap = 1;
@@ -911,7 +911,7 @@ InfBlocks.prototype.reset = function(z, c){
 	{b>>>=(14);k-=(14);}
 
 	this.index = 0;
-	mode = IB_BTREE;
+	this.mode = IB_BTREE;
       case IB_BTREE:
 	while (this.index < 4 + (this.table >>> 10)){
 	  while(k<(3)){
@@ -1103,7 +1103,7 @@ InfBlocks.prototype.reset = function(z, c){
 	  this.write=q;
 	  return this.inflate_flush(z, r);
 	}
-	mode = DONE;
+	this.mode = DONE;
       case IB_DONE:
 	r = Z_STREAM_END;
 
