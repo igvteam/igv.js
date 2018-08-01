@@ -23,11 +23,9 @@
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igvDiv,
-            options;
 
-        igvDiv = document.getElementById("igv-div");
-        options =
+       const igvDiv = document.getElementById("igv-div");
+       const options =
             {
                 showNavigation: true,
                 showRuler: true,
@@ -56,7 +54,10 @@
             };
 
 
-        igv.createBrowser(igvDiv, options);
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

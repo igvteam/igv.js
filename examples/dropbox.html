@@ -29,37 +29,38 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_examples_dropbox,
-            options;
-
-        options = {
+        const options = {
             showKaryo: false,
             showIdeogram: true,
             showNavigation: true,
             showRuler: true,
             genome: "hg19",
             locus: "chr22:24,376,148-24,376,519",
-            tracks:
-                [
-                    {
-                        type: 'bam',
-                        url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
-                        indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
-                        label: 'Dopbox BAM'
-                    },
-                    {
-                        name: "Genes",
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                        order: Number.MAX_VALUE,
-                        displayMode: "EXPANDED"
+            tracks: [
+                {
+                    type: 'bam',
+                    url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
+                    indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
+                    label: 'Dopbox BAM'
+                },
+                {
+                    name: "Genes",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
 
-                    }
+                }
 
-                ]
+            ]
         };
 
-        igv_examples_dropbox = document.getElementById("igv-examples-dropbox");
-        igv.createBrowser(igv_examples_dropbox, options);
+        const igv_examples_dropbox = document.getElementById("igv-examples-dropbox");
+
+        createBrowser(igv_examples_dropbox, options)
+
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     })
 
