@@ -245,7 +245,7 @@ var igv = (function (igv) {
 
     }
 
-    GFFTranscript = function (feature) {
+    var GFFTranscript = function (feature) {
         Object.assign(this, feature);
         this.exons = [];
         this.attributeString = feature.attributeString;

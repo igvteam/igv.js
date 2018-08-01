@@ -364,7 +364,7 @@ var igv = (function (igv) {
         this.trackView = undefined;
     }
 
-    CoverageTrack = function (config, parent) {
+    var CoverageTrack = function (config, parent) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
@@ -531,7 +531,7 @@ var igv = (function (igv) {
 
     };
 
-    AlignmentTrack = function (config, parent) {
+    var AlignmentTrack = function (config, parent) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
