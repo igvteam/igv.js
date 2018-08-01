@@ -31,6 +31,23 @@ module.exports = function (grunt) {
                 ],
                 dest: 'dist/igv.js'
             },
+            igv_es6: {
+                src: [
+                    'wrapper/header-es6.js',
+                    'tmp/embedCss.js',
+                    'vendor/jquery-1.12.4.js',
+                    'vendor/jquery-ui.js',
+                    'vendor/underscore.js',
+                    'vendor/zlib_and_gzip.js',
+                    'vendor/inflate.js',
+                    'vendor/jquery.mousewheel.js',
+                    'vendor/rbtree.js',
+                    'vendor/tdigest.js',
+                    'js/**/*.js',
+                    'wrapper/footer-es6.js'
+                ],
+                dest: 'examples/js/igv.es6.js'
+            },
             zlib: {
                 src: [
                     'vendor/zlib/zlib.js',
@@ -61,7 +78,6 @@ module.exports = function (grunt) {
                 ],
                 dest: 'tmp/igv-all.css'
             }
-
         },
 
         // uglify: {
@@ -89,7 +105,7 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
     //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv']);
+    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6']);
 
     grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
 
