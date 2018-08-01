@@ -23,12 +23,10 @@
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igvDiv,
-                options;
 
-        igvDiv = document.getElementById("myDiv");
+        const igvDiv = document.getElementById("myDiv");
 
-        options = {
+        const options = {
 
             locus: '1:67,655,272-67,684,468',
             minimumBases: 6,
@@ -83,7 +81,10 @@
             ]
         };
 
-        igv.createBrowser(igvDiv, options);
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     })
 

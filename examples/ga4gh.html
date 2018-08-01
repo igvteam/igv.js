@@ -28,10 +28,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_examples_ga4gh,
-                options;
-
-        options =
+        const options =
         {
             genome: "hg19",
             showRuler: true,
@@ -76,8 +73,13 @@
             ]
         };
 
-        igv_examples_ga4gh = document.getElementById("igv-examples-ga4gh");
-        igv.createBrowser(igv_examples_ga4gh, options);
+        const igv_examples_ga4gh = document.getElementById("igv-examples-ga4gh");
+
+        igv.createBrowser(igv_examples_ga4gh, options)
+
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

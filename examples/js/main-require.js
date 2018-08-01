@@ -11,13 +11,12 @@ requirejs.config({
 
 // Start loading the main app file. Put all of
 // your application logic in there.
-requirejs(['igv'], function (igv) {
+requirejs(['igv.min'], function (igv) {
 
-    var igvDiv,
-        options;
 
-    igvDiv = document.getElementById("igv-div");
-    options =
+    const igvDiv = document.getElementById("igv-div");
+    
+    const options =
     {
         showNavigation: true,
         showRuler: true,
