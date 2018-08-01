@@ -177,7 +177,7 @@ var igv = (function (igv) {
 
                 value = segment.value;
                 if (!self.isLog) {
-                    value = Math.log2(value / 2);
+                    value = igv.Math.log2(value / 2);
                 }
 
                 if (value < -0.1) {

@@ -353,7 +353,7 @@ var igv = (function (igv) {
                 lastChr,
                 n = 0,
                 c = 1,
-                lines = data.splitLines(),
+                lines = igv.splitLines(data),
                 len = lines.length,
                 cytobands = {};
 
@@ -415,7 +415,7 @@ var igv = (function (igv) {
 
             .then(function (data) {
 
-                var lines = data.splitLines(),
+                var lines = igv.splitLines(data),
                     aliases = [];
 
                 lines.forEach(function (line) {

@@ -336,7 +336,7 @@ var igv = (function (igv) {
             var lines, i, j, len, tokens, blocks, pos, qualString, rnext, pnext, lengthOnRef,
                 alignment, cigarArray, started;
 
-            lines = sam.splitLines();
+            lines = igv.splitLines(sam);
             len = lines.length;
             started = false;
 
