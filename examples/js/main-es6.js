@@ -1,4 +1,4 @@
-import igv from '../../dist/igv.es6.js'
+import igv from '../../dist/igv.es6.min.js'
 
 (function () {
 
