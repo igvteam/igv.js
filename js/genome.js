@@ -94,7 +94,7 @@ var igv = (function (igv) {
     };
 
 
-    Genome = function (config, sequence, ideograms, aliases) {
+    var Genome = function (config, sequence, ideograms, aliases) {
 
         this.config = config;
         this.id = config.id;
