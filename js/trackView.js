@@ -377,7 +377,7 @@ var igv = (function (igv) {
     }
 
     igv.TrackView.prototype.isLoading = function () {
-        for (i = 0; i < this.viewports.length; i++) {
+        for (let i = 0; i < this.viewports.length; i++) {
             if (this.viewports[i].isLoading()) return true;
         }
     };

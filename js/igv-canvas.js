@@ -40,13 +40,9 @@ var igv = (function (igv) {
         if (debug) {
             var d = new Date();
             var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-            if (typeof copy != "undefined") {
-                copy(msg);
-            }
             if (typeof console != "undefined") {
                 console.log("igv-canvas: " + time + " " + msg);
             }
-
         }
     };
 
