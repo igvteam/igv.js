@@ -1784,7 +1784,7 @@ var igv = (function (igv) {
             linesTrimmed = [],
             results = [];
 
-        lines = data.splitLines();
+        lines = igv.splitLines(data);
 
         lines.forEach(function (item) {
             if ("" === item) {

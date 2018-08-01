@@ -77,8 +77,12 @@ var igv = (function (igv) {
 
         clamp: function (value, min, max) {
             return Math.min(Math.max(value, min), max);
+        },
+        
+        log2: function (x) {
+                return Math.log(x) / Math.LN2;
         }
-
+        
     };
 
     igv.Rect = {
