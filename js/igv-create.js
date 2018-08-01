@@ -90,24 +90,7 @@ var igv = (function (igv) {
 
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        promise = doPromiseChain(browser,config);
-
-        if (config.promisified) {
-
-            return promise;
-
-        } else {
-
-            promise
-                .then(function (browser) {
-                    console.log("igv browser ready");
-                })
-                .catch(function (error) {
-                    console.error(error);
-                    alert("Error creating igv browser");
-                });
-            return browser;
-        }
+        return doPromiseChain(browser, config);
 
     };
 

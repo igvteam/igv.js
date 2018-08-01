@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+(function (igv) {
 
     igv.ga4gh = {
 

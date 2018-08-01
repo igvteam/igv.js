@@ -99,10 +99,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_example_api,
-            options;
-
-        options =
+        const options =
             {
                 showNavigation: true,
                 showRuler: true,
@@ -127,8 +124,12 @@
                     ]
             };
 
-        igv_example_api = document.getElementById('igv-api-example');
-        igv.createBrowser(igv_example_api, options);
+        const igv_example_api = document.getElementById('igv-api-example');
+
+        igv.createBrowser(igv_example_api, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

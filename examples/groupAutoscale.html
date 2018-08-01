@@ -27,12 +27,11 @@
 
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igvDiv,
-                options;
 
-        igvDiv = document.getElementById("igv-div");
+        const igvDiv = document.getElementById("igv-div");
 
-        options = {
+        const options = {
+
             locus: ['myc'],
             reference: {
                 id: "hg19",
@@ -73,7 +72,10 @@
             ]
         };
 
-        igv.createBrowser(igvDiv, options);
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     })
 

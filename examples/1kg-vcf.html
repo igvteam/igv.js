@@ -27,10 +27,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_example_1000_genomes_1kgvcf,
-            options;
-
-        options =
+       const options =
             {
                 reference:
                     {
@@ -63,8 +60,12 @@
 
             };
 
-        igv_example_1000_genomes_1kgvcf = document.getElementById("igvDiv");
-        var browser = igv.createBrowser(igv_example_1000_genomes_1kgvcf, options);
+       const igv_example_1000_genomes_1kgvcf = document.getElementById("igvDiv");
+
+        igv.createBrowser(igv_example_1000_genomes_1kgvcf, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     })
 
