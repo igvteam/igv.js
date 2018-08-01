@@ -46,7 +46,7 @@ module.exports = function (grunt) {
                     'js/**/*.js',
                     'wrapper/footer-es6.js'
                 ],
-                dest: 'examples/js/igv.es6.js'
+                dest: 'dist/igv.es6.js'
             },
             zlib: {
                 src: [
