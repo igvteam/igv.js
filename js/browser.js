@@ -172,21 +172,17 @@ var igv = (function (igv) {
         return loadSessionFile(sessionURL)
 
             .then(function (session) {
-
                 // Merge session json with config object
                 if (session) {
                     Object.assign(config, session);
                 }
-
                 return config;
-
             })
 
             .then(function (config) {
-
                 return self.loadGenome(config.reference || config.genome, config.locus)
-
             })
+
             .then(function (genome) {
 
                 if (config.roi) {
@@ -217,11 +213,15 @@ var igv = (function (igv) {
                 self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
 
             })
+
             .then(function (ignore) {
+
                 igv.TrackView.DisableUpdates = false;
                 // Resize is called to address minor alignment problems with multi-locus view.
                 self.resize();
+
             })
+
             .catch(function (error) {
                 igv.presentAlert(error, undefined);
                 console.log(error);
@@ -289,9 +289,7 @@ var igv = (function (igv) {
             .then(function (genome) {
 
                 genomeChange = self.genome && (self.genome.id !== genome.id);
-
                 self.genome = genome;
-
                 self.$current_genome.text(genome.id || '');
                 self.$current_genome.attr('title', genome.id || '');
                 self.chromosomeSelectWidget.update(genome);
@@ -299,16 +297,18 @@ var igv = (function (igv) {
                 if (genomeChange) {
                     self.removeAllTracks();
                 }
-
                 return genome;
-
             })
+
             .then(function (genome) {
-
                 self.genome = genome;
-
                 return self.search(getInitialLocus(initialLocus, genome), true);
+            })
 
+            .catch(function (error) {
+                // Couldn't find initial locus
+                console.error(error);
+                return self.search(self.genome.getHomeChromosomeName());
             })
 
             .then(function (genomicStateList) {
@@ -1450,9 +1450,6 @@ var igv = (function (igv) {
 
                 return genomicStateList;
             })
-            .catch(function (error) {
-                igv.presentAlert(error);
-            });
 
 
         /**
@@ -1464,11 +1461,10 @@ var igv = (function (igv) {
          */
         function createGenomicStateList(loci) {
 
-            var searchConfig, geneNameLoci, genomicState, result, unique, promises, ordered, dictionary;
 
-            searchConfig = igv.browser.searchConfig,
-                ordered = {};
-            unique = [];
+            let searchConfig = igv.browser.searchConfig;
+            let ordered = {};
+            let unique = [];
 
             // prune duplicates as the order list is built
             loci.forEach(function (locus, index) {
@@ -1478,13 +1474,14 @@ var igv = (function (igv) {
                 }
             });
 
-            result = [];
-            geneNameLoci = [];
-            dictionary = {};
+            let result = [];
+            let geneNameLoci = [];
+            let dictionary = {};
 
             // Try locus string first  (e.g.  chr1:100-200)
             unique.forEach(function (locus) {
-                genomicState = isLocusChrNameStartEnd(locus, self.genome);
+
+                let genomicState = isLocusChrNameStartEnd(locus, self.genome);
 
                 if (genomicState) {
                     genomicState.locusSearchString = locus;
@@ -1504,7 +1501,7 @@ var igv = (function (igv) {
 
                 // Search based on feature symbol
                 // Try local feature cache first.  This is created from feature tracks tagged "searchable"
-                promises = [];
+                let promises = [];
                 geneNameLoci.forEach(function (locus) {
                     var feature, genomicState, chromosome;
 
@@ -1533,22 +1530,22 @@ var igv = (function (igv) {
                     return Promise.all(promises)
 
                         .then(function (searchResponses) {
-                            var cooked;
 
                             searchResponses.forEach(function (response) {
-                                var genomicState = processSearchResult(response.result, response.locusSearchString);
+
+                                const genomicState = processSearchResult(response.result, response.locusSearchString);
+
                                 if (genomicState) {
                                     result.push(genomicState);
                                     dictionary[genomicState.locusSearchString] = genomicState;
                                 }
                             });
 
-                            cooked = Array(Object.keys(dictionary).length);
+                            let cooked = Array(Object.keys(dictionary).length);
+
                             result.forEach(function (r) {
-                                var key,
-                                    index;
-                                key = r.locusSearchString;
-                                index = ordered[key];
+                                let key = r.locusSearchString;
+                                let index = ordered[key];
                                 cooked[index] = r;
                             });
 
