@@ -28,7 +28,7 @@ function initClient() {
                 queryParametersSupported: true
             };
 
-            browser = igv.createBrowser(div, options);
+            igv.createBrowser(div, options);
 
             gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
         })

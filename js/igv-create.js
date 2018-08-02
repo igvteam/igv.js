@@ -101,27 +101,38 @@ var igv = (function (igv) {
             .then(function (ignore) {
 
                 if (false === config.showTrackLabels) {
+
                     browser.hideTrackLabels();
+
                 } else {
+
                     browser.showTrackLabels();
+
                     if (browser.trackLabelControl) {
                         browser.trackLabelControl.setState(browser.trackLabelsVisible);
                     }
-
                 }
 
                 if (false === config.showCursorTrackingGuide) {
+
                     browser.hideCursorGuide();
+
                 } else {
+
                     browser.showCursorGuide();
                     browser.cursorGuide.setState(browser.cursorGuideVisible);
+
                 }
 
                 if (false === config.showCenterGuide) {
+
                     browser.hideCenterGuide();
+
                 } else {
+
                     browser.showCenterGuide();
                     browser.centerGuide.setState(browser.centerGuideVisible);
+
                 }
 
                 // multi-locus mode
@@ -302,7 +313,12 @@ var igv = (function (igv) {
             $searchContainer.append(browser.$searchInput);
 
             browser.$searchInput.change(function (e) {
-                browser.search($(this).val());
+
+                browser.search($(this).val())
+
+                    .catch(function (error) {
+                        igv.presentAlert(error);
+                    });
             });
 
             // search icon
