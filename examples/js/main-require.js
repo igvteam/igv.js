@@ -28,17 +28,6 @@ requirejs(['igv.min'], function (igv) {
                 indexed: false,
                 isLog: true,
                 name: 'Segmented CN'
-            },
-            {
-                name: "Genes",
-                type: "annotation",
-                format: "bed",
-                sourceType: "file",
-                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                order: Number.MAX_VALUE,
-                visibilityWindow: 300000000,
-                displayMode: "EXPANDED"
             }
         ]
     };
