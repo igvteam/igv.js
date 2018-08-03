@@ -610,7 +610,7 @@ var igv = (function (igv) {
 
         function postInit(track) {
 
-            if(typeof track.postInit === 'function') {
+            if(track && typeof track.postInit === 'function') {
                 return track.postInit();
             }
             else {
@@ -1923,8 +1923,8 @@ var igv = (function (igv) {
             var track, config;
 
             track = tv.track;
-            if (typeof track.getConfig === "function") {
-                config = track.getConfig();
+            if (typeof track.getState === "function") {
+                config = track.getState();
             }
             else {
                 config = track.config;
