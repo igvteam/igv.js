@@ -174,16 +174,17 @@
 
     }
 
-    $(document).ready(function () {
-        var options;
+    document.addEventListener("DOMContentLoaded", function () {
 
-        options = {
+        const div = document.getElementById("myDiv");
+
+        const options = {
             showRuler: true,
             showChromosomeWidget: true,
             genome: "hg19"
         };
 
-        igv.createBrowser($('#myDiv').get(0), options);
+        igv.createBrowser(div, options);
 
     })
 

@@ -189,12 +189,11 @@
                 })
     }
 
-    $(document).ready(function () {
-        var div,
-                options;
+    document.addEventListener("DOMContentLoaded", function () {
 
-        div = $("#myDiv")[0];
-        options = {
+        const div = document.getElementById("myDiv");
+
+        const options = {
             genome: "hg19"
         };
 
