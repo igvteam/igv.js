@@ -101,27 +101,8 @@
 
         const options =
             {
-                showNavigation: true,
-                showRuler: true,
                 locus: "chr1:155,160,475-155,184,282",
-                reference:
-                    {
-                        id: "hg19"
-                    },
-                tracks:
-                    [
-                        {
-                            name: "Genes",
-                            type: "annotation",
-                            format: "bed",
-                            sourceType: "file",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                            order: Number.MAX_VALUE,
-                            visibilityWindow: 300000000,
-                            displayMode: "EXPANDED"
-                        }
-                    ]
+                genome: "hg19"
             };
 
         const igv_example_api = document.getElementById('igv-api-example');

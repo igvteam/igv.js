@@ -57,7 +57,6 @@
     <script src="../js/bigwig/bwSource.js"></script>
 
 
-
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
     <script src="../js/feature/featureSource.js"></script>
@@ -140,7 +139,6 @@
     <script src="../js/trackCore.js"></script>
 
 
-
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
     <script src="../vendor/tdigest.js"></script>
@@ -157,27 +155,17 @@
 
 <script type="text/javascript">
 
-    $(document).ready(function () {
-        var options;
 
-        options = {
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const div = document.getElementById("myDiv");
+
+        const options = {
 
             locus: '1:67,655,272-67,684,468',
-            minimumBases: 6,
-            flanking: 1000,
-            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
-            palette: [
-                "#00A0B0",
-                "#6A4A3C",
-                "#CC333F",
-                "#EB6841"
-            ],
-            reference: {
-                id: "hg19",
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-            },
 
+
+            genome: "hg19",
             // Define 2 "region of interest" sets
             roi: [
                 {
@@ -199,24 +187,11 @@
                     name: '3 Column BED File',
                     url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
                     indexed: false
-                },
-                {
-                    name: "Genes",
-                    searchable: false,
-                    type: "annotation",
-                    format: "gtf",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
-                    visibilityWindow: 10000000,
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
                 }
-
             ]
         };
 
-        igv.createBrowser($("#myDiv").get(0), options);
+        igv.createBrowser(div, options);
 
     })
 

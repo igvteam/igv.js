@@ -156,28 +156,15 @@
 <script type="text/javascript">
 
     $(document).ready(function () {
-        var options;
 
-        options = {
-            showKaryo: false,
-            showIdeogram: true,
-            showNavigation: true,
-            showRuler: true,
+        const options = {
             genome: "hg19",
             locus: "egfr",
             tracks: [
                 {
                     url: 'https://www.dropbox.com/s/1630ue6t1co7lsg/egfr_hg38.bed.gz?dl=0',
                     label: 'Protected bed'
-                },
-                {
-                    name: "Genes",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-
                 }
-
             ]
         };
 
