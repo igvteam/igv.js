@@ -57,7 +57,7 @@ var igv = (function (igv) {
      *
      * @returns {*|{}}
      */
-    igv.InteractionTrack.prototype.getConfig = function () {
+    igv.InteractionTrack.prototype.getState = function () {
 
         var config = this.config || {};
         config.arcOrientation = this.arcOrientation;
