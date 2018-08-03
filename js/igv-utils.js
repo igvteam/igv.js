@@ -506,7 +506,7 @@ var igv = (function (igv) {
      * @returns boolean
      */
     igv.isStringOrNumber = function (value) {
-        return (value.substring || value.toFixed) ? true : false
+        return (value && (value.substring || value.toFixed)) ? true : false
     };
 
     igv.constrainBBox = function ($child, $parent) {

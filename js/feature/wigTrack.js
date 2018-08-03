@@ -374,7 +374,7 @@ var igv = (function (igv) {
         return {min: min, max: max};
     }
 
-    igv.WIGTrack.prototype.getConfig = function () {
+    igv.WIGTrack.prototype.getState = function () {
 
         let config = this.config;
 

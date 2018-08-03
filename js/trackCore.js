@@ -327,6 +327,10 @@ var igv = (function (igv) {
             track.type = config.type;
         }
 
+        if(!track.getState) {
+            track.getState = getState;
+        }
+
     };
 
     igv.setTrackLabel = function ($label, track, label) {
@@ -756,6 +760,28 @@ var igv = (function (igv) {
     igv.hasVisibilityWindow = function (trackOrFeatureSource) {
         return !(-1 === trackOrFeatureSource.visibilityWindow);
     };
+
+
+    /**
+     * Default implementation -- return the current state of the "this" object, which should be a track.  Used
+     * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
+     * current state.  Only simple properties (string, number, boolean) are updated.
+     */
+    function getState() {
+
+        const config = this.config;
+        const self = this;
+
+        Object.keys(config).forEach(function (key) {
+            const value = self[key];
+            if(value && (igv.isStringOrNumber(value) || typeof value === "boolean")) {
+                config[key] = value;
+            }
+        })
+
+        return config;
+
+    }
 
     return igv;
 })(igv || {});
