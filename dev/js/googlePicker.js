@@ -16,6 +16,10 @@ function initClient() {
                 'scope': scope
             });
         })
+        
+        .then(function (ignore) {
+            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+        })
 
         .then(function () {
 
@@ -30,7 +34,7 @@ function initClient() {
 
             igv.createBrowser(div, options);
 
-            gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+            
         })
 
     //

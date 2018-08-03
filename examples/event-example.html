@@ -49,9 +49,6 @@
                 <ol>
                     <li>Zoom or pan the canvas in the IGV viewer.</li>
                     <li>Notice that the page URL updated to match the new locus.</li>
-                    <li>Copy-paste the URL into a different browser tab - now you can easily share it with
-                        collaborators.
-                    </li>
                 </ol>
             </div>
         </div>
@@ -73,21 +70,8 @@
         const locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
 
         const options = {
-            showNavigation: true,
             locus: locus,
-            reference: {
-                id: "hg19"
-            },
-            tracks: [
-                {
-                    name: "Genes",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-
-                }
-            ]
+            genome: "hg19"
         };
 
         const $igv = $("#igvDiv");
