@@ -25,6 +25,8 @@
 
 var igv = (function (igv) {
 
+    "use strict";
+
     igv.FeatureTrack = function (config) {
 
         // Set defaults
@@ -93,8 +95,8 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.postInit = function () {
 
-        let self = this,
-            format = this.config.format.toLowerCase();
+        const self = this;
+        const format = this.config.format.toLowerCase();
 
         if (format === 'bigbed' && false === igv.hasVisibilityWindow(this)) {
 
@@ -112,7 +114,7 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.getFileHeader = function () {
 
-        var self = this;
+        const self = this;
 
         if (typeof self.featureSource.getFileHeader === "function") {
 
@@ -138,7 +140,6 @@ var igv = (function (igv) {
                             self.header = {};
                         }
 
-
                         return header;
 
                     })
@@ -151,7 +152,7 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this;
+        const self = this;
 
         return this.getFileHeader()
 
@@ -170,7 +171,6 @@ var igv = (function (igv) {
      */
     igv.FeatureTrack.prototype.computePixelHeight = function (features) {
 
-        var height;
 
         if (this.displayMode === "COLLAPSED") {
             return this.margin + this.expandedRowHeight;
@@ -187,7 +187,7 @@ var igv = (function (igv) {
                 });
             }
 
-            height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
+            const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
             return height;
 
         }
@@ -196,26 +196,25 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.draw = function (options) {
 
-        var track = this,
-            featureList = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            selectedFeatureName,
-            selectedFeature,
-            c;
+        const self = this;
+        const featureList = options.features;
+        const ctx = options.context;
+        const bpPerPixel = options.bpPerPixel;
+        const bpStart = options.bpStart;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (featureList) {
 
-            selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
+            const selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
 
-            for (var gene, i = 0, len = featureList.length; i < len; i++) {
-                gene = featureList[i];
+            let selectedFeature;
+            for (let i = 0, len = featureList.length; i < len; i++) {
+                const gene = featureList[i];
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
 
@@ -223,14 +222,14 @@ var igv = (function (igv) {
                     selectedFeature = gene;
                 }
                 else {
-                    track.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                    self.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
                 }
             }
 
             if (selectedFeature) {
-                c = selectedFeature.color;
+                const c = selectedFeature.color;
                 selectedFeature.color = "rgb(255,0,0)";
-                track.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                self.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
                 selectedFeature.color = c;
             }
         }
@@ -246,42 +245,14 @@ var igv = (function (igv) {
      */
     igv.FeatureTrack.prototype.popupData = function (args) {
 
-        let features = args.viewport.getCachedFeatures();
-        if (!features || features.length === 0) return [];
+        const features = this.popupFeatures(args);
 
-        // We use the cached features rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+        const data = [];
 
-        let genomicLocation = args.genomicLocation;
-        let yOffset = args.y - this.margin;
-        let referenceFrame = args.viewport.genomicState.referenceFrame;
+        features.forEach(function (feature) {
 
-        // We need some tolerance around genomicLocation
-        let tolerance = 3 * referenceFrame.bpPerPixel;
-        let ss = genomicLocation - tolerance;
-        let ee = genomicLocation + tolerance;
-        //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
+            const featureData = feature.popupData ? feature.popupData(genomicLocation) : extractPopupData(feature);
 
-        let row;
-        if ('COLLAPSED' !== this.displayMode) {
-            row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
-        }
-
-
-        hits = features.filter(function (feature) {
-            return (feature.end >= ss && feature.start <= ee) &&
-                (row === undefined || feature.row === undefined || row === feature.row);
-        })
-
-        let data = [];
-        hits.forEach(function (feature) {
-            let featureData;
-
-            if (feature.popupData) {
-                featureData = feature.popupData(genomicLocation);
-            } else {
-                featureData = extractPopupData(feature);
-            }
             if (featureData) {
                 if (data.length > 0) {
                     data.push("<HR>");
@@ -291,7 +262,6 @@ var igv = (function (igv) {
         });
 
         return data;
-
 
     };
 
@@ -303,13 +273,13 @@ var igv = (function (igv) {
     function extractPopupData(feature) {
 
         const filteredProperties = new Set(['row', 'color']);
-        let data = [];
-        let alleles, alleleFreqs;
+        const data = [];
 
+        let alleles, alleleFreqs;
         for (var property in feature) {
 
             if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
-                igv.isStringOrNumber(feature[property])) {
+                igv.isSimpleType(feature[property])) {
 
                 data.push({name: property, value: feature[property]});
 
@@ -329,9 +299,16 @@ var igv = (function (igv) {
 
 
         function addCravatLinks(alleles, alleleFreqs, data) {
+
             if (alleles && alleleFreqs) {
-                if (alleles.endsWith(",")) alleles = alleles.substr(0, alleles.length - 1);
-                if (alleleFreqs.endsWith(",")) alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+
+                if (alleles.endsWith(",")) {
+                    alleles = alleles.substr(0, alleles.length - 1);
+                }
+                if (alleleFreqs.endsWith(",")) {
+                    alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+                }
+
                 let a = alleles.split(",");
                 let af = alleleFreqs.split(",");
                 if (af.length > 1) {
@@ -362,8 +339,8 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.menuItemList = function () {
 
-        var self = this,
-            menuItems = [];
+        const self = this;
+        const menuItems = [];
 
         if (this.render === renderSnp) {
             (["function", "class"]).forEach(function (colorScheme) {
@@ -380,7 +357,7 @@ var igv = (function (igv) {
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
         ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
-            var lut =
+            const lut =
             {
                 "COLLAPSED": "Collapse",
                 "SQUISHED": "Squish",
@@ -407,11 +384,9 @@ var igv = (function (igv) {
 
     igv.FeatureTrack.prototype.description = function () {
 
-        var desc;
-
         // if('snp' === this.type) {
         if (renderSnp === this.render) {
-            desc = "<html>" + this.name + "<hr>";
+            let desc = "<html>" + this.name + "<hr>";
             desc += '<em>Color By Function:</em><br>';
             desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
             desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
@@ -471,11 +446,11 @@ var igv = (function (igv) {
      * @returns {{px: number, px1: number, pw: number, h: number, py: number}}
      */
     function calculateFeatureCoordinates(feature, bpStart, xScale) {
-        var px = (feature.start - bpStart) / xScale,
-            px1 = (feature.end - bpStart) / xScale,
+        let px = (feature.start - bpStart) / xScale;
+        let px1 = (feature.end - bpStart) / xScale;
         //px = Math.round((feature.start - bpStart) / xScale),
         //px1 = Math.round((feature.end - bpStart) / xScale),
-            pw = px1 - px;
+        let pw = px1 - px;
 
         if (pw < 3) {
             pw = 3;

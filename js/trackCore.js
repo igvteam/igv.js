@@ -327,9 +327,14 @@ var igv = (function (igv) {
             track.type = config.type;
         }
 
-        if(!track.getState) {
-            track.getState = getState;
-        }
+        // Define some default base functions and properties common to all tracks.   
+        Object.keys(baseProperties).forEach(function (key) {
+            {
+                if (undefined === track[key]) {
+                    track[key] = baseProperties[key];
+                }
+            }
+        });
 
     };
 
@@ -493,7 +498,7 @@ var igv = (function (igv) {
             menuItems = menuItems.concat(trackView.track.menuItemList());
         }
 
-        if(vizWindowTypes.has(trackView.track.config.type)) {
+        if (vizWindowTypes.has(trackView.track.config.type)) {
             menuItems.push('<hr/>');
             menuItems.push(igv.visibilityWindowMenuItem(trackView));
         }
@@ -593,7 +598,7 @@ var igv = (function (igv) {
 
                 value = igv.inputDialog.$input.val().trim();
 
-                if('' === value || undefined === value){
+                if ('' === value || undefined === value) {
                     value = -1;
                 }
 
@@ -762,25 +767,67 @@ var igv = (function (igv) {
     };
 
 
-    /**
-     * Default implementation -- return the current state of the "this" object, which should be a track.  Used
-     * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
-     * current state.  Only simple properties (string, number, boolean) are updated.
-     */
-    function getState() {
+    const baseProperties = {
+        /**
+         * Default implementation -- return the current state of the "this" object, which should be a track.  Used
+         * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
+         * current state.  Only simple properties (string, number, boolean) are updated.
+         */
+        getState: function () {
 
-        const config = this.config;
-        const self = this;
+            const config = this.config;
+            const self = this;
 
-        Object.keys(config).forEach(function (key) {
-            const value = self[key];
-            if(value && (igv.isStringOrNumber(value) || typeof value === "boolean")) {
-                config[key] = value;
+            Object.keys(config).forEach(function (key) {
+                const value = self[key];
+                if (value && (igv.isSimpleType(value) || typeof value === "boolean")) {
+                    config[key] = value;
+                }
+            })
+
+            return config;
+        },
+        
+        popupFeatures: function (args) {
+       
+            let features = args.viewport.getCachedFeatures();
+            if (!features || features.length === 0) {
+                return [];
             }
-        })
+            
+            // We use the cached features rather than method to avoid async load.  If the
+            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-        return config;
+            const genomicLocation = args.genomicLocation;
+            const yOffset = args.y - (this.margin ? this.margin : 0);
+            const referenceFrame = args.viewport.genomicState.referenceFrame;
 
+            // We need some tolerance around genomicLocation
+            let tolerance = 3 * referenceFrame.bpPerPixel;
+
+            let row;
+            switch(this.displayMode) {
+                case 'SQUISHED':
+                    row = Math.floor(yOffset / this.squishedRowHeight);
+                    break;
+                case 'EXPANDED':
+                    row = Math.floor(yOffset / this.expandedRowHeight);
+                    break;
+                default:
+                    row = undefined;
+
+            }
+
+            let ss = genomicLocation - tolerance;
+            let ee = genomicLocation + tolerance;
+
+            features = (new igv.FeatureCache(features)).queryFeatures(referenceFrame.chrName, ss, ee);
+
+            return features.filter(function (feature) {
+                return (feature.end >= ss && feature.start <= ee) &&
+                    (row === undefined || feature.row === undefined || row === feature.row);
+            })
+        }
     }
 
     return igv;
