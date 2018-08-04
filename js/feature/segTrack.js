@@ -32,12 +32,11 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.isLog = config.isLog;
-
+        
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
-
         this.maxHeight = config.maxHeight || 500;
-        this.sampleSquishHeight = config.sampleSquishHeight || 2;
-        this.sampleExpandHeight = config.sampleExpandHeight || 12;
+        this.squishedRowHeight = config.sampleSquishHeight ||  config.squishedRowHeight || 2;
+        this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 12;
 
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
@@ -121,18 +120,18 @@ var igv = (function (igv) {
         //         });
         // }
         // else {
-            return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-       // }
+        return self.featureSource.getFeatures(chr, bpStart, bpEnd);
+        // }
 
     };
 
 
     igv.SegTrack.prototype.draw = function (options) {
 
-        var self = this,  featureList, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd, segment, len, sampleKey,
+        var self = this, featureList, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd, segment, len, sampleKey,
             i, y, color, value, px, px1, pw, xScale, sampleHeight, border;
 
-        sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
+        sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
         border = ("SQUISHED" === this.displayMode) ? 0 : 1;
 
         ctx = options.context;
@@ -229,9 +228,9 @@ var igv = (function (igv) {
 
         var sampleHeight, i, len, sampleKey;
 
-        if(!features) return 0;
+        if (!features) return 0;
 
-        sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight;
+        sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
 
         // Create a map for fast id -> row lookup
         let samples = new Set(this.sampleKeys);
@@ -308,39 +307,44 @@ var igv = (function (igv) {
             })
     };
 
+    igv.SegTrack.prototype.clickedFeatures = function (args) {
 
-    igv.SegTrack.prototype.popupData = function (config) {
+        let features = args.viewport.getCachedFeatures();
+        if (!features || features.length === 0) return [];
 
-        var genomicLocation = config.genomicLocation,
-            xOffset = config.x,
-            yOffset = config.y,
-            referenceFrame = config.viewport.genomicState.referenceFrame,
-            sampleHeight = ("SQUISHED" === this.displayMode) ? this.sampleSquishHeight : this.sampleExpandHeight,
-            sampleKey,
-            row,
-            items;
+        // We use the cached features rather than method to avoid async load.  If the
+        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-        items = [];
-        row = Math.floor(yOffset / sampleHeight);
+        let genomicLocation = args.genomicLocation;
+        let yOffset = args.y - this.margin;
+        let referenceFrame = args.viewport.genomicState.referenceFrame;
 
-        if (row < this.sampleKeys.length) {
+        // We need some tolerance around genomicLocation
+        let tolerance = 3 * referenceFrame.bpPerPixel;
+        let ss = genomicLocation - tolerance;
+        let ee = genomicLocation + tolerance;
+        //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
 
-            sampleKey = this.sampleKeys[row];
-
-            // We use the featureCache property rather than method to avoid async load.  If the
-            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-            if (this.featureSource.featureCache) {
-                var chr = referenceFrame.chrName;  // TODO -- this should be passed in
-                var featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation, genomicLocation);
-                featureList.forEach(function (f) {
-                    if (f.sampleKey === sampleKey) {
-                        extractPopupData(f, items);
-                    }
-                });
-            }
-
-
+        let row;
+        if ('COLLAPSED' !== this.displayMode) {
+            row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
         }
+
+        return features.filter(function (feature) {
+            return (feature.end >= ss && feature.start <= ee) &&
+                (row === undefined || feature.row === undefined || row === feature.row);
+        })
+    }
+
+    igv.SegTrack.prototype.popupData = function (args) {
+
+        const featureList = this.popupFeatures(args);
+        const items = [];
+
+        featureList.forEach(function (f) {
+            extractPopupData(f, items);
+
+        });
 
         return items;
 
@@ -350,7 +354,7 @@ var igv = (function (igv) {
 
             Object.keys(feature).forEach(function (property) {
                 if (!filteredProperties.has(property) &&
-                    igv.isStringOrNumber(feature[property])) {
+                    igv.isSimpleType(feature[property])) {
                     data.push({name: property, value: feature[property]});
                 }
             });
@@ -361,7 +365,6 @@ var igv = (function (igv) {
 
         var self = this,
             clickHandler;
-
 
 
         clickHandler = function () {
@@ -379,7 +382,7 @@ var igv = (function (igv) {
 
         };
 
-        return [{label: 'Sort by value',  click: clickHandler, init: undefined}];
+        return [{label: 'Sort by value', click: clickHandler, init: undefined}];
 
     };
 

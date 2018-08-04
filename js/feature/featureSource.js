@@ -48,7 +48,7 @@ var igv = (function (igv) {
                 mapProperties(features, config.mappings)
             }
             this.queryable = false;
-            this.featureCache = new igv.FeatureCache(features);
+
         }
         else if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config);
@@ -171,20 +171,21 @@ var igv = (function (igv) {
         maxRows = self.config.maxRows || 500;
         str = chr.toLowerCase();
 
-
-
         return getFeatureCache()
 
             .then(function (featureCache) {
 
-                let isQueryable = self.queryable;
+                const  isQueryable = self.queryable;
 
                 if ("all" === str) {
+
                     if(isQueryable) {
                         return [];
                     }
                     else {
-                        return getWGFeatures(featureCache.allFeatures());
+                        const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
+                        return wgFeatureCache.queryFeatures(str, bpStart, bpEnd);
+
                     }
                 }
                 else {
@@ -333,35 +334,35 @@ var igv = (function (igv) {
     }
 
     // TODO -- filter by pixel size
-    function getWGFeatures(features) {
+    igv.FeatureSource.prototype.getWGFeatureCache = function (features) {
 
-        var wgFeatures,
-            wgChromosomeNames,
-            genome;
+        if(!this.wgFeatureCache) {
 
-        genome = igv.browser.genome;
+            const genome = igv.browser.genome;
 
-        wgChromosomeNames = new Set(genome.wgChromosomeNames);
+            const wgChromosomeNames = new Set(genome.wgChromosomeNames);
 
-        wgFeatures = [];
+            const wgFeatures = [];
 
-        features.forEach(function (f) {
+            features.forEach(function (f) {
 
-            var wg,
-                queryChr;
+                let queryChr = genome.getChromosomeName(f.chr);
 
-            queryChr = genome.getChromosomeName(f.chr);
-            if (wgChromosomeNames.has(queryChr)) {
+                if (wgChromosomeNames.has(queryChr)) {
 
-                wg = Object.assign({}, f);
-                wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
-                wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+                    let wg = Object.assign({}, f);
+                    wg.chr = "all";
+                    wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
+                    wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
 
-                wgFeatures.push(wg);
-            }
-        });
+                    wgFeatures.push(wg);
+                }
+            });
 
-        return wgFeatures;
+            this.wgFeatureCache = new igv.FeatureCache(wgFeatures);
+        }
+
+        return this.wgFeatureCache;
     }
 
 
