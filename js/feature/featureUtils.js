@@ -42,12 +42,11 @@ var igv = (function (igv) {
 
             maxRows = maxRows || 10000;
 
-            if(!sorted) {
+            if (!sorted) {
                 features.sort(function (a, b) {
                     return a.start - b.start;
                 });
             }
-
 
 
             if (features.length === 0) {
@@ -128,7 +127,8 @@ var igv = (function (igv) {
                 } // while (allocatedCount)
 
             }
-        }
+        },
+        
 
     }
 
