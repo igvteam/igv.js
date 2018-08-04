@@ -86,7 +86,9 @@ var igv = (function (igv) {
 
     };
 
-    igv.FeatureCache.prototype.allFeatures = function () {
+    igv.FeatureCache.prototype.getAllFeatures = function () {
+
+
 
         var allFeatures = [];
         var treeMap = this.treeMap;

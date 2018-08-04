@@ -505,8 +505,12 @@ var igv = (function (igv) {
      * @param value
      * @returns boolean
      */
-    igv.isStringOrNumber = function (value) {
-        return (value && (value.substring || value.toFixed)) ? true : false
+    const simpleTypes = new Set(["boolean", "number", "string", "symbol"]);
+    igv.isSimpleType = function (value) {
+        
+        const valueType = typeof value;
+        
+        return (value != undefined && (simpleTypes.has(valueType) ||  value.substring || value.toFixed))
     };
 
     igv.constrainBBox = function ($child, $parent) {
