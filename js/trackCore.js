@@ -787,46 +787,26 @@ var igv = (function (igv) {
 
             return config;
         },
-        
-        popupFeatures: function (args) {
-       
-            let features = args.viewport.getCachedFeatures();
+
+        popupFeatures: function (clickState) {
+
+            // We use the cached features rather than method to avoid async load.  If the
+            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+            const features = clickState.viewport.getCachedFeatures();
+
             if (!features || features.length === 0) {
                 return [];
             }
-            
-            // We use the cached features rather than method to avoid async load.  If the
-            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-            const genomicLocation = args.genomicLocation;
-            const yOffset = args.y - (this.margin ? this.margin : 0);
-            const referenceFrame = args.viewport.genomicState.referenceFrame;
+            const genomicLocation = clickState.genomicLocation;
+            const chr = clickState.referenceFrame.chrName;
 
             // We need some tolerance around genomicLocation
-            let tolerance = 3 * referenceFrame.bpPerPixel;
+            const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
+            const ss = genomicLocation - tolerance;
+            const ee = genomicLocation + tolerance;
 
-            let row;
-            switch(this.displayMode) {
-                case 'SQUISHED':
-                    row = Math.floor(yOffset / this.squishedRowHeight);
-                    break;
-                case 'EXPANDED':
-                    row = Math.floor(yOffset / this.expandedRowHeight);
-                    break;
-                default:
-                    row = undefined;
-
-            }
-
-            let ss = genomicLocation - tolerance;
-            let ee = genomicLocation + tolerance;
-
-            features = (new igv.FeatureCache(features)).queryFeatures(referenceFrame.chrName, ss, ee);
-
-            return features.filter(function (feature) {
-                return (feature.end >= ss && feature.start <= ee) &&
-                    (row === undefined || feature.row === undefined || row === feature.row);
-            })
+            return (new igv.FeatureCache(features)).queryFeatures(chr, ss, ee);
         }
     }
 
