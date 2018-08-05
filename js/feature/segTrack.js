@@ -172,6 +172,7 @@ var igv = (function (igv) {
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
+                segment.row = samples[segment.sampleKey];
                 y = samples[segment.sampleKey] * sampleHeight + border;
 
                 value = segment.value;
@@ -336,9 +337,12 @@ var igv = (function (igv) {
         })
     }
 
-    igv.SegTrack.prototype.popupData = function (args) {
+    igv.SegTrack.prototype.popupData = function (clickState) {
 
-        const featureList = this.popupFeatures(args);
+        const self = this;
+
+        const featureList = filterByRow(this.popupFeatures(clickState), clickState.y);
+        
         const items = [];
 
         featureList.forEach(function (f) {
@@ -359,7 +363,20 @@ var igv = (function (igv) {
                 }
             });
         }
-    };
+
+        function filterByRow(features, y) {
+            if (!features || 'COLLAPSED' === self.displayMode) {
+                return features;
+            }
+            else {
+                let row = 'SQUISHED' === self.displayMode ? Math.floor(y / self.squishedRowHeight) : Math.floor(y / self.expandedRowHeight);
+
+                return features.filter(function (feature) {
+                    return   feature.row === undefined || row === feature.row;
+                })
+            }
+        }
+    }
 
     igv.SegTrack.prototype.contextMenuItemList = function (config) {
 
