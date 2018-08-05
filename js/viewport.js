@@ -1,7 +1,12 @@
 /**
  * Created by dat on 9/16/16.
  */
+
+
+
 var igv = (function (igv) {
+
+    "use strict";
 
     var NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -438,7 +443,7 @@ var igv = (function (igv) {
             this[key] = undefined;
         })
     }
-    
+
     igv.Viewport.prototype.getCachedFeatures = function () {
         return this.tile ? this.tile.features : [];
     }
@@ -461,38 +466,25 @@ var igv = (function (igv) {
 
     function addMouseHandlers() {
 
-        var self = this,
-            lastMouseX,
-            mouseDownX,
-            lastClickTime,
-            popupTimer;
+        let self = this;
+        let lastMouseX;
+        let mouseDownX;
+        let popupTimer;
 
-        lastClickTime = 0;
+        let lastClickTime = 0;
 
         this.$viewport.on("contextmenu", function (e) {
 
-            var trackLocationState,
-                menuItems;
-
-            trackLocationState = createTrackLocationState(e, self);
-
             e.preventDefault();
 
-            if (undefined === trackLocationState) {
+            const config = createTrackLocationState(e, self);
+
+            if (undefined === config) {
                 return
             }
 
-            var config =
-            {
-                viewport: self,
-                genomicState: self.genomicState,
-                genomicLocation: trackLocationState.genomicLocation,
-                x: trackLocationState.x,
-                y: trackLocationState.y
-            };
-
             // Track specific items
-            menuItems = [];
+            let menuItems = [];
             if (typeof self.trackView.track.contextMenuItemList === "function") {
                 menuItems = self.trackView.track.contextMenuItemList(config);
             }
@@ -530,15 +522,6 @@ var igv = (function (igv) {
          */
         this.$viewport.on('mouseup', function (e) {
 
-            var mouseX,
-                mouseXCanvas,
-                referenceFrame,
-                xBP,
-                time,
-                centerBP,
-                string,
-                loci,
-                chr;
 
             if (3 === e.which || e.ctrlKey || self.isDragging || mouseDownX === undefined) {
                 return;
@@ -547,12 +530,12 @@ var igv = (function (igv) {
             // This is a mouse click.  Handle it here, stop bubbling.
             e.preventDefault();
 
-            mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-            mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
-            referenceFrame = self.genomicState.referenceFrame;
-            xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+            const mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+            const mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
+            const referenceFrame = self.genomicState.referenceFrame;
+            const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
 
-            time = Date.now();
+            const time = Date.now();
 
             if (time - lastClickTime < igv.browser.constants.doubleClickDelay) {
 
@@ -562,15 +545,18 @@ var igv = (function (igv) {
                     popupTimer = undefined;
                 }
 
-                centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+                const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+
+                let string;
+
                 if ('all' === referenceFrame.chrName.toLowerCase()) {
 
-                    chr = igv.browser.genome.getChromosomeCoordinate(centerBP).chr;
+                    const chr = igv.browser.genome.getChromosomeCoordinate(centerBP).chr;
 
                     if (1 === igv.browser.genomicStateList.length) {
                         string = chr;
                     } else {
-                        loci = igv.browser.genomicStateList.map(function (g) {
+                        let loci = igv.browser.genomicStateList.map(function (g) {
                             return g.locusSearchString;
                         });
                         loci[igv.browser.genomicStateList.indexOf(self.genomicState)] = chr;
@@ -585,9 +571,12 @@ var igv = (function (igv) {
 
 
             } else {
-
+                // single-click
+                
                 if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
+                    
                     self.trackView.track.shiftClick(xBP, e);
+                    
                 } else if (typeof self.trackView.track.popupData === "function") {
 
                     popupTimer = window.setTimeout(function () {
@@ -616,19 +605,21 @@ var igv = (function (igv) {
 
         function createTrackLocationState(e, viewport) {
 
-            var referenceFrame = viewport.genomicState.referenceFrame,
-                genomicLocation,
-                viewportCoords,
-                xOrigin;
-
-            viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
-            genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));  //Math.floor
+            const referenceFrame = viewport.genomicState.referenceFrame;
+            const viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
+            const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
             if (undefined === genomicLocation || null === viewport.tile) {
                 return undefined;
             }
 
-            return {genomicLocation: genomicLocation, x: viewportCoords.x, y: viewportCoords.y}
+            return {
+                viewport: viewport,
+                referenceFrame: referenceFrame,
+                genomicLocation: genomicLocation,
+                x: viewportCoords.x,
+                y: viewportCoords.y
+            }
 
         }
 
@@ -640,31 +631,21 @@ var igv = (function (igv) {
          * @returns {*}
          */
         function getPopupContent(e, viewport) {
-
-            var track = viewport.trackView.track,
-                trackLocationState,
-                dataList,
-                popupClickHandlerResult,
-                content,
-                config;
-
-            trackLocationState = createTrackLocationState(e, viewport);
-            if (undefined === trackLocationState) {
+            
+            const clickState = createTrackLocationState(e, viewport);
+   
+            if (undefined === clickState) {
                 return;
             }
+            
+            let track = viewport.trackView.track;
+            const dataList = track.popupData(clickState);
 
-            config =
-            {
-                viewport: viewport,
-                genomicLocation: trackLocationState.genomicLocation,
-                x: trackLocationState.x,
-                y: trackLocationState.y
-            };
-            dataList = track.popupData(config);
+            const popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
 
-            popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
-
+            let content;
             if (undefined === popupClickHandlerResult) {
+                
                 if (dataList && dataList.length > 0) {
                     content = formatPopoverText(dataList);
                 }
