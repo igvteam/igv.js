@@ -243,12 +243,14 @@ var igv = (function (igv) {
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    igv.FeatureTrack.prototype.popupData = function (args) {
+    igv.FeatureTrack.prototype.popupData = function (clickState) {
 
-        const features = this.popupFeatures(args);
+        let self = this;
 
+        const yOffset = clickState.y - this.margin;
+        const features = filterByRow(this.popupFeatures(clickState), yOffset);
+       
         const data = [];
-
         features.forEach(function (feature) {
 
             const featureData = feature.popupData ? feature.popupData(genomicLocation) : extractPopupData(feature);
@@ -262,6 +264,25 @@ var igv = (function (igv) {
         });
 
         return data;
+        
+        function filterByRow(features, y) {
+           
+            let row;
+            switch(self.displayMode) {
+                case 'SQUISHED':
+                    row = Math.floor(y / self.squishedRowHeight);
+                    break;
+                case 'EXPANDED':
+                    row = Math.floor(y / self.expandedRowHeight);
+                    break;
+                default:
+                    row = undefined;
+            }
+
+            return features.filter(function (feature) {
+                return (row === undefined || feature.row === undefined || row === feature.row);
+            })
+        }
 
     };
 
