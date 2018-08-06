@@ -98,7 +98,7 @@ var igv = (function (igv) {
         const self = this;
         const format = this.config.format.toLowerCase();
 
-        if (format === 'bigbed' && false === igv.hasVisibilityWindow(this)) {
+        if (format === 'bigbed' && this.visibilityWindow === undefined) {
 
             return this.featureSource.defaultVisibilityWindow()
                 .then(function (visibilityWindow) {
