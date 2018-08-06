@@ -428,7 +428,6 @@ var igv = (function (igv) {
      * Called when the associated track is removed.  Do any needed cleanup here.
      */
     igv.Viewport.prototype.dispose = function () {
-
         this.$viewport.off();
         this.$viewport.empty();
         $(this.contentDiv).off();
@@ -439,14 +438,14 @@ var igv = (function (igv) {
             $(this.popover).off();
             $(this.popover).empty();
         }
-        Object.keys(this).forEach(function (key) {
-            this[key] = undefined;
+        Object.keys(this).forEach(function (key, i, list) {
+            list[key] = undefined;
         })
-    }
+    };
 
     igv.Viewport.prototype.getCachedFeatures = function () {
         return this.tile ? this.tile.features : [];
-    }
+    };
 
     var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features) {
         this.chr = chr;
