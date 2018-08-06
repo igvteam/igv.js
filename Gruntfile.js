@@ -24,7 +24,7 @@ module.exports = function (grunt) {
             },
             igv_es6: {
                 src: [
-                    'wrapper/header-es6.js',
+                    'wrapper/header-esm.js',
                     'tmp/embedCss.js',
                     'vendor/jquery-1.12.4.js',
                     'vendor/jquery-ui.js',
@@ -35,9 +35,9 @@ module.exports = function (grunt) {
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
                     'js/**/*.js',
-                    'wrapper/footer-es6.js'
+                    'wrapper/footer-esm.js'
                 ],
-                dest: 'dist/igv.es6.js'
+                dest: 'dist/igv.esm.js'
             },
             zlib: {
                 src: [
@@ -80,9 +80,9 @@ module.exports = function (grunt) {
                 src: 'dist/igv.js',
                 dest: 'dist/igv.min.js'
             },
-            igv_es6: {
-                src: 'dist/igv.es6.js',
-                dest: 'dist/igv.es6.min.js'
+            igv_esm: {
+                src: 'dist/igv.esm.js',
+                dest: 'dist/igv.esm.min.js'
             }
         },
 
@@ -93,7 +93,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_es6']);
+    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_esm']);
 
     grunt.registerTask('doc', ['md2html']);
 
