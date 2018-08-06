@@ -428,6 +428,7 @@ var igv = (function (igv) {
      * Called when the associated track is removed.  Do any needed cleanup here.
      */
     igv.Viewport.prototype.dispose = function () {
+        const self = this;
         this.$viewport.off();
         this.$viewport.empty();
         $(this.contentDiv).off();
@@ -438,8 +439,10 @@ var igv = (function (igv) {
             $(this.popover).off();
             $(this.popover).empty();
         }
+        // Null out all properties -- this should not be neccessary, but just in case there is a
+        // reference to self somewhere we want to free memory.
         Object.keys(this).forEach(function (key, i, list) {
-            list[key] = undefined;
+            self[key] = undefined;
         })
     };
 
