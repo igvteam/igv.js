@@ -30,6 +30,7 @@
 
 var igv = (function (igv) {
 
+    "use strict";
 
     igv.FeatureUtils = {
 
@@ -128,10 +129,89 @@ var igv = (function (igv) {
 
             }
         },
-        
 
+
+        /**
+         * Find features overlapping the given interval.  It is assumed that all features share the same chromosome.
+         *
+         * TODO -- significant overlap with FeatureCache, refactor to combine
+         *
+         * @param featureList
+         * @param start
+         * @param end
+         */
+        findOverlapping: function (featureList, start, end) {
+
+            if (!featureList || featureList.length == 0) {
+                return [];
+            }
+            else {
+                const tree = buildIntervalTree(featureList);
+                const intervals = tree.findOverlapping(start, end);
+
+                if (intervals.length == 0) {
+                    return [];
+                }
+                else {
+                    // Trim the list of features in the intervals to those
+                    // overlapping the requested range.
+                    // Assumption: features are sorted by start position
+
+                    featureList = [];
+
+                    intervals.forEach(function (interval) {
+                        const intervalFeatures = interval.value;
+                        const len = intervalFeatures.length;
+                        for (let i = 0; i < len; i++) {
+                            const feature = intervalFeatures[i];
+                            if (feature.start > end) break;
+                            else if (feature.end >= start) {
+                                featureList.push(feature);
+                            }
+                        }
+                    });
+
+                    featureList.sort(function (a, b) {
+                        return a.start - b.start;
+                    });
+
+                    return featureList;
+                }
+            }
+
+        }
     }
 
+
+    /**
+     * Build an interval tree from the feature list for fast interval based queries.   We lump features in groups
+     * of 10, or total size / 100,   to reduce size of the tree.
+     *
+     * @param featureList
+     */
+    function buildIntervalTree(featureList) {
+
+        const tree = new igv.IntervalTree();
+        const len = featureList.length;
+        const chunkSize = Math.max(10, Math.round(len / 100));
+
+        featureList.sort(function (f1, f2) {
+            return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
+        });
+
+        for (let i = 0; i < len; i += chunkSize) {
+            const e = Math.min(len, i + chunkSize);
+            const subArray = featureList.slice(i, e);
+            const iStart = subArray[0].start;
+            let iEnd = iStart;
+            subArray.forEach(function (feature) {
+                iEnd = Math.max(iEnd, feature.end);
+            });
+            tree.insert(iStart, iEnd, subArray);
+        }
+
+        return tree;
+    }
 
     return igv;
 })(igv || {});
