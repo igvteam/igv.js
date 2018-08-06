@@ -50,9 +50,7 @@ var igv = (function (igv) {
 
         this.alignmentTrack = new AlignmentTrack(config, this);
 
-        if (!igv.hasVisibilityWindow(this)) {
-            this.visibilityWindow = 30000;
-        }
+        this.visibilityWindow = config.visibilityWindow || 30000;
 
         this.viewAsPairs = config.viewAsPairs;
 
