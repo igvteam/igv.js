@@ -390,61 +390,6 @@ var igv = (function (igv) {
         return (call.genotype[alleleNum] > 0) ? variant.alleles[call.genotype[alleleNum] - 1] : variant.referenceBases;
     }
 
-    function sortCallSets(callSets, variant, direction) {
-        var d = (direction === "DESC") ? 1 : -1;
-        Object.keys(callSets).forEach(function (property) {
-            callSets[property].sort(function (a, b) {
-                var aNan = isNaN(variant.calls[a.id].genotype[0]);
-                var bNan = isNaN(variant.calls[b.id].genotype[0]);
-                if (aNan && bNan) {
-                    return 0;
-                } else if (aNan) {
-                    return 1;
-                } else if (bNan) {
-                    return -1;
-                } else {
-                    var a0 = getAlleleString(variant.calls[a.id], variant, 0);
-                    var a1 = getAlleleString(variant.calls[a.id], variant, 1);
-                    var b0 = getAlleleString(variant.calls[b.id], variant, 0);
-                    var b1 = getAlleleString(variant.calls[b.id], variant, 1);
-                    var result = Math.max(b0.length, b1.length) - Math.max(a0.length, a1.length);
-                    if (result === 0) {
-                        result = Math.min(b0.length, b1.length) - Math.min(a0.length, a1.length);
-                    }
-                    return d * result;
-                }
-            });
-        });
-    }
-
-    igv.VariantTrack.prototype.altClick = function (genomicLocation, referenceFrame, event) {
-
-        var chr = referenceFrame.chrName,
-            tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance),
-            self = this;
-
-        if (this.callSets && featureList && featureList.length > 0) {
-
-            featureList.forEach(function (variant) {
-
-
-                if ((variant.start <= genomicLocation + tolerance) &&
-                    (variant.end > genomicLocation - tolerance)) {
-                    // var content = igv.formatPopoverText(['Ascending', 'Descending', 'Repeat Number']);
-                    //igv.popover.presentContent(event.pageX, event.pageY, [$asc, $desc]);
-
-                    sortCallSets(this.callSets, variant, sortDirection);
-                    if (self.filterBy) {
-                        sortCallSets(self.filteredCallSets, variant, sortDirection);
-                    }
-                    sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                    self.trackView.repaintViews();
-                }
-            });
-        }
-    };
-
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
@@ -615,9 +560,10 @@ var igv = (function (igv) {
         return popupData;
     }
 
-    igv.VariantTrack.prototype.contextMenuItemList = function (config) {
-        var menuItems = [];
-        var self = this;
+    igv.VariantTrack.prototype.contextMenuItemList = function (clickState) {
+
+        const self = this;
+        const menuItems = [];
 
         if (this.groupBy !== 'None' && igv.sampleInformation.hasAttributes()) {
             menuItems.push({
@@ -635,28 +581,20 @@ var igv = (function (igv) {
             })
         }
 
-
-        var referenceFrame = config.viewport.genomicState.referenceFrame,
-            genomicLocation = config.genomicLocation,
-            chr = referenceFrame.chrName,
-            tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-            featureList = this.featureSource.featureCache.queryFeatures(chr, genomicLocation - tolerance, genomicLocation + tolerance);
-
+        const featureList = this.clickedFeatures(clickState);
+        
         if (this.callSets && featureList && featureList.length > 0) {
 
             featureList.forEach(function (variant) {
-
-
-                if ((variant.start <= genomicLocation + tolerance) && (variant.end > genomicLocation - tolerance)) {
 
                     if ('str' === variant.type) {
 
                         menuItems.push({
                             label: 'Sort by allele length',
                             click: function () {
-                                sortCallSets(self.callSets, variant, sortDirection);
+                                sortCallSetsByAlleleLength(self.callSets, variant, sortDirection);
                                 if (this.filterBy) {
-                                    sortCallSets(self.filteredCallSets, variant, sortDirection)
+                                    sortCallSetsByAlleleLength(self.filteredCallSets, variant, sortDirection)
                                 }
                                 sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
                                 self.trackView.repaintViews();
@@ -664,9 +602,38 @@ var igv = (function (igv) {
                         });
 
                     }
-                }
+                
             });
         }
+
+
+        function sortCallSetsByAlleleLength(callSets, variant, direction) {
+            var d = (direction === "DESC") ? 1 : -1;
+            Object.keys(callSets).forEach(function (property) {
+                callSets[property].sort(function (a, b) {
+                    var aNan = isNaN(variant.calls[a.id].genotype[0]);
+                    var bNan = isNaN(variant.calls[b.id].genotype[0]);
+                    if (aNan && bNan) {
+                        return 0;
+                    } else if (aNan) {
+                        return 1;
+                    } else if (bNan) {
+                        return -1;
+                    } else {
+                        var a0 = getAlleleString(variant.calls[a.id], variant, 0);
+                        var a1 = getAlleleString(variant.calls[a.id], variant, 1);
+                        var b0 = getAlleleString(variant.calls[b.id], variant, 0);
+                        var b1 = getAlleleString(variant.calls[b.id], variant, 1);
+                        var result = Math.max(b0.length, b1.length) - Math.max(a0.length, a1.length);
+                        if (result === 0) {
+                            result = Math.min(b0.length, b1.length) - Math.min(a0.length, a1.length);
+                        }
+                        return d * result;
+                    }
+                });
+            });
+        }
+
 
         return menuItems;
 

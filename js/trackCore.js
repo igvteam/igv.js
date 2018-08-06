@@ -788,7 +788,7 @@ var igv = (function (igv) {
             return config;
         },
 
-        popupFeatures: function (clickState) {
+        clickedFeatures: function (clickState) {
 
             // We use the cached features rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
@@ -799,14 +799,13 @@ var igv = (function (igv) {
             }
 
             const genomicLocation = clickState.genomicLocation;
-            const chr = clickState.referenceFrame.chrName;
 
             // We need some tolerance around genomicLocation
             const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
             const ss = genomicLocation - tolerance;
             const ee = genomicLocation + tolerance;
 
-            return (new igv.FeatureCache(features)).queryFeatures(chr, ss, ee);
+            return (igv.FeatureUtils.findOverlapping(features, ss, ee));
         }
     }
 
