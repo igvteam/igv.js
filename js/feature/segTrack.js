@@ -32,7 +32,7 @@ var igv = (function (igv) {
         igv.configTrack(this, config);
 
         this.isLog = config.isLog;
-        
+
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;
         this.squishedRowHeight = config.sampleSquishHeight ||  config.squishedRowHeight || 2;
@@ -308,41 +308,12 @@ var igv = (function (igv) {
             })
     };
 
-    igv.SegTrack.prototype.clickedFeatures = function (args) {
-
-        let features = args.viewport.getCachedFeatures();
-        if (!features || features.length === 0) return [];
-
-        // We use the cached features rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-
-        let genomicLocation = args.genomicLocation;
-        let yOffset = args.y - this.margin;
-        let referenceFrame = args.viewport.genomicState.referenceFrame;
-
-        // We need some tolerance around genomicLocation
-        let tolerance = 3 * referenceFrame.bpPerPixel;
-        let ss = genomicLocation - tolerance;
-        let ee = genomicLocation + tolerance;
-        //featureList = this.featureSource.featureCache.queryFeatures(referenceFrame.chrName, ss, ee);
-
-        let row;
-        if ('COLLAPSED' !== this.displayMode) {
-            row = 'SQUISHED' === this.displayMode ? Math.floor((yOffset - 0) / this.squishedRowHeight) : Math.floor((yOffset - 0) / this.expandedRowHeight);
-        }
-
-        return features.filter(function (feature) {
-            return (feature.end >= ss && feature.start <= ee) &&
-                (row === undefined || feature.row === undefined || row === feature.row);
-        })
-    }
-
     igv.SegTrack.prototype.popupData = function (clickState) {
 
         const self = this;
 
-        const featureList = filterByRow(this.popupFeatures(clickState), clickState.y);
-        
+        const featureList = filterByRow(this.clickedFeatures(clickState), clickState.y);
+
         const items = [];
 
         featureList.forEach(function (f) {

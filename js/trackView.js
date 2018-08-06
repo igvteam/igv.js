@@ -466,14 +466,12 @@ var igv = (function (igv) {
                     self.viewports.forEach(function (vp) {
                         var referenceFrame, chr, start, end, cache;
                         referenceFrame = vp.genomicState.referenceFrame;
-                        chr = referenceFrame.chrName;
                         start = referenceFrame.start;
                         end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
                         if (vp.tile && vp.tile.features) {
                             if (self.track.autoscale) {
-                                cache = new igv.FeatureCache(vp.tile.features);
-                                allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                                allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
                             }
                             else {
                                 allFeatures = allFeatures.concat(vp.tile.features);
@@ -537,11 +535,9 @@ var igv = (function (igv) {
                     if (vp.tile && vp.tile.features) {
                         var referenceFrame, chr, start, end, cache;
                         referenceFrame = vp.genomicState.referenceFrame;
-                        chr = referenceFrame.chrName;
                         start = referenceFrame.start;
                         end = start + referenceFrame.toBP($(vp.contentDiv).width());
-                        cache = new igv.FeatureCache(vp.tile.features);
-                        allFeatures = allFeatures.concat(cache.queryFeatures(chr, start, end));
+                        allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
                     }
                 });
                 return allFeatures;

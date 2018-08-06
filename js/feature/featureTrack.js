@@ -248,7 +248,7 @@ var igv = (function (igv) {
         let self = this;
 
         const yOffset = clickState.y - this.margin;
-        const features = filterByRow(this.popupFeatures(clickState), yOffset);
+        const features = filterByRow(this.clickedFeatures(clickState), yOffset);
        
         const data = [];
         features.forEach(function (feature) {
