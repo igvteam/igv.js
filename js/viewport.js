@@ -477,16 +477,16 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            const config = createTrackLocationState(e, self);
+            const clickState = createClickState(e, self);
 
-            if (undefined === config) {
+            if (undefined === clickState) {
                 return
             }
 
             // Track specific items
             let menuItems = [];
             if (typeof self.trackView.track.contextMenuItemList === "function") {
-                menuItems = self.trackView.track.contextMenuItemList(config);
+                menuItems = self.trackView.track.contextMenuItemList(clickState);
             }
 
             // Add items common to all tracks
@@ -603,7 +603,7 @@ var igv = (function (igv) {
         });
 
 
-        function createTrackLocationState(e, viewport) {
+        function createClickState(e, viewport) {
 
             const referenceFrame = viewport.genomicState.referenceFrame;
             const viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
@@ -632,7 +632,7 @@ var igv = (function (igv) {
          */
         function getPopupContent(e, viewport) {
             
-            const clickState = createTrackLocationState(e, viewport);
+            const clickState = createClickState(e, viewport);
    
             if (undefined === clickState) {
                 return;
