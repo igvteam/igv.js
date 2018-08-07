@@ -355,7 +355,12 @@ var igv = (function (igv) {
         var inflate = new Zlib.Gunzip(bytes);
         var plain = inflate.decompress();
 
-        return String.fromCharCode.apply(null, plain);
+        let s = "";
+        const len = plain.length;
+        for (let i = 0; i < len; i++)
+            s += String.fromCharCode(plain[i]);
+
+        return s;
     }
 
 
