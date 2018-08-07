@@ -64,7 +64,6 @@ var igv = (function (igv) {
         var genomeId;
 
         this.flanking = options.flanking;
-        this.type = options.type || "IGV";
         this.crossDomainProxy = options.crossDomainProxy;
         this.formats = options.formats;
         this.trackDefaults = options.trackDefaults;
