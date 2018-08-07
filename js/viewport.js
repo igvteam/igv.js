@@ -366,10 +366,12 @@ var igv = (function (igv) {
 
 
     function showZoomInNotice() {
-        var referenceFrame = this.genomicState.referenceFrame;
-        return (this.trackView.track.visibilityWindow !== undefined && this.trackView.track.visibilityWindow > 0 &&
+        const referenceFrame = this.genomicState.referenceFrame;
+        return (
+            this.trackView.track.visibilityWindow !== undefined &&
+            this.trackView.track.visibilityWindow > 0 &&
             (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow)) ||
-            (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome);
+            (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome());
     }
 
     function viewIsReady() {

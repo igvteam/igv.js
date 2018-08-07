@@ -64,6 +64,7 @@ var igv = (function (igv) {
             return Promise.resolve(undefined);
         }
         else {
+            // bigbed
             let genomeSize = getGenomeLength();
             return this.reader.loadHeader()
                 .then(function (header) {
@@ -71,8 +72,7 @@ var igv = (function (igv) {
                     return 1000 * (genomeSize / header.dataCount);
                 })
         }
-
-
+        
         function getGenomeLength() {
             if (igv.browser && igv.browser.genome) {
                 return igv.browser.genome.getGenomeLength();
@@ -123,6 +123,10 @@ var igv = (function (igv) {
                 })
 
         }
+    }
+
+    igv.BWSource.prototype.supportsWholeGenome = function() {
+        return true;
     }
 
 

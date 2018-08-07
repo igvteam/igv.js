@@ -46,7 +46,7 @@ var igv = (function (igv) {
         this.thickness = config.thickness || 2;
         this.color = config.color || "rgb(180,25,137)"
 
-        this.supportsWholeGenome = false;
+        this.visibilityWindow = -1;
 
         this.colorAlphaCache = {};
 
