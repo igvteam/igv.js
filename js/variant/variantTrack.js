@@ -30,10 +30,11 @@
 
 var igv = (function (igv) {
 
-    var DEFAULT_VISIBILITY_WINDOW = 100000;
-    var MAX_PIXEL_HEIGHT = 30000;
-    var sortDirection = "ASC";
-    var strColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"];
+    "use strict";
+
+    const DEFAULT_VISIBILITY_WINDOW = 100000;
+    const MAX_PIXEL_HEIGHT = 30000;
+    const strColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"];
 
     igv.VariantTrack = function (config) {
 
@@ -62,6 +63,8 @@ var igv = (function (igv) {
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
 
+        this.sortDirection = "ASC";
+
         this.nRows = 1;  // Computed dynamically
         this.groupBy = "None";
         this.filterBy = undefined;
@@ -71,7 +74,7 @@ var igv = (function (igv) {
 
     igv.VariantTrack.prototype.getFileHeader = function () {
 
-        var self = this;
+        const self = this;
 
         if (typeof self.featureSource.getFileHeader === "function") {
 
@@ -115,8 +118,8 @@ var igv = (function (igv) {
     }
 
     function getCallsetsLength() {
-        var length = 0,
-            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
+        let length = 0;
+        const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
         Object.keys(callSets).forEach(function (key) {
             if (callSets[key]) length += callSets[key].length;
         });
@@ -127,7 +130,7 @@ var igv = (function (igv) {
     function computeVisibilityWindow() {
 
         if (this.callSets) {
-            var length = getCallsetsLength.call(this);
+            const length = getCallsetsLength.call(this);
             if (length < 10) {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
             }
@@ -161,18 +164,10 @@ var igv = (function (igv) {
      */
     igv.VariantTrack.prototype.computePixelHeight = function (features) {
 
-        var callSets = (this.filterBy) ? this.filteredCallSets : this.callSets,
-            nCalls = callSets ? getCallsetsLength.call(this) : 0,
-            callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight),
-            vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
-            groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
-            groupsLength = Object.keys(callSets).length,
-            groupSpace = (groupsLength - 1) * groupGap,
-            nRows,
-            h;
+        const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
+        const nCalls = callSets ? getCallsetsLength.call(this) : 0;
 
-        // Adjust call height if required for max canvas size.  This is a hack, real solution is to draw canvas
-        // sections as needed.
+        // Adjust call height if required for max canvas size.
         if (nCalls > 0) {
             let maxCallHeight = MAX_PIXEL_HEIGHT / nCalls;
             this.squishedCallHeight = Math.min(this.squishedCallHeight, maxCallHeight);
@@ -192,18 +187,16 @@ var igv = (function (igv) {
 
                 });
             }
-            nRows = maxRow + 1;
-
-            h = 10 + nRows * (this.variantHeight + vGap);
+            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+            const nRows = maxRow + 1;
+            const h = 10 + nRows * (this.variantHeight + vGap);
             this.nRows = nRows;  // Needed in draw function
 
-
-            // if ((nCalls * nRows * this.expandedCallHeight) > 2000) {
-            //     this.expandedCallHeight = Math.max(1, 2000 / (nCalls * nRows));
-            // }
-
+            const groupsLength = Object.keys(callSets).length;
+            const groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap;
+            const groupSpace = (groupsLength - 1) * groupGap;
+            const callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
             return h + vGap + groupSpace + (nCalls + 1) * (callHeight + vGap);
-            //return h + vGap + nCalls * nRows * (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
 
         }
 
@@ -582,27 +575,27 @@ var igv = (function (igv) {
         }
 
         const featureList = this.clickedFeatures(clickState);
-        
+
         if (this.callSets && featureList && featureList.length > 0) {
 
             featureList.forEach(function (variant) {
 
-                    if ('str' === variant.type) {
+                if ('str' === variant.type) {
 
-                        menuItems.push({
-                            label: 'Sort by allele length',
-                            click: function () {
-                                sortCallSetsByAlleleLength(self.callSets, variant, sortDirection);
-                                if (this.filterBy) {
-                                    sortCallSetsByAlleleLength(self.filteredCallSets, variant, sortDirection)
-                                }
-                                sortDirection = (sortDirection === "ASC") ? "DESC" : "ASC";
-                                self.trackView.repaintViews();
+                    menuItems.push({
+                        label: 'Sort by allele length',
+                        click: function () {
+                            sortCallSetsByAlleleLength(self.callSets, variant, self.sortDirection);
+                            if (this.filterBy) {
+                                sortCallSetsByAlleleLength(self.filteredCallSets, variant, self.sortDirection)
                             }
-                        });
+                            self.sortDirection = (self.sortDirection === "ASC") ? "DESC" : "ASC";
+                            self.trackView.repaintViews();
+                        }
+                    });
 
-                    }
-                
+                }
+
             });
         }
 

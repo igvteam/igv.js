@@ -12,12 +12,7 @@ var igv = (function (igv) {
 
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
-        var self = this,
-            $spinnerContainer,
-            dimen,
-            $div,
-            $canvas,
-            rulerSweeper;
+        const self = this;
 
         this.trackView = trackView;
         this.genomicState = genomicState;
@@ -27,13 +22,13 @@ var igv = (function (igv) {
         $container.append(this.$viewport);
 
         // viewport-content
-        $div = $("<div>", {class: 'igv-viewport-content-div'});
+        const $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
         $div.height(this.$viewport.height());
         this.contentDiv = $div.get(0);
 
         // viewport canvas
-        $canvas = $('<canvas>');
+        const $canvas = $('<canvas>');
         $(this.contentDiv).append($canvas);
         this.canvas = $canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
@@ -50,7 +45,7 @@ var igv = (function (igv) {
             this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
             $(this.contentDiv).append(this.$wholeGenomeContainer);
 
-            rulerSweeper = new igv.RulerSweeper(this);
+            const rulerSweeper = new igv.RulerSweeper(this);
             trackView.track.rulerSweepers.push(rulerSweeper);
             rulerSweeper.layoutWholeGenome();
 
@@ -68,8 +63,8 @@ var igv = (function (igv) {
         } else {
             addMouseHandlers.call(this);
 
-            dimen = Math.min(32, this.$viewport.height());
-            $spinnerContainer = $('<div class="igv-viewport-spinner">');
+            const dimen = Math.min(32, this.$viewport.height());
+            const $spinnerContainer = $('<div class="igv-viewport-spinner">');
             $spinnerContainer.css({'font-size': dimen + 'px'});
 
             this.$spinner = igv.createIcon("spinner");
@@ -100,7 +95,7 @@ var igv = (function (igv) {
             }
 
             this.$trackLabel.click(function (e) {
-                var str;
+                let str;
 
                 e.stopPropagation();
 
@@ -131,13 +126,11 @@ var igv = (function (igv) {
     };
 
     function createZoomInNotice($parent) {
-        var $e,
-            $notice;
 
-        $notice = $('<div class="zoom-in-notice-container">');
+        const $notice = $('<div class="zoom-in-notice-container">');
         $parent.append($notice);
 
-        $e = $('<div>');
+        const $e = $('<div>');
         $notice.append($e);
         $e.text('Zoom in to see features');
 
@@ -157,7 +150,7 @@ var igv = (function (igv) {
     //    animation: fa5-spin 2s infinite linear; }
 
     igv.Viewport.prototype.startSpinner = function () {
-        var $spinner = this.$spinner;
+        const $spinner = this.$spinner;
         if ($spinner) {
             $spinner.addClass("fa5-spin");
             $spinner.show();
@@ -165,7 +158,7 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.stopSpinner = function () {
-        var $spinner = this.$spinner;
+        const $spinner = this.$spinner;
         if ($spinner) {
             $spinner.hide();
             $spinner.removeClass("fa5-spin");
@@ -211,34 +204,35 @@ var igv = (function (igv) {
     }
 
     igv.Viewport.prototype.shift = function () {
-        var self = this;
-        var referenceFrame = self.genomicState.referenceFrame;
-        if (self.canvas && self.tile && self.tile.chr === referenceFrame.chrName && self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
-            var pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
+        const self = this;
+        const referenceFrame = self.genomicState.referenceFrame;
+
+        if (self.canvas &&
+            self.tile &&
+            self.tile.chr === referenceFrame.chrName &&
+            self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
+
+            const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
             self.canvas.style.left = pixelOffset + "px";
         }
     }
 
     igv.Viewport.prototype.loadFeatures = function () {
 
-        var self = this,
-            pixelWidth,
-            bpWidth,
-            bpStart,
-            bpEnd,
-            genomicState = self.genomicState,
-            referenceFrame = genomicState.referenceFrame,
-            chr;
+        var self = this;
 
-        chr = referenceFrame.chrName;
+        const genomicState = self.genomicState;
+        const referenceFrame = genomicState.referenceFrame;
+
+        const chr = referenceFrame.chrName;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-        var chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+        const chrLength = igv.browser.genome.getChromosome(chr).bpLength;
 
-        pixelWidth = $(self.contentDiv).width() * 3;
-        bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
-        bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
+        const pixelWidth = $(self.contentDiv).width() * 3;
+        const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+        const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
 
         if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
@@ -274,38 +268,40 @@ var igv = (function (igv) {
      */
     igv.Viewport.prototype.repaint = function (tile) {
 
-        var self = this,
-            pixelWidth, bpStart, bpEnd, bpPerPixel, features, genomicState, referenceFrame, drawConfiguration,
-            newCanvas, ctx, pixelHeight, devicePixelRatio, pixelOffset;
+        var self = this;
 
-        if (!tile) tile = this.tile;
-        if (!tile) return;
+        if (!tile) {
+            tile = this.tile;
+        }
+        if (!tile) {
+            return;
+        }
 
-        genomicState = this.genomicState;
-        referenceFrame = this.genomicState.referenceFrame;
-        bpStart = tile.startBP;
-        bpEnd = tile.endBP;
-        bpPerPixel = tile.bpPerPixel;
-        features = tile.features;
+        const genomicState = this.genomicState;
+        const referenceFrame = this.genomicState.referenceFrame;
+        const bpStart = tile.startBP;
+        const bpEnd = tile.endBP;
+        const bpPerPixel = tile.bpPerPixel;
+        const features = tile.features;
 
-        pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
-        pixelHeight = self.getContentHeight();
-        devicePixelRatio = window.devicePixelRatio;
-        newCanvas = $('<canvas>').get(0);
+        const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        const pixelHeight = self.getContentHeight();
+        const devicePixelRatio = window.devicePixelRatio;
+        const newCanvas = $('<canvas>').get(0);
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
         newCanvas.width = devicePixelRatio * pixelWidth;
         newCanvas.height = devicePixelRatio * pixelHeight;
-        ctx = newCanvas.getContext("2d");
+        const ctx = newCanvas.getContext("2d");
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+        const pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
         newCanvas.style.position = 'absolute';
         newCanvas.style.left = pixelOffset + "px";
         newCanvas.style.top = self.canvas.style.top + "px";
 
 
-        drawConfiguration =
+        const drawConfiguration =
         {
             features: features,
             context: ctx,
@@ -334,21 +330,24 @@ var igv = (function (igv) {
         }
 
         if (igv.browser.roi) {
-            var roiPromises = igv.browser.roi.map(function (r) {
+
+            const roiPromises = igv.browser.roi.map(function (r) {
                 return r.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
             });
 
             Promise.all(roiPromises)
+
                 .then(function (roiArray) {
                     for (var i = 0; i < roiArray.length; i++) {
                         drawConfiguration.features = roiArray[i];
                         igv.browser.roi[i].draw(drawConfiguration);
                     }
                 })
+
                 .catch(function (error) {
                     console.error(error);
                     self.loading = false;
-                    alert("ERROR DRAWING REGIONS OF INTEREST");
+                    igv.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
                 })
         }
 
@@ -366,7 +365,9 @@ var igv = (function (igv) {
 
 
     function showZoomInNotice() {
+
         const referenceFrame = this.genomicState.referenceFrame;
+
         return (
             this.trackView.track.visibilityWindow !== undefined &&
             this.trackView.track.visibilityWindow > 0 &&
@@ -398,27 +399,25 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.saveImage = function () {
 
-        var data, a, filename, w, h, x, y, imageData, exportCanvas, exportCtx;
-
         if (!this.ctx) return;
 
-        var devicePixelRatio = window.devicePixelRatio;
-        w = this.$viewport.width() * devicePixelRatio;
-        h = this.$viewport.height() * devicePixelRatio;
-        x = -$(this.canvas).position().left * devicePixelRatio;
-        y = -$(this.contentDiv).position().top * devicePixelRatio;
+        const devicePixelRatio = window.devicePixelRatio;
+        const w = this.$viewport.width() * devicePixelRatio;
+        const h = this.$viewport.height() * devicePixelRatio;
+        const x = -$(this.canvas).position().left * devicePixelRatio;
+        const y = -$(this.contentDiv).position().top * devicePixelRatio;
 
-        imageData = this.ctx.getImageData(x, y, w, h);
-        exportCanvas = document.createElement('canvas');
-        exportCtx = exportCanvas.getContext('2d');
+        const imageData = this.ctx.getImageData(x, y, w, h);
+        const exportCanvas = document.createElement('canvas');
+        const exportCtx = exportCanvas.getContext('2d');
         exportCanvas.width = imageData.width;
         exportCanvas.height = imageData.height;
         exportCtx.putImageData(imageData, 0, 0);
 
         // filename = this.trackView.track.name + ".png";
-        filename = this.$trackLabel.text() + ".png";
-        data = exportCanvas.toDataURL("image/png");
-        a = document.createElement('a');
+        const filename = this.$trackLabel.text() + ".png";
+        const data = exportCanvas.toDataURL("image/png");
+        const a = document.createElement('a');
         a.href = data;
         a.download = filename || "image.png";
         document.body.appendChild(a);
@@ -431,6 +430,7 @@ var igv = (function (igv) {
      */
     igv.Viewport.prototype.dispose = function () {
         const self = this;
+
         this.$viewport.off();
         this.$viewport.empty();
         $(this.contentDiv).off();
@@ -576,11 +576,11 @@ var igv = (function (igv) {
 
             } else {
                 // single-click
-                
+
                 if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-                    
+
                     self.trackView.track.shiftClick(xBP, e);
-                    
+
                 } else if (typeof self.trackView.track.popupData === "function") {
 
                     popupTimer = window.setTimeout(function () {
@@ -635,13 +635,13 @@ var igv = (function (igv) {
          * @returns {*}
          */
         function getPopupContent(e, viewport) {
-            
+
             const clickState = createClickState(e, viewport);
-   
+
             if (undefined === clickState) {
                 return;
             }
-            
+
             let track = viewport.trackView.track;
             const dataList = track.popupData(clickState);
 
@@ -649,7 +649,7 @@ var igv = (function (igv) {
 
             let content;
             if (undefined === popupClickHandlerResult) {
-                
+
                 if (dataList && dataList.length > 0) {
                     content = formatPopoverText(dataList);
                 }
