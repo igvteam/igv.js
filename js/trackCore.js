@@ -191,7 +191,7 @@ var igv = (function (igv) {
 
             if (config.type) return;
 
-            if (config.format !== undefined) {
+            if (config.format) {
                 switch (config.format.toLowerCase()) {
                     case "bw":
                     case "bigwig":
