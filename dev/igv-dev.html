@@ -58,7 +58,6 @@
     <script src="../js/bigwig/bwSource.js"></script>
 
 
-
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
     <script src="../js/feature/featureSource.js"></script>
@@ -143,7 +142,6 @@
     <script src="../js/trackCore.js"></script>
 
 
-
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
     <script src="../vendor/tdigest.js"></script>
@@ -162,7 +160,6 @@
 <div id="trackList"></div>
 
 
-
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
@@ -170,17 +167,14 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        igvdev.createTrackList(document.getElementById('trackList'))
+        igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-                .then(function (igore) {
-                    return igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-                })
                 .then(function (google) {
 
                     const igvDiv = document.getElementById("igvDiv");
 
                     const options = {
-                       // locus: 'myc',
+                        // locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true
@@ -195,13 +189,11 @@
 
                     igv.createBrowser(igvDiv, options)
                             .then(function (browser) {
-                                console.log("Browser created " + browser);
+                                igvdev.createTrackList(document.getElementById('trackList'), browser)
                             })
 
                 })
     });
-
-
 
 
     function findTracks(property, value) {
