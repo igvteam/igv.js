@@ -37,7 +37,6 @@ var igv = (function (igv) {
         this.disableButtons = false;
         this.order = config.order || -Number.MAX_VALUE;
         this.ignoreTrackMenu = false;
-        this.supportsWholeGenome = false;
 
         this.removable = false;
         this.reversed = false;
@@ -281,6 +280,10 @@ var igv = (function (igv) {
         }
 
     };
+
+    igv.SequenceTrack.prototype.supportsWholeGenome = function () {
+        return false;
+    }
 
     return igv;
 })

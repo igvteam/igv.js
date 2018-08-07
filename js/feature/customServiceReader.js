@@ -36,7 +36,6 @@ var igv = (function (igv) {
 
         this.config = config;
 
-        this.supportsWholeGenome = true;
     }
 
     igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {

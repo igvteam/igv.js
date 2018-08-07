@@ -55,8 +55,6 @@ var igv = (function (igv) {
         this.format = this.config.format;
 
         this.parser = this.getParser(this.format, this.config.decode);
-
-        this.supportsWholeGenome = (this.format === "seg");  // TODO -- move this up to track level
     };
 
     /**
