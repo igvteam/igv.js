@@ -486,7 +486,7 @@ var igv = (function (igv) {
             referenceFrame = config.viewport.genomicState.referenceFrame,
             coverageMap = features.coverageMap,
             nameValues = [],
-            coverageMapIndex = genomicLocation - coverageMap.bpStart,
+            coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
             coverage = coverageMap.coverage[coverageMapIndex];
 
         if (coverage) {
