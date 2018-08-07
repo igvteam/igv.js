@@ -191,6 +191,7 @@ var igv = (function (igv) {
             if (showZoomInNotice.call(this)) {
                 if (this.canvas) {
                     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.tile = undefined;
                 }
                 this.$zoomInNotice.show();
                 return false;
