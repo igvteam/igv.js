@@ -76,9 +76,13 @@ var igv = (function (igv) {
 
     igv.createTrack = function (config) {
 
-        var type, track;
+        // Lowercase format
+        if(config.format) {
+            config.format = config.format.toLowerCase();
+        }
 
-        type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
+
+        const type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
 
         switch (type) {
 

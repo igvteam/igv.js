@@ -43,9 +43,10 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        if ("bigwig" === config.format) {
+        const format = config.format.toLowerCase();
+        if ("bigwig" === format) {
             this.featureSource = new igv.BWSource(config);
-        } else if ("tdf" === config.format) {
+        } else if ("tdf" === format) {
             this.featureSource = new igv.TDFSource(config);
         } else {
             this.featureSource = new igv.FeatureSource(config);
