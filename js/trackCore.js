@@ -806,6 +806,10 @@ var igv = (function (igv) {
             const ee = genomicLocation + tolerance;
 
             return (igv.FeatureUtils.findOverlapping(features, ss, ee));
+        },
+
+        supportsWholeGenome: function () {
+            return false;
         }
     }
 

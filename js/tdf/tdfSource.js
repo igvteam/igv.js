@@ -127,6 +127,10 @@ var igv = (function (igv) {
             }
         }
     }
+    
+    igv.TDFSource.prototype.supportsWholeGenome = function() {
+        return false;
+    }
 
     function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 

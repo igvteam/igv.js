@@ -33,7 +33,6 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-        this.supportsWholeGenome = true;
         this.rulerSweepers = [];
         this.removable = false;
 
@@ -126,6 +125,10 @@ var igv = (function (igv) {
         }
 
     };
+    
+    igv.RulerTrack.prototype.supportsWholeGenome = function () {
+        return true;
+    }
 
     igv.Tick = function (pixelWidthBP, options) {
 

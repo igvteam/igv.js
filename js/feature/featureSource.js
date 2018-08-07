@@ -41,10 +41,10 @@ var igv = (function (igv) {
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
-        if(config.features && Array.isArray(config.features)) {
+        if (config.features && Array.isArray(config.features)) {
 
             let features = config.features;
-            if(config.mappings) {
+            if (config.mappings) {
                 mapProperties(features, config.mappings)
             }
             this.queryable = false;
@@ -57,8 +57,8 @@ var igv = (function (igv) {
             this.reader = new igv.ImmVarReader(config);
             this.queryable = true;
         } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
-                this.reader = new igv.GtexReader(config);
-                this.queryable = true;
+            this.reader = new igv.GtexReader(config);
+            this.queryable = true;
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
             this.queryable = true;
@@ -71,7 +71,7 @@ var igv = (function (igv) {
         }
         else {
             this.reader = new igv.FeatureFileReader(config);
-            if(config.queryable != undefined) {
+            if (config.queryable != undefined) {
                 this.queryable = config.queryable
             } else if (queryableFormats.has(config.format)) {
                 this.queryable = true;
@@ -84,7 +84,6 @@ var igv = (function (igv) {
         this.visibilityWindow = config.visibilityWindow;
 
     };
-
 
     igv.FeatureSource.prototype.getFileHeader = function () {
 
@@ -175,11 +174,11 @@ var igv = (function (igv) {
 
             .then(function (featureCache) {
 
-                const  isQueryable = self.queryable;
+                const isQueryable = self.queryable;
 
                 if ("all" === str) {
 
-                    if(isQueryable) {
+                    if (isQueryable) {
                         return [];
                     }
                     else {
@@ -204,7 +203,7 @@ var igv = (function (igv) {
 
             genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
-            if(self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
+            if (self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
 
                 return Promise.resolve(self.featureCache);
             }
@@ -212,14 +211,14 @@ var igv = (function (igv) {
 
                 // If a visibility window is defined, expand query interval
 
-                if(-1 !== visibilityWindow) {
-                    if(visibilityWindow <= 0) {
+                if (-1 !== visibilityWindow) {
+                    if (visibilityWindow <= 0) {
                         // Whole chromosome
                         intervalStart = 0;
                         intervalEnd = Number.MAX_VALUE;
                     }
                     else {
-                        if(visibilityWindow > (bpEnd - bpStart)) {
+                        if (visibilityWindow > (bpEnd - bpStart)) {
                             intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
                             intervalEnd = bpStart + visibilityWindow;
                         }
@@ -232,8 +231,8 @@ var igv = (function (igv) {
 
                     .then(function (featureList) {
 
-                        if(self.queryable === undefined) self.queryable = self.reader.indexed;
-                        
+                        if (self.queryable === undefined) self.queryable = self.reader.indexed;
+
                         if (featureList) {
 
                             if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
@@ -336,7 +335,7 @@ var igv = (function (igv) {
     // TODO -- filter by pixel size
     igv.FeatureSource.prototype.getWGFeatureCache = function (features) {
 
-        if(!this.wgFeatureCache) {
+        if (!this.wgFeatureCache) {
 
             const genome = igv.browser.genome;
 
