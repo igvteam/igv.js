@@ -60,7 +60,7 @@ var igv = (function (igv) {
         this.colorScale = new igv.BinnedColorScale(cs);
 
         // An obvious hack -- the source should be passed in as an arbument
-        if (config.format && ("gtexGWAS" === config.format)) {
+        if (config.format && ("gtexgwas" === config.format.toLowerCase())) {
             this.featureSource = new igv.FeatureSource(config);
         } else {
             this.featureSource = new igv.T2DVariantSource(config);
