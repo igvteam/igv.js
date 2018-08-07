@@ -1,6 +1,33 @@
 {
-  "name": "IGV",
-  "version": "0.0.1",
+  "name": "igv",
+  "version": "2.0.0-rc5",
+  "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
+  "main": "dist/igv.esm.js",
+  "files": ["dist/**"],
+  "scripts": {
+    "prepublishOnly": "grunt"
+  },
+  "author": {
+    "name": "Jim Robinson",
+    "email": "igv-team@broadinstitute.org",
+    "url": "https://igv.org"
+  },
+  "bugs": {
+    "url": "https://github.com/igvteam/igv.js/issues"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "homepage": "https://igv.org",
+  "keywords": [
+    "IGV",
+    "genomics",
+    "visualization"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igvteam/igv.js.git"
+  },
   "devDependencies": {
     "grunt": "1.0.3",
     "grunt-contrib-concat": "1.0.1",
