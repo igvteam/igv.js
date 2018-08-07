@@ -71,9 +71,6 @@ var igv = (function (igv) {
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = new igv.FeatureSource(this.config);
 
-        this.supportsWholeGenome = true;
-
-
     };
 
     igv.SegTrack.prototype.menuItemList = function () {
@@ -373,6 +370,11 @@ var igv = (function (igv) {
         return [{label: 'Sort by value', click: clickHandler, init: undefined}];
 
     };
+    
+    igv.SegTrack.prototype.supportsWholeGenome = function () {
+        return true;
+    }
+    
 
     return igv;
 

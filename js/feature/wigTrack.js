@@ -344,6 +344,31 @@ var igv = (function (igv) {
             return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
         }
     }
+    
+    igv.WIGTrack.prototype.getState = function () {
+
+        let config = this.config;
+
+        config.autoscale = this.autoscale;
+
+        if (!this.autoscale && this.dataRange) {
+            config.min = this.dataRange.min;
+            config.max = this.dataRange.max;
+        }
+        return config;
+
+    }
+    
+    igv.WIGTrack.prototype.supportsWholeGenome = function () {
+        
+        if(typeof this.featureSource.supportsWholeGenome === 'function') {
+            return this.featureSource.supportsWholeGenome();
+        }
+        else {
+            return false;
+        }
+        
+    }
 
 
     // Static function
@@ -374,19 +399,6 @@ var igv = (function (igv) {
         return {min: min, max: max};
     }
 
-    igv.WIGTrack.prototype.getState = function () {
-
-        let config = this.config;
-
-        config.autoscale = this.autoscale;
-
-        if (!this.autoscale && this.dataRange) {
-            config.min = this.dataRange.min;
-            config.max = this.dataRange.max;
-        }
-        return config;
-
-    }
 
     return igv;
 
