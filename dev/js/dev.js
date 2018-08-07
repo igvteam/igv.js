@@ -1,6 +1,6 @@
 var igvdev = {
 
-    createTrackList:  function (div) {
+    createTrackList:  function (div, browser) {
 
 
         return igv.xhr.loadJson("../test/testTracks.json")
@@ -24,7 +24,7 @@ var igvdev = {
                             // Convert to json to insure we can load json representations (not strictly neccessary).
                             var json = JSON.stringify(track);
 
-                            igv.browser.loadTrack(json);
+                            browser.loadTrack(json);
                         });
 
                         div.appendChild(trackDiv);
@@ -58,7 +58,7 @@ var igvdev = {
                             "visibilityWindow": 1000000
                         };
 
-                        igv.browser.loadTrack(gtexTrack);
+                        browser.loadTrack(gtexTrack);
 
                     });
 
