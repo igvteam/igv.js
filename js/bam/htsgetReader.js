@@ -30,7 +30,6 @@ var igv = (function (igv) {
 
     igv.HtsgetReader = function (config) {
         this.config = config;
-
         igv.BamUtils.setReaderDefaults(this, config);
     };
 
@@ -45,8 +44,8 @@ var igv = (function (igv) {
             queryChr = chr;
         }
 
-        const url = self.config.endpoint + '/reads/' + self.config.id +
-            '?referenceName=' + queryChr +
+        const url = self.config.endpoint + '/reads/' + self.config.id + '?format=BAM' +
+            '&referenceName=' + queryChr +
             '&start=' + start +
             '&end=' + end;
 
@@ -65,26 +64,38 @@ var igv = (function (igv) {
                 const ba = new Uint8Array(unc);
 
                 if (!self.header) {
-                    const genome = igv.browser ? igv.browser.genome : undefined;
+                    const genome = self.config.genome ? self.config.genome :
+                        igv.browser ? igv.browser.genome : undefined;
                     self.header = igv.BamUtils.decodeBamHeader(ba, genome);
                 }
 
-
                 const chrIdx = self.header.chrToIndex[chr];
 
-                if (chrIdx === undefined && queryChr !== self.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
-                    queryChr = self.header.chrAliasTable[chr]
-                    return self.readAlignments(queryChr, start, end, 1);
+                const alignmentContainer = new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
+                alignmentContainer.finish();
+
+                if(alignmentContainer.alignments.length === 0) {
+                    return tryChrAlias(chr, start, end);
                 }
                 else {
-                    const alignmentContainer = new igv.AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
-                    igv.BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
-                    alignmentContainer.finish()
                     return alignmentContainer;
                 }
-            })
+                
+                
+                function tryChrAlias(chr, start, end) {
+                    if (chrIdx === undefined && self.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
+                        queryChr = self.header.chrAliasTable[chr]
+                        return self.readAlignments(queryChr, start, end, 1);
+                    }
+                    else {
+                        return alignmentContainer;
+                    }
+                }
 
+            })
     }
+    
 
 
     function loadUrls(urls) {
