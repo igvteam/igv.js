@@ -20,7 +20,7 @@ function runHtsgetTests() {
 
         var url = 'http://htsnexus.rnd.dnanex.us/v1',
             id = 'BroadHiSeqX_b37/NA12878',
-            chr = '1',
+            chr = 'chr1',
             s = 10000,
             end = 10100;
 
