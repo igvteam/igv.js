@@ -168,115 +168,100 @@ var igv = (function (igv) {
 
         const self = this;
         const queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
+        const maxRows = self.config.maxRows || 500;
 
-        if (this.static) {
-            return Promise.resolve(self.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
-        }
+        return getFeatureCache()
 
-        else {
+            .then(function (featureCache) {
 
-            const maxRows = self.config.maxRows || 500;
+                const isQueryable = self.queryable;
 
-            if (this.featureCache && this.config.features) {
-                return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+                if ("all" === chr.toLowerCase()) {
+                    if (isQueryable) {
+                        return [];
+                    }
+                    else {
+                        const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
+                        return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
+
+                    }
+                }
+                else {
+                    return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+                }
+
+            })
+
+
+        function getFeatureCache() {
+
+            var genomicInterval;
+
+            let intervalStart = bpStart;
+            let intervalEnd = bpEnd;
+
+            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+            if (self.featureCache &&
+                (self.static || self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
+
+                return Promise.resolve(self.featureCache);
             }
-
             else {
-                return getFeatureCache()
 
-                    .then(function (featureCache) {
+                // If a visibility window is defined, expand query interval
 
-                        const isQueryable = self.queryable;
+                if (-1 !== visibilityWindow) {
+                    if (visibilityWindow <= 0) {
+                        // Whole chromosome
+                        intervalStart = 0;
+                        intervalEnd = Number.MAX_VALUE;
+                    }
+                    else {
+                        if (visibilityWindow > (bpEnd - bpStart)) {
+                            intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
+                            intervalEnd = bpStart + visibilityWindow;
+                        }
+                    }
+                    genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+                }
 
-                        if ("all" === chr.toLowerCase()) {
 
-                            if (isQueryable) {
-                                return [];
+                return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+
+                    .then(function (featureList) {
+
+                        if (self.queryable === undefined) self.queryable = self.reader.indexed;
+
+                        if (featureList) {
+
+                            if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
+                                featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
                             }
-                            else {
-                                const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
-                                return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
 
+                            // Assign overlapping features to rows
+                            packFeatures(featureList, maxRows);
+
+                            // Note - replacing previous cache with new one
+                            self.featureCache = self.queryable ?
+                                new igv.FeatureCache(featureList, genomicInterval) :
+                                new igv.FeatureCache(featureList);
+
+
+                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                            if (self.config.searchable) {
+                                addFeaturesToDB(featureList);
                             }
                         }
                         else {
-                            return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+                            self.featureCache = new igv.FeatureCache();     // Empty cache
                         }
+
+                        return self.featureCache;
 
                     })
             }
-
-
-            function getFeatureCache() {
-
-                var genomicInterval;
-
-                let intervalStart = bpStart;
-                let intervalEnd = bpEnd;
-
-                genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-                if (self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-
-                    return Promise.resolve(self.featureCache);
-                }
-                else {
-
-                    // If a visibility window is defined, expand query interval
-
-                    if (-1 !== visibilityWindow) {
-                        if (visibilityWindow <= 0) {
-                            // Whole chromosome
-                            intervalStart = 0;
-                            intervalEnd = Number.MAX_VALUE;
-                        }
-                        else {
-                            if (visibilityWindow > (bpEnd - bpStart)) {
-                                intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
-                                intervalEnd = bpStart + visibilityWindow;
-                            }
-                        }
-                        genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
-                    }
-
-
-                    return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-
-                        .then(function (featureList) {
-
-                            if (self.queryable === undefined) self.queryable = self.reader.indexed;
-
-                            if (featureList) {
-
-                                if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                    featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
-                                }
-
-                                // Assign overlapping features to rows
-                                packFeatures(featureList, maxRows);
-
-                                // Note - replacing previous cache with new one
-                                self.featureCache = self.queryable ?
-                                    new igv.FeatureCache(featureList, genomicInterval) :
-                                    new igv.FeatureCache(featureList);
-
-
-                                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                                if (self.config.searchable) {
-                                    addFeaturesToDB(featureList);
-                                }
-                            }
-                            else {
-                                self.featureCache = new igv.FeatureCache();     // Empty cache
-                            }
-
-                            return self.featureCache;
-
-                        })
-                }
-            }
         }
-
     };
 
 
