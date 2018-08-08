@@ -174,7 +174,7 @@ var igv = (function (igv) {
             locus = session.getAttribute("locus");
             ucscID = session.getAttribute("ucscID");
 
-            if (knownGenomes.hasOwnProperty(genome)) {
+            if (knownGenomes && knownGenomes.hasOwnProperty(genome)) {
                 self.genome = genome;
 
             } else {

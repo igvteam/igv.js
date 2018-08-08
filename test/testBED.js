@@ -18,30 +18,7 @@ function runBedTests() {
             }
         }
     };
-
-    // asyncTest("Missing line feed", function () {
-    //
-    //     var chr = "chr1",
-    //         bpStart = 0,
-    //         bpEnd = Number.MAX_VALUE,
-    //         featureSource = new igv.FeatureSource({
-    //             format: 'bed',
-    //             indexed: false,
-    //             url: 'data/bed/missing_linefeed.bed'
-    //         });
-    //
-    //     // Must get file header first
-    //     featureSource.getFeatures(chr, bpStart, bpEnd)
-    //         .then(function (features) {
-    //
-    //             equal(4, features.length);   // feature count. Determined by grepping file
-    //
-    //             start();
-    //         })
-    //         .catch(function (error) {
-    //             console.log(error);
-    //         });
-    // });
+    
 
     asyncTest("Missing line feed  - gzipped", function () {
 
