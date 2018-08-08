@@ -48,6 +48,8 @@ var igv = (function (igv) {
                 mapProperties(features, config.mappings)
             }
             this.queryable = false;
+            this.featureCache = new igv.FeatureCache(features);
+            this.static = true;
 
         }
         else if (config.sourceType === "ga4gh") {
@@ -164,102 +166,114 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-        var self = this, maxRows, str, queryChr;
+        const self = this;
+        const queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
 
-        queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
-        maxRows = self.config.maxRows || 500;
-        str = chr.toLowerCase();
+        if (this.static) {
+            return Promise.resolve(self.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
+        }
 
-        return getFeatureCache()
+        else {
 
-            .then(function (featureCache) {
+            const maxRows = self.config.maxRows || 500;
 
-                const isQueryable = self.queryable;
-
-                if ("all" === str) {
-
-                    if (isQueryable) {
-                        return [];
-                    }
-                    else {
-                        const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
-                        return wgFeatureCache.queryFeatures(str, bpStart, bpEnd);
-
-                    }
-                }
-                else {
-                    return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
-                }
-
-            })
-
-
-        function getFeatureCache() {
-
-            var genomicInterval;
-
-            let intervalStart = bpStart;
-            let intervalEnd = bpEnd;
-
-            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-            if (self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
-
-                return Promise.resolve(self.featureCache);
+            if (this.featureCache && this.config.features) {
+                return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
             }
+
             else {
+                return getFeatureCache()
 
-                // If a visibility window is defined, expand query interval
+                    .then(function (featureCache) {
 
-                if (-1 !== visibilityWindow) {
-                    if (visibilityWindow <= 0) {
-                        // Whole chromosome
-                        intervalStart = 0;
-                        intervalEnd = Number.MAX_VALUE;
-                    }
-                    else {
-                        if (visibilityWindow > (bpEnd - bpStart)) {
-                            intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
-                            intervalEnd = bpStart + visibilityWindow;
-                        }
-                    }
-                    genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
-                }
+                        const isQueryable = self.queryable;
 
+                        if ("all" === chr.toLowerCase()) {
 
-                return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-
-                    .then(function (featureList) {
-
-                        if (self.queryable === undefined) self.queryable = self.reader.indexed;
-
-                        if (featureList) {
-
-                            if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
+                            if (isQueryable) {
+                                return [];
                             }
+                            else {
+                                const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
+                                return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
 
-                            // Assign overlapping features to rows
-                            packFeatures(featureList, maxRows);
-
-                            // Note - replacing previous cache with new one
-                            self.featureCache = self.queryable ?
-                                new igv.FeatureCache(featureList, genomicInterval) :
-                                new igv.FeatureCache(featureList);
-
-
-                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                            if (self.config.searchable) {
-                                addFeaturesToDB(featureList);
                             }
                         }
                         else {
-                            self.featureCache = new igv.FeatureCache();     // Empty cache
+                            return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
                         }
 
-                        return self.featureCache;
-
                     })
+            }
+
+
+            function getFeatureCache() {
+
+                var genomicInterval;
+
+                let intervalStart = bpStart;
+                let intervalEnd = bpEnd;
+
+                genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+                if (self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
+
+                    return Promise.resolve(self.featureCache);
+                }
+                else {
+
+                    // If a visibility window is defined, expand query interval
+
+                    if (-1 !== visibilityWindow) {
+                        if (visibilityWindow <= 0) {
+                            // Whole chromosome
+                            intervalStart = 0;
+                            intervalEnd = Number.MAX_VALUE;
+                        }
+                        else {
+                            if (visibilityWindow > (bpEnd - bpStart)) {
+                                intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
+                                intervalEnd = bpStart + visibilityWindow;
+                            }
+                        }
+                        genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+                    }
+
+
+                    return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+
+                        .then(function (featureList) {
+
+                            if (self.queryable === undefined) self.queryable = self.reader.indexed;
+
+                            if (featureList) {
+
+                                if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
+                                    featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
+                                }
+
+                                // Assign overlapping features to rows
+                                packFeatures(featureList, maxRows);
+
+                                // Note - replacing previous cache with new one
+                                self.featureCache = self.queryable ?
+                                    new igv.FeatureCache(featureList, genomicInterval) :
+                                    new igv.FeatureCache(featureList);
+
+
+                                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+                                if (self.config.searchable) {
+                                    addFeaturesToDB(featureList);
+                                }
+                            }
+                            else {
+                                self.featureCache = new igv.FeatureCache();     // Empty cache
+                            }
+
+                            return self.featureCache;
+
+                        })
+                }
             }
         }
 
