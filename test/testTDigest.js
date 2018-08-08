@@ -17,7 +17,7 @@ function runTDigestTests() {
 
     })
 
-    test("Print examples", function () {
+    function printExamples () {
 
 // Note:  Convenience methd, no real tests here.
 
@@ -92,5 +92,5 @@ function runTDigestTests() {
 
 
         ok(true);
-    })
+    }
 }
