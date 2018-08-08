@@ -13,13 +13,13 @@ function runGenomeTests() {
             };
 
 
-        igv.loadGenome(reference).then(function (genome) {
+        igv.GenomeUtils.loadGenome(reference).then(function (genome) {
 
             ok(genome);
 
             equal(86, genome.chromosomeNames.length);
 
-            equal(249250, genome.getCumulativeOffset("2"));
+            equal(genome.getCumulativeOffset("2"), 249250621);
 
             start();
 
