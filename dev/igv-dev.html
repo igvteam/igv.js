@@ -177,7 +177,7 @@
                         // locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
-                        queryParametersSupported: true
+                        queryParametersSupported: true,
 //  GTEX search service.  Uncomment to test.
 //                        search: {
 //                            url: "https://gtexportal.org/rest/v1/reference/featuresDev/$FEATURE$?format=json&datasetId=gtex_v7",
@@ -185,6 +185,15 @@
 //                            geneField: "geneSymbol",
 //                            snpField: 'snpId'
 //                        },
+                        tracks: [
+                            {
+                                url: 'http://data.broadinstitute.org/igvdata/test/data/bed/test.bed.gz',
+                                indexURL: 'http://data.broadinstitute.org/igvdata/test/data/bed/test.bed.gz.tbi',
+//                                url: 'http://localhost:5000/static/data/public/test.bed.gz',
+//                                indexURL: 'http://localhost:5000/static/data/public/test.bed.gz.tbi',
+                                name: 'small bed'
+                            }
+                        ]
                     };
 
                     igv.createBrowser(igvDiv, options)
