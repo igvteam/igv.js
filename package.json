@@ -3,9 +3,11 @@
   "version": "2.0.0-rc5",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
-  "files": ["dist/**"],
+  "files": [
+    "dist/**"
+  ],
   "scripts": {
-    "prepublishOnly": "grunt"
+    "prepack": "grunt"
   },
   "author": {
     "name": "Jim Robinson",
