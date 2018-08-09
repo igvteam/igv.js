@@ -171,24 +171,14 @@
 <script type="text/javascript">
 
     function submitGenome() {
-        let fasta,
-            index,
-            fileOrObject;
 
-        fasta = document.getElementById('fasta').files[0];
-        index = document.getElementById('index').files[0];
+        var fasta = document.getElementById('fasta').files[0];
+        var index = document.getElementById('index').files[0];
 
-        if (true === igv.isFilePath(fasta) && 'json' === igv.getExtension({ url:fasta })) {
-            fileOrObject = fasta;
-        } else {
-            fileOrObject =
-                {
-                    fastaURL: fasta,
-                    indexURL: index
-                }
-        }
-
-        igv.browser.loadGenome(fileOrObject);
+        igv.browser.loadGenome({
+            fastaURL: fasta,
+            indexURL: index
+        });
     }
 
     function selectGenome() {
