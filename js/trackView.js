@@ -240,6 +240,8 @@ var igv = (function (igv) {
             indexDestination,
             indexDragged;
 
+        const browser = this.browser;
+
         this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
         $viewportContainer.append(this.$trackDragScrim);
         this.$trackDragScrim.hide();
@@ -271,11 +273,11 @@ var igv = (function (igv) {
 
             if ((dragDestination && dragged) && (dragDestination !== dragged)) {
 
-                indexDestination = igv.browser.trackViews.indexOf(dragDestination);
-                indexDragged = igv.browser.trackViews.indexOf(dragged);
+                indexDestination = browser.trackViews.indexOf(dragDestination);
+                indexDragged = browser.trackViews.indexOf(dragged);
 
-                igv.browser.trackViews[indexDestination] = dragged;
-                igv.browser.trackViews[indexDragged] = dragDestination;
+                browser.trackViews[indexDestination] = dragged;
+                browser.trackViews[indexDragged] = dragDestination;
 
                 if (indexDestination < indexDragged) {
                     $(dragged.trackDiv).insertBefore($(dragDestination.trackDiv));
@@ -386,7 +388,7 @@ var igv = (function (igv) {
 
         var width;
 
-        width = igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length;
+        width = this.browser.viewportContainerWidth() / this.browser.genomicStateList.length;
 
         if (width === 0) return;
         this.viewports.forEach(function (viewport) {
@@ -428,7 +430,7 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.updateViews = function (force) {
 
-        if (!(igv.browser && igv.browser.genomicStateList)) return;
+        if (!(this.browser && this.browser.genomicStateList)) return;
 
         if (igv.TrackView.DisableUpdates) return;
 
@@ -514,7 +516,7 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.getInViewFeatures = function (force) {
 
-        if (!(igv.browser && igv.browser.genomicStateList)) {
+        if (!(this.browser && this.browser.genomicStateList)) {
             return Promise.resolve([]);
         }
 

@@ -29,9 +29,7 @@ var igv = (function (igv) {
 
         this.config = options;
 
-        igv.browser = this;   // Make globally visible (for use in html markup).
-
-        igv.browser.$root = $('<div id="igvRootDiv" class="igv-root-div">');
+        this.$root = $('<div id="igvRootDiv" class="igv-root-div">');
 
         initialize.call(this, options);
 
@@ -203,7 +201,7 @@ var igv = (function (igv) {
 
                 if (true === config.showIdeogram) {
                     panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
-                    self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth);
+                    self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth, self);
                     self.ideoPanel.repaint();
                 }
 
@@ -609,7 +607,7 @@ var igv = (function (igv) {
 
         function postInit(track) {
 
-            if(track && typeof track.postInit === 'function') {
+            if (track && typeof track.postInit === 'function') {
                 return track.postInit();
             }
             else {
@@ -918,7 +916,7 @@ var igv = (function (igv) {
         }
 
         // Don't autoscale while dragging.
-        if(self.isDragging) {
+        if (self.isDragging) {
             views.forEach(function (trackView) {
                 trackView.updateViews();
             })
@@ -1205,6 +1203,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
 
+        const genome = this.genome;
+
         var referenceFrame,
             viewportWidth,
             leftMatePairGenomicState,
@@ -1239,7 +1239,7 @@ var igv = (function (igv) {
             ss = alignmentCC - (bpp * (pixels / 2));
             ee = ss + (bpp * pixels);
 
-            return new igv.ReferenceFrame(chromosomeName, ss, ee, bpp);
+            return new igv.ReferenceFrame(genome, chromosomeName, ss, ee, bpp);
         }
 
     };
@@ -1260,6 +1260,9 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
+
+        const genome = this.genome;
+
         var self = this,
             index,
             viewportContainerWidth,
@@ -1282,13 +1285,11 @@ var igv = (function (igv) {
         this.genomicStateList.splice(index, 1);
 
         this.genomicStateList.forEach(function (gs, i) {
-            var bpp,
-                ee;
 
-            ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
-            bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
+            const ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
+            const bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
 
-            self.genomicStateList[i].referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
+            self.genomicStateList[i].referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
         });
 
         this.updateUIWithGenomicStateListChange(this.genomicStateList);
@@ -1461,7 +1462,7 @@ var igv = (function (igv) {
         function createGenomicStateList(loci) {
 
 
-            let searchConfig = igv.browser.searchConfig;
+            let searchConfig = self.searchConfig;
             let ordered = {};
             let unique = [];
 
@@ -1514,7 +1515,7 @@ var igv = (function (igv) {
                                 end: feature.end,
                                 locusSearchString: locus
                             }
-                            igv.Browser.validateLocusExtent(genomicState.chromosome, genomicState);
+                            igv.Browser.validateLocusExtent(genomicState.chromosome, genomicState, self);
                             result.push(genomicState);
                             dictionary[locus] = genomicState;
                         }
@@ -1558,10 +1559,14 @@ var igv = (function (igv) {
 
 
             function appendReferenceFrames(genomicStateList) {
-                var viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
+
+                const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
+                const genome = this.genome;
+
                 genomicStateList.forEach(function (gs) {
-                    gs.referenceFrame = new igv.ReferenceFrame(gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
+                    gs.referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
                 });
+
                 return genomicStateList;
             }
 
@@ -1643,9 +1648,9 @@ var igv = (function (igv) {
                         end = start + 1;
                     }
 
-                    if (igv.browser.flanking) {
-                        start = Math.max(0, start - igv.browser.flanking);
-                        end += igv.browser.flanking;
+                    if (self.flanking) {
+                        start = Math.max(0, start - self.flanking);
+                        end += self.flanking;
                     }
 
                     geneNameLocusObject = Object.assign({}, result);
@@ -1668,6 +1673,65 @@ var igv = (function (igv) {
 
 
                 }
+
+
+                /**
+                 * Parse the igv line-oriented (non json) search results.
+                 * Example
+                 *    EGFR    chr7:55,086,724-55,275,031    refseq
+                 *
+                 * @param data
+                 */
+                function parseSearchResults(data) {
+
+                    var lines,
+                        linesTrimmed = [],
+                        results = [];
+
+                    lines = igv.splitLines(data);
+
+                    lines.forEach(function (item) {
+                        if ("" === item) {
+                            // do nothing
+                        } else {
+                            linesTrimmed.push(item);
+                        }
+                    });
+
+                    linesTrimmed.forEach(function (line) {
+
+                        var tokens = line.split("\t"),
+                            source,
+                            locusTokens,
+                            rangeTokens,
+                            obj;
+
+                        if (tokens.length >= 3) {
+
+                            locusTokens = tokens[1].split(":");
+                            rangeTokens = locusTokens[1].split("-");
+                            source = tokens[2].trim();
+
+                            obj =
+                            {
+                                gene: tokens[0],
+                                chromosome: self.genome.getChromosomeName(locusTokens[0].trim()),
+                                start: parseInt(rangeTokens[0].replace(/,/g, '')),
+                                end: parseInt(rangeTokens[1].replace(/,/g, '')),
+                                type: ("gtex" === source ? "snp" : "gene")
+                            };
+
+                            results.push(obj);
+
+                        }
+
+                    });
+
+                    return results;
+
+                }
+
+                s
 
             }
 
@@ -1719,7 +1783,7 @@ var igv = (function (igv) {
 
                     }
 
-                    igv.Browser.validateLocusExtent(locusObject.chromosome, locusObject);
+                    igv.Browser.validateLocusExtent(locusObject.chromosome, locusObject, self);
 
                     return locusObject;
 
@@ -1729,7 +1793,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.validateLocusExtent = function (chromosome, extent) {
+    igv.Browser.validateLocusExtent = function (chromosome, extent, browser) {
 
         var ss = extent.start,
             ee = extent.end,
@@ -1737,29 +1801,29 @@ var igv = (function (igv) {
 
         if (undefined === ee) {
 
-            ss -= igv.browser.minimumBasesExtent() / 2;
-            ee = ss + igv.browser.minimumBasesExtent();
+            ss -= browser.minimumBasesExtent() / 2;
+            ee = ss + browser.minimumBasesExtent();
 
             if (ee > chromosome.bpLength) {
                 ee = chromosome.bpLength;
-                ss = ee - igv.browser.minimumBasesExtent();
+                ss = ee - browser.minimumBasesExtent();
             } else if (ss < 0) {
                 ss = 0;
-                ee = igv.browser.minimumBasesExtent();
+                ee = browser.minimumBasesExtent();
             }
 
-        } else if (ee - ss < igv.browser.minimumBasesExtent()) {
+        } else if (ee - ss < browser.minimumBasesExtent()) {
 
             center = (ee + ss) / 2;
-            if (center - igv.browser.minimumBasesExtent() / 2 < 0) {
+            if (center - browser.minimumBasesExtent() / 2 < 0) {
                 ss = 0;
-                ee = ss + igv.browser.minimumBasesExtent();
-            } else if (center + igv.browser.minimumBasesExtent() / 2 > chromosome.bpLength) {
+                ee = ss + browser.minimumBasesExtent();
+            } else if (center + browser.minimumBasesExtent() / 2 > chromosome.bpLength) {
                 ee = chromosome.bpLength;
-                ss = ee - igv.browser.minimumBasesExtent();
+                ss = ee - browser.minimumBasesExtent();
             } else {
-                ss = center - igv.browser.minimumBasesExtent() / 2;
-                ee = ss + igv.browser.minimumBasesExtent();
+                ss = center - browser.minimumBasesExtent() / 2;
+                ee = ss + browser.minimumBasesExtent();
             }
         }
 
@@ -1767,61 +1831,6 @@ var igv = (function (igv) {
         extent.end = Math.floor(ee);
     };
 
-    /**
-     * Parse the igv line-oriented (non json) search results.
-     * Example
-     *    EGFR    chr7:55,086,724-55,275,031    refseq
-     *
-     * @param data
-     */
-    function parseSearchResults(data) {
-
-        var lines,
-            linesTrimmed = [],
-            results = [];
-
-        lines = igv.splitLines(data);
-
-        lines.forEach(function (item) {
-            if ("" === item) {
-                // do nothing
-            } else {
-                linesTrimmed.push(item);
-            }
-        });
-
-        linesTrimmed.forEach(function (line) {
-
-            var tokens = line.split("\t"),
-                source,
-                locusTokens,
-                rangeTokens,
-                obj;
-
-            if (tokens.length >= 3) {
-
-                locusTokens = tokens[1].split(":");
-                rangeTokens = locusTokens[1].split("-");
-                source = tokens[2].trim();
-
-                obj =
-                {
-                    gene: tokens[0],
-                    chromosome: igv.browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                };
-
-                results.push(obj);
-
-            }
-
-        });
-
-        return results;
-
-    }
 
     igv.Browser.prototype.loadSampleInformation = function (url) {
         var name = url;

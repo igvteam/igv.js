@@ -43,7 +43,7 @@ var cBio = {
             })
     },
 
-    initMenu: function (div) {
+    initMenu: function (div, browser) {
 
         let self = this;
 
@@ -89,7 +89,7 @@ var cBio = {
                                         },
 
                                     }
-                                    igv.browser.loadTrack(trackJson);
+                                    browser.loadTrack(trackJson);
 
                                 });
 

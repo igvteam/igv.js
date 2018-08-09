@@ -87,13 +87,7 @@ var igv = (function (igv) {
     }
 
     igv.FastaSequence.prototype.getSequence = function (chr, start, end) {
-
-        var genome;
-        genome = igv.browser ? igv.browser.genome : undefined;
-        if(genome) {
-            chr = genome.getChromosomeName(chr);  // Translates from alias if required
-        }
-
+        
         if (this.indexed) {
             return getSequenceIndexed.call(this, chr, start, end);
         }

@@ -72,6 +72,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         var self = this;
+     
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
             .then(function (alignmentContainer) {
