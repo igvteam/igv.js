@@ -167,13 +167,16 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        cBio.initMenu(document.getElementById('trackList'));
+
 
         const options = {
             genome: "hg19"
         }
 
-        igv.createBrowser(igvDiv, options);
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    cBio.initMenu(document.getElementById('trackList'), browser);
+                })
 
 
     });
