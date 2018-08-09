@@ -59,6 +59,7 @@ var igv = (function (igv) {
         setTrackOrder(config);
 
         browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
+        
 
         $(parentDiv).append(browser.$root);
 
@@ -89,6 +90,9 @@ var igv = (function (igv) {
         if (config.apiKey) igv.setGoogleApiKey(config.apiKey);
 
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
+
+        // Make globally visible -- this will be refactored out, but it will take some time.
+        igv.browser = browser;
 
         return doPromiseChain(browser, config);
 
