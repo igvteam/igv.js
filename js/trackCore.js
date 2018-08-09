@@ -319,7 +319,9 @@ var igv = (function (igv) {
 
         track.height = config.height || 100;
 
-        if (config.autoHeight === undefined)  config.autoHeight = config.autoheight; // Some case confusion in the initial releasae
+        if (config.autoHeight === undefined)  {
+            config.autoHeight = config.autoheight;
+        } // Some case confusion in the initial releasae
 
         track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
         track.minHeight = config.minHeight || Math.min(25, track.height);

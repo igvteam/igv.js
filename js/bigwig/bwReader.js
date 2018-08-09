@@ -125,9 +125,17 @@ var igv = (function (igv) {
                                 size: item.dataSize
                             }, true)
                                 .then(function (uint8Array) {
+                                    let plain;
+                                    const isCompressed = self.header.uncompressBuffSize > 0
+                                    if(isCompressed) {
+                                        var inflate = new Zlib.Inflate(uint8Array);
+                                        plain = inflate.decompress();
+                                    }
+                                    else {
+                                        plain = uint8Array;
+                                    }
+
                                     var features = [];
-                                    var inflate = new Zlib.Inflate(uint8Array);
-                                    var plain = inflate.decompress();
                                     decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, self.chromTree.idToChrom, windowFunction);
                                     return features;
                                 })
@@ -177,72 +185,77 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
-            range: {
-                start: 0,
-                size: BBFILE_HEADER_SIZE
-            }
-        }))
-            .then(function (data) {
-
-                var header;
-
-                // Assume low-to-high unless proven otherwise
-                self.littleEndian = true;
-
-                var binaryParser = new igv.BinaryParser(new DataView(data));
-
-                var magic = binaryParser.getUInt();
-
-                if (magic === BIGWIG_MAGIC_LTH) {
-                    self.type = "BigWig";
+        if (self.header) {
+            return Promise.resolve(header);
+        }
+        else {
+            return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                range: {
+                    start: 0,
+                    size: BBFILE_HEADER_SIZE
                 }
-                else if (magic == BIGBED_MAGIC_LTH) {
-                    self.type = "BigBed";
-                }
-                else {
-                    //Try big endian order
-                    self.littleEndian = false;
+            }))
+                .then(function (data) {
 
-                    binaryParser.littleEndian = false;
-                    binaryParser.position = 0;
+                    var header;
+
+                    // Assume low-to-high unless proven otherwise
+                    self.littleEndian = true;
+
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
+
                     var magic = binaryParser.getUInt();
 
-                    if (magic === BIGWIG_MAGIC_HTL) {
+                    if (magic === BIGWIG_MAGIC_LTH) {
                         self.type = "BigWig";
                     }
-                    else if (magic == BIGBED_MAGIC_HTL) {
+                    else if (magic == BIGBED_MAGIC_LTH) {
                         self.type = "BigBed";
                     }
                     else {
-                        // TODO -- error, unknown file type  or BE
+                        //Try big endian order
+                        self.littleEndian = false;
+
+                        binaryParser.littleEndian = false;
+                        binaryParser.position = 0;
+                        var magic = binaryParser.getUInt();
+
+                        if (magic === BIGWIG_MAGIC_HTL) {
+                            self.type = "BigWig";
+                        }
+                        else if (magic == BIGBED_MAGIC_HTL) {
+                            self.type = "BigBed";
+                        }
+                        else {
+                            // TODO -- error, unknown file type  or BE
+                        }
                     }
-                }
-                // Table 5  "Common header for BigWig and BigBed files"
-                header = {};
-                header.bwVersion = binaryParser.getUShort();
-                header.nZoomLevels = binaryParser.getUShort();
-                header.chromTreeOffset = binaryParser.getLong();
-                header.fullDataOffset = binaryParser.getLong();
-                header.fullIndexOffset = binaryParser.getLong();
-                header.fieldCount = binaryParser.getUShort();
-                header.definedFieldCount = binaryParser.getUShort();
-                header.autoSqlOffset = binaryParser.getLong();
-                header.totalSummaryOffset = binaryParser.getLong();
-                header.uncompressBuffSize = binaryParser.getInt();
-                header.reserved = binaryParser.getLong();
+                    // Table 5  "Common header for BigWig and BigBed files"
+                    header = {};
+                    header.bwVersion = binaryParser.getUShort();
+                    header.nZoomLevels = binaryParser.getUShort();
+                    header.chromTreeOffset = binaryParser.getLong();
+                    header.fullDataOffset = binaryParser.getLong();
+                    header.fullIndexOffset = binaryParser.getLong();
+                    header.fieldCount = binaryParser.getUShort();
+                    header.definedFieldCount = binaryParser.getUShort();
+                    header.autoSqlOffset = binaryParser.getLong();
+                    header.totalSummaryOffset = binaryParser.getLong();
+                    header.uncompressBuffSize = binaryParser.getInt();
+                    header.reserved = binaryParser.getLong();
 
-                return header;
+                    return header;
 
-            })
+                })
 
-            .then(function (header) {
+                .then(function (header) {
 
-                self.header = header;
+                    self.header = header;
 
-                return loadZoomHeadersAndChrTree.call(self);
+                    return loadZoomHeadersAndChrTree.call(self);
 
-            })
+                })
+        }
 
 
         function loadZoomHeadersAndChrTree() {

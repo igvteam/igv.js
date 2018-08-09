@@ -19,14 +19,24 @@ function runSampleInformationTests() {
         }
     };
 
-    asyncTest('Load Plink', function() {
-        igv.sampleInformation.loadPlinkFile('data/misc/pedigree.fam').then(function(attributes) {
-            ok(attributes);
-            console.log(attributes);
-            equal(attributes['SS0012979'].familyId, 14109);
-            equal(igv.sampleInformation.getAttributes('SS0012979').familyId, 14109);
+    asyncTest('Load Plink', function () {
+        igv.sampleInformation.loadPlinkFile('data/misc/pedigree.fam')
 
-        });
+            .then(function (attributes) {
+
+                ok(attributes);
+                console.log(attributes);
+                equal(attributes['SS0012979'].familyId, 14109);
+                equal(igv.sampleInformation.getAttributes('SS0012979').familyId, 14109);
+                start();
+            })
+
+            .catch(function (error) {
+                console.log(error);
+                ok(false);
+                start();
+            });
+
     })
 
 }

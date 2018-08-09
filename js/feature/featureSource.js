@@ -48,6 +48,8 @@ var igv = (function (igv) {
                 mapProperties(features, config.mappings)
             }
             this.queryable = false;
+            this.featureCache = new igv.FeatureCache(features);
+            this.static = true;
 
         }
         else if (config.sourceType === "ga4gh") {
@@ -164,11 +166,9 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-        var self = this, maxRows, str, queryChr;
-
-        queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
-        maxRows = self.config.maxRows || 500;
-        str = chr.toLowerCase();
+        const self = this;
+        const queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
+        const maxRows = self.config.maxRows || 500;
 
         return getFeatureCache()
 
@@ -176,14 +176,13 @@ var igv = (function (igv) {
 
                 const isQueryable = self.queryable;
 
-                if ("all" === str) {
-
+                if ("all" === chr.toLowerCase()) {
                     if (isQueryable) {
                         return [];
                     }
                     else {
                         const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
-                        return wgFeatureCache.queryFeatures(str, bpStart, bpEnd);
+                        return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
 
                     }
                 }
@@ -203,7 +202,8 @@ var igv = (function (igv) {
 
             genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
-            if (self.featureCache && (self.featureCache.containsRange(genomicInterval) || "all" === str)) {
+            if (self.featureCache &&
+                (self.static || self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
 
                 return Promise.resolve(self.featureCache);
             }
@@ -262,7 +262,6 @@ var igv = (function (igv) {
                     })
             }
         }
-
     };
 
 
