@@ -29,9 +29,11 @@
 
 var igv = (function (igv) {
 
-    igv.IdeoPanel = function ($parent, panelWidth) {
+    igv.IdeoPanel = function ($parent, panelWidth, browser) {
+        this.browser = browser;
         this.$parent = $parent;
         this.buildPanels($parent, panelWidth);
+
     };
 
     igv.IdeoPanel.prototype.buildPanels = function ($parent, width) {
@@ -40,7 +42,7 @@ var igv = (function (igv) {
 
         $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
 
-        this.panels = igv.browser.genomicStateList.map(function (genomicState) {
+        this.panels = this.browser.genomicStateList.map(function (genomicState) {
             return panelWithGenomicState.call(self, $parent, genomicState, width)
         });
     };
@@ -64,13 +66,15 @@ var igv = (function (igv) {
     };
 
     igv.IdeoPanel.prototype.resize = function () {
-        this.setWidth(igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length, true)
+        this.setWidth(this.browser.viewportContainerWidth() / this.browser.genomicStateList.length, true)
     };
 
     igv.IdeoPanel.prototype.repaint = function () {
 
-        _.each(this.panels, function(panel) {
-            repaintPanel(panel);
+        const browser = this.browser;
+
+        this.panels.forEach(function (panel) {
+            repaintPanel(browser, panel);
         })
 
     };
@@ -92,14 +96,14 @@ var igv = (function (igv) {
         panel = panelWithGenomicState.call(this, this.$parent, genomicState, width);
 
         if (index === this.panels.length) {
-            this.panels.push( panel );
+            this.panels.push(panel);
         } else {
 
             this.panels.splice(index, 0, panel);
 
             // The viewport constructor always appends. Reorder here.
             $detached = panel.$ideogram.detach();
-            $detached.insertAfter(this.panels[ index - 1 ].$ideogram);
+            $detached.insertAfter(this.panels[index - 1].$ideogram);
         }
 
         assessBorders(this.panels);
@@ -107,7 +111,7 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.removePanelWithLocusIndex = function (index) {
 
-        this.panels[ index ].$ideogram.remove();
+        this.panels[index].$ideogram.remove();
         this.panels.splice(index, 1);
 
         assessBorders(this.panels);
@@ -116,15 +120,17 @@ var igv = (function (igv) {
 
     igv.IdeoPanel.prototype.repaintPanelWithGenomicState = function (genomicState) {
 
-        var index;
-        index = igv.browser.genomicStateList.indexOf(genomicState);
-        repaintPanel( this.panels[ index ] );
+        const browser = this.browser;
+        const index = this.browser.genomicStateList.indexOf(genomicState);
+        repaintPanel(browser, this.panels[index]);
     };
 
     function panelWithGenomicState($parent, genomicState, width) {
 
         var canvas,
             panel;
+
+        const browser = this.browser;
 
         panel = {};
 
@@ -134,7 +140,7 @@ var igv = (function (igv) {
 
         $parent.append(panel.$ideogram);
 
-        addBorder(panel.$ideogram, igv.browser.genomicStateList.indexOf(genomicState), igv.browser.genomicStateList.length);
+        addBorder(panel.$ideogram, browser.genomicStateList.indexOf(genomicState), browser.genomicStateList.length);
 
         panel.$ideogram.outerWidth(width);
 
@@ -146,7 +152,7 @@ var igv = (function (igv) {
         panel.ideograms = {};
 
         panel.$ideogram.on('click', function (e) {
-            clickHandler(panel, e);
+            clickHandler(browser, panel, e);
         });
 
         return panel;
@@ -162,7 +168,7 @@ var igv = (function (igv) {
 
     }
 
-    function assessBorders (panels) {
+    function assessBorders(panels) {
 
         panels.forEach(function (panel, p) {
 
@@ -176,81 +182,77 @@ var igv = (function (igv) {
 
     }
 
-    function repaintPanel (panel) {
+    function repaintPanel(browser, panel) {
 
-        try {
-            var image,
-                chromosome,
-                percentWidth,
-                percentX,
-                width,
-                widthBP,
-                x,
-                xBP,
-                referenceFrame,
-                stainColors,
-                xx,
-                yy,
-                ww,
-                hh;
+        var image,
+            chromosome,
+            percentWidth,
+            percentX,
+            width,
+            widthBP,
+            x,
+            xBP,
+            referenceFrame,
+            stainColors,
+            xx,
+            yy,
+            ww,
+            hh;
 
-            var w = panel.$canvas.width();
-            var h = panel.$canvas.height();
-            
-            if(!(w > 0 && h > 0)) return;
+        var w = panel.$canvas.width();
+        var h = panel.$canvas.height();
 
-            referenceFrame = panel.genomicState.referenceFrame;
-            if (!(igv.browser.genome && referenceFrame && igv.browser.genome.getChromosome(referenceFrame.chrName) && panel.$canvas.height() > 0)) {
-                return;
-            }
+        if (!(w > 0 && h > 0)) return;
 
-            stainColors = [];
-            igv.graphics.fillRect(panel.ctx, 0, 0, panel.$canvas.width(), panel.$canvas.height(), { fillStyle: igv.Color.greyScale(255) });
-
-            if(referenceFrame.chrName.toLowerCase() === "all") {
-                return;
-            }
-
-            drawIdeogram(panel.ctx, panel.$canvas.width(), panel.$canvas.height());
-
-            chromosome = igv.browser.genome.getChromosome(referenceFrame.chrName);
-
-            widthBP = Math.round(referenceFrame.bpPerPixel * panel.$ideogram.width());
-            xBP = referenceFrame.start;
-
-            if (widthBP < chromosome.bpLength) {
-
-                percentWidth = widthBP/chromosome.bpLength;
-                percentX =     xBP/chromosome.bpLength;
-
-                x =     Math.floor(    percentX * panel.$canvas.width());
-                width = Math.floor(percentWidth * panel.$canvas.width());
-
-                x = Math.max(0, x);
-                x = Math.min(panel.$canvas.width() - width, x);
-
-                // Push current context
-                panel.ctx.save();
-
-                // Draw red box
-                panel.ctx.strokeStyle = "red";
-                panel.ctx.lineWidth = (width < 2) ? 1 : 2;
-
-                xx = x + (panel.ctx.lineWidth)/2;
-                ww = (width < 2) ? 1 : width - panel.ctx.lineWidth;
-
-                yy = panel.ctx.lineWidth/2;
-                hh = panel.$canvas.height() - panel.ctx.lineWidth;
-
-                panel.ctx.strokeRect(xx, yy, ww, hh);
-
-                // Pop current context
-                panel.ctx.restore();
-            }
-
-        } catch (e) {
-            console.log("Error painting ideogram: " + e.message);
+        referenceFrame = panel.genomicState.referenceFrame;
+        if (!(browser.genome && referenceFrame && browser.genome.getChromosome(referenceFrame.chrName) && panel.$canvas.height() > 0)) {
+            return;
         }
+
+        stainColors = [];
+        igv.graphics.fillRect(panel.ctx, 0, 0, panel.$canvas.width(), panel.$canvas.height(), {fillStyle: igv.Color.greyScale(255)});
+
+        if (referenceFrame.chrName.toLowerCase() === "all") {
+            return;
+        }
+
+        drawIdeogram(panel.ctx, panel.$canvas.width(), panel.$canvas.height());
+
+        chromosome = browser.genome.getChromosome(referenceFrame.chrName);
+
+        widthBP = Math.round(referenceFrame.bpPerPixel * panel.$ideogram.width());
+        xBP = referenceFrame.start;
+
+        if (widthBP < chromosome.bpLength) {
+
+            percentWidth = widthBP / chromosome.bpLength;
+            percentX = xBP / chromosome.bpLength;
+
+            x = Math.floor(percentX * panel.$canvas.width());
+            width = Math.floor(percentWidth * panel.$canvas.width());
+
+            x = Math.max(0, x);
+            x = Math.min(panel.$canvas.width() - width, x);
+
+            // Push current context
+            panel.ctx.save();
+
+            // Draw red box
+            panel.ctx.strokeStyle = "red";
+            panel.ctx.lineWidth = (width < 2) ? 1 : 2;
+
+            xx = x + (panel.ctx.lineWidth) / 2;
+            ww = (width < 2) ? 1 : width - panel.ctx.lineWidth;
+
+            yy = panel.ctx.lineWidth / 2;
+            hh = panel.$canvas.height() - panel.ctx.lineWidth;
+
+            panel.ctx.strokeRect(xx, yy, ww, hh);
+
+            // Pop current context
+            panel.ctx.restore();
+        }
+
 
         function drawIdeogram(ctx, width, height) {
 
@@ -272,13 +274,13 @@ var igv = (function (igv) {
             shim2 = 0.5 * shim;
             ideogramTop = 0;
 
-            if (undefined === igv.browser.genome) {
+            if (undefined === browser.genome) {
                 return;
             }
 
-            igv.graphics.fillRect(ctx, 0, 0, width, height, { fillStyle: igv.Color.greyScale(255) });
+            igv.graphics.fillRect(ctx, 0, 0, width, height, {fillStyle: igv.Color.greyScale(255)});
 
-            cytobands = igv.browser.genome.getCytobands(referenceFrame.chrName);
+            cytobands = browser.genome.getCytobands(referenceFrame.chrName);
             if (cytobands) {
 
                 center = (ideogramTop + height / 2);
@@ -296,7 +298,7 @@ var igv = (function (igv) {
 
                 // round rect clipping path
                 ctx.beginPath();
-                igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
+                igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1);
                 ctx.clip();
 
                 for (i = 0; i < cytobands.length; i++) {
@@ -336,7 +338,7 @@ var igv = (function (igv) {
 
             // round rect border
             ctx.strokeStyle = igv.Color.greyScale(41);
-            igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2*shim2, height - 2*shim2, (height - 2*shim2)/2, 0, 1);
+            igv.graphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1);
         }
 
         function getCytobandColor(colors, data) {
@@ -374,7 +376,7 @@ var igv = (function (igv) {
         panel.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
     }
 
-    function clickHandler (panel, e) {
+    function clickHandler(browser, panel, e) {
 
         var xy,
             xPercentage,
@@ -392,26 +394,26 @@ var igv = (function (igv) {
 
         locusLength = referenceFrame.bpPerPixel * panel.$ideogram.width();
 
-        chr = igv.browser.genome.getChromosome(referenceFrame.chrName);
+        chr = browser.genome.getChromosome(referenceFrame.chrName);
         chrCoveragePercentage = locusLength / chr.bpLength;
 
-        if (xPercentage - (chrCoveragePercentage/2.0) < 0) {
-            xPercentage = chrCoveragePercentage/2.0;
+        if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
+            xPercentage = chrCoveragePercentage / 2.0;
         }
 
-        if (xPercentage + (chrCoveragePercentage/2.0) > 1.0) {
-            xPercentage = 1.0 - chrCoveragePercentage/2.0;
+        if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
+            xPercentage = 1.0 - chrCoveragePercentage / 2.0;
         }
 
-        ss = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
-        ee = Math.round((xPercentage + (chrCoveragePercentage/2.0)) * chr.bpLength);
+        ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * chr.bpLength);
+        ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * chr.bpLength);
 
-        referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage/2.0)) * chr.bpLength);
-        referenceFrame.bpPerPixel = (ee - ss)/ panel.$ideogram.width();
+        referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * chr.bpLength);
+        referenceFrame.bpPerPixel = (ee - ss) / panel.$ideogram.width();
 
-        igv.browser.updateLocusSearchWidget(genomicState);
+        browser.updateLocusSearchWidget(genomicState);
 
-        igv.browser.updateViews()
+        browser.updateViews()
 
     }
 

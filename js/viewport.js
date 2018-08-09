@@ -16,6 +16,7 @@ var igv = (function (igv) {
 
         this.trackView = trackView;
         this.genomicState = genomicState;
+        this.browser = trackView.browser;
 
         // viewport
         this.$viewport = $('<div class="igv-viewport-div">');
@@ -54,7 +55,7 @@ var igv = (function (igv) {
             this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
 
             this.$rulerLabel.click(function (e) {
-                igv.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
+                self.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
             });
 
             $(this.contentDiv).append(this.$rulerLabel);
@@ -71,7 +72,7 @@ var igv = (function (igv) {
             $spinnerContainer.append(this.$spinner);
             this.$viewport.append($spinnerContainer);
             this.stopSpinner();
-            this.popover = new igv.Popover(igv.browser.$content);
+            this.popover = new igv.Popover(self.browser.$content);
 
         }
 
@@ -83,14 +84,14 @@ var igv = (function (igv) {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
         }
 
-        if (trackView.track.name && 0 === igv.browser.genomicStateList.indexOf(this.genomicState)) {
+        if (trackView.track.name && 0 === self.browser.genomicStateList.indexOf(this.genomicState)) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
 
             igv.setTrackLabel(this.$trackLabel, trackView.track, trackView.track.name);
 
-            if (false === igv.browser.trackLabelsVisible) {
+            if (false === self.browser.trackLabelsVisible) {
                 this.$trackLabel.hide();
             }
 
@@ -228,7 +229,7 @@ var igv = (function (igv) {
         const chr = referenceFrame.chrName;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
-        const chrLength = igv.browser.genome.getChromosome(chr).bpLength;
+        const chrLength = this.browser.genome.getChromosome(chr).bpLength;
 
         const pixelWidth = $(self.contentDiv).width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
@@ -317,7 +318,7 @@ var igv = (function (igv) {
             viewport: self,
             viewportWidth: self.$viewport.width(),
             viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
-            viewportContainerWidth: igv.browser.viewportContainerWidth()
+            viewportContainerWidth: this.browser.viewportContainerWidth()
         };
 
         ctx.save();
@@ -330,18 +331,20 @@ var igv = (function (igv) {
 
         }
 
-        if (igv.browser.roi) {
+        if (self.browser.roi) {
 
-            const roiPromises = igv.browser.roi.map(function (r) {
+            const roiPromises = self.browser.roi.map(function (r) {
                 return r.getFeatures(referenceFrame.chrName, bpStart, bpEnd)
             });
+
+            const browser = self.browser;
 
             Promise.all(roiPromises)
 
                 .then(function (roiArray) {
                     for (var i = 0; i < roiArray.length; i++) {
                         drawConfiguration.features = roiArray[i];
-                        igv.browser.roi[i].draw(drawConfiguration);
+                        browser.roi[i].draw(drawConfiguration);
                     }
                 })
 
@@ -377,7 +380,7 @@ var igv = (function (igv) {
     }
 
     function viewIsReady() {
-        return igv.browser && igv.browser.genomicStateList && this.genomicState.referenceFrame;
+        return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
     }
 
 
@@ -471,7 +474,9 @@ var igv = (function (igv) {
 
     function addMouseHandlers() {
 
-        let self = this;
+        const  self = this;
+        const browser = this.browser;
+
         let lastMouseX;
         let mouseDownX;
         let popupTimer;
@@ -516,7 +521,7 @@ var igv = (function (igv) {
          */
         this.$viewport.on('mousedown', function (e) {
             mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-            igv.browser.mouseDownOnViewport(e, self);
+            browser.mouseDownOnViewport(e, self);
 
         });
 
@@ -542,7 +547,7 @@ var igv = (function (igv) {
 
             const time = Date.now();
 
-            if (time - lastClickTime < igv.browser.constants.doubleClickDelay) {
+            if (time - lastClickTime < browser.constants.doubleClickDelay) {
 
                 // double-click
                 if (popupTimer) {
@@ -556,22 +561,22 @@ var igv = (function (igv) {
 
                 if ('all' === referenceFrame.chrName.toLowerCase()) {
 
-                    const chr = igv.browser.genome.getChromosomeCoordinate(centerBP).chr;
+                    const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
 
-                    if (1 === igv.browser.genomicStateList.length) {
+                    if (1 === browser.genomicStateList.length) {
                         string = chr;
                     } else {
-                        let loci = igv.browser.genomicStateList.map(function (g) {
+                        let loci = browser.genomicStateList.map(function (g) {
                             return g.locusSearchString;
                         });
-                        loci[igv.browser.genomicStateList.indexOf(self.genomicState)] = chr;
+                        loci[browser.genomicStateList.indexOf(self.genomicState)] = chr;
                         string = loci.join(' ');
                     }
 
-                    igv.browser.search(string);
+                    browser.search(string);
 
                 } else {
-                    igv.browser.zoomInWithViewport(self, centerBP);
+                    browser.zoomInWithViewport(self, centerBP);
                 }
 
 
@@ -592,7 +597,7 @@ var igv = (function (igv) {
                             }
                             popupTimer = undefined;
                         },
-                        igv.browser.constants.doubleClickDelay);
+                        browser.constants.doubleClickDelay);
                 }
             }
 
@@ -646,7 +651,7 @@ var igv = (function (igv) {
             let track = viewport.trackView.track;
             const dataList = track.popupData(clickState);
 
-            const popupClickHandlerResult = igv.browser.fireEvent('trackclick', [track, dataList]);
+            const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
 
             let content;
             if (undefined === popupClickHandlerResult) {
