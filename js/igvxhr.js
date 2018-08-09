@@ -151,8 +151,8 @@ var igv = (function (igv) {
                 xhr.onload = function (event) {
                     // when the url points to a local file, the status is 0 but that is no error
                     if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-
-                        if (range && xhr.status != 206) {
+                        if (range && xhr.status != 206 && range.start !== 0) {
+                            // For small files a range starting at 0 can return the whole file => 200
                             handleError("ERROR: range-byte header was ignored for url: " + url);
                         }
                         else {
@@ -193,9 +193,7 @@ var igv = (function (igv) {
                         else {// TODO -- better error handling
                             handleError(xhr.status);
                         }
-
                     }
-
                 };
 
                 xhr.onerror = function (event) {
