@@ -74,7 +74,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.createTrack = function (config) {
+    igv.createTrack = function (config, browser) {
 
         // Lowercase format
         if(config.format) {
@@ -111,7 +111,7 @@ var igv = (function (igv) {
                 break;
 
             case "sequence":
-                return new igv.SequenceTrack(config);
+                return new igv.SequenceTrack(config, browser);
                 break;
 
             case "eqtl":

@@ -29,7 +29,7 @@
  */
 var igv = (function (igv) {
 
-    igv.MergedTrack = function (config) {
+    igv.MergedTrack = function (config, browser) {
 
         var self = this;
 
@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
             if(!tconf.type) igv.inferTrackTypes(tconf);
 
-            var t = igv.createTrack(tconf);
+            var t = igv.createTrack(tconf, browser);
 
             if (t) {
                 t.autoscale = false;     // Scaling done from merged track
