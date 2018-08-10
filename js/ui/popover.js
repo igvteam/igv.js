@@ -65,7 +65,7 @@ var igv = (function (igv) {
         this.$popover.hide();
     };
 
-    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView) {
+    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView, browser) {
 
         var self = this,
             $container,
@@ -93,7 +93,7 @@ var igv = (function (igv) {
 
             this.$popover.css(clampPopoverLocation(pageX, pageY, this));
             this.$popover.show();
-            this.$popover.offset(igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)));
+            this.$popover.offset(igv.constrainBBox(this.$popover, $(browser.trackContainerDiv)));
 
         }
     };
