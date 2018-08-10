@@ -33,15 +33,17 @@ var igv = (function (igv) {
      * @constructor
      */
 
-    igv.FeatureCache = function (featureList, range) {
-        this.treeMap = buildTreeMap(featureList);
+    igv.FeatureCache = function (featureList, genome, range) {
+        
+        this.treeMap = buildTreeMap(featureList, genome);
         this.range = range;
+        
     }
 
     igv.FeatureCache.prototype.containsRange = function (genomicRange) {
 
         // No range means cache contains all features
-        return(this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
+        return (this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
 
     }
 
@@ -89,7 +91,6 @@ var igv = (function (igv) {
     igv.FeatureCache.prototype.getAllFeatures = function () {
 
 
-
         var allFeatures = [];
         var treeMap = this.treeMap;
         if (treeMap) {
@@ -112,24 +113,22 @@ var igv = (function (igv) {
 
     }
 
-    function buildTreeMap(featureList) {
-
-        var featureCache = {},
-            chromosomes = [],
-            treeMap = {},
-            genome = igv.browser ? igv.browser.genome : null,
-            i,
-            chr;
-
+    function buildTreeMap(featureList, genome) {
+        
+        const treeMap = {};
+        const chromosomes = [];
+        const featureCache = {};
+        
         if (featureList) {
 
             featureList.forEach(function (feature) {
 
-                var chr = feature.chr,
-                    geneList;
+                let chr = feature.chr;
 
                 // Translate to "official" name
-                if(genome) chr = genome.getChromosomeName(chr);
+                if(genome) {
+                    chr = genome.getChromosomeName(chr);
+                }
 
                 geneList = featureCache[chr];
 
@@ -138,16 +137,13 @@ var igv = (function (igv) {
                     geneList = [];
                     featureCache[chr] = geneList;
                 }
-
                 geneList.push(feature);
-
             });
 
 
             // Now build interval tree for each chromosome
-
-            for (i = 0; i < chromosomes.length; i++) {
-                chr = chromosomes[i];
+            for (let i = 0; i < chromosomes.length; i++) {
+                const chr = chromosomes[i];
                 treeMap[chr] = buildIntervalTree(featureCache[chr]);
             }
         }

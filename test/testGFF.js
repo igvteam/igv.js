@@ -1,22 +1,12 @@
 function runGFFTests() {
 
     // mock object
-    if (igv === undefined) {
-        igv = {};
-    }
 
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
         }
-    };
+    }
 
     asyncTest("GFF query", function () {
 
@@ -24,9 +14,10 @@ function runGFFTests() {
             bpStart = 1,
             bpEnd = 10000,
             featureSource = new igv.FeatureSource({
-                url: 'data/gff/eden.gff',
-                format: 'gff3'
-            });
+                    url: 'data/gff/eden.gff',
+                    format: 'gff3'
+                },
+                genome);
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 

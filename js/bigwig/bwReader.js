@@ -41,16 +41,18 @@ var igv = (function (igv) {
     var BUFFER_SIZE = 512000;     //  buffer
     var BPTREE_HEADER_SIZE = 32;
 
-    igv.BWReader = function (config) {
+    igv.BWReader = function (config, genome) {
         this.path = config.url;
-        this.headPath = config.headURL || this.path;
+        this.genome = genome;
         this.rpTreeCache = {};
         this.config = config;
     };
 
-    igv.BWReader.prototype.readWGFeatures = function (genome, bpPerPixel, windowFunction) {
+    igv.BWReader.prototype.readWGFeatures = function (bpPerPixel, windowFunction) {
 
-        var self = this;
+        const self = this;
+        const genome = this.genome;
+        
         return self.getZoomHeaders()
             .then(function (zoomLevelHeaders) {
                 var chrIdx1, chrIdx2, chr1, chr2;
@@ -301,7 +303,7 @@ var igv = (function (igv) {
                     // Chrom data index
                     if (self.header.chromTreeOffset > 0) {
                         binaryParser.position = self.header.chromTreeOffset - startOffset;
-                        self.chromTree = new BPTree(binaryParser, startOffset);
+                        self.chromTree = new BPTree(binaryParser, startOffset, self.genome);
                     }
                     else {
                         // TODO -- this is an error, not expected
@@ -521,10 +523,9 @@ var igv = (function (igv) {
 
     }
 
-    function BPTree(binaryParser, startOffset) {
+    function BPTree(binaryParser, startOffset, genome) {
 
-        var self = this,
-            genome = igv.browser ? igv.browser.genome : null;
+        const self = this;
 
         var magic = binaryParser.getInt();
         var blockSize = binaryParser.getInt();

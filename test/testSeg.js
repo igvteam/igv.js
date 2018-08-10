@@ -2,40 +2,34 @@ function runSegTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-    // mock object
-    if (igv === undefined) {
-        igv = {};
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
     }
 
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
-        }
-    };
 
     asyncTest("SEG query", function () {
 
         var url = dataURL + "seg/segmented_data_080520.seg.gz",
-            featureSource = new igv.FeatureSource({format: 'seg', url: url, indexed: false}),
-            chr = "1",
+            featureSource = new igv.FeatureSource(
+                {format: 'seg', url: url, indexed: false},
+                genome),
+            chr = "chr1",
             bpStart = 0,
             bpEnd = 747751863;
 
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
+        featureSource.getFeatures(chr, bpStart, bpEnd)
+            
+            .then(function (features) {
 
             ok(features);
 
             equal(features.length, 1438);
 
             // Test 1 feature, insure its on chr1
-            var c = features[0].chr;
+            var c = genome.getChromosomeName(features[0].chr);
+
             equal(chr, c);
 
             start();
@@ -60,8 +54,6 @@ function runSegTests() {
     //
     //
     //     igv.loadGenome(reference).then(function (genome) {
-    //
-    //         igv.browser.genome = genome;
     //
     //         featureSource.getFeatures(chr).then(function (features) {
     //

@@ -26,7 +26,7 @@
 var igv = (function (igv) {
 
 
-    igv.EqtlTrack = function (config) {
+    igv.EqtlTrack = function (config, browser) {
 
         var url = config.url,
             label = config.name;
@@ -51,7 +51,7 @@ var igv = (function (igv) {
         this.disableButtons = config.disableButtons;
         this.visibilityWindow = config.visibilityWindow;
 
-        this.featureSource = new igv.FeatureSource(config);
+        this.featureSource = new igv.FeatureSource(config, browser.genome);
 
         igv.GtexUtils.gtexLoaded = true;
 

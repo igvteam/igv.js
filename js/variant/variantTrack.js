@@ -36,7 +36,7 @@ var igv = (function (igv) {
     const MAX_PIXEL_HEIGHT = 30000;
     const strColors = ["rgb(150,150,150)", "rgb(255,0,0)", "rgb(255,255,0)", "rgb(0,0,255)", "rgb(0,255,0)", "rgb(128,0,128)"];
 
-    igv.VariantTrack = function (config) {
+    igv.VariantTrack = function (config, browser) {
 
 
         this.visibilityWindow = config.visibilityWindow === undefined ? 'compute' : config.visibilityWindow;
@@ -57,7 +57,7 @@ var igv = (function (igv) {
 
         this.featureHeight = config.featureHeight || 14;
 
-        this.featureSource = new igv.FeatureSource(config);
+        this.featureSource = new igv.FeatureSource(config, browser.genome);
 
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";

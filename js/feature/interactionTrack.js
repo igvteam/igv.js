@@ -30,10 +30,12 @@
 
 var igv = (function (igv) {
 
-    igv.InteractionTrack = function (config) {
+    "use strict";
+
+    igv.InteractionTrack = function (config, browser) {
 
         igv.configTrack(this, config);
-
+        this.browser = browser;
         this.theta = config.theta || Math.PI / 4;
         this.sinTheta = Math.sin(this.theta);
         this.cosTheta = Math.cos(this.theta);
@@ -70,27 +72,27 @@ var igv = (function (igv) {
 
     igv.InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+        const self = this;
+        const genome = this.browser.genome;
 
         if (self.featureCache) {
             return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
         }
         else {
 
-            var self = this;
-            var options = igv.buildOptions(self.config);    // Add oauth token, if any
+            const options = igv.buildOptions(self.config);    // Add oauth token, if any
 
             return igv.xhr.loadString(self.config.url, options)
 
                 .then(function (data) {
 
-                    var parser = new igv.FeatureParser("bedpe");
+                    const parser = new igv.FeatureParser("bedpe");
 
-                    var header = parser.parseHeader(data);
+                    const header = parser.parseHeader(data);
 
-                    var features = parser.parseFeatures(data);
+                    const features = parser.parseFeatures(data);
 
-                    self.featureCache = new igv.FeatureCache(features);
+                    self.featureCache = new igv.FeatureCache(features, genome);
 
                     // TODO -- whole genome features here.
 
@@ -126,7 +128,7 @@ var igv = (function (igv) {
                 let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
                 let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
                 let direction = self.arcOrientation;
-                
+
                 let w = (pixelEnd - pixelStart);
                 if (w < 3) {
                     w = 3;

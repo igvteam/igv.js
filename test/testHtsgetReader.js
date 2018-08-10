@@ -16,7 +16,7 @@ function runHtsgetTests() {
             s = 10000,
             end = 10100;
 
-        const reader = new igv.HtsgetReader({endpoint: url, id: id, genome: genome});
+        const reader = new igv.HtsgetReader({endpoint: url, id: id}, genome);
 
 
         reader.readAlignments(chr, s, end)
