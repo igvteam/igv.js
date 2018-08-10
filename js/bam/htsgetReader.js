@@ -28,14 +28,18 @@ var igv = (function (igv) {
 
     "use strict";
 
-    igv.HtsgetReader = function (config) {
+    igv.HtsgetReader = function (config, genome) {
+      
         this.config = config;
+        this.genome = genome;
         igv.BamUtils.setReaderDefaults(this, config);
+        
     };
 
     igv.HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
 
         const self = this;
+        const genome = this.genome;
 
         let queryChr;
         if (self.header) {
@@ -64,8 +68,6 @@ var igv = (function (igv) {
                 const ba = new Uint8Array(unc);
 
                 if (!self.header) {
-                    const genome = self.config.genome ? self.config.genome :
-                        igv.browser ? igv.browser.genome : undefined;
                     self.header = igv.BamUtils.decodeBamHeader(ba, genome);
                 }
 

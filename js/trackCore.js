@@ -94,20 +94,20 @@ var igv = (function (igv) {
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(config);
+                return new igv.FeatureTrack(config, browser.genome);
                 break;
 
             case "variant":
-                return new igv.VariantTrack(config);
+                return new igv.VariantTrack(config, browser);
                 break;
 
             case "alignment":
-                return new igv.BAMTrack(config);
+                return new igv.BAMTrack(config, browser);
                 break;
 
             case "data":  // deprecated
             case "wig":
-                return new igv.WIGTrack(config);
+                return new igv.WIGTrack(config, browser);
                 break;
 
             case "sequence":
@@ -115,18 +115,18 @@ var igv = (function (igv) {
                 break;
 
             case "eqtl":
-                return new igv.EqtlTrack(config);
+                return new igv.EqtlTrack(config, browser);
                 break;
 
             case "seg":
-                return new igv.SegTrack(config);
+                return new igv.SegTrack(config, browser);
                 break;
 
             case "merged":
-                return new igv.MergedTrack(config);
+                return new igv.MergedTrack(config, browser);
 
             case "interaction":
-                return new igv.InteractionTrack(config);
+                return new igv.InteractionTrack(config, browser);
 
             default:
                 return undefined;

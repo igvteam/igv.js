@@ -26,27 +26,28 @@
 
 var igv = (function (igv) {
 
-    igv.ShardedBamReader = function (config) {
+    "use strict";
 
-        var genome, alias, bamReaders, chrAliasTable;
+    igv.ShardedBamReader = function (config, genome) {
 
         this.config = config;
+        this.genome = genome;
 
-        bamReaders = {};
-        chrAliasTable = {};
-        genome = igv.browser ? igv.browser.genome : undefined;
+        const bamReaders = {};
+        const chrAliasTable = {};
 
         config.sources.sequences.forEach(function (chr) {
 
             bamReaders[chr] = null;   // Placeholder
 
             if (genome) {
-                alias = genome.getChromosomeName(chr);
+                const alias = genome.getChromosomeName(chr);
                 chrAliasTable[alias] = chr;
             }
         });
 
         this.chrAliasTable = chrAliasTable;
+
         this.bamReaders = bamReaders;
 
         igv.BamUtils.setReaderDefaults(this, config);
@@ -54,10 +55,10 @@ var igv = (function (igv) {
 
     igv.ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
 
-        var self = this,
-            queryChr, reader, tmp, bamConfig;
+        const genome = this.genome;
+        const self = this;
 
-        queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
+        const queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
         if (!this.bamReaders.hasOwnProperty(queryChr) || "none" === this.bamReaders[queryChr]) {
             return Promise.resolve(new igv.AlignmentContainer(chr, start, end));
@@ -65,27 +66,33 @@ var igv = (function (igv) {
 
         else {
 
-            reader = self.bamReaders[queryChr];
+            let reader = self.bamReaders[queryChr];
+            let tmp;
 
             if (!reader) {
+
                 tmp = {
                     url: self.config.sources.url.replace("$CHR", queryChr)
                 }
+
                 if (self.config.sources.indexURL) {
                     tmp.indexURL = self.config.sources.indexURL.replace("$CHR", queryChr);
                 }
-                bamConfig = Object.assign(self.config, tmp);
+
+                const bamConfig = Object.assign(self.config, tmp);
                 reader = new igv.BamReader(bamConfig);
                 self.bamReaders[queryChr] = reader;
             }
 
             return reader.readAlignments(queryChr, start, end)
+
                 .catch(function (error) {
                     console.error(error);
-                    igv.presentAlert("Error reading BAM or index file for: " + tmp.url);
+                    igv.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                     self.bamReaders[queryChr] = "none";
                     return new igv.AlignmentContainer(chr, start, end);   // Empty alignment container
                 })
+
         }
     }
 

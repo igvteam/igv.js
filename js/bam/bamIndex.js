@@ -16,14 +16,13 @@ var igv = (function (igv) {
      *
      * @returns a Promised for the bam or tabix index.  The fulfill function takes the index as an argument.
      */
-    igv.loadBamIndex = function (indexURL, config, tabix) {
+    igv.loadBamIndex = function (indexURL, config, tabix, genome) {
 
         return new Promise(function (fullfill, reject) {
-
-            var genome = igv.browser ? igv.browser.genome : null;
-
+            
             igv.xhr
                 .loadArrayBuffer(indexURL, igv.buildOptions(config))
+               
                 .then(function (arrayBuffer) {
 
                     var indices = [],
@@ -65,7 +64,9 @@ var igv = (function (igv) {
                                 var seq_name = parser.getString();
 
                                 // Translate to "official" chr name.
-                                if (genome) seq_name = genome.getChromosomeName(seq_name);
+                                if (genome) {
+                                    seq_name = genome.getChromosomeName(seq_name);
+                                }
 
                                 sequenceIndexMap[seq_name] = i;
                             }

@@ -33,11 +33,12 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.FeatureFileReader = function (config) {
+    igv.FeatureFileReader = function (config, genome) {
 
         var uriParts;
 
         this.config = config || {};
+        this.genome = genome;
         this.indexURL = config.indexURL;
         this.indexed = config.indexed;
 
@@ -82,7 +83,7 @@ var igv = (function (igv) {
     igv.FeatureFileReader.prototype.readHeader = function () {
 
         var self = this;
-        
+
         if (self.header) {
             return Promise.resolve(self.header);
         } else {
@@ -123,7 +124,7 @@ var igv = (function (igv) {
                     }
                 })
                 .then(function (header) {
-                    if(header && self.parser) {
+                    if (header && self.parser) {
                         self.parser.header = header;
                     }
                     return header;
@@ -150,17 +151,22 @@ var igv = (function (igv) {
      * Return a Promise for the async loaded index
      */
     igv.FeatureFileReader.prototype.loadIndex = function () {
+
         var idxFile = this.config.indexURL;
+
         if (this.filename.endsWith('.gz')) {
+
             if (!idxFile) {
                 idxFile = this.config.url + '.tbi';
             }
-            return igv.loadBamIndex(idxFile, this.config, true);
+            return igv.loadBamIndex(idxFile, this.config, true, this.genome);
+            
         } else {
+
             if (!idxFile) {
                 idxFile = this.config.url + '.idx';
             }
-            return igv.loadTribbleIndex(idxFile, this.config);
+            return igv.loadTribbleIndex(idxFile, this.config, this.genome);
         }
     };
 
