@@ -42,24 +42,13 @@ var igvtest = {
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                tissueSummary.forEach(function (obj) {
+                tissueSummary.forEach((ts) => {
 
                     let trackDiv = document.createElement('div');
-                    trackDiv.innerHTML = (obj['tissueSiteDetailId'].split('_').join(' '));
+
+                    trackDiv.innerHTML = (ts['tissueSiteDetailId'].split('_').join(' '));
                     trackDiv.addEventListener('click', function (event) {
-
-                        let gtexTrack =
-                            {
-                                "type": "eqtl",
-                                "sourceType": "gtex-ws",
-                                "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
-                                "tissueName": obj.tissueSiteDetailId,
-                                "name": obj.tissueSiteDetailId,
-                                "visibilityWindow": 1000000
-                            };
-
-                        igv.browser.loadTrack(gtexTrack);
-
+                        igv.browser.loadTrack(igv.GtexUtils.trackConfiguration(ts));
                     });
 
                     div.appendChild(trackDiv)
@@ -68,4 +57,4 @@ var igvtest = {
             });
 
     }
-}
+};
