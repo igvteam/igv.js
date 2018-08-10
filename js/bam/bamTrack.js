@@ -33,9 +33,11 @@ var igv = (function (igv) {
     var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
     var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack = function (config, browser) {
+        
+        this.browser = browser;
 
-        this.featureSource = new igv.BamSource(config);
+        this.featureSource = new igv.BamSource(config, browser.genome);
 
         // Override default track height for bams
         if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;

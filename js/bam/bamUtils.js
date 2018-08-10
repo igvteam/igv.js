@@ -42,28 +42,22 @@ var igv = (function (igv) {
     igv.BamUtils = {
 
         readHeader: function (url, options, genome) {
+            
+            return igv.xhr.loadArrayBuffer(url, options)
 
-            return new Promise(function (fulfill, reject) {
+                .then(function (compressedBuffer) {
 
-                igv.xhr.loadArrayBuffer(url, options)
+                    var header, unc, uncba;
 
-                    .then(function (compressedBuffer) {
+                    unc = igv.unbgzf(compressedBuffer);
+                    uncba = new Uint8Array(unc);
 
-                        var header, unc, uncba;
+                    header = igv.BamUtils.decodeBamHeader(uncba, genome);
 
-                        unc = igv.unbgzf(compressedBuffer);
-                        uncba = new Uint8Array(unc);
+                    return header;
 
-                        header = igv.BamUtils.decodeBamHeader(uncba, genome);
+                })
 
-                        fulfill(header);
-
-                    })
-                    .catch(function (error) {
-                        reject(error);
-                    });
-
-            });
         },
 
         /**
@@ -410,10 +404,10 @@ var igv = (function (igv) {
 
         setReaderDefaults: function (reader, config) {
 
-            reader.filter =  new igv.BamFilter(config.filter);
+            reader.filter = new igv.BamFilter(config.filter);
 
-            if(config.readgroup) {
-                reader.filter.readgroups =  new Set([config.readgroup]);
+            if (config.readgroup) {
+                reader.filter.readgroups = new Set([config.readgroup]);
             }
 
 
@@ -542,7 +536,13 @@ var igv = (function (igv) {
 
                     blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                    blocks.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType}));
+                    blocks.push(new igv.AlignmentBlock({
+                        start: pos,
+                        len: c.len,
+                        seq: blockSeq,
+                        qual: blockQuals,
+                        gapType: gapType
+                    }));
                     seqOffset += c.len;
                     pos += c.len;
 
@@ -618,7 +618,7 @@ var igv = (function (igv) {
 
         return tagDict;
     }
-    
+
     return igv;
 
 })

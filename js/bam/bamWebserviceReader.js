@@ -26,36 +26,29 @@
 
 var igv = (function (igv) {
 
-
-    const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
-    const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
-    const DEFAULT_SAMPLING_DEPTH = 50;
-    const MAXIMUM_SAMPLING_DEPTH = 2500;
-
     /**
-     * Class for reading a bam file
+     * Class for reading bam records from an igv.js-flask server
      *
      * @param config
      * @constructor
      */
-    igv.BamWebserviceReader = function (config) {
+    igv.BamWebserviceReader = function (config, genome) {
 
         this.config = config;
-
+        this.genome = genome;
         igv.BamUtils.setReaderDefaults(this, config);
 
     };
 
     // Example http://localhost:5000/alignments/?reference=/Users/jrobinso/hg19mini.fa&file=/Users/jrobinso/cram_with_crai_index.cram&region=1:100-2000
+
     igv.BamWebserviceReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
+        return getHeader.call(self)
 
-            getHeader.call(self)
-
-                .then(function (header) {
+            .then(function (header) {
 
                     var queryChr, url;
 
@@ -67,7 +60,8 @@ var igv = (function (igv) {
                         "&region=" + queryChr + ":" + bpStart + "-" + bpEnd;
 
 
-                    igv.xhr.loadString(url, igv.buildOptions(self.config))
+                    return igv.xhr.loadString(url, igv.buildOptions(self.config))
+
                         .then(function (sam) {
 
                             var alignmentContainer, chrId, ba;
@@ -78,39 +72,37 @@ var igv = (function (igv) {
 
                             igv.BamUtils.decodeSamRecords(sam, alignmentContainer, queryChr, bpStart, bpEnd, self.filter);
 
-                            fulfill(alignmentContainer);
+                            return alignmentContainer;
 
-                        }).catch(function (obj) {
-                        reject(obj);
-                    });
+                        })
 
                 })
-                .catch(reject);
-        });
-
     }
 
 
-    // Example  http://localhost:5000/alignments/?reference=/Users/jrobinso/hg19mini.fa&file=/Users/jrobinso/cram_with_crai_index.cram&options=-b%20-H
+// Example  http://localhost:5000/alignments/?reference=/Users/jrobinso/hg19mini.fa&file=/Users/jrobinso/cram_with_crai_index.cram&options=-b%20-H
     function getHeader() {
 
-        var self = this;
+        const self = this;
+        const genome = this.genome;
 
         if (this.header) {
-            return Promise.resolve(this.header)
-        } else {
-            var url = this.config.url + "?file=" + this.config.alignmentFile + "&options=-b,-H",
-                options = igv.buildOptions(this.config),
-                genome = igv.browser ? igv.browser.genome : null;
 
-            return new Promise(function (fulfill, reject) {
-                igv.BamUtils.readHeader(url, options, genome)
-                    .then(function (header) {
-                        self.header = header;
-                        fulfill(header);
-                    })
-                    .catch(reject);
-            });
+            return Promise.resolve(this.header);
+
+        } else {
+
+            const url = this.config.url + "?file=" + this.config.alignmentFile + "&options=-b,-H";
+            const options = igv.buildOptions(this.config);
+
+            return igv.BamUtils.readHeader(url, options, genome)
+
+                .then(function (header) {
+
+                    self.header = header;
+                    return header;
+
+                })
         }
 
     }

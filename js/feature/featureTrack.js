@@ -27,8 +27,10 @@ var igv = (function (igv) {
 
     "use strict";
 
-    igv.FeatureTrack = function (config) {
+    igv.FeatureTrack = function (config, browser) {
 
+        this.browser = browser;
+        
         // Set defaults
         igv.configTrack(this, config);
 
