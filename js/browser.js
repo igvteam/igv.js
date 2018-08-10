@@ -185,7 +185,7 @@ var igv = (function (igv) {
                 if (config.roi) {
                     self.roi = [];
                     config.roi.forEach(function (r) {
-                        self.roi.push(new igv.ROI(r));
+                        self.roi.push(new igv.ROI(r), self.genome);
                     });
                 }
 
@@ -1409,6 +1409,8 @@ var igv = (function (igv) {
         var self = this,
             loci;
 
+        const genome = this.genome;
+
         if (string && string.trim().toLowerCase() === "all") string = "all";
 
         loci = string.split(' ');
@@ -1561,7 +1563,6 @@ var igv = (function (igv) {
             function appendReferenceFrames(genomicStateList) {
 
                 const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
-                const genome = this.genome;
 
                 genomicStateList.forEach(function (gs) {
                     gs.referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
