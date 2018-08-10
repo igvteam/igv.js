@@ -34,8 +34,9 @@ var igv = (function (igv) {
 
     var GZIP_FLAG = 0x1;
 
-    igv.TDFReader = function (config) {
+    igv.TDFReader = function (config, genome) {
         this.config = config;
+        this.genome = genome;
         this.path = config.url;
         this.groupCache = {};
         this.datasetCache = {};
@@ -129,7 +130,7 @@ var igv = (function (igv) {
 
         key = chr + "_" + windowFunction + "_" + zoom;
 
-        if(self.datasetCache[key]) {
+        if (self.datasetCache[key]) {
             return Promise.resolve(self.datasetCache[key]);
         }
 
@@ -202,13 +203,13 @@ var igv = (function (igv) {
         }
 
 
-
     }
 
     igv.TDFReader.prototype.readRootGroup = function () {
 
-        var self = this,
-            rootGroup = this.groupCache["/"];
+        const self = this;
+        const genome = this.genome;
+        const rootGroup = this.groupCache["/"];
 
         if (rootGroup) {
             return Promise.resolve(rootGroup);
@@ -216,9 +217,8 @@ var igv = (function (igv) {
         else {
             return self.readGroup("/").then(function (group) {
 
-                var genome = igv.browser.genome,
-                    names = group["chromosomes"],
-                    maxZoomString = group["maxZoom"];
+                const names = group["chromosomes"];
+                const maxZoomString = group["maxZoom"];
 
                 // Now parse out interesting attributes.  This is a side effect, and bad bad bad,  but the alternative is messy as well.
                 if (maxZoomString) {

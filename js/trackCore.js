@@ -94,7 +94,7 @@ var igv = (function (igv) {
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(config, browser.genome);
+                return new igv.FeatureTrack(config, browser);
                 break;
 
             case "variant":

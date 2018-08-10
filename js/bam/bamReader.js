@@ -148,7 +148,7 @@ var igv = (function (igv) {
             return Promise.resolve(self.index);
         }
         else {
-            return igv.loadBamIndex(self.baiPath, self.config, genome)
+            return igv.loadBamIndex(self.baiPath, self.config, false, genome)
                 .then(function (index) {
                     self.index = index;
                     return self.index;

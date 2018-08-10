@@ -28,10 +28,10 @@ var igv = (function (igv) {
 
     var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 
-    igv.ROI = function (config) {
+    igv.ROI = function (config, genome) {
         this.config = config;
         this.name = config.name;
-        this.roiSource = new igv.FeatureSource(config);
+        this.roiSource = new igv.FeatureSource(config, genome);
         this.color = config.color || defaultHighlightColor;
     };
 

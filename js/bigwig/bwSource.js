@@ -30,8 +30,9 @@
 
 var igv = (function (igv) {
 
-    igv.BWSource = function (config) {
-        this.reader = new igv.BWReader(config);
+    igv.BWSource = function (config, genome) {
+        this.reader = new igv.BWReader(config, genome);
+        this.genome = genome;
         this.wgValues = {};
     };
 
@@ -65,38 +66,30 @@ var igv = (function (igv) {
         }
         else {
             // bigbed
-            let genomeSize = getGenomeLength();
+            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
             return this.reader.loadHeader()
                 .then(function (header) {
                     // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
                     return 1000 * (genomeSize / header.dataCount);
                 })
         }
-        
-        function getGenomeLength() {
-            if (igv.browser && igv.browser.genome) {
-                return igv.browser.genome.getGenomeLength();
-            }
-            else {
-                return 3088286401;
-            }
-        }
-
     }
 
     igv.BWSource.prototype.getWGValues = function (windowFunction) {
         var self = this,
             bpPerPixel,
             nominalScreenWidth = 500;      // This doesn't need to be precise
+        
+        const genome = this.genome;
 
         if (self.wgValues[windowFunction]) {
             return Promise.resolve(self.wgValues[windowFunction]);
         }
         else {
 
-            bpPerPixel = igv.browser.genome.getGenomeLength() / nominalScreenWidth;
+            bpPerPixel = genome.getGenomeLength() / nominalScreenWidth;
 
-            return self.reader.readWGFeatures(igv.browser.genome, bpPerPixel, windowFunction)
+            return self.reader.readWGFeatures(bpPerPixel, windowFunction)
 
                 .then(function (features) {
 
@@ -107,7 +100,7 @@ var igv = (function (igv) {
                         var wgFeature, offset, chr;
 
                         chr = f.chr;
-                        offset = igv.browser.genome.getCumulativeOffset(chr);
+                        offset = genome.getCumulativeOffset(chr);
 
                         wgFeature = Object.assign({}, f);
                         wgFeature.chr = "all";

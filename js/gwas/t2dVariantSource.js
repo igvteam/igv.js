@@ -73,7 +73,9 @@ var igv = (function (igv) {
 
     igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+        const  self = this;
+        const genome = this.genome;
+        
         return new Promise(function (fulfill, reject) {
 
             if (self.cache && self.cache.chr === chr && self.cache.end > bpEnd && self.cache.start < bpStart) {

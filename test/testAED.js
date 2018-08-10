@@ -1,23 +1,16 @@
 function runAedTests() {
 
 
-    // mock object
+    // mock objects
     if (igv === undefined) {
         igv = {};
     }
 
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
         }
-    };
+    }
 
     asyncTest("AED - UTF8 with BOM", function () {
 
@@ -28,7 +21,8 @@ function runAedTests() {
                 format: 'aed',
                 indexed: false,
                 url: 'data/aed/utf8-bom.aed'
-            });
+            },
+            genome);
 
         // Must get file header first
         featureSource.getFeatures(chr, bpStart, bpEnd)

@@ -1,20 +1,19 @@
 function runTDFTests() {
 
-    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
+    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-    function createMockObjects() {
+    // Mock objects
 
-        igv.browser = {
-            genome: {
-                getChromosome: function (name) {
-                    return {bpLength: 51304566};
-                },
-                getChromosomeName: function (chr) {
-                    return chr.startsWith("chr") ? chr : "chr" + chr;
-                }
-            }
+    // The TDF file uses chr1, chr2, ... convention.  Define genome as 1,2,3... to test chromosome aliasing
+    const genome = {
+        getChromosome: function (name) {
+            return {bpLength: 51304566};
+        },
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr.substr(3) : + chr;
         }
     }
+
 
     function reject(error) {
         console.log(error);
@@ -26,9 +25,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
-
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readHeader().then(function () {
@@ -49,9 +46,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
-
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
@@ -74,9 +69,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
-
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readGroup("/").then(function (group) {
@@ -97,9 +90,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
-
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
@@ -129,9 +120,8 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
 
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readDataset("chr22", "raw").then(function (dataset) {
@@ -163,9 +153,8 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        createMockObjects();
 
-        tdfReader = new igv.TDFReader({url: url});
+        tdfReader = new igv.TDFReader({url: url}, genome);
         ok(tdfReader);
 
         tdfReader.readRootGroup().then(function (group) {
@@ -184,14 +173,13 @@ function runTDFTests() {
 
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfSource,
-            chr = "chr22",
+            chr = "22",
             bpstart = 24376175,
             end = 24376200,
             bpPerPixel = 1;
 
-        createMockObjects();
 
-        tdfSource = new igv.TDFSource({url: url});
+        tdfSource = new igv.TDFSource({url: url}, genome);
 
         tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
 
@@ -207,14 +195,13 @@ function runTDFTests() {
 
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfSource,
-            chr = "chr22",
+            chr = "22",
             bpstart = 24049020,
             end = 24375399,
             bpPerPixel = 51304566 / (Math.pow(2, 6) *700);
 
-        createMockObjects();
 
-        tdfSource = new igv.TDFSource({url: url});
+        tdfSource = new igv.TDFSource({url: url}, genome);
 
         tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
 
