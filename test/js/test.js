@@ -37,25 +37,26 @@ var igvtest = {
 
             .then(function (json) {
 
-                let tissueInfo = json["tissueInfo"];
+                let tissueSummary = json['tissueSummary'];
 
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                tissueInfo.forEach(function (ti) {
+                tissueSummary.forEach(function (obj) {
 
                     let trackDiv = document.createElement('div');
-                    trackDiv.innerHTML = ti.tissueName;
+                    trackDiv.innerHTML = (obj['tissueSiteDetailId'].split('_').join(' '));
                     trackDiv.addEventListener('click', function (event) {
 
-                        let gtexTrack = {
-                            "type": "eqtl",
-                            "sourceType": "gtex-ws",
-                            "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
-                            "tissueName": ti.tissueId,
-                            "name": ti.tissueName,
-                            "visibilityWindow": 1000000
-                        };
+                        let gtexTrack =
+                            {
+                                "type": "eqtl",
+                                "sourceType": "gtex-ws",
+                                "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocationDev",
+                                "tissueName": obj.tissueSiteDetailId,
+                                "name": obj.tissueSiteDetailId,
+                                "visibilityWindow": 1000000
+                            };
 
                         igv.browser.loadTrack(gtexTrack);
 
