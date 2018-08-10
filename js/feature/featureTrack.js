@@ -450,15 +450,15 @@ var igv = (function (igv) {
         }
 
         var unSubscribe = function (removedTrack) {
-            if (igv.browser.un && track === removedTrack) {
-                igv.browser.un('trackdrag', onDragEnd);
-                igv.browser.un('trackremoved', unSubscribe);
+            if (track.browser.un && track === removedTrack) {
+                track.browser.un('trackdrag', onDragEnd);
+                track.browser.un('trackremoved', unSubscribe);
             }
         };
 
-        if (igv.browser.on) {
-            igv.browser.on('trackdragend', onDragEnd);
-            igv.browser.on('trackremoved', unSubscribe);
+        if (track.browser.on) {
+            track.browser.on('trackdragend', onDragEnd);
+            track.browser.on('trackremoved', unSubscribe);
         }
     }
 
@@ -498,6 +498,8 @@ var igv = (function (igv) {
      */
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
+        const browser = this.browser;
+        
         var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
             windowX, windowX1,
             coord = calculateFeatureCoordinates(feature, bpStart, xScale),
@@ -593,7 +595,7 @@ var igv = (function (igv) {
         }
 
         windowX = Math.round(options.viewportContainerX);
-        windowX1 = windowX + options.viewportContainerWidth / (igv.browser.genomicStateList.length || 1);
+        windowX1 = windowX + options.viewportContainerWidth / (browser.genomicStateList.length || 1);
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
     }

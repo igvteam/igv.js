@@ -25,10 +25,11 @@
 
 var igv = (function (igv) {
 
-    igv.WindowSizePanel = function ($parent) {
+    igv.WindowSizePanel = function ($parent, browser) {
 
         this.$content = $('<div id="igv-windowsizepanel-content-div">');
         $parent.append(this.$content);
+        this.browser = browser;
 
     };
 
@@ -42,13 +43,13 @@ var igv = (function (igv) {
 
     igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
 
-        if (1 === igv.browser.genomicStateList.length && genomicState.locusSearchString && 'all' !== genomicState.locusSearchString.toLowerCase()) {
+        if (1 === this.browser.genomicStateList.length && genomicState.locusSearchString && 'all' !== genomicState.locusSearchString.toLowerCase()) {
             this.show();
         } else {
             this.hide();
         }
 
-        this.$content.text( igv.prettyBasePairNumber(Math.round( igv.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
+        this.$content.text( igv.prettyBasePairNumber(Math.round( this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
     };
 
     return igv;

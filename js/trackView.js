@@ -198,6 +198,8 @@ var igv = (function (igv) {
 
         var self = this,
             $gearButton, $fa;
+        
+        const browser = this.browser;
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
         $parent.append($(this.rightHandGutter));
@@ -206,7 +208,7 @@ var igv = (function (igv) {
         $(this.rightHandGutter).append($gearButton);
 
         $gearButton.click(function (e) {
-            igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self);
+            igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self, browser);
         });
 
     }
