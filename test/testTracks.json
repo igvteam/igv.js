@@ -69,11 +69,11 @@
     "sourceType": "shardedBam",
     "sources": {
       "sequences": [
-        "21",
-        "22"
+        "chr1",
+        "chr8"
       ],
-      "url": "gs://igv-bam-test/mock/recalibrated.$CHR.bam",
-      "indexURL": "gs://igv-bam-test/mock/recalibrated.$CHR.bam.bai"
+      "url": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam",
+      "indexURL": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam.bai"
     }
   },
   {
