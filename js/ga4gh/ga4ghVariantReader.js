@@ -98,7 +98,7 @@ var igv = (function (igv) {
     igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         const self = this;
-const genome = this.genome;
+        const genome = this.genome;
 
         return self.readHeader()
 
@@ -129,7 +129,7 @@ const genome = this.genome;
                         var variants = [];
 
                         json.variants.forEach(function (json) {
-                         
+
                             v = igv.createGAVariant(json);
 
                             if (!v.isRefBlock()) {
@@ -156,7 +156,9 @@ const genome = this.genome;
 
                         self.metadata = json.metadata;
                         self.chrAliasTable = {};
-                        if (json.referenceBounds && igv.browser) {
+
+                        if (json.referenceBounds && genome) {
+
                             json.referenceBounds.forEach(function (rb) {
                                 var refName = rb.referenceName,
                                     alias = genome.getChromosomeName(refName);

@@ -24,9 +24,12 @@
  */
 
 var igv = (function (igv) {
+    
+    "use strict";
 
-    igv.RulerTrack = function () {
+    igv.RulerTrack = function (browser) {
 
+        this.browser = browser;
         this.height = 40;
         this.name = "";
         this.id = "ruler";
@@ -53,6 +56,8 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
 
+        const browser = this.browser;
+        
         var $close,
             $closeButton;
 
@@ -66,7 +71,7 @@ var igv = (function (igv) {
         $close.append($closeButton);
 
         $close.click(function (e) {
-            igv.browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+            browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
         });
 
     };
@@ -82,8 +87,7 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.draw = function (options) {
-        var self = this,
-            key,
+        var key,
             rulerSweeper,
             $viewportContent,
             pixelWidthBP,
@@ -91,7 +95,7 @@ var igv = (function (igv) {
             shim,
             tickHeight;
 
-        key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
+        key = this.browser.genomicStateList.indexOf(options.genomicState).toString();
         rulerSweeper = this.rulerSweepers[key];
         if (!rulerSweeper) {
             //console.log("No rulerSweeper for key: " + key);

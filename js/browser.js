@@ -317,7 +317,7 @@ var igv = (function (igv) {
                 if (self.genomicStateList.length > 0) {
 
                     if (!self.rulerTrack) { //} && config.showRuler) {
-                        self.rulerTrack = new igv.RulerTrack();
+                        self.rulerTrack = new igv.RulerTrack(self);
                         self.addTrack(self.rulerTrack);
                     }
 
