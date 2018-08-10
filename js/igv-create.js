@@ -38,13 +38,6 @@ var igv = (function (igv) {
      */
     igv.createBrowser = function (parentDiv, config) {
 
-        var browser,
-            promise;
-
-        if (igv.browser) {
-            //console.log("Attempt to create 2 browsers.");
-            igv.removeBrowser();
-        }
 
         if (undefined === config) config = {};
 
@@ -58,8 +51,7 @@ var igv = (function (igv) {
         // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
         setTrackOrder(config);
 
-        browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
-        
+        const browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
 
         $(parentDiv).append(browser.$root);
 
@@ -91,8 +83,10 @@ var igv = (function (igv) {
 
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        // Make globally visible -- this will be refactored out, but it will take some time.
-        igv.browser = browser;
+        // Backward compatibility -- globally visible.   This will be removed in a future release
+        if(!igv.browser) {
+            igv.browser = browser;
+        }
 
         return doPromiseChain(browser, config);
 
@@ -343,7 +337,7 @@ var igv = (function (igv) {
             // browser.$searchResults.hide();
 
             // window size display
-            browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group);
+            browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group, browser);
 
 
             // cursor guide | center guide | track labels
@@ -355,14 +349,14 @@ var igv = (function (igv) {
             $igv_nav_bar_right_container.append($toggle_button_container);
 
             // cursor guide
-            browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config);
+            browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
 
             // center guide
-            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config);
+            browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
 
             // toggle track labels
             if (true === config.showTrackLabelButton) {
-                browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container);
+                browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, browser);
             }
 
             // zoom widget
@@ -491,10 +485,10 @@ var igv = (function (igv) {
 
     }
 
-    igv.removeBrowser = function () {
-        igv.browser.$root.remove();
-        igv.browser.dispose();
-        $(".igv-generic-dialog-container").remove();
+    igv.removeBrowser = function (browser) {
+        browser.$root.remove();
+        browser.dispose();
+        //$(".igv-generic-dialog-container").remove();   // TODO -- this is global, needs to be specific for this browser
     };
 
 

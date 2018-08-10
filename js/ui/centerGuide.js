@@ -29,10 +29,16 @@
  */
 var igv = (function (igv) {
 
-    igv.CenterGuide = function ($guideParent, $controlParent, config) {
-        var self = this;
+    "use strict";
+    
+    igv.CenterGuide = function ($guideParent, $controlParent, config, browser) {
+     
+        const self = this;
+        
+        this.browser = browser;
 
         this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
+        
         $guideParent.append(this.$container);
 
         if (true === config.showCenterGuideButton) {
@@ -42,7 +48,7 @@ var igv = (function (igv) {
             this.$centerGuideToggle.text('center line');
 
             this.$centerGuideToggle.on('click', function () {
-                if (true === igv.browser.centerGuideVisible) {
+                if (true === browser.centerGuideVisible) {
                     self.doHide();
                 } else {
                     self.doShow();
@@ -57,7 +63,7 @@ var igv = (function (igv) {
         if (this.$centerGuideToggle) {
             this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
         }
-        igv.browser.hideCenterGuide();
+        this.browser.hideCenterGuide();
     };
 
     igv.CenterGuide.prototype.doShow = function () {
@@ -66,7 +72,7 @@ var igv = (function (igv) {
             this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
         }
 
-        igv.browser.showCenterGuide();
+        this.browser.showCenterGuide();
     };
 
     igv.CenterGuide.prototype.setState = function (centerGuideVisible) {
@@ -106,15 +112,15 @@ var igv = (function (igv) {
             center,
             referenceFrame;
 
-        if (igv.browser.genomicStateList) {
+        if (this.browser.genomicStateList) {
 
-            referenceFrame = igv.browser.genomicStateList[ 0 ].referenceFrame;
+            referenceFrame = this.browser.genomicStateList[ 0 ].referenceFrame;
             ppb = 1.0/referenceFrame.bpPerPixel;
 
             if (ppb > 1) {
 
-                xy = igv.browser.trackViews[ 0 ].$viewportContainer.position();
-                halfWidth = Math.round( igv.browser.trackViews[ 0 ].$viewportContainer.width() / 2 );
+                xy = this.browser.trackViews[ 0 ].$viewportContainer.position();
+                halfWidth = Math.round( this.browser.trackViews[ 0 ].$viewportContainer.width() / 2 );
 
                 center = xy.left + halfWidth;
                 width = referenceFrame.toPixels(1);

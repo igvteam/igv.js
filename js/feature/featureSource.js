@@ -148,6 +148,7 @@ var igv = (function (igv) {
 
         featureList.forEach(function (feature) {
             if (feature.name) {
+                //TODO igv.browser => igv.Globals or igv.FeatureDB
                 igv.browser.featureDB[feature.name.toLowerCase()] = feature;
             }
         });

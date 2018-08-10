@@ -151,7 +151,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        if (igv.browser.isMultiLocus()) {
+        if (this.browser.isMultiLocus()) {
             ctx.clearRect(0, 0, pixelWidth, pixelHeight);
         }
         else {
@@ -292,36 +292,7 @@ var igv = (function (igv) {
             return {name: undefined, object: $e, click: clickHandler, init: undefined}
 
         }
-
-        function sortMenuItem() {
-
-            var $e,
-                clickHandler;
-
-            $e = $('<div>');
-            $e.text('Sort by base');
-
-            clickHandler = function () {
-                var genomicState = igv.browser.genomicStateList[0],
-                    referenceFrame = genomicState.referenceFrame,
-                    genomicLocation,
-                    viewportHalfWidth;
-
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
-
-                self.sortOption = {sort: "NUCLEOTIDE"};
-                self.alignmentTrack.sortAlignmentRows(genomicLocation, sortOption);
-
-                if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
-                    igv.browser.centerGuide.$centerGuideToggle.trigger("click");
-                }
-
-            };
-
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
-        }
-
+        
     };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
