@@ -51,7 +51,7 @@ var igv = (function (igv) {
             this.bamReader = new igv.ShardedBamReader(config, genome);
         } else {
             if (this.config.indexed === false) {
-                this.bamReader = new igv.BamReaderNonIndexed(config);
+                this.bamReader = new igv.BamReaderNonIndexed(config, genome);
             }
             else {
                 this.bamReader = new igv.BamReader(config, genome);
@@ -121,7 +121,7 @@ var igv = (function (igv) {
                     }
                     else {
                         
-                        return genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end)
+                        return genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
 
                             .then(function (sequence) {
 

@@ -45,10 +45,10 @@ var igv = (function (igv) {
 
         const format = config.format ? config.format.toLowerCase() : undefined;
         if ('bigwig' === format || 'bigbed' === format) {
-            this.featureSource = new igv.BWSource(config);
+            this.featureSource = new igv.BWSource(config, browser.genome);
 
         } else {
-            this.featureSource = new igv.FeatureSource(config);
+            this.featureSource = new igv.FeatureSource(config, browser.genome);
         }
 
         // Set default heights

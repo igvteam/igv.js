@@ -35,9 +35,10 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.FeatureSource = function (config) {
+    igv.FeatureSource = function (config, genome) {
 
         this.config = config || {};
+        this.genome = genome;
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
@@ -48,12 +49,12 @@ var igv = (function (igv) {
                 mapProperties(features, config.mappings)
             }
             this.queryable = false;
-            this.featureCache = new igv.FeatureCache(features);
+            this.featureCache = new igv.FeatureCache(features, genome);
             this.static = true;
 
         }
         else if (config.sourceType === "ga4gh") {
-            this.reader = new igv.Ga4ghVariantReader(config);
+            this.reader = new igv.Ga4ghVariantReader(config, genome);
             this.queryable = true;
         } else if (config.sourceType === "immvar") {
             this.reader = new igv.ImmVarReader(config);
@@ -72,7 +73,7 @@ var igv = (function (igv) {
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
         }
         else {
-            this.reader = new igv.FeatureFileReader(config);
+            this.reader = new igv.FeatureFileReader(config, genome);
             if (config.queryable != undefined) {
                 this.queryable = config.queryable
             } else if (queryableFormats.has(config.format)) {
@@ -89,8 +90,9 @@ var igv = (function (igv) {
 
     igv.FeatureSource.prototype.getFileHeader = function () {
 
-        var self = this,
-            maxRows = this.config.maxRows || 500;
+        const self = this;
+        const genome = this.genome;
+        const    maxRows = this.config.maxRows || 500;
 
 
         if (self.header) {
@@ -118,7 +120,7 @@ var igv = (function (igv) {
 
                                 // Assign overlapping features to rows
                                 packFeatures(features, maxRows);
-                                self.featureCache = new igv.FeatureCache(features);
+                                self.featureCache = new igv.FeatureCache(features, genome);
 
                                 // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                                 if (self.config.searchable) {
@@ -167,7 +169,8 @@ var igv = (function (igv) {
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
         const self = this;
-        const queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
+        const genome = this.genome;
+        const queryChr = genome ? genome.getChromosomeName(chr) : chr;
         const maxRows = self.config.maxRows || 500;
 
         return getFeatureCache()
@@ -244,8 +247,8 @@ var igv = (function (igv) {
 
                             // Note - replacing previous cache with new one
                             self.featureCache = self.queryable ?
-                                new igv.FeatureCache(featureList, genomicInterval) :
-                                new igv.FeatureCache(featureList);
+                                new igv.FeatureCache(featureList, genome, genomicInterval) :
+                                new igv.FeatureCache(featureList, genome);
 
 
                             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
@@ -334,9 +337,9 @@ var igv = (function (igv) {
     // TODO -- filter by pixel size
     igv.FeatureSource.prototype.getWGFeatureCache = function (features) {
 
+        const genome = this.genome;
+        
         if (!this.wgFeatureCache) {
-
-            const genome = igv.browser.genome;
 
             const wgChromosomeNames = new Set(genome.wgChromosomeNames);
 
@@ -350,14 +353,14 @@ var igv = (function (igv) {
 
                     let wg = Object.assign({}, f);
                     wg.chr = "all";
-                    wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
-                    wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
+                    wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                    wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
                     wgFeatures.push(wg);
                 }
             });
 
-            this.wgFeatureCache = new igv.FeatureCache(wgFeatures);
+            this.wgFeatureCache = new igv.FeatureCache(wgFeatures, genome);
         }
 
         return this.wgFeatureCache;

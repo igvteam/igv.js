@@ -5,30 +5,22 @@ function runWigTests() {
 
 
     //mock object
-    if (igv === undefined) {
-        igv = {};
-    }
 
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
         }
-    };
+    }
 
     asyncTest("wig fixed step", function () {
 
         var path = "data/wig/fixedStep-example.wig",
-            featureSource = new igv.FeatureSource({ format : 'wig', url: path }),
+            featureSource = new igv.FeatureSource(
+                {format: 'wig', url: path},
+                genome),
             chr = "chr19",
             bpStart = 49300000,
-            bpEnd   = 49400000;
+            bpEnd = 49400000;
 
         ok(featureSource, "featureSource");
 
@@ -65,40 +57,42 @@ function runWigTests() {
 
     asyncTest("wig variable step", function () {
 
-       var url = "data/wig/variableStep-example.wig";
+        var url = "data/wig/variableStep-example.wig";
 
-       var wigFeatureSource = new igv.FeatureSource({format : 'wig', url: url});
+        var wigFeatureSource = new igv.FeatureSource(
+            {format: 'wig', url: url},
+            genome);
 
-       ok(wigFeatureSource);
+        ok(wigFeatureSource);
 
-       //variableStep chrom=chr19 span=150
-       var starts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
-       var values = [10.0, 12.5, 15.0, 17.5 , 20.0, 17.5, 15.0, 12.5, 10.0];
-       span = 150;
+        //variableStep chrom=chr19 span=150
+        var starts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
+        var values = [10.0, 12.5, 15.0, 17.5, 20.0, 17.5, 15.0, 12.5, 10.0];
+        span = 150;
 
-       var chr = "chr19";
-       var bpStart = 49304200;
-       var bpEnd = 49310700;
+        var chr = "chr19";
+        var bpStart = 49304200;
+        var bpEnd = 49310700;
 
-       wigFeatureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
+        wigFeatureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-           ok(features);
+            ok(features);
 
-           equal(features.length, 9);
+            equal(features.length, 9);
 
-           //fixedStep chrom=chr19 start=49307401 step=300 span=200
-           features.forEach(function (feature, index) {
+            //fixedStep chrom=chr19 start=49307401 step=300 span=200
+            features.forEach(function (feature, index) {
 
-               equal(feature.start, starts[index]);
-               equal(feature.end, starts[index] + span);
-               equal(feature.value, values[index]);
+                equal(feature.start, starts[index]);
+                equal(feature.end, starts[index] + span);
+                equal(feature.value, values[index]);
 
-           });
-           start();
-       }).catch(function (error) {
-           console.log(error);
-           ok(false);
-       });
+            });
+            start();
+        }).catch(function (error) {
+            console.log(error);
+            ok(false);
+        });
 
 
     });

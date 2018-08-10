@@ -68,7 +68,7 @@ var igv = (function (igv) {
         // clamp right
         if (viewportWidth) {
         
-            var chromosome = genome.getChromosome(this.chrName);
+            var chromosome = this.genome.getChromosome(this.chrName);
             var maxEnd = chromosome.bpLength;
             var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
 
