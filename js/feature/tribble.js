@@ -31,12 +31,8 @@ var igv = (function (igv) {
      * @param config
      * @returns a Promise for the tribble-style (.idx) index.  The fulfill function takes the index as an argument
      */
-    igv.loadTribbleIndex = function (indexFile, config) {
-
-
-        var genome = igv.browser ? igv.browser.genome : null;
-
-
+    igv.loadTribbleIndex = function (indexFile, config, genome) {
+        
         return new Promise(function (fullfill) {
 
             igv.xhr

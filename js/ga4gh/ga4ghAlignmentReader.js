@@ -25,23 +25,7 @@
 
 var igv = (function (igv) {
 
-
-    var BAM_MAGIC = 21840194;
-    var BAI_MAGIC = 21578050;
-    var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
-    var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
-    var READ_PAIRED_FLAG = 0x1;
-    var PROPER_PAIR_FLAG = 0x2;
-    var READ_UNMAPPED_FLAG = 0x4;
-    var MATE_UNMAPPED_FLAG = 0x8;
-    var READ_STRAND_FLAG = 0x10;
-    var MATE_STRAND_FLAG = 0x20;
-    var FIRST_OF_PAIR_FLAG = 0x40;
-    var SECOND_OF_PAIR_FLAG = 0x80;
-    var NOT_PRIMARY_ALIGNMENT_FLAG = 0x100;
-    var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
-    var DUPLICATE_READ_FLAG = 0x400;
-    var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+    "use strict";
 
     var CigarOperationTable = {
         "ALIGNMENT_MATCH": "M",
@@ -55,9 +39,10 @@ var igv = (function (igv) {
         "SEQUENCE_MISMATCH": "X"
     }
 
-    igv.Ga4ghAlignmentReader = function (config) {
+    igv.Ga4ghAlignmentReader = function (config, genome) {
 
         this.config = config;
+        this.genome = genome;
         this.url = config.url;
         this.filter = new igv.BamFilter(config.filter);
         this.readGroupSetIds = config.readGroupSetIds;
@@ -76,29 +61,17 @@ var igv = (function (igv) {
 
     igv.Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
+        const genome = this.genome;
+        const self = this;
 
-        //ALIGNMENT_MATCH, INSERT, DELETE, SKIP, CLIP_SOFT, CLIP_HARD, PAD, SEQUENCE_MATCH, SEQUENCE_MISMATCH
-        var self = this,
-            cigarMap = {
-                "ALIGNMENT_MATCH": "M",
-                "INSERT": "I",
-                "DELETE": "D",
-                "SKIP": "N",
-                "CLIP_SOFT": "S",
-                "CLIP_HARD": "H",
-                "PAD": "P",
-                "SEQUENCE_MATCH": "=",
-                "SEQUENCE_MISMATCH": "X"
-            };
+        return getChrAliasTable()
 
-        return new Promise(function (fulfill, reject) {
-
-            getChrAliasTable().then(function (chrAliasTable) {
+            .then(function (chrAliasTable) {
 
                 var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                     readURL = self.url + "/reads/search";
 
-                igv.ga4ghSearch({
+                return igv.ga4ghSearch({
                     url: readURL,
                     body: {
                         "readGroupSetIds": [self.readGroupSetIds],
@@ -109,283 +82,283 @@ var igv = (function (igv) {
                     },
                     decode: decodeGa4ghReads,
                     results: new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported)
-                }).then(fulfill)
-                    .catch(reject);
+                })
+            });
 
-            }).catch(reject);
 
-            function getChrAliasTable() {
+        function getChrAliasTable() {
 
-                if (self.chrAliasTable) {
-                    return Promise.resolve(self.chrAliasTable);
-                } else {
-                    return new Promise(function (fulfill, reject) {
+            if (self.chrAliasTable) {
 
-                        self.readMetadata()
-                            .then(function (json) {
+                return Promise.resolve(self.chrAliasTable);
 
-                                self.chrAliasTable = {};
+            } else {
 
-                                if (igv.browser && json.readGroups && json.readGroups.length > 0) {
+                return self.readMetadata()
 
-                                    var referenceSetId = json.readGroups[0].referenceSetId;
+                    .then(function (json) {
 
-                                    console.log("No reference set specified");
+                        self.chrAliasTable = {};
 
-                                    if (referenceSetId) {
+                        if (genome && json.readGroups && json.readGroups.length > 0) {
 
-                                        // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
-                                        var readURL = self.url + "/references/search";
+                            var referenceSetId = json.readGroups[0].referenceSetId;
 
-                                        igv.ga4ghSearch({
-                                            url: readURL,
-                                            body: {
-                                                "referenceSetId": referenceSetId
-                                            },
-                                            decode: function (j) {
-                                                return j.references;
-                                            }
-                                        })
-                                            .then(function (references) {
-                                                references.forEach(function (ref) {
-                                                    var refName = ref.name,
-                                                        alias = igv.browser.genome.getChromosomeName(refName);
-                                                    self.chrAliasTable[alias] = refName;
-                                                });
-                                                fulfill(self.chrAliasTable);
+                            if (referenceSetId) {
 
-                                            })
-                                            .catch(reject);
+                                // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
+                                var readURL = self.url + "/references/search";
+
+                                return igv.ga4ghSearch({
+                                    url: readURL,
+                                    body: {
+                                        "referenceSetId": referenceSetId
+                                    },
+                                    decode: function (j) {
+                                        return j.references;
                                     }
-                                    else {
-
-                                        // Try hardcoded constants -- workaround for non-compliant data at Google
-                                        populateChrAliasTable(self.chrAliasTable, self.config.datasetId);
-
-                                        fulfill(self.chrAliasTable);
-                                    }
-                                }
-
-                                else {
-                                    // No browser object, can't build map.  This can occur when run from unit tests
-                                    fulfill(self.chrAliasTable);
-                                }
-                            })
-                            .catch(reject);
+                                })
+                                    .then(function (references) {
 
 
-                    });
-                }
+                                        references.forEach(function (ref) {
+                                            var refName = ref.name,
+                                                alias = genome.getChromosomeName(refName);
+                                            self.chrAliasTable[alias] = refName;
+                                        });
+
+
+                                        return self.chrAliasTable;
+
+                                    })
+                            }
+                            else {
+
+                                // Try hardcoded constants -- workaround for non-compliant data at Google
+                                populateChrAliasTable(self.chrAliasTable, self.config.datasetId);
+
+                                return self.chrAliasTable;
+                            }
+                        }
+
+                        else {
+                            // No browser object, can't build map.  This can occur when run from unit tests
+                            fulfill(self.chrAliasTable);
+                        }
+                    })
             }
+        }
+
+        /**
+         * Decode an array of ga4gh read records
+         *
+
+         */
+        function decodeGa4ghReads(json) {
+
+            var i,
+                jsonRecords = json.alignments,
+                len = jsonRecords.length,
+                json,
+                alignment,
+                jsonAlignment,
+                cigarDecoded,
+                alignments = [],
+                mate,
+                blocks;
+
+            for (i = 0; i < len; i++) {
+
+                json = jsonRecords[i];
+
+                alignment = new igv.BamAlignment();
+
+                alignment.readName = json.fragmentName;
+                alignment.properPlacement = json.properPlacement;
+                alignment.duplicateFragment = json.duplicateFragment;
+                alignment.numberReads = json.numberReads;
+                alignment.fragmentLength = json.fragmentLength;
+                alignment.readNumber = json.readNumber;
+                alignment.failedVendorQualityChecks = json.failedVendorQualityChecks;
+                alignment.secondaryAlignment = json.secondaryAlignment;
+                alignment.supplementaryAlignment = json.supplementaryAlignment;
+                alignment.seq = json.alignedSequence;
+                alignment.qual = json.alignedQuality;
+                alignment.matePos = json.nextMatePosition;
+                alignment.tagDict = json.info;
+                alignment.flags = encodeFlags(json);
+
+
+                jsonAlignment = json.alignment;
+                if (jsonAlignment) {
+                    alignment.mapped = true;
+
+                    alignment.chr = json.alignment.position.referenceName;
+                    if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
+
+                    alignment.start = parseInt(json.alignment.position.position);
+                    alignment.strand = !(json.alignment.position.reverseStrand);
+                    alignment.mq = json.alignment.mappingQuality;
+                    alignment.cigar = encodeCigar(json.alignment.cigar);
+                    cigarDecoded = translateCigar(json.alignment.cigar);
+
+                    alignment.lengthOnRef = cigarDecoded.lengthOnRef;
+
+                    blocks = makeBlocks(alignment, cigarDecoded.array);
+                    alignment.blocks = blocks.blocks;
+                    alignment.insertions = blocks.insertions;
+
+                }
+                else {
+                    alignment.mapped = false;
+                }
+
+                mate = json.nextMatePosition;
+                if (mate) {
+                    alignment.mate = {
+                        chr: mate.referenceFrame,
+                        position: parseInt(mate.position),
+                        strand: !mate.reverseStrand
+                    };
+                }
+
+                if (self.filter.pass(alignment)) {
+                    alignments.push(alignment);
+                }
+
+
+            }
+
+            return alignments;
+
+
+            // Encode a cigar string -- used for popup text
+            function encodeCigar(cigarArray) {
+
+                var cigarString = "";
+                cigarArray.forEach(function (cigarUnit) {
+                    var op = CigarOperationTable[cigarUnit.operation],
+                        len = cigarUnit.operationLength;
+                    cigarString = cigarString + (len + op);
+                });
+
+                return cigarString;
+            }
+
+            // TODO -- implement me
+            function encodeFlags(json) {
+                return 0;
+            }
+
+            function translateCigar(cigar) {
+
+                var cigarUnit, opLen, opLtr,
+                    lengthOnRef = 0,
+                    cigarArray = [],
+                    i;
+
+                for (i = 0; i < cigar.length; i++) {
+
+                    cigarUnit = cigar[i];
+
+                    opLtr = CigarOperationTable[cigarUnit.operation];
+                    opLen = parseInt(cigarUnit.operationLength);    // Google represents long as a String
+
+                    if (opLtr === 'M' || opLtr === 'EQ' || opLtr === 'X' || opLtr === 'D' || opLtr === 'N' || opLtr === '=')
+                        lengthOnRef += opLen;
+
+                    cigarArray.push({len: opLen, ltr: opLtr});
+
+                }
+
+                return {lengthOnRef: lengthOnRef, array: cigarArray};
+            }
+
 
             /**
-             * Decode an array of ga4gh read records
+             * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
+             * its portion of the read sequence and base quality strings.  A read sequence or base quality string
+             * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
+             * and quality string (block.qual) must == the block length.
              *
-
+             * NOTE: Insertions are not yet treated // TODO
+             *
+             * @param record
+             * @param cigarArray
+             * @returns array of blocks
              */
-            function decodeGa4ghReads(json) {
-
-                var i,
-                    jsonRecords = json.alignments,
-                    len = jsonRecords.length,
-                    json,
-                    alignment,
-                    jsonAlignment,
-                    cigarDecoded,
-                    alignments = [],
-                    genome = igv.browser.genome,
-                    mate,
-                    blocks;
-
-                for (i = 0; i < len; i++) {
-
-                    json = jsonRecords[i];
-
-                    alignment = new igv.BamAlignment();
-
-                    alignment.readName = json.fragmentName;
-                    alignment.properPlacement = json.properPlacement;
-                    alignment.duplicateFragment = json.duplicateFragment;
-                    alignment.numberReads = json.numberReads;
-                    alignment.fragmentLength = json.fragmentLength;
-                    alignment.readNumber = json.readNumber;
-                    alignment.failedVendorQualityChecks = json.failedVendorQualityChecks;
-                    alignment.secondaryAlignment = json.secondaryAlignment;
-                    alignment.supplementaryAlignment = json.supplementaryAlignment;
-                    alignment.seq = json.alignedSequence;
-                    alignment.qual = json.alignedQuality;
-                    alignment.matePos = json.nextMatePosition;
-                    alignment.tagDict = json.info;
-                    alignment.flags = encodeFlags(json);
+            function makeBlocks(record, cigarArray) {
 
 
-                    jsonAlignment = json.alignment;
-                    if (jsonAlignment) {
-                        alignment.mapped = true;
+                var blocks = [],
+                    insertions,
+                    seqOffset = 0,
+                    pos = record.start,
+                    len = cigarArray.length,
+                    blockSeq,
+                    gapType,
+                    blockQuals;
 
-                        alignment.chr = json.alignment.position.referenceName;
-                        if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
+                for (var i = 0; i < len; i++) {
 
-                        alignment.start = parseInt(json.alignment.position.position);
-                        alignment.strand = !(json.alignment.position.reverseStrand);
-                        alignment.mq = json.alignment.mappingQuality;
-                        alignment.cigar = encodeCigar(json.alignment.cigar);
-                        cigarDecoded = translateCigar(json.alignment.cigar);
+                    var c = cigarArray[i];
 
-                        alignment.lengthOnRef = cigarDecoded.lengthOnRef;
+                    switch (c.ltr) {
+                        case 'H' :
+                            break; // ignore hard clips
+                        case 'P' :
+                            break; // ignore pads
+                        case 'S' :
+                            seqOffset += c.len;
+                            gapType = 'S';
+                            break; // soft clip read bases
+                        case 'N' :
+                            pos += c.len;
+                            gapType = 'N';
+                            break;  // reference skip
+                        case 'D' :
+                            pos += c.len;
+                            gapType = 'D';
+                            break;
+                        case 'I' :
+                            blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                            blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                            if (insertions === undefined) insertions = [];
+                            insertions.push(new igv.AlignmentBlock({
+                                start: pos,
+                                len: c.len,
+                                seq: blockSeq,
+                                qual: blockQuals
+                            }));
+                            seqOffset += c.len;
+                            break;
+                        case 'M' :
+                        case 'EQ' :
+                        case '=' :
+                        case 'X' :
 
-                        blocks = makeBlocks(alignment, cigarDecoded.array);
-                        alignment.blocks = blocks.blocks;
-                        alignment.insertions = blocks.insertions;
+                            blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
+                            blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                            blocks.push({
+                                start: pos,
+                                len: c.len,
+                                seq: blockSeq,
+                                qual: blockQuals,
+                                gapType: gapType
+                            });
+                            seqOffset += c.len;
+                            pos += c.len;
 
+                            break;
+
+                        default :
+                            console.log("Error processing cigar element: " + c.len + c.ltr);
                     }
-                    else {
-                        alignment.mapped = false;
-                    }
-
-                    mate = json.nextMatePosition;
-                    if (mate) {
-                        alignment.mate = {
-                            chr: mate.referenceFrame,
-                            position: parseInt(mate.position),
-                            strand: !mate.reverseStrand
-                        };
-                    }
-
-                    if (self.filter.pass(alignment)) {
-                        alignments.push(alignment);
-                    }
-
-
                 }
 
-                return alignments;
-
-                // Encode a cigar string -- used for popup text
-                function encodeCigar(cigarArray) {
-
-                    var cigarString = "";
-                    cigarArray.forEach(function (cigarUnit) {
-                        var op = CigarOperationTable[cigarUnit.operation],
-                            len = cigarUnit.operationLength;
-                        cigarString = cigarString + (len + op);
-                    });
-
-                    return cigarString;
-                }
-
-                // TODO -- implement me
-                function encodeFlags(json) {
-                    return 0;
-                }
-
-                function translateCigar(cigar) {
-
-                    var cigarUnit, opLen, opLtr,
-                        lengthOnRef = 0,
-                        cigarArray = [],
-                        i;
-
-                    for (i = 0; i < cigar.length; i++) {
-
-                        cigarUnit = cigar[i];
-
-                        opLtr = CigarOperationTable[cigarUnit.operation];
-                        opLen = parseInt(cigarUnit.operationLength);    // Google represents long as a String
-
-                        if (opLtr === 'M' || opLtr === 'EQ' || opLtr === 'X' || opLtr === 'D' || opLtr === 'N' || opLtr === '=')
-                            lengthOnRef += opLen;
-
-                        cigarArray.push({len: opLen, ltr: opLtr});
-
-                    }
-
-                    return {lengthOnRef: lengthOnRef, array: cigarArray};
-                }
-
-
-                /**
-                 * Split the alignment record into blocks as specified in the cigarArray.  Each aligned block contains
-                 * its portion of the read sequence and base quality strings.  A read sequence or base quality string
-                 * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
-                 * and quality string (block.qual) must == the block length.
-                 *
-                 * NOTE: Insertions are not yet treated // TODO
-                 *
-                 * @param record
-                 * @param cigarArray
-                 * @returns array of blocks
-                 */
-                function makeBlocks(record, cigarArray) {
-
-
-                    var blocks = [],
-                        insertions,
-                        seqOffset = 0,
-                        pos = record.start,
-                        len = cigarArray.length,
-                        blockSeq,
-                        gapType,
-                        blockQuals;
-
-                    for (var i = 0; i < len; i++) {
-
-                        var c = cigarArray[i];
-
-                        switch (c.ltr) {
-                            case 'H' :
-                                break; // ignore hard clips
-                            case 'P' :
-                                break; // ignore pads
-                            case 'S' :
-                                seqOffset += c.len;
-                                gapType = 'S';
-                                break; // soft clip read bases
-                            case 'N' :
-                                pos += c.len;
-                                gapType = 'N';
-                                break;  // reference skip
-                            case 'D' :
-                                pos += c.len;
-                                gapType = 'D';
-                                break;
-                            case 'I' :
-                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                                blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                                if (insertions === undefined) insertions = [];
-                                insertions.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals}));
-                                seqOffset += c.len;
-                                break;
-                            case 'M' :
-                            case 'EQ' :
-                            case '=' :
-                            case 'X' :
-
-                                blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                                blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                                blocks.push({
-                                    start: pos,
-                                    len: c.len,
-                                    seq: blockSeq,
-                                    qual: blockQuals,
-                                    gapType: gapType
-                                });
-                                seqOffset += c.len;
-                                pos += c.len;
-
-                                break;
-
-                            default :
-                                console.log("Error processing cigar element: " + c.len + c.ltr);
-                        }
-                    }
-
-                    return {blocks: blocks, insertions: insertions};
-                }
+                return {blocks: blocks, insertions: insertions};
             }
-
-
-        });
+        }
     }
 
 
