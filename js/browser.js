@@ -1359,9 +1359,9 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $('.igv-scrollbar-outer-div').remove();
-        $('.igv-viewport-div').remove();
-        $('.igv-ruler-sweeper-div').remove();
+        $(this.trackContainerDiv).find('.igv-scrollbar-outer-div').remove();
+        $(this.trackContainerDiv).find('.igv-viewport-div').remove();
+        $(this.trackContainerDiv).find('.igv-ruler-sweeper-div').remove();
 
         $('#igv-content-header').empty();
 
