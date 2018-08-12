@@ -98,7 +98,7 @@ var igv = (function (igv) {
         if (self.header) {
             return Promise.resolve(self.header);
         } else {
-            if (typeof self.reader.readHeader === "function") {
+            if (self.reader && typeof self.reader.readHeader === "function") {
 
                 return self.reader.readHeader()
 
