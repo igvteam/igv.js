@@ -70,7 +70,7 @@ var igv = (function (igv) {
         browser.userFeedback = new igv.UserFeedback(browser.$content);
         browser.userFeedback.hide();
 
-        igv.popover = new igv.Popover(browser.$content);
+        browser.popover = new igv.Popover(browser.$content);
 
         igv.alertDialog = new igv.AlertDialog(browser.$content);
 

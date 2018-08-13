@@ -197,7 +197,7 @@ var igv = (function (igv) {
         $(this.rightHandGutter).append($gearButton);
 
         $gearButton.click(function (e) {
-            igv.popover.presentTrackGearMenu(e.pageX, e.pageY, self, browser);
+            browser.popover.presentTrackGearMenu(e.pageX, e.pageY, self, browser);
         });
 
     }

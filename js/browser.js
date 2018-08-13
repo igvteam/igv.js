@@ -2012,7 +2012,7 @@ var igv = (function (igv) {
             var target = e.target;
             if (!self.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
-                igv.popover.hide();
+                self.popover.hide();
             }
         });
 
