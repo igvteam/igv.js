@@ -487,12 +487,24 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.loadTrackList = function (configList) {
 
-        var self = this,
-            groupAutoscaleViews,
-            promises;
+        const self = this;
 
-        promises = [];
-        configList.forEach(function (config) {
+        const unloadableTracks = configList.filter(function (config) {
+            return !knowHowToLoad(config);
+        })
+
+
+        if (unloadableTracks.length > 0) {
+            let message = "The following tracks could not be loaded.  Are these local files?";
+            unloadableTracks.forEach(function (config) {
+                message += ", " + config.name;
+            })
+            igv.presentAlert(message);
+        }
+
+
+        const promises = [];
+        configList.filter(knowHowToLoad).forEach(function (config) {
             promises.push(self.loadTrack(config));
         });
 
@@ -500,7 +512,7 @@ var igv = (function (igv) {
 
             .then(function (loadedTracks) {
 
-                groupAutoscaleViews = self.trackViews.filter(function (trackView) {
+                const groupAutoscaleViews = self.trackViews.filter(function (trackView) {
                     return trackView.track.autoscaleGroup
                 })
 
@@ -511,6 +523,19 @@ var igv = (function (igv) {
                 return loadedTracks;
             })
     };
+
+
+    function knowHowToLoad(config) {
+
+        // config might be json
+        if (igv.isString(config)) {
+            config = JSON.parse(config);
+        }
+
+        const url = config.url;
+        const features = config.features;
+        return Array.isArray(features) || igv.isString(url) || igv.isFilePath(url) || "sequence" === config.type;
+    }
 
     /**
      * Return a promise to load a track
@@ -525,6 +550,11 @@ var igv = (function (igv) {
         // config might be json
         if (igv.isString(config)) {
             config = JSON.parse(config);
+        }
+
+        if(!knowHowToLoad(config)) {
+            igv.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
+            return Promise.resolve();
         }
 
         return resolveTrackProperties(config)
