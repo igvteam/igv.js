@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Segmented copy number</title>
+    <title>Multiple genome browsers</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -32,13 +32,27 @@
         const options1 =
         {
             genome: "hg19",
-            locus: 'chr1'
+            locus: 'chr7',
+            tracks: [
+                {
+                    "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                    "indexed": false,
+                    "isLog": true,
+                    "name": "GBM Copy # (TCGA Broad GDAC)"
+                }
+            ]
         };
 
         const options2 =
         {
             genome: "hg19",
-            locus: 'chr2'
+            locus: 'myc',
+            tracks: [
+                {
+                    "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                    "name": "ctcf bigwig"
+                }
+            ]
         };
 
 
