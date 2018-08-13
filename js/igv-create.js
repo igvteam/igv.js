@@ -60,7 +60,8 @@ var igv = (function (igv) {
         browser.$content = $('<div class="igv-content-div">');
         browser.$root.append(browser.$content);
 
-        browser.$contentHeader = $('<div id="igv-content-header">');
+        let content_header_id =
+        browser.$contentHeader = $('<div>', { class:'igv-content-header' });
         browser.$content.append(browser.$contentHeader);
 
         browser.$content.append(browser.trackContainerDiv);

@@ -130,17 +130,6 @@ var igv = (function (igv) {
         this.decorateViewports();
     };
 
-    igv.TrackView.prototype.viewportWithGenomicState = function (genomicState) {
-        var i, viewport;
-        for (i = 0; i < this.viewports.length; i++) {
-            viewport = this.viewports[i];
-            if (viewport.genomicState === genomicState) {
-                return viewport;
-            }
-        }
-        return undefined;
-    };
-
     igv.TrackView.prototype.decorateViewports = function () {
         var self = this;
 

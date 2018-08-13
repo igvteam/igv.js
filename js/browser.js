@@ -1362,8 +1362,7 @@ var igv = (function (igv) {
         $(this.trackContainerDiv).find('.igv-scrollbar-outer-div').remove();
         $(this.trackContainerDiv).find('.igv-viewport-div').remove();
         $(this.trackContainerDiv).find('.igv-ruler-sweeper-div').remove();
-
-        $('#igv-content-header').empty();
+        this.$contentHeader.empty();
 
         this.trackViews.forEach(function (trackView) {
 
@@ -1441,7 +1440,7 @@ var igv = (function (igv) {
                 if (self.ideoPanel) {
                     self.ideoPanel.discardPanels();
                     panelWidth = self.viewportContainerWidth() / genomicStateList.length;
-                    self.ideoPanel.buildPanels($('#igv-content-header'), panelWidth);
+                    self.ideoPanel.buildPanels($('.igv-content-header'), panelWidth);
                 }
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
