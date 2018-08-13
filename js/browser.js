@@ -571,7 +571,7 @@ var igv = (function (igv) {
 
         function resolveTrackProperties(config) {
 
-            if (typeof config.url === 'string' && config.url.startsWith("https://drive.google.com")) {
+            if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
                 return igv.Google.getDriveFileInfo(config.url)
 
@@ -619,7 +619,7 @@ var igv = (function (igv) {
 
         function resolveTrackProperties(config) {
 
-            if (typeof config.url === 'string' && config.url.startsWith("https://drive.google.com")) {
+            if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
                 return igv.Google.getDriveFileInfo(config.url)
 
