@@ -44,7 +44,7 @@ var igv = (function (igv) {
 
         if (igv.isFilePath(this.config.url)) {
             this.filename = this.config.url.name;
-        } else if (this.config.url.startsWith('data:')) {
+        } else if (igv.isString(this.config.url) && this.config.url.startsWith('data:')) {
             this.indexed = false;  // by definition
             this.dataURI = config.url;
         } else {
