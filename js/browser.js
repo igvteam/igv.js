@@ -220,7 +220,7 @@ var igv = (function (igv) {
             })
 
             .catch(function (error) {
-                igv.presentAlert(error, undefined);
+                self.presentAlert(error, undefined);
                 console.log(error);
             });
 
@@ -323,7 +323,7 @@ var igv = (function (igv) {
 
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
-                    igv.presentAlert(errorString, undefined);
+                    self.presentAlert(errorString, undefined);
                 }
 
                 if (genomeConfig.tracks) {
@@ -363,7 +363,7 @@ var igv = (function (igv) {
 
                         var reference = knownGenomes[genomeID];
                         if (!reference) {
-                            igv.presentAlert("Uknown genome id: " + genomeID, undefined);
+                            self.presentAlert("Uknown genome id: " + genomeID, undefined);
                         }
                         return reference;
                     })
@@ -552,7 +552,7 @@ var igv = (function (igv) {
                 newTrack = igv.createTrack(config, self);
 
                 if (undefined === newTrack) {
-                    igv.presentAlert("Unknown file type: " + config.url, undefined);
+                    self.presentAlert("Unknown file type: " + config.url, undefined);
                     return newTrack;
                 }
 
@@ -1999,6 +1999,19 @@ var igv = (function (igv) {
 
     }
 
+    igv.Browser.prototype.presentAlert = function (alert, $parent) {
+
+        var string;
+
+        string = alert.message || alert;
+
+        if (httpMessages.hasOwnProperty(string)) {
+            string = httpMessages[string];
+        }
+
+        this.alertDialog.configure({label: string});
+        this.alertDialog.present($parent);
+    };
 
     function addMouseHandlers() {
 

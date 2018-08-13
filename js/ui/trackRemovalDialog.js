@@ -25,10 +25,12 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackRemovalDialog = function ($parent) {
+    igv.TrackRemovalDialog = function ($parent, browser) {
         var self = this,
             $header,
             $buttons;
+
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });

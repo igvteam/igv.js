@@ -28,7 +28,8 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function ($parent) {
+    igv.Popover = function ($parent, browser) {
+        this.browser = browser;
         this.$parent = initializationHelper.call(this, $parent);
     };
 

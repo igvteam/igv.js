@@ -84,49 +84,52 @@ var igv = (function (igv) {
 
         const type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
 
+        // add browser to track config
+        let trackConfig = Object.assign({}, config);
+
         switch (type) {
 
             case "gwas":
-                return new igv.GWASTrack(config);
+                return new igv.GWASTrack(trackConfig);
                 break;
 
             case "annotation":
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(config, browser);
+                return new igv.FeatureTrack(trackConfig, browser);
                 break;
 
             case "variant":
-                return new igv.VariantTrack(config, browser);
+                return new igv.VariantTrack(trackConfig, browser);
                 break;
 
             case "alignment":
-                return new igv.BAMTrack(config, browser);
+                return new igv.BAMTrack(trackConfig, browser);
                 break;
 
             case "data":  // deprecated
             case "wig":
-                return new igv.WIGTrack(config, browser);
+                return new igv.WIGTrack(trackConfig, browser);
                 break;
 
             case "sequence":
-                return new igv.SequenceTrack(config, browser);
+                return new igv.SequenceTrack(trackConfig, browser);
                 break;
 
             case "eqtl":
-                return new igv.EqtlTrack(config, browser);
+                return new igv.EqtlTrack(trackConfig, browser);
                 break;
 
             case "seg":
-                return new igv.SegTrack(config, browser);
+                return new igv.SegTrack(trackConfig, browser);
                 break;
 
             case "merged":
-                return new igv.MergedTrack(config, browser);
+                return new igv.MergedTrack(trackConfig, browser);
 
             case "interaction":
-                return new igv.InteractionTrack(config, browser);
+                return new igv.InteractionTrack(trackConfig, browser);
 
             default:
                 return undefined;
@@ -582,8 +585,8 @@ var igv = (function (igv) {
 
         clickHandler = function () {
 
-            igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.inputDialog.show($(trackView.trackDiv));
+            trackView.browser.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+            trackView.browser.inputDialog.show($(trackView.trackDiv));
 
         };
 
