@@ -166,28 +166,20 @@ var igv = (function (igv) {
 
                             .then(function (accessToken) {
 
-                                if (undefined === accessToken) {
+                                options.oauthToken = accessToken;
 
-                                    reject(Error('Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.'));
-                                } else {
-
-                                    options.oauthToken = accessToken;
-
-                                    igv.xhr
-                                        .load(url, options)
-                                        .then(function (response) {
-                                            fullfill(response);
-                                        })
-                                        .catch(function (error) {
-                                            if (reject) {
-                                                reject(error);
-                                            }
-                                            else {
-                                                throw(error);
-                                            }
-                                        })
-
-                                }
+                                igv.xhr.load(url, options)
+                                    .then(function (response) {
+                                        fullfill(response);
+                                    })
+                                    .catch(function (error) {
+                                        if (reject) {
+                                            reject(error);
+                                        }
+                                        else {
+                                            throw(error);
+                                        }
+                                    })
                             })
 
 
@@ -528,6 +520,7 @@ var igv = (function (igv) {
 
             authInstance = gapi.auth2.getAuthInstance();
             if (!authInstance) {
+                igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
                 return undefined;
             }
             else {
