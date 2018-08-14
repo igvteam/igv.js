@@ -13,6 +13,7 @@
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link rel="stylesheet" type="text/css" href="css/multiple-browsers.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
@@ -147,43 +148,67 @@
 
 <body>
 
-<div id="igvDiv1" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div class="side-by-side-container">
+    <div id="ba">
+    </div>
+    <!--<div id="bb">-->
+    <!--</div>-->
+</div>
 
-<div id="igvDiv2" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div class="side-by-side-container">
+    <div id="bc">
+    </div>
+    <!--<div id="bd">-->
+    <!--</div>-->
+</div>
+
+
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const igvDiv1 = document.getElementById("igvDiv1");
-        const igvDiv2 = document.getElementById("igvDiv2");
-
-        const options1 =
+        const config_a =
             {
                 genome: "hg19",
-                locus: 'chr1'
+                locus: 'myc'
             };
 
-        const options2 =
+        const config_b =
             {
                 genome: "hg19",
-                locus: 'chr2'
+                locus: 'egfr'
             };
-
 
         igv
-            .createBrowser(igvDiv1, options1)
+            .createBrowser(document.getElementById("ba"), config_a)
             .then(function (b) {
                 igv.browser = b;
                 console.log("Created browser guid: " + b.guid);
             });
 
+        // igv
+        //     .createBrowser(document.getElementById("bb"), config_b)
+        //     .then(function (b) {
+        //         igv.browser = b;
+        //         console.log("Created browser guid: " + b.guid);
+        //     });
+
         igv
-            .createBrowser(igvDiv2, options2)
+            .createBrowser(document.getElementById("bc"), config_b)
             .then(function (b) {
                 igv.browser = b;
-                console.log("Created browser guid:" + b.guid);
+                console.log("Created browser guid: " + b.guid);
             });
+
+        // igv
+        //     .createBrowser(document.getElementById("bd"), config_a)
+        //     .then(function (b) {
+        //         igv.browser = b;
+        //         console.log("Created browser guid: " + b.guid);
+        //     });
+
+
 
     });
 

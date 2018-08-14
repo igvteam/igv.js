@@ -1,0 +1,15 @@
+.side-by-side-container {
+
+  margin-top: 16px;
+  margin-bottom: 16px;
+
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  > div {
+    width: 100%;
+  }
+}
