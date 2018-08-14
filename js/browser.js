@@ -724,10 +724,10 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
-            trackPanelRemoved.dispose();
             this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             this.fireEvent('trackremoved', [trackPanelRemoved.track]);
+            trackPanelRemoved.dispose();
         }
 
     };
