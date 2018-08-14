@@ -41,13 +41,13 @@ var igv = (function (igv) {
             {
                 document:
                     {
-                        down:'mousedown.rulersweeper.' + guid,
-                        move:'mousemove.rulersweeper.' + guid,
-                          up:  'mouseup.rulersweeper.' + guid
+                        down:'mousedown._document_.' + guid,
+                        move:'mousemove._document_.' + guid,
+                          up:  'mouseup._document_.' + guid
                     },
                 viewport:
                     {
-                        down:'mousedown.rulersweeper.viewport.' + guid
+                        down:'mousedown.viewport.' + guid
                     }
 
             };

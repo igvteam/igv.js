@@ -34,7 +34,8 @@ var igv = (function (igv) {
         var self = this,
             width,
             $track,
-            config;
+            config,
+            guid;
 
         this.browser = browser;
         this.track = track;
@@ -44,6 +45,20 @@ var igv = (function (igv) {
         this.trackDiv = $track.get(0);
         $container.append($track);
 
+        guid = igv.guid();
+        this.mouseHandlers =
+            {
+                document:
+                    {
+                        up: 'mouseup._document_.' + guid
+                    },
+                window:
+                    {
+                        up:'mouseup._window_.' + guid,
+                        move:'mousemove._window_.' + guid
+                    }
+
+            };
 
         if (this.track instanceof igv.RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
@@ -228,7 +243,8 @@ var igv = (function (igv) {
 
         var self = this,
             indexDestination,
-            indexDragged;
+            indexDragged,
+            str;
 
         const browser = this.browser;
 
@@ -290,7 +306,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on('mouseup.document.trackview', function (e) {
+        $(document).on(self.mouseHandlers.document.up, function (e) {
 
             if (dragged) {
                 dragged.$trackDragScrim.hide();
@@ -607,8 +623,10 @@ var igv = (function (igv) {
             this.$innerScroll.off();
         }
 
-        $(window).off("mousemove.igv");
-        $(window).off("mouseup.igv");
+        $(window).off(this.mouseHandlers.window.up);
+        $(window).off(this.mouseHandlers.window.move);
+
+        $(document).off(this.mouseHandlers.document.up);
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();
@@ -660,9 +678,9 @@ var igv = (function (igv) {
 
             offY = event.pageY - $(this).position().top;
 
-            $(window).on("mousemove.igv", null, null, mouseMove);
+            $(window).on(self.mouseHandlers.window.move, mouseMove);
 
-            $(window).on("mouseup.igv", null, null, mouseUp);
+            $(window).on(self.mouseHandlers.window.up, mouseUp);
 
             // <= prevents start of horizontal track panning)
             event.stopPropagation();
@@ -686,8 +704,8 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $(window).off("mousemove.igv", null, mouseMove);
-            $(window).off("mouseup.igv", null, mouseUp);
+            $(window).off(self.mouseHandlers.window.move);
+            $(window).off(self.mouseHandlers.window.up);
         }
 
         function moveScrollerTo(y) {

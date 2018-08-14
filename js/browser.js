@@ -27,6 +27,10 @@ var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainerDiv) {
 
+        this.guid = igv.guid();
+        this.window_resize_browser_str = 'resize.browser.' + this.guid;
+        this.document_click_browser_str = 'click.browser.' + this.guid;
+
         this.config = options;
 
         this.$root = $('<div id="igvRootDiv" class="igv-root-div">');
@@ -1898,8 +1902,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.dispose = function () {
 
-        $(window).off('resize.browser');
-        $(document).off('click.browser');
+        $(window).off(this.window_resize_browser_str);
+        $(document).off(this.document_click_browser_str);
 
         this.trackViews.forEach(function (tv) {
             tv.dispose();
@@ -2017,11 +2021,11 @@ var igv = (function (igv) {
 
         var self = this;
 
-        $(window).on('resize.browser', function () {
+        $(window).on(this.window_resize_browser_str, function () {
             self.resize();
         });
 
-        $(document).on('click.browser', function (e) {
+        $(document).on(this.document_click_browser_str, function (e) {
             var target = e.target;
             if (!self.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
