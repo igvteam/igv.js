@@ -30,9 +30,10 @@
     "type": "git",
     "url": "git+https://github.com/igvteam/igv.js.git"
   },
-  "devDependencies": {
-    "grunt": "1.0.3",
-    "grunt-contrib-concat": "1.0.1",
-    "grunt-contrib-uglify-es": "3.3.0"
+  "devDependencies": {},
+  "dependencies": {
+    "grunt": "^1.0.3",
+    "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-uglify-es": "^3.3.0"
   }
 }
