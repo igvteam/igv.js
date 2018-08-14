@@ -91,7 +91,7 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.toggleSampleHeight = function () {
 
         this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
-
+        this.trackView.checkContentHeight();
         this.trackView.repaintViews();
     };
 
