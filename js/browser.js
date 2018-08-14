@@ -1444,7 +1444,7 @@ var igv = (function (igv) {
                 if (self.ideoPanel) {
                     self.ideoPanel.discardPanels();
                     panelWidth = self.viewportContainerWidth() / genomicStateList.length;
-                    self.ideoPanel.buildPanels($('.igv-content-header'), panelWidth);
+                    self.ideoPanel.buildPanels(self.$contentHeader, panelWidth);
                 }
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
