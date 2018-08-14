@@ -88,7 +88,7 @@ var igv = (function (igv) {
 
                 .catch(function (error) {
                     console.error(error);
-                    igv.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                    igv.browser.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                     self.bamReaders[queryChr] = "none";
                     return new igv.AlignmentContainer(chr, start, end);   // Empty alignment container
                 })
