@@ -151,15 +151,15 @@
 <div class="side-by-side-container">
     <div id="ba">
     </div>
-    <!--<div id="bb">-->
-    <!--</div>-->
+    <div id="bb">
+    </div>
 </div>
 
 <div class="side-by-side-container">
     <div id="bc">
     </div>
-    <!--<div id="bd">-->
-    <!--</div>-->
+    <div id="bd">
+    </div>
 </div>
 
 
@@ -171,13 +171,27 @@
         const config_a =
             {
                 genome: "hg19",
-                locus: 'myc'
+                locus: 'chr7',
+                tracks: [
+                    {
+                        "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        "indexed": false,
+                        "isLog": true,
+                        "name": "GBM Copy # (TCGA Broad GDAC)"
+                    }
+                ]
             };
 
         const config_b =
             {
                 genome: "hg19",
-                locus: 'egfr'
+                locus: 'myc',
+                tracks: [
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                        "name": "ctcf bigwig"
+                    }
+                ]
             };
 
         igv
@@ -187,12 +201,12 @@
                 console.log("Created browser guid: " + b.guid);
             });
 
-        // igv
-        //     .createBrowser(document.getElementById("bb"), config_b)
-        //     .then(function (b) {
-        //         igv.browser = b;
-        //         console.log("Created browser guid: " + b.guid);
-        //     });
+        igv
+            .createBrowser(document.getElementById("bb"), config_b)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
 
         igv
             .createBrowser(document.getElementById("bc"), config_b)
@@ -201,12 +215,12 @@
                 console.log("Created browser guid: " + b.guid);
             });
 
-        // igv
-        //     .createBrowser(document.getElementById("bd"), config_a)
-        //     .then(function (b) {
-        //         igv.browser = b;
-        //         console.log("Created browser guid: " + b.guid);
-        //     });
+        igv
+            .createBrowser(document.getElementById("bd"), config_a)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
 
 
 

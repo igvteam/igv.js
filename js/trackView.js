@@ -125,7 +125,7 @@ var igv = (function (igv) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
-            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
+            this.scrollbar = new igv.TrackScrollbar($viewportContainer, viewports, this);
 
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
@@ -656,13 +656,11 @@ var igv = (function (igv) {
 
     }
 
-    function TrackScrollbar($viewportContainer, viewports) {
+    igv.TrackScrollbar = function ($viewportContainer, viewports, trackView) {
 
         var self = this,
             offY,
             contentDivHeight;
-
-        contentDivHeight = maxContentHeight(viewports);
 
         this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
         this.$innerScroll = $('<div>');
@@ -678,9 +676,9 @@ var igv = (function (igv) {
 
             offY = event.pageY - $(this).position().top;
 
-            $(window).on(self.mouseHandlers.window.move, mouseMove);
+            $(window).on(trackView.mouseHandlers.window.move, mouseMove);
 
-            $(window).on(self.mouseHandlers.window.up, mouseUp);
+            $(window).on(trackView.mouseHandlers.window.up, mouseUp);
 
             // <= prevents start of horizontal track panning)
             event.stopPropagation();
@@ -704,8 +702,8 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $(window).off(self.mouseHandlers.window.move);
-            $(window).off(self.mouseHandlers.window.up);
+            $(window).off(trackView.mouseHandlers.window.move);
+            $(window).off(trackView.mouseHandlers.window.up);
         }
 
         function moveScrollerTo(y) {
@@ -734,7 +732,7 @@ var igv = (function (igv) {
         }
     };
 
-    TrackScrollbar.prototype.update = function () {
+    igv.TrackScrollbar.prototype.update = function () {
 
         var viewportContainerHeight,
             contentHeight,
