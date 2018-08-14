@@ -806,7 +806,7 @@ var igv = (function (igv) {
                 function () {
                     var value;
 
-                    value = igv.inputDialog.$input.val().trim();
+                    value = self.trackView.browser.inputDialog.$input.val().trim();
 
                     if (undefined !== value) {
                         self.filterByFamily(value);

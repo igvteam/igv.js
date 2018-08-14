@@ -258,7 +258,7 @@ var igv = (function (igv) {
                         self.alignmentTrack.colorBy = 'tag';
                         self.config.colorBy = 'tag';
 
-                        tag = igv.inputDialog.$input.val().trim();
+                        tag = self.trackView.browser.inputDialog.$input.val().trim();
                         if (tag !== self.alignmentTrack.colorByTag) {
                             self.alignmentTrack.colorByTag = tag;
                             self.config.colorByTag = tag;
@@ -277,8 +277,8 @@ var igv = (function (igv) {
                         click: clickFunction
                     };
 
-                    igv.inputDialog.configure(config);
-                    igv.inputDialog.present($(self.trackView.trackDiv));
+                    self.trackView.browser.inputDialog.configure(config);
+                    self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
 
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;

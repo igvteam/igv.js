@@ -605,7 +605,7 @@ var igv = (function (igv) {
             dialogClickHandler = function () {
                 var value;
 
-                value = igv.inputDialog.$input.val().trim();
+                value = trackView.browser.inputDialog.$input.val().trim();
 
                 if ('' === value || undefined === value) {
                     value = -1;
@@ -615,12 +615,12 @@ var igv = (function (igv) {
                 trackView.updateViews();
             };
 
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Visibility Window',
                 input: (trackView.track.visibilityWindow),
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
@@ -658,9 +658,8 @@ var igv = (function (igv) {
         $e.text('Set data range');
 
         clickHandler = function () {
-            // igv.dataRangeDialog.configureWithTrackView(trackView);
-            igv.dataRangeDialog.configure({trackView: trackView});
-            igv.dataRangeDialog.present($(trackView.trackDiv));
+            trackView.browser.dataRangeDialog.configure({trackView: trackView});
+            trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
         };
 
         return {object: $e, click: clickHandler};
@@ -696,19 +695,19 @@ var igv = (function (igv) {
             dialogClickHandler = function () {
                 var value;
 
-                value = igv.inputDialog.$input.val().trim();
+                value = trackView.browser.inputDialog.$input.val().trim();
 
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
                 igv.setTrackLabel(trackView.viewports[0].$trackLabel, trackView.track, value);
             };
 
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Track Name',
                 input: (igv.getTrackLabelText(trackView.track) || 'unnamed'),
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
@@ -726,18 +725,13 @@ var igv = (function (igv) {
         $e.text('Set track height');
 
         menuClickHandler = function () {
-            var dialogLabelHandler,
-                dialogClickHandler;
-
-            dialogLabelHandler = function () {
-                return "Track Height"
-            };
+            var dialogClickHandler;
 
             dialogClickHandler = function () {
 
                 var number;
 
-                number = parseFloat(igv.inputDialog.$input.val(), 10);
+                number = parseFloat(trackView.browser.inputDialog.$input.val(), 10);
 
                 if (undefined !== number) {
 
@@ -756,13 +750,12 @@ var igv = (function (igv) {
 
             };
 
-
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Track Height',
                 input: trackView.trackDiv.clientHeight,
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
