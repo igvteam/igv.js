@@ -124,7 +124,7 @@ var igv = (function (igv) {
 
                                 // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                                 if (self.config.searchable) {
-                                    addFeaturesToDB(features);
+                                    addFeaturesToDB.call(self, features);
                                 }
                             }
                         }
@@ -145,11 +145,12 @@ var igv = (function (igv) {
     };
 
     function addFeaturesToDB(featureList) {
+        let self = this;
 
         featureList.forEach(function (feature) {
             if (feature.name) {
                 //TODO igv.browser => igv.Globals or igv.FeatureDB
-                igv.browser.featureDB[feature.name.toLowerCase()] = feature;
+                self.config.browser.featureDB[feature.name.toLowerCase()] = feature;
             }
         });
 
@@ -254,7 +255,7 @@ var igv = (function (igv) {
 
                             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                             if (self.config.searchable) {
-                                addFeaturesToDB(featureList);
+                                addFeaturesToDB.call(self, featureList);
                             }
                         }
                         else {

@@ -86,6 +86,7 @@ var igv = (function (igv) {
 
         // add browser to track config
         let trackConfig = Object.assign({}, config);
+        trackConfig.browser = browser;
 
         switch (type) {
 
@@ -314,7 +315,7 @@ var igv = (function (igv) {
         track.id = config.id || track.name;   // TODO -- remove this property, not used
 
         track.order = config.order;
-        track.color = config.color || igv.browser.constants.defaultColor || "rgb(0,0,150)";
+        track.color = config.color || track.config.browser.constants.defaultColor || "rgb(0,0,150)";
 
         track.autoscaleGroup = config.autoscaleGroup;
 
