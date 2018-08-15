@@ -26,12 +26,14 @@
 
 var igv = (function (igv) {
 
+    "use strict";
+
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
     var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
     var DEFAULT_TRACK_HEIGHT = 300;
     var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
-    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
+    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 
     igv.BAMTrack = function (config, browser) {
         
