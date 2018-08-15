@@ -60,7 +60,8 @@ var igv = (function (igv) {
         browser.$content = $('<div class="igv-content-div">');
         browser.$root.append(browser.$content);
 
-        browser.$contentHeader = $('<div id="igv-content-header">');
+        let content_header_id =
+        browser.$contentHeader = $('<div>', { class:'igv-content-header' });
         browser.$content.append(browser.$contentHeader);
 
         browser.$content.append(browser.trackContainerDiv);
@@ -69,15 +70,15 @@ var igv = (function (igv) {
         browser.userFeedback = new igv.UserFeedback(browser.$content);
         browser.userFeedback.hide();
 
-        igv.popover = new igv.Popover(browser.$content);
+        browser.popover = new igv.Popover(browser.$content, browser);
 
-        igv.alertDialog = new igv.AlertDialog(browser.$content);
+        browser.alertDialog = new igv.AlertDialog(browser.$content, browser);
 
-        igv.inputDialog = new igv.InputDialog(browser.$root);
+        browser.inputDialog = new igv.InputDialog(browser.$root, browser);
 
-        igv.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root);
+        browser.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root, browser);
 
-        igv.dataRangeDialog = new igv.DataRangeDialog(browser.$root);
+        browser.dataRangeDialog = new igv.DataRangeDialog(browser.$root, browser);
 
         if (config.apiKey) igv.setGoogleApiKey(config.apiKey);
 
@@ -188,51 +189,6 @@ var igv = (function (igv) {
 
     }
 
-    function setReferenceConfiguration(conf) {
-
-        var genomeID;
-
-        if (conf.genome) {
-            genomeID = conf.genome;
-            conf.reference = expandGenome(conf.genome);
-        }
-        else if (conf.reference && conf.reference.id !== undefined && conf.reference.fastaURL === undefined) {
-            genomeID = conf.reference.id;
-            conf.reference = expandGenome(conf.reference.id);
-        }
-
-
-        if (genomeID) {
-            return igv.GenomeUtils.getKnownGenomes()
-                .then(function (knownGenomes) {
-                    conf.reference = knownGenomes[genomeID];
-                    if (!conf.reference)igv.presentAlert("Uknown genome id: " + genomeID, undefined);
-                    return conf;
-                })
-        }
-        else {
-            if (!(conf.reference && conf.reference.fastaURL)) {
-                //alert("Fatal error:  reference must be defined");
-                igv.presentAlert("Fatal error:  reference must be defined", undefined);
-                throw new Error("Fatal error:  reference must be defined");
-            }
-            return Promise.resolve(conf);
-        }
-
-
-        /**
-         * Expands ucsc type genome identifiers to genome object.
-         *
-         * @param genomeId
-         * @returns {{}}
-         */
-        function expandGenome(genomeId) {
-
-
-        }
-
-    }
-
     function setControls(browser, conf) {
 
         var controlDiv;
@@ -315,7 +271,7 @@ var igv = (function (igv) {
                 browser.search($(this).val())
 
                     .catch(function (error) {
-                        igv.presentAlert(error);
+                        browser.presentAlert(error);
                     });
             });
 

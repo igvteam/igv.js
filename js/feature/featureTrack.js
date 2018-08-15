@@ -391,7 +391,7 @@ var igv = (function (igv) {
                 {
                     object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                     click: function () {
-                        igv.popover.hide();
+                        self.browser.popover.hide();
                         self.displayMode = displayMode;
                         self.config.displayMode = displayMode;
                         self.trackView.checkContentHeight();
@@ -442,24 +442,26 @@ var igv = (function (igv) {
      * @param track
      */
     function monitorTrackDrag(track) {
-        var onDragEnd = function () {
-            if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
-                return;
-            }
-            track.trackView.repaintViews();
-        }
-
-        var unSubscribe = function (removedTrack) {
-            if (track.browser.un && track === removedTrack) {
-                track.browser.un('trackdrag', onDragEnd);
-                track.browser.un('trackremoved', unSubscribe);
-            }
-        };
 
         if (track.browser.on) {
             track.browser.on('trackdragend', onDragEnd);
             track.browser.on('trackremoved', unSubscribe);
         }
+
+        function onDragEnd() {
+            if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
+                return;
+            }
+            track.trackView.repaintViews();
+        }
+        
+        function unSubscribe(removedTrack) {
+            if (track.browser.un && track === removedTrack) {
+                track.browser.un('trackdrag', onDragEnd);
+                track.browser.un('trackremoved', unSubscribe);
+            }
+        }
+
     }
 
     /**

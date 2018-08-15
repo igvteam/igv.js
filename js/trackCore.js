@@ -84,49 +84,53 @@ var igv = (function (igv) {
 
         const type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
 
+        // add browser to track config
+        let trackConfig = Object.assign({}, config);
+        trackConfig.browser = browser;
+
         switch (type) {
 
             case "gwas":
-                return new igv.GWASTrack(config);
+                return new igv.GWASTrack(trackConfig);
                 break;
 
             case "annotation":
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(config, browser);
+                return new igv.FeatureTrack(trackConfig, browser);
                 break;
 
             case "variant":
-                return new igv.VariantTrack(config, browser);
+                return new igv.VariantTrack(trackConfig, browser);
                 break;
 
             case "alignment":
-                return new igv.BAMTrack(config, browser);
+                return new igv.BAMTrack(trackConfig, browser);
                 break;
 
             case "data":  // deprecated
             case "wig":
-                return new igv.WIGTrack(config, browser);
+                return new igv.WIGTrack(trackConfig, browser);
                 break;
 
             case "sequence":
-                return new igv.SequenceTrack(config, browser);
+                return new igv.SequenceTrack(trackConfig, browser);
                 break;
 
             case "eqtl":
-                return new igv.EqtlTrack(config, browser);
+                return new igv.EqtlTrack(trackConfig, browser);
                 break;
 
             case "seg":
-                return new igv.SegTrack(config, browser);
+                return new igv.SegTrack(trackConfig, browser);
                 break;
 
             case "merged":
-                return new igv.MergedTrack(config, browser);
+                return new igv.MergedTrack(trackConfig, browser);
 
             case "interaction":
-                return new igv.InteractionTrack(config, browser);
+                return new igv.InteractionTrack(trackConfig, browser);
 
             default:
                 return undefined;
@@ -311,7 +315,7 @@ var igv = (function (igv) {
         track.id = config.id || track.name;   // TODO -- remove this property, not used
 
         track.order = config.order;
-        track.color = config.color || igv.browser.constants.defaultColor || "rgb(0,0,150)";
+        track.color = config.color || track.config.browser.constants.defaultColor || "rgb(0,0,150)";
 
         track.autoscaleGroup = config.autoscaleGroup;
 
@@ -582,8 +586,8 @@ var igv = (function (igv) {
 
         clickHandler = function () {
 
-            igv.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-            igv.inputDialog.show($(trackView.trackDiv));
+            trackView.browser.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
+            trackView.browser.inputDialog.show($(trackView.trackDiv));
 
         };
 
@@ -602,7 +606,7 @@ var igv = (function (igv) {
             dialogClickHandler = function () {
                 var value;
 
-                value = igv.inputDialog.$input.val().trim();
+                value = trackView.browser.inputDialog.$input.val().trim();
 
                 if ('' === value || undefined === value) {
                     value = -1;
@@ -612,12 +616,12 @@ var igv = (function (igv) {
                 trackView.updateViews();
             };
 
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Visibility Window',
                 input: (trackView.track.visibilityWindow),
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
@@ -655,9 +659,8 @@ var igv = (function (igv) {
         $e.text('Set data range');
 
         clickHandler = function () {
-            // igv.dataRangeDialog.configureWithTrackView(trackView);
-            igv.dataRangeDialog.configure({trackView: trackView});
-            igv.dataRangeDialog.present($(trackView.trackDiv));
+            trackView.browser.dataRangeDialog.configure({trackView: trackView});
+            trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
         };
 
         return {object: $e, click: clickHandler};
@@ -693,19 +696,19 @@ var igv = (function (igv) {
             dialogClickHandler = function () {
                 var value;
 
-                value = igv.inputDialog.$input.val().trim();
+                value = trackView.browser.inputDialog.$input.val().trim();
 
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
                 igv.setTrackLabel(trackView.viewports[0].$trackLabel, trackView.track, value);
             };
 
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Track Name',
                 input: (igv.getTrackLabelText(trackView.track) || 'unnamed'),
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
@@ -723,18 +726,13 @@ var igv = (function (igv) {
         $e.text('Set track height');
 
         menuClickHandler = function () {
-            var dialogLabelHandler,
-                dialogClickHandler;
-
-            dialogLabelHandler = function () {
-                return "Track Height"
-            };
+            var dialogClickHandler;
 
             dialogClickHandler = function () {
 
                 var number;
 
-                number = parseFloat(igv.inputDialog.$input.val(), 10);
+                number = parseFloat(trackView.browser.inputDialog.$input.val(), 10);
 
                 if (undefined !== number) {
 
@@ -753,13 +751,12 @@ var igv = (function (igv) {
 
             };
 
-
-            igv.inputDialog.configure({
+            trackView.browser.inputDialog.configure({
                 label: 'Track Height',
                 input: trackView.trackDiv.clientHeight,
                 click: dialogClickHandler
             });
-            igv.inputDialog.present($(trackView.trackDiv));
+            trackView.browser.inputDialog.present($(trackView.trackDiv));
 
         };
 
