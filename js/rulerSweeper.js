@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.RulerSweeper = function (viewport) {
 
-        var index;
+        var guid;
 
         this.viewport = viewport;
         this.browser = viewport.browser;
@@ -35,19 +35,19 @@ var igv = (function (igv) {
         this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
         $(viewport.contentDiv).append(this.$rulerSweeper);
 
-        index = this.browser.genomicStateList.indexOf(viewport.genomicState);
+        guid = igv.guid();
 
         this.mouseHandlers =
             {
                 document:
                     {
-                        down:'mousedown.rulersweeper.' + index,
-                        move:'mousemove.rulersweeper.' + index,
-                          up:'mouseup.rulersweeper.' + index
+                        down:'mousedown._document_.' + guid,
+                        move:'mousemove._document_.' + guid,
+                          up:  'mouseup._document_.' + guid
                     },
                 viewport:
                     {
-                        down:'mousedown.rulersweeper.viewport.' + index
+                        down:'mousedown.viewport.' + guid
                     }
 
             };

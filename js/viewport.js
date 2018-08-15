@@ -351,7 +351,7 @@ var igv = (function (igv) {
                 .catch(function (error) {
                     console.error(error);
                     self.loading = false;
-                    igv.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
+                    browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
                 })
         }
 

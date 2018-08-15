@@ -186,20 +186,6 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (alert, $parent) {
-
-        var string;
-
-        string = alert.message || alert;
-
-        if (httpMessages.hasOwnProperty(string)) {
-            string = httpMessages[string];
-        }
-
-        igv.alertDialog.configure({label: string});
-        igv.alertDialog.present($parent);
-    };
-
     var httpMessages = {
         "401": "Access unauthorized",
         "403": "Access forbidden",
