@@ -28,12 +28,13 @@
  */
 var igv = (function (igv) {
 
-    igv.AlertDialog = function ($parent) {
+    igv.AlertDialog = function ($parent, browser) {
         var self = this,
             $header,
             $ok_container;
 
         this.$parent = $parent;
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });

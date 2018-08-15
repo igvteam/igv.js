@@ -27,6 +27,10 @@ var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainerDiv) {
 
+        this.guid = igv.guid();
+        this.window_resize_browser_str = 'resize.browser.' + this.guid;
+        this.document_click_browser_str = 'click.browser.' + this.guid;
+
         this.config = options;
 
         this.$root = $('<div id="igvRootDiv" class="igv-root-div">');
@@ -220,7 +224,7 @@ var igv = (function (igv) {
             })
 
             .catch(function (error) {
-                igv.presentAlert(error, undefined);
+                self.presentAlert(error, undefined);
                 console.log(error);
             });
 
@@ -323,7 +327,7 @@ var igv = (function (igv) {
 
                 } else {
                     errorString = 'Unrecognized locus ' + config.locus;
-                    igv.presentAlert(errorString, undefined);
+                    self.presentAlert(errorString, undefined);
                 }
 
                 if (genomeConfig.tracks) {
@@ -363,7 +367,7 @@ var igv = (function (igv) {
 
                         var reference = knownGenomes[genomeID];
                         if (!reference) {
-                            igv.presentAlert("Uknown genome id: " + genomeID, undefined);
+                            self.presentAlert("Uknown genome id: " + genomeID, undefined);
                         }
                         return reference;
                     })
@@ -582,7 +586,7 @@ var igv = (function (igv) {
                 newTrack = igv.createTrack(config, self);
 
                 if (undefined === newTrack) {
-                    igv.presentAlert("Unknown file type: " + config.url, undefined);
+                    self.presentAlert("Unknown file type: " + config.url, undefined);
                     return newTrack;
                 }
 
@@ -754,10 +758,10 @@ var igv = (function (igv) {
         }
 
         if (trackPanelRemoved) {
-            trackPanelRemoved.dispose();
             this.trackViews.splice(i, 1);
             this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
             this.fireEvent('trackremoved', [trackPanelRemoved.track]);
+            trackPanelRemoved.dispose();
         }
 
     };
@@ -1389,11 +1393,10 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $('.igv-scrollbar-outer-div').remove();
-        $('.igv-viewport-div').remove();
-        $('.igv-ruler-sweeper-div').remove();
-
-        $('#igv-content-header').empty();
+        $(this.trackContainerDiv).find('.igv-scrollbar-outer-div').remove();
+        $(this.trackContainerDiv).find('.igv-viewport-div').remove();
+        $(this.trackContainerDiv).find('.igv-ruler-sweeper-div').remove();
+        this.$contentHeader.empty();
 
         this.trackViews.forEach(function (trackView) {
 
@@ -1471,7 +1474,7 @@ var igv = (function (igv) {
                 if (self.ideoPanel) {
                     self.ideoPanel.discardPanels();
                     panelWidth = self.viewportContainerWidth() / genomicStateList.length;
-                    self.ideoPanel.buildPanels($('#igv-content-header'), panelWidth);
+                    self.ideoPanel.buildPanels(self.$contentHeader, panelWidth);
                 }
 
                 self.updateUIWithGenomicStateListChange(genomicStateList);
@@ -1929,8 +1932,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.dispose = function () {
 
-        $(window).off('resize.browser');
-        $(document).off('click.browser');
+        $(window).off(this.window_resize_browser_str);
+        $(document).off(this.document_click_browser_str);
 
         this.trackViews.forEach(function (tv) {
             tv.dispose();
@@ -2030,20 +2033,33 @@ var igv = (function (igv) {
 
     }
 
+    igv.Browser.prototype.presentAlert = function (alert, $parent) {
+
+        var string;
+
+        string = alert.message || alert;
+
+        if (httpMessages.hasOwnProperty(string)) {
+            string = httpMessages[string];
+        }
+
+        this.alertDialog.configure({label: string});
+        this.alertDialog.present($parent);
+    };
 
     function addMouseHandlers() {
 
         var self = this;
 
-        $(window).on('resize.browser', function () {
+        $(window).on(this.window_resize_browser_str, function () {
             self.resize();
         });
 
-        $(document).on('click.browser', function (e) {
+        $(document).on(this.document_click_browser_str, function (e) {
             var target = e.target;
             if (!self.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
-                igv.popover.hide();
+                self.popover.hide();
             }
         });
 

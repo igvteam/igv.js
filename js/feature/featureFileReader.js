@@ -322,7 +322,7 @@ var igv = (function (igv) {
                 .catch(function (error) {
                     self.indexed = false;
                     if (self.config.indexURL !== undefined) {
-                        igv.presentAlert("Index file not found.  Check track configuration", undefined)
+                        self.config.browser.presentAlert("Index file not found.  Check track configuration", undefined)
                     }
                 });
         } else {
