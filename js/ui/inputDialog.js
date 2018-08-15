@@ -26,11 +26,12 @@
 
 var igv = (function (igv) {
 
-    igv.InputDialog = function ($parent) {
+    igv.InputDialog = function ($parent, browser) {
         var self = this,
             $header,
-            $buttons,
-            $div;
+            $buttons;
+
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });

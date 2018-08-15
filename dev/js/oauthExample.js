@@ -102,7 +102,7 @@ function createPicker() {
                 picker.setVisible(true);
             }
             else {
-                igv.presentAlert("Sign into Google before using picker");
+                igv.browser.presentAlert("Sign into Google before using picker");
             }
         })
         .catch(function (error) {
