@@ -189,7 +189,7 @@ var igv = (function (igv) {
                 if (config.roi) {
                     self.roi = [];
                     config.roi.forEach(function (r) {
-                        self.roi.push(new igv.ROI(r), self.genome);
+                        self.roi.push(new igv.ROI(r, self.genome));
                     });
                 }
 
@@ -1952,7 +1952,8 @@ var igv = (function (igv) {
         // Use rulerTrack to get current loci.   This is really obtuse and fragile
         var locus = [];
         this.rulerTrack.trackView.viewports.forEach(function (viewport) {
-            locus.push(viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width()));
+            const pixelWidth = viewport.$viewport[0].clientWidth;
+            locus.push(viewport.genomicState.referenceFrame.showLocus(pixelWidth));
 
         })
         json["locus"] = locus;
@@ -1973,6 +1974,10 @@ var igv = (function (igv) {
             }
 
             if (config) {
+                // null backpointer to browser
+                if(config.browser) {
+                    delete config.browser;
+                }
                 config.order = order++;
                 trackJson.push(config);
             }
@@ -2039,9 +2044,9 @@ var igv = (function (igv) {
 
         string = alert.message || alert;
 
-        if (httpMessages.hasOwnProperty(string)) {
-            string = httpMessages[string];
-        }
+        // if (httpMessages.hasOwnProperty(string)) {
+        //     string = httpMessages[string];
+        // }
 
         this.alertDialog.configure({label: string});
         this.alertDialog.present($parent);

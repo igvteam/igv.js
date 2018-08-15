@@ -25,6 +25,8 @@
 
 var igv = (function (igv) {
 
+    "use strict";
+
     /**
      * Object for caching lists of features.  Supports effecient queries for sub-range  (chr, start, end)
      *
@@ -130,7 +132,7 @@ var igv = (function (igv) {
                     chr = genome.getChromosomeName(chr);
                 }
 
-                geneList = featureCache[chr];
+                let geneList = featureCache[chr];
 
                 if (!geneList) {
                     chromosomes.push(chr);

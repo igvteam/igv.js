@@ -20,7 +20,7 @@
 <main>
     <h1>Dropbox hosted BAM file</h1>
 
-    <div id="igv-examples-dropbox" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+    <div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto">
     </div>
 
 </main>
@@ -34,17 +34,18 @@
             locus: "chr22:24,376,148-24,376,519",
             tracks: [
                 {
-                    type: 'bam',
+                    type: 'alignment',
+                    format: 'bam',
                     url: 'https://www.dropbox.com/s/avt88fdsdnk1w0v/gstt1_sample.bam',
                     indexURL: 'https://www.dropbox.com/s/5xd7goqiir1xzdr/gstt1_sample.bam.bai',
-                    label: 'Dopbox BAM'
+                    name: 'Dopbox BAM'
                 }
             ]
         };
 
-        const igv_examples_dropbox = document.getElementById("igv-examples-dropbox");
+        const igvDiv = document.getElementById("igv-div");
 
-        createBrowser(igv_examples_dropbox, options)
+        igv.createBrowser(igvDiv, options)
 
                 .then(function (browser) {
                     console.log("Created IGV browser");

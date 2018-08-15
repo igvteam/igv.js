@@ -49,7 +49,10 @@ var igv = (function (igv) {
         this.height = config.height || 100;
         this.autoHeight = false;
         this.disableButtons = config.disableButtons;
-        this.visibilityWindow = config.visibilityWindow;
+
+        // Limit visibility window to 2 mb,  gtex server gets flaky beyond that
+        this.visibilityWindow = config.visibilityWindow === undefined ?
+            2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000;
 
         this.featureSource = new igv.FeatureSource(config, browser.genome);
 
