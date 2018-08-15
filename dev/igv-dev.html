@@ -13,7 +13,7 @@
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    
+
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
@@ -166,11 +166,12 @@
 
         igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-                .then(function (google) {
+            .then(function (google) {
 
-                    const igvDiv = document.getElementById("igvDiv");
+                const igvDiv = document.getElementById("igvDiv");
 
-                    const options = {
+                const options =
+                    {
                         // locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
@@ -178,20 +179,21 @@
 
 
                         //GTEX search service.  Uncomment to test.
-//                        search: {
-//                            url: "https://gtexportal.org/rest/v1/reference/features/$FEATURE$?format=json&datasetId=gtex_v7",
-//                            resultsField: "features",
-//                            geneField: "geneSymbol",
-//                            snpField: 'snpId'
-//                        }
-                    }
+                        // search:
+                        //     {
+                        //     url: "https://gtexportal.org/rest/v1/reference/features/$FEATURE$?format=json&datasetId=gtex_v7",
+                        //     resultsField: "features",
+                        //     geneField: "geneSymbol",
+                        //     snpField: 'snpId'
+                        // }
+                    };
 
-                    igv.createBrowser(igvDiv, options)
-                            .then(function (browser) {
-                                igvdev.createTrackList(document.getElementById('trackList'), browser)
-                            })
+                igv.createBrowser(igvDiv, options)
+                    .then(function (browser) {
+                        igvdev.createTrackList(document.getElementById('trackList'), browser)
+                    })
 
-                })
+            })
     });
 
 
