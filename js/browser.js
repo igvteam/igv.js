@@ -994,7 +994,7 @@ var igv = (function (igv) {
                         featureArray.forEach(function (features) {
                             allFeatures = allFeatures.concat(features);
                         })
-                        dataRange = igv.WIGTrack.autoscale(allFeatures);
+                        dataRange = igv.WIGTrack.doAutoscale(allFeatures);
 
                         groupTrackViews.forEach(function (trackView) {
                             trackView.track.dataRange = dataRange;
