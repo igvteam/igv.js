@@ -373,7 +373,7 @@ var igv = (function (igv) {
 
 
     // Static function
-    igv.WIGTrack.autoscale = function (features) {
+    igv.WIGTrack.doAutoscale = function (features) {
         var min, max;
 
         if (features.length > 0) {

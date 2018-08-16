@@ -480,7 +480,12 @@ var igv = (function (igv) {
                             }
                         }
                     });
-                    self.track.dataRange = igv.WIGTrack.autoscale(allFeatures);
+
+                    if(typeof self.track.doAutoscale === 'function') {
+                        self.track.doAutoscale(allFeatures);
+                    } else {
+                        self.track.dataRange = igv.WIGTrack.doAutoscale(allFeatures);
+                    }
                 }
 
 
