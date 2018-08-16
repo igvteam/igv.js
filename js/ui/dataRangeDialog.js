@@ -94,7 +94,8 @@ var igv = (function (igv) {
             self.$container.hide();
         });
 
-        this.$container.draggable({ handle:$header.get(0) });
+        //this.$container.draggable({ handle:$header.get(0) });
+igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };
