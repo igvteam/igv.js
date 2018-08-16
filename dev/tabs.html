@@ -10,7 +10,6 @@
 
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.3.1.slim.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 
     <!-- IGV CSS -->
@@ -23,7 +22,6 @@
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <!-- Vendor JS -->
-    <script src="../vendor/jquery.mousewheel.js"></script>
     <script src="../vendor/underscore.js"></script>
 
     <script src="../vendor/zlib_and_gzip.js"></script>
@@ -133,73 +131,195 @@
     <script src="../js/trackCore.js"></script>
 
 
-
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
 
 
-    <script>
-        $(function () {
-            $("#tabs").tabs({
-                active: 0
-            });
+    <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+    <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <!-- This page is copyright Elated Communications Ltd. (www.elated.com) -->
 
-            var igvDiv, options;
-            igvDiv = $("#igvDiv")[0];
-            options =
-            {
-                locus: "AQP4",
-                minimumBases: 5,
-                showRuler: true,
-                reference: {
-                    id: "hg38",
-                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
-                },
-                tracks: [
+        <title>JavaScript tabs example</title>
+
+        <style type="text/css">
+            body {
+                font-size: 80%;
+                font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
+            }
+
+            ul#tabs {
+                list-style-type: none;
+                margin: 30px 0 0 0;
+                padding: 0 0 0.3em 0;
+            }
+
+            ul#tabs li {
+                display: inline;
+            }
+
+            ul#tabs li a {
+                color: #42454a;
+                background-color: #dedbde;
+                border: 1px solid #c9c3ba;
+                border-bottom: none;
+                padding: 0.3em;
+                text-decoration: none;
+            }
+
+            ul#tabs li a:hover {
+                background-color: #f1f0ee;
+            }
+
+            ul#tabs li a.selected {
+                color: #000;
+                background-color: #f1f0ee;
+                font-weight: bold;
+                padding: 0.7em 0.3em 0.38em 0.3em;
+            }
+
+            div.tabContent {
+                border: 1px solid #c9c3ba;
+                padding: 0.5em;
+                background-color: #f1f0ee;
+            }
+
+            div.tabContent.hide {
+                display: none;
+            }
+        </style>
+
+        <script type="text/javascript">
+            //<![CDATA[
+
+            var tabLinks = new Array();
+            var contentDivs = new Array();
+
+            function init() {
+
+                // Grab the tab links and content divs from the page
+                var tabListItems = document.getElementById('tabs').childNodes;
+                for (var i = 0; i < tabListItems.length; i++) {
+                    if (tabListItems[i].nodeName == "LI") {
+                        var tabLink = getFirstChildWithTagName(tabListItems[i], 'A');
+                        var id = getHash(tabLink.getAttribute('href'));
+                        tabLinks[id] = tabLink;
+                        contentDivs[id] = document.getElementById(id);
+                    }
+                }
+
+                // Assign onclick events to the tab links, and
+                // highlight the first tab
+                var i = 0;
+
+                for (var id in tabLinks) {
+                    tabLinks[id].onclick = showTab;
+                    tabLinks[id].onfocus = function () {
+                        this.blur()
+                    };
+                    if (i == 0) tabLinks[id].className = 'selected';
+                    i++;
+                }
+
+                // Hide all content divs except the first
+                var i = 0;
+
+                for (var id in contentDivs) {
+                    if (i != 0) contentDivs[id].className = 'tabContent hide';
+                    i++;
+                }
+
+                initIGV();
+            }
+
+            function showTab() {
+                var selectedId = getHash(this.getAttribute('href'));
+
+                // Highlight the selected tab, and dim all others.
+                // Also show the selected content div, and hide all others.
+                for (var id in contentDivs) {
+                    if (id == selectedId) {
+                        tabLinks[id].className = 'selected';
+                        contentDivs[id].className = 'tabContent';
+                    } else {
+                        tabLinks[id].className = '';
+                        contentDivs[id].className = 'tabContent hide';
+                    }
+                }
+
+                // Stop the browser following the link
+                return false;
+            }
+
+            function getFirstChildWithTagName(element, tagName) {
+                for (var i = 0; i < element.childNodes.length; i++) {
+                    if (element.childNodes[i].nodeName == tagName) return element.childNodes[i];
+                }
+            }
+
+            function getHash(url) {
+                var hashPos = url.lastIndexOf('#');
+                return url.substring(hashPos + 1);
+            }
+
+            function initIGV() {
+
+                var igvDiv, options;
+                igvDiv = $("#igvDiv")[0];
+                options =
                     {
-                        name: 'Gencode v24',
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi",
-                        format: 'gtf',
-                        visibilityWindow: 2000000,
-                        displayMode: 'EXPANDED'
-                    },
-                ]
-            }; // options
-            browser = igv.createBrowser(igvDiv, options);
+                        locus: "AQP4",
+                        minimumBases: 5,
+                        showRuler: true,
+                        reference: {
+                            id: "hg38",
+                            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                            cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
+                        },
+                        tracks: [
+                            {
+                                name: 'Gencode v24',
+                                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz",
+                                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi",
+                                format: 'gtf',
+                                visibilityWindow: 2000000,
+                                displayMode: 'EXPANDED'
+                            },
+                        ]
+                    }; // options
+                igv.createBrowser(igvDiv, options);
 
-            $("#tabs").on("tabsactivate", function (event, ui) {
-                igv.browser.resize();
-            });
+            }
 
-        });
-    </script>
+            //]]>
+        </script>
+    </head>
+<body onload="init()">
+<h1>JavaScript tabs example</h1>
 
-</head>
-<body>
+<ul id="tabs">
+    <li><a href="#about">First Tab</a></li>
+    <li><a href="#advantages">IGV Tab</a></li>
+</ul>
 
-<div id="tabs">
+<div class="tabContent" id="about">
     <ul>
-        <li><a href="#tabs-1">Explanation</a></li>
-        <li><a href="#igvTab">igv</a></li>
+        <li> When this tab (really, just a div) comes first in the document, then igv renders incompletely in its
+            div
+        <li> Reverse the order of the two li items in the unordered list, the igvDiv is then visible, and it renders
+            nicely
     </ul>
+</div>
 
-    <div id="tabs-1">
-        <ul>
-            <li> When this tab (really, just a div) comes first in the document, then igv renders incompletely in its
-                div
-            <li> Reverse the order of the two li items in the unordered list, the igvDiv is then visible, and it renders
-                nicely
-        </ul>
-    </div>
-    <div id="igvTab">
-        <div id="igvDiv"></div>
-    </div>
+<div class="tabContent" id="advantages">
+    <div id="igvDiv"></div>
 </div>
 
 
 </body>
+</html>
+
 </html>
