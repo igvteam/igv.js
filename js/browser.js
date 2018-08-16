@@ -503,7 +503,7 @@ var igv = (function (igv) {
             unloadableTracks.forEach(function (config) {
                 message += ", " + config.name;
             })
-            igv.presentAlert(message);
+            self.presentAlert(message);
         }
 
 
@@ -538,7 +538,7 @@ var igv = (function (igv) {
 
         const url = config.url;
         const features = config.features;
-        return Array.isArray(features) || igv.isString(url) || igv.isFilePath(url) || "sequence" === config.type;
+        return undefined === url || igv.isString(url) || igv.isFilePath(url);
     }
 
     /**
@@ -557,7 +557,7 @@ var igv = (function (igv) {
         }
 
         if(!knowHowToLoad(config)) {
-            igv.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
+            self.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
             return Promise.resolve();
         }
 
