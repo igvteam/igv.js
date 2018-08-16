@@ -33,15 +33,11 @@
  */
 var igv = (function (igv) {
 
-    let dragStartData;   // Its assumed we are only dragging one element at a time.
+    let dragData;   // Its assumed we are only dragging one element at a time.
 
     igv.makeDraggable = function (target, handle) {
 
-        handle.addEventListener('mousedown', dragStart.bind(target));
-        document.addEventListener('mousemove', drag.bind(target));
-        document.addEventListener('mouseup', dragEnd.bind(target));
-        document.addEventListener('mouseleave', dragEnd.bind(target));
-        document.addEventListener('mouseexit', dragEnd.bind(target));
+        handle.addEventListener('mousedown', dragStart.bind(target), true);
 
     }
 
@@ -54,17 +50,28 @@ var igv = (function (igv) {
         const y = event.screenY;
         const styleX = Math.round(parseFloat(target.style.left.replace("px", "")));
         const styleY = Math.round(parseFloat(target.style.top.replace("px", "")));
-        dragStartData =
+
+        const dragFunction = drag.bind(target);
+        const dragEndFunction = dragEnd.bind(target);
+        dragData =
             {
+                dragFunction: dragFunction,
+                dragEndFunction: dragEndFunction,
                 dx: styleX - x,
                 dy: styleY - y
             };
+
+        document.addEventListener('mousemove', dragFunction);
+        document.addEventListener('mouseup', dragEndFunction);
+        document.addEventListener('mouseleave', dragEndFunction);
+        document.addEventListener('mouseexit', dragEndFunction);
+
     }
 
     function drag(event) {
 
-        if(!dragStartData) {
-            console.log("No drag start data!")
+        if(!dragData) {
+            console.log("No drag data!")
             return;
         }
 
@@ -73,16 +80,16 @@ var igv = (function (igv) {
         const target = this;
         const x = event.screenX;
         const y = event.screenY;
-        const styleX = dragStartData.dx + x;
-        const styleY = dragStartData.dy + y;
+        const styleX = dragData.dx + x;
+        const styleY = dragData.dy + y;
         target.style.left = styleX + "px";
         target.style.top = styleY + "px";
     }
 
     function dragEnd(event) {
 
-        if(!dragStartData) {
-            console.log("No drag start data!")
+        if(!dragData) {
+            console.log("No drag data!")
             return;
         }
 
@@ -91,16 +98,16 @@ var igv = (function (igv) {
         const target = this;
         const x = event.screenX;
         const y = event.screenY;
-        const styleX = dragStartData.dx + x;
-        const styleY = dragStartData.dy + y;
+        const styleX = dragData.dx + x;
+        const styleY = dragData.dy + y;
         target.style.left = styleX + "px";
         target.style.top = styleY + "px";
-        dragStartData = undefined;
 
-        document.removeEventListener('mousemove', drag);
-        document.removeEventListener('mouseup', dragEnd);
-        document.removeEventListener('mouseleave', dragEnd);
-        document.removeEventListener('mouseexit', dragEnd);
+        document.removeEventListener('mousemove', dragData.dragFunction);
+        document.removeEventListener('mouseup', dragData.dragEndFunction);
+        document.removeEventListener('mouseleave', dragData.dragEndFunction);
+        document.removeEventListener('mouseexit', dragData.dragEndFunction);
+        dragData = undefined;
     }
 
     return igv;
