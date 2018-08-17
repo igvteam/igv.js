@@ -188,9 +188,21 @@
                     };
 
                 igv.createBrowser(igvDiv, options)
-                    .then(function (browser) {
-                        igvdev.createTrackList(document.getElementById('trackList'), browser)
-                    })
+                .then(function (browser) {
+                    igvdev.createTrackList(document.getElementById('trackList'), browser);
+                    return browser;
+                })
+                //     .then(function (browser) {
+                //
+                //         browser.loadTrack({
+                //             "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                //             "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
+                //             "name": "Bed - Tabix Index"
+                //         })
+                //             .then(function (track) {
+                //                 browser.removeTrack(track);
+                //             })
+                //     })
 
             })
     });

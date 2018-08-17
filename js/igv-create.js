@@ -29,6 +29,8 @@ var igv = (function (igv) {
     var igvjs_version = "@VERSION";
     igv.version = igvjs_version;
 
+    let allBrowsers = [];
+
     /**
      * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
      *
@@ -52,6 +54,8 @@ var igv = (function (igv) {
         setTrackOrder(config);
 
         const browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
+
+        browser.parent = parentDiv;
 
         $(parentDiv).append(browser.$root);
 
@@ -84,14 +88,29 @@ var igv = (function (igv) {
 
         if (config.oauthToken) igv.setOauthToken(config.oauthToken);
 
-        // Backward compatibility -- globally visible.   This will be removed in a future release
-        if(!igv.browser) {
-            igv.browser = browser;
-        }
 
-        return doPromiseChain(browser, config);
+        return doPromiseChain(browser, config)
+            .then(function (browser) {
+
+                allBrowsers.push(browser);
+
+                // Backward compatibility -- globally visible.   This will be removed in a future release
+                if(!igv.browser) {
+                    igv.browser = browser;
+                }
+
+                return browser;
+            })
 
     };
+
+    igv.removeBrowser = function (browser) {
+
+        browser.parent.removeChild(browser.$root.get(0));   // Mix of es6 && jquery, migrating to es6
+
+        allBrowsers = allBrowsers.filter(item => item !== browser);
+
+    }
 
     function doPromiseChain(browser, config) {
 
@@ -152,6 +171,17 @@ var igv = (function (igv) {
 
     }
 
+
+    /**
+     * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
+     * made visible from a tab, accordion, or similar widget.   There are no events to catch for this case,
+     * igv has to be told.
+     */
+    igv.visibilityChange = function () {
+        allBrowsers.forEach(function (browser) {
+            browser.visibilityChange();
+        })
+    }
 
     //@deprecated -- user setGoogleApiKey
     igv.setApiKey = function (key) {
