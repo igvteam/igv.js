@@ -32,7 +32,7 @@ function runTDFTests() {
 
             equal(4, tdfReader.version);
             equal(true, tdfReader.compressed);
-            equal(10, _.size(tdfReader.datasetIndex));
+            equal(10, Object.keys(tdfReader.datasetIndex).length);
 
             start();
 
