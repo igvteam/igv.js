@@ -878,6 +878,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.visibilityChange = function () {
+        this.resize();
+    }
+
     igv.Browser.prototype.resize = function () {
 
         var self = this,
