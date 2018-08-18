@@ -447,11 +447,11 @@ var igv = (function (igv) {
                 var tmp = [];
                 var isize = alignment.fragmentLength;
                 var estReadLen = alignment.end - alignment.start;
-                if (isize == 0) {
+                if (isize === 0) {
                     //isize not recorded.  Need to estimate.  This calculation was validated against an Illumina
                     // -> <- library bam.
-                    var estMateEnd = alignment.start < mate.start ?
-                    mate.start + estReadLen : mate.start - estReadLen;
+                    var estMateEnd = alignment.start < mate.position ?
+                    mate.position + estReadLen : mate.position - estReadLen;
                     isize = estMateEnd - alignment.start;
                 }
 
