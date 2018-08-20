@@ -248,19 +248,19 @@ var igv = (function (igv) {
             $searchContainer,
             $faSearch;
 
-        $controls = $('<div id="igvControlDiv">');
+        $controls = $('<div>', { class:'igvControlDiv' });
 
         if (config.showNavigation) {
 
-            $navigation = $('<div id="igv-navbar">');
+            $navigation = $('<div>', { class:'igv-navbar' });
             $controls.append($navigation);
             browser.$navigation = $navigation;
 
-            $igv_nav_bar_left_container = $('<div id="igv-nav-bar-left-container">');
+            $igv_nav_bar_left_container = $('<div>', { class: 'igv-nav-bar-left-container' });
             $navigation.append($igv_nav_bar_left_container);
 
             // IGV logo
-            logoDiv = $('<div id="igv-logo">');
+            logoDiv = $('<div>', { class: 'igv-logo' });
             var logoSvg = logo();
             logoSvg.css("width", "34px");
             logoSvg.css("height", "32px");
@@ -268,28 +268,28 @@ var igv = (function (igv) {
             $igv_nav_bar_left_container.append(logoDiv);
 
             // current genome
-            browser.$current_genome = $('<div>', {id: 'igv-current_genome'});
+            browser.$current_genome = $('<div>', { class: 'igv-current_genome' });
             $igv_nav_bar_left_container.append(browser.$current_genome);
             browser.$current_genome.text('');
 
             //
-            $genomic_location = $('<div id="igv-genomic-location">');
+            $genomic_location = $('<div>', { class: 'igv-genomic-location' });
             $igv_nav_bar_left_container.append($genomic_location);
 
             // chromosome select widget
             browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
-            if (undefined == config.showChromosomeWidget || true === config.showChromosomeWidget) {
+            if (undefined === config.showChromosomeWidget || true === config.showChromosomeWidget) {
                 browser.chromosomeSelectWidget.$container.show();
             } else {
                 browser.chromosomeSelectWidget.$container.hide();
             }
 
 
-            $locus_size_group = $('<div id="igv-locus-size-group">');
+            $locus_size_group = $('<div>', { class: 'igv-locus-size-group' });
             $genomic_location.append($locus_size_group);
 
             // locus goto widget container
-            $searchContainer = $('<div id="igv-search-container">');
+            $searchContainer = $('<div>', { class: 'igv-search-container' });
             $locus_size_group.append($searchContainer);
 
             // locus goto input
@@ -328,10 +328,10 @@ var igv = (function (igv) {
 
             // cursor guide | center guide | track labels
 
-            $igv_nav_bar_right_container = $('<div id="igv-nav-bar-right-container">');
+            $igv_nav_bar_right_container = $('<div class="igv-nav-bar-right-container">');
             $navigation.append($igv_nav_bar_right_container);
 
-            $toggle_button_container = $('<div id="igv-nav-bar-toggle-button-container">');
+            $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
             $igv_nav_bar_right_container.append($toggle_button_container);
 
             // cursor guide
@@ -365,7 +365,7 @@ var igv = (function (igv) {
         var $div,
             $fa;
 
-        browser.$zoomContainer = $('<div id="igv-zoom-widget">');
+        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
 
         browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
 
