@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     igv.ChromosomeSelectWidget = function (browser, $parent) {
 
-        this.$container = $('<div>', { id:'igv-chromosome-select-widget-container' });
+        this.$container = $('<div>', { class:'igv-chromosome-select-widget-container' });
         $parent.append(this.$container);
 
         this.$select = $('<select>', { 'name': 'chromosome-select-widget' });
