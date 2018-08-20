@@ -64,7 +64,7 @@ $igv-dark-grey-color: #373737;
 
 }
 
-#igvControlDiv {
+.igvControlDiv {
   position: relative;
 }
 
@@ -133,7 +133,7 @@ $igv-dark-grey-color: #373737;
 }
 
 // nav bar
-#igv-navbar {
+.igv-navbar {
 
   display: flex;
   flex-flow: row;
@@ -168,7 +168,7 @@ $igv-dark-grey-color: #373737;
     color: #434343;
   }
 
-  #igv-nav-bar-left-container {
+  .igv-nav-bar-left-container {
 
     display: flex;
     flex-flow: row;
@@ -179,7 +179,7 @@ $igv-dark-grey-color: #373737;
     height: $igv-navbar-height;
 
     // igv logo
-    #igv-logo {
+    .igv-logo {
       width: 34px;
       height: $igv-navbar-height;
 
@@ -187,12 +187,7 @@ $igv-dark-grey-color: #373737;
       margin-right: 32px;
     }
 
-    // drag & drop file upload button
-    #igv-drag-and-drop-presentation-button {
-      margin-right: 32px;
-    }
-
-    #igv-current_genome {
+    .igv-current_genome {
 
       height: $igv-navbar-height;
 
@@ -211,7 +206,7 @@ $igv-dark-grey-color: #373737;
     }
 
     // chromosome select widget | chromosome select widget | locus goto | search icon | window size
-    #igv-genomic-location {
+    .igv-genomic-location {
 
       display: flex;
       flex-flow: row;
@@ -222,7 +217,7 @@ $igv-dark-grey-color: #373737;
       height: $igv-navbar-height;
 
       // chromosome select widget
-      #igv-chromosome-select-widget-container {
+      .igv-chromosome-select-widget-container {
         width: 96px;
         margin-right: 4px;
 
@@ -244,7 +239,7 @@ $igv-dark-grey-color: #373737;
         }
       }
 
-      #igv-locus-size-group {
+      .igv-locus-size-group {
         display: flex;
         flex-flow: row;
         flex-wrap: nowrap;
@@ -254,7 +249,7 @@ $igv-dark-grey-color: #373737;
         height: 75%;
 
         // locus goto | search icon
-        #igv-search-container {
+        .igv-search-container {
           width: 260px;
 
           display: flex;
@@ -303,7 +298,7 @@ $igv-dark-grey-color: #373737;
         }
 
         // window size panel
-        #igv-windowsizepanel-content-div {
+        .igv-windowsizepanel-content-div {
           margin-left: 4px;
 
           user-select: none;
@@ -320,7 +315,7 @@ $igv-dark-grey-color: #373737;
 
   }
 
-  #igv-nav-bar-right-container {
+  .igv-nav-bar-right-container {
 
     display: flex;
     flex-flow: row;
@@ -329,7 +324,7 @@ $igv-dark-grey-color: #373737;
     align-items: center;
 
     // toggle buttons
-    #igv-nav-bar-toggle-button-container {
+    .igv-nav-bar-toggle-button-container {
 
       display: flex;
       flex-flow: row;
@@ -352,7 +347,7 @@ $igv-dark-grey-color: #373737;
     }
 
     // nav bar - zoom
-    #igv-zoom-widget {
+    .igv-zoom-widget {
 
       user-select: none;
 
@@ -412,7 +407,7 @@ $igv-dark-grey-color: #373737;
 }
 
 // TODO: figure out what to do with this
-#igv-logo-nonav {
+.igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
   position: absolute;
