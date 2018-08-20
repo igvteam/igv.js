@@ -154,13 +154,6 @@ var igv = (function (igv) {
         return $button;
     };
 
-    var httpMessages = {
-        "401": "Access unauthorized",
-        "403": "Access forbidden",
-        "404": "Not found"
-    };
-
-
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
         var $container,

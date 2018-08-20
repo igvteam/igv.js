@@ -2042,15 +2042,22 @@ var igv = (function (igv) {
 
     }
 
+    const httpMessages =
+        {
+            "401": "Access unauthorized",
+            "403": "Access forbidden",
+            "404": "Not found"
+        };
+
     igv.Browser.prototype.presentAlert = function (alert, $parent) {
 
         var string;
 
         string = alert.message || alert;
 
-        // if (httpMessages.hasOwnProperty(string)) {
-        //     string = httpMessages[string];
-        // }
+        if (httpMessages.hasOwnProperty(string)) {
+            string = httpMessages[string];
+        }
 
         this.alertDialog.configure({label: string});
         this.alertDialog.present($parent);
