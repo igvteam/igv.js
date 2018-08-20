@@ -1,3 +1,0 @@
-<component name="DependencyValidationManager">
-  <scope name="js" pattern="file:js//*.js&amp;&amp;!file:js/bam/bamReader.js&amp;&amp;!file:js/bam/bamIndex.js&amp;&amp;!file:js/bam/bgzf.js" />
-</component>
