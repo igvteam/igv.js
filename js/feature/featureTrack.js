@@ -30,7 +30,7 @@ var igv = (function (igv) {
     igv.FeatureTrack = function (config, browser) {
 
         this.browser = browser;
-        
+
         // Set defaults
         igv.configTrack(this, config);
 
@@ -251,7 +251,7 @@ var igv = (function (igv) {
 
         const yOffset = clickState.y - this.margin;
         const features = filterByRow(this.clickedFeatures(clickState), yOffset);
-       
+
         const data = [];
         features.forEach(function (feature) {
 
@@ -266,11 +266,11 @@ var igv = (function (igv) {
         });
 
         return data;
-        
+
         function filterByRow(features, y) {
-           
+
             let row;
-            switch(self.displayMode) {
+            switch (self.displayMode) {
                 case 'SQUISHED':
                     row = Math.floor(y / self.squishedRowHeight);
                     break;
@@ -454,7 +454,7 @@ var igv = (function (igv) {
             }
             track.trackView.repaintViews();
         }
-        
+
         function unSubscribe(removedTrack) {
             if (track.browser.un && track === removedTrack) {
                 track.browser.un('trackdrag', onDragEnd);
@@ -501,16 +501,10 @@ var igv = (function (igv) {
     function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
         const browser = this.browser;
-        
-        var x, e, exonCount, cy, direction, exon, ePx, ePx1, ePxU, ePw, py2, h2, py,
-            windowX, windowX1,
-            coord = calculateFeatureCoordinates(feature, bpStart, xScale),
-            h = this.featureHeight,
-            step = this.arrowSpacing,
-            color = this.color;
 
+        let color = this.color;  // default
         if (this.config.colorBy) {
-            var colorByValue = feature[this.config.colorBy.field];
+            const colorByValue = feature[this.config.colorBy.field];
             if (colorByValue) {
                 color = this.config.colorBy.pallete[colorByValue];
             }
@@ -518,25 +512,28 @@ var igv = (function (igv) {
         else if (feature.color) {
             color = feature.color;
         }
-
         ctx.fillStyle = color;
         ctx.strokeStyle = color;
 
+        let h;
+        let py;
         if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
             h = this.featureHeight / 2;
             py = this.margin + this.squishedRowHeight * feature.row;
         } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
+            h = this.featureHeight
             py = this.margin + this.expandedRowHeight * feature.row;
         } else {  // collapsed
+            h = this.featureHeight;
             py = this.margin;
         }
 
-        cy = py + h / 2;
-        h2 = h / 2;
-        py2 = cy - h2 / 2;
+        const cy = py + h / 2;
+        const h2 = h / 2;
+        const py2 = cy - h2 / 2;
 
-        exonCount = feature.exons ? feature.exons.length : 0;
-
+        const exonCount = feature.exons ? feature.exons.length : 0;
+        const coord = calculateFeatureCoordinates(feature, bpStart, xScale);
         if (exonCount === 0) {
             // single-exon transcript
             ctx.fillRect(coord.px, py, coord.pw, h);
@@ -546,18 +543,31 @@ var igv = (function (igv) {
             // multi-exon transcript
             igv.graphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
-            direction = feature.strand === '+' ? 1 : -1;
-            for (x = coord.px + step / 2; x < coord.px1; x += step) {
+            const direction = feature.strand === '+' ? 1 : -1;
+            const step = this.arrowSpacing;
+            const pixelWidth = options.pixelWidth;
+
+            const xLeft = Math.max(0, coord.px) + step/2;
+            const xRight = Math.min(pixelWidth, coord.px1);
+            for (let x = xLeft; x < xRight; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
                 igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
                 igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
             }
-            for (e = 0; e < exonCount; e++) {
+            for (let e = 0; e < exonCount; e++) {
                 // draw the exons
-                exon = feature.exons[e];
-                ePx = Math.round((exon.start - bpStart) / xScale);
-                ePx1 = Math.round((exon.end - bpStart) / xScale);
-                ePw = Math.max(1, ePx1 - ePx);
+                const exon = feature.exons[e];
+                let ePx = Math.round((exon.start - bpStart) / xScale);
+                let ePx1 = Math.round((exon.end - bpStart) / xScale);
+                let ePw = Math.max(1, ePx1 - ePx);
+                let ePxU;
+
+                if(ePx + ePw < 0) {
+                    continue;  // Off the left edge
+                }
+                if(ePx > pixelWidth) {
+                    break; // Off the right edge
+                }
 
                 if (exon.utr) {
                     ctx.fillRect(ePx, py2, ePw, h2); // Entire exon is UTR
@@ -583,7 +593,7 @@ var igv = (function (igv) {
                     if (ePw > step + 5) {
                         ctx.fillStyle = "white";
                         ctx.strokeStyle = "white";
-                        for (x = ePx + step / 2; x < ePx1; x += step) {
+                        for (let x = ePx + step / 2; x < ePx1; x += step) {
                             // draw arrowheads along central line indicating transcribed orientation
                             igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
                             igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
@@ -596,8 +606,8 @@ var igv = (function (igv) {
             }
         }
 
-        windowX = Math.round(options.viewportContainerX);
-        windowX1 = windowX + options.viewportContainerWidth / (browser.genomicStateList.length || 1);
+        const windowX = Math.round(options.viewportContainerX);
+        const windowX1 = windowX + options.viewportContainerWidth / (browser.genomicStateList.length || 1);
 
         renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
     }
