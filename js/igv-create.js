@@ -106,6 +106,8 @@ var igv = (function (igv) {
 
     igv.removeBrowser = function (browser) {
 
+        browser.dispose();
+
         browser.parent.removeChild(browser.$root.get(0));   // Mix of es6 && jquery, migrating to es6
 
         allBrowsers = allBrowsers.filter(item => item !== browser);
