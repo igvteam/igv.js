@@ -471,12 +471,6 @@ var igv = (function (igv) {
 
     }
 
-    igv.removeBrowser = function (browser) {
-        browser.$root.remove();
-        browser.dispose();
-        //$(".igv-generic-dialog-container").remove();   // TODO -- this is global, needs to be specific for this browser
-    };
-
 
     function extractQuery(config) {
 
