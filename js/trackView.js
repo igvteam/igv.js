@@ -622,7 +622,9 @@ var igv = (function (igv) {
             this.$innerScroll.off();
         }
 
-        this.scrollbar.dispose();
+        if(this.scrollbar) {
+            this.scrollbar.dispose();
+        }
 
         $(document).off(this.mouseHandlers.document.up);
 
