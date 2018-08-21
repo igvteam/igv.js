@@ -223,12 +223,12 @@ var igv = (function (igv) {
 
         var controlDiv;
 
-        // Create controls.  This can be customized by passing in a function, which should return a div containing the
-        // controls
+        // Create controls. Can be customized by passing in a creation function that returns a div containing the controls
+        controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
+        browser.$root.append($(controlDiv));
 
-        if (conf.showCommandBar !== false && conf.showControls !== false) {
-            controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-            browser.$root.append($(controlDiv));
+        if (false === conf.showControls) {
+            $(controlDiv).hide();
         }
 
     }
