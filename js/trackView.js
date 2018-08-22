@@ -119,7 +119,7 @@ var igv = (function (igv) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
-            this.scrollbar = new igv.TrackScrollbar($viewportContainer, viewports);
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
 
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
@@ -614,6 +614,8 @@ var igv = (function (igv) {
      */
     igv.TrackView.prototype.dispose = function () {
 
+        const self = this;
+
         if (this.$trackManipulationHandle) {
             this.$trackManipulationHandle.off();
         }
@@ -633,6 +635,9 @@ var igv = (function (igv) {
         }
 
         var track = this.track;
+        if(typeof track.dispose === 'function') {
+            track.dispose();
+        }
         Object.keys(track).forEach(function (key) {
             track[key] = undefined;
         })
@@ -651,12 +656,12 @@ var igv = (function (igv) {
         }
 
         Object.keys(this).forEach(function (key) {
-            this[key] = undefined;
+            self[key] = undefined;
         })
 
     }
 
-    igv.TrackScrollbar = function ($viewportContainer, viewports) {
+    const TrackScrollbar = function ($viewportContainer, viewports) {
 
         var self = this,
             offY,
@@ -744,12 +749,12 @@ var igv = (function (igv) {
         }
     };
 
-    igv.TrackScrollbar.prototype.dispose = function () {
+    TrackScrollbar.prototype.dispose = function () {
         $(window).off(this.mouseHandlers.window.up);
         $(window).off(this.mouseHandlers.window.move);
     };
 
-    igv.TrackScrollbar.prototype.update = function () {
+    TrackScrollbar.prototype.update = function () {
 
         var viewportContainerHeight,
             contentHeight,
