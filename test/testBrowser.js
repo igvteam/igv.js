@@ -47,37 +47,37 @@ function runBrowserTests() {
 
     asyncTest("Test remove browser", function () {
 
-        // Create 100 browsers, then remove them 1 at a time;
+        // Create and remove "n" browsers.
 
+        const n = 10;
+        let i =0;
 
-        const browsers = [];
+        createRemove();
 
-        const promises = [];
+        function createRemove() {
 
-        for (let i = 0; i < 100; i++) {
-            promises.push(igv.createBrowser(div, {
+            igv.createBrowser(div, {
                 genome: "hg19",
                 showRuler: false
-            }));
-        }
-
-        Promise.all(promises)
-            .then(function (browsers) {
-
-                browsers.forEach(function (b) {
-                    igv.removeBrowser(b);
-                })
-
-                ok(true);
-
-                start();
-
             })
+                .then(function (browser) {
+                    igv.removeBrowser(browser);
+                    if(i++ < 10) {
+                        createRemove();
+                    } else {
+                        ok(true);
+                        start();
+                    }
+
+                })
                 .catch(function (error) {
+                    console.error(error);
                     ok(false);
-                    console.log(error);
                     start();
                 })
+        }
+
+
 
     })
 
