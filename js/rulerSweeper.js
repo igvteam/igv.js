@@ -238,6 +238,11 @@ var igv = (function (igv) {
 
     };
 
+    igv.RulerSweeper.prototype.dispose = function () {
+        this.disableMouseHandlers();
+    }
+
+
     function bp(pixel) {
         return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
     }

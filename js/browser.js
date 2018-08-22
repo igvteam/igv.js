@@ -758,7 +758,7 @@ var igv = (function (igv) {
 
         if (trackPanelRemoved) {
             this.trackViews.splice(i, 1);
-            this.trackContainerDiv.removeChild(trackPanelRemoved.trackDiv);
+            $(trackPanelRemoved.trackDiv).remove();
             this.fireEvent('trackremoved', [trackPanelRemoved.track]);
             trackPanelRemoved.dispose();
         }
