@@ -41,7 +41,7 @@ var igv = (function (igv) {
         $guideParent.append(this.$guide);
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $guideParent.on('mousemove.cursorGuide', igv.throttle(function (e) {
+        $guideParent.on('mousemove.cursorGuide', function (e) {
             var exe;
 
             e.preventDefault();
@@ -51,7 +51,7 @@ var igv = (function (igv) {
             // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
 
             self.$guide.css({ left: exe + 'px' });
-        }, 10));
+        });
 
         if (true === config.showCursorTrackingGuideButton) {
 
