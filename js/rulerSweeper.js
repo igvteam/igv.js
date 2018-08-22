@@ -180,7 +180,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(this.mouseHandlers.document.move, igv.throttle(function (e) {
+        $(document).on(this.mouseHandlers.document.move, function (e) {
             var mouseCurrent;
 
             if (isMouseDown && isMouseIn) {
@@ -201,7 +201,7 @@ var igv = (function (igv) {
 
             }
 
-        }, 10));
+        });
 
         $(document).on(this.mouseHandlers.document.up, function (e) {
 
