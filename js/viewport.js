@@ -474,12 +474,12 @@ var igv = (function (igv) {
 
     function addMouseHandlers() {
 
-        const  self = this;
+        const self = this;
         const browser = this.browser;
 
         let lastMouseX;
         let mouseDownX;
-        let popupTimer;
+        let popupTimerID;
 
         let lastClickTime = 0;
 
@@ -550,9 +550,9 @@ var igv = (function (igv) {
             if (time - lastClickTime < browser.constants.doubleClickDelay) {
 
                 // double-click
-                if (popupTimer) {
-                    window.clearTimeout(popupTimer);
-                    popupTimer = undefined;
+                if (popupTimerID) {
+                    window.clearTimeout(popupTimerID);
+                    popupTimerID = undefined;
                 }
 
                 const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
@@ -589,13 +589,14 @@ var igv = (function (igv) {
 
                 } else if (typeof self.trackView.track.popupData === "function") {
 
-                    popupTimer = window.setTimeout(function () {
+                    popupTimerID = setTimeout(function () {
 
                             var content = getPopupContent(e, self);
                             if (content) {
                                 self.popover.presentTrackPopup(e, content);
                             }
-                            popupTimer = undefined;
+                            clearTimeout(popupTimerID);
+                            popupTimerID = undefined;
                         },
                         browser.constants.doubleClickDelay);
                 }
