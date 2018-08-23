@@ -63,11 +63,8 @@ var igv = (function (igv) {
 
         browser.$content = $('<div class="igv-content-div">');
         browser.$root.append(browser.$content);
-
-        let content_header_id =
-        browser.$contentHeader = $('<div>', { class:'igv-content-header' });
+        browser.$contentHeader = $('<div>', {class: 'igv-content-header'});
         browser.$content.append(browser.$contentHeader);
-
         browser.$content.append(browser.trackContainerDiv);
 
         // user feedback
@@ -84,9 +81,13 @@ var igv = (function (igv) {
 
         browser.dataRangeDialog = new igv.DataRangeDialog(browser.$root, browser);
 
-        if (config.apiKey) igv.setGoogleApiKey(config.apiKey);
+        if (config.apiKey) {
+            igv.setGoogleApiKey(config.apiKey);
+        }
 
-        if (config.oauthToken) igv.setOauthToken(config.oauthToken);
+        if (config.oauthToken) {
+            igv.setOauthToken(config.oauthToken);
+        }
 
 
         return doPromiseChain(browser, config)
@@ -95,7 +96,7 @@ var igv = (function (igv) {
                 allBrowsers.push(browser);
 
                 // Backward compatibility -- globally visible.   This will be removed in a future release
-                if(!igv.browser) {
+                if (!igv.browser) {
                     igv.browser = browser;
                 }
 
@@ -109,6 +110,10 @@ var igv = (function (igv) {
         browser.dispose();
 
         browser.$root.remove();
+
+        if (browser === igv.browser) {
+            igv.browser = undefined;
+        }
 
         allBrowsers = allBrowsers.filter(item => item !== browser);
 
@@ -251,17 +256,17 @@ var igv = (function (igv) {
             $searchContainer,
             $faSearch;
 
-        $controls = $('<div>', { class:'igvControlDiv' });
+        $controls = $('<div>', {class: 'igvControlDiv'});
 
-        $navigation = $('<div>', { class:'igv-navbar' });
+        $navigation = $('<div>', {class: 'igv-navbar'});
         $controls.append($navigation);
         browser.$navigation = $navigation;
 
-        $igv_nav_bar_left_container = $('<div>', { class: 'igv-nav-bar-left-container' });
+        $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
         $navigation.append($igv_nav_bar_left_container);
 
         // IGV logo
-        logoDiv = $('<div>', { class: 'igv-logo' });
+        logoDiv = $('<div>', {class: 'igv-logo'});
         logoSvg = logo();
         logoSvg.css("width", "34px");
         logoSvg.css("height", "32px");
@@ -269,12 +274,12 @@ var igv = (function (igv) {
         $igv_nav_bar_left_container.append(logoDiv);
 
         // current genome
-        browser.$current_genome = $('<div>', { class: 'igv-current_genome' });
+        browser.$current_genome = $('<div>', {class: 'igv-current_genome'});
         $igv_nav_bar_left_container.append(browser.$current_genome);
         browser.$current_genome.text('');
 
         //
-        $genomic_location = $('<div>', { class: 'igv-genomic-location' });
+        $genomic_location = $('<div>', {class: 'igv-genomic-location'});
         $igv_nav_bar_left_container.append($genomic_location);
 
         // chromosome select widget
@@ -286,11 +291,11 @@ var igv = (function (igv) {
         }
 
 
-        $locus_size_group = $('<div>', { class: 'igv-locus-size-group' });
+        $locus_size_group = $('<div>', {class: 'igv-locus-size-group'});
         $genomic_location.append($locus_size_group);
 
         // locus goto widget container
-        $searchContainer = $('<div>', { class: 'igv-search-container' });
+        $searchContainer = $('<div>', {class: 'igv-search-container'});
         $locus_size_group.append($searchContainer);
 
         // locus goto input
