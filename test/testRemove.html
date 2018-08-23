@@ -21,7 +21,7 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         const div = document.getElementById("igvDiv");
-        const n = 5;
+        const n = 10;
         let i = 0;
 
         createRemove();
@@ -34,13 +34,16 @@
             })
                 .then(function (browser) {
 
-                    setTimeout(function () {
+                    const id =setTimeout(function () {
+
+                        clearTimeout(id);
 
                         igv.removeBrowser(browser);
 
-                        if (i++ < 10) {
+                        if (++i < n) {
                             createRemove();
                         }
+
                     }, 3000);
 
                 })
