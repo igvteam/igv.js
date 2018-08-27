@@ -26,16 +26,20 @@
 
 var igv = (function (igv) {
 
+    "use strict";
+
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
     var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
     var DEFAULT_TRACK_HEIGHT = 300;
     var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
-    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
+    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack = function (config, browser) {
+        
+        this.browser = browser;
 
-        this.featureSource = new igv.BamSource(config);
+        this.featureSource = new igv.BamSource(config, browser.genome);
 
         // Override default track height for bams
         if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
@@ -72,6 +76,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         var self = this;
+     
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
             .then(function (alignmentContainer) {
@@ -148,7 +153,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        if (igv.browser.isMultiLocus()) {
+        if (this.browser.isMultiLocus()) {
             ctx.clearRect(0, 0, pixelWidth, pixelHeight);
         }
         else {
@@ -255,7 +260,7 @@ var igv = (function (igv) {
                         self.alignmentTrack.colorBy = 'tag';
                         self.config.colorBy = 'tag';
 
-                        tag = igv.inputDialog.$input.val().trim();
+                        tag = self.trackView.browser.inputDialog.$input.val().trim();
                         if (tag !== self.alignmentTrack.colorByTag) {
                             self.alignmentTrack.colorByTag = tag;
                             self.config.colorByTag = tag;
@@ -274,8 +279,8 @@ var igv = (function (igv) {
                         click: clickFunction
                     };
 
-                    igv.inputDialog.configure(config);
-                    igv.inputDialog.present($(self.trackView.trackDiv));
+                    self.trackView.browser.inputDialog.configure(config);
+                    self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
 
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
@@ -289,36 +294,7 @@ var igv = (function (igv) {
             return {name: undefined, object: $e, click: clickHandler, init: undefined}
 
         }
-
-        function sortMenuItem() {
-
-            var $e,
-                clickHandler;
-
-            $e = $('<div>');
-            $e.text('Sort by base');
-
-            clickHandler = function () {
-                var genomicState = igv.browser.genomicStateList[0],
-                    referenceFrame = genomicState.referenceFrame,
-                    genomicLocation,
-                    viewportHalfWidth;
-
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
-
-                self.sortOption = {sort: "NUCLEOTIDE"};
-                self.alignmentTrack.sortAlignmentRows(genomicLocation, sortOption);
-
-                if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
-                    igv.browser.centerGuide.$centerGuideToggle.trigger("click");
-                }
-
-            };
-
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
-        }
-
+        
     };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
@@ -947,7 +923,7 @@ var igv = (function (igv) {
         function viewMateInSplitScreen() {
             if (alignment.mate) {
                 self.highlightedAlignmentReadNamed = alignment.readName;
-                igv.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
+                self.trackView.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
             }
         }
     };

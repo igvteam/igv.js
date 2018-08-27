@@ -5,22 +5,11 @@ function runBEDGraphTests() {
 
 
     //mock object
-    if (igv === undefined) {
-        igv = {};
-    }
-
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
         }
-    };
+    }
 
     asyncTest("BEDGraphFeatureSource getFeatures", function () {
 
@@ -28,9 +17,10 @@ function runBEDGraphTests() {
             bpStart = 49302001,
             bpEnd = 49304701,
             featureSource = new igv.FeatureSource({
-                format: 'bedgraph',
-                url: 'data/wig/bedgraph-example-uscs.bedgraph'
-            });
+                    format: 'bedgraph',
+                    url: 'data/wig/bedgraph-example-uscs.bedgraph'
+                },
+                genome);
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 

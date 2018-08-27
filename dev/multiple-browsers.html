@@ -1,4 +1,5 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -8,22 +9,19 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-    <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
-    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
-
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="../css/igv.css">
-
-    <!-- Dev CSS -->
-    <link rel="stylesheet" type="text/css" href="css/dev.css">
+    <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
+    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link rel="stylesheet" type="text/css" href="css/multiple-browsers.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
+    <script src="js/dev.js"></script>
+
     <!-- Vendor JS -->
-    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
 
     <script src="../vendor/zlib_and_gzip.js"></script>
@@ -31,6 +29,9 @@
 
     <!-- IGV JS -->
     <script src="../js/igv-icons.js"></script>
+    <script src="../js/session/igvXmlSession.js"></script>
+    <script src="../js/feature/mergedTrack.js"></script>
+
 
     <script src="../js/bam/coverageMap.js"></script>
     <script src="../js/bam/bamReader.js"></script>
@@ -46,6 +47,8 @@
     <script src="../js/bam/bamUtils.js"></script>
     <script src="../js/bam/bamWebserviceReader.js"></script>
     <script src="../js/bam/htsgetReader.js"></script>
+    <script src="../js/bam/alignmentBlock.js"></script>
+    <script src="../js/bam/shardedBamReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -53,8 +56,8 @@
     <script src="../js/bigwig/bwReader.js"></script>
     <script src="../js/bigwig/bwSource.js"></script>
 
+
     <script src="../js/feature/featureCache.js"></script>
-    <script src="../js/feature/featureTree.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
     <script src="../js/feature/featureSource.js"></script>
     <script src="../js/feature/featureParsers.js"></script>
@@ -68,7 +71,9 @@
     <script src="../js/feature/featureUtils.js"></script>
     <script src="../js/feature/segParser.js"></script>
     <script src="../js/feature/segTrack.js"></script>
-    <script type="text/javascript" src="../js/feature/dataWrapper.js"></script>
+    <script src="../js/feature/dataWrapper.js"></script>
+    <script src="../js/feature/interactionTrack.js"></script>
+    <script src="../js/feature/ucscServiceReader.js"></script>
 
     <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
@@ -76,7 +81,6 @@
     <script src="../js/ga4gh/googleUtils.js"></script>
 
     <script src="../js/gtex/eqtlTrack.js"></script>
-    <script src="../js/gtex/gtexFileReader.js"></script>
     <script src="../js/gtex/gtexReader.js"></script>
     <script src="../js/gtex/gtex.js"></script>
     <script src="../js/gtex/immvarReader.js"></script>
@@ -84,23 +88,21 @@
     <script src="../js/gwas/t2dVariantSource.js"></script>
     <script src="../js/gwas/gwasTrack.js"></script>
 
-    <script src="../js/karyo/karyo.js"></script>
-
     <script src="../js/tdf/tdfReader.js"></script>
     <script src="../js/tdf/tdfSource.js"></script>
 
     <script src="../js/ui/trackMenuPopupDialog.js"></script>
     <script src="../js/ui/dataRangeDialog.js"></script>
-    <script src="../js/ui/trackRemovalDialog.js"></script>
     <script src="../js/ui/inputDialog.js"></script>
+    <script src="../js/ui/trackRemovalDialog.js"></script>
     <script src="../js/ui/alertDialog.js"></script>
-    <script src="../js/ui/centerGuide.js"></script>
     <script src="../js/ui/cursorGuide.js"></script>
+    <script src="../js/ui/centerGuide.js"></script>
     <script src="../js/ui/trackLabelControl.js"></script>
     <script src="../js/ui/userFeedback.js"></script>
-    <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/popover.js"></script>
     <script src="../js/ui/chromosomeSelectWidget.js"></script>
+    <script src="../js/ui/draggable.js"></script>
 
     <script src="../js/variant/vcfParser.js"></script>
     <script src="../js/variant/variant.js"></script>
@@ -120,6 +122,7 @@
     <script src="../js/rulerTrack.js"></script>
     <script src="../js/rulerSweeper.js"></script>
 
+
     <script src="../js/igv-math.js"></script>
     <script src="../js/igv-color.js"></script>
     <script src="../js/igv-utils.js"></script>
@@ -136,73 +139,96 @@
     <script src="../js/trackCore.js"></script>
 
 
-
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
 
-
-    <script>
-        $(function () {
-            $("#tabs").tabs({
-                active: 0
-            });
-
-            var igvDiv, options;
-            igvDiv = $("#igvDiv")[0];
-            options =
-            {
-                locus: "AQP4",
-                minimumBases: 5,
-                showRuler: true,
-                reference: {
-                    id: "hg38",
-                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
-                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt"
-                },
-                tracks: [
-                    {
-                        name: 'Gencode v24',
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz",
-                        indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/genes/gencode.v24.annotation.sorted.gtf.gz.tbi",
-                        format: 'gtf',
-                        visibilityWindow: 2000000,
-                        displayMode: 'EXPANDED'
-                    },
-                ]
-            }; // options
-            browser = igv.createBrowser(igvDiv, options);
-
-            $("#tabs").on("tabsactivate", function (event, ui) {
-                igv.browser.resize();
-            });
-
-        });
-    </script>
-
 </head>
+
 <body>
 
-<div id="tabs">
-    <ul>
-        <li><a href="#tabs-1">Explanation</a></li>
-        <li><a href="#igvTab">igv</a></li>
-    </ul>
-
-    <div id="tabs-1">
-        <ul>
-            <li> When this tab (really, just a div) comes first in the document, then igv renders incompletely in its
-                div
-            <li> Reverse the order of the two li items in the unordered list, the igvDiv is then visible, and it renders
-                nicely
-        </ul>
+<div class="side-by-side-container">
+    <div id="ba" style="width: 50%">
     </div>
-    <div id="igvTab">
-        <div id="igvDiv"></div>
+    <div id="bb" style="width: 50%">
+    </div>
+</div>
+
+<div class="side-by-side-container">
+    <div id="bc" style="width: 50%">
+    </div>
+    <div id="bd" style="width: 50%">
     </div>
 </div>
 
 
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const config_a =
+            {
+                genome: "hg19",
+                locus: 'egfr',
+                tracks: [
+                    {
+                        "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        "indexed": false,
+                        "isLog": true,
+                        "name": "GBM Copy # (TCGA Broad GDAC)"
+                    }
+                ]
+            };
+
+        const config_b =
+            {
+                genome: "hg19",
+                locus: 'myc',
+                tracks: [
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                        "name": "ctcf bigwig"
+                    }
+                ]
+            };
+
+        igv
+            .createBrowser(document.getElementById("ba"), config_a)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
+
+        igv
+            .createBrowser(document.getElementById("bb"), config_b)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
+
+        igv
+            .createBrowser(document.getElementById("bc"), config_b)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
+
+        igv
+            .createBrowser(document.getElementById("bd"), config_a)
+            .then(function (b) {
+                igv.browser = b;
+                console.log("Created browser guid: " + b.guid);
+            });
+
+
+
+    });
+
+
+</script>
+
 </body>
+
 </html>

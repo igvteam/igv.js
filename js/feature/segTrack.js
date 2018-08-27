@@ -27,7 +27,7 @@ var igv = (function (igv) {
 
     var sortDirection = "DESC";
 
-    igv.SegTrack = function (config) {
+    igv.SegTrack = function (config, browser) {
 
         igv.configTrack(this, config);
 
@@ -69,7 +69,7 @@ var igv = (function (igv) {
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = new igv.FeatureSource(this.config);
+        this.featureSource = new igv.FeatureSource(this.config, browser.genome);
 
     };
 
@@ -91,7 +91,7 @@ var igv = (function (igv) {
     igv.SegTrack.prototype.toggleSampleHeight = function () {
 
         this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
-
+        this.trackView.checkContentHeight();
         this.trackView.repaintViews();
     };
 

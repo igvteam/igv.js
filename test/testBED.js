@@ -1,24 +1,13 @@
 function runBedTests() {
 
 
-    // mock object
-    if (igv === undefined) {
-        igv = {};
+    // mock objects
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
     }
 
-    igv.browser = {
-        getFormat: function () {
-        },
-
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
-        }
-    };
-    
 
     asyncTest("Missing line feed  - gzipped", function () {
 
@@ -26,10 +15,11 @@ function runBedTests() {
             bpStart = 0,
             bpEnd = Number.MAX_VALUE,
             featureSource = new igv.FeatureSource({
-                format: 'bed',
-                indexed: false,
-                url: 'data/bed/missing_linefeed.bed.gz'
-            });
+                    format: 'bed',
+                    indexed: false,
+                    url: 'data/bed/missing_linefeed.bed.gz'
+                },
+                genome);
 
         // Must get file header first
         featureSource.getFeatures(chr, bpStart, bpEnd)
@@ -82,10 +72,11 @@ function runBedTests() {
             bpStart = 67655271,
             bpEnd = 67684468,
             featureSource = new igv.FeatureSource({
-                format: 'bed',
-                indexed: false,
-                url: 'data/bed/basic_feature_3_columns.bed'
-            });
+                    format: 'bed',
+                    indexed: false,
+                    url: 'data/bed/basic_feature_3_columns.bed'
+                },
+                genome);
 
         // Must get file header first
         featureSource.getFileHeader().then(function (header) {
@@ -105,10 +96,11 @@ function runBedTests() {
     asyncTest("BED track line", function () {
 
         var featureSource = new igv.FeatureSource({
-            format: 'bed',
-            indexed: false,
-            url: 'data/bed/basic_feature_3_columns.bed'
-        });
+                format: 'bed',
+                indexed: false,
+                url: 'data/bed/basic_feature_3_columns.bed'
+            },
+            genome);
 
         featureSource.getFileHeader().then(function (header) {
 
@@ -126,9 +118,10 @@ function runBedTests() {
             bpStart = 67655271,
             bpEnd = 67684468,
             featureSource = new igv.FeatureSource({
-                format: 'bed',
-                url: 'data/bed/basic_feature_3_columns.bed.gz'
-            });
+                    format: 'bed',
+                    url: 'data/bed/basic_feature_3_columns.bed.gz'
+                },
+                genome);
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
@@ -185,9 +178,10 @@ function runBedTests() {
             bpEnd;
 
         featureSource = new igv.FeatureSource({
-            format: 'refflat',
-            url: "data/bed/myc_refFlat.txt"
-        });
+                format: 'refflat',
+                url: "data/bed/myc_refFlat.txt"
+            },
+            genome);
 
         chr = "chr1";
         bpStart = 1;
@@ -222,9 +216,10 @@ function runBedTests() {
             bpEnd;
 
         featureSource = new igv.FeatureSource({
-            format: 'genePred',
-            url: "data/bed/genePred_myc_hg38.txt"
-        });
+                format: 'genePred',
+                url: "data/bed/genePred_myc_hg38.txt"
+            },
+            genome);
 
         chr = "chr8";
         bpStart = 1;
@@ -259,9 +254,10 @@ function runBedTests() {
             bpEnd;
 
         featureSource = new igv.FeatureSource({
-            format: 'refgene',
-            url: "data/bed/myc_refGene_genePredExt.txt"
-        });
+                format: 'refgene',
+                url: "data/bed/myc_refGene_genePredExt.txt"
+            },
+            genome);
 
         chr = "chr1";
         bpStart = 1;

@@ -81,30 +81,30 @@
       cursor: pointer;
       color: #0f0f0f; }
 
-#igvControlDiv {
+.igvControlDiv {
   position: relative; }
 
-#igv-content-header {
+.igv-content-header {
   position: relative;
   height: 16px;
   clear: both;
   margin-top: 10px;
   white-space: nowrap; }
-  #igv-content-header .igv-ideogram-left-shim {
+  .igv-content-header .igv-ideogram-left-shim {
     position: relative;
     height: 100%;
     width: 50px;
     display: inline-block;
     background-color: white; }
-  #igv-content-header .igv-ideogram-content-div {
+  .igv-content-header .igv-ideogram-content-div {
     position: relative;
     height: 100%;
     display: inline-block;
     background-color: white; }
-    #igv-content-header .igv-ideogram-content-div canvas {
+    .igv-content-header .igv-ideogram-content-div canvas {
       width: 100%;
       height: 100%; }
-  #igv-content-header .igv-ideogram-content-div-border-right {
+  .igv-content-header .igv-ideogram-content-div-border-right {
     border-right-color: #292929;
     border-right-style: solid;
     border-right-width: 1px; }
@@ -120,7 +120,7 @@
   border-right-style: solid;
   border-right-width: 1px; }
 
-#igv-navbar {
+.igv-navbar {
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -138,28 +138,26 @@
   border-width: thin;
   border-color: #bfbfbf;
   background-color: #f3f3f3; }
-  #igv-navbar i {
+  .igv-navbar i {
     cursor: pointer;
     color: #666666; }
-  #igv-navbar i:hover,
-  #igv-navbar i:focus,
-  #igv-navbar i:active {
+  .igv-navbar i:hover,
+  .igv-navbar i:focus,
+  .igv-navbar i:active {
     color: #434343; }
-  #igv-navbar #igv-nav-bar-left-container {
+  .igv-navbar .igv-nav-bar-left-container {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
     height: 32px; }
-    #igv-navbar #igv-nav-bar-left-container #igv-logo {
+    .igv-navbar .igv-nav-bar-left-container .igv-logo {
       width: 34px;
       height: 32px;
       margin-left: 8px;
       margin-right: 32px; }
-    #igv-navbar #igv-nav-bar-left-container #igv-drag-and-drop-presentation-button {
-      margin-right: 32px; }
-    #igv-navbar #igv-nav-bar-left-container #igv-current_genome {
+    .igv-navbar .igv-nav-bar-left-container .igv-current_genome {
       height: 32px;
       margin-right: 16px;
       user-select: none;
@@ -169,18 +167,18 @@
       font-weight: 400;
       line-height: 32px;
       text-align: center; }
-    #igv-navbar #igv-nav-bar-left-container #igv-genomic-location {
+    .igv-navbar .igv-nav-bar-left-container .igv-genomic-location {
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
       height: 32px; }
-      #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-chromosome-select-widget-container {
+      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container {
         width: 96px;
         margin-right: 4px;
         height: 70%; }
-        #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-chromosome-select-widget-container select {
+        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container select {
           display: block;
           outline: none;
           font-family: "Open Sans", sans-serif;
@@ -189,21 +187,21 @@
           color: #444;
           width: 100%;
           height: 100%; }
-      #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group {
+      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group {
         display: flex;
         flex-flow: row;
         flex-wrap: nowrap;
         justify-content: space-between;
         align-items: center;
         height: 75%; }
-        #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container {
+        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container {
           width: 260px;
           display: flex;
           flex-flow: row;
           flex-wrap: nowrap;
           justify-content: flex-start;
           align-items: center; }
-          #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container input {
+          .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container input {
             display: block;
             width: 85%;
             padding-left: 8px;
@@ -220,37 +218,37 @@
             border-width: thin;
             border-color: #bfbfbf;
             background-color: white; }
-          #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container div {
+          .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container div {
             height: 100%; }
-            #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-search-container div i {
+            .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container div i {
               font-size: 18px; }
-        #igv-navbar #igv-nav-bar-left-container #igv-genomic-location #igv-locus-size-group #igv-windowsizepanel-content-div {
+        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-windowsizepanel-content-div {
           margin-left: 4px;
           user-select: none;
           font-family: "Open Sans", sans-serif;
           font-size: 12px;
           font-weight: 400;
           color: #444; }
-  #igv-navbar #igv-nav-bar-right-container {
+  .igv-navbar .igv-nav-bar-right-container {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
-    #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container {
+    .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
       margin-right: 8px; }
-      #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container div {
+      .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
         margin-left: 0;
         margin-right: 4px; }
-      #igv-navbar #igv-nav-bar-right-container #igv-nav-bar-toggle-button-container div:last-child {
+      .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div:last-child {
         margin-left: 0;
         margin-right: 0; }
-    #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget {
+    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
       user-select: none;
       display: flex;
       flex-flow: row;
@@ -260,7 +258,7 @@
       width: 44px;
       margin-left: 16px;
       margin-right: 8px; }
-      #igv-navbar #igv-nav-bar-right-container #igv-zoom-widget div i {
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div i {
         font-size: 24px; }
 
 .igv-nav-bar-button {
@@ -287,7 +285,7 @@
 .igv-nav-bar-button:hover {
   cursor: pointer; }
 
-#igv-logo-nonav {
+.igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
   position: absolute;

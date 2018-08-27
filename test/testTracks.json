@@ -1,5 +1,24 @@
 [
   {
+    "format": "bed",
+    "name": "Embedded features",
+    "type": "annotation",
+    "features": [
+      {
+        "chr": "1",
+        "start": 7432951,
+        "end": 7438000,
+        "name": "feature 1"
+      },
+      {
+        "chr": "1",
+        "start": 8438000,
+        "end": 8440000,
+        "name": "feature 2"
+      }
+    ]
+  },
+  {
     "HEADING": "Platinum Genomes (BAM)"
   },
   {
@@ -69,11 +88,11 @@
     "sourceType": "shardedBam",
     "sources": {
       "sequences": [
-        "21",
-        "22"
+        "chr1",
+        "chr8"
       ],
-      "url": "gs://igv-bam-test/mock/recalibrated.$CHR.bam",
-      "indexURL": "gs://igv-bam-test/mock/recalibrated.$CHR.bam.bai"
+      "url": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam",
+      "indexURL": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam.bai"
     }
   },
   {

@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.WIGTrack = function (config) {
+    igv.WIGTrack = function (config, browser) {
 
         this.featureType = 'numeric';
         this.config = config;
@@ -45,11 +45,11 @@ var igv = (function (igv) {
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
-            this.featureSource = new igv.BWSource(config);
+            this.featureSource = new igv.BWSource(config, browser.genome);
         } else if ("tdf" === format) {
-            this.featureSource = new igv.TDFSource(config);
+            this.featureSource = new igv.TDFSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.FeatureSource(config);
+            this.featureSource = new igv.FeatureSource(config, browser.genome);
         }
 
         this.autoscale = config.autoscale || config.max === undefined;
@@ -373,7 +373,7 @@ var igv = (function (igv) {
 
 
     // Static function
-    igv.WIGTrack.autoscale = function (features) {
+    igv.WIGTrack.doAutoscale = function (features) {
         var min, max;
 
         if (features.length > 0) {

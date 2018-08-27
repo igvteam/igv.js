@@ -13,16 +13,14 @@
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    
+
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <script src="js/dev.js"></script>
 
     <!-- Vendor JS -->
-    <script src="../vendor/jquery-1.12.4.js"></script>
-    <script src="../vendor/jquery-ui.js"></script>
-    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
 
     <script src="../vendor/zlib_and_gzip.js"></script>
@@ -82,7 +80,6 @@
     <script src="../js/ga4gh/googleUtils.js"></script>
 
     <script src="../js/gtex/eqtlTrack.js"></script>
-    <script src="../js/gtex/gtexFileReader.js"></script>
     <script src="../js/gtex/gtexReader.js"></script>
     <script src="../js/gtex/gtex.js"></script>
     <script src="../js/gtex/immvarReader.js"></script>
@@ -90,11 +87,10 @@
     <script src="../js/gwas/t2dVariantSource.js"></script>
     <script src="../js/gwas/gwasTrack.js"></script>
 
-    <script src="../js/karyo/karyo.js"></script>
-
     <script src="../js/tdf/tdfReader.js"></script>
     <script src="../js/tdf/tdfSource.js"></script>
 
+    <script src="../js/ui/draggable.js"></script>
     <script src="../js/ui/trackMenuPopupDialog.js"></script>
     <script src="../js/ui/dataRangeDialog.js"></script>
     <script src="../js/ui/inputDialog.js"></script>
@@ -169,39 +165,46 @@
 
         igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-                .then(function (google) {
+            .then(function (google) {
 
-                    const igvDiv = document.getElementById("igvDiv");
+                const igvDiv = document.getElementById("igvDiv");
 
-                    const options = {
+                const options =
+                    {
                         // locus: 'myc',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
-//  GTEX search service.  Uncomment to test.
-//                        search: {
-//                            url: "https://gtexportal.org/rest/v1/reference/featuresDev/$FEATURE$?format=json&datasetId=gtex_v7",
-//                            resultsField: "features",
-//                            geneField: "geneSymbol",
-//                            snpField: 'snpId'
-//                        },
-                        tracks: [
-                            {
-                                url: 'http://data.broadinstitute.org/igvdata/test/data/bed/test.bed.gz',
-                                indexURL: 'http://data.broadinstitute.org/igvdata/test/data/bed/test.bed.gz.tbi',
-//                                url: 'http://localhost:5000/static/data/public/test.bed.gz',
-//                                indexURL: 'http://localhost:5000/static/data/public/test.bed.gz.tbi',
-                                name: 'small bed'
-                            }
-                        ]
+
+
+                        //GTEX search service.  Uncomment to test.
+                        // search:
+                        //     {
+                        //     url: "https://gtexportal.org/rest/v1/reference/features/$FEATURE$?format=json&datasetId=gtex_v7",
+                        //     resultsField: "features",
+                        //     geneField: "geneSymbol",
+                        //     snpField: 'snpId'
+                        // }
                     };
 
-                    igv.createBrowser(igvDiv, options)
-                            .then(function (browser) {
-                                igvdev.createTrackList(document.getElementById('trackList'), browser)
-                            })
-
+                igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    igvdev.createTrackList(document.getElementById('trackList'), browser);
+                    return browser;
                 })
+                //     .then(function (browser) {
+                //
+                //         browser.loadTrack({
+                //             "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+                //             "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
+                //             "name": "Bed - Tabix Index"
+                //         })
+                //             .then(function (track) {
+                //                 browser.removeTrack(track);
+                //             })
+                //     })
+
+            })
     });
 
 

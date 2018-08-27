@@ -25,8 +25,6 @@
 
 var igv = (function (igv) {
 
-    var self = this;
-
     igv.genericContainer = function ($parent, config, closeHandler) {
 
         var $generic_container,
@@ -63,41 +61,11 @@ var igv = (function (igv) {
             closeHandler();
         });
 
-        $generic_container.draggable({handle: $header.get(0)});
-
+        // $generic_container.draggable({handle: $header.get(0)});
+        igv.makeDraggable($generic_container.get(0), $header.get(0));
         return $generic_container;
     };
 
-    igv.makeDraggable = function ($target, $handle) {
-        $handle.on('mousedown', function (event) {
-
-            event.preventDefault();
-            event.stopPropagation();
-
-            self.initX = $target.position().left;
-            self.initY = $target.position().top;
-
-            self.mousePressX = event.clientX;
-            self.mousePressY = event.clientY;
-
-            $handle.on('mousemove', move);
-
-            window.addEventListener('mouseup', function () {
-                $handle.off('mousemove');
-            }, false);
-
-            function move(e) {
-
-                e.preventDefault();
-                e.stopPropagation();
-
-                $target.css({
-                    left: (self.initX + e.clientX - self.mousePressX),
-                    top: (self.initY + e.clientY - self.mousePressY)
-                });
-            }
-        });
-    };
 
     igv.getExtension = function (config) {
         var path,
@@ -186,27 +154,6 @@ var igv = (function (igv) {
         return $button;
     };
 
-    igv.presentAlert = function (alert, $parent) {
-
-        var string;
-
-        string = alert.message || alert;
-
-        if (httpMessages.hasOwnProperty(string)) {
-            string = httpMessages[string];
-        }
-
-        igv.alertDialog.configure({label: string});
-        igv.alertDialog.present($parent);
-    };
-
-    var httpMessages = {
-        "401": "Access unauthorized",
-        "403": "Access forbidden",
-        "404": "Not found"
-    };
-
-
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
         var $container,
@@ -285,7 +232,7 @@ var igv = (function (igv) {
             loose: /^(?:(?![^:@]+:[^:@\/]*@)([^:\/?#.]+):)?(?:\/\/)?((?:(([^:@]*)(?::([^:@]*))?)?@)?([^:\/?#]*)(?::(\d*))?)(((\/(?:[^?#](?![^?#\/]*\.[^?#\/.]+(?:[?#]|$)))*\/?)?([^?#\/]*))(?:\?([^#]*))?(?:#(.*))?)/
         }
     };
-    
+
     igv.splitLines = function (string) {
         return string.split(/\n|\r\n|\r/g);
     }
@@ -355,8 +302,8 @@ var igv = (function (igv) {
             decsep = '.';
 
         return dec[0].split('').reverse().reduce(function (prev, now, i) {
-                return i % 3 === 0 ? prev + sep + now : prev + now;
-            }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
+            return i % 3 === 0 ? prev + sep + now : prev + now;
+        }).split('').reverse().join('') + (dec[1] ? decsep + dec[1] : '');
     };
 
     igv.numberUnFormatter = function (formatedNumber) {
@@ -395,32 +342,6 @@ var igv = (function (igv) {
         eFixed = $.event.fix(e);
         return {x: eFixed.pageX, y: eFixed.pageY}
     }
-
-
-    igv.throttle = function (fn, threshhold, scope) {
-        threshhold || (threshhold = 200);
-        var last, deferTimer;
-
-        return function () {
-            var context = scope || this;
-
-            var now = +new Date,
-                args = arguments;
-            if (last && now < last + threshhold) {
-                // hold on to it
-                clearTimeout(deferTimer);
-                deferTimer = setTimeout(function () {
-                    last = now;
-                    fn.apply(context, args);
-                }, threshhold);
-            } else {
-                last = now;
-                fn.apply(context, args);
-            }
-        }
-    };
-
-    var foo = typeof igv.throttle;
 
     igv.splitStringRespectingQuotes = function (string, delim) {
 
@@ -507,10 +428,10 @@ var igv = (function (igv) {
      */
     const simpleTypes = new Set(["boolean", "number", "string", "symbol"]);
     igv.isSimpleType = function (value) {
-        
+
         const valueType = typeof value;
-        
-        return (value != undefined && (simpleTypes.has(valueType) ||  value.substring || value.toFixed))
+
+        return (value != undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
     };
 
     igv.constrainBBox = function ($child, $parent) {

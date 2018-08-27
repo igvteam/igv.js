@@ -9,8 +9,7 @@ module.exports = function (grunt) {
                 src: [
                     'wrapper/header.js',
                     'tmp/embedCss.js',
-                    'vendor/jquery-1.12.4.js',
-                    'vendor/jquery-ui.js',
+                    'vendor/jquery-3.3.1.slim.js',
                     'vendor/underscore.js',
                     'vendor/zlib_and_gzip.js',
                     'vendor/inflate.js',
@@ -26,8 +25,7 @@ module.exports = function (grunt) {
                 src: [
                     'wrapper/header-esm.js',
                     'tmp/embedCss.js',
-                    'vendor/jquery-1.12.4.js',
-                    'vendor/jquery-ui.js',
+                    'vendor/jquery-3.3.1.slim.js',
                     'vendor/underscore.js',
                     'vendor/zlib_and_gzip.js',
                     'vendor/inflate.js',

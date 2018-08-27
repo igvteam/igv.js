@@ -29,15 +29,18 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackLabelControl = function ($parent) {
+    igv.TrackLabelControl = function ($parent, browser) {
+        
         var self = this;
 
+        this.browser = browser;
+        
         this.$button = $('<div class="igv-nav-bar-button">');
         $parent.append(this.$button);
         this.$button.text('track labels');
 
         this.$button.on('click', function () {
-            if (true === igv.browser.trackLabelsVisible) {
+            if (true === browser.trackLabelsVisible) {
                 self.doHide();
             } else {
                 self.doShow();
@@ -47,12 +50,12 @@ var igv = (function (igv) {
 
     igv.TrackLabelControl.prototype.doHide = function () {
         this.$button.removeClass('igv-nav-bar-button-clicked');
-        igv.browser.hideTrackLabels();
+        this.browser.hideTrackLabels();
     };
 
     igv.TrackLabelControl.prototype.doShow = function () {
         this.$button.addClass('igv-nav-bar-button-clicked');
-        igv.browser.showTrackLabels();
+        this.browser.showTrackLabels();
     };
 
     igv.TrackLabelControl.prototype.setState = function (trackLabelsVisible) {

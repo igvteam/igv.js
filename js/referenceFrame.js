@@ -28,7 +28,8 @@
 var igv = (function (igv) {
 
 
-    igv.ReferenceFrame = function (chrName, start, end, bpPerPixel) {
+    igv.ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
+        this.genome = genome;
         this.chrName = chrName;
         this.start = start;
         this.end = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
@@ -67,7 +68,7 @@ var igv = (function (igv) {
         // clamp right
         if (viewportWidth) {
         
-            var chromosome = igv.browser.genome.getChromosome(this.chrName);
+            var chromosome = this.genome.getChromosome(this.chrName);
             var maxEnd = chromosome.bpLength;
             var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
 

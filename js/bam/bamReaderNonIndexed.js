@@ -39,13 +39,15 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BamReaderNonIndexed = function (config) {
+    igv.BamReaderNonIndexed = function (config, genome) {
 
         this.config = config;
+        
+        this.genome = genome;
 
         this.bamPath = config.url;
 
-        this.isDataUri = config.url && config.url.startsWith("data:");
+        this.isDataUri = igv.isString(config.url) && config.url.startsWith("data:");
 
         igv.BamUtils.setReaderDefaults(this, config);
 
@@ -55,8 +57,9 @@ var igv = (function (igv) {
     // Return an alignment container
     igv.BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
-        var self = this;
-
+        const self = this;
+        const genome = this.genome;
+        
         if (this.alignmentCache) {
 
             return fetchAlignments(chr, bpStart, bpEnd);
@@ -95,7 +98,7 @@ var igv = (function (igv) {
 
             igv.BamUtils.decodeBamRecords(data, self.header.size, alignments, self.header.chrNames);
 
-            self.alignmentCache = new igv.FeatureCache(alignments);
+            self.alignmentCache = new igv.FeatureCache(alignments, genome);
         }
 
 

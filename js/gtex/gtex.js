@@ -96,13 +96,27 @@ var igv = (function (igv) {
 
             datasetId = datasetId || "gtex_v7";
 
-            let url = "https://gtexportal.org/rest/v1/dataset/tissueInfo?format=json&datasetId=" + datasetId;
+            // let depricated_url = 'https://gtexportal.org/rest/v1/dataset/tissueInfo?format=json&datasetId=' + datasetId;
+
+            let url = 'https://gtexportal.org/rest/v1/dataset/tissueSummary?datasetId=' + datasetId;
 
             return igv.xhr.loadJson(url, {})
+        },
+
+        trackConfiguration: function (tissueSummary) {
+
+            return {
+                type: "eqtl",
+                sourceType: "gtex-ws",
+                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                tissueName: tissueSummary.tissueSiteDetailId,
+                name: (tissueSummary.tissueSiteDetailId.split('_').join(' ')),
+                visibilityWindow: 1000000
+            }
+
         }
 
-
-    }
+    };
 
 
     return igv;

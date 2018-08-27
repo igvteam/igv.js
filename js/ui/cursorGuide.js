@@ -28,15 +28,20 @@
  * Created by dat on 3/26/18.
  */
 var igv = (function (igv) {
+    
+    "use strict";
 
-    igv.CursorGuide = function ($guideParent, $controlParent, config) {
-        var self = this;
+    igv.CursorGuide = function ($guideParent, $controlParent, config, browser) {
+        
+        const self = this;
 
+        this.browser = browser;
+        
         this.$guide = $('<div class="igv-cursor-tracking-guide">');
         $guideParent.append(this.$guide);
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $guideParent.on('mousemove.cursorGuide', igv.throttle(function (e) {
+        $guideParent.on('mousemove.cursorGuide', function (e) {
             var exe;
 
             e.preventDefault();
@@ -46,7 +51,7 @@ var igv = (function (igv) {
             // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
 
             self.$guide.css({ left: exe + 'px' });
-        }, 10));
+        });
 
         if (true === config.showCursorTrackingGuideButton) {
 
@@ -55,7 +60,7 @@ var igv = (function (igv) {
             this.$button.text('cursor guide');
 
             this.$button.on('click', function () {
-                if (true === igv.browser.cursorGuideVisible) {
+                if (true === browser.cursorGuideVisible) {
                     self.doHide();
                 } else {
                     self.doShow();
@@ -70,12 +75,12 @@ var igv = (function (igv) {
         if (this.$button) {
             this.$button.removeClass('igv-nav-bar-button-clicked');
         }
-        igv.browser.hideCursorGuide();
+        this.browser.hideCursorGuide();
     };
 
     igv.CursorGuide.prototype.doShow = function () {
         this.$button.addClass('igv-nav-bar-button-clicked');
-        igv.browser.showCursorGuide();
+        this.browser.showCursorGuide();
     };
 
     igv.CursorGuide.prototype.setState = function (cursorGuideVisible) {

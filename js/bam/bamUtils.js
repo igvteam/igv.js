@@ -42,28 +42,22 @@ var igv = (function (igv) {
     igv.BamUtils = {
 
         readHeader: function (url, options, genome) {
+            
+            return igv.xhr.loadArrayBuffer(url, options)
 
-            return new Promise(function (fulfill, reject) {
+                .then(function (compressedBuffer) {
 
-                igv.xhr.loadArrayBuffer(url, options)
+                    var header, unc, uncba;
 
-                    .then(function (compressedBuffer) {
+                    unc = igv.unbgzf(compressedBuffer);
+                    uncba = new Uint8Array(unc);
 
-                        var header, unc, uncba;
+                    header = igv.BamUtils.decodeBamHeader(uncba, genome);
 
-                        unc = igv.unbgzf(compressedBuffer);
-                        uncba = new Uint8Array(unc);
+                    return header;
 
-                        header = igv.BamUtils.decodeBamHeader(uncba, genome);
+                })
 
-                        fulfill(header);
-
-                    })
-                    .catch(function (error) {
-                        reject(error);
-                    });
-
-            });
         },
 
         /**
@@ -410,10 +404,10 @@ var igv = (function (igv) {
 
         setReaderDefaults: function (reader, config) {
 
-            reader.filter =  new igv.BamFilter(config.filter);
+            reader.filter = new igv.BamFilter(config.filter);
 
-            if(config.readgroup) {
-                reader.filter.readgroups =  new Set([config.readgroup]);
+            if (config.readgroup) {
+                reader.filter.readgroups = new Set([config.readgroup]);
             }
 
 
@@ -453,11 +447,11 @@ var igv = (function (igv) {
                 var tmp = [];
                 var isize = alignment.fragmentLength;
                 var estReadLen = alignment.end - alignment.start;
-                if (isize == 0) {
+                if (isize === 0) {
                     //isize not recorded.  Need to estimate.  This calculation was validated against an Illumina
                     // -> <- library bam.
-                    var estMateEnd = alignment.start < mate.start ?
-                    mate.start + estReadLen : mate.start - estReadLen;
+                    var estMateEnd = alignment.start < mate.position ?
+                    mate.position + estReadLen : mate.position - estReadLen;
                     isize = estMateEnd - alignment.start;
                 }
 
@@ -542,7 +536,13 @@ var igv = (function (igv) {
 
                     blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
                     blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                    blocks.push(new igv.AlignmentBlock({start: pos, len: c.len, seq: blockSeq, qual: blockQuals, gapType: gapType}));
+                    blocks.push(new igv.AlignmentBlock({
+                        start: pos,
+                        len: c.len,
+                        seq: blockSeq,
+                        qual: blockQuals,
+                        gapType: gapType
+                    }));
                     seqOffset += c.len;
                     pos += c.len;
 
@@ -618,7 +618,7 @@ var igv = (function (igv) {
 
         return tagDict;
     }
-    
+
     return igv;
 
 })
