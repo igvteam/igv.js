@@ -36,7 +36,7 @@ var igv = (function (igv) {
     var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 
     igv.BAMTrack = function (config, browser) {
-        
+
         this.browser = browser;
 
         this.featureSource = new igv.BamSource(config, browser.genome);
@@ -75,8 +75,9 @@ var igv = (function (igv) {
     };
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        var self = this;
-     
+
+        const self = this;
+
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
             .then(function (alignmentContainer) {
@@ -179,18 +180,14 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.menuItemList = function () {
 
-        var self = this,
-            $e,
-            html,
-            menuItems = [],
-            colorByMenuItems = [],
-            tagLabel,
-            selected;
+        const self = this;
 
+
+        const menuItems = [];
         // sort by @ center line
         //menuItems.push(sortMenuItem());
 
-        colorByMenuItems.push({key: 'strand', label: 'read strand'});
+        const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
 
         if (self.alignmentTrack.hasPairs) {
             colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
@@ -198,15 +195,15 @@ var igv = (function (igv) {
             colorByMenuItems.push({key: 'fragmentLength', label: 'fragment length'});
         }
 
-        tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
+        const tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
         colorByMenuItems.push({key: 'tag', label: tagLabel});
 
-        $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
         $e.text('Color by');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
 
         colorByMenuItems.forEach(function (item) {
-            selected = (self.alignmentTrack.colorBy === item.key);
+            const selected = (self.alignmentTrack.colorBy === item.key);
             menuItems.push(colorByCB(item, selected));
         });
 
@@ -217,7 +214,8 @@ var igv = (function (igv) {
             menuItems.push({
                 object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                 click: function () {
-                    var $fa = $(this).find('i');
+
+                    const $fa = $(this).find('i');
 
                     self.viewAsPairs = !self.viewAsPairs;
 
@@ -238,12 +236,11 @@ var igv = (function (igv) {
 
         function colorByCB(menuItem, showCheck) {
 
-            var $e,
-                clickHandler;
 
-            $e = igv.createCheckbox(menuItem.label, showCheck);
+            const $e = igv.createCheckbox(menuItem.label, showCheck);
 
-            clickHandler = function () {
+            const clickHandler = function () {
+
                 var config,
                     clickFunction;
 
@@ -254,13 +251,12 @@ var igv = (function (igv) {
 
                 } else if ('tag' === menuItem.key) {
 
-                    clickFunction = function () {
-                        var tag;
+                    const clickFunction = function () {
 
                         self.alignmentTrack.colorBy = 'tag';
                         self.config.colorBy = 'tag';
 
-                        tag = self.trackView.browser.inputDialog.$input.val().trim();
+                        const tag = self.trackView.browser.inputDialog.$input.val().trim();
                         if (tag !== self.alignmentTrack.colorByTag) {
                             self.alignmentTrack.colorByTag = tag;
                             self.config.colorByTag = tag;
@@ -272,17 +268,18 @@ var igv = (function (igv) {
                         self.trackView.repaintViews();
                     };
 
-                    config =
-                    {
-                        label: 'Tag Name',
-                        input: self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
-                        click: clickFunction
-                    };
+                    const config =
+                        {
+                            label: 'Tag Name',
+                            input: self.alignmentTrack.colorByTag ? self.alignmentTrack.colorByTag : '',
+                            click: clickFunction
+                        };
 
                     self.trackView.browser.inputDialog.configure(config);
                     self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
 
                 } else {
+
                     self.alignmentTrack.colorBy = menuItem.key;
                     self.config.colorBy = menuItem.key;
 
@@ -294,26 +291,15 @@ var igv = (function (igv) {
             return {name: undefined, object: $e, click: clickHandler, init: undefined}
 
         }
-        
+
     };
 
-    function shadedBaseColor(qual, nucleotide, genomicLocation) {
+    function shadedBaseColor(qual, nucleotide) {
 
-        var baseColor,
-            alpha,
-            minQ = 5,   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
-            maxQ = 20,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
-            foregroundColor = igv.nucleotideColorComponents[nucleotide],
-            backgroundColor = [255, 255, 255];   // White
+        const minQ = 5;   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
+        const maxQ = 20;  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
 
-
-        //if (171167156 === genomicLocation) {
-        //    // NOTE: Add 1 when presenting genomic location
-        //    console.log("shadedBaseColor - locus " + igv.numberFormatter(1 + genomicLocation) + " qual " + qual);
-        //}
-
-        if (!foregroundColor) return;
-
+        let alpha;
         if (qual < minQ) {
             alpha = 0.1;
         } else {
@@ -322,11 +308,18 @@ var igv = (function (igv) {
         // Round alpha to nearest 0.1
         alpha = Math.round(alpha * 10) / 10.0;
 
+        let baseColor;
         if (alpha >= 1) {
             baseColor = igv.nucleotideColors[nucleotide];
         }
         else {
-            baseColor = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";    //igv.getCompositeColor(backgroundColor, foregroundColor, alpha);
+            const foregroundColor = igv.nucleotideColorComponents[nucleotide];
+            if(!foregroundColor) {
+                return undefined;
+            }
+
+            const backgroundColor = [255, 255, 255];   // White
+            baseColor = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";
         }
         return baseColor;
     }
@@ -456,9 +449,9 @@ var igv = (function (igv) {
     CoverageTrack.prototype.popupData = function (config) {
 
         let features = config.viewport.getCachedFeatures();
-        if(!features || features.length === 0) return;
+        if (!features || features.length === 0) return;
 
-        let genomicLocation = config.genomicLocation,
+        let genomicLocation = Math.floor(config.genomicLocation),
             referenceFrame = config.viewport.genomicState.referenceFrame,
             coverageMap = features.coverageMap,
             nameValues = [],
@@ -474,28 +467,28 @@ var igv = (function (igv) {
 
             // A
             let tmp = coverage.posA + coverage.negA;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
+            if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
             nameValues.push({name: 'A', value: tmp});
 
 
             // C
             tmp = coverage.posC + coverage.negC;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
+            if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
             nameValues.push({name: 'C', value: tmp});
 
             // G
             tmp = coverage.posG + coverage.negG;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
+            if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
             nameValues.push({name: 'G', value: tmp});
 
             // T
             tmp = coverage.posT + coverage.negT;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
+            if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
             nameValues.push({name: 'T', value: tmp});
 
             // N
             tmp = coverage.posN + coverage.negN;
-            if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
+            if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
             nameValues.push({name: 'N', value: tmp});
 
         }
@@ -869,9 +862,10 @@ var igv = (function (igv) {
 
     };
 
+
     AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption, alignmentContainer) {
 
-        var self = this;
+        const self = this;
 
         if (alignmentContainer === null) {
             alignmentContainer = this.featureSource.alignmentContainer;
@@ -892,23 +886,24 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.popupData = function (config) {
 
-        var clickedObject;
-
-        clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
+        const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
 
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
     AlignmentTrack.prototype.contextMenuItemList = function (config) {
 
-        var self = this,
-            clickHandler,
-            list = [];
+        const self = this;
+        const list = [];
 
         list.push({label: 'Sort by base', click: sortRows});
 
-        var alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-        if (alignment && !alignment.paired && alignment.isPaired() && alignment.isMateMapped()) {
+        const alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
+
+        // Object might be a DownsampledInterval,  or a PairedAlignment
+        const isSingeAlignment = alignment && !alignment.paired && (typeof alignment.isPaired === 'function');
+
+        if (isSingeAlignment && alignment.isMateMapped()) {
             list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
         }
 
@@ -917,7 +912,7 @@ var igv = (function (igv) {
         function sortRows() {
             if (!config.viewport.tile) return;
             self.sortOption = {sort: "NUCLEOTIDE"};
-            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.getCachedFeatures());
+            self.sortAlignmentRows(Math.floor(config.genomicLocation), self.sortOption, config.viewport.getCachedFeatures());
         }
 
         function viewMateInSplitScreen() {
@@ -938,7 +933,7 @@ var igv = (function (igv) {
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
         let features = viewport.getCachedFeatures();
-        if(!features || features.length === 0) return;
+        if (!features || features.length === 0) return;
 
         let packedAlignmentRows = features.packedAlignmentRows;
         let downsampledIntervals = features.downsampledIntervals;
@@ -966,13 +961,12 @@ var igv = (function (igv) {
 
     function getAlignmentColor(alignment) {
 
-        var self = this,
-            option = self.colorBy,
-            tagValue, color,
-            strand;
+        const self = this;
 
-        color = self.parent.color;
 
+        let color = self.parent.color;
+
+        const option = self.colorBy;
         switch (option) {
 
             case "strand":
@@ -1021,7 +1015,7 @@ var igv = (function (igv) {
                 break;
 
             case "tag":
-                tagValue = alignment.tags()[self.colorByTag];
+                const tagValue = alignment.tags()[self.colorByTag];
                 if (tagValue !== undefined) {
 
                     if (self.bamColorTag === self.colorByTag) {
