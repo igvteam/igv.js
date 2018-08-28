@@ -262,9 +262,8 @@ var igv = (function (igv) {
 
     igv.BamAlignment.prototype.readBaseAt = function (genomicLocation) {
 
-        var block;
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
 
-        block = blockAtGenomicLocation(this.blocks, genomicLocation);
         if (block) {
             return block.baseAt(genomicLocation);
         }
@@ -274,9 +273,8 @@ var igv = (function (igv) {
 
         function blockAtGenomicLocation(blocks, genomicLocation) {
 
-            var i, block;
-            for (i = 0; i < blocks.length; i++) {
-                block = blocks[i];
+            for (let i = 0; i < blocks.length; i++) {
+                const block = blocks[i];
                 if (genomicLocation >= block.start && genomicLocation <= block.start + block.len) {
                     return block;
                 }

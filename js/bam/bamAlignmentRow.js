@@ -65,7 +65,7 @@ var igv = (function (igv) {
 
     igv.BamAlignmentRow.prototype.updateScore = function (genomicLocation, genomicInterval, sortOption, sortDirection) {
 
-        this.score = this.calculateScore(genomicLocation, genomicInterval, sortOption, sortDirection);
+        this.score = this.calculateScore(Math.floor(genomicLocation), genomicInterval, sortOption, sortDirection);
 
     };
 
@@ -74,6 +74,7 @@ var igv = (function (igv) {
         var readBase,
             alignment,
             block;
+
 
         alignment = this.findCenterAlignment(genomicLocation);
         if (undefined === alignment) {
@@ -107,7 +108,7 @@ var igv = (function (igv) {
 
 
 
-            idx = genomicLocation - interval.start;
+            idx = Math.floor(genomicLocation) - interval.start;
             if(idx < interval.sequence.length) {
                 reference = interval.sequence.charAt(idx);
             }
@@ -119,7 +120,7 @@ var igv = (function (igv) {
                 return 3;
             } else if ("X" === base || reference !== base) {
 
-                idx = genomicLocation - interval.coverageMap.bpStart;
+                idx = Math.floor(genomicLocation) - interval.coverageMap.bpStart;
                 if(idx > 0 && idx < interval.coverageMap.coverage.length) {
                     coverage = interval.coverageMap.coverage[idx];
                     count = coverage["pos" + base] + coverage["neg" + base];
