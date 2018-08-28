@@ -42,13 +42,11 @@ var igv = (function (igv) {
 
     igv.AlignmentBlock.prototype.baseAt = function (genomicLocation) {
 
-        var idx;
-
         if ("*" === this.seq) {
             return "*";
         } else {
 
-            idx = genomicLocation - this.start;
+            const idx = Math.floor(genomicLocation) - this.start;
             if (idx > 0 && idx < this.seq.length) {
                 return this.seq[idx];
             }
@@ -67,7 +65,7 @@ var igv = (function (igv) {
             return 30;
         } else {
 
-            idx = genomicLocation - this.start;
+            const idx = Math.floor(genomicLocation) - this.start;
             if (idx > 0 && idx < this.qual.length) {
                 return this.qual[idx];
             }

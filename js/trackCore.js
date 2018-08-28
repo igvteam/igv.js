@@ -805,8 +805,8 @@ var igv = (function (igv) {
 
             // We need some tolerance around genomicLocation
             const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
-            const ss = genomicLocation - tolerance;
-            const ee = genomicLocation + tolerance;
+            const ss = Math.floor(genomicLocation) - tolerance;
+            const ee = Math.ceil(genomicLocation) + tolerance;
 
             return (igv.FeatureUtils.findOverlapping(features, ss, ee));
         },
