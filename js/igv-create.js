@@ -284,7 +284,10 @@ var igv = (function (igv) {
 
         // chromosome select widget
         browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
-        if (undefined === config.showChromosomeWidget || true === config.showChromosomeWidget) {
+        if(undefined === config.showChromosomeWidget) {
+            config.showChromosomeWidget = true;   // Default to true
+        }
+        if (true === config.showChromosomeWidget) {
             browser.chromosomeSelectWidget.$container.show();
         } else {
             browser.chromosomeSelectWidget.$container.hide();
