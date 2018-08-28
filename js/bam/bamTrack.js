@@ -245,7 +245,7 @@ var igv = (function (igv) {
 
                     self.alignmentTrack.colorBy = 'none';
                     self.config.colorBy = 'none';
-                    self.trackView.repaint(true);
+                    self.trackView.repaintViews();
 
                 } else if ('tag' === menuItem.key) {
 
