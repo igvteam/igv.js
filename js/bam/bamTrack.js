@@ -241,10 +241,8 @@ var igv = (function (igv) {
 
             const clickHandler = function () {
 
-                var config,
-                    clickFunction;
-
                 if (menuItem.key === self.alignmentTrack.colorBy) {
+
                     self.alignmentTrack.colorBy = 'none';
                     self.config.colorBy = 'none';
                     self.trackView.repaint(true);
@@ -329,6 +327,20 @@ var igv = (function (igv) {
      */
     igv.BAMTrack.prototype.dispose = function () {
         this.trackView = undefined;
+    }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    igv.BAMTrack.prototype.getState = function () {
+
+        var config = this.config || {};
+
+
+        return config;
+
     }
 
     var CoverageTrack = function (config, parent) {
@@ -1023,6 +1035,10 @@ var igv = (function (igv) {
                         color = "rgb(" + tagValue + ")";
                     }
                     else {
+
+                        if(!self.tagColors) {
+                            self.tagColors = new igv.PaletteColorTable("Set1");
+                        }
                         color = self.tagColors.getColor(tagValue);
                     }
                 }
