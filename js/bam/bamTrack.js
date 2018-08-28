@@ -918,7 +918,7 @@ var igv = (function (igv) {
         function viewMateInSplitScreen() {
             if (alignment.mate) {
                 self.highlightedAlignmentReadNamed = alignment.readName;
-                self.trackView.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
+                self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
             }
         }
     };
