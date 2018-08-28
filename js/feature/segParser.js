@@ -36,6 +36,7 @@
 var igv = (function (igv) {
 
     var maxFeatureCount = Number.MAX_VALUE,    // For future use,  controls downsampling
+        sampleKeyColumn = 0,
         sampleColumn = 0,
         chrColumn = 1,
         startColumn = 2,
@@ -47,7 +48,7 @@ var igv = (function (igv) {
 
     igv.SegParser.prototype.parseHeader = function (data) {
 
-        var lines = data.splitLines(),
+        var lines = igv.splitLines(data),
             len = lines.length,
             line,
             i,
@@ -72,7 +73,7 @@ var igv = (function (igv) {
 
     igv.SegParser.prototype.parseFeatures = function (data) {
 
-        var lines = data ? data.splitLines() : [] ,
+        var lines = data ? igv.splitLines(data) : [] ,
             len = lines.length,
             tokens, allFeatures = [], line, i, dataColumn;
 
@@ -91,6 +92,7 @@ var igv = (function (igv) {
             if (tokens.length > dataColumn) {
 
                 allFeatures.push({
+                    sampleKey: tokens[sampleKeyColumn],
                     sample: tokens[sampleColumn],
                     chr: tokens[chrColumn],
                     start: parseInt(tokens[startColumn]),

@@ -27,11 +27,9 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_example_1000_genomes_1kgvcf,
-            options;
-
-        options =
+        const options =
             {
+                // Example of fully specifying a reference genome.  We could alternatively use  genome: "hg19"
                 reference:
                     {
                         id: "hg19",
@@ -45,7 +43,6 @@
                             name: "Genes",
                             type: "annotation",
                             format: "bed",
-                            sourceType: "file",
                             url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
                             indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
                             order: Number.MAX_VALUE,
@@ -54,17 +51,21 @@
                         },
                         {
                             name: "Phase 3 WGS variants",
+                            type: "variant",
                             format: "vcf",
                             url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-                            indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
-                            type: "variant"
+                            indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi"
                         }
                     ]
 
             };
 
-        igv_example_1000_genomes_1kgvcf = document.getElementById("igvDiv");
-        var browser = igv.createBrowser(igv_example_1000_genomes_1kgvcf, options);
+        const igvDiv = document.getElementById("igvDiv");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
 
     })
 

@@ -20,11 +20,8 @@
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <!-- Vendor JS -->
-    <script src="../vendor/jquery-1.12.4.js"></script>
-    <script src="../vendor/jquery-ui.js"></script>
-    <script src="../vendor/jquery.mousewheel.js"></script>
+    <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
-    <script src="../vendor/promise.js"></script>
 
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
@@ -57,8 +54,6 @@
     <script src="../js/bigwig/bwReader.js"></script>
     <script src="../js/bigwig/bwSource.js"></script>
 
-    <script src="../js/encode/encodeDataSource.js"></script>
-
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
     <script src="../js/feature/featureSource.js"></script>
@@ -66,8 +61,8 @@
     <script src="../js/feature/tribble.js"></script>
     <script src="../js/feature/featureFileReader.js"></script>
     <script src="../js/feature/customServiceReader.js"></script>
-    <script src="../js/feature/aneuSource.js"></script>
-    <script src="../js/feature/aneuTrack.js"></script>
+
+
     <script src="../js/feature/featureTrack.js"></script>
     <script src="../js/feature/wigTrack.js"></script>
     <script src="../js/feature/featureUtils.js"></script>
@@ -81,17 +76,12 @@
     <script src="../js/ga4gh/googleUtils.js"></script>
 
     <script src="../js/gtex/eqtlTrack.js"></script>
-    <script src="../js/gtex/gtexFileReader.js"></script>
     <script src="../js/gtex/gtexReader.js"></script>
     <script src="../js/gtex/gtex.js"></script>
     <script src="../js/gtex/immvarReader.js"></script>
 
     <script src="../js/gwas/t2dVariantSource.js"></script>
     <script src="../js/gwas/gwasTrack.js"></script>
-
-    <script src="../js/karyo/karyo.js"></script>
-
-    <script src="../js/oauth/google.js"></script>
 
     <script src="../js/tdf/tdfReader.js"></script>
     <script src="../js/tdf/tdfSource.js"></script>
@@ -134,16 +124,15 @@
     <script src="../js/fasta.js"></script>
     <script src="../js/sequenceTrack.js"></script>
 
-    <script src="../js/igv-exts.js"></script>
+
     <script src="../js/igvxhr.js"></script>
     <script src="../js/binary.js"></script>
 
     <script src="../js/intervalTree.js"></script>
 
     <script src="../js/trackCore.js"></script>
-    <script src="../js/ui/fileLoadWidget.js"></script>
 
-    <script src="../js/set.js"></script>
+
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
@@ -160,11 +149,9 @@
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igvDiv,
-                options;
 
-        igvDiv = document.getElementById("igvDiv");
-        options =
+        const igvDiv = document.getElementById("igvDiv");
+        const options =
         {
             locus: 'CIC--DUX4',
             reference:

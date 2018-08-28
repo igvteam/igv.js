@@ -25,15 +25,17 @@
 
 var igv = (function (igv) {
 
-    igv.RulerTrack = function () {
+    "use strict";
 
+    igv.RulerTrack = function (browser) {
+
+        this.browser = browser;
         this.height = 40;
         this.name = "";
         this.id = "ruler";
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-        this.supportsWholeGenome = true;
         this.rulerSweepers = [];
         this.removable = false;
 
@@ -47,12 +49,14 @@ var igv = (function (igv) {
             str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
 
             // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
-            viewport.$rulerLabel.text( str );
+            viewport.$rulerLabel.text(str);
         });
 
     };
 
     igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+
+        const browser = this.browser;
 
         var $close,
             $closeButton;
@@ -67,7 +71,7 @@ var igv = (function (igv) {
         $close.append($closeButton);
 
         $close.click(function (e) {
-            igv.browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+            browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
         });
 
     };
@@ -83,21 +87,21 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.draw = function (options) {
-        var self = this,
-            key,
+        var key,
             rulerSweeper,
             $viewportContent,
             pixelWidthBP,
             tick,
-            label,
             shim,
-            center,
-            size,
-            rect,
             tickHeight;
 
-        key = igv.browser.genomicStateList.indexOf(options.genomicState).toString();
-        rulerSweeper = this.rulerSweepers[ key ];
+        key = this.browser.genomicStateList.indexOf(options.genomicState).toString();
+        rulerSweeper = this.rulerSweepers[key];
+        if (!rulerSweeper) {
+            //console.log("No rulerSweeper for key: " + key);
+            return;
+        }
+
 
         $viewportContent = $(rulerSweeper.viewport.contentDiv);
 
@@ -116,7 +120,7 @@ var igv = (function (igv) {
             shim = 2;
 
             pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tick = new igv.Tick(pixelWidthBP, options);
+            tick = new Tick(pixelWidthBP, options);
 
             tick.drawTicks(options, tickHeight, shim, this.height);
 
@@ -126,7 +130,19 @@ var igv = (function (igv) {
 
     };
 
-    igv.Tick = function (pixelWidthBP, options) {
+    igv.RulerTrack.prototype.supportsWholeGenome = function () {
+        return true;
+    }
+
+    igv.RulerTrack.prototype.dispose = function () {
+
+        this.rulerSweepers.forEach(function (sweeper) {
+            sweeper.dispose();
+        })
+
+    }
+
+    const Tick = function (pixelWidthBP, options) {
 
         initialize.call(this, pixelWidthBP, options);
 
@@ -136,8 +152,7 @@ var igv = (function (igv) {
                 majorUnit,
                 unitMultiplier,
                 numberOfMajorTicks,
-                str,
-                labelWidthBP;
+                str;
 
             if (pixelWidthBP < 10) {
                 set.call(this, 1, "bp", 1);
@@ -160,7 +175,7 @@ var igv = (function (igv) {
             }
 
             str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
-            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText( str ).width));
+            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
 
             numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
 
@@ -179,16 +194,13 @@ var igv = (function (igv) {
             this.majorUnit = majorUnit;
 
             this.halfTick = majorTick / 2;
-            this.quarterTick = majorTick / 4;
-
-            this.minorTick = majorTick / 10.0;
 
             this.unitMultiplier = unitMultiplier;
         }
 
     };
 
-    igv.Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
+    Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
 
         var numberOfTicks,
             bp,
@@ -200,7 +212,7 @@ var igv = (function (igv) {
             floored;
 
         // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.majorTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
@@ -218,7 +230,7 @@ var igv = (function (igv) {
         }
 
         // major ticks
-        numberOfTicks = Math.floor(options.bpStart/this.halfTick) - 1;
+        numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
 
@@ -242,7 +254,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Tick.prototype.description = function (blurb) {
+    Tick.prototype.description = function (blurb) {
         console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
     };
 

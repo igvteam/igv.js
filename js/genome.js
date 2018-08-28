@@ -94,7 +94,7 @@ var igv = (function (igv) {
     };
 
 
-    Genome = function (config, sequence, ideograms, aliases) {
+    var Genome = function (config, sequence, ideograms, aliases) {
 
         this.config = config;
         this.id = config.id;
@@ -103,7 +103,11 @@ var igv = (function (igv) {
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
 
-        constructWG(this);
+        if (Object.keys(sequence.chromosomes).length > 1) {
+            constructWG(this);
+        } else {
+            this.wgChromosomeNames = [sequence.chromosomeNames[0]];
+        }
 
         /**
          * Return the official chromosome name for the (possibly) alias.  Deals with
@@ -152,10 +156,19 @@ var igv = (function (igv) {
         this.chrAliasTable = chrAliasTable;
 
     }
-    
+
     Genome.prototype.toJSON = function () {
 
         return Object.assign({}, this.config, {tracks: undefined});
+    }
+
+    Genome.prototype.getHomeChromosomeName = function () {
+        if (this.chromosomes.hasOwnProperty("all")) {
+            return "all";
+        }
+        else {
+            return this.chromosomeNames[0];
+        }
     }
 
     Genome.prototype.getChromosomeName = function (str) {
@@ -265,12 +278,21 @@ var igv = (function (igv) {
     }
 
     /**
-     * Return the genome length in kb
+     * Return the nominal genome length, this is the length of the main chromosomes (no scaffolds, etc).
      */
     Genome.prototype.getGenomeLength = function () {
-        var lastChr, offset;
-        lastChr = _.last(this.wgChromosomeNames);
-        return this.getCumulativeOffset(lastChr) + this.getChromosome(lastChr).bpLength;
+
+        let self = this;
+
+        if (!this.bpLength) {
+            let bpLength = 0;
+            self.wgChromosomeNames.forEach(function (cname) {
+                let c = self.chromosomes[cname];
+                bpLength += c.bpLength;
+            });
+            this.bpLength = bpLength;
+        }
+        return this.bpLength;
     }
 
     igv.Chromosome = function (name, order, bpLength) {
@@ -331,7 +353,7 @@ var igv = (function (igv) {
                 lastChr,
                 n = 0,
                 c = 1,
-                lines = data.splitLines(),
+                lines = igv.splitLines(data),
                 len = lines.length,
                 cytobands = {};
 
@@ -383,7 +405,12 @@ var igv = (function (igv) {
             var inflate = new Zlib.Gunzip(bytes);
             var plain = inflate.decompress();
 
-            return String.fromCharCode.apply(null, plain);
+            let s = "";
+            const len = plain.length;
+            for (let i = 0; i < len; i++) {
+                s += String.fromCharCode(plain[i]);
+            }
+            return s;
         }
     }
 
@@ -393,7 +420,7 @@ var igv = (function (igv) {
 
             .then(function (data) {
 
-                var lines = data.splitLines(),
+                var lines = igv.splitLines(data),
                     aliases = [];
 
                 lines.forEach(function (line) {

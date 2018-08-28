@@ -25,9 +25,9 @@
 
 var igv = (function (igv) {
 
+    "use strict";
 
-    igv.EqtlTrack = function (config) {
-
+    igv.EqtlTrack = function (config, browser) {
 
         var url = config.url,
             label = config.name;
@@ -39,27 +39,42 @@ var igv = (function (igv) {
         this.geneField = config.geneField || "geneSymbol";
         this.snpField = config.snpField || "snp";
 
-        this.autoscale = (config.autoScale === undefined ? true : config.autoScale);
-        this.percentile = (config.percentile === undefined ? 98 : config.percentile);
+        const min = config.minLogP || config.min;
+        const max = config.maxLogP || config.max;
+        this.dataRange = {
+            min: min || 3.5,
+            max: max || 25
+        }
+        if (!max) {
+            this.autoscale = true;
+        }
+        else {
+            this.autoscale = config.autoscale;
+        }
+        this.autoscalePercentile = (config.autoscalePercentile === undefined ? 98 : config.autoscalePercentile);
 
-        this.minLogP = config.minLogP || 3.5;
-        this.maxLogP = config.maxLogP || 25;
+
         this.background = config.background;    // No default
         this.divider = config.divider || "rgb(225,225,225)";
         this.dotSize = config.dotSize || 2;
         this.height = config.height || 100;
         this.autoHeight = false;
         this.disableButtons = config.disableButtons;
-        this.visibilityWindow = config.visibilityWindow;
 
-        this.featureSource = new igv.FeatureSource(config);
+        // Limit visibility window to 2 mb,  gtex server gets flaky beyond that
+        this.visibilityWindow = config.visibilityWindow === undefined ?
+            2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000;
+
+        this.featureSource = new igv.FeatureSource(config, browser.genome);
+
+        igv.GtexUtils.gtexLoaded = true;
 
     };
 
     igv.EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         var track = this,
-            yScale = (track.maxLogP - track.minLogP) / pixelHeight;
+            yScale = (track.dataRange.max - track.dataRange.min) / pixelHeight;
 
         var font = {
             'font': 'normal 10px Arial',
@@ -68,13 +83,13 @@ var igv = (function (igv) {
         };
 
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-        
-        // Determine a tick spacing such that there is at least 10 pixels between ticks
-        
-        var n = Math.ceil((this.maxLogP - this.minLogP) * 10 / pixelHeight);
-        
 
-        for (var p = 4; p <= track.maxLogP; p += n) {
+        // Determine a tick spacing such that there is at least 10 pixels between ticks
+
+        var n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight);
+
+
+        for (var p = 4; p <= track.dataRange.max; p += n) {
 
             var x1,
                 x2,
@@ -88,11 +103,11 @@ var igv = (function (igv) {
             x1 = ref - 5;
             x2 = ref;
 
-            y1 = y2 = pixelHeight - Math.round((p - track.minLogP) / yScale);
+            y1 = y2 = pixelHeight - Math.round((p - track.dataRange.min) / yScale);
 
             igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
 
-            if(y1 > 8) {
+            if (y1 > 8) {
                 igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
             } // Offset numbers down by 2 pixels;
         }
@@ -104,7 +119,16 @@ var igv = (function (igv) {
     };
 
     igv.EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-        return this.featureSource.getFeatures(chr, bpStart, bpEnd);
+
+        const pValueField = this.pValueField;
+
+        return this.featureSource.getFeatures(chr, bpStart, bpEnd)
+            .then(function (features) {
+                features.forEach(function (f) {
+                    f.value = f[pValueField];
+                })
+                return features;
+            })
     };
 
     igv.EqtlTrack.prototype.draw = function (options) {
@@ -117,7 +141,7 @@ var igv = (function (igv) {
             pixelWidth = options.pixelWidth,
             pixelHeight = options.pixelHeight,
             bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            yScale = (self.maxLogP - self.minLogP) / pixelHeight,
+            yScale = (self.dataRange.max - self.dataRange.min) / pixelHeight,
             selection = options.genomicState.selection;
 
         // Background
@@ -127,32 +151,17 @@ var igv = (function (igv) {
         if (ctx) {
 
             var len = featureList.length;
-            
+
             ctx.save();
-            
-            self.maxLogP = autoscale(featureList, bpStart, bpEnd);
-            
-            // Draw in two passes, with "selected" eqtls drawn last
+
+             // Draw in two passes, with "selected" eqtls drawn last
             drawEqtls(false);
             drawEqtls(true);
-            
+
             ctx.restore();
 
         }
 
-        function autoscale(featureList, start, end) {
-
-            var values = featureList
-                .filter(function (eqtl) {
-                    return eqtl.position >= start && eqtl.position <= end
-                })
-                .map(function (eqtl) {
-                    return -Math.log(eqtl[self.pValueField]) / Math.LN10
-                })
-
-            return igv.Math.percentile(values, self.percentile);
-            
-        }
 
         function drawEqtls(drawSelected) {
 
@@ -190,17 +199,17 @@ var igv = (function (igv) {
                     }
 
                     var mLogP = -Math.log(eqtl[self.pValueField]) / Math.LN10;
-                    if (mLogP >= self.minLogP) {
+                    if (mLogP >= self.dataRange.min) {
 
-                        if(mLogP > self.maxLogP) {
-                            mLogP = self.maxLogP;
+                        if (mLogP > self.dataRange.max) {
+                            mLogP = self.dataRange.max;
                             capped = true;
                         } else {
                             capped = false;
 
                         }
 
-                        py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - self.minLogP) / yScale));
+                        py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - self.dataRange.min) / yScale));
                         eqtl.px = px;
                         eqtl.py = py;
 
@@ -225,49 +234,94 @@ var igv = (function (igv) {
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
     igv.EqtlTrack.prototype.popupData = function (config) {
-    
-        var genomicLocation = config.genomicLocation,
+
+        let features = config.viewport.getCachedFeatures();
+        if (!features || features.length === 0) return [];
+
+        let genomicLocation = config.genomicLocation,
             xOffset = config.x,
             yOffset = config.y,
-            referenceFrame = config.viewport.genomicState.referenceFrame;
+            referenceFrame = config.viewport.genomicState.referenceFrame,
+            tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
+            dotSize = this.dotSize,
+            tissue = this.name,
+            popupData = [];
 
-        // We use the featureCache property rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.tile.features) {
+        features.forEach(function (feature) {
+            if (feature.end >= genomicLocation - tolerance &&
+                feature.start <= genomicLocation + tolerance &&
+                feature.py - yOffset < 2 * dotSize) {
 
-            var chr = referenceFrame.chrName,
-                tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
-                featureList = config.viewport.tile.features,
-                dotSize = this.dotSize,
-                tissue = this.name;
+                if (popupData.length > 0) {
+                    popupData.push("<hr>");
+                }
 
-            if (featureList && featureList.length > 0) {
+                popupData.push(
+                    {name: "snp id", value: feature.snp},
+                    {name: "gene id", value: feature.geneId},
+                    {name: "gene name", value: feature.geneName},
+                    {name: "p value", value: feature.pValue},
+                    {name: "tissue", value: tissue});
 
-
-                var popupData = [];
-                featureList.forEach(function (feature) {
-                    if (feature.end >= genomicLocation - tolerance &&
-                        feature.start <= genomicLocation + tolerance &&
-                        feature.py - yOffset < 2 * dotSize) {
-
-                        if (popupData.length > 0) {
-                            popupData.push("<hr>");
-                        }
-
-                        popupData.push(
-                            {name: "snp id", value: feature.snp},
-                            {name: "gene id", value: feature.geneId},
-                            {name: "gene name", value: feature.geneName},
-                            {name: "p value", value: feature.pValue},
-                            {name: "tissue", value: tissue});
-
-                    }
-                });
-                return popupData;
             }
-        }
+        });
+        return popupData;
+
+
     }
-    
+
+
+    igv.EqtlTrack.prototype.menuItemList = function () {
+
+        var self = this,
+            menuItems = [];
+
+        menuItems.push(igv.dataRangeMenuItem(this.trackView));
+
+        menuItems.push({
+            object: igv.createCheckbox("Autoscale", self.autoscale),
+            click: function () {
+                var $fa = $(this).find('i');
+
+                self.autoscale = !self.autoscale;
+
+                if (true === self.autoscale) {
+                    $fa.removeClass('igv-fa-check-hidden');
+                } else {
+                    $fa.addClass('igv-fa-check-hidden');
+                }
+
+                self.config.autoscale = self.autoscale;
+                self.trackView.setDataRange(undefined, undefined, self.autoscale);
+            }
+        });
+
+        return menuItems;
+
+    };
+
+
+    // Static function
+    igv.EqtlTrack.prototype.doAutoscale = function (featureList) {
+
+        if (featureList.length > 0) {
+
+            var values = featureList
+                .map(function (eqtl) {
+                    return -Math.log(eqtl.value) / Math.LN10
+                })
+
+            this.dataRange.max = igv.Math.percentile(values, this.autoscalePercentile);
+        }
+        else {
+            // No features -- default
+            const max = config.maxLogP || config.max;
+            this.dataRange.max = max || 25
+        }
+
+        return this.dataRange;
+    }
+
 
     return igv;
 

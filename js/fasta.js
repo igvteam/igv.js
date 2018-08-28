@@ -87,13 +87,7 @@ var igv = (function (igv) {
     }
 
     igv.FastaSequence.prototype.getSequence = function (chr, start, end) {
-
-        var genome;
-        genome = igv.browser ? igv.browser.genome : undefined;
-        if(genome) {
-            chr = genome.getChromosomeName(chr);  // Translates from alias if required
-        }
-
+        
         if (this.indexed) {
             return getSequenceIndexed.call(this, chr, start, end);
         }
@@ -171,7 +165,7 @@ var igv = (function (igv) {
             } else {
                 igv.xhr.load(self.indexFile, igv.buildOptions(self.config))
                     .then(function (data) {
-                        var lines = data.splitLines();
+                        var lines = igv.splitLines(data);
                         var len = lines.length;
                         var lineNo = 0;
 
@@ -226,7 +220,7 @@ var igv = (function (igv) {
             self.chromosomes = {};
             self.sequences = {};
 
-            var lines = data.splitLines(),
+            var lines = igv.splitLines(data),
                 len = lines.length,
                 lineNo = 0,
                 nextLine,
@@ -246,7 +240,7 @@ var igv = (function (igv) {
                         self.sequences[currentChr] = currentSeq;
                         self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
                     }
-                    currentChr = nextLine.substr(1).split("\\s+")[0];
+                    currentChr = nextLine.substr(1).split(/(\s+)/)[0];
                     currentSeq = "";
                 }
                 else {
@@ -355,7 +349,12 @@ var igv = (function (igv) {
         var inflate = new Zlib.Gunzip(bytes);
         var plain = inflate.decompress();
 
-        return String.fromCharCode.apply(null, plain);
+        let s = "";
+        const len = plain.length;
+        for (let i = 0; i < len; i++)
+            s += String.fromCharCode(plain[i]);
+
+        return s;
     }
 
 

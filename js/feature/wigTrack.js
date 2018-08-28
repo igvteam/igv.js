@@ -28,7 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.WIGTrack = function (config) {
+    igv.WIGTrack = function (config, browser) {
 
         this.featureType = 'numeric';
         this.config = config;
@@ -43,24 +43,23 @@ var igv = (function (igv) {
 
         igv.configTrack(this, config);
 
-        if ("bigwig" === config.format) {
-            this.featureSource = new igv.BWSource(config);
-        } else if ("tdf" === config.format) {
-            this.featureSource = new igv.TDFSource(config);
+        const format = config.format ? config.format.toLowerCase() : config.format;
+        if ("bigwig" === format) {
+            this.featureSource = new igv.BWSource(config, browser.genome);
+        } else if ("tdf" === format) {
+            this.featureSource = new igv.TDFSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.FeatureSource(config);
+            this.featureSource = new igv.FeatureSource(config, browser.genome);
         }
 
-        //this.autoscale = config.autoscale;
-        // Min and max values.  No defaults for these, if they aren't set track will autoscale.
-        if (config.max !== undefined) {
+        this.autoscale = config.autoscale || config.max === undefined;
+        if (!this.autoscale) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
-        } else {
-            this.autoscale = true;
         }
+
         this.windowFunction = config.windowFunction || "mean";
 
         this.paintAxis = igv.paintAxis;
@@ -100,6 +99,7 @@ var igv = (function (igv) {
                     $fa.addClass('igv-fa-check-hidden');
                 }
 
+                self.config.autoscale = self.autoscale;
                 self.trackView.setDataRange(undefined, undefined, self.autoscale);
             }
         });
@@ -131,9 +131,9 @@ var igv = (function (igv) {
                             }
                         }
                         self.header = header;
-                        
+
                         return header;
-                        
+
                     })
             }
         }
@@ -145,48 +145,38 @@ var igv = (function (igv) {
 
     igv.WIGTrack.prototype.draw = function (options) {
 
-        var self = this,
-            features = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            featureValueMinimum,
-            featureValueMaximum,
-            featureValueRange,
-            baselineColor;
+        var self = this, features, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd,
+            featureValueMinimum, featureValueMaximum, featureValueRange, baselineColor;
 
+        features = options.features;
+        ctx = options.context;
+        bpPerPixel = options.bpPerPixel;
+        bpStart = options.bpStart;
+        pixelWidth = options.pixelWidth;
+        pixelHeight = options.pixelHeight;
+        bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-        // Temp hack
         if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
             baselineColor = igv.Color.addAlpha(self.color, 0.1);
         }
 
-
         if (features && features.length > 0) {
 
+            if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
-            featureValueMinimum = self.dataRange.min === undefined ? 0 : self.dataRange.min;
+            featureValueMinimum = self.dataRange.min;
             featureValueMaximum = self.dataRange.max;
-
-
-            if (undefined === self.dataRange) {
-                self.dataRange = {};
-            }
-
-            self.dataRange.min = featureValueMinimum;  // Record for disply, menu, etc
-            self.dataRange.max = featureValueMaximum;
 
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
             if (featureValueMaximum > featureValueMinimum) {
+
                 featureValueRange = featureValueMaximum - featureValueMinimum;
+
                 features.forEach(renderFeature);
 
                 // If the track includes negative values draw a baseline
-                if (featureValueMinimum < 0) {
+                if (featureValueMaximum > 0 && featureValueMinimum < 0) {
                     var alpha = ctx.lineWidth;
                     ctx.lineWidth = 5;
                     var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
@@ -198,15 +188,9 @@ var igv = (function (igv) {
         }
 
 
-        function renderFeature(feature, index, featureList) {
+        function renderFeature(feature) {
 
-            var yUnitless,
-                heightUnitLess,
-                x,
-                y,
-                width,
-                color,
-                rectEnd;
+            var yUnitless, y, yb, y2, heightUnitLess, x, width, color, rectEnd;
 
             if (feature.end < bpStart) return;
             if (feature.start > bpEnd) return;
@@ -215,31 +199,21 @@ var igv = (function (igv) {
             rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             width = Math.max(1, rectEnd - x);
 
-            //height = ((feature.value - featureValueMinimum) / featureValueRange) * pixelHeight;
-            //rectBaseline = pixelHeight - height;
-            //canvas.fillRect(rectOrigin, rectBaseline, rectWidth, rectHeight, {fillStyle: track.color});
+            y = (featureValueMaximum - feature.value) / (featureValueRange);
 
-            if (signsDiffer(featureValueMinimum, featureValueMaximum)) {
-
-                if (feature.value < 0) {
-                    yUnitless = featureValueMaximum / featureValueRange;
-                    heightUnitLess = -feature.value / featureValueRange;
-                } else {
-                    yUnitless = ((featureValueMaximum - feature.value) / featureValueRange);
-                    heightUnitLess = feature.value / featureValueRange;
-                }
-
-            }
-            else if (featureValueMinimum < 0) {
-                yUnitless = 0;
-                heightUnitLess = -feature.value / featureValueRange;
-            }
-            else {
-                yUnitless = 1.0 - feature.value / featureValueRange;
-                heightUnitLess = feature.value / featureValueRange;
+            if (featureValueMinimum > 0) {
+                yb = 1;
+            } else if (featureValueMaximum < 0) {
+                yb = 0;
+            } else {
+                yb = featureValueMaximum / featureValueRange;
             }
 
-            //canvas.fillRect(x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, { fillStyle: igv.randomRGB(64, 255) });
+            yUnitless = Math.min(y, yb);
+            y2 = Math.max(y, yb);
+            heightUnitLess = y2 - yUnitless;
+
+            if (yUnitless >= 1 || y2 <= 0) return;      //  Value < minimum
 
             color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
 
@@ -253,44 +227,36 @@ var igv = (function (igv) {
 
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if (config.viewport.tile.features) {
 
-            var genomicLocation = config.genomicLocation,
+        let features = config.viewport.getCachedFeatures();
 
-                referenceFrame = config.viewport.genomicState.referenceFrame,
-                tolerance,
-                featureList,
-                popupData,
-                selectedFeature,
-                posString;
+        if (features && features.length > 0) {
 
-            featureList = config.viewport.tile.features;
+            let genomicLocation = config.genomicLocation;
+            let referenceFrame = config.viewport.genomicState.referenceFrame;
+            let popupData = [];
 
-            if (featureList.length > 0) {
+            // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            let tolerance = 2 * referenceFrame.bpPerPixel;
+            let selectedFeature = binarySearch(features, genomicLocation, tolerance);
 
-                popupData = [];
-
-                // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                tolerance = 2 * referenceFrame.bpPerPixel;
-                selectedFeature = binarySearch(featureList, genomicLocation, tolerance);
-
-                if (selectedFeature) {
-                    posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                        igv.numberFormatter(selectedFeature.start + 1)
-                        : igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end);
-                    popupData.push({name: "Position:", value: posString});
-                    popupData.push({
-                        name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                        value: igv.numberFormatter(selectedFeature.value)
-                    });
-                }
-
-                return popupData;
+            if (selectedFeature) {
+                let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
+                    igv.numberFormatter(selectedFeature.start + 1)
+                    : igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end);
+                popupData.push({name: "Position:", value: posString});
+                popupData.push({
+                    name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+                    value: igv.numberFormatter(selectedFeature.value)
+                });
             }
+
+            return popupData;
+
 
         }
         else {
-            return null;
+            return [];
         }
     }
 
@@ -379,22 +345,61 @@ var igv = (function (igv) {
             return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
         }
     }
+    
+    igv.WIGTrack.prototype.getState = function () {
+
+        let config = this.config;
+
+        config.autoscale = this.autoscale;
+
+        if (!this.autoscale && this.dataRange) {
+            config.min = this.dataRange.min;
+            config.max = this.dataRange.max;
+        }
+        return config;
+
+    }
+    
+    igv.WIGTrack.prototype.supportsWholeGenome = function () {
+        
+        if(typeof this.featureSource.supportsWholeGenome === 'function') {
+            return this.featureSource.supportsWholeGenome();
+        }
+        else {
+            return false;
+        }
+        
+    }
 
 
     // Static function
-    igv.WIGTrack.autoscale = function (features) {
-        var min = 0,
+    igv.WIGTrack.doAutoscale = function (features) {
+        var min, max;
+
+        if (features.length > 0) {
+            min = Number.MAX_VALUE;
             max = -Number.MAX_VALUE;
 
-        features.forEach(function (f) {
-            if (!Number.isNaN(f.value)) {
-                min = Math.min(min, f.value);
-                max = Math.max(max, f.value);
-            }
-        });
+            features.forEach(function (f) {
+                if (!Number.isNaN(f.value)) {
+                    min = Math.min(min, f.value);
+                    max = Math.max(max, f.value);
+                }
+            });
+
+            // Insure we have a zero baseline
+            if (max > 0) min = Math.min(0, min);
+            if (max < 0) max = 0;
+        }
+        else {
+            // No features -- default
+            min = 0;
+            max = 100;
+        }
 
         return {min: min, max: max};
     }
+
 
     return igv;
 

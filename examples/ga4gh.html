@@ -20,7 +20,7 @@
 
 <div style="margin-left:16px;margin-top:16px;margin-right:16px;">
     <h1>Embedded GA4GH browser</h1>
-    <div id="igv-examples-ga4gh" style="padding: 2px; border:1px solid lightgray"></div>
+    <div id="igv-div" style="padding: 2px; border:1px solid lightgray"></div>
 </div>
 
 
@@ -28,16 +28,12 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_examples_ga4gh,
-                options;
-
-        options =
+        const options =
         {
             genome: "hg19",
-            showRuler: true,
             locus: "muc1",
             // Insert your applications api key here,  or use OAuth
-            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            apiKey: 'GOOGLE_API_KEY',
             tracks: [
                 {
                     sourceType: 'ga4gh',
@@ -60,24 +56,18 @@
                     url: 'https://genomics.googleapis.com/v1',
                     readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
                     name: 'Ga4gh alignments'
-                },
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "bed",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                    order: Number.MAX_VALUE,
-                    visibilityWindow: 300000000,
-                    displayMode: "EXPANDED"
                 }
 
             ]
         };
 
-        igv_examples_ga4gh = document.getElementById("igv-examples-ga4gh");
-        igv.createBrowser(igv_examples_ga4gh, options);
+        const igvDiv = document.getElementById("igv-div");
+
+        igv.createBrowser(igvDiv, options)
+
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

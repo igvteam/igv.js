@@ -25,7 +25,9 @@
 
 var igv = (function (igv) {
 
-    igv.SequenceTrack = function (config) {
+    igv.SequenceTrack = function (config, browser) {
+
+        this.browser = browser;
 
         this.removable = false;
         
@@ -37,7 +39,6 @@ var igv = (function (igv) {
         this.disableButtons = false;
         this.order = config.order || -Number.MAX_VALUE;
         this.ignoreTrackMenu = false;
-        this.supportsWholeGenome = false;
 
         this.removable = false;
         this.reversed = false;
@@ -172,11 +173,13 @@ var igv = (function (igv) {
 
     igv.SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
+        const browser = this.browser;
+
         return new Promise(function (fulfill, reject) {
             if (bpPerPixel &&  bpPerPixel > 1) {
                 fulfill(null);
             } else {
-                igv.browser.genome.sequence.getSequence(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+                browser.genome.sequence.getSequence(chr, bpStart, bpEnd).then(fulfill).catch(reject);
             }
         });
     };
@@ -281,6 +284,10 @@ var igv = (function (igv) {
         }
 
     };
+
+    igv.SequenceTrack.prototype.supportsWholeGenome = function () {
+        return false;
+    }
 
     return igv;
 })

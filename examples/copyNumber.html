@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Data URIs</title>
+    <title>Examples - Segmented copy number</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -23,14 +23,10 @@
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        var igvDiv,
-            options;
 
-        igvDiv = document.getElementById("igv-div");
-        options =
+       const igvDiv = document.getElementById("igv-div");
+       const options =
             {
-                showNavigation: true,
-                showRuler: true,
                 genome: "hg19",
                 locus: 'chr7',
                 tracks:
@@ -40,23 +36,15 @@
                             indexed: false,
                             isLog: true,
                             name: 'Segmented CN'
-                        },
-                        {
-                            name: "Genes",
-                            type: "annotation",
-                            format: "bed",
-                            sourceType: "file",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                            order: Number.MAX_VALUE,
-                            visibilityWindow: 300000000,
-                            displayMode: "EXPANDED"
                         }
                     ]
             };
 
 
-        igv.createBrowser(igvDiv, options);
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

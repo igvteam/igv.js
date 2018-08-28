@@ -45,7 +45,6 @@ var igv = (function (igv) {
 
         // Hack for old service that is missing CORS headers
         // if (config.dataset === undefined && config.proxy === undefined) {
-        //     config.proxy = "//data.broadinstitute.org/igvdata/t2d/postJson.php";
         // }
 
         if (config.valueThreshold === undefined) {
@@ -74,7 +73,9 @@ var igv = (function (igv) {
 
     igv.T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+        const  self = this;
+        const genome = this.genome;
+        
         return new Promise(function (fulfill, reject) {
 
             if (self.cache && self.cache.chr === chr && self.cache.end > bpEnd && self.cache.start < bpStart) {
@@ -103,7 +104,7 @@ var igv = (function (igv) {
 
                         if (json.error_code) {
                             //alert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
-                            igv.presentAlert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")", undefined);
+                            igv.browser.presentAlert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")", undefined);
                             fulfill(null);
                         }
                         else {

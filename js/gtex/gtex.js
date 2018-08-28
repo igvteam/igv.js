@@ -90,6 +90,34 @@ var igv = (function (igv) {
     brewer.push("rgb(204, 235, 197");
     brewer.push("rgb(255, 237, 111");
 
+    igv.GtexUtils = {
+
+        getTissueInfo: function(datasetId) {
+
+            datasetId = datasetId || "gtex_v7";
+
+            // let depricated_url = 'https://gtexportal.org/rest/v1/dataset/tissueInfo?format=json&datasetId=' + datasetId;
+
+            let url = 'https://gtexportal.org/rest/v1/dataset/tissueSummary?datasetId=' + datasetId;
+
+            return igv.xhr.loadJson(url, {})
+        },
+
+        trackConfiguration: function (tissueSummary) {
+
+            return {
+                type: "eqtl",
+                sourceType: "gtex-ws",
+                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                tissueName: tissueSummary.tissueSiteDetailId,
+                name: (tissueSummary.tissueSiteDetailId.split('_').join(' ')),
+                visibilityWindow: 1000000
+            }
+
+        }
+
+    };
+
 
     return igv;
 

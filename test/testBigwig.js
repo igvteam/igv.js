@@ -52,7 +52,6 @@ function runBigwigTests() {
     });
 
 
-
     asyncTest("Bigwig meta data", function () {
 
         var url = dataURL + "bigwig/bigWigExample.bw",
@@ -95,7 +94,7 @@ function runBigwigTests() {
 
 
             // Total data count -- note this is the # of "sections", not the # of data points.  Verified with grep
-            equal(6857, bwReader.dataCount);
+            equal(6857, bwReader.header.dataCount);
 
             var type = bwReader.type;
             equal("BigWig", type);
@@ -147,6 +146,32 @@ function runBigwigTests() {
             ok(features);
 
             equal(features.length, 337);   // Verified in iPad app
+
+            start();
+        }).catch(function (error) {
+            console.log(error);
+            ok(false);
+        });
+    });
+
+    asyncTest("Uncompressed bigwig", function () {
+
+        //chr21:19,146,376-19,193,466
+        var url =  dataURL + "bigwig/uncompressed.bw",
+            chr = "chr21",
+            bpStart = 0,
+            bpEnd = Number.MAX_SAFE_INTEGER,
+            bpPerPixel = 6191354.824;    // To match iOS unit test
+
+        createMockObjects(bpPerPixel);
+
+        var bwReader = new igv.BWReader({url: url});
+
+        bwReader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel).then(function (features) {
+
+            ok(features);
+
+            equal(features.length, 8);   // Verified in iPad app
 
             start();
         }).catch(function (error) {

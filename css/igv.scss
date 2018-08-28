@@ -1,7 +1,6 @@
 
 @import "igv-colorpicker";
 @import "igv-generic-container";
-@import "igv-file-load-widget";
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
@@ -12,6 +11,17 @@ $igv-navbar-toggle-dark-dark: #737373;
 $igv-navbar-button-height: 18px;
 $igv-navbar-button-width: 96px;
 $igv-navbar-button-font-size: 11px;
+
+$igv-button-width: 75px;
+$igv-button-height: 28px;
+
+$igv-button-border-radius: 2px;
+
+$igv-button-ok-color: #5ea4e0;
+$igv-button-ok-hover-color: #3b5c7f;
+
+$igv-button-cancel-color: #c4c4c4;
+$igv-button-cancel-hover-color: #7f7f7f;
 
 $igv-border-color: #bfbfbf;
 
@@ -54,11 +64,11 @@ $igv-dark-grey-color: #373737;
 
 }
 
-#igvControlDiv {
+.igvControlDiv {
   position: relative;
 }
 
-#igv-content-header {
+.igv-content-header {
 
   position: relative;
   height: $igv-ideogram-height;
@@ -123,7 +133,7 @@ $igv-dark-grey-color: #373737;
 }
 
 // nav bar
-#igv-navbar {
+.igv-navbar {
 
   display: flex;
   flex-flow: row;
@@ -158,7 +168,7 @@ $igv-dark-grey-color: #373737;
     color: #434343;
   }
 
-  #igv-nav-bar-left-container {
+  .igv-nav-bar-left-container {
 
     display: flex;
     flex-flow: row;
@@ -169,24 +179,21 @@ $igv-dark-grey-color: #373737;
     height: $igv-navbar-height;
 
     // igv logo
-    #igv-logo {
+    .igv-logo {
       width: 34px;
-      height: 16px;
+      height: $igv-navbar-height;
 
       margin-left: 8px;
       margin-right: 32px;
     }
 
-    // drag & drop file upload button
-    #igv-drag-and-drop-presentation-button {
-      margin-right: 32px;
-    }
-
-    #igv-current_genome {
+    .igv-current_genome {
 
       height: $igv-navbar-height;
 
       margin-right: 16px;
+
+      user-select: none;
 
       color: #444;
       font-family: $igv-default-font-face;
@@ -199,7 +206,7 @@ $igv-dark-grey-color: #373737;
     }
 
     // chromosome select widget | chromosome select widget | locus goto | search icon | window size
-    #igv-genomic-location {
+    .igv-genomic-location {
 
       display: flex;
       flex-flow: row;
@@ -210,7 +217,7 @@ $igv-dark-grey-color: #373737;
       height: $igv-navbar-height;
 
       // chromosome select widget
-      #igv-chromosome-select-widget-container {
+      .igv-chromosome-select-widget-container {
         width: 96px;
         margin-right: 4px;
 
@@ -232,7 +239,7 @@ $igv-dark-grey-color: #373737;
         }
       }
 
-      #igv-locus-size-group {
+      .igv-locus-size-group {
         display: flex;
         flex-flow: row;
         flex-wrap: nowrap;
@@ -242,7 +249,7 @@ $igv-dark-grey-color: #373737;
         height: 75%;
 
         // locus goto | search icon
-        #igv-search-container {
+        .igv-search-container {
           width: 260px;
 
           display: flex;
@@ -291,8 +298,10 @@ $igv-dark-grey-color: #373737;
         }
 
         // window size panel
-        #igv-windowsizepanel-content-div {
+        .igv-windowsizepanel-content-div {
           margin-left: 4px;
+
+          user-select: none;
 
           font-family: $igv-default-font-face;
           font-size: $igv-navbar-font-size;
@@ -306,7 +315,7 @@ $igv-dark-grey-color: #373737;
 
   }
 
-  #igv-nav-bar-right-container {
+  .igv-nav-bar-right-container {
 
     display: flex;
     flex-flow: row;
@@ -315,7 +324,7 @@ $igv-dark-grey-color: #373737;
     align-items: center;
 
     // toggle buttons
-    #igv-nav-bar-toggle-button-container {
+    .igv-nav-bar-toggle-button-container {
 
       display: flex;
       flex-flow: row;
@@ -338,7 +347,9 @@ $igv-dark-grey-color: #373737;
     }
 
     // nav bar - zoom
-    #igv-zoom-widget {
+    .igv-zoom-widget {
+
+      user-select: none;
 
       display: flex;
       flex-flow: row;
@@ -369,6 +380,8 @@ $igv-dark-grey-color: #373737;
   min-width: $igv-navbar-button-width;
   text-transform: capitalize;
 
+  user-select: none;
+
   line-height: $igv-navbar-button-height;
   text-align: center;
   font-family: $igv-default-font-face;
@@ -376,30 +389,25 @@ $igv-dark-grey-color: #373737;
   font-weight: 200;
 
   color: $igv-navbar-toggle-dark-dark;
-  border-color: $igv-navbar-toggle-dark-dark;
   background-color: $igv-navbar-toggle-light-color;
 
+  border-color: $igv-navbar-toggle-dark-dark;
   border-style: solid;
   border-width: thin;
   border-radius: 10px;
 }
 
 .igv-nav-bar-button-clicked {
-  cursor: pointer;
   color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
   background-color: $igv-navbar-toggle-dark-dark;
 }
 
 .igv-nav-bar-button:hover {
   cursor: pointer;
-  color: white;
-  border-color: $igv-navbar-toggle-dark-dark;
-  background-color: $igv-navbar-toggle-dark-dark;
 }
 
 // TODO: figure out what to do with this
-#igv-logo-nonav {
+.igv-logo-nonav {
   margin-left: 4px;
   margin-top: 12px;
   position: absolute;
@@ -1263,7 +1271,7 @@ $igv-dark-grey-color: #373737;
   .igv-generic-dialog-ok-cancel {
 
     width: 100%;
-    height: $igv-flw-button-height;
+    height: $igv-button-height;
 
     display: flex;
     flex-flow: row;
@@ -1279,39 +1287,39 @@ $igv-dark-grey-color: #373737;
       font-size: 14px;
       font-weight: 200;
 
-      width: $igv-flw-button-width;
-      height: $igv-flw-button-height;
+      width: $igv-button-width;
+      height: $igv-button-height;
 
-      line-height: $igv-flw-button-height;
+      line-height: $igv-button-height;
       text-align: center;
 
       border-color: transparent;
       border-style: solid;
       border-width: thin;
-      border-radius: $igv-flw-border-radius;
+      border-radius: $igv-button-border-radius;
 
     }
 
     div:first-child {
       margin-left: 32px;
       margin-right: 0;
-      background-color: $igv-flw-button-ok-color;
+      background-color: $igv-button-ok-color;
     }
 
     div:last-child {
       margin-left: 0;
       margin-right: 32px;
-      background-color: $igv-flw-button-cancel-color;
+      background-color: $igv-button-cancel-color;
     }
 
     div:first-child:hover {
       cursor: pointer;
-      background-color: $igv-flw-button-ok-hover-color;
+      background-color: $igv-button-ok-hover-color;
     }
 
     div:last-child:hover {
       cursor: pointer;
-      background-color: $igv-flw-button-cancel-hover-color;
+      background-color: $igv-button-cancel-hover-color;
     }
 
   }

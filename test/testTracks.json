@@ -1,0 +1,384 @@
+[
+  {
+    "format": "bed",
+    "name": "Embedded features",
+    "type": "annotation",
+    "features": [
+      {
+        "chr": "1",
+        "start": 7432951,
+        "end": 7438000,
+        "name": "feature 1"
+      },
+      {
+        "chr": "1",
+        "start": 8438000,
+        "end": 8440000,
+        "name": "feature 2"
+      }
+    ]
+  },
+  {
+    "HEADING": "Platinum Genomes (BAM)"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam.bai",
+    "name": "NA12877"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+    "name": "NA12878"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+    "name": "NA12889"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
+    "name": "NA12890"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+    "name": "NA12891"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam",
+    "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12892_S1.bam.bai",
+    "name": "NA12892"
+  },
+  {
+    "HEADING": "BAM"
+  },
+  {
+    "sourceType": "gcs",
+    "type": "alignment",
+    "url": "gs://genomics-public-data/platinum-genomes/bam/NA12877_S1.bam",
+    "height": 500,
+    "autoHeight": false,
+    "viewAsPairs": false,
+    "name": "Google Storage BAM (NA12877)"
+  },
+  {
+    "type": "alignment",
+    "format": "bam",
+    "url": "https://drive.google.com/open?id=0B-lleX9c2pZFZVZyVTdkSFZ2cm8",
+    "indexURL": "https://drive.google.com/file/d/0B-lleX9c2pZFbDJ4VVRxakJzVGM/view?usp=sharing",
+    "name": "Google Drive BAM (GSTT1)"
+  },
+  {
+    "name": "Sharded Bam",
+    "type": "alignment",
+    "sourceType": "shardedBam",
+    "sources": {
+      "sequences": [
+        "chr1",
+        "chr8"
+      ],
+      "url": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam",
+      "indexURL": "https://data.broadinstitute.org/igvdata/test/data/bam/hg19_$CHR.bam.bai"
+    }
+  },
+  {
+    "HEADING": "BED / GTF"
+  },
+  {
+    "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
+    "name": "Bed - Tabix Index"
+  },
+  {
+    "type": "bed",
+    "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+    "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
+    "name": "Bed - Tribble Index"
+  },
+  {
+    "type": "bed",
+    "url": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz",
+    "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
+    "name": "dbSNP 137 - Tribble index",
+    "visibilityWindow": 200000
+  },
+  {
+    "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
+    "name": "Gencode v24 (gtf)",
+    "format": "gtf",
+    "visibilityWindow": 10000000
+  },
+  {
+    "HEADING": "BedPE"
+  },
+  {
+    "url": "https://s3.amazonaws.com/igv.org.test/data/gm12878_loops.bedpe.gz",
+    "type": "interaction",
+    "format": "bedpe",
+    "name": "GM12878 Loops (bedpe)"
+  },
+  {
+    "HEADING": "Trinity Fusion"
+  },
+  {
+    "url": "../test/data/misc/FusionJuncSpan.tabular",
+    "type": "FusionJuncSpan",
+    "name": "Fusion Inspector (chr1, chr2)"
+  },
+  {
+    "HEADING": "SEG"
+  },
+  {
+    "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+    "indexed": false,
+    "isLog": true,
+    "name": "GBM Copy # (TCGA Broad GDAC)"
+  },
+  {
+    "HEADING": "BigWig - BigBed"
+  },
+  {
+    "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+    "name": "Big BigWig"
+  },
+  {
+    "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+    "name": "ctcf bigwig"
+  },
+  {
+    "url": "https://www.encodeproject.org/files/ENCFF522RNT/@@download/ENCFF522RNT.bigBed",
+    "name": "ENCODE BigBed",
+    "height": 50,
+    "autoHeight": false
+  },
+  {
+    "url": "http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig",
+    "name": "Gm12878H3k4me3"
+  },
+  {
+    "url": "https://data.broadinstitute.org/igvdata/encode/hg19/broadHistone/wgEncodeBroadHistoneGm12878H3k4me2StdSig.wig.tdf",
+    "name": "GM12878H3k4m3 (tdf)"
+  },
+  {
+    "HEADING": "VCF"
+  },
+  {
+    "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
+    "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
+    "visibilityWindow": 20000,
+    "name": "1KG Sites"
+  },
+  {
+    "type": "variant",
+    "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
+    "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi",
+    "name": "1KG variants (chr22)",
+    "squishedCallHeight": 1,
+    "expandedCallHeight": 4,
+    "displayMode": "squished",
+    "visibilityWindow": 1000
+  },
+  {
+    "HEADING": "GA4GH"
+  },
+  {
+    "sourceType": "ga4gh",
+    "type": "bam",
+    "url": "https://genomics.googleapis.com/v1",
+    "readGroupSetIds": "CMvnhpKTFhCjz9_25e_lCw",
+    "height": 200,
+    "autoHeight": false,
+    "viewAsPairs": false,
+    "name": "Ga4gh alignments"
+  },
+  {
+    "sourceType": "ga4gh",
+    "type": "variant",
+    "url": "https://genomics.googleapis.com/v1",
+    "variantSetId": [
+      "10473108253681171589"
+    ],
+    "includeCalls": false,
+    "visibilityWindow": 100000,
+    "name": "Ga4gh variants"
+  },
+  {
+    "sourceType": "ga4gh",
+    "type": "variant",
+    "url": "https://genomics.googleapis.com/v1",
+    "variantSetId": [
+      "10473108253681171589"
+    ],
+    "callSetIds": [
+      "10473108253681171589-2"
+    ],
+    "visibilityWindow": 100000,
+    "name": "Ga4gh variants - single call set"
+  },
+  {
+    "HEADING": "cBIO - http only"
+  },
+  {
+    "name": "cBio 2.0 Seg",
+    "type": "seg",
+    "displayMode": "EXPANDED",
+    "sourceType": "custom",
+    "source": {
+      "url": "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
+      "method": "POST",
+      "contentType": "application/json",
+      "body": "[ { \"sampleId\": \"TCGA-OR-A5J2-01\", \"studyId\": \"acc_tcga\" }]",
+      "isLog": true,
+      "mappings": {
+        "chr": "chromosome",
+        "value": "segmentMean",
+        "sampleKey": "uniqueSampleKey",
+        "sample": "sampleId"
+      },
+      "queryable": false
+    }
+  },
+  {
+    "name": "cBio 2.0 - specify features",
+    "type": "seg",
+    "displayMode": "EXPANDED",
+    "mappings": {
+      "chr": "chromosome",
+      "value": "segmentMean",
+      "sampleKey": "uniqueSampleKey",
+      "sample": "sampleId"
+    },
+    "features": [
+      {
+        "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+        "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+        "patientId": "TCGA-OR-A5J2",
+        "start": 3218610,
+        "end": 4749076,
+        "segmentMean": -0.2239,
+        "studyId": "acc_tcga",
+        "sampleId": "TCGA-OR-A5J2-01",
+        "chromosome": "1",
+        "numberOfProbes": 958
+      },
+      {
+        "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+        "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+        "patientId": "TCGA-OR-A5J2",
+        "start": 4750119,
+        "end": 11347492,
+        "segmentMean": -0.8391,
+        "studyId": "acc_tcga",
+        "sampleId": "TCGA-OR-A5J2-01",
+        "chromosome": "1",
+        "numberOfProbes": 3544
+      }
+    ]
+  },
+  {
+    "HEADING": "HTSGET"
+  },
+  {
+    "name": "htsget bam (Sanger NA12877)",
+    "type": "alignment",
+    "sourceType": "htsget",
+    "endpoint": "http://35.196.212.220",
+    "id": "genomics-public-data/platinum-genomes/bam/NA12877_S1.bam"
+  },
+  {
+    "name": "htsget bam (DNANexus NA12878",
+    "type": "alignment",
+    "sourceType": "htsget",
+    "endpoint": "http://htsnexus.rnd.dnanex.us/v1",
+    "id": "BroadHiSeqX_b37/NA12878"
+  },
+  {
+    "HEADING": "IGV Flask Server"
+  },
+  {
+    "name": "Known Genes (UCSC service)",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "source": {
+      "url": "https://data.igv.org/ucsc?db=hg19",
+      "method": "GET",
+      "tableName": "knownGene"
+    }
+  },
+  {
+    "name": "Gencode V28 - hg38 (UCSC service)",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "source": {
+      "url": "https://data.igv.org/ucsc?db=hg38",
+      "method": "GET",
+      "tableName": "wgEncodeGencodeBasicV28"
+    }
+  },
+  {
+    "name": "SNP 150 (hg19)",
+    "type": "snp",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "visibilityWindow": 10000,
+    "height": 30,
+    "source": {
+      "url": "https://data.igv.org/ucsc?db=hg19",
+      "method": "GET",
+      "tableName": "snp150Common"
+    }
+  },
+  {
+    "name": "SNP 150 (hg38)",
+    "type": "snp",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "visibilityWindow": 10000,
+    "height": 30,
+    "source": {
+      "url": "https://data.igv.org/ucsc?db=hg38",
+      "method": "GET",
+      "tableName": "snp150"
+    }
+  },
+  {
+    "name": "Repeat Masker",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "source": {
+      "url": "https://data.igv.org/ucsc?db=hg19",
+      "method": "GET",
+      "tableName": "rmsk"
+    }
+  },
+  {
+    "HEADING": "IGV CRAM Server (http: only)"
+  },
+  {
+    "name": "CRAM file (flask server)",
+    "type": "bam",
+    "sourceType": "pysam",
+    "url": "https://data.igv.org/alignments",
+    "alignmentFile": "/home/ec2-user/test/data/cram_with_crai_index.cram",
+    "referenceFile": "/home/ec2-user/test/data/hg19mini.fa",
+    "label": "CRAM file"
+  }
+]

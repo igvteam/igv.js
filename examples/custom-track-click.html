@@ -12,20 +12,27 @@
     <title>IGV - Custom Track Click</title>
 
     <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
     <!-- Examples CSS -->
     <link rel="stylesheet" href="css/custom-track-click.css">
 
     <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+            crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+            crossorigin="anonymous"></script>
 
     <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous"></script>
 
     <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
+    <script src="../dist/igv.js"></script>
 
 </head>
 
@@ -35,7 +42,8 @@
 
     <div class="igv-custom-track-click-container">
         <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
-        <p class="lead">In this example we show how to use the <code>trackclick</code> event to disable the default pop-over. Instead
+        <p class="lead">In this example we show how to use the <code>trackclick</code> event to disable the default
+            pop-over. Instead
             we're going to use it as a hook to implement custom click behavior.</p>
 
         <h3>Try it out:</h3>
@@ -63,53 +71,48 @@
 
     $(document).ready(function () {
 
-        var browser,
-            igv_custom_track_click,
-            options,
-            genesInList;
+       const options =
+        {
+            showNavigation: true,
+            locus: "chr1:155,160,475-155,184,282",
+            genome: "hg19",
+            tracks: [
+                {
+                    name: "Genes",
+                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
+                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
+                    order: Number.MAX_VALUE,
+                    displayMode: "EXPANDED"
 
-        options =
-            {
-                showNavigation: true,
-                locus: "chr1:155,160,475-155,184,282",
-                reference:
-                    {
-                        id: "hg19"
-                    },
-                tracks:
-                    [
-                        {
-                            name: "Genes",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
-                            order: Number.MAX_VALUE,
-                            displayMode: "EXPANDED"
-
-                        }
-                    ]
-            };
-
-        igv_custom_track_click = $('#igv-custom-track-click');
-        browser = igv.createBrowser(igv_custom_track_click.get(0), options);
-
-        genesInList = {};
-        browser.on('trackclick', function (track, popoverData) {
-            var symbol = null;
-            popoverData.forEach(function (nameValue) {
-                if (nameValue.name && nameValue.name === 'Name') {
-                    symbol = nameValue.value;
                 }
-            });
+            ]
+        };
 
-            if (symbol && !genesInList[symbol]) {
-                genesInList[symbol] = true;
-                $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol+ '">' + symbol + '</a></li>');
-            }
+        const igv_custom_track_click = $('#igv-custom-track-click');
 
-            // Prevent default pop-over behavior
-            return false;
-        });
+        igv.createBrowser(igv_custom_track_click.get(0), options)
 
+                .then(function (browser) {
+
+                    let genesInList = {};
+
+                    browser.on('trackclick', function (track, popoverData) {
+                        var symbol = null;
+                        popoverData.forEach(function (nameValue) {
+                            if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
+                                symbol = nameValue.value;
+                            }
+                        });
+
+                        if (symbol && !genesInList[symbol]) {
+                            genesInList[symbol] = true;
+                            $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>');
+                        }
+
+                        // Prevent default pop-over behavior
+                        return false;
+                    });
+                });
     });
 
 </script>

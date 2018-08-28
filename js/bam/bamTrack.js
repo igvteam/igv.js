@@ -26,16 +26,20 @@
 
 var igv = (function (igv) {
 
+    "use strict";
+
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
     var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
     var DEFAULT_TRACK_HEIGHT = 300;
     var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
-    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)"
+    var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 
-    igv.BAMTrack = function (config) {
+    igv.BAMTrack = function (config, browser) {
+        
+        this.browser = browser;
 
-        this.featureSource = new igv.BamSource(config);
+        this.featureSource = new igv.BamSource(config, browser.genome);
 
         // Override default track height for bams
         if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
@@ -50,7 +54,7 @@ var igv = (function (igv) {
 
         this.alignmentTrack = new AlignmentTrack(config, this);
 
-        this.visibilityWindow = config.visibilityWindow || 30000;     // 30kb default
+        this.visibilityWindow = config.visibilityWindow || 30000;
 
         this.viewAsPairs = config.viewAsPairs;
 
@@ -72,6 +76,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         var self = this;
+     
         return this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
             .then(function (alignmentContainer) {
@@ -148,7 +153,7 @@ var igv = (function (igv) {
 
     igv.BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-        if (igv.browser.isMultiLocus()) {
+        if (this.browser.isMultiLocus()) {
             ctx.clearRect(0, 0, pixelWidth, pixelHeight);
         }
         else {
@@ -255,7 +260,7 @@ var igv = (function (igv) {
                         self.alignmentTrack.colorBy = 'tag';
                         self.config.colorBy = 'tag';
 
-                        tag = igv.inputDialog.$input.val().trim();
+                        tag = self.trackView.browser.inputDialog.$input.val().trim();
                         if (tag !== self.alignmentTrack.colorByTag) {
                             self.alignmentTrack.colorByTag = tag;
                             self.config.colorByTag = tag;
@@ -274,8 +279,8 @@ var igv = (function (igv) {
                         click: clickFunction
                     };
 
-                    igv.inputDialog.configure(config);
-                    igv.inputDialog.present($(self.trackView.trackDiv));
+                    self.trackView.browser.inputDialog.configure(config);
+                    self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
 
                 } else {
                     self.alignmentTrack.colorBy = menuItem.key;
@@ -289,36 +294,7 @@ var igv = (function (igv) {
             return {name: undefined, object: $e, click: clickHandler, init: undefined}
 
         }
-
-        function sortMenuItem() {
-
-            var $e,
-                clickHandler;
-
-            $e = $('<div>');
-            $e.text('Sort by base');
-
-            clickHandler = function () {
-                var genomicState = igv.browser.genomicStateList[0],
-                    referenceFrame = genomicState.referenceFrame,
-                    genomicLocation,
-                    viewportHalfWidth;
-
-                viewportHalfWidth = Math.floor(0.5 * (igv.browser.viewportContainerWidth() / igv.browser.genomicStateList.length));
-                genomicLocation = Math.floor((referenceFrame.start) + referenceFrame.toBP(viewportHalfWidth));
-
-                self.sortOption = {sort: "NUCLEOTIDE"};
-                self.alignmentTrack.sortAlignmentRows(genomicLocation, sortOption);
-
-                if ("show center guide" === igv.browser.centerGuide.$centerGuideToggle.text()) {
-                    igv.browser.centerGuide.$centerGuideToggle.trigger("click");
-                }
-
-            };
-
-            return {name: undefined, object: $e, click: clickHandler, init: undefined}
-        }
-
+        
     };
 
     function shadedBaseColor(qual, nucleotide, genomicLocation) {
@@ -362,7 +338,7 @@ var igv = (function (igv) {
         this.trackView = undefined;
     }
 
-    CoverageTrack = function (config, parent) {
+    var CoverageTrack = function (config, parent) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
@@ -479,19 +455,15 @@ var igv = (function (igv) {
 
     CoverageTrack.prototype.popupData = function (config) {
 
-        var genomicLocation = config.genomicLocation,
-            xOffset = config.x,
-            yOffset = config.y,
+        let features = config.viewport.getCachedFeatures();
+        if(!features || features.length === 0) return;
+
+        let genomicLocation = config.genomicLocation,
             referenceFrame = config.viewport.genomicState.referenceFrame,
-            coverageMap = config.viewport.tile.features.coverageMap,
-            coverageMapIndex,
-            coverage,
+            coverageMap = features.coverageMap,
             nameValues = [],
-            tmp;
-
-
-        coverageMapIndex = genomicLocation - coverageMap.bpStart;
-        coverage = coverageMap.coverage[coverageMapIndex];
+            coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
+            coverage = coverageMap.coverage[coverageMapIndex];
 
         if (coverage) {
 
@@ -501,7 +473,7 @@ var igv = (function (igv) {
             nameValues.push({name: 'Total Count', value: coverage.total});
 
             // A
-            tmp = coverage.posA + coverage.negA;
+            let tmp = coverage.posA + coverage.negA;
             if (tmp > 0)  tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
             nameValues.push({name: 'A', value: tmp});
 
@@ -533,7 +505,7 @@ var igv = (function (igv) {
 
     };
 
-    AlignmentTrack = function (config, parent) {
+    var AlignmentTrack = function (config, parent) {
 
         this.parent = parent;
         this.featureSource = parent.featureSource;
@@ -943,14 +915,15 @@ var igv = (function (igv) {
         return list;
 
         function sortRows() {
+            if (!config.viewport.tile) return;
             self.sortOption = {sort: "NUCLEOTIDE"};
-            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.tile.features);
+            self.sortAlignmentRows(config.genomicLocation, self.sortOption, config.viewport.getCachedFeatures());
         }
 
         function viewMateInSplitScreen() {
             if (alignment.mate) {
                 self.highlightedAlignmentReadNamed = alignment.readName;
-                igv.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
+                self.trackView.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
             }
         }
     };
@@ -964,26 +937,23 @@ var igv = (function (igv) {
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
-        var packedAlignmentRows,
-            downsampledIntervals,
-            packedAlignmentsIndex,
-            alignmentRow, clicked, i;
+        let features = viewport.getCachedFeatures();
+        if(!features || features.length === 0) return;
 
-        packedAlignmentRows = viewport.tile.features.packedAlignmentRows;
-        downsampledIntervals = viewport.tile.features.downsampledIntervals;
-
-        packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
+        let packedAlignmentRows = features.packedAlignmentRows;
+        let downsampledIntervals = features.downsampledIntervals;
+        let packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
 
         if (packedAlignmentsIndex < 0) {
-            for (i = 0; i < downsampledIntervals.length; i++) {
+            for (let i = 0; i < downsampledIntervals.length; i++) {
                 if (downsampledIntervals[i].start <= genomicLocation && (downsampledIntervals[i].end >= genomicLocation)) {
                     return downsampledIntervals[i];
                 }
             }
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
 
-            alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            clicked = alignmentRow.alignments.filter(function (alignment) {
+            let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            let clicked = alignmentRow.alignments.filter(function (alignment) {
                 return (genomicLocation >= alignment.start && genomicLocation <= (alignment.start + alignment.lengthOnRef));
             });
 

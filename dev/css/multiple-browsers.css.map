@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA,uBAAwB;EAEtB,OAAO,EAAE,IAAI;EACb,cAAc,EAAE,GAAG;EACnB,SAAS,EAAE,MAAM;EACjB,eAAe,EAAE,UAAU;EAC3B,WAAW,EAAE,UAAU;EAEvB,KAAK,EAAE,IAAI;EAEX,MAAM,EAAE,IAAI",
+"sources": ["multiple-browsers.scss"],
+"names": [],
+"file": "multiple-browsers.css"
+}

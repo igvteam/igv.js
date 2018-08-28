@@ -25,34 +25,36 @@
 
 var igv = (function (igv) {
 
+    "use strict";
 
-    igv.BamSource = function (config) {
+    igv.BamSource = function (config, genome) {
 
         this.config = config;
+        this.genome = genome;
         this.alignmentContainer = undefined;
         this.maxRows = config.maxRows || 1000;
 
         if (igv.isFilePath(config.url)) {
             // do nothing
             console.log('ignore');
-        } else if (config.url && config.url.startsWith("data:")) {
+        } else if (igv.isString(config.url) && config.url.startsWith("data:")) {
             this.config.indexed = false;
         }
 
         if ("ga4gh" === config.sourceType) {
-            this.bamReader = new igv.Ga4ghAlignmentReader(config);
+            this.bamReader = new igv.Ga4ghAlignmentReader(config, genome);
         } else if ("pysam" === config.sourceType) {
-            this.bamReader = new igv.BamWebserviceReader(config)
+            this.bamReader = new igv.BamWebserviceReader(config, genome)
         } else if ("htsget" === config.sourceType) {
-            this.bamReader = new igv.HtsgetReader(config);
+            this.bamReader = new igv.HtsgetReader(config, genome);
         } else if ("shardedBam" === config.sourceType) {
-            this.bamReader = new igv.ShardedBamReader(config);
+            this.bamReader = new igv.ShardedBamReader(config, genome);
         } else {
             if (this.config.indexed === false) {
-                this.bamReader = new igv.BamReaderNonIndexed(config);
+                this.bamReader = new igv.BamReaderNonIndexed(config, genome);
             }
             else {
-                this.bamReader = new igv.BamReader(config);
+                this.bamReader = new igv.BamReader(config, genome);
             }
         }
 
@@ -83,23 +85,28 @@ var igv = (function (igv) {
 
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
-        var self = this, hasAlignments;
+        const self = this;
+        const genome = this.genome;
+
 
         if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+            
             return Promise.resolve(self.alignmentContainer);
+            
         } else {
+            
             return self.bamReader.readAlignments(chr, bpStart, bpEnd)
 
                 .then(function (alignmentContainer) {
 
-                    var maxRows = self.config.maxRows || 500,
-                        alignments = alignmentContainer.alignments;
+                    const maxRows = self.config.maxRows || 500;
+                     let   alignments = alignmentContainer.alignments;
 
                     if (!self.viewAsPairs) {
                         alignments = unpairAlignments([{alignments: alignments}]);
                     }
 
-                    hasAlignments = alignments.length > 0;
+                    const hasAlignments = alignments.length > 0;
 
                     alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows);
 
@@ -108,10 +115,13 @@ var igv = (function (igv) {
                     self.alignmentContainer = alignmentContainer;
                     
                     if (!hasAlignments) {
+                        
                         return alignmentContainer;
+                        
                     }
                     else {
-                        return igv.browser.genome.sequence.getSequence(alignmentContainer.chr, alignmentContainer.start, alignmentContainer.end)
+                        
+                        return genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
 
                             .then(function (sequence) {
 

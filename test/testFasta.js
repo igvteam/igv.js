@@ -4,9 +4,6 @@ function runFastaTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-    module("Fasta");
-
-
 //    asyncTest("Fasta index", 5, function () {                         ©
 //
 //        var sequence = igv.FastaSequence.ance();

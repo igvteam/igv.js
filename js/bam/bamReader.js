@@ -35,9 +35,11 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.BamReader = function (config) {
+    igv.BamReader = function (config, genome) {
 
         this.config = config;
+        
+        this.genome = genome;
 
         this.bamPath = config.url;
 
@@ -119,15 +121,16 @@ var igv = (function (igv) {
 
     function readHeader() {
 
-        var self = this;
-
+        const self = this;
+        const genome = this.genome;
+        
         return getIndex.call(self)
 
             .then(function (index) {
 
-                var len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE,   // Insure we get the complete compressed block containing the header
-                    options = igv.buildOptions(self.config, {range: {start: 0, size: len}}),
-                    genome = igv.browser ? igv.browser.genome : null;
+                const len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
+                
+                const    options = igv.buildOptions(self.config, {range: {start: 0, size: len}});
 
                 return igv.BamUtils.readHeader(self.bamPath, options, genome);
             })
@@ -138,13 +141,14 @@ var igv = (function (igv) {
 
     function getIndex() {
 
-        var self = this;
+        const self = this;
+        const genome = this.genome;
 
         if (self.index) {
             return Promise.resolve(self.index);
         }
         else {
-            return igv.loadBamIndex(self.baiPath, self.config)
+            return igv.loadBamIndex(self.baiPath, self.config, false, genome)
                 .then(function (index) {
                     self.index = index;
                     return self.index;

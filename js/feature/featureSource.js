@@ -35,24 +35,33 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.FeatureSource = function (config) {
+    igv.FeatureSource = function (config, genome) {
 
         this.config = config || {};
+        this.genome = genome;
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
-        if (config.sourceType === "ga4gh") {
-            this.reader = new igv.Ga4ghVariantReader(config);
+        if (config.features && Array.isArray(config.features)) {
+
+            let features = config.features;
+            if (config.mappings) {
+                mapProperties(features, config.mappings)
+            }
+            this.queryable = false;
+            this.featureCache = new igv.FeatureCache(features, genome);
+            this.static = true;
+
+        }
+        else if (config.sourceType === "ga4gh") {
+            this.reader = new igv.Ga4ghVariantReader(config, genome);
+            this.queryable = true;
         } else if (config.sourceType === "immvar") {
             this.reader = new igv.ImmVarReader(config);
-        } else if (config.type === "eqtl") {
-            if (config.sourceType === "gtex-ws") {
-                this.reader = new igv.GtexReader(config);
-                this.queryable = true;
-            }
-            else {
-                this.reader = new igv.GtexFileReader(config);
-            }
+            this.queryable = true;
+        } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
+            this.reader = new igv.GtexReader(config);
+            this.queryable = true;
         } else if (config.sourceType === "bigquery") {
             this.reader = new igv.BigQueryFeatureReader(config);
             this.queryable = true;
@@ -61,28 +70,35 @@ var igv = (function (igv) {
             this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new igv.CustomServiceReader(config.source);
-            this.queryable = true;
+            this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
         }
         else {
-            // Default for all sorts of ascii tab-delimited file formts
-            this.reader = new igv.FeatureFileReader(config);
+            this.reader = new igv.FeatureFileReader(config, genome);
+            if (config.queryable != undefined) {
+                this.queryable = config.queryable
+            } else if (queryableFormats.has(config.format)) {
+                this.queryable = true;
+            }
+            else {
+                // Leav undefined -- will defer until we know if reader has an index
+            }
         }
+
         this.visibilityWindow = config.visibilityWindow;
-        
-        this.queryable = this.queryable || queryableFormats.has(config.format);
-        
+
     };
 
     igv.FeatureSource.prototype.getFileHeader = function () {
 
-        var self = this,
-            maxRows = this.config.maxRows || 500;
+        const self = this;
+        const genome = this.genome;
+        const    maxRows = this.config.maxRows || 500;
 
 
         if (self.header) {
             return Promise.resolve(self.header);
         } else {
-            if (typeof self.reader.readHeader === "function") {
+            if (self.reader && typeof self.reader.readHeader === "function") {
 
                 return self.reader.readHeader()
 
@@ -104,11 +120,11 @@ var igv = (function (igv) {
 
                                 // Assign overlapping features to rows
                                 packFeatures(features, maxRows);
-                                self.featureCache = new igv.FeatureCache(features);
+                                self.featureCache = new igv.FeatureCache(features, genome);
 
                                 // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                                 if (self.config.searchable) {
-                                    addFeaturesToDB(features);
+                                    addFeaturesToDB.call(self, features);
                                 }
                             }
                         }
@@ -129,10 +145,12 @@ var igv = (function (igv) {
     };
 
     function addFeaturesToDB(featureList) {
+        let self = this;
 
         featureList.forEach(function (feature) {
             if (feature.name) {
-                igv.browser.featureDB[feature.name.toLowerCase()] = feature;
+                //TODO igv.browser => igv.Globals or igv.FeatureDB
+                self.config.browser.featureDB[feature.name.toLowerCase()] = feature;
             }
         });
 
@@ -150,44 +168,75 @@ var igv = (function (igv) {
      * @param bpPerPixel
      */
 
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-        var self = this;
+        const self = this;
+        const genome = this.genome;
+        const queryChr = genome ? genome.getChromosomeName(chr) : chr;
+        const maxRows = self.config.maxRows || 500;
+
+        return getFeatureCache()
+
+            .then(function (featureCache) {
+
+                const isQueryable = self.queryable;
+
+                if ("all" === chr.toLowerCase()) {
+                    if (isQueryable) {
+                        return [];
+                    }
+                    else {
+                        const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
+                        return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
+
+                    }
+                }
+                else {
+                    return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+                }
+
+            })
 
 
-        var genomicInterval,
-            featureCache,
-            maxRows,
-            str,
-            queryChr;
+        function getFeatureCache() {
 
-        queryChr = (igv.browser && igv.browser.genome) ? igv.browser.genome.getChromosomeName(chr) : chr;
-        genomicInterval = new igv.GenomicInterval(queryChr, bpStart, bpEnd);
-        featureCache = self.featureCache;
-        maxRows = self.config.maxRows || 500;
-        str = chr.toLowerCase();
+            var genomicInterval;
 
-        if ("all" === str) {
+            let intervalStart = bpStart;
+            let intervalEnd = bpEnd;
 
-            if (featureCache && featureCache.range === undefined) {      // range === undefined => cache contains all features
-                return Promise.resolve(getWGFeatures(featureCache.allFeatures()));
+            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+            if (self.featureCache &&
+                (self.static || self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
+
+                return Promise.resolve(self.featureCache);
             }
             else {
-                return Promise.resolve(null);
-            }
-        }
 
-        else if (featureCache &&  featureCache.containsRange(genomicInterval)) {
-            return Promise.resolve(self.featureCache.queryFeatures(queryChr, bpStart, bpEnd));
-        }
+                // If a visibility window is defined, expand query interval
 
-        else {
+                if (-1 !== visibilityWindow) {
+                    if (visibilityWindow <= 0) {
+                        // Whole chromosome
+                        intervalStart = 0;
+                        intervalEnd = Number.MAX_VALUE;
+                    }
+                    else {
+                        if (visibilityWindow > (bpEnd - bpStart)) {
+                            intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
+                            intervalEnd = bpStart + visibilityWindow;
+                        }
+                    }
+                    genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+                }
 
-            return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
-                .then(
+                return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
-                    function (featureList) {
+                    .then(function (featureList) {
+
+                        if (self.queryable === undefined) self.queryable = self.reader.indexed;
 
                         if (featureList) {
 
@@ -198,26 +247,26 @@ var igv = (function (igv) {
                             // Assign overlapping features to rows
                             packFeatures(featureList, maxRows);
 
-                            var isQueryable = self.queryable || self.reader.indexed;
-                            self.featureCache = isQueryable ?
-                                new igv.FeatureCache(featureList, genomicInterval) :
-                                new igv.FeatureCache(featureList);   // Note - replacing previous cache with new one
+                            // Note - replacing previous cache with new one
+                            self.featureCache = self.queryable ?
+                                new igv.FeatureCache(featureList, genome, genomicInterval) :
+                                new igv.FeatureCache(featureList, genome);
 
 
                             // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
                             if (self.config.searchable) {
-                                addFeaturesToDB(featureList);
+                                addFeaturesToDB.call(self, featureList);
                             }
-
-                            return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
                         }
                         else {
-                            return undefined;
+                            self.featureCache = new igv.FeatureCache();     // Empty cache
                         }
 
-                    })
-        }
+                        return self.featureCache;
 
+                    })
+            }
+        }
     };
 
 
@@ -287,38 +336,46 @@ var igv = (function (igv) {
         }
     }
 
-
     // TODO -- filter by pixel size
-    function getWGFeatures(features) {
+    igv.FeatureSource.prototype.getWGFeatureCache = function (features) {
 
-        var wgFeatures,
-            wgChromosomeNames,
-            genome;
+        const genome = this.genome;
+        
+        if (!this.wgFeatureCache) {
 
-        genome = igv.browser.genome;
+            const wgChromosomeNames = new Set(genome.wgChromosomeNames);
 
-        wgChromosomeNames = new Set(genome.wgChromosomeNames);
+            const wgFeatures = [];
 
-        wgFeatures = [];
+            features.forEach(function (f) {
 
+                let queryChr = genome.getChromosomeName(f.chr);
+
+                if (wgChromosomeNames.has(queryChr)) {
+
+                    let wg = Object.assign({}, f);
+                    wg.chr = "all";
+                    wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                    wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+
+                    wgFeatures.push(wg);
+                }
+            });
+
+            this.wgFeatureCache = new igv.FeatureCache(wgFeatures, genome);
+        }
+
+        return this.wgFeatureCache;
+    }
+
+
+    function mapProperties(features, mappings) {
+        let mappingKeys = Object.keys(mappings);
         features.forEach(function (f) {
-
-            var wg,
-                queryChr;
-
-            queryChr = genome.getChromosomeName(f.chr);
-            if (wgChromosomeNames.has(queryChr)) {
-
-                wg = Object.assign({}, f);
-                wg.start = igv.browser.genome.getGenomeCoordinate(f.chr, f.start);
-                wg.end = igv.browser.genome.getGenomeCoordinate(f.chr, f.end);
-
-                wgFeatures.push(wg);
-            }
+            mappingKeys.forEach(function (key) {
+                f[key] = f[mappings[key]];
+            });
         });
-
-
-        return wgFeatures;
     }
 
     return igv;

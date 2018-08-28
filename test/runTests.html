@@ -6,16 +6,15 @@
     <title>igv.js unit tests</title>
 
     <link rel="stylesheet" href="vendor/qunit.css" type="text/css"/>
-
-
-    <link rel="import" href="../dev/shared-css.html">
-    <link rel="import" href="../dev/shared-js.html">
+    
+    <script src="../dist/igv.js"></script>
 
     <script type="text/javascript" src="vendor/qunit.js"></script>
 
     <script type="text/javascript" src="testBigwig.js"></script>
     <script type="text/javascript" src="testBAM.js"></script>
     <script type="text/javascript" src="testBamIndex.js"></script>
+    <script type="text/javascript" src="testAED.js"></script>
     <script type="text/javascript" src="testBED.js"></script>
     <script type="text/javascript" src="testBEDGraph.js"></script>
     <script type="text/javascript" src="testWig.js"></script>
@@ -30,11 +29,10 @@
     <script type="text/javascript" src="testTDF.js"></script>
     <script type="text/javascript" src="testSampleInformation.js"></script>
     <script type="text/javascript" src="testHtsgetReader.js"></script>
-    <script type="text/javascript" src="../js/bam/htsgetReader.js"></script>
     <script type="text/javascript" src="testUcscService.js"></script>
     <script type="text/javascript" src="testIgvSession.js"></script>
     <script type="text/javascript" src="testVariant.js"></script>
-    <script type="text/javascript" src="testTDigest.js"></script>
+    <script type="text/javascript" src="testBrowser.js"></script>
 
 
 </head>
@@ -47,6 +45,7 @@
         runBigwigTests();
         runBAMTests();
         runBAMIndexTests();
+        runAedTests();
         runBedTests();
         runBEDGraphTests();
         runBufferedReaderTests();
@@ -63,7 +62,7 @@
         runUcscTests();
         runIgvSessionTests();
         runVariantTests();
-        runTDigestTests();
+        runBrowserTests();
 
     });
 </script>

@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-    <title>Integrative Genomics Viewer - API Example</title>
+    <title>Integrative Genomics Viewer</title>
 
     <!-- Bootstrap 4 - CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -44,17 +44,18 @@
                            onclick="igv.browser.loadTrack({
                                  url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
                                  isLog: true,
-                                 label: 'GBM Copy # (TCGA Broad GDAC)'});">GBM Copy # (TCGA Broad GDAC))</a>
+                                 name: 'GBM Copy # (TCGA Broad GDAC)'});">GBM Copy # (TCGA Broad GDAC))</a>
                     </li>
 
                     <li>
                         <a href="#"
                            onclick="igv.browser.loadTrack({
+                                 type: 'annotation',
                                  format: 'bed',
                                  url: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz',
                                  indexURL: 'https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi',
                                  visibilityWindow: 200000,
-                                 label: 'dbSNP 137'})">dbSNP 137 (bed tabix)
+                                 name: 'dbSNP 137'})">dbSNP 137 (bed tabix)
                         </a>
                     </li>
 
@@ -62,6 +63,8 @@
                         <a href="#"
                            onclick="igv.browser.loadTrack(
                                 {
+                                type: 'wig',
+                                format: 'bigwig',
                                 url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/encode/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
                                 name: 'Gm12878H3k4me3'
                                 })">Encode bigwig
@@ -72,8 +75,10 @@
                         <a href="#"
                            onclick="igv.browser.loadTrack(
                                 {
+                                type: 'alignment',
+                                format: 'bam',
                                 url:'https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
-                                label: 'HG02450'
+                                name: 'HG02450'
                                 })">1KG Bam (HG02450)
                         </a>
                     </li>
@@ -99,36 +104,18 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var igv_example_api,
-            options;
-
-        options =
+        const options =
             {
-                showNavigation: true,
-                showRuler: true,
                 locus: "chr1:155,160,475-155,184,282",
-                reference:
-                    {
-                        id: "hg19"
-                    },
-                tracks:
-                    [
-                        {
-                            name: "Genes",
-                            type: "annotation",
-                            format: "bed",
-                            sourceType: "file",
-                            url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                            order: Number.MAX_VALUE,
-                            visibilityWindow: 300000000,
-                            displayMode: "EXPANDED"
-                        }
-                    ]
+                genome: "hg19"
             };
 
-        igv_example_api = document.getElementById('igv-api-example');
-        igv.createBrowser(igv_example_api, options);
+        const igv_example_api = document.getElementById('igv-api-example');
+
+        igv.createBrowser(igv_example_api, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
 
     });
 

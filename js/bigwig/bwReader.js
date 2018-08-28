@@ -41,16 +41,18 @@ var igv = (function (igv) {
     var BUFFER_SIZE = 512000;     //  buffer
     var BPTREE_HEADER_SIZE = 32;
 
-    igv.BWReader = function (config) {
+    igv.BWReader = function (config, genome) {
         this.path = config.url;
-        this.headPath = config.headURL || this.path;
+        this.genome = genome;
         this.rpTreeCache = {};
         this.config = config;
     };
 
-    igv.BWReader.prototype.readWGFeatures = function (genome, bpPerPixel, windowFunction) {
+    igv.BWReader.prototype.readWGFeatures = function (bpPerPixel, windowFunction) {
 
-        var self = this;
+        const self = this;
+        const genome = this.genome;
+        
         return self.getZoomHeaders()
             .then(function (zoomLevelHeaders) {
                 var chrIdx1, chrIdx2, chr1, chr2;
@@ -125,9 +127,17 @@ var igv = (function (igv) {
                                 size: item.dataSize
                             }, true)
                                 .then(function (uint8Array) {
+                                    let plain;
+                                    const isCompressed = self.header.uncompressBuffSize > 0
+                                    if(isCompressed) {
+                                        var inflate = new Zlib.Inflate(uint8Array);
+                                        plain = inflate.decompress();
+                                    }
+                                    else {
+                                        plain = uint8Array;
+                                    }
+
                                     var features = [];
-                                    var inflate = new Zlib.Inflate(uint8Array);
-                                    var plain = inflate.decompress();
                                     decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, features, self.chromTree.idToChrom, windowFunction);
                                     return features;
                                 })
@@ -177,72 +187,77 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
-            range: {
-                start: 0,
-                size: BBFILE_HEADER_SIZE
-            }
-        }))
-            .then(function (data) {
-
-                var header;
-
-                // Assume low-to-high unless proven otherwise
-                self.littleEndian = true;
-
-                var binaryParser = new igv.BinaryParser(new DataView(data));
-
-                var magic = binaryParser.getUInt();
-
-                if (magic === BIGWIG_MAGIC_LTH) {
-                    self.type = "BigWig";
+        if (self.header) {
+            return Promise.resolve(header);
+        }
+        else {
+            return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                range: {
+                    start: 0,
+                    size: BBFILE_HEADER_SIZE
                 }
-                else if (magic == BIGBED_MAGIC_LTH) {
-                    self.type = "BigBed";
-                }
-                else {
-                    //Try big endian order
-                    self.littleEndian = false;
+            }))
+                .then(function (data) {
 
-                    binaryParser.littleEndian = false;
-                    binaryParser.position = 0;
+                    var header;
+
+                    // Assume low-to-high unless proven otherwise
+                    self.littleEndian = true;
+
+                    var binaryParser = new igv.BinaryParser(new DataView(data));
+
                     var magic = binaryParser.getUInt();
 
-                    if (magic === BIGWIG_MAGIC_HTL) {
+                    if (magic === BIGWIG_MAGIC_LTH) {
                         self.type = "BigWig";
                     }
-                    else if (magic == BIGBED_MAGIC_HTL) {
+                    else if (magic == BIGBED_MAGIC_LTH) {
                         self.type = "BigBed";
                     }
                     else {
-                        // TODO -- error, unknown file type  or BE
+                        //Try big endian order
+                        self.littleEndian = false;
+
+                        binaryParser.littleEndian = false;
+                        binaryParser.position = 0;
+                        var magic = binaryParser.getUInt();
+
+                        if (magic === BIGWIG_MAGIC_HTL) {
+                            self.type = "BigWig";
+                        }
+                        else if (magic == BIGBED_MAGIC_HTL) {
+                            self.type = "BigBed";
+                        }
+                        else {
+                            // TODO -- error, unknown file type  or BE
+                        }
                     }
-                }
-                // Table 5  "Common header for BigWig and BigBed files"
-                header = {};
-                header.bwVersion = binaryParser.getUShort();
-                header.nZoomLevels = binaryParser.getUShort();
-                header.chromTreeOffset = binaryParser.getLong();
-                header.fullDataOffset = binaryParser.getLong();
-                header.fullIndexOffset = binaryParser.getLong();
-                header.fieldCount = binaryParser.getUShort();
-                header.definedFieldCount = binaryParser.getUShort();
-                header.autoSqlOffset = binaryParser.getLong();
-                header.totalSummaryOffset = binaryParser.getLong();
-                header.uncompressBuffSize = binaryParser.getInt();
-                header.reserved = binaryParser.getLong();
+                    // Table 5  "Common header for BigWig and BigBed files"
+                    header = {};
+                    header.bwVersion = binaryParser.getUShort();
+                    header.nZoomLevels = binaryParser.getUShort();
+                    header.chromTreeOffset = binaryParser.getLong();
+                    header.fullDataOffset = binaryParser.getLong();
+                    header.fullIndexOffset = binaryParser.getLong();
+                    header.fieldCount = binaryParser.getUShort();
+                    header.definedFieldCount = binaryParser.getUShort();
+                    header.autoSqlOffset = binaryParser.getLong();
+                    header.totalSummaryOffset = binaryParser.getLong();
+                    header.uncompressBuffSize = binaryParser.getInt();
+                    header.reserved = binaryParser.getLong();
 
-                return header;
+                    return header;
 
-            })
+                })
 
-            .then(function (header) {
+                .then(function (header) {
 
-                self.header = header;
+                    self.header = header;
 
-                return loadZoomHeadersAndChrTree.call(self);
+                    return loadZoomHeadersAndChrTree.call(self);
 
-            })
+                })
+        }
 
 
         function loadZoomHeadersAndChrTree() {
@@ -253,6 +268,7 @@ var igv = (function (igv) {
             var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
             return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+
                 .then(function (data) {
 
                     var nZooms = self.header.nZoomLevels,
@@ -287,7 +303,7 @@ var igv = (function (igv) {
                     // Chrom data index
                     if (self.header.chromTreeOffset > 0) {
                         binaryParser.position = self.header.chromTreeOffset - startOffset;
-                        self.chromTree = new BPTree(binaryParser, startOffset);
+                        self.chromTree = new BPTree(binaryParser, startOffset, self.genome);
                     }
                     else {
                         // TODO -- this is an error, not expected
@@ -295,7 +311,7 @@ var igv = (function (igv) {
 
                     //Finally total data count
                     binaryParser.position = self.header.fullDataOffset - startOffset;
-                    self.dataCount = binaryParser.getInt();
+                    self.header.dataCount = binaryParser.getInt();
 
                     return self.header;
 
@@ -314,8 +330,11 @@ var igv = (function (igv) {
         }
         else {
             rpTree = new RPTree(offset, self.contentLength, self.config, self.littleEndian);
-            self.rpTreeCache[offset] = rpTree;
-            return rpTree.load();
+            return rpTree.load()
+                .then(function () {
+                    self.rpTreeCache[offset] = rpTree;
+                    return rpTree;
+                })
         }
     }
 
@@ -504,10 +523,9 @@ var igv = (function (igv) {
 
     }
 
-    function BPTree(binaryParser, startOffset) {
+    function BPTree(binaryParser, startOffset, genome) {
 
-        var self = this,
-            genome = igv.browser ? igv.browser.genome : null;
+        const self = this;
 
         var magic = binaryParser.getInt();
         var blockSize = binaryParser.getInt();
@@ -518,6 +536,14 @@ var igv = (function (igv) {
         var chromToId = {};
         var idToChrom = [];
 
+        this.header = {
+            magic: magic,
+            blockSize: blockSize,
+            keySize: keySize,
+            valSize: valSize,
+            itemCount: itemCount,
+            reserved: reserved
+        };
         this.chromToID = chromToId;
         this.idToChrom = idToChrom;
 
@@ -578,7 +604,7 @@ var igv = (function (igv) {
     function overlaps(item, chrIdx1, startBase, chrIdx2, endBase) {
 
         if (!item) {
-            console.log("null item");
+            console.log("null item for " + chrIdx1 + " " + startBase + " " + endBase);
             return false;
         }
 
@@ -766,7 +792,7 @@ var igv = (function (igv) {
                 exons = [];
 
                 for (var i = 0; i < exonCount; i++) {
-                    eStart = start + parseInt(exonStarts[i]);
+                    eStart = chromStart + parseInt(exonStarts[i]);
                     eEnd = eStart + parseInt(exonSizes[i]);
                     exons.push({start: eStart, end: eEnd});
                 }

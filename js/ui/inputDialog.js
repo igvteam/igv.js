@@ -26,11 +26,12 @@
 
 var igv = (function (igv) {
 
-    igv.InputDialog = function ($parent) {
+    igv.InputDialog = function ($parent, browser) {
         var self = this,
             $header,
-            $buttons,
-            $div;
+            $buttons;
+
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });
@@ -79,7 +80,8 @@ var igv = (function (igv) {
             self.$container.hide();
         });
 
-        this.$container.draggable({ handle:$header.get(0) });
+        //this.$container.draggable({ handle:$header.get(0) });
+        igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };

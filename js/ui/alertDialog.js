@@ -28,12 +28,13 @@
  */
 var igv = (function (igv) {
 
-    igv.AlertDialog = function ($parent) {
+    igv.AlertDialog = function ($parent, browser) {
         var self = this,
             $header,
             $ok_container;
 
         this.$parent = $parent;
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });
@@ -44,7 +45,7 @@ var igv = (function (igv) {
         $header = $("<div>", { class:'igv-generic-dialog-header' });
         this.$container.append($header);
         igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.$label.text('');
+            self.$label.html('');
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
@@ -52,7 +53,7 @@ var igv = (function (igv) {
         // dialog label
         this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
         this.$container.append(this.$label);
-        self.$label.text('');
+        self.$label.html('');
 
         // ok container
         $ok_container = $("<div>", { class:'igv-generic-dialog-ok' });
@@ -64,18 +65,19 @@ var igv = (function (igv) {
         this.$ok.text('OK');
 
         this.$ok.on('click', function () {
-            self.$label.text('');
+            self.$label.html('');
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
 
-        this.$container.draggable({ handle:$header.get(0) });
+        //this.$container.draggable({ handle:$header.get(0) });
+igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };
 
     igv.AlertDialog.prototype.configure = function (config) {
-        this.$label.text(config.label);
+        this.$label.html(config.label);
     };
 
     igv.AlertDialog.prototype.present = function ($alternativeParent) {

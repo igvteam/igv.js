@@ -81,17 +81,19 @@ var igv = (function (igv) {
 
         // Flatten GA4GH attributes array
         variant.info = {};
-        Object.getOwnPropertyNames(json.info).forEach(function (key) {
-            var value,
-                valueArray = json.info[key];
+        if(json.info) {
+            Object.keys(json.info).forEach(function (key) {
+                var value,
+                    valueArray = json.info[key];
 
-            if (Array.isArray(valueArray)) {
-                value = valueArray.join(",");
-            } else {
-                value = valueArray;
-            }
-            variant.info[key] = value;
-        });
+                if (Array.isArray(valueArray)) {
+                    value = valueArray.join(",");
+                } else {
+                    value = valueArray;
+                }
+                variant.info[key] = value;
+            });
+        }
 
 
         // Need to build a hash of calls for fast lookup
@@ -224,16 +226,6 @@ var igv = (function (igv) {
             return 1 - sum;
         };
 
-
-        function isRef(altAlleles) {
-
-            return !altAlleles ||
-                altAlleles.trim().length === 0 ||
-                altAlleles === "<NON_REF>" ||
-                altAlleles === "<*>";
-
-        };
-
     }
 
     igv.Variant = function () {
@@ -273,6 +265,23 @@ var igv = (function (igv) {
                 fields.push({name: key, value: arrayToString(self.info[key])});
             });
         }
+
+        if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
+            let ref = this.referenceBases;
+            if (ref.length === 1) {
+                let altArray = this.alternateBases.split(",");
+                fields.push("<hr/>");
+                for (let i = 0; i < altArray.length; i++) {
+                    let alt = this.alternateBases[i];
+                    if (alt.length === 1) {
+                        let l = "<a target='_blank' " +
+                            "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                        fields.push(l);
+                    }
+                }
+            }
+        }
+
         return fields;
 
 
@@ -280,6 +289,15 @@ var igv = (function (igv) {
 
     igv.Variant.prototype.isRefBlock = function () {
         return "refblock" === this.type;
+    }
+
+    function isRef(altAlleles) {
+
+        return !altAlleles ||
+            altAlleles.trim().length === 0 ||
+            altAlleles === "<NON_REF>" ||
+            altAlleles === "<*>";
+
     }
 
     function arrayToString(value, delim) {

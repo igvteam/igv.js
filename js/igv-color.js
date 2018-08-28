@@ -276,7 +276,7 @@ var igv = (function (igv) {
             if (token.includes(",")) {
                 return token.startsWith("rgb") ? token : "rgb(" + token + ")";
             } else {
-                return undefined;
+                return token;
             }
         }
     };
@@ -425,7 +425,7 @@ var igv = (function (igv) {
     //
     // inspired by http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
 
-    RColor = function () {
+    var RColor = function () {
         this.hue = Math.random(),
             this.goldenRatio = 0.618033988749895;
         this.hexwidth = 2;

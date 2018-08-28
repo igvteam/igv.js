@@ -35,19 +35,33 @@ module.exports = function (grunt) {
                 src: [
                     'wrapper/header.js',
                     'tmp/embedCss.js',
-                    'vendor/jquery-1.12.4.js',
-                    'vendor/jquery-ui.js',
+                    'vendor/jquery-3.3.1.slim.js',
                     'vendor/underscore.js',
                     'vendor/zlib_and_gzip.js',
                     'vendor/inflate.js',
                     'vendor/jquery.mousewheel.js',
-                    'vendor/promise.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
                     'js/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
+            },
+            igv_es6: {
+                src: [
+                    'wrapper/header-esm.js',
+                    'tmp/embedCss.js',
+                    'vendor/jquery-3.3.1.slim.js',
+                    'vendor/underscore.js',
+                    'vendor/zlib_and_gzip.js',
+                    'vendor/inflate.js',
+                    'vendor/jquery.mousewheel.js',
+                    'vendor/rbtree.js',
+                    'vendor/tdigest.js',
+                    'js/**/*.js',
+                    'wrapper/footer-esm.js'
+                ],
+                dest: 'dist/igv.esm.js'
             },
             zlib: {
                 src: [
@@ -79,7 +93,6 @@ module.exports = function (grunt) {
                 ],
                 dest: 'tmp/igv-all.css'
             }
-
         },
 
         uglify: {
@@ -87,46 +100,25 @@ module.exports = function (grunt) {
                 mangle: false,
                 sourceMap: true
             },
-
             igv: {
                 src: 'dist/igv.js',
                 dest: 'dist/igv.min.js'
+            },
+            igv_esm: {
+                src: 'dist/igv.esm.js',
+                dest: 'dist/igv.esm.min.js'
             }
         },
 
-        copy: {
-            img: {
-                expand: true,
-                cwd: 'css/img',
-                src: '**',
-                dest: 'dist/img'
-            }
-        }
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-cssmin');
-    grunt.loadNpmTasks('grunt-contrib-qunit');
-    grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
 
-
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    //grunt.registerTask('default', ['concat:igvexp', 'uglify:igvexp']);
-    //grunt.registerTask('default', ['concat:igv', 'uglify:igv', 'md2html:igv']);
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv','copy']);
-
-    grunt.task.registerTask('unittest', 'Run one unit test.', function (testname) {
-
-        if (!!testname)
-            grunt.config('qunit.all', ['test/' + testname + '.html']);
-
-        grunt.task.run('qunit:all');
-
-    });
+    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_esm']);
 
     grunt.registerTask('doc', ['md2html']);
 

@@ -31,17 +31,20 @@
 
 var igv = (function (igv) {
 
-    igv.TDFSource = function (config) {
+    "use strict";
 
+    igv.TDFSource = function (config, genome) {
+
+        this.genome = genome;
         this.windowFunction = config.windowFunction || "mean";
-        this.reader = new igv.TDFReader(config);
+        this.reader = new igv.TDFReader(config, genome);
     };
 
     igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-        var self = this,
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd),
-            i;
+        const self = this;
+        const    genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+        const genome = this.genome;
 
         if (chr.toLowerCase() === "all") {
             return Promise.resolve([]);      // Whole genome view not yet supported
@@ -54,7 +57,7 @@ var igv = (function (igv) {
 
             .then(function (group) {
 
-                var zoom = zoomLevelForScale(chr, bpPerPixel),
+                var zoom = zoomLevelForScale(chr, bpPerPixel, genome),
                     queryChr = self.reader.chrAliasTable[chr],
                     maxZoom = self.reader.maxZoom,
                     wf;
@@ -126,6 +129,10 @@ var igv = (function (igv) {
                     });
             }
         }
+    }
+    
+    igv.TDFSource.prototype.supportsWholeGenome = function() {
+        return false;
     }
 
     function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
@@ -211,13 +218,13 @@ var igv = (function (igv) {
 
     var log2 = Math.log(2);
 
-    function zoomLevelForScale(chr, bpPerPixel) {
+    function zoomLevelForScale(chr, bpPerPixel, genome) {
 
         // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  IGV computes zoom levels assuming
         // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
         // Zoom level 1 is magnified 2X,  and so forth
 
-        var chrSize = igv.browser.genome.getChromosome(chr).bpLength;
+        var chrSize = genome.getChromosome(chr).bpLength;
 
         return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2);
     }

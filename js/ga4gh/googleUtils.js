@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     igv.Google = {
 
+        fileInfoCache: {},
+
         // Crude test, this is conservative, nothing bad happens for a false positive
         isGoogleURL: function (url) {
             return url.includes("googleapis");
@@ -97,17 +99,39 @@ var igv = (function (igv) {
 
             var id = getGoogleDriveFileID(link);
 
-            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media" : link;
+            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&supportsTeamDrives=true" : link;
         },
 
         getDriveFileInfo: function (googleDriveURL) {
 
             var id = getGoogleDriveFileID(googleDriveURL),
-                endPoint = "https://www.googleapis.com/drive/v2/files/" + id;
+                endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
 
             return igv.xhr.loadJson(endPoint, igv.buildOptions({}));
+        },
+
+        loadGoogleProperties: function (propertiesURL) {
+
+            return igv.xhr.loadArrayBuffer(propertiesURL)
+                .then(function (arrayBuffer) {
+                    var inflate, plain, str;
+
+                    inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+                    plain = inflate.decompress();
+                    str = String.fromCharCode.apply(null, plain);
+                    igv.Google.properties = JSON.parse(str);
+                    igv.setGoogleApiKey(igv.Google.properties["api_key"]);
+                    return igv.Google.properties;
+
+                })
         }
     }
+
+
+    igv.oauth = {
+        google: {}
+    };
+
 
     function getGoogleDriveFileID(link) {
 
@@ -121,7 +145,7 @@ var igv = (function (igv) {
                 return link.substring(i1, i2)
             }
             else if (i1 > 0) {
-                 return link.substring(i1);
+                return link.substring(i1);
             }
 
         }

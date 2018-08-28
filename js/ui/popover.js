@@ -28,7 +28,8 @@
  */
 var igv = (function (igv) {
 
-    igv.Popover = function ($parent) {
+    igv.Popover = function ($parent, browser) {
+        this.browser = browser;
         this.$parent = initializationHelper.call(this, $parent);
     };
 
@@ -55,7 +56,8 @@ var igv = (function (igv) {
 
         this.$popover.append(this.$popoverContent);
 
-        this.$popover.draggable({handle: $popoverHeader.get(0)});
+       // this.$popover.draggable({handle: $popoverHeader.get(0)});
+       igv.makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
 
         return $parent;
 
@@ -65,7 +67,7 @@ var igv = (function (igv) {
         this.$popover.hide();
     };
 
-    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView) {
+    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView, browser) {
 
         var self = this,
             $container,
@@ -93,7 +95,7 @@ var igv = (function (igv) {
 
             this.$popover.css(clampPopoverLocation(pageX, pageY, this));
             this.$popover.show();
-            this.$popover.offset(igv.constrainBBox(this.$popover, $(igv.browser.trackContainerDiv)));
+            this.$popover.offset(igv.constrainBBox(this.$popover, $(browser.trackContainerDiv)));
 
         }
     };

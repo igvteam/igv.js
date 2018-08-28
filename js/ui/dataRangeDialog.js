@@ -26,11 +26,13 @@
 
 var igv = (function (igv) {
 
-    igv.DataRangeDialog = function ($parent) {
+    igv.DataRangeDialog = function ($parent, browser) {
         var self = this,
             $header,
             $buttons,
             $div;
+
+        this.browser = browser;
 
         // dialog container
         this.$container = $("<div>", { class:'igv-generic-dialog-container' });
@@ -92,7 +94,8 @@ var igv = (function (igv) {
             self.$container.hide();
         });
 
-        this.$container.draggable({ handle:$header.get(0) });
+        //this.$container.draggable({ handle:$header.get(0) });
+igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };
@@ -138,13 +141,14 @@ var igv = (function (igv) {
     };
 
     function processResults (config) {
-        var min,
+        var self = this,
+            min,
             max;
 
         min = parseFloat(this.$minimum_input.val());
         max = parseFloat(this.$maximum_input.val());
         if(isNaN(min) || isNaN(max)) {
-            igv.presentAlert("Must input numeric values", undefined);
+            self.browser.presentAlert("Must input numeric values", undefined);
         } else {
 
             if (true === config.trackView.track.autoscale) {

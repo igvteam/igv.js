@@ -30,7 +30,7 @@ var igv = (function (igv) {
 
     const DEFAULT_POPOVER_WINDOW = 100000000;
 
-    igv.GWASTrack = function (config) {
+    igv.GWASTrack = function (config, browser) {
         this.config = config;
         this.url = config.url;
         this.name = config.name;
@@ -60,10 +60,10 @@ var igv = (function (igv) {
         this.colorScale = new igv.BinnedColorScale(cs);
 
         // An obvious hack -- the source should be passed in as an arbument
-        if (config.format && ("gtexGWAS" === config.format)) {
-            this.featureSource = new igv.FeatureSource(config);
+        if (config.format && ("gtexgwas" === config.format.toLowerCase())) {
+            this.featureSource = new igv.FeatureSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.T2DVariantSource(config);
+            this.featureSource = new igv.T2DVariantSource(config, browser.genome);
         }
 
     };

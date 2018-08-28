@@ -33,9 +33,9 @@ var igv = (function (igv) {
 
 
     igv.CustomServiceReader = function (config) {
+
         this.config = config;
 
-        this.supportsWholeGenome = true;
     }
 
     igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
@@ -61,20 +61,46 @@ var igv = (function (igv) {
             }
         }
 
-        return igv.xhr.load(url, self.config).then(function (data) {
+        return igv.xhr.load(url, self.config)
+            
+            .then(function (data) {
 
-            if (data) {
+                if (data) {
+                    if (typeof self.config.parser === "function") {
+                        return self.config.parser(data);
+                    }
+                    else if (igv.isString(data)) {
+                        // TODO -- make this explict in config (returnType="json", "xml", etc)
+                        try {
+                            return JSON.parse(data);
+                        } catch (e) {
+                            // Apparently not json, just return data
+                            return data;
+                        }
+                    }
+                    else {
+                        return data;
+                    }
+                }
+                else {
+                    return [];
+                }
+            })
+            .then(function (features) {
 
-                var results = (typeof self.config.parser === "function") ? self.config.parser(data) : data;
+                if(self.config.mappings) {
 
-                return results;
+                    let mappingKeys = Object.keys(self.config.mappings);
+                    features.forEach(function (f) {
+                        mappingKeys.forEach(function (key) {
+                            f[key] = f[self.config.mappings[key]];
+                        });
+                    });
+                }
 
-            }
-            else {
-                return null;
-            }
+                return features;
 
-        })
+            })
     }
 
 

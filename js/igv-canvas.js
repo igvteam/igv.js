@@ -40,13 +40,9 @@ var igv = (function (igv) {
         if (debug) {
             var d = new Date();
             var time = d.getHours() + ":" + d.getMinutes() + ":" + d.getSeconds();
-            if (typeof copy != "undefined") {
-                copy(msg);
-            }
             if (typeof console != "undefined") {
                 console.log("igv-canvas: " + time + " " + msg);
             }
-
         }
     };
 
@@ -73,14 +69,17 @@ var igv = (function (igv) {
 
             log("stroke line, prop: " + properties);
 
-            ctx.save();
-            if (properties) igv.graphics.setProperties(ctx, properties);
+            if (properties) {
+                ctx.save();
+                igv.graphics.setProperties(ctx, properties);
+            }
 
             ctx.beginPath();
             ctx.moveTo(x1, y1);
             ctx.lineTo(x2, y2);
             ctx.stroke();
-            ctx.restore();
+
+            if (properties) ctx.restore();
         },
 
         fillRect: function (ctx, x, y, w, h, properties) {
@@ -100,33 +99,38 @@ var igv = (function (igv) {
         },
 
         fillPolygon: function (ctx, x, y, properties) {
-            ctx.save();
-            if (properties)   igv.graphics.setProperties(ctx, properties);
-            doPath(ctx, x, y);
-            ctx.fill();
-            ctx.restore();
-        },
-
-        strokePolygon: function (ctx, x, y, properties) {
-            ctx.save();
-            if (properties)   igv.graphics.setProperties(ctx, properties);
-            doPath(ctx, x, y);
-            ctx.stroke();
-            ctx.restore();
-        },
-
-        fillText: function (ctx, text, x, y, properties, transforms) {
-
             if (properties) {
                 ctx.save();
                 igv.graphics.setProperties(ctx, properties);
             }
+            doPath(ctx, x, y);
+            ctx.fill();
+            if (properties) ctx.restore();
+        },
 
+        strokePolygon: function (ctx, x, y, properties) {
+            if (properties) {
+                ctx.save();
+                igv.graphics.setProperties(ctx, properties);
+            }
+            doPath(ctx, x, y);
+            ctx.stroke();
+            if (properties) ctx.restore();
+        },
 
-            ctx.save();
+        fillText: function (ctx, text, x, y, properties, transforms) {
 
-            ctx.translate(x, y);
+            if (properties || transforms) {
+                ctx.save();
+            }
+
+            if (properties) {
+                igv.graphics.setProperties(ctx, properties);
+            }
+
             if (transforms) {
+                // Slow path with context saving and extra translate
+                ctx.translate(x, y);
 
                 for (var transform in transforms) {
                     var value = transforms[transform];
@@ -140,26 +144,28 @@ var igv = (function (igv) {
                     }
                 }
 
+                ctx.fillText(text, 0, 0);
+            }
+            else {
+                ctx.fillText(text, x, y);
             }
 
-            ctx.fillText(text, 0, 0);
-            ctx.restore();
-
-            if (properties) ctx.restore();
-
+            if (properties || transforms) ctx.restore();
         },
 
         strokeText: function (ctx, text, x, y, properties, transforms) {
 
 
-            ctx.save();
+            if (properties || transforms) {
+                ctx.save();
+            }
+
             if (properties) {
                 igv.graphics.setProperties(ctx, properties);
             }
 
-
-            ctx.translate(x, y);
             if (transforms) {
+                ctx.translate(x, y);
 
                 for (var transform in transforms) {
                     var value = transforms[transform];
@@ -172,12 +178,14 @@ var igv = (function (igv) {
                         ctx.rotate(value['angle'] * Math.PI / 180);
                     }
                 }
+
+                ctx.strokeText(text, 0, 0);
+            }
+            else {
+                ctx.strokeText(text, x, y);
             }
 
-
-            ctx.strokeText(text, 0, 0);
-            ctx.restore();
-
+            if (properties || transforms) ctx.restore();
         },
 
         strokeCircle: function (ctx, x, y, radius) {
@@ -214,14 +222,16 @@ var igv = (function (igv) {
         },
 
         dashedLine: function (ctx, x1, y1, x2, y2, dashLen, properties) {
-            ctx.save();
             x1 = Math.round(x1);
             y1 = Math.round(y1);
             x2 = Math.round(x2);
             y2 = Math.round(y2);
             dashLen = Math.round(dashLen);
             log("dashedLine");
-            if (properties) igv.graphics.setProperties(ctx, properties);
+            if (properties) {
+                ctx.save();
+                igv.graphics.setProperties(ctx, properties);
+            }
 
             if (dashLen == undefined) dashLen = 2;
             ctx.moveTo(x1, y1);
@@ -240,8 +250,57 @@ var igv = (function (igv) {
             }
             ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
 
-            ctx.restore();
+            if (properties) ctx.restore();
         },
+
+        roundRect: function (ctx, x, y, width, height, radius, fill, stroke) {
+
+            if (typeof stroke == "undefined") {
+                stroke = true;
+            }
+            if (typeof radius === "undefined") {
+                radius = 5;
+            }
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+            if (stroke) {
+                ctx.stroke();
+            }
+            if (fill) {
+                ctx.fill();
+            }
+        },
+        polygon: function (ctx, x, y, fill, stroke) {
+
+            if (typeof stroke == "undefined") {
+                stroke = true;
+            }
+
+            ctx.beginPath();
+            var len = x.length;
+            ctx.moveTo(x[0], y[0]);
+            for (var i = 1; i < len; i++) {
+                ctx.lineTo(x[i], y[i]);
+                // this.moveTo(x[i], y[i]);
+            }
+
+            ctx.closePath();
+            if (stroke) {
+                ctx.stroke();
+            }
+            if (fill) {
+                ctx.fill();
+            }
+        }
 
 
     }
