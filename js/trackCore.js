@@ -613,6 +613,8 @@ var igv = (function (igv) {
                 }
 
                 trackView.track.visibilityWindow = value;
+                trackView.track.config = value;               // Hack for session state.
+
                 trackView.updateViews();
             };
 
