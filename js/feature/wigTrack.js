@@ -1,3 +1,4 @@
+
 /*
  * The MIT License (MIT)
  *
@@ -74,7 +75,7 @@ var igv = (function (igv) {
 
             .then(function (header) {
 
-                return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+                return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.windowFunction);
 
             });
     };
