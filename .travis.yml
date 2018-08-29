@@ -6,4 +6,4 @@ addons:
   chrome: stable
 before_script:
   - npm link
-script: npm test
+script: grunt doChromeTest
