@@ -21,7 +21,7 @@ module.exports = function (grunt) {
                   width: 1920,
                   height: 1080
                 },
-                qunitPage: "http://localhost/igv.js/test/helloQUnit.html"
+                qunitPage: 'http://127.0.0.1:8887/igv.js/test/runTests.html'
               }
             }
           },
