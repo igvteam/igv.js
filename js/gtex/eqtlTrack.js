@@ -235,13 +235,13 @@ var igv = (function (igv) {
      */
     igv.EqtlTrack.prototype.popupData = function (config) {
 
-        let features = config.viewport.getCachedFeatures();
+        let features = this.config.viewport.getCachedFeatures();
         if (!features || features.length === 0) return [];
 
-        let genomicLocation = config.genomicLocation,
-            xOffset = config.x,
-            yOffset = config.y,
-            referenceFrame = config.viewport.genomicState.referenceFrame,
+        let genomicLocation = this.config.genomicLocation,
+            xOffset = this.config.x,
+            yOffset = this.config.y,
+            referenceFrame = this.config.viewport.genomicState.referenceFrame,
             tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
             dotSize = this.dotSize,
             tissue = this.name,
@@ -309,13 +309,13 @@ var igv = (function (igv) {
             var values = featureList
                 .map(function (eqtl) {
                     return -Math.log(eqtl.value) / Math.LN10
-                })
+                });
 
             this.dataRange.max = igv.Math.percentile(values, this.autoscalePercentile);
         }
         else {
             // No features -- default
-            const max = config.maxLogP || config.max;
+            const max = this.config.maxLogP || this.config.max;
             this.dataRange.max = max || 25
         }
 
