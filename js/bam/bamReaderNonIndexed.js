@@ -62,7 +62,7 @@ var igv = (function (igv) {
         
         if (this.alignmentCache) {
 
-            return fetchAlignments(chr, bpStart, bpEnd);
+            return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
         }
 
         else {
