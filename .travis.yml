@@ -5,4 +5,4 @@ node_js:
 addons:
   chrome: stable
 before_script: npm install -g grunt-cli; npm ls
-script: grunt doChromeTest
+script: grunt doTestChrome
