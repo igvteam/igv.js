@@ -13,6 +13,7 @@ module.exports = function (grunt) {
             test: {
               options: {
                 headless: false,
+                noSandbox: true,
                 traceSettings: {
                   outputConsole: true,
                   outputAllAssertions: true
