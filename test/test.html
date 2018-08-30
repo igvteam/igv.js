@@ -73,25 +73,24 @@
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
+        const igvDiv = document.getElementById("igvDiv");
 
-        igvtest.createTrackList(document.getElementById('trackList'))
-                .then(function (igore) {
-                    return igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-                })
+        const options = {
+            genome: "hg19",
+            flanking: 1000,
+            queryParametersSupported: true
+        };
 
-                .then(function (google) {
+        igv.createBrowser(igvDiv, options)
 
-                    const igvDiv = document.getElementById("igvDiv");
+            .then(function (browser) {
+                return igvtest.createTrackList(document.getElementById('trackList'), browser)
+            })
 
-                    const options = {
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true
-                    };
+            .then(function (igore) {
+                return igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+            })
 
-                    igv.createBrowser(igvDiv, options);
-
-                })
     });
 
 
