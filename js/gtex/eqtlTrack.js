@@ -235,13 +235,13 @@ var igv = (function (igv) {
      */
     igv.EqtlTrack.prototype.popupData = function (config) {
 
-        let features = this.config.viewport.getCachedFeatures();
+        let features = config.viewport.getCachedFeatures();
         if (!features || features.length === 0) return [];
 
-        let genomicLocation = this.config.genomicLocation,
-            xOffset = this.config.x,
-            yOffset = this.config.y,
-            referenceFrame = this.config.viewport.genomicState.referenceFrame,
+        let genomicLocation = config.genomicLocation,
+            xOffset = config.x,
+            yOffset = config.y,
+            referenceFrame = config.viewport.genomicState.referenceFrame,
             tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
             dotSize = this.dotSize,
             tissue = this.name,
