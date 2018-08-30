@@ -355,7 +355,7 @@ var igv = (function (igv) {
         }
 
         // zoom widget
-        zoomWidget(browser, $igv_nav_bar_right_container);
+        browser.zoomWidget = new igv.ZoomWidget(browser, $igv_nav_bar_right_container);
 
         // $karyo = $('#igvKaryoDiv');
         // if (undefined === $karyo.get(0)) {
@@ -370,36 +370,6 @@ var igv = (function (igv) {
         return $controls.get(0);
     }
 
-    function zoomWidget(browser, $parent) {
-
-        var $div,
-            $fa;
-
-        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
-
-        browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
-
-        $parent.append(browser.$zoomContainer);
-
-        // zoom out
-        $div = $('<i>');
-        browser.$zoomContainer.append($div);
-        $fa = igv.createIcon("minus-circle");
-        $div.append($fa);
-        $div.on('click', function () {
-            browser.zoomOut();
-        });
-
-        // zoom in
-        $div = $('<i>');
-        browser.$zoomContainer.append($div);
-        $fa = igv.createIcon("plus-circle");
-        $div.append($fa);
-        $div.on('click', function () {
-            browser.zoomIn();
-        });
-
-    }
 
     function setDefaults(config) {
 
