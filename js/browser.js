@@ -854,12 +854,12 @@ var igv = (function (igv) {
 
         // Minimal attempt at responsiveness
         const rootWidth = this.$root.width();
-        if(rootWidth < 1000) {
+        if (rootWidth < 1000) {
             this.chromosomeSelectWidget.$container.hide();
             this.$root.find(".igv-nav-bar-toggle-button-container").hide();
         }
         else {
-            if(this.config.showChromosomeWidget) {
+            if (this.config.showChromosomeWidget) {
                 this.chromosomeSelectWidget.$container.show();
             }
             this.$root.find(".igv-nav-bar-toggle-button-container").show();
@@ -872,8 +872,8 @@ var igv = (function (igv) {
         if (this.genomicStateList && viewportWidth > 0) {
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
-                if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.end) {
-                    referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth;
+                if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.initialEnd) {
+                    referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth;
                 }
             })
         }
@@ -1893,6 +1893,7 @@ var igv = (function (igv) {
         results = eventHandler.map(function (event) {
             return event.apply(scope, args);
         });
+
 
         return results[0];
 

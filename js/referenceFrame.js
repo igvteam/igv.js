@@ -32,7 +32,7 @@ var igv = (function (igv) {
         this.genome = genome;
         this.chrName = chrName;
         this.start = start;
-        this.end = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+        this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
         this.bpPerPixel = bpPerPixel;
     };
 
@@ -51,7 +51,6 @@ var igv = (function (igv) {
     };
 
     igv.ReferenceFrame.prototype.toPixels = function (bp) {
-        // TODO -- do we really need ot round this?
         return bp / this.bpPerPixel;
     };
 
