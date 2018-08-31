@@ -2,25 +2,26 @@ module.exports = function (grunt) {
 
     // 1. All configuration goes here
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('package.json'),
 
-        concat: {
-            igv_build: {
-                src: [
-                    'wrapper/header.js',
-                    'tmp/embedCss.js',
-                    'vendor/jquery-3.3.1.slim.js',
-                    'vendor/underscore.js',
-                    'vendor/zlib_and_gzip.js',
-                    'vendor/inflate.js',
-                    'vendor/jquery.mousewheel.js',
-                    'vendor/rbtree.js',
-                    'vendor/tdigest.js',
-                    'build/**/*.js',
-                    'wrapper/footer.js'
-                ],
-                dest: 'dist/igv.build.js'
+        babel: {
+            options: {
+                presets: ['env']
             },
+            dist: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'js/',
+                        src: ['**/*.js'],
+                        dest: 'build/'
+                    }
+                ]
+            }
+        },
+
+        concat: {
             igv: {
                 src: [
                     'wrapper/header.js',
@@ -32,7 +33,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'js/**/*.js',
+                    'build/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
@@ -105,9 +106,11 @@ module.exports = function (grunt) {
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
+    grunt.loadNpmTasks('babel-core');
+    grunt.loadNpmTasks('grunt-babel');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_es6', 'concat:igv_build' ]);
+    grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_es6']);
 
     grunt.registerTask('doc', ['md2html']);
 
