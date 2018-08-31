@@ -740,7 +740,8 @@ var igv = (function (igv) {
             newTrackViews = [];
 
         this.trackViews.forEach(function (tv) {
-            if (tv.track.removable !== false) {
+
+            if (!(tv.track.id === 'sequence' || tv.track.id === 'ruler')) {
                 self.trackContainerDiv.removeChild(tv.trackDiv);
                 self.fireEvent('trackremoved', [tv.track]);
                 tv.dispose();
