@@ -5,6 +5,22 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         concat: {
+            igv_build: {
+                src: [
+                    'wrapper/header.js',
+                    'tmp/embedCss.js',
+                    'vendor/jquery-3.3.1.slim.js',
+                    'vendor/underscore.js',
+                    'vendor/zlib_and_gzip.js',
+                    'vendor/inflate.js',
+                    'vendor/jquery.mousewheel.js',
+                    'vendor/rbtree.js',
+                    'vendor/tdigest.js',
+                    'build/**/*.js',
+                    'wrapper/footer.js'
+                ],
+                dest: 'dist/igv.build.js'
+            },
             igv: {
                 src: [
                     'wrapper/header.js',
@@ -91,7 +107,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_esm']);
+    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_es6', 'concat:igv_build' ]);
 
     grunt.registerTask('doc', ['md2html']);
 
@@ -106,7 +122,7 @@ module.exports = function (grunt) {
         ping = pong.replace(/"/g, '\\"');
 
         foo = grunt.file.read('wrapper/embedCss.js');
-        foo = foo.replace('_CSS_', ping)
+        foo = foo.replace('_CSS_', ping);
 
         grunt.file.write('tmp/embedCss.js', foo);
     });

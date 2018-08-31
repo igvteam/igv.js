@@ -30,8 +30,13 @@
     "type": "git",
     "url": "git+https://github.com/igvteam/igv.js.git"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/preset-env": "^7.0.0"
+  },
   "dependencies": {
+    "@babel/polyfill": "^7.0.0",
     "grunt": "^1.0.3",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify-es": "^3.3.0"
