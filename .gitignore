@@ -1,4 +1,5 @@
 .DS_Store
+/build/
 /.idea/
 /igv.js.iml
 /node_modules/.bin/cake

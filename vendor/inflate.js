@@ -410,7 +410,7 @@ Inflate.prototype.inflateInit = function(z, w){
     this.blocks = null;
 
     // handle undocumented nowrap option (no zlib header or check)
-    let nowrap = 0;
+    var nowrap = 0;
     if(w < 0){
       w = - w;
       nowrap = 1;
