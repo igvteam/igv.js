@@ -15,7 +15,7 @@ module.exports = function (grunt) {
                         expand: true,
                         cwd: 'js/',
                         src: ['**/*.js'],
-                        dest: 'build/'
+                        dest: 'es5/'
                     }
                 ]
             }
@@ -33,7 +33,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'build/**/*.js',
+                    'es5/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
