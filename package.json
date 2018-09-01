@@ -36,9 +36,7 @@
     "@babel/preset-env": "^7.0.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
-    "grunt-babel": "^7.0.0"
-  },
-  "dependencies": {
+    "grunt-babel": "^7.0.0",
     "@babel/polyfill": "^7.0.0",
     "grunt": "^1.0.3",
     "grunt-contrib-concat": "^1.0.1",
