@@ -101,6 +101,8 @@ module.exports = function (grunt) {
             }
         },
 
+        clean: ['es5', 'tmp']
+
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
@@ -108,9 +110,10 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('babel-core');
     grunt.loadNpmTasks('grunt-babel');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_es6']);
+    grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_es6', 'clean']);
 
     grunt.registerTask('doc', ['md2html']);
 
