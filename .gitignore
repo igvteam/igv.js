@@ -1,4 +1,5 @@
 .DS_Store
+/dist/
 /es5/
 /.idea/
 /igv.js.iml
