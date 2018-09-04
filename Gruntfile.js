@@ -22,14 +22,19 @@ module.exports = function (grunt) {
                   width: 1920,
                   height: 1080
                 },
-                qunitPage: 'http://127.0.0.1:8887/igv.js/test/runTests.html'
+                qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
               }
             }
           },
 
-        connect: {
-            uses_defaults: {}
-        },
+          connect: {
+            server: {
+              options: {
+                port: 8000,
+                base: '.'
+              }
+            }
+          },
 
         concat: {
             igv: {
@@ -117,13 +122,14 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
+    grunt.loadNpmTasks('grunt-contrib-connect');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_esm']);
 
     grunt.registerTask('doc', ['md2html']);
 
-    grunt.registerTask('doTestChrome', ['qunit_puppeteer:test']);
+    grunt.registerTask('doTestChrome', ['connect', 'qunit_puppeteer:test']);
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
