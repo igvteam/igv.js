@@ -12,7 +12,7 @@ module.exports = function (grunt) {
           qunit_puppeteer: {
             test: {
               options: {
-                headless: false,
+                headless: true,
                 noSandbox: true,
                 traceSettings: {
                   outputConsole: true,

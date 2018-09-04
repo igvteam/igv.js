@@ -17,7 +17,6 @@
   "bugs": {
     "url": "https://github.com/igvteam/igv.js/issues"
   },
-  "bundleDependencies": false,
   "deprecated": false,
   "homepage": "https://igv.org",
   "keywords": [
