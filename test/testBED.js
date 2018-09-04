@@ -9,7 +9,9 @@ function runBedTests() {
     }
 
 
-    asyncTest("Missing line feed  - gzipped", function () {
+    QUnit.test("Missing line feed  - gzipped", function(assert) {
+
+        var done = assert.async();
 
         var chr = "chr1",
             bpStart = 0,
@@ -25,16 +27,19 @@ function runBedTests() {
         featureSource.getFeatures(chr, bpStart, bpEnd)
             .then(function (features) {
 
-                equal(4, features.length);   // feature count. Determined by grepping file
+                assert.equal(4, features.length);   // feature count. Determined by grepping file
 
-                start();
+                done();
             })
             .catch(function (error) {
                 console.log(error);
             });
     });
 
-    asyncTest("Missing line feed  - block gzipped", function () {
+    QUnit.test("Missing line feed  - block gzipped", function(assert) {
+
+        var done = assert.async();
+
         var config = {
             format: 'bed',
             url: 'data/bed/missing_linefeed.bed.gz',
@@ -53,9 +58,9 @@ function runBedTests() {
                 tb.readFeatures(chr, bpStart, bpEnd)
                     .then(function (features) {
 
-                        equal(4, features.length);   // feature count. Determined by grepping file
+                        assert.equal(4, features.length);   // feature count. Determined by grepping file
 
-                        start();
+                        done();
                     });
             })
             .catch(function (error) {
@@ -66,7 +71,9 @@ function runBedTests() {
     });
 
 
-    asyncTest("BED query", function () {
+    QUnit.test("BED query", function(assert) {
+
+        var done = assert.async();
 
         var chr = "chr1",
             bpStart = 67655271,
@@ -82,18 +89,20 @@ function runBedTests() {
         featureSource.getFileHeader().then(function (header) {
             featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-                ok(features);
-                equal(128, features.length);   // feature count. Determined by grepping file
-                equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
+                assert.ok(features);
+                assert.equal(128, features.length);   // feature count. Determined by grepping file
+                assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
-                start();
+                done();
             }, undefined);
         }).catch(function (error) {
             console.log(error);
         });
     });
 
-    asyncTest("BED track line", function () {
+    QUnit.test("BED track line", function(assert) {
+
+        var done = assert.async();
 
         var featureSource = new igv.FeatureSource({
                 format: 'bed',
@@ -104,15 +113,17 @@ function runBedTests() {
 
         featureSource.getFileHeader().then(function (header) {
 
-            ok(header);
-            equal(header.name, "Basic Features");
-            equal(header.color, "255,0,0");
-            start();
+            assert.ok(header);
+            assert.equal(header.name, "Basic Features");
+            assert.equal(header.color, "255,0,0");
+            done();
         });
 
     });
 
-    asyncTest("BED query gzip", function () {
+    QUnit.test("BED query gzip", function(assert) {
+
+        var done = assert.async();
 
         var chr = "chr1",
             bpStart = 67655271,
@@ -125,16 +136,18 @@ function runBedTests() {
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
-            equal(128, features.length);   // feature count. Determined by grepping file
-            equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
+            assert.ok(features);
+            assert.equal(128, features.length);   // feature count. Determined by grepping file
+            assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
-            start();
+            done();
         }, undefined);
 
     });
 
-    asyncTest("broadPeak parsing ", function () {
+    QUnit.test("broadPeak parsing ", function(assert) {
+
+        var done = assert.async();
 
         var featureSource,
             chr,
@@ -153,24 +166,26 @@ function runBedTests() {
 
             var feature;
 
-            ok(features);
-            equal(features.length, 100);   // # of features over this region
+            assert.ok(features);
+            assert.equal(features.length, 100);   // # of features over this region
 
             feature = features[0];
-            equal(chr, feature.chr);
+            assert.equal(chr, feature.chr);
 
-            equal(feature.start, 16847690);
-            ok(feature.end > bpStart);
-            equal(feature.signal, 5.141275);
+            assert.equal(feature.start, 16847690);
+            assert.ok(feature.end > bpStart);
+            assert.equal(feature.signal, 5.141275);
 
-            start();
+            done();
 
         }, undefined);
 
     });
 
 
-    asyncTest("refflat parsing ", function () {
+    QUnit.test("refflat parsing ", function(assert) {
+
+        var done = assert.async();
 
         var featureSource,
             chr,
@@ -190,25 +205,27 @@ function runBedTests() {
 
             var feature;
 
-            ok(features);
-            equal(10, features.length);   // # of features over this region
+            assert.ok(features);
+            assert.equal(10, features.length);   // # of features over this region
 
             feature = features[0];
-            equal("GJA9-MYCBP", feature.name);
-            equal(chr, feature.chr);
+            assert.equal("GJA9-MYCBP", feature.name);
+            assert.equal(chr, feature.chr);
 
-            equal(39328161, feature.start);
-            ok(feature.end > bpStart);
-            equal(7, feature.exons.length);
+            assert.equal(39328161, feature.start);
+            assert.ok(feature.end > bpStart);
+            assert.equal(7, feature.exons.length);
 
-            start();
+            done();
 
         }, undefined);
 
     });
 
 
-    asyncTest("genepred parsing ", function () {
+    QUnit.test("genepred parsing ", function(assert) {
+
+        var done = assert.async();
 
         var featureSource,
             chr,
@@ -228,25 +245,27 @@ function runBedTests() {
 
             var feature;
 
-            ok(features);
-            equal(7, features.length);   // # of features over this region
+            assert.ok(features);
+            assert.equal(7, features.length);   // # of features over this region
 
             feature = features[0];
-            equal("uc022bbe.2", feature.name);
-            equal(chr, feature.chr);
+            assert.equal("uc022bbe.2", feature.name);
+            assert.equal(chr, feature.chr);
 
-            equal(127735433, feature.start);
-            ok(feature.end > bpStart);
-            equal(3, feature.exons.length);
+            assert.equal(127735433, feature.start);
+            assert.ok(feature.end > bpStart);
+            assert.equal(3, feature.exons.length);
 
-            start();
+            done();
 
         }, undefined);
 
     });
 
 
-    asyncTest("refgene parsing ", function () {
+    QUnit.test("refgene parsing ", function(assert) {
+
+        var done = assert.async();
 
         var featureSource,
             chr,
@@ -266,18 +285,18 @@ function runBedTests() {
 
             var feature;
 
-            ok(features);
-            equal(10, features.length);   // # of features over this region
+            assert.ok(features);
+            assert.equal(10, features.length);   // # of features over this region
 
             feature = features[0];
-            equal("GJA9-MYCBP", feature.name);
-            equal(chr, feature.chr);
+            assert.equal("GJA9-MYCBP", feature.name);
+            assert.equal(chr, feature.chr);
 
-            equal(39328161, feature.start);
-            ok(feature.end > bpStart);
-            equal(3, feature.exons.length);
+            assert.equal(39328161, feature.start);
+            assert.ok(feature.end > bpStart);
+            assert.equal(3, feature.exons.length);
 
-            start();
+            done();
 
         }, undefined);
 

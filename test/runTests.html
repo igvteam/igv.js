@@ -12,10 +12,12 @@
     <script type="text/javascript" src="vendor/qunit.js"></script>
 
     <script type="text/javascript" src="testBigwig.js"></script>
-    <!-- <script type="text/javascript" src="testBAM.js"></script>
+    <script type="text/javascript" src="testBAM.js"></script>
+    <!--
     <script type="text/javascript" src="testBamIndex.js"></script>
-    <script type="text/javascript" src="testAED.js"></script>
+    <script type="text/javascript" src="testAED.js"></script> -->
     <script type="text/javascript" src="testBED.js"></script>
+    <!--
     <script type="text/javascript" src="testBEDGraph.js"></script>
     <script type="text/javascript" src="testWig.js"></script>
     <script type="text/javascript" src="testGFF.js"></script>
@@ -43,10 +45,10 @@
     document.addEventListener('DOMContentLoaded', function () {
 
         runBigwigTests();
-        // runBAMTests();
+        runBAMTests();
         // runBAMIndexTests();
         // runAedTests();
-        // runBedTests();
+        runBedTests();
         // runBEDGraphTests();
         // runBufferedReaderTests();
         // runCoverageColoredRenderingTests();
