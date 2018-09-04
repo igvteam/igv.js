@@ -65,17 +65,17 @@
     $(document).ready(function () {
 
 
-        const HASH_PREFIX = "#/locus/";
-        const currentHash = window.location.hash;
-        const locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
+        var HASH_PREFIX = "#/locus/";
+        var currentHash = window.location.hash;
+        var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
 
-        const options = {
+        var options = {
             locus: locus,
             genome: "hg19"
         };
 
-        const $igv = $("#igvDiv");
-        const browser = igv.createBrowser($igv.get(0), options)
+        var $igv = $("#igvDiv");
+        var browser = igv.createBrowser($igv.get(0), options)
 
                 .then(function (browser) {
                     console.log("Created IGV browser");
