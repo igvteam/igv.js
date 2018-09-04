@@ -25,7 +25,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
+        var options =
         {
             genome: "hg19",
             locus: ["myc", "chr1:155,157,300-155,163,706"],
@@ -40,7 +40,7 @@
             ]
         };
 
-        const igvDiv = document.getElementById("igv-div");
+        var igvDiv = document.getElementById("igv-div");
 
         igv.createBrowser(igvDiv, options)
                 .then(function (browser) {

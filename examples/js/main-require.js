@@ -14,9 +14,9 @@ requirejs.config({
 requirejs(['igv.min'], function (igv) {
 
 
-    const igvDiv = document.getElementById("igv-div");
+    var igvDiv = document.getElementById("igv-div");
     
-    const options =
+    var options =
     {
         showNavigation: true,
         showRuler: true,
