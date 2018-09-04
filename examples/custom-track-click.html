@@ -71,7 +71,7 @@
 
     $(document).ready(function () {
 
-       const options =
+       var options =
         {
             showNavigation: true,
             locus: "chr1:155,160,475-155,184,282",
@@ -88,13 +88,13 @@
             ]
         };
 
-        const igv_custom_track_click = $('#igv-custom-track-click');
+        var igv_custom_track_click = $('#igv-custom-track-click');
 
         igv.createBrowser(igv_custom_track_click.get(0), options)
 
                 .then(function (browser) {
 
-                    let genesInList = {};
+                    var genesInList = {};
 
                     browser.on('trackclick', function (track, popoverData) {
                         var symbol = null;

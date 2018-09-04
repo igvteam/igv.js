@@ -28,12 +28,12 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
+        var options =
         {
             genome: "hg19",
             locus: "muc1",
             // Insert your applications api key here,  or use OAuth
-            apiKey: 'GOOGLE_API_KEY',
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
             tracks: [
                 {
                     sourceType: 'ga4gh',
@@ -61,7 +61,7 @@
             ]
         };
 
-        const igvDiv = document.getElementById("igv-div");
+        var igvDiv = document.getElementById("igv-div");
 
         igv.createBrowser(igvDiv, options)
 
