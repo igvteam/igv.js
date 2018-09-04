@@ -104,13 +104,13 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
+        var options =
             {
                 locus: "chr1:155,160,475-155,184,282",
                 genome: "hg19"
             };
 
-        const igv_example_api = document.getElementById('igv-api-example');
+        var igv_example_api = document.getElementById('igv-api-example');
 
         igv.createBrowser(igv_example_api, options)
                 .then(function (browser) {
