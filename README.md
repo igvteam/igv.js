@@ -85,7 +85,7 @@ Building igv.js and running the examples requires [node.js](https://nodejs.org/)
 
 
 ```  
-git clone git@github.com:igvteam/igv.js.git
+git clone https://github.com/igvteam/igv.js.git
 npm install
 grunt
 ```
