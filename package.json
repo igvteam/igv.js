@@ -7,8 +7,8 @@
     "dist/**"
   ],
   "scripts": {
-    "grunt": "node_modules/grunt/bin/grunt",
-    "prepublish": "node_modules/grunt/bin/grunt",
+    "grunt": "node node_modules/grunt/bin/grunt",
+    "prepack": "node_modules/grunt/bin/grunt",
     "http-server": "node_modules/http-server/bin/http-server ."
   },
   "author": {
@@ -47,6 +47,7 @@
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify-es": "^3.3.0",
-    "http-server": "^0.8.0"
+    "http-server": "^0.8.0",
+    "shelljs": "^0.8.2"
   }
 }
