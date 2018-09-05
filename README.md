@@ -86,8 +86,9 @@ Building igv.js and running the examples requires [node.js](https://nodejs.org/)
 
 ```  
 git clone https://github.com/igvteam/igv.js.git
+cd igv.js
 npm install
-grunt
+npm run grunt
 ```
 
 This creates a dist folder with the following files
@@ -100,7 +101,7 @@ This creates a dist folder with the following files
 
 To run the tests start an [http-server](https://www.npmjs.com/package/http-server)
 
-    http-server
+    npm run http-server
 
 Then open [http://localhost:8080/test/runTests.html](http://localhost:8080/test/runTests.html).
 
@@ -109,7 +110,7 @@ Then open [http://localhost:8080/test/runTests.html](http://localhost:8080/test/
 
 To run the examples start an [http-server](https://www.npmjs.com/package/http-server)
 
-    http-server
+    npm run http-server
 
 Then open [http://localhost:8080/index.html](http://localhost:8080/index.html).
 
