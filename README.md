@@ -7,9 +7,13 @@ igv.js is an embeddable interactive genome visualization component developed by 
  
  ***Examples***
  
-***[Alignments viewer](http://igv.org/web/test/examples/bam.html)***
+***[Alignments](https://igv.org/web/test/examples/bam.html)***
 
-***[Copy number viewer](http://igv.org/web/test/examples/copyNumber.html)***
+***[GA4GH](https://igv.org/web/test/examples/ga4gh.html)***
+
+***[Copy number](https://igv.org/web/test/examples/copyNumber.html)***
+
+***[Multiple regions](http://igv.org/web/test/examples/multi-locus.html)***
 
 ***[More](http://igv.org/web/test/examples)***
  
@@ -78,6 +82,14 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for full documentation of
 
 
 ## Development
+
+### Requirements
+
+Building igv.js and running the examples require Linux or MacOS.  Other Unix environments will probably
+work but have not been tested.  
+
+Windows users can use [Cygwin](https://www.cygwin.com/) or 
+ [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ### Building
 
