@@ -41,13 +41,6 @@ function initClient() {
                 genome: "hg19",
                 locus: 'myc',
                 apiKey: igv.Google.properties["api_key"],
-                tracks: [
-                    {
-                        url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                        name: "Genes",
-                        order: 10000
-                    }
-                ]
             };
 
             browser = igv.createBrowser(div, options);
