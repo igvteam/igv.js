@@ -8,7 +8,7 @@
   ],
   "scripts": {
     "grunt": "node_modules/grunt/bin/grunt",
-    "prepack": "node_modules/grunt/bin/grunt",
+    "prepublish": "node_modules/grunt/bin/grunt",
     "http-server": "node_modules/http-server/bin/http-server ."
   },
   "author": {
