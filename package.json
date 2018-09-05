@@ -10,10 +10,13 @@
     "prepack": "grunt"
   },
   "author": {
-    "name": "Jim Robinson",
-    "email": "igv-team@broadinstitute.org",
-    "url": "https://igv.org"
+    "name": "Jim Robinson"
   },
+  "contributors": [
+    {
+      "name": "Douglass Turner"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/igvteam/igv.js/issues"
   },
@@ -41,6 +44,7 @@
     "grunt-babel": "^7.0.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.1",
-    "grunt-contrib-uglify-es": "^3.3.0"
+    "grunt-contrib-uglify-es": "^3.3.0",
+    "http-server": "^0.8.0"
   }
 }
