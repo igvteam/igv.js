@@ -157,7 +157,7 @@ function runBigwigTests() {
     asyncTest("Uncompressed bigwig", function () {
 
         //chr21:19,146,376-19,193,466
-        var url =  dataURL + "bigwig/uncompressed.bw",
+        var url =  "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
             chr = "chr21",
             bpStart = 0,
             bpEnd = Number.MAX_SAFE_INTEGER,
