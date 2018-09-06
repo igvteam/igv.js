@@ -525,6 +525,10 @@ var igv = (function (igv) {
 
         });
 
+        this.$viewport.on('touchstart', function (e) {
+           browser.mouseDownOnViewport(e, self);
+        });
+
 
         /**
          * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
