@@ -2147,24 +2147,31 @@ var igv = (function (igv) {
 
             else {
                 // Assuming 1 finger movement is a drag
+                if (self.vpMouseDown) {
+                    const coords = translateTouchCoordinates(ev.targetTouches[0], el);
+                    const viewport = self.vpMouseDown.viewport;
+                    const viewportWidth = viewport.$viewport.width();
+                    const referenceFrame = viewport.genomicState.referenceFrame;
 
-                const touchCoords = translateTouchCoordinates(ev.targetTouches[0], el);
-                const offsetX = touchCoords.x;
-                const offsetY = touchCoords.y;
-                if (lastTouch) {
-                    const dx = lastTouch.x - offsetX;
-                    const dy = lastTouch.y - offsetY;
-                    if (!isNaN(dx) && !isNaN(dy)) {
-                        self.shiftPixels(dx, dy);
+                    if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
+                        self.isDragging = true;
+                        viewport.isDragging = true;
                     }
-                }
 
-                lastTouch = {
-                    x: offsetX,
-                    y: offsetY,
-                    timeStamp: ev.timeStamp || Date.now(),
-                    count: ev.targetTouches.length
-                };
+                    if (viewport.isDragging) {
+
+                        referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
+
+                        self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
+
+                        self.updateViews();
+
+                        self.fireEvent('trackdrag');
+
+                    }
+
+                    self.vpMouseDown.lastMouseX = coords.x;
+                }
             }
 
         }
