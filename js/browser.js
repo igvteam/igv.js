@@ -58,7 +58,6 @@ var igv = (function (igv) {
         this.eventHandlers = {};
 
         addMouseHandlers.call(this);
-        addTouchHandlers.call(this);
 
     };
 
@@ -1901,21 +1900,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.mouseDownOnViewport = function (e, viewport) {
-
-        var coords;
-
-        coords = igv.pageCoordinates(e);
-
-        this.vpMouseDown = {
-            viewport: viewport,
-            lastMouseX: coords.x,
-            mouseDownX: coords.x,
-            genomicState: viewport.genomicState,
-            referenceFrame: viewport.genomicState.referenceFrame
-        };
-    };
-
     igv.Browser.prototype.dispose = function () {
 
         $(window).off(this.window_resize_browser_str);
@@ -2045,6 +2029,31 @@ var igv = (function (igv) {
         this.alertDialog.present($parent);
     };
 
+
+    /**
+     * Record a mouse click on a specific viewport.   This might be the start of a drag operation.   Dragging
+     * (panning) is handled here so that the mouse can move out of a specific viewport (e.g. stray into another
+     * track) without halting the drag.
+     *
+     * @param e
+     * @param viewport
+     */
+    igv.Browser.prototype.mouseDownOnViewport = function (e, viewport) {
+
+        var coords;
+        coords = igv.pageCoordinates(e);
+        this.vpMouseDown = {
+            viewport: viewport,
+            lastMouseX: coords.x,
+            mouseDownX: coords.x,
+            genomicState: viewport.genomicState,
+            referenceFrame: viewport.genomicState.referenceFrame
+        };
+    };
+
+    /**
+     * Mouse handlers to support drag (pan)
+     */
     function addMouseHandlers() {
 
         var self = this;
@@ -2061,7 +2070,21 @@ var igv = (function (igv) {
             }
         });
 
-        $(this.trackContainerDiv).on('mousemove', function (e) {
+        $(this.trackContainerDiv).on('mousemove', handleMouseMove);
+
+        $(this.trackContainerDiv).on('touchmove', handleMouseMove);
+
+        $(this.trackContainerDiv).on('mouseleave', function (e) {
+            mouseUpOrLeave(e);
+        });
+
+        $(this.trackContainerDiv).on('mouseup', function (e) {
+            mouseUpOrLeave(e);
+        });
+
+        $(this.trackContainerDiv).on('touchend', mouseUpOrLeave)
+
+        function handleMouseMove (e) {
 
             var coords, viewport, viewportWidth, referenceFrame;
 
@@ -2097,17 +2120,7 @@ var igv = (function (igv) {
 
                 self.vpMouseDown.lastMouseX = coords.x;
             }
-
-        });
-
-        $(this.trackContainerDiv).on('mouseleave', function (e) {
-            mouseUpOrLeave(e);
-        });
-
-        $(this.trackContainerDiv).on('mouseup', function (e) {
-            mouseUpOrLeave(e);
-
-        });
+        }
 
         function mouseUpOrLeave(e) {
 
@@ -2124,69 +2137,6 @@ var igv = (function (igv) {
         }
 
     }
-
-    function addTouchHandlers() {
-
-        const self = this;
-        const el = this.trackContainerDiv;
-
-        $(this.trackContainerDiv).on('touchmove', function (ev) {
-
-            ev.preventDefault();
-            ev.stopPropagation();
-
-            if (ev.targetTouches.length === 2) {
-
-                // Update pinch  (assuming 2 finger movement is a pinch)
-
-            }
-
-            else {
-                // Assuming 1 finger movement is a drag
-                if (self.vpMouseDown) {
-
-                    const coords = igv.pageCoordinates(e);
-                    const viewport = self.vpMouseDown.viewport;
-                    const viewportWidth = viewport.$viewport.width();
-                    const referenceFrame = viewport.genomicState.referenceFrame;
-
-                    if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                        self.isDragging = true;
-                        viewport.isDragging = true;
-                    }
-
-                    if (viewport.isDragging) {
-
-                        referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
-
-                        self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
-
-                        self.updateViews();
-
-                        self.fireEvent('trackdrag');
-
-                    }
-
-                    self.vpMouseDown.lastMouseX = coords.x;
-                }
-            }
-        });
-
-        $(this.trackContainerDiv).on('touchend', function (ev) {
-            ev.preventDefault();
-
-            if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
-                self.vpMouseDown.viewport.isDragging = false;
-                self.isDragging = false;
-                self.updateViews();
-                self.fireEvent('trackdragend');
-            }
-            self.vpMouseDown = undefined;
-        });
-
-
-    }
-
 
     return igv;
 })

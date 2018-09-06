@@ -105,7 +105,10 @@ var igv = (function (igv) {
                 } else {
                     str = trackView.track.name;
                 }
-                self.popover.presentContent(e.pageX, e.pageY, str);
+
+                const page = igv.pageCoordinates(e);
+
+                self.popover.presentContent(page.x, page.y, str);
 
             });
             this.$trackLabel.mousedown(function (e) {
@@ -520,24 +523,24 @@ var igv = (function (igv) {
          * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
          */
         this.$viewport.on('mousedown', function (e) {
-            mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             browser.mouseDownOnViewport(e, self);
 
         });
 
         this.$viewport.on('touchstart', function (e) {
-           browser.mouseDownOnViewport(e, self);
+            browser.mouseDownOnViewport(e, self);
         });
 
+        this.$viewport.on('touchend',  handleMouseUp);
 
         /**
          * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
          * those, it is a click.
          */
-        this.$viewport.on('mouseup', function (e) {
+        this.$viewport.on('mouseup', handleMouseUp);
 
-
-            if (3 === e.which || e.ctrlKey || self.isDragging || mouseDownX === undefined) {
+        function handleMouseUp(e) {
+            if (3 === e.which || e.ctrlKey || self.isDragging) {
                 return;
             }
 
@@ -606,17 +609,8 @@ var igv = (function (igv) {
                 }
             }
 
-            mouseDownX = lastMouseX = undefined;
             lastClickTime = time;
-        });
-
-        /**
-         * Mouse has moved out of the viewport.  Cancel pending click.
-         */
-        this.$viewport.on('mouseout', function (e) {
-            mouseDownX = lastMouseX = lastClickTime = undefined;
-        });
-
+        }
 
         function createClickState(e, viewport) {
 

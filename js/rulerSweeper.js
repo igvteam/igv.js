@@ -91,7 +91,11 @@ var igv = (function (igv) {
                 shortName = (name.startsWith("chr")) ? name.substring(3) : name;
                 $e.text(shortName);
 
-                $div.on('click', function (e) {
+                $div.on('click', handleClick);
+                $div.on('touchend', handleClick);
+
+                function handleClick(e) {
+
                     var locusString,
                         loci;
 
@@ -110,7 +114,7 @@ var igv = (function (igv) {
                     }
 
                     browser.search(locusString);
-                });
+                }
             }
 
         });
@@ -165,7 +169,7 @@ var igv = (function (igv) {
 
             isMouseIn = true;
 
-            mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
+            mouseDown = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
 
             if (true === isMouseDown ) {
 
@@ -185,7 +189,7 @@ var igv = (function (igv) {
 
             if (isMouseDown && isMouseIn) {
 
-                mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
+                mouseCurrent = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
                 mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
                 mouseCurrent = Math.max(mouseCurrent, 0);
 
@@ -247,22 +251,7 @@ var igv = (function (igv) {
         return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
     }
 
-    function translateMouseCoordinates(e, $target) {
 
-        var eFixed,
-            posx,
-            posy;
-
-        eFixed = $.event.fix(e);
-
-        if (undefined === $target.offset()) {
-            console.log('igv.translateMouseCoordinates - $target.offset() is undefined.');
-        }
-        posx = eFixed.pageX - $target.offset().left;
-        posy = eFixed.pageY - $target.offset().top;
-
-        return { x: posx, y: posy }
-    }
 
     return igv;
 
