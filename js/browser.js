@@ -2129,12 +2129,8 @@ var igv = (function (igv) {
 
         const self = this;
         const el = this.trackContainerDiv;
-        let lastTouch;
 
-        el.addEventListener("touchmove", handleMove, false);
-
-
-        function handleMove(ev) {
+        $(this.trackContainerDiv).on('touchmove', function (ev) {
 
             ev.preventDefault();
             ev.stopPropagation();
@@ -2148,7 +2144,8 @@ var igv = (function (igv) {
             else {
                 // Assuming 1 finger movement is a drag
                 if (self.vpMouseDown) {
-                    const coords = translateTouchCoordinates(ev.targetTouches[0], el);
+
+                    const coords = igv.pageCoordinates(e);
                     const viewport = self.vpMouseDown.viewport;
                     const viewportWidth = viewport.$viewport.width();
                     const referenceFrame = viewport.genomicState.referenceFrame;
@@ -2173,17 +2170,20 @@ var igv = (function (igv) {
                     self.vpMouseDown.lastMouseX = coords.x;
                 }
             }
+        });
 
-        }
+        $(this.trackContainerDiv).on('touchend', function () {
+            e.preventDefault();
 
+            if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
+                self.vpMouseDown.viewport.isDragging = false;
+                self.isDragging = false;
+                self.updateViews();
+                self.fireEvent('trackdragend');
+            }
+            self.vpMouseDown = undefined;
+        });
 
-        function translateTouchCoordinates(e, target) {
-
-            const $target = $(target);
-            const posx = e.pageX - $target.offset().left;
-            const posy = e.pageY - $target.offset().top;
-            return {x: posx, y: posy}
-        }
 
     }
 
