@@ -2128,8 +2128,10 @@ var igv = (function (igv) {
     function addTouchHandlers() {
 
         const self = this;
+        const el = this.trackContainerDiv;
         let lastTouch;
-        this.trackContainerDiv.addEventListener("touchmove", handleMove, false);
+
+        el.addEventListener("touchmove", handleMove, false);
 
 
         function handleMove(ev) {
