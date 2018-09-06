@@ -57,6 +57,10 @@ var igv = (function (igv) {
                 colorHandler(rgb);
             });
 
+            $swatch.on('touchend',function () {
+                colorHandler(rgb);
+            });
+
         });
 
     };
