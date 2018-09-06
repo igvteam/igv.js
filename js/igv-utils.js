@@ -57,9 +57,8 @@ var igv = (function (igv) {
         $fa = igv.createIcon("times");
         $header.append($fa);
 
-        $fa.on('click', function (e) {
-            closeHandler();
-        });
+        $fa.on('click', closeHandler);
+        $fa.on('touchend', closeHandler);
 
         // $generic_container.draggable({handle: $header.get(0)});
         igv.makeDraggable($generic_container.get(0), $header.get(0));
@@ -166,6 +165,7 @@ var igv = (function (igv) {
         $container.append($fa);
 
         $fa.click(closeHandler);
+        $fa.on('touchstart', closeHandler)
 
     };
 
@@ -320,27 +320,31 @@ var igv = (function (igv) {
     igv.translateMouseCoordinates = function (e, target) {
 
         var $target = $(target),
-            eFixed,
             posx,
             posy;
-
-        // Sets pageX and pageY for browsers that don't support them
-        eFixed = $.event.fix(e);
 
         if (undefined === $target.offset()) {
             console.log('igv.translateMouseCoordinates - $target.offset() is undefined.');
         }
-        posx = eFixed.pageX - $target.offset().left;
-        posy = eFixed.pageY - $target.offset().top;
+
+        const pageCoordinates = igv.pageCoordinates(e);
+
+        posx = pageCoordinates.x - $target.offset().left;
+        posy = pageCoordinates.y - $target.offset().top;
 
         return {x: posx, y: posy}
     };
 
     igv.pageCoordinates = function (e) {
-        var eFixed;
-        // Sets pageX and pageY for browsers that don't support them
-        eFixed = $.event.fix(e);
-        return {x: eFixed.pageX, y: eFixed.pageY}
+
+        if(e.type.startsWith("touch")) {
+            const touch = e.changedTouches[0] || e.targetTouches[0];
+            return {x:touch.pageX, y:touch.pageY};
+        }
+        else {
+            return {x: e.pageX, y: e.pageY}
+        }
+
     }
 
     igv.splitStringRespectingQuotes = function (string, delim) {

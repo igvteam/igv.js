@@ -109,6 +109,7 @@ var igv = (function (igv) {
 
         igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
             self.setColor(rgb);
+            self.$colorpicker_container.hide();
         });
 
         this.$colorpicker_container.hide();
@@ -204,9 +205,13 @@ var igv = (function (igv) {
         $gearButton = igv.createWrappedIcon("cog");
         $(this.rightHandGutter).append($gearButton);
 
-        $gearButton.click(function (e) {
-            browser.popover.presentTrackGearMenu(e.pageX, e.pageY, self, browser);
-        });
+        $gearButton.click(handleClick);
+        $gearButton.on('touchend', handleClick);
+
+        function handleClick(e) {
+            const page = igv.pageCoordinates(e);
+            browser.popover.presentTrackGearMenu(page.x, page.y, self, browser);
+        }
 
     }
 
@@ -674,7 +679,9 @@ var igv = (function (igv) {
                 window:
                     {
                         up:'mouseup._window_.' + guid,
-                        move:'mousemove._window_.' + guid
+                        move:'mousemove._window_.' + guid,
+                        touchend: 'touchend._window_.' + guid,
+                        touchmove: 'touchmove._window_.' + guid
                     }
 
             };
@@ -694,8 +701,9 @@ var igv = (function (igv) {
             offY = event.pageY - $(this).position().top;
 
             $(window).on(self.mouseHandlers.window.move, mouseMove);
-
+            $(window).on(self.mouseHandlers.window.touchmove, mouseMove);
             $(window).on(self.mouseHandlers.window.up, mouseUp);
+            $(window).on(self.mouseHandlers.window.touchend, mouseUp);
 
             // <= prevents start of horizontal track panning)
             event.stopPropagation();
@@ -721,6 +729,8 @@ var igv = (function (igv) {
         function mouseUp(event) {
             $(window).off(self.mouseHandlers.window.up);
             $(window).off(self.mouseHandlers.window.move);
+            $(window).off(this.mouseHandlers.window.touchend);
+            $(window).off(this.mouseHandlers.window.touchmove);
         }
 
         function moveScrollerTo(y) {
@@ -752,6 +762,8 @@ var igv = (function (igv) {
     TrackScrollbar.prototype.dispose = function () {
         $(window).off(this.mouseHandlers.window.up);
         $(window).off(this.mouseHandlers.window.move);
+        $(window).off(this.mouseHandlers.window.touchend);
+        $(window).off(this.mouseHandlers.window.touchmove);
     };
 
     TrackScrollbar.prototype.update = function () {
