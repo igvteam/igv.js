@@ -58,6 +58,7 @@ var igv = (function (igv) {
         this.eventHandlers = {};
 
         addMouseHandlers.call(this);
+        addTouchHandlers.call(this);
 
     };
 
@@ -2123,6 +2124,60 @@ var igv = (function (igv) {
         }
 
     }
+
+    function addTouchHandlers() {
+
+        const self = this;
+        let lastTouch;
+        this.trackContainerDiv.addEventListener("touchmove", handleMove, false);
+
+
+        function handleMove(ev) {
+
+            ev.preventDefault();
+            ev.stopPropagation();
+
+            if (ev.targetTouches.length === 2) {
+
+                // Update pinch  (assuming 2 finger movement is a pinch)
+
+            }
+
+            else {
+                // Assuming 1 finger movement is a drag
+
+                const touchCoords = translateTouchCoordinates(ev.targetTouches[0], el);
+                const offsetX = touchCoords.x;
+                const offsetY = touchCoords.y;
+                if (lastTouch) {
+                    const dx = lastTouch.x - offsetX;
+                    const dy = lastTouch.y - offsetY;
+                    if (!isNaN(dx) && !isNaN(dy)) {
+                        self.shiftPixels(dx, dy);
+                    }
+                }
+
+                lastTouch = {
+                    x: offsetX,
+                    y: offsetY,
+                    timeStamp: ev.timeStamp || Date.now(),
+                    count: ev.targetTouches.length
+                };
+            }
+
+        }
+
+
+        function translateTouchCoordinates(e, target) {
+
+            const $target = $(target);
+            const posx = e.pageX - $target.offset().left;
+            const posy = e.pageY - $target.offset().top;
+            return {x: posx, y: posy}
+        }
+
+    }
+
 
     return igv;
 })
