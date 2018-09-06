@@ -2172,8 +2172,8 @@ var igv = (function (igv) {
             }
         });
 
-        $(this.trackContainerDiv).on('touchend', function () {
-            e.preventDefault();
+        $(this.trackContainerDiv).on('touchend', function (ev) {
+            ev.preventDefault();
 
             if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
                 self.vpMouseDown.viewport.isDragging = false;
