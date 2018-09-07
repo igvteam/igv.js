@@ -36,21 +36,7 @@ var igv = (function (igv) {
         $(viewport.contentDiv).append(this.$rulerSweeper);
 
         guid = igv.guid();
-
-        this.mouseHandlers =
-            {
-                document:
-                    {
-                        down:'mousedown._document_.' + guid,
-                        move:'mousemove._document_.' + guid,
-                          up:  'mouseup._document_.' + guid
-                    },
-                viewport:
-                    {
-                        down:'mousedown.viewport.' + guid
-                    }
-
-            };
+        this.namespace = '.sweeper_' + guid;
 
         this.addMouseHandlers();
     };
@@ -139,11 +125,8 @@ var igv = (function (igv) {
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
 
-        $(document).off(this.mouseHandlers.document.down);
-        $(document).off(this.mouseHandlers.document.move);
-        $(document).off(this.mouseHandlers.document.up);
-
-        this.viewport.$viewport.off(this.mouseHandlers.viewport.down);
+        $(document).off(this.namespace);
+        this.viewport.$viewport.off(this.namespace);
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -165,7 +148,7 @@ var igv = (function (igv) {
 
         threshold = 1;
 
-        $(document).on(this.mouseHandlers.document.down, function (e) {
+        $(document).on('mousedown' + this.namespace, function (e) {
 
             isMouseIn = true;
 
@@ -184,7 +167,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(this.mouseHandlers.document.move, function (e) {
+        $(document).on('mousemove' + this.namespace, function (e) {
             var mouseCurrent;
 
             if (isMouseDown && isMouseIn) {
@@ -207,7 +190,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(this.mouseHandlers.document.up, function (e) {
+        $(document).on('mouseup' + this.namespace, function (e) {
 
             var extent;
 
@@ -235,7 +218,7 @@ var igv = (function (igv) {
 
         });
 
-        this.viewport.$viewport.on(this.mouseHandlers.viewport.down, function (e) {
+        this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
 
             isMouseDown = true;
         });
