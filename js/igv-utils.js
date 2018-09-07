@@ -338,7 +338,7 @@ var igv = (function (igv) {
     igv.pageCoordinates = function (e) {
 
         if(e.type.startsWith("touch")) {
-            const touch = e.changedTouches[0] || e.targetTouches[0];
+            const touch = e.touches[0];
             return {x:touch.pageX, y:touch.pageY};
         }
         else {
