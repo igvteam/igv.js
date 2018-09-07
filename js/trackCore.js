@@ -559,10 +559,6 @@ var igv = (function (igv) {
                         $popover.hide();
                     });
 
-                    $e.on('touchend', function () {
-                        item.click();
-                        $popover.hide();
-                    })
                 }
 
                 return {object: $e, init: (item.init || undefined)};

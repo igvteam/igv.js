@@ -29,7 +29,8 @@ var igv = (function (igv) {
         let str;
 
         this.guid = igv.guid();
-        this.window_resize_browser_str = 'resize.browser.' + this.guid;
+
+        this.namespace = '.browser_' + this.guid;
         this.document_click_browser_str = 'click.browser.' + this.guid;
 
         this.config = options;
@@ -1910,8 +1911,8 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.dispose = function () {
 
-        $(window).off(this.window_resize_browser_str);
-        $(document).off(this.document_click_browser_str);
+        $(window).off(this.namespace);
+        $(document).off(this.namespace);
 
         this.trackViews.forEach(function (tv) {
             tv.dispose();
@@ -2066,11 +2067,11 @@ var igv = (function (igv) {
 
         var self = this;
 
-        $(window).on(this.window_resize_browser_str, function () {
+        $(window).on('resize' + this.namespace, function () {
             self.resize();
         });
 
-        $(document).on(this.document_click_browser_str, function (e) {
+        $(document).on('click' + this.namespace, function (e) {
             var target = e.target;
             if (!self.$root.get(0).contains(target)) {
                 // We've clicked outside the IGV div.  Close any open popovers.
@@ -2132,14 +2133,12 @@ var igv = (function (igv) {
 
         function mouseUpOrLeave(e) {
 
-            e.preventDefault();
-
             if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
                 self.vpMouseDown.viewport.isDragging = false;
                 self.isDragging = false;
                 self.updateViews();
                 self.fireEvent('trackdragend');
-
+                e.preventDefault()
             }
             self.vpMouseDown = undefined;
         }

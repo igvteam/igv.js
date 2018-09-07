@@ -531,7 +531,6 @@ var igv = (function (igv) {
             browser.mouseDownOnViewport(e, self);
         });
 
-        this.$viewport.on('touchend',  handleMouseUp);
 
         /**
          * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
