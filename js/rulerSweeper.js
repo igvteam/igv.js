@@ -148,7 +148,7 @@ var igv = (function (igv) {
 
         threshold = 1;
 
-        $(document).on('mousedown' + this.namespace, function (e) {
+        $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
 
             isMouseIn = true;
 
@@ -167,7 +167,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on('mousemove' + this.namespace, function (e) {
+        $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
             var mouseCurrent;
 
             if (isMouseDown && isMouseIn) {
@@ -190,7 +190,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on('mouseup' + this.namespace, function (e) {
+        $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
 
             var extent;
 
