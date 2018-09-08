@@ -87,7 +87,6 @@ var igv = (function (igv) {
             // do nuthin
         } else {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
-            addTouchHandlers.call(this);
         }
 
         // Create color picker.
@@ -115,7 +114,7 @@ var igv = (function (igv) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
-            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports, this.browser.$root);
 
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
@@ -240,6 +239,7 @@ var igv = (function (igv) {
             str;
 
         const browser = this.browser;
+        const namespace = this.namespace;
 
         this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
         $viewportContainer.append(this.$trackDragScrim);
@@ -248,18 +248,18 @@ var igv = (function (igv) {
         self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
         $track.append(self.$trackManipulationHandle);
 
-        self.$trackManipulationHandle.on('mousedown.trackview', function (e) {
+        self.$trackManipulationHandle.on('mousedown', function (e) {
             e.preventDefault();
             self.isMouseDown = true;
             dragged = self;
         });
 
-        self.$trackManipulationHandle.on('mouseup.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseup', function (e) {
             e.preventDefault();
             self.isMouseDown = undefined;
         });
 
-        self.$trackManipulationHandle.on('mouseenter.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseenter', function (e) {
             e.preventDefault();
             self.isMouseIn = true;
             dragDestination = self;
@@ -288,7 +288,7 @@ var igv = (function (igv) {
 
         });
 
-        self.$trackManipulationHandle.on('mouseleave.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseleave', function (e) {
             e.preventDefault();
             self.isMouseIn = undefined;
             dragDestination = undefined;
@@ -299,7 +299,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on('mouseup' + self.namespace, function (e) {
+        $(document).on('mouseup' + namespace, function (e) {
 
             if (dragged) {
                 dragged.$trackDragScrim.hide();
@@ -439,9 +439,7 @@ var igv = (function (igv) {
             viewport.shift();
         });
 
-        let isDragging = this.viewports.some(function (vp) {
-            return vp.isDragging
-        });
+        let isDragging = this.browser.isDragging;
 
         // List of viewports that need reloading
         rpV = viewportsToReload.call(this, force);
@@ -586,7 +584,7 @@ var igv = (function (igv) {
 
     function adjustTrackHeight() {
 
-        var maxHeight = maxContentHeight(this.viewports);
+        var maxHeight = this.maxContentHeight();
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         }
@@ -596,6 +594,10 @@ var igv = (function (igv) {
         if (this.scrollbar) {
             this.scrollbar.update();
         }
+    }
+
+    igv.TrackView.prototype.maxContentHeight = function () {
+        return maxContentHeight(this.viewports);
     }
 
     function maxContentHeight(viewports) {
@@ -661,38 +663,11 @@ var igv = (function (igv) {
     }
 
 
-    function addTouchHandlers() {
-
-        const self = this;
-
-        let lastY;
-
-        $(this.trackDiv).on('touchmove', touchmove);
-        $(this.trackDiv).on('touchend', touchend);
-
-        function touchmove(event) {
-
-            const page = igv.pageCoordinates(event);
-
-            if(lastY === 0) {
-                lastY = page.y;
-            }
-            else {
-                const viewportContainerHeight = self.$viewportContainer.height();
-                const contentHeight = maxContentHeight(self.viewports);
-                const r = viewportContainerHeight / contentHeight;
-                const delta = -r * (page.y - lastY);
-                lastY = page.y;
-                self.scrollbar.moveScrollerBy(delta);
-            }
-        }
-
-        function touchend(event) {
-            lastY = 0;
-        }
+    igv.TrackView.prototype.scrollBy = function (delta) {
+        this.scrollbar.moveScrollerBy(delta);
     }
 
-    const TrackScrollbar = function ($viewportContainer, viewports) {
+    const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 
         const self = this;
         let lastY;
@@ -729,8 +704,8 @@ var igv = (function (igv) {
 
             lastY = page.y;
 
-            $(window).on('mousemove' + namespace, mouseMove);
-            $(window).on('mouseup' + namespace, mouseUp);
+            rootDiv.on('mousemove' + namespace, mouseMove);
+            rootDiv.on('mouseup' + namespace, mouseUp);
 
             // prevents start of horizontal track panning)
             event.stopPropagation();
@@ -753,7 +728,7 @@ var igv = (function (igv) {
 
     };
 
-    TrackScrollbar.prototype.moveScrollerBy = function(delta) {
+    TrackScrollbar.prototype.moveScrollerBy = function (delta) {
 
 
         const outerScrollHeight = this.$outerScroll.height();
