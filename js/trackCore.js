@@ -554,11 +554,17 @@ var igv = (function (igv) {
                 }
 
                 if (item.click) {
-                    $e.click(function () {
-                        item.click();
-                        $popover.hide();
+                    $e.on('click', handleClick);
+                    $e.on('touchend', function (e) {
+                        handleClick(e);
                     });
 
+                    function handleClick(e) {
+                        item.click();
+                        $popover.hide();
+                        e.preventDefault();
+                        e.stopPropagation()
+                    }
                 }
 
                 return {object: $e, init: (item.init || undefined)};
