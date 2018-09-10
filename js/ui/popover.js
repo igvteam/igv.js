@@ -73,6 +73,9 @@ var igv = (function (igv) {
             $container,
             menuItems;
 
+        // Only 1 popover open at a time
+        $('.igv-popover').hide();
+
         menuItems = igv.trackMenuItemList(this, trackView);
         if (menuItems.length > 0) {
 
@@ -105,10 +108,13 @@ var igv = (function (igv) {
         var $container,
             $popover = this.$popover;
 
+        // Only 1 popover open at a time
+        $('.igv-popover').hide();
+
         if (menuItems.length > 0) {
-            
+
             menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
-            
+
             this.$popoverContent.empty();
             this.$popoverContent.removeClass("igv-popover-track-popup-content");
 
@@ -134,6 +140,9 @@ var igv = (function (igv) {
 
     igv.Popover.prototype.presentContent = function (pageX, pageY, content) {
         var $container;
+
+        // Only 1 popover open at a time
+        $('.igv-popover').hide();
 
         if (undefined === content) {
             return;

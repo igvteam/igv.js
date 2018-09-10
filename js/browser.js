@@ -2081,15 +2081,6 @@ var igv = (function (igv) {
             self.resize();
         });
 
-        // If event has bubbled to root close popup
-        $(this.$root).on('mouseup', function (e) {
-            $('.igv-popover').hide();
-        });
-
-        $(this.$root).on('touchend', function (e) {
-            $('.igv-popover').hide();
-        });
-
         $(this.trackContainerDiv).on('mousemove', handleMouseMove);
 
         $(this.trackContainerDiv).on('touchmove', handleMouseMove);
