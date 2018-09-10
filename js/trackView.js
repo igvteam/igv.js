@@ -676,7 +676,8 @@ var igv = (function (igv) {
         const namespace = '.trackscrollbar' + guid;
         this.namespace = namespace;
 
-        this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        const $outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        this.$outerScroll = $outerScroll;
         this.$innerScroll = $('<div>');
 
         this.$outerScroll.append(this.$innerScroll);
@@ -704,8 +705,9 @@ var igv = (function (igv) {
 
             lastY = page.y;
 
-            rootDiv.on('mousemove' + namespace, mouseMove);
-            rootDiv.on('mouseup' + namespace, mouseUp);
+            $outerScroll.on('mousemove' + namespace, mouseMove);
+            $outerScroll.on('mouseup' + namespace, mouseUp);
+            $outerScroll.on('mouseleave' + namespace, mouseUp);
 
             // prevents start of horizontal track panning)
             event.stopPropagation();
@@ -723,7 +725,11 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $(window).off(self.namespace);
+            $outerScroll.off(self.namespace);
+        }
+
+        function cancelScroll(event) {
+
         }
 
     };
