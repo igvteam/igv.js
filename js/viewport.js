@@ -552,17 +552,18 @@ var igv = (function (igv) {
                 return;
             }
 
+            // Close any currently open popups
+            $('.igv-popover').hide();
+            self.browser.cancelDrag();
+
             if (3 === e.which || e.ctrlKey) {
-                return true;
+                return;
             }
 
             // Treat as a mouse click, its either a single or double click.
             // Handle here and stop propogation / default
             e.preventDefault();
             e.stopPropagation();
-
-            // Close any currently open popups
-            $('.igv-popover').hide();
 
             const mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             const mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
@@ -607,10 +608,6 @@ var igv = (function (igv) {
             } else {
                 // single-click
 
-                // for now, ignore if this is a touch event.   Dismissing the popups is frustrating and unreliable
-
-                //  if(!igv.isMobile()) {
-
                 if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
 
                     self.trackView.track.shiftClick(xBP, e);
@@ -628,7 +625,6 @@ var igv = (function (igv) {
                         },
                         browser.constants.doubleClickDelay);
                 }
-                // }
             }
 
             lastClickTime = time;
@@ -637,7 +633,7 @@ var igv = (function (igv) {
         function createClickState(e, viewport) {
 
             const referenceFrame = viewport.genomicState.referenceFrame;
-            const viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
+            const viewportCoords = igv.translateMouseCoordinates(e, viewport.contentDiv);
             const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
             if (undefined === genomicLocation || null === viewport.tile) {

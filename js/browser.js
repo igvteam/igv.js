@@ -51,6 +51,7 @@ var igv = (function (igv) {
 
         this.constants = {
             dragThreshold: 3,
+            scrollThreshold: 5,
             defaultColor: "rgb(0,0,150)",
             doubleClickDelay: options.doubleClickDelay || 500
         };
@@ -2066,6 +2067,7 @@ var igv = (function (igv) {
         this.isDragging = false;
         this.isScrolling = false;
         this.vpMouseDown = undefined;
+
     }
 
     /**
@@ -2112,33 +2114,39 @@ var igv = (function (igv) {
 
             if (self.vpMouseDown) {
 
+                // Determine direction,  true == horizontal
+                const horizontal = Math.abs((coords.x - self.vpMouseDown.mouseDownX)) > Math.abs((coords.y - self.vpMouseDown.mouseDownY));
+
                 viewport = self.vpMouseDown.viewport;
                 viewportWidth = viewport.$viewport.width();
                 referenceFrame = viewport.genomicState.referenceFrame;
 
-                if (!self.isDragging && self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                    self.isDragging = true;
+                if(!self.isDragging && !self.isScrolling) {
+                    if(horizontal) {
+                        if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
+                            self.isDragging = true;
+                        }
+                    }
+                    else {
+                        if (self.vpMouseDown.mouseDownY &&
+                            Math.abs(coords.y - self.vpMouseDown.mouseDownY) > self.constants.scrollThreshold) {
+                            self.isScrolling = true;
+                            const trackView = viewport.trackView;
+                            const viewportContainerHeight = trackView.$viewportContainer.height();
+                            const contentHeight = trackView.maxContentHeight();
+                            self.vpMouseDown.r = viewportContainerHeight / contentHeight;
+                        }
+                    }
                 }
 
                 if (self.isDragging) {
 
                     referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
-
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
-
                     self.updateViews();
-
                     self.fireEvent('trackdrag');
                 }
 
-
-                if (!self.isScrolling && self.vpMouseDown.mouseDownY && Math.abs(coords.y - self.vpMouseDown.mouseDownY) > self.constants.dragThreshold) {
-                    self.isScrolling = true;
-                    const trackView = self.vpMouseDown.viewport.trackView;
-                    const viewportContainerHeight = trackView.$viewportContainer.height();
-                    const contentHeight = trackView.maxContentHeight();
-                    self.vpMouseDown. r = viewportContainerHeight / contentHeight;
-                }
 
                 if (self.isScrolling) {
                     const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - coords.y);
