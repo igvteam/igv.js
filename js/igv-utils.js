@@ -164,8 +164,13 @@ var igv = (function (igv) {
         $fa = igv.createIcon("times");
         $container.append($fa);
 
-        $fa.click(closeHandler);
-        $fa.on('touchstart', closeHandler)
+        $fa.on('click', closeHandler);
+        $fa.on('touchend', closeHandler);
+
+        $fa.on('touchstart', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        })
 
     };
 
