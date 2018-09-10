@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - tabs</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.js"></script>
@@ -106,12 +106,14 @@
 
     function initTabs() {
 
-        const tabs = [];
+        var tabs = [];
 
         // Grab the tab links and content divs from the page
-        const liItems = Array.from(document.getElementById('tabs').childNodes).filter(item => item.nodeName === 'LI');
+        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function(item) {
+            return item.nodeName === 'LI'
+        });
 
-        const tabLinks = liItems.map(function (li) {
+        var tabLinks = liItems.map(function (li) {
             return getFirstChildWithTagName(li, 'A');
         })
 
@@ -120,8 +122,8 @@
             tabLink.onfocus = function () {
                 this.blur()
             };
-            const id = getHash(tabLink.getAttribute('href'));
-            const contentDiv = document.getElementById(id);
+            var id = getHash(tabLink.getAttribute('href'));
+            var contentDiv = document.getElementById(id);
             tabs.push({
                 id: id,
                 link: tabLink,
@@ -131,7 +133,7 @@
 
         tabs[0].content.className = 'tabContent';
         tabs[0].link.className = 'selected';
-        for (let i = 1; i < tabs.length; i++) {
+        for (var i = 1; i < tabs.length; i++) {
             tabs[i].link.className = '';
             tabs[i].content.className = 'tabContent hide'
         }

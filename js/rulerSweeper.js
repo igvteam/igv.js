@@ -36,21 +36,7 @@ var igv = (function (igv) {
         $(viewport.contentDiv).append(this.$rulerSweeper);
 
         guid = igv.guid();
-
-        this.mouseHandlers =
-            {
-                document:
-                    {
-                        down:'mousedown._document_.' + guid,
-                        move:'mousemove._document_.' + guid,
-                          up:  'mouseup._document_.' + guid
-                    },
-                viewport:
-                    {
-                        down:'mousedown.viewport.' + guid
-                    }
-
-            };
+        this.namespace = '.sweeper_' + guid;
 
         this.addMouseHandlers();
     };
@@ -91,7 +77,11 @@ var igv = (function (igv) {
                 shortName = (name.startsWith("chr")) ? name.substring(3) : name;
                 $e.text(shortName);
 
-                $div.on('click', function (e) {
+                $div.on('click', handleClick);
+                $div.on('touchend', handleClick);
+
+                function handleClick(e) {
+
                     var locusString,
                         loci;
 
@@ -110,7 +100,7 @@ var igv = (function (igv) {
                     }
 
                     browser.search(locusString);
-                });
+                }
             }
 
         });
@@ -135,11 +125,8 @@ var igv = (function (igv) {
 
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
 
-        $(document).off(this.mouseHandlers.document.down);
-        $(document).off(this.mouseHandlers.document.move);
-        $(document).off(this.mouseHandlers.document.up);
-
-        this.viewport.$viewport.off(this.mouseHandlers.viewport.down);
+        $(document).off(this.namespace);
+        this.viewport.$viewport.off(this.namespace);
     };
 
     igv.RulerSweeper.prototype.addMouseHandlers = function () {
@@ -161,11 +148,11 @@ var igv = (function (igv) {
 
         threshold = 1;
 
-        $(document).on(this.mouseHandlers.document.down, function (e) {
+        $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
 
             isMouseIn = true;
 
-            mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
+            mouseDown = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
 
             if (true === isMouseDown ) {
 
@@ -180,12 +167,12 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(this.mouseHandlers.document.move, function (e) {
+        $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
             var mouseCurrent;
 
             if (isMouseDown && isMouseIn) {
 
-                mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
+                mouseCurrent = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
                 mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
                 mouseCurrent = Math.max(mouseCurrent, 0);
 
@@ -203,7 +190,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(this.mouseHandlers.document.up, function (e) {
+        $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
 
             var extent;
 
@@ -231,7 +218,7 @@ var igv = (function (igv) {
 
         });
 
-        this.viewport.$viewport.on(this.mouseHandlers.viewport.down, function (e) {
+        this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
 
             isMouseDown = true;
         });
@@ -247,22 +234,7 @@ var igv = (function (igv) {
         return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
     }
 
-    function translateMouseCoordinates(e, $target) {
 
-        var eFixed,
-            posx,
-            posy;
-
-        eFixed = $.event.fix(e);
-
-        if (undefined === $target.offset()) {
-            console.log('igv.translateMouseCoordinates - $target.offset() is undefined.');
-        }
-        posx = eFixed.pageX - $target.offset().left;
-        posy = eFixed.pageY - $target.offset().top;
-
-        return { x: posx, y: posy }
-    }
 
     return igv;
 

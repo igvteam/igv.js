@@ -119,15 +119,16 @@ var igv = (function (igv) {
                 $container.append(item.object);
             });
 
-            $popover.css(clampPopoverLocation(e.pageX, e.pageY, this));
+            const page = igv.pageCoordinates(e);
+            $popover.css(clampPopoverLocation(page.x, page.y, this));
             $popover.show();
         }
 
     };
 
     igv.Popover.prototype.presentTrackPopup = function (e, content) {
-
-        this.presentContent(e.pageX, e.pageY, content);
+        const page = igv.pageCoordinates(e);
+        this.presentContent(page.x, page.y, content);
 
     };
 

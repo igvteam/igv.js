@@ -29,7 +29,8 @@ var igv = (function (igv) {
         let str;
 
         this.guid = igv.guid();
-        this.window_resize_browser_str = 'resize.browser.' + this.guid;
+
+        this.namespace = '.browser_' + this.guid;
         this.document_click_browser_str = 'click.browser.' + this.guid;
 
         this.config = options;
@@ -50,6 +51,7 @@ var igv = (function (igv) {
 
         this.constants = {
             dragThreshold: 3,
+            scrollThreshold: 5,
             defaultColor: "rgb(0,0,150)",
             doubleClickDelay: options.doubleClickDelay || 500
         };
@@ -740,7 +742,8 @@ var igv = (function (igv) {
             newTrackViews = [];
 
         this.trackViews.forEach(function (tv) {
-            if (tv.track.removable !== false) {
+
+            if (!(tv.track.id === 'sequence' || tv.track.id === 'ruler')) {
                 self.trackContainerDiv.removeChild(tv.trackDiv);
                 self.fireEvent('trackremoved', [tv.track]);
                 tv.dispose();
@@ -854,15 +857,17 @@ var igv = (function (igv) {
 
         // Minimal attempt at responsiveness
         const rootWidth = this.$root.width();
-        if(rootWidth < 1000) {
+        if (rootWidth < 1000) {
             this.chromosomeSelectWidget.$container.hide();
             this.$root.find(".igv-nav-bar-toggle-button-container").hide();
         }
         else {
-            if(this.config.showChromosomeWidget) {
+            if (this.config.showChromosomeWidget) {
                 this.chromosomeSelectWidget.$container.show();
             }
             this.$root.find(".igv-nav-bar-toggle-button-container").show();
+            this.$root.find(".igv-right-hand-gutter").show();
+            //this.$root.find(".igv-track-manipulation-handle").show();
         }
 
 
@@ -872,8 +877,8 @@ var igv = (function (igv) {
         if (this.genomicStateList && viewportWidth > 0) {
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
-                if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.end) {
-                    referenceFrame.bpPerPixel = (referenceFrame.end - referenceFrame.start) / viewportWidth;
+                if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.initialEnd) {
+                    referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth;
                 }
             })
         }
@@ -1894,29 +1899,15 @@ var igv = (function (igv) {
             return event.apply(scope, args);
         });
 
+
         return results[0];
 
     };
 
-    igv.Browser.prototype.mouseDownOnViewport = function (e, viewport) {
-
-        var coords;
-
-        coords = igv.pageCoordinates(e);
-
-        this.vpMouseDown = {
-            viewport: viewport,
-            lastMouseX: coords.x,
-            mouseDownX: coords.x,
-            genomicState: viewport.genomicState,
-            referenceFrame: viewport.genomicState.referenceFrame
-        };
-    };
-
     igv.Browser.prototype.dispose = function () {
 
-        $(window).off(this.window_resize_browser_str);
-        $(document).off(this.document_click_browser_str);
+        $(window).off(this.namespace);
+        $(document).off(this.namespace);
 
         this.trackViews.forEach(function (tv) {
             tv.dispose();
@@ -2042,23 +2033,74 @@ var igv = (function (igv) {
         this.alertDialog.present($parent);
     };
 
+
+    /**
+     * Record a mouse click on a specific viewport.   This might be the start of a drag operation.   Dragging
+     * (panning) is handled here so that the mouse can move out of a specific viewport (e.g. stray into another
+     * track) without halting the drag.
+     *
+     * @param e
+     * @param viewport
+     */
+    igv.Browser.prototype.mouseDownOnViewport = function (e, viewport) {
+
+        var coords;
+        coords = igv.pageCoordinates(e);
+        this.vpMouseDown = {
+            viewport: viewport,
+            lastMouseX: coords.x,
+            mouseDownX: coords.x,
+            lastMouseY: coords.y,
+            mouseDownY: coords.y,
+            genomicState: viewport.genomicState,
+            referenceFrame: viewport.genomicState.referenceFrame
+        };
+    };
+
+
+    igv.Browser.prototype.cancelDrag = function () {
+
+        if (this.isDragging) {
+            this.updateViews();
+            this.fireEvent('trackdragend');
+        }
+        this.isDragging = false;
+        this.isScrolling = false;
+        this.vpMouseDown = undefined;
+
+    }
+
+    /**
+     * Mouse handlers to support drag (pan)
+     */
     function addMouseHandlers() {
 
         var self = this;
 
-        $(window).on(this.window_resize_browser_str, function () {
+        $(window).on('resize' + this.namespace, function () {
             self.resize();
         });
 
-        $(document).on(this.document_click_browser_str, function (e) {
-            var target = e.target;
-            if (!self.$root.get(0).contains(target)) {
-                // We've clicked outside the IGV div.  Close any open popovers.
-                self.popover.hide();
-            }
+        // If event has bubbled to root close popup
+        $(this.$root).on('mouseup', function (e) {
+            $('.igv-popover').hide();
         });
 
-        $(this.trackContainerDiv).on('mousemove', function (e) {
+        $(this.$root).on('touchend', function (e) {
+            $('.igv-popover').hide();
+        });
+
+        $(this.trackContainerDiv).on('mousemove', handleMouseMove);
+
+        $(this.trackContainerDiv).on('touchmove', handleMouseMove);
+
+        $(this.trackContainerDiv).on('mouseleave', mouseUpOrLeave);
+
+        $(this.trackContainerDiv).on('mouseup', mouseUpOrLeave);
+
+        $(this.trackContainerDiv).on('touchend', mouseUpOrLeave);
+
+        function handleMouseMove(e) {
 
             var coords, viewport, viewportWidth, referenceFrame;
 
@@ -2072,55 +2114,55 @@ var igv = (function (igv) {
 
             if (self.vpMouseDown) {
 
+                // Determine direction,  true == horizontal
+                const horizontal = Math.abs((coords.x - self.vpMouseDown.mouseDownX)) > Math.abs((coords.y - self.vpMouseDown.mouseDownY));
+
                 viewport = self.vpMouseDown.viewport;
                 viewportWidth = viewport.$viewport.width();
                 referenceFrame = viewport.genomicState.referenceFrame;
 
-                if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                    self.isDragging = true;
-                    viewport.isDragging = true;
+                if(!self.isDragging && !self.isScrolling) {
+                    if(horizontal) {
+                        if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
+                            self.isDragging = true;
+                        }
+                    }
+                    else {
+                        if (self.vpMouseDown.mouseDownY &&
+                            Math.abs(coords.y - self.vpMouseDown.mouseDownY) > self.constants.scrollThreshold) {
+                            self.isScrolling = true;
+                            const trackView = viewport.trackView;
+                            const viewportContainerHeight = trackView.$viewportContainer.height();
+                            const contentHeight = trackView.maxContentHeight();
+                            self.vpMouseDown.r = viewportContainerHeight / contentHeight;
+                        }
+                    }
                 }
 
-                if (viewport.isDragging) {
+                if (self.isDragging) {
 
                     referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
-
                     self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
-
                     self.updateViews();
-
                     self.fireEvent('trackdrag');
                 }
 
+
+                if (self.isScrolling) {
+                    const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - coords.y);
+                    self.vpMouseDown.viewport.trackView.scrollBy(delta);
+                }
+
                 self.vpMouseDown.lastMouseX = coords.x;
+                self.vpMouseDown.lastMouseY = coords.y
             }
-
-        });
-
-        $(this.trackContainerDiv).on('mouseleave', function (e) {
-            mouseUpOrLeave(e);
-        });
-
-        $(this.trackContainerDiv).on('mouseup', function (e) {
-            mouseUpOrLeave(e);
-
-        });
-
-        function mouseUpOrLeave(e) {
-
-            e.preventDefault();
-
-            if (self.vpMouseDown && self.vpMouseDown.viewport.isDragging) {
-                self.vpMouseDown.viewport.isDragging = false;
-                self.isDragging = false;
-                self.updateViews();
-                self.fireEvent('trackdragend');
-
-            }
-            self.vpMouseDown = undefined;
         }
 
+        function mouseUpOrLeave(e) {
+            self.cancelDrag();
+        }
     }
+
 
     return igv;
 })

@@ -1,11 +1,13 @@
 .DS_Store
 /.vscode/
+/dist/
+/es5/
 /.idea/
 /igv.js.iml
 /node_modules/.bin/cake
 /node_modules
-/dist/
 /tmp/
 /cBio/
 /miRNA/
 *.iml
+/npm-debug.log

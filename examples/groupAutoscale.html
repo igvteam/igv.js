@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Group Autoscale</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -18,19 +18,18 @@
 
 <body>
 
-<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<h1>Group Autoscale</h1>
 
-
-</div>
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"/>
 
 <script type="text/javascript">
 
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const igvDiv = document.getElementById("igv-div");
+        var igvDiv = document.getElementById("igv-div");
 
-        const options = {
+        var options = {
 
             locus: ['myc'],
             genome: "hg19",

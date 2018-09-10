@@ -69,31 +69,21 @@
 
     $(document).ready(function () {
 
-        const options =
+        var options =
         {
             showNavigation: true,
             locus: "chr1:155,160,475-155,184,282",
             genome: "hg19",
-            tracks: [
-                {
-                    name: "Genes",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.idx",
-                    order: Number.MAX_VALUE,
-                    displayMode: "EXPANDED"
-
-                }
-            ]
         };
 
-        const igv_custom_track_popover = $('#igv-custom-track-popover');
+        var igv_custom_track_popover = $('#igv-custom-track-popover');
 
         igv.createBrowser(igv_custom_track_popover.get(0), options)
 
                 .then(function (browser) {
                     browser.on('trackclick', function (track, popoverData) {
 
-                        let markup = "<table class=\"igv-popover-table\">";
+                        var markup = "<table class=\"igv-popover-table\">";
 
                         // Don't show a pop-over when there's no data.
                         if (!popoverData || !popoverData.length) {
@@ -104,7 +94,7 @@
 
                             if (nameValue.name) {
 
-                                let value = nameValue.name.toLowerCase() === 'name'
+                                var value = nameValue.name.toLowerCase() === 'name'
                                         ? '<a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
                                         : nameValue.value;
 

@@ -46,13 +46,7 @@ var igv = (function (igv) {
         $container.append($track);
 
         guid = igv.guid();
-        this.mouseHandlers =
-            {
-                document:
-                    {
-                        up: 'mouseup._document_.' + guid
-                    }
-            };
+        this.namespace = '.trackview_' + guid;
 
         if (this.track instanceof igv.RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
@@ -97,11 +91,11 @@ var igv = (function (igv) {
 
         // Create color picker.
         config =
-        {
-            // width = (29 * swatch-width) + border-width + border-width
-            width: ((29 * 24) + 1 + 1),
-            classes: ['igv-position-absolute']
-        };
+            {
+                // width = (29 * swatch-width) + border-width + border-width
+                width: ((29 * 24) + 1 + 1),
+                classes: ['igv-position-absolute']
+            };
 
         this.$colorpicker_container = igv.genericContainer($track, config, function () {
             self.$colorpicker_container.toggle();
@@ -109,6 +103,7 @@ var igv = (function (igv) {
 
         igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
             self.setColor(rgb);
+            self.$colorpicker_container.hide();
         });
 
         this.$colorpicker_container.hide();
@@ -119,7 +114,7 @@ var igv = (function (igv) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
-            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports, this.browser.$root);
 
             $viewportContainer.append(this.scrollbar.$outerScroll);
         }
@@ -195,7 +190,7 @@ var igv = (function (igv) {
 
         var self = this,
             $gearButton, $fa;
-        
+
         const browser = this.browser;
 
         this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
@@ -204,9 +199,12 @@ var igv = (function (igv) {
         $gearButton = igv.createWrappedIcon("cog");
         $(this.rightHandGutter).append($gearButton);
 
-        $gearButton.click(function (e) {
-            browser.popover.presentTrackGearMenu(e.pageX, e.pageY, self, browser);
-        });
+        $gearButton.click(handleClick);
+
+        function handleClick(e) {
+            const page = igv.pageCoordinates(e);
+            browser.popover.presentTrackGearMenu(page.x, page.y, self, browser);
+        }
 
     }
 
@@ -241,6 +239,7 @@ var igv = (function (igv) {
             str;
 
         const browser = this.browser;
+        const namespace = this.namespace;
 
         this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
         $viewportContainer.append(this.$trackDragScrim);
@@ -249,18 +248,18 @@ var igv = (function (igv) {
         self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
         $track.append(self.$trackManipulationHandle);
 
-        self.$trackManipulationHandle.on('mousedown.trackview', function (e) {
+        self.$trackManipulationHandle.on('mousedown', function (e) {
             e.preventDefault();
             self.isMouseDown = true;
             dragged = self;
         });
 
-        self.$trackManipulationHandle.on('mouseup.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseup', function (e) {
             e.preventDefault();
             self.isMouseDown = undefined;
         });
 
-        self.$trackManipulationHandle.on('mouseenter.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseenter', function (e) {
             e.preventDefault();
             self.isMouseIn = true;
             dragDestination = self;
@@ -289,7 +288,7 @@ var igv = (function (igv) {
 
         });
 
-        self.$trackManipulationHandle.on('mouseleave.trackview', function (e) {
+        self.$trackManipulationHandle.on('mouseleave', function (e) {
             e.preventDefault();
             self.isMouseIn = undefined;
             dragDestination = undefined;
@@ -300,7 +299,7 @@ var igv = (function (igv) {
 
         });
 
-        $(document).on(self.mouseHandlers.document.up, function (e) {
+        $(document).on('mouseup' + namespace, function (e) {
 
             if (dragged) {
                 dragged.$trackDragScrim.hide();
@@ -440,9 +439,7 @@ var igv = (function (igv) {
             viewport.shift();
         });
 
-        let isDragging = this.viewports.some(function (vp) {
-            return vp.isDragging
-        });
+        let isDragging = this.browser.isDragging;
 
         // List of viewports that need reloading
         rpV = viewportsToReload.call(this, force);
@@ -481,7 +478,7 @@ var igv = (function (igv) {
                         }
                     });
 
-                    if(typeof self.track.doAutoscale === 'function') {
+                    if (typeof self.track.doAutoscale === 'function') {
                         self.track.doAutoscale(allFeatures);
                     } else {
                         self.track.dataRange = igv.WIGTrack.doAutoscale(allFeatures);
@@ -587,7 +584,7 @@ var igv = (function (igv) {
 
     function adjustTrackHeight() {
 
-        var maxHeight = maxContentHeight(this.viewports);
+        var maxHeight = this.maxContentHeight();
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         }
@@ -597,6 +594,10 @@ var igv = (function (igv) {
         if (this.scrollbar) {
             this.scrollbar.update();
         }
+    }
+
+    igv.TrackView.prototype.maxContentHeight = function () {
+        return maxContentHeight(this.viewports);
     }
 
     function maxContentHeight(viewports) {
@@ -624,18 +625,18 @@ var igv = (function (igv) {
             this.$innerScroll.off();
         }
 
-        if(this.scrollbar) {
+        if (this.scrollbar) {
             this.scrollbar.dispose();
         }
 
-        $(document).off(this.mouseHandlers.document.up);
+        $(document).off(this.namespace);
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();
         }
 
         var track = this.track;
-        if(typeof track.dispose === 'function') {
+        if (typeof track.dispose === 'function') {
             track.dispose();
         }
         Object.keys(track).forEach(function (key) {
@@ -661,25 +662,22 @@ var igv = (function (igv) {
 
     }
 
-    const TrackScrollbar = function ($viewportContainer, viewports) {
 
-        var self = this,
-            offY,
-            contentDivHeight,
-            guid;
+    igv.TrackView.prototype.scrollBy = function (delta) {
+        this.scrollbar.moveScrollerBy(delta);
+    }
 
-        guid = igv.guid();
-        this.mouseHandlers =
-            {
-                window:
-                    {
-                        up:'mouseup._window_.' + guid,
-                        move:'mousemove._window_.' + guid
-                    }
+    const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 
-            };
+        const self = this;
+        let lastY;
 
-        this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        const guid = igv.guid();
+        const namespace = '.trackscrollbar' + guid;
+        this.namespace = namespace;
+
+        const $outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        this.$outerScroll = $outerScroll;
         this.$innerScroll = $('<div>');
 
         this.$outerScroll.append(this.$innerScroll);
@@ -687,71 +685,77 @@ var igv = (function (igv) {
         this.$viewportContainer = $viewportContainer;
         this.viewports = viewports;
 
-        this.$innerScroll.on("mousedown", function (event) {
-
-            event.preventDefault();
-
-            offY = event.pageY - $(this).position().top;
-
-            $(window).on(self.mouseHandlers.window.move, mouseMove);
-
-            $(window).on(self.mouseHandlers.window.up, mouseUp);
-
-            // <= prevents start of horizontal track panning)
-            event.stopPropagation();
-        });
+        this.$innerScroll.on("mousedown", mouseDown);
 
         this.$innerScroll.on("click", function (event) {
             event.stopPropagation();
         });
 
         this.$outerScroll.on("click", function (event) {
-            moveScrollerTo(event.offsetY - self.$innerScroll.height() / 2);
+            self.moveScrollerBy(event.offsetY - self.$innerScroll.height() / 2);
             event.stopPropagation();
 
         });
 
-        function mouseMove(event) {
+        function mouseDown(event) {
 
             event.preventDefault();
-            moveScrollerTo(event.pageY - offY);
+
+            const page = igv.pageCoordinates(event);
+
+            lastY = page.y;
+
+            $outerScroll.on('mousemove' + namespace, mouseMove);
+            $outerScroll.on('mouseup' + namespace, mouseUp);
+            $outerScroll.on('mouseleave' + namespace, mouseUp);
+
+            // prevents start of horizontal track panning)
             event.stopPropagation();
         }
 
+        function mouseMove(event) {
+
+            event.preventDefault();
+            event.stopPropagation();
+
+            const page = igv.pageCoordinates(event);
+            self.moveScrollerBy(page.y - lastY);
+            lastY = page.y;
+
+        }
+
         function mouseUp(event) {
-            $(window).off(self.mouseHandlers.window.up);
-            $(window).off(self.mouseHandlers.window.move);
+            $outerScroll.off(self.namespace);
         }
 
-        function moveScrollerTo(y) {
-
-            var newTop,
-                contentTop,
-                contentDivHeight,
-                outerScrollHeight,
-                innerScrollHeight;
-
-            outerScrollHeight = self.$outerScroll.height();
-            innerScrollHeight = self.$innerScroll.height();
-
-            newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
-
-            contentDivHeight = maxContentHeight(viewports);
-
-            contentTop = -Math.round(newTop * ( contentDivHeight / self.$viewportContainer.height() ));
-
-            self.$innerScroll.css("top", newTop + "px");
-
-            viewports.forEach(function (viewport) {
-                $(viewport.contentDiv).css("top", contentTop + "px");
-            });
+        function cancelScroll(event) {
 
         }
+
     };
 
+    TrackScrollbar.prototype.moveScrollerBy = function (delta) {
+
+
+        const outerScrollHeight = this.$outerScroll.height();
+        const innerScrollHeight = this.$innerScroll.height();
+
+        const y = this.$innerScroll.position().top + delta;
+        const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
+
+        const contentDivHeight = maxContentHeight(this.viewports);
+        const contentTop = -Math.round(newTop * (contentDivHeight / this.$viewportContainer.height()));
+
+        this.$innerScroll.css("top", newTop + "px");
+
+        this.viewports.forEach(function (viewport) {
+            $(viewport.contentDiv).css("top", contentTop + "px");
+        });
+
+    }
+
     TrackScrollbar.prototype.dispose = function () {
-        $(window).off(this.mouseHandlers.window.up);
-        $(window).off(this.mouseHandlers.window.move);
+        $(window).off(this.namespace);
     };
 
     TrackScrollbar.prototype.update = function () {

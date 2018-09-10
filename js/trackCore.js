@@ -558,6 +558,7 @@ var igv = (function (igv) {
                         item.click();
                         $popover.hide();
                     });
+
                 }
 
                 return {object: $e, init: (item.init || undefined)};
@@ -679,7 +680,9 @@ var igv = (function (igv) {
             trackView.$colorpicker_container.toggle();
         };
 
-        return {object: $e, click: clickHandler};
+        return {
+            object: $e,
+            click: clickHandler};
 
     };
 

@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Copy Number</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -17,7 +17,7 @@
 
 <body>
 
-<h1>Embedded copy number browser</h1>
+<h1>Alignments from a BAM file</h1>
 
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -25,7 +25,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
+        var options =
         {
             genome: "hg19",
             locus: "chr8:128,747,267-128,754,546",
@@ -40,7 +40,7 @@
             ]
         };
 
-        const igvDiv = document.getElementById("igv-div");
+        var igvDiv = document.getElementById("igv-div");
 
         igv.createBrowser(igvDiv, options)
                 .then(function (browser) {

@@ -8,8 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>IGV Examples - hts get</title>
-
+    <title>igv.js</title>
     <!-- IGV JS-->
     <script src="../dist/igv.js"></script>
 
@@ -17,15 +16,16 @@
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-</div>
+<h1>Alignments from a htsget server (DNAnexus)</h1>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const div = document.getElementById("myDiv");
-        const options = {
+        var div = document.getElementById("myDiv");
+        var options = {
             genome: "hg19",
             locus: "chr8:128,747,267-128,754,546",
             tracks: [

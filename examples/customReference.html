@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Data URIs</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -24,8 +24,8 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const igvDiv = document.getElementById("igv-div");
-        const options =
+        var igvDiv = document.getElementById("igv-div");
+        var options =
         {
             reference: {
                 id: "myCustomGenome",

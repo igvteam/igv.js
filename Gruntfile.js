@@ -2,6 +2,7 @@ module.exports = function (grunt) {
 
     // 1. All configuration goes here
     grunt.initConfig({
+
         pkg: grunt.file.readJSON('package.json'),
 
         qunit: {
@@ -34,6 +35,21 @@ module.exports = function (grunt) {
               }
             }
           },
+        babel: {
+            options: {
+                presets: ['env']
+            },
+            dist: {
+                files: [
+                    {
+                        expand: true,
+                        cwd: 'js/',
+                        src: ['**/*.js'],
+                        dest: 'es5/'
+                    }
+                ]
+            }
+        },
 
         concat: {
             igv: {
@@ -47,12 +63,12 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'js/**/*.js',
+                    'es5/**/*.js',
                     'wrapper/footer.js'
                 ],
                 dest: 'dist/igv.js'
             },
-            igv_es6: {
+            igv_esm: {
                 src: [
                     'wrapper/header-esm.js',
                     'tmp/embedCss.js',
@@ -115,6 +131,8 @@ module.exports = function (grunt) {
             }
         },
 
+        clean: ['es5', 'tmp']
+
     });
 
     // 3. Where we tell Grunt we plan to use this plug-in.
@@ -122,9 +140,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
     grunt.loadNpmTasks('grunt-contrib-connect');
+    grunt.loadNpmTasks('babel-core');
+    grunt.loadNpmTasks('grunt-babel');
+    grunt.loadNpmTasks('grunt-contrib-clean');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', [ 'concat:css', 'embed-css', 'concat:igv', 'concat:igv_es6', 'uglify:igv', 'uglify:igv_esm']);
+    grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_esm', 'uglify:igv_esm', 'clean']);
 
     grunt.registerTask('doc', ['md2html']);
 
@@ -141,7 +162,7 @@ module.exports = function (grunt) {
         ping = pong.replace(/"/g, '\\"');
 
         foo = grunt.file.read('wrapper/embedCss.js');
-        foo = foo.replace('_CSS_', ping)
+        foo = foo.replace('_CSS_', ping);
 
         grunt.file.write('tmp/embedCss.js', foo);
     });

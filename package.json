@@ -1,19 +1,24 @@
 {
   "name": "igv",
-  "version": "2.0.0-rc2",
+  "version": "2.0.0-rc5",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
   "files": [
     "dist/**"
   ],
   "scripts": {
-    "prepack": "grunt"
+    "grunt": "node node_modules/grunt/bin/grunt",
+    "prepack": "node_modules/grunt/bin/grunt",
+    "http-server": "node_modules/http-server/bin/http-server ."
   },
   "author": {
-    "name": "Jim Robinson",
-    "email": "igv-team@broadinstitute.org",
-    "url": "https://igv.org"
+    "name": "Jim Robinson"
   },
+  "contributors": [
+    {
+      "name": "Douglass Turner"
+    }
+  ],
   "bugs": {
     "url": "https://github.com/igvteam/igv.js/issues"
   },
@@ -33,9 +38,19 @@
     "grunt-contrib-connect": "^1.0.2"
   },
   "dependencies": {
+    "@babel/cli": "^7.0.0",
+    "@babel/core": "^7.0.0",
+    "@babel/polyfill": "^7.0.0",
+    "@babel/preset-env": "^7.0.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
     "grunt": "^1.0.3",
+    "grunt-babel": "^7.0.0",
+    "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-uglify-es": "^3.3.0",
-    "grunt-qunit-puppeteer": "^1.0.10"
+    "grunt-qunit-puppeteer": "^1.0.10",
+    "http-server": "^0.8.0",
+    "shelljs": "^0.8.2"
   }
 }

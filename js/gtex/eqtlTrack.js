@@ -309,13 +309,13 @@ var igv = (function (igv) {
             var values = featureList
                 .map(function (eqtl) {
                     return -Math.log(eqtl.value) / Math.LN10
-                })
+                });
 
             this.dataRange.max = igv.Math.percentile(values, this.autoscalePercentile);
         }
         else {
             // No features -- default
-            const max = config.maxLogP || config.max;
+            const max = this.config.maxLogP || this.config.max;
             this.dataRange.max = max || 25
         }
 

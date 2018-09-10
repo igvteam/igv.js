@@ -9,7 +9,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-    <title>Integrative Genomics Viewer</title>
+    <title>igv.js</title>
 
     <!-- Bootstrap 4 - CSS -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
@@ -104,13 +104,13 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
+        var options =
             {
                 locus: "chr1:155,160,475-155,184,282",
                 genome: "hg19"
             };
 
-        const igv_example_api = document.getElementById('igv-api-example');
+        var igv_example_api = document.getElementById('igv-api-example');
 
         igv.createBrowser(igv_example_api, options)
                 .then(function (browser) {

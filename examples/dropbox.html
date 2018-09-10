@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Dropbox</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -29,7 +29,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options = {
+        var options = {
             genome: "hg19",
             locus: "chr22:24,376,148-24,376,519",
             tracks: [
@@ -43,7 +43,7 @@
             ]
         };
 
-        const igvDiv = document.getElementById("igv-div");
+        var igvDiv = document.getElementById("igv-div");
 
         igv.createBrowser(igvDiv, options)
 

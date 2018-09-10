@@ -103,6 +103,7 @@
     <script src="../js/ui/alertDialog.js"></script>
     <script src="../js/ui/popover.js"></script>
     <script src="../js/ui/chromosomeSelectWidget.js"></script>
+    <script src="../js/ui/zoomWidget.js"></script>
 
     <script src="../js/variant/vcfParser.js"></script>
     <script src="../js/variant/variant.js"></script>
@@ -176,15 +177,6 @@
                         flanking: 1000,
                         queryParametersSupported: true,
 
-
-                        //GTEX search service.  Uncomment to test.
-                        // search:
-                        //     {
-                        //     url: "https://gtexportal.org/rest/v1/reference/features/$FEATURE$?format=json&datasetId=gtex_v7",
-                        //     resultsField: "features",
-                        //     geneField: "geneSymbol",
-                        //     snpField: 'snpId'
-                        // }
                     };
 
                 igv.createBrowser(igvDiv, options)
@@ -192,17 +184,6 @@
                     igvdev.createTrackList(document.getElementById('trackList'), browser);
                     return browser;
                 })
-                //     .then(function (browser) {
-                //
-                //         browser.loadTrack({
-                //             "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz",
-                //             "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.collapsed.bed.gz.tbi",
-                //             "name": "Bed - Tabix Index"
-                //         })
-                //             .then(function (track) {
-                //                 browser.removeTrack(track);
-                //             })
-                //     })
 
             })
     });

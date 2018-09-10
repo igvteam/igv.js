@@ -13,6 +13,7 @@
         module.exports = factory();
     } else {
         // Browser globals (root is window)
+        if(!root) root = window;   // Neccessary for Babel transform, which changes "this" to void
         root.igv = factory();
     }
  }(this, function () {

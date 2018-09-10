@@ -105,7 +105,10 @@ var igv = (function (igv) {
                 } else {
                     str = trackView.track.name;
                 }
-                self.popover.presentContent(e.pageX, e.pageY, str);
+
+                const page = igv.pageCoordinates(e);
+
+                self.popover.presentContent(page.x, page.y, str);
 
             });
             this.$trackLabel.mousedown(function (e) {
@@ -304,22 +307,22 @@ var igv = (function (igv) {
 
 
         const drawConfiguration =
-        {
-            features: features,
-            context: ctx,
-            pixelWidth: pixelWidth,
-            pixelHeight: pixelHeight,
-            bpStart: bpStart,
-            bpEnd: bpEnd,
-            bpPerPixel: bpPerPixel,
-            referenceFrame: referenceFrame,
-            genomicState: genomicState,
-            selection: self.selection,
-            viewport: self,
-            viewportWidth: self.$viewport.width(),
-            viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
-            viewportContainerWidth: this.browser.viewportContainerWidth()
-        };
+            {
+                features: features,
+                context: ctx,
+                pixelWidth: pixelWidth,
+                pixelHeight: pixelHeight,
+                bpStart: bpStart,
+                bpEnd: bpEnd,
+                bpPerPixel: bpPerPixel,
+                referenceFrame: referenceFrame,
+                genomicState: genomicState,
+                selection: self.selection,
+                viewport: self,
+                viewportWidth: self.$viewport.width(),
+                viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
+                viewportContainerWidth: this.browser.viewportContainerWidth()
+            };
 
         ctx.save();
 
@@ -485,13 +488,18 @@ var igv = (function (igv) {
 
         this.$viewport.on("contextmenu", function (e) {
 
-            e.preventDefault();
-
+            // Ignore if we are doing a drag.  This can happen with touch events.
+            if (self.browser.isDragging) {
+                return false;
+            }
             const clickState = createClickState(e, self);
 
             if (undefined === clickState) {
-                return
+                return false;
             }
+
+
+            e.preventDefault();
 
             // Track specific items
             let menuItems = [];
@@ -520,25 +528,42 @@ var igv = (function (igv) {
          * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
          */
         this.$viewport.on('mousedown', function (e) {
-            mouseDownX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             browser.mouseDownOnViewport(e, self);
 
         });
 
+        this.$viewport.on('touchstart', function (e) {
+            browser.mouseDownOnViewport(e, self);
+        });
 
         /**
          * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
          * those, it is a click.
          */
-        this.$viewport.on('mouseup', function (e) {
+        this.$viewport.on('mouseup', handleMouseUp);
 
+        function handleMouseUp(e) {
 
-            if (3 === e.which || e.ctrlKey || self.isDragging || mouseDownX === undefined) {
+            // Any mouse up cancels drag and scrolling
+            if (self.browser.isDragging || self.browser.isScrolling) {
+                self.browser.cancelDrag();
+                e.preventDefault();
+                e.stopPropagation();
                 return;
             }
 
-            // This is a mouse click.  Handle it here, stop bubbling.
+            // Close any currently open popups
+            $('.igv-popover').hide();
+            self.browser.cancelDrag();
+
+            if (3 === e.which || e.ctrlKey) {
+                return;
+            }
+
+            // Treat as a mouse click, its either a single or double click.
+            // Handle here and stop propogation / default
             e.preventDefault();
+            e.stopPropagation();
 
             const mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
             const mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
@@ -602,22 +627,13 @@ var igv = (function (igv) {
                 }
             }
 
-            mouseDownX = lastMouseX = undefined;
             lastClickTime = time;
-        });
-
-        /**
-         * Mouse has moved out of the viewport.  Cancel pending click.
-         */
-        this.$viewport.on('mouseout', function (e) {
-            mouseDownX = lastMouseX = lastClickTime = undefined;
-        });
-
+        }
 
         function createClickState(e, viewport) {
 
             const referenceFrame = viewport.genomicState.referenceFrame;
-            const viewportCoords = igv.translateMouseCoordinates(e, viewport.$viewport);
+            const viewportCoords = igv.translateMouseCoordinates(e, viewport.contentDiv);
             const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
             if (undefined === genomicLocation || null === viewport.tile) {

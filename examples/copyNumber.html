@@ -8,7 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>Examples - Segmented copy number</title>
+    <title>igv.js</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
@@ -17,6 +17,7 @@
 
 <body>
 
+<h1>Segmented Copy Number</h1>
 
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -24,11 +25,10 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-       const igvDiv = document.getElementById("igv-div");
-       const options =
+       var igvDiv = document.getElementById("igv-div");
+       var options =
             {
                 genome: "hg19",
-                locus: 'chr7',
                 tracks:
                     [
                         {
