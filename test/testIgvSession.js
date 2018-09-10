@@ -1,6 +1,7 @@
 function runIgvSessionTests() {
 
-    asyncTest("session file", function () {
+    QUnit.test("session file", function (assert) {
+        var done = assert.async();
 
         var url = "http://homer.ucsd.edu/cbenner/test/report-170817/homo_sapiens.igv.xml";
 
@@ -9,9 +10,9 @@ function runIgvSessionTests() {
                 
                 var session = new igv.XMLSession(string);
                 
-                ok(session);
+                assert.ok(session);
 
-                start();
+                done();
             })
 
     });
