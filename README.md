@@ -76,10 +76,7 @@ a browser on a single alignment track opened at a specific locus:
                 })
 ```
 
-## API
-
-See the [Wiki](https://github.com/igvteam/igv.js/wiki) for full documentation of the API.
-
+For more details see the [Wiki](https://github.com/igvteam/igv.js/wiki) for full documentation of the API.
 
 ## Development
 
