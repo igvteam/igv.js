@@ -1175,6 +1175,62 @@ var igv = (function (igv) {
         return feature;
     }
 
+
+    /**
+     * Decode UCSC "interact" files.  See https://genome.ucsc.edu/goldenpath/help/interact.html
+     * @param tokens
+     * @param ignore
+     * @returns {*}
+     */
+    function decodeInteract(tokens, ignore) {
+
+        if (tokens.length < 6) {
+            console.log("Skipping line: " + nextLine);
+            return undefined;
+        }
+
+        var feature = {
+            chr1: tokens[8],
+            start1: Number.parseInt(tokens[9]),
+            end1: Number.parseInt(tokens[10]),
+            chr2: tokens[13],
+            start2: Number.parseInt(tokens[14]),
+            end2: Number.parseInt(tokens[15]),
+
+            name: tokens[3],
+            score: Number.parseFloat(tokens[4]),
+            value: Number.parseFloat(tokens[5]),
+            color: tokens[6]
+
+    }
+
+        feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
+
+        // Start and end for the feature as a whole.  This needs revisited for interchr features
+        feature.start = Math.min(feature.start1, feature.start2);
+        feature.end = Math.max(feature.end1, feature.end2);
+
+        // Midpoints
+        let m1 = (feature.start1 + feature.end1) / 2;
+        let m2 = (feature.start2 + feature.end2) / 2;
+        feature.m1 = (m1 < m2) ? m1 : m2;
+        feature.m2 = (m1 < m2) ? m2 : m1;
+
+        // Optional extra columns
+        if (this.header) {
+            let thicknessColumn = this.header.thicknessColumn;
+            let colorColumn = this.header.colorColumn;
+            if (colorColumn && colorColumn < tokens.length) {
+                feature.color = igv.Color.createColorString(tokens[colorColumn])
+            }
+            if (thicknessColumn && thicknessColumn < tokens.length) {
+                feature.thickness = tokens[thicknessColumn];
+            }
+        }
+
+        return feature;
+    }
+
     /**
      * Special decoder for Hic Domain files.   In these files feature1 == feature2, they are really bed records.
      * @param tokens
