@@ -552,13 +552,15 @@ var igv = (function (igv) {
                 return;
             }
 
-            // Close any currently open popups
-            $('.igv-popover').hide();
+
             self.browser.cancelDrag();
 
             if (3 === e.which || e.ctrlKey) {
                 return;
             }
+
+            // Close any currently open popups
+            $('.igv-popover').hide();
 
             // Treat as a mouse click, its either a single or double click.
             // Handle here and stop propogation / default
