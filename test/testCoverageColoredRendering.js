@@ -1,14 +1,14 @@
 /**
  * Created by turner on 3/20/14.
  */
-function runCoverageColoredRenderingTests() {
+function runCoverageColoredRenderingTests(assert) {
 
-    test( "Test Mismatch Array Creation", 2 * ( 3 + (3 * 5)) + 7, function() {
+    QUnit.test( "Test Mismatch Array Creation", function(assert) {
 
         var doIncrement = function(key, base, index) {
 
-//            ok(mismatches[ key ]);
-//            ok(mismatches[ key + base ]);
+//            assert.ok(mismatches[ key ]);
+//            assert.ok(mismatches[ key + base ]);
 
             if (null == mismatches[ key ][ index]) {
 
@@ -45,13 +45,13 @@ function runCoverageColoredRenderingTests() {
 
             posnegqual.forEach(function(pnq) {
 
-                ok(mismatches[ pnq ]);
-                equal(mismatches[ pnq ].length, count);
+                assert.ok(mismatches[ pnq ]);
+                assert.equal(mismatches[ pnq ].length, count);
 
                 atcgn.forEach(function(base) {
 
-                    ok(mismatches[ (pnq + base) ]);
-                    equal(mismatches[ (pnq + base) ].length, count);
+                    assert.ok(mismatches[ (pnq + base) ]);
+                    assert.equal(mismatches[ (pnq + base) ].length, count);
                 });
 
             });
@@ -96,16 +96,16 @@ function runCoverageColoredRenderingTests() {
             traverse: doTraverse
         };
 
-        ok(mismatches, "mismatches");
-        ok(mismatches.posA, "mismatches.posA");
+        assert.ok(mismatches, "mismatches");
+        assert.ok(mismatches.posA, "mismatches.posA");
 
-        ok(mismatches.pos, "mismatches.pos");
-        equal(mismatches.qual.length, count);
+        assert.ok(mismatches.pos, "mismatches.pos");
+        assert.equal(mismatches.qual.length, count);
 
-        ok(mismatches[ posnegqual[ 0 ] ]);
-        ok(mismatches[ posnegqual[ 0 ] + atcgn[ 2 ] ]);
+        assert.ok(mismatches[ posnegqual[ 0 ] ]);
+        assert.ok(mismatches[ posnegqual[ 0 ] + atcgn[ 2 ] ]);
 
-        equal(mismatches[ posnegqual[ 0 ] + atcgn[ 2 ] ].length, count);
+        assert.equal(mismatches[ posnegqual[ 0 ] + atcgn[ 2 ] ].length, count);
 
         mismatches.traverse(posnegqual, atcgn);
 

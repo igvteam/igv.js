@@ -12,7 +12,8 @@ function runWigTests() {
         }
     }
 
-    asyncTest("wig fixed step", function () {
+    QUnit.test("wig fixed step", function(assert) {
+				var done = assert.async();
 
         var path = "data/wig/fixedStep-example.wig",
             featureSource = new igv.FeatureSource(
@@ -22,7 +23,7 @@ function runWigTests() {
             bpStart = 49300000,
             bpEnd = 49400000;
 
-        ok(featureSource, "featureSource");
+        assert.ok(featureSource, "featureSource");
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
@@ -32,30 +33,31 @@ function runWigTests() {
                 span = 200,
                 value = 1000;
 
-            ok(features);
-            equal(features.length, 10);
+            assert.ok(features);
+            assert.equal(features.length, 10);
 
             //features.forEach(function (feature) {
             //
-            //    equal(feature.start, ss);
-            //    equal(feature.end, ss + span);
-            //    equal(feature.value, value);
+            //    assert.equal(feature.start, ss);
+            //    assert.equal(feature.end, ss + span);
+            //    assert.equal(feature.value, value);
             //
             //    ss += step;
             //    value -= 100;
             //
             //});
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
 
 
     });
 
-    asyncTest("wig variable step", function () {
+    QUnit.test("wig variable step", function(assert) {
+				var done = assert.async();
 
         var url = "data/wig/variableStep-example.wig";
 
@@ -63,7 +65,7 @@ function runWigTests() {
             {format: 'wig', url: url},
             genome);
 
-        ok(wigFeatureSource);
+        assert.ok(wigFeatureSource);
 
         //variableStep chrom=chr19 span=150
         var starts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
@@ -76,22 +78,22 @@ function runWigTests() {
 
         wigFeatureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
+            assert.ok(features);
 
-            equal(features.length, 9);
+            assert.equal(features.length, 9);
 
             //fixedStep chrom=chr19 start=49307401 step=300 span=200
             features.forEach(function (feature, index) {
 
-                equal(feature.start, starts[index]);
-                equal(feature.end, starts[index] + span);
-                equal(feature.value, values[index]);
+                assert.equal(feature.start, starts[index]);
+                assert.equal(feature.end, starts[index] + span);
+                assert.equal(feature.value, values[index]);
 
             });
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
 
 

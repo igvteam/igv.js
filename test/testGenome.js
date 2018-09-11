@@ -4,7 +4,8 @@ function runGenomeTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-    asyncTest("Genome coordinates", function () {
+    QUnit.test("Genome coordinates", function (assert) {
+        var done = assert.async();
 
         var reference = {
                 id: "hg19",
@@ -15,16 +16,16 @@ function runGenomeTests() {
 
         igv.GenomeUtils.loadGenome(reference).then(function (genome) {
 
-            ok(genome);
+            assert.ok(genome);
 
-            equal(86, genome.chromosomeNames.length);
+            assert.equal(86, genome.chromosomeNames.length);
 
-            equal(genome.getCumulativeOffset("2"), 249250621);
+            assert.equal(genome.getCumulativeOffset("2"), 249250621);
 
-            start();
+            done();
 
         }).catch(function (error) {
-            ok(false, error);  // failed
+            assert.ok(false, error);  // failed
         });
 
 

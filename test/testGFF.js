@@ -8,7 +8,8 @@ function runGFFTests() {
         }
     }
 
-    asyncTest("GFF query", function () {
+    QUnit.test("GFF query", function(assert) {
+				var done = assert.async();
 
         var chr = "chr1",
             bpStart = 1,
@@ -21,16 +22,16 @@ function runGFFTests() {
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
-            equal(3, features.length);
-            equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
+            assert.ok(features);
+            assert.equal(3, features.length);
+            assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
-            start();
+            done();
         })
             .catch(function (error) {
                 console.log(error);
-                ok(false);
-                start();
+                assert.ok(false);
+                done();
             });
     });
 }

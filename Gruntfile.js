@@ -5,6 +5,27 @@ module.exports = function (grunt) {
 
         pkg: grunt.file.readJSON('package.json'),
 
+        qunit_puppeteer: {
+          test: {
+            options: {
+              headless: true,
+              traceSettings: {
+                outputConsole: false,
+                outputAllAssertions: false
+              },
+              qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
+            }
+          }
+        },
+
+        connect: {
+          server: {
+            options: {
+              port: 8000,
+              base: '.'
+            }
+          }
+        },
         babel: {
             options: {
                 presets: ['env']
@@ -108,6 +129,8 @@ module.exports = function (grunt) {
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
+    grunt.loadNpmTasks('grunt-qunit-puppeteer');
+    grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('babel-core');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -116,6 +139,8 @@ module.exports = function (grunt) {
     grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_esm', 'uglify:igv_esm', 'clean']);
 
     grunt.registerTask('doc', ['md2html']);
+
+    grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 

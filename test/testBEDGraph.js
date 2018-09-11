@@ -11,7 +11,9 @@ function runBEDGraphTests() {
         }
     }
 
-    asyncTest("BEDGraphFeatureSource getFeatures", function () {
+    QUnit.test("BEDGraphFeatureSource getFeatures", function (assert) {
+
+        var done = assert.async();
 
         var chr = "chr19",
             bpStart = 49302001,
@@ -24,20 +26,20 @@ function runBEDGraphTests() {
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
-            equal(features.length, 9);
+            assert.ok(features);
+            assert.equal(features.length, 9);
 
             //chr19	49302600	49302900	-0.50
             var f = features[2];
-            equal(f.chr, "chr19", "chromosome");
-            equal(f.start, 49302600, "start");
-            equal(f.end, 49302900, "end");
-            equal(f.value, -0.50, "value");
+            assert.equal(f.chr, "chr19", "chromosome");
+            assert.equal(f.start, 49302600, "start");
+            assert.equal(f.end, 49302900, "end");
+            assert.equal(f.value, -0.50, "value");
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
 
     });
