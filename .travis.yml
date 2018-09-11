@@ -1,0 +1,9 @@
+language: node_js
+dist: trusty
+sudo: required
+node_js:
+  - "8.11.1"
+addons:
+  chrome: stable
+before_script: npm install -g grunt-cli; npm ls; grunt
+script: npm test
