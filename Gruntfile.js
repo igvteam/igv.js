@@ -5,36 +5,27 @@ module.exports = function (grunt) {
 
         pkg: grunt.file.readJSON('package.json'),
 
-        qunit: {
-            hello: ['test/helloQUnit.html'],
-            all: ['test/**/*.html']
+        qunit_puppeteer: {
+          test: {
+            options: {
+              headless: true,
+              traceSettings: {
+                outputConsole: false,
+                outputAllAssertions: false
+              },
+              qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
+            }
+          }
         },
 
-          qunit_puppeteer: {
-            test: {
-              options: {
-                headless: true,
-                traceSettings: {
-                  outputConsole: true,
-                  outputAllAssertions: true
-                },
-                viewport: {
-                  width: 1920,
-                  height: 1080
-                },
-                qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
-              }
+        connect: {
+          server: {
+            options: {
+              port: 8000,
+              base: '.'
             }
-          },
-
-          connect: {
-            server: {
-              options: {
-                port: 8000,
-                base: '.'
-              }
-            }
-          },
+          }
+        },
         babel: {
             options: {
                 presets: ['env']
@@ -149,7 +140,7 @@ module.exports = function (grunt) {
 
     grunt.registerTask('doc', ['md2html']);
 
-    grunt.registerTask('doTestChrome', ['connect', 'qunit_puppeteer:test']);
+    grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
