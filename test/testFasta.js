@@ -4,31 +4,32 @@ function runFastaTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-//    asyncTest("Fasta index", 5, function () {                         ©
+//    QUnit.test("Fasta index", function (assert) {
 //
 //        var sequence = igv.FastaSequence.ance();
 //
 //        sequence.loadIndex(function (index) {
 //
-//            ok(index, "Expected non-nil index.  Got: " + index);
+//            assert.ok(index, "Expected non-nil index.  Got: " + index);
 //
 //            var indexEntry = index["chr22"];
 //
-//            equal(indexEntry.size, 51304566, "indexEntry size");
-//            equal(indexEntry.position, 7, "indexEntry position");
-//            equal(indexEntry.basesPerLine, 50, "indexEntry basesPerLine");
-//            equal(indexEntry.bytesPerLine, 51, "indexEntry bytesPerLine");
-//            start();
+//            assert.equal(indexEntry.size, 51304566, "indexEntry size");
+//            assert.equal(indexEntry.position, 7, "indexEntry position");
+//            assert.equal(indexEntry.basesPerLine, 50, "indexEntry basesPerLine");
+//            assert.equal(indexEntry.bytesPerLine, 51, "indexEntry bytesPerLine");
+//            done();
 //        });
 //
 //    });
 
     function handleError(error) {
         console.log(error);
-        ok(false);
+        assert.ok(false);
     }
 
-    asyncTest("FastaSequence - Test fasata with no index", 1, function () {
+    QUnit.test("FastaSequence - Test fasata with no index", function (assert) {
+        var done = assert.async();
 
         var sequence = new igv.FastaSequence(
             {
@@ -44,15 +45,16 @@ function runFastaTests() {
             var expectedSequence = "GCTGC";
             sequence.getSequence("CACNG6--RPLP2", 60, 65).then(function (seq) {
 
-                equal(seq, expectedSequence);
-                start();
+                assert.equal(seq, expectedSequence);
+                done();
             }).catch(function (error) {
                 console.log(error);
             })
         }).catch(handleError)
     })
 
-    asyncTest("FastaSequence - Test getSequence", 2, function () {
+    QUnit.test("FastaSequence - Test getSequence", function (assert) {
+        var done = assert.async();
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
@@ -62,18 +64,19 @@ function runFastaTests() {
             // chr22:29565177-29565216
             sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
-                ok(sequence, "sequence");
+                assert.ok(sequence, "sequence");
 
                 var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
 
-                equal(seqString, expectedSeqString);
+                assert.equal(seqString, expectedSeqString);
 
-                start();
+                done();
             })
         }).catch(handleError)
     })
 
-    asyncTest("FastaSequence - Test readSequence", 2, function () {
+    QUnit.test("FastaSequence - Test readSequence", function (assert) {
+        var done = assert.async();
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
@@ -83,18 +86,19 @@ function runFastaTests() {
             // chr22:29565177-29565216
             sequence.readSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
-                ok(sequence, "sequence");
+                assert.ok(sequence, "sequence");
 
                 var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
 
-                equal(seqString, expectedSeqString);
+                assert.equal(seqString, expectedSeqString);
 
-                start();
+                done();
             }).catch(handleError)
         })
     })
 
-    asyncTest("FastaSequence - Test readSequence - with unknown sequence", 1, function () {
+    QUnit.test("FastaSequence - Test readSequence - with unknown sequence", function (assert) {
+        var done = assert.async();
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
@@ -104,8 +108,8 @@ function runFastaTests() {
             // chr22:29565177-29565216
             sequence.readSequence("noSuchChromosome", 29565176, 29565216).then(function (nullSeq) {
 
-                ok(!nullSeq);
-                start();
+                assert.ok(!nullSeq);
+                done();
             }).catch(function (error) {
                 console.log(error);
             })

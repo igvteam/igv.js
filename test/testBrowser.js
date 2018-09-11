@@ -4,7 +4,8 @@ function runBrowserTests() {
 
     const div = document.createElement("div");
 
-    asyncTest("Test navigation option", function () {
+    QUnit.test("Test navigation option", function (assert) {
+        var done = assert.async();
 
         const options = {
             genome: "hg19",
@@ -13,18 +14,19 @@ function runBrowserTests() {
 
         igv.createBrowser(div, options)
             .then(function (browser) {
-                ok(browser);
-                start();
+                assert.ok(browser);
+                done();
             })
 
             .catch(function (error) {
-                ok(false);
+                assert.ok(false);
                 console.log(error);
-                start();
+                done();
             })
     });
 
-    asyncTest("Test ruler option", function () {
+    QUnit.test("Test ruler option", function (assert) {
+        var done = assert.async();
 
         const options = {
             genome: "hg19",
@@ -33,19 +35,20 @@ function runBrowserTests() {
 
         igv.createBrowser(div, options)
             .then(function (browser) {
-                ok(browser);
+                assert.ok(browser);
                 start();
             })
 
             .catch(function (error) {
-                ok(false);
+                assert.ok(false);
                 console.log(error);
-                start();
+                done();
             })
     });
 
 
-    asyncTest("Test remove browser", function () {
+    QUnit.test("Test remove browser", function (assert) {
+        var done = assert.async();
 
         // Create and remove "n" browsers.
 
@@ -66,16 +69,16 @@ function runBrowserTests() {
                     if (i++ < 10) {
                         createRemove();
                     } else {
-                        ok(true);
-                        start();
+                        assert.ok(true);
+                        done();
                     }
 
 
                 })
                 .catch(function (error) {
                     console.error(error);
-                    ok(false);
-                    start();
+                    assert.ok(false);
+                    done();
                 })
         }
 
