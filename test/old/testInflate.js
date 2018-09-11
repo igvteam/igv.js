@@ -1,14 +1,10 @@
 function runInflateTests() {
 
-    console.log('before module')
-
     module("ZLib");
     var numberOfAssertions = 3;
     QUnit.asyncTest("Inflate", numberOfAssertions, function (assert) {
         console.log("Inflate test");
         var url = "../test/data/misc/inflateTest.gz";
-
-        console.log(igvxhr);
 
         igvxhr.loadArrayBuffer(url).then(function (data) {
 
