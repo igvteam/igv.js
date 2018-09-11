@@ -9,7 +9,8 @@ function runUcscTests() {
         }
     }
 
-    asyncTest("knownGene table", function () {
+    QUnit.test("knownGene table", function (assert) {
+        var done = assert.async();
 
         var chr = "chr8",
             bpStart = 128739950,
@@ -30,10 +31,10 @@ function runUcscTests() {
         featureSource.getFeatures(chr, bpStart, bpEnd)
             .then(function (features) {
 
-                ok(features);
-                equal(4, features.length);   // feature count. Determined by grepping file
+                assert.ok(features);
+                assert.equal(4, features.length);   // feature count. Determined by grepping file
 
-                start();
+                done();
             });
 
     });

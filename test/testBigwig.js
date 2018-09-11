@@ -10,7 +10,8 @@ function runBigwigTests() {
 
     }
 
-    asyncTest("No data", function () {
+    QUnit.test("No data", function (assert) {
+        var done = assert.async();
 
         var bw = new igv.BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
@@ -18,18 +19,18 @@ function runBigwigTests() {
 
         bw.getFeatures('NoSuchChromosome', 0, 100)
             .then(function (features) {
-                equal(0, features.length);
-
-                start();
+                assert.equal(0, features.length);
+                done();
             })
 
             .catch(function (error) {
                 console.log(Error('query bigWig error: ') + error);
-                ok(false);
+                assert.ok(false);
             });
     });
 
-    asyncTest("Many chromosomes", function () {
+    QUnit.test("Many chromosomes", function (assert) {
+        var done = assert.async();
 
         var bw = new igv.BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
@@ -37,22 +38,23 @@ function runBigwigTests() {
 
         bw.getFeatures('AluJb', 0, 100)
             .then(function (features) {
-                equal(99, features.length);
+                assert.equal(99, features.length);
                 features.forEach(function (f) {
-                    equal("AluJb", f.chr);
+                    assert.equal("AluJb", f.chr);
                 });
 
-                start();
+                done();
             })
 
             .catch(function (error) {
                 console.log(Error('query bigWig error: ') + error);
-                ok(false);
+                assert.ok(false);
             });
     });
 
 
-    asyncTest("Bigwig meta data", function () {
+    QUnit.test("Bigwig meta data", function (assert) {
+        var done = assert.async();
 
         var url = dataURL + "bigwig/bigWigExample.bw",
             bwReader;
@@ -60,52 +62,53 @@ function runBigwigTests() {
         createMockObjects();
 
         bwReader = new igv.BWReader({url: url});
-        ok(bwReader);
+        assert.ok(bwReader);
 
         bwReader.loadHeader().then(function () {
 
             var header = bwReader.header;
 
-            ok(header);
+            assert.ok(header);
 
-            equal(4, header.bwVersion);
-            equal(10, header.nZoomLevels);
-            equal(344, header.chromTreeOffset);
-            equal(393, header.fullDataOffset);
-            equal(15751049, header.fullIndexOffset);
+            assert.equal(4, header.bwVersion);
+            assert.equal(10, header.nZoomLevels);
+            assert.equal(344, header.chromTreeOffset);
+            assert.equal(393, header.fullDataOffset);
+            assert.equal(15751049, header.fullIndexOffset);
 
             // Summary data
-            equal(35106705, bwReader.totalSummary.basesCovered);
-            equal(0, bwReader.totalSummary.minVal);
-            equal(100, bwReader.totalSummary.maxVal);
-            equal(77043134252.78125, bwReader.totalSummary.sumSquares);
+            assert.equal(35106705, bwReader.totalSummary.basesCovered);
+            assert.equal(0, bwReader.totalSummary.minVal);
+            assert.equal(100, bwReader.totalSummary.maxVal);
+            assert.equal(77043134252.78125, bwReader.totalSummary.sumSquares);
 
 //            // chrom tree -- values taken from IGV java
             var ctHeader = bwReader.chromTree.header;
-            equal(1, ctHeader.blockSize);
-            equal(5, ctHeader.keySize);
-            equal(8, ctHeader.valSize);
-            equal(1, ctHeader.itemCount);
+            assert.equal(1, ctHeader.blockSize);
+            assert.equal(5, ctHeader.keySize);
+            assert.equal(8, ctHeader.valSize);
+            assert.equal(1, ctHeader.itemCount);
 
             // chrom lookup  == there's only 1 chromosome in this test file
             var chrName = "chr21";
             var chrIdx = bwReader.chromTree.chromToID[chrName];
-            equal(0, chrIdx);
+            assert.equal(0, chrIdx);
 
 
             // Total data count -- note this is the # of "sections", not the # of data points.  Verified with grep
-            equal(6857, bwReader.header.dataCount);
+            assert.equal(6857, bwReader.header.dataCount);
 
             var type = bwReader.type;
-            equal("BigWig", type);
+            assert.equal("BigWig", type);
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
         });
     });
 
-    asyncTest("R+ Tree", function () {
+    QUnit.test("R+ Tree", function (assert) {
+        var done = assert.async();
 
         createMockObjects();
 
@@ -118,17 +121,18 @@ function runBigwigTests() {
 
             bwReader.loadRPTree(offset).then(function (rpTree) {
 
-                ok(rpTree.rootNode);
+                assert.ok(rpTree.rootNode);
 
-                start();
+                done();
             });
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
     });
 
-    asyncTest("Wig features", function () {
+    QUnit.test("Wig features", function (assert) {
+        var done = assert.async();
 
         //chr21:19,146,376-19,193,466
         var url = dataURL + "bigwig/bigWigExample.bw",
@@ -143,18 +147,19 @@ function runBigwigTests() {
 
         bWSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
-            ok(features);
+            assert.ok(features);
 
-            equal(features.length, 337);   // Verified in iPad app
+            assert.equal(features.length, 337);   // Verified in iPad app
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
     });
 
-    asyncTest("Uncompressed bigwig", function () {
+    QUnit.test("Uncompressed bigwig", function (assert) {
+        var done = assert.async();
 
         //chr21:19,146,376-19,193,466
         var url =  "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
@@ -169,18 +174,19 @@ function runBigwigTests() {
 
         bwReader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel).then(function (features) {
 
-            ok(features);
+            assert.ok(features);
 
-            equal(features.length, 8);   // Verified in iPad app
+            assert.equal(features.length, 8);   // Verified in iPad app
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
     });
 
-    asyncTest("Zoom data", function () {
+    QUnit.test("Zoom data", function (assert) {
+        var done = assert.async();
 
         //chr21:19,146,376-19,193,466
         var url = dataURL + "bigwig/bigWigExample.bw",
@@ -196,18 +202,19 @@ function runBigwigTests() {
         bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel)
             .then(function (features) {
 
-                ok(features);
+                assert.ok(features);
 
-                equal(features.length, 1293);   // Verified in iPad app
+                assert.equal(features.length, 1293);   // Verified in iPad app
 
-                start();
+                done();
             }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         })
     });
 
-    asyncTest("Bed features", function () {
+    QUnit.test("Bed features", function (assert) {
+        var done = assert.async();
 
         //chr21:19,146,376-19,193,466
         var url = dataURL + "bigwig/bigBedExample.bb",
@@ -222,14 +229,14 @@ function runBigwigTests() {
 
         bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(function (features) {
 
-            ok(features);
+            assert.ok(features);
 
-            equal(features.length, 23);   // Verified in iPad app
+            assert.equal(features.length, 23);   // Verified in iPad app
 
-            start();
+            done();
         }).catch(function (error) {
             console.log(error);
-            ok(false);
+            assert.ok(false);
         });
     });
 

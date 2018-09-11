@@ -13,7 +13,9 @@ function runBAMTests() {
     };
 
 
-    asyncTest("4 alignment bam", function () {
+    QUnit.test("4 alignment bam", function (assert) {
+
+				var done = assert.async();
 
         var chr = "13",
             beg = 32353128,
@@ -28,16 +30,18 @@ function runBAMTests() {
 
         bamReader.readAlignments(chr, beg, end).then(function (alignmentContainer) {
             var alignments = alignmentContainer.alignments;
-            ok(alignments, "alignments");
-            equal(4, alignments.length, "alignments.length");
+            assert.ok(alignments, "alignments");
+            assert.equal(4, alignments.length, "alignments.length");
 
-            start();
+            done();
         }).catch(function (error) {
-            ok(false, error);  // failed
+            assert.ok(false, error);  // failed
         });
     });
     
-    asyncTest("alignments for range", function () {
+    QUnit.test("alignments for range", function (assert) {
+
+				var done = assert.async();
 
         var chr = "chr22",
             beg = 24375199,
@@ -52,12 +56,12 @@ function runBAMTests() {
 
         bamReader.readAlignments(chr, beg, end).then(function (alignments) {
 
-            ok(alignments, "alignments");
-            equal(3345, alignments.length, "alignments.length");
+            assert.ok(alignments, "alignments");
+            assert.equal(3345, alignments.length, "alignments.length");
 
-            start();
+            done();
         }).catch(function (error) {
-            ok(false, error);  // failed
+            assert.ok(false, error);  // failed
         });
     });
 

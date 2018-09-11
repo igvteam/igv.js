@@ -3,7 +3,8 @@ function runTabixTests() {
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
 
-    asyncTest("blocksForRange", function () {
+    QUnit.test("blocksForRange", function (assert) {
+        var done = assert.async();
 
         var refID = 14,
             beg = 24375199,
@@ -13,12 +14,12 @@ function runTabixTests() {
 
         igv.loadBamIndex(indexPath, config, true).then(function (bamIndex) {
 
-            ok(bamIndex);
-            start();
+            assert.ok(bamIndex);
+            done();
         }).catch(function (error) {
-            ok(false);
+            assert.ok(false);
             console.log(error);
-            start();
+            done();
         });
 
     });

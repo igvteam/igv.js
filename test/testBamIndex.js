@@ -2,7 +2,7 @@ function runBAMIndexTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-    // asyncTest("blocksForRange", function () {
+    // QUnit.test("blocksForRange", function (assert) {
     //
     //     var refID = 14,
     //         beg = 24375199,
@@ -21,28 +21,29 @@ function runBAMIndexTests() {
     //
     //         chunks = bamIndex.blocksForRange(refID, beg, end);
     //
-    //         ok(chunks, "chunks are non-null");
-    //         equal(chunks.length, 1, "chunks.length is correct");
+    //         assert.ok(chunks, "chunks are non-null");
+    //         assert.equal(chunks.length, 1, "chunks.length is correct");
     //
     //         var chunk = chunks[0];
-    //         equal(0, chunk.maxv.offset, "chunk.maxv.offset");
-    //         equal(60872, chunk.maxv.block, "chunk.maxv.block");
+    //         assert.equal(0, chunk.maxv.offset, "chunk.maxv.offset");
+    //         assert.equal(60872, chunk.maxv.block, "chunk.maxv.block");
     //
-    //         start();
+    //         done();
     //
     //     });
     // });
 
-    asyncTest("loadIndex", function() {
+    QUnit.test("loadIndex", function (assert) {
+        var done = assert.async();
 
         var url = "http://1000genomes.s3.amazonaws.com/phase3/data/HG01879/alignment/HG01879.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai";
 
 
         igv.loadBamIndex(url, {}, false).then(function (bamIndex){
 
-            ok(bamIndex);
+            assert.ok(bamIndex);
 
-            start();
+            done();
         });
 
     })
