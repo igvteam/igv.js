@@ -78,14 +78,12 @@ var igv = (function (igv) {
     };
 
     igv.ReferenceFrame.prototype.showLocus = function (pixels) {
-        var ss,
-            ee;
 
         if ('all' === this.chrName.toLowerCase()) {
             return this.chrName.toLowerCase();
         } else {
-            ss = igv.numberFormatter(Math.round(this.start));
-            ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+            const ss = igv.numberFormatter(Math.floor(this.start) + 1);
+            const ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
             return this.chrName + ':' + ss + '-' + ee;
         }
     };
