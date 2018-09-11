@@ -111,7 +111,13 @@ This creates a dist folder with the following files
 
 ### Tests
 
-To run the tests start an [http-server](https://www.npmjs.com/package/http-server)
+To run the tests from the command line
+
+```
+    grunt test
+```
+
+To run the tests in a browser start an [http-server](https://www.npmjs.com/package/http-server)
 
     npm run http-server
 
