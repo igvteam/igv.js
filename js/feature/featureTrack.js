@@ -114,6 +114,10 @@ var igv = (function (igv) {
 
     }
 
+    igv.FeatureTrack.prototype.supportsWholeGenome = function () {
+        return this.config.indexed === false;
+    }
+
     igv.FeatureTrack.prototype.getFileHeader = function () {
 
         const self = this;
