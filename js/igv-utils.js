@@ -166,6 +166,11 @@ var igv = (function (igv) {
 
         $fa.on('click', closeHandler);
         $fa.on('touchend', closeHandler);
+        $fa.on('mouseup', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        })
+
 
         $fa.on('touchstart', function (e) {
             e.preventDefault();
