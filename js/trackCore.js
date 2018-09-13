@@ -558,6 +558,10 @@ var igv = (function (igv) {
                     $e.on('touchend', function (e) {
                         handleClick(e);
                     });
+                    $e.on('mouseup', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    })
 
                     function handleClick(e) {
                         item.click();
