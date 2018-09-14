@@ -31,7 +31,6 @@ var igv = (function (igv) {
         this.guid = igv.guid();
 
         this.namespace = '.browser_' + this.guid;
-        this.document_click_browser_str = 'click.browser.' + this.guid;
 
         this.config = options;
 
@@ -703,6 +702,7 @@ var igv = (function (igv) {
 
     };
 
+
     igv.Browser.prototype.removeTrackByName = function (name) {
 
         var remove;
@@ -770,71 +770,6 @@ var igv = (function (igv) {
             }
         })
         return tracks;
-    };
-
-    igv.Browser.prototype.reduceTrackOrder = function (trackView) {
-
-        var indices = [],
-            raisable,
-            raiseableOrder;
-
-        if (1 === this.trackViews.length) {
-            return;
-        }
-
-        this.trackViews.forEach(function (tv, i, tvs) {
-
-            indices.push({trackView: tv, index: i});
-
-            if (trackView === tv) {
-                raisable = indices[i];
-            }
-
-        });
-
-        if (0 === raisable.index) {
-            return;
-        }
-
-        raiseableOrder = raisable.trackView.track.order;
-        raisable.trackView.track.order = indices[raisable.index - 1].trackView.track.order;
-        indices[raisable.index - 1].trackView.track.order = raiseableOrder;
-
-        this.reorderTracks();
-
-    };
-
-    igv.Browser.prototype.increaseTrackOrder = function (trackView) {
-
-        var j,
-            indices = [],
-            raisable,
-            raiseableOrder;
-
-        if (1 === this.trackViews.length) {
-            return;
-        }
-
-        this.trackViews.forEach(function (tv, i, tvs) {
-
-            indices.push({trackView: tv, index: i});
-
-            if (trackView === tv) {
-                raisable = indices[i];
-            }
-
-        });
-
-        if ((this.trackViews.length - 1) === raisable.index) {
-            return;
-        }
-
-        raiseableOrder = raisable.trackView.track.order;
-        raisable.trackView.track.order = indices[1 + raisable.index].trackView.track.order;
-        indices[1 + raisable.index].trackView.track.order = raiseableOrder;
-
-        this.reorderTracks();
-
     };
 
     igv.Browser.prototype.setTrackHeight = function (newHeight) {
@@ -2058,7 +1993,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.cancelDrag = function () {
+    igv.Browser.prototype.cancelTrackPan = function () {
 
         if (this.isDragging) {
             this.updateViews();
@@ -2070,6 +2005,71 @@ var igv = (function (igv) {
 
     }
 
+
+    igv.Browser.prototype.startTrackDrag = function (trackView) {
+
+        this.dragTrack = trackView;
+
+    }
+
+    igv.Browser.prototype.updateTrackDrag = function (dragDestination) {
+
+        if (dragDestination && this.dragTrack) {
+
+            const dragged = this.dragTrack;
+            const indexDestination = this.trackViews.indexOf(dragDestination);
+            const indexDragged = this.trackViews.indexOf(dragged);
+            const trackViews = this.trackViews;
+
+            trackViews[indexDestination] = dragged;
+            trackViews[indexDragged] = dragDestination;
+
+            const newOrder = this.trackViews[indexDestination].track.order;
+            this.trackViews[indexDragged].track.order = newOrder;
+
+            const nTracks = trackViews.length;
+            let lastOrder = newOrder;
+
+            if (indexDestination < indexDragged) {
+                // Displace tracks below
+
+                for (let i = indexDestination + 1; i < nTracks; i++) {
+                    const track = trackViews[i].track;
+                    if (track.order <= lastOrder) {
+                        track.order = Math.min(Number.MAX_VALUE, lastOrder + 1);
+                        lastOrder = track.order;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            else {
+                // Displace tracks above.  First track (index 0) is "ruler"
+                for (let i = indexDestination - 1; i > 0; i--) {
+                    const track = trackViews[i].track;
+                    if (track.order >= lastOrder) {
+                        track.order = Math.max(-Number.MAX_VALUE, lastOrder - 1);
+                        lastOrder = track.order;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+            this.reorderTracks();
+        }
+    }
+
+    igv.Browser.prototype.endTrackDrag = function () {
+        if (this.dragTrack) {
+            this.dragTrack.$trackDragScrim.hide();
+        }
+        this.dragTrack = undefined;
+    }
+
+
+
     /**
      * Mouse handlers to support drag (pan)
      */
@@ -2080,6 +2080,9 @@ var igv = (function (igv) {
         $(window).on('resize' + this.namespace, function () {
             self.resize();
         });
+
+        $(this.root).on('mouseup', mouseUpOrLeave);
+        $(this.root).on('mouseleave', mouseUpOrLeave);
 
         $(this.trackContainerDiv).on('mousemove', handleMouseMove);
 
@@ -2096,6 +2099,7 @@ var igv = (function (igv) {
             var coords, viewport, viewportWidth, referenceFrame;
 
             e.preventDefault();
+
 
             if (self.loadInProgress()) {
                 return;
@@ -2144,13 +2148,16 @@ var igv = (function (igv) {
                     self.vpMouseDown.viewport.trackView.scrollBy(delta);
                 }
 
+
+
                 self.vpMouseDown.lastMouseX = coords.x;
                 self.vpMouseDown.lastMouseY = coords.y
             }
         }
 
         function mouseUpOrLeave(e) {
-            self.cancelDrag();
+            self.cancelTrackPan();
+            self.endTrackDrag();
         }
     }
 

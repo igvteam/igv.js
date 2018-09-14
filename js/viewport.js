@@ -546,14 +546,14 @@ var igv = (function (igv) {
 
             // Any mouse up cancels drag and scrolling
             if (self.browser.isDragging || self.browser.isScrolling) {
-                self.browser.cancelDrag();
+                self.browser.cancelTrackPan();
                 e.preventDefault();
                 e.stopPropagation();
                 return;
             }
 
-
-            self.browser.cancelDrag();
+            self.browser.cancelTrackPan();
+            self.browser.endTrackDrag();
 
             if (3 === e.which || e.ctrlKey) {
                 return;
