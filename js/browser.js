@@ -1952,7 +1952,7 @@ var igv = (function (igv) {
                 if (config.browser) {
                     delete config.browser;
                 }
-                config.order = order++;
+                config.order = track.order; //order++;
                 trackJson.push(config);
             }
         });
