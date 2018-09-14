@@ -153,6 +153,30 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
+                // Restore gtex selections.  
+                if (config.gtexSelections) {
+
+                    const genomicStates = {};
+
+                    for (let gs of self.genomicStateList) {
+                        genomicStates[gs.locusSearchString] = gs;
+                    }
+
+                    for (let s of Object.getOwnPropertyNames(config.gtexSelections)) {
+                        const gs = genomicStates[s];
+                        if (gs) {
+                            const gene = config.gtexSelections[s].gene;
+                            const snp = config.gtexSelections[s].snp;
+                            gs.selection = new igv.GtexSelection(gene, snp);
+                        }
+                    }
+                }
+
+                return genome;
+            })
+
+            .then(function (genome) {
+
                 if (config.roi) {
                     self.roi = [];
                     config.roi.forEach(function (r) {
@@ -1859,14 +1883,31 @@ var igv = (function (igv) {
         };
 
         // Use rulerTrack to get current loci.   This is really obtuse and fragile
-        var locus = [];
+        const locus = [];
+        const gtexSelections = {};
         this.rulerTrack.trackView.viewports.forEach(function (viewport) {
-            const pixelWidth = viewport.$viewport[0].clientWidth;
-            locus.push(viewport.genomicState.referenceFrame.showLocus(pixelWidth));
 
-        })
+            const genomicState = viewport.genomicState;
+            const pixelWidth = viewport.$viewport[0].clientWidth;
+            const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+            locus.push(locusString);
+
+            if (genomicState.selection) {
+                const selection = {
+                    gene: genomicState.selection.gene,
+                    snp: genomicState.selection.snp
+                };
+
+                gtexSelections[locusString] = selection;
+            }
+        });
+
         json["locus"] = locus;
 
+        const gtexKeys = Object.getOwnPropertyNames(gtexSelections);
+        if (gtexKeys.length > 0) {
+            json["gtexSelections"] = gtexSelections;
+        }
 
         trackJson = [];
         order = 0;
@@ -2069,7 +2110,6 @@ var igv = (function (igv) {
     }
 
 
-
     /**
      * Mouse handlers to support drag (pan)
      */
@@ -2116,8 +2156,8 @@ var igv = (function (igv) {
                 viewportWidth = viewport.$viewport.width();
                 referenceFrame = viewport.genomicState.referenceFrame;
 
-                if(!self.isDragging && !self.isScrolling) {
-                    if(horizontal) {
+                if (!self.isDragging && !self.isScrolling) {
+                    if (horizontal) {
                         if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
                             self.isDragging = true;
                         }
@@ -2147,7 +2187,6 @@ var igv = (function (igv) {
                     const delta = self.vpMouseDown.r * (self.vpMouseDown.lastMouseY - coords.y);
                     self.vpMouseDown.viewport.trackView.scrollBy(delta);
                 }
-
 
 
                 self.vpMouseDown.lastMouseX = coords.x;
