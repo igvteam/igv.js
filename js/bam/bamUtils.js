@@ -508,6 +508,9 @@ var igv = (function (igv) {
                 case 'P' :
                     break; // ignore pads
                 case 'S' :
+                    blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
+                    blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                    blocks.push({start: i > 0 ? pos : pos-c.len, len: c.len, seq: blockSeq, qual: blockQuals, gapType: 's'});
                     seqOffset += c.len;
                     gapType = 'S';
                     break; // soft clip read bases
@@ -547,7 +550,7 @@ var igv = (function (igv) {
                     }));
                     seqOffset += c.len;
                     pos += c.len;
-
+                    gapType = undefined;
                     break;
 
                 default :

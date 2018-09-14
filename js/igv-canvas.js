@@ -188,19 +188,25 @@ var igv = (function (igv) {
             if (properties || transforms) ctx.restore();
         },
 
-        strokeCircle: function (ctx, x, y, radius) {
+        strokeCircle: function (ctx, x, y, radius, properties) {
 
+            ctx.save();
+            if (properties)   igv.graphics.setProperties(ctx, properties);
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI);
             ctx.stroke();
+            ctx.restore();
         },
 
-        fillCircle: function (ctx, x, y, radius) {
+        fillCircle: function (ctx, x, y, radius, properties) {
 
+            ctx.save();
+            if (properties)   igv.graphics.setProperties(ctx, properties);
             ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI);
             ctx.fill();
-        },
+            ctx.restore();
+        }, 
 
         drawArrowhead: function (ctx, x, y, size, lineWidth) {
 

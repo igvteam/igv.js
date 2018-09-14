@@ -663,6 +663,7 @@ var igv = (function (igv) {
         this.colorBy = config.colorBy || "pairOrientation";
         this.colorByTag = config.colorByTag;
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
+        this.showSoftclips = config.showSoftclips;
 
         this.hasPairs = false;   // Until proven otherwise
 
@@ -799,6 +800,7 @@ var igv = (function (igv) {
 
             var alignmentColor,
                 outlineColor,
+                showSoftclips = self.showSoftclips,
                 lastBlockEnd,
                 blocks,
                 block,
@@ -867,6 +869,10 @@ var igv = (function (igv) {
                 arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
                 blockSequence = block.seq.toUpperCase();
                 yStrokedLine = yRect + alignmentHeight / 2;
+
+                if ("s" === block.gapType && !showSoftclips) {
+                    return;
+                }
 
                 if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                     if ("D" === block.gapType) {
@@ -975,6 +981,11 @@ var igv = (function (igv) {
                         }
                     }
                 }
+
+                if (("S" === block.gapType || "s" === block.gapType && b > 0) && showSoftclips) {
+                    igv.graphics.fillCircle(ctx, blockStartPixel, yStrokedLine, 2, {fillStyle: "black"});
+                } 
+
             }
 
             function renderBlockOrReadChar(context, bpp, bbox, color, char) {
@@ -1039,8 +1050,12 @@ var igv = (function (igv) {
         const list = [];
 
         list.push({label: 'Sort by base', click: sortRows});
+        list.push({label: 'Refresh', click: refreshWindow});
+
+	const alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
 
         const clickedObject = this.getClickedObject(clickState.viewport, clickState.y, clickState.genomicLocation);
+	// Object might be a DownsampledInterval,  or a PairedAlignment
         const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
         if (isSingleAlignment && clickedObject.isMateMapped()) {
             list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
@@ -1075,6 +1090,10 @@ var igv = (function (igv) {
                 self.highlightedAlignmentReadNamed = clickedObject.readName;
                 self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
             }
+        }
+
+        function refreshWindow() {
+            self.parent.trackView.updateViews(true);
         }
     };
 

@@ -167,6 +167,22 @@ var igv = (function (igv) {
 
     }
 
+    igv.BamAlignment.prototype.getSoftStart = function () {
+        var start = this.start,
+            blocks = this.blocks;
+        if (blocks.length > 0 && blocks[0].gapType === "s")
+            start = blocks[0].start;
+        return start;
+    }   
+
+    igv.BamAlignment.prototype.getSoftEnd = function () {
+        var end = this.start + this.lengthOnRef,
+            blocks = this.blocks;
+        if (blocks.length > 1 && blocks[blocks.length-1].gapType === "s")
+            end = blocks[blocks.length-1].start + blocks[blocks.length-1].len;
+        return end;
+    } 
+
     igv.BamAlignment.prototype.popupData = function (genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the

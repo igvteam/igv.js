@@ -59,7 +59,7 @@ var igv = (function (igv) {
         }
 
         this.viewAsPairs = config.viewAsPairs;
-
+        this.showSoftclips = config.showSoftclips;
         this.groupBy = config.groupBy || 'none';
         this.groupByTag = config.groupBy === 'tag' ? config.groupByTag : undefined;
     };
@@ -215,7 +215,7 @@ var igv = (function (igv) {
             (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
     }
 
-    function packAlignmentRows(packedAlignmentRows, alignments, start, end, maxRows) {
+    function packAlignmentRows(packedAlignmentRows, alignments, start, end, maxRows, showSoftclips) {
 
         if (!alignments) return;
 
@@ -237,19 +237,24 @@ var igv = (function (igv) {
 
 
             alignments.sort(function (a, b) {
-                if (a.start !== b.start)
-                    return a.start - b.start;
-                if (a.lengthOnRef !== b.lengthOnRef)
-                return b.lengthOnRef - a.lengthOnRef;
+                var sa = showSoftclips ? a.getSoftStart() : a.start,
+                sb = showSoftclips ? b.getSoftStart() : b.start,
+                la = showSoftclips ? a.getSoftEnd() - sa : a.lengthOnRef,
+                lb = showSoftclips ? b.getSoftEnd() - sb : b.lengthOnRef;
+                if (sa !== sb) 
+                    return sa - sb; 
+                if (la !== lb) 
+                    return lb - la; 
                 return b.strand - a.strand;
             });
 
-            bucketStart = Math.max(start, alignments[0].start);
+            bucketStart = Math.max(start, showSoftclips ? alignments[0].getSoftStart() : alignments[0].start);
             nextStart = bucketStart;
 
             alignments.forEach(function (alignment) {
 
-                var buckListIndex = Math.max(0, alignment.start - bucketStart);
+                var s = showSoftclips ? alignment.getSoftStart() : alignment.start,
+                    buckListIndex = Math.max(0, s - bucketStart);
                 if (bucketList[buckListIndex] === undefined) {
                     bucketList[buckListIndex] = [];
                 }
@@ -285,7 +290,7 @@ var igv = (function (igv) {
                     }
 
                     alignmentRow.alignments.push(alignment);
-                    nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
+                    nextStart = (showSoftclips ? alignment.getSoftEnd() : alignment.start + alignment.lengthOnRef) + alignmentSpace;
                     ++allocatedCount;
 
                 } // while (nextStart)

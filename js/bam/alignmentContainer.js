@@ -235,6 +235,7 @@ var igv = (function (igv) {
         }
         else {
             alignment.blocks.forEach(function (block) {
+                if ("s" === block.gapType) return;
                 incBlockCount(block);
             });
         }

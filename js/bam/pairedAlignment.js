@@ -69,6 +69,20 @@ var igv = (function (igv) {
 
     }
 
+    igv.PairedAlignment.prototype.getSoftStart = function () {
+        var pos = this.firstAlignment.getSoftStart();
+        if (this.secondAlignment)
+            pos = Math.min(pos, this.secondAlignment.getSoftStart());
+        return Math.min(pos, this.start);
+    }   
+
+    igv.PairedAlignment.prototype.getSoftEnd = function () {
+        var pos = this.firstAlignment.getSoftEnd();
+        if (this.secondAlignment)
+            pos = Math.max(pos, this.secondAlignment.getSoftEnd());
+        return Math.max(pos, this.end);
+    } 
+
     igv.PairedAlignment.prototype.popupData = function (genomicLocation) {
 
         var nameValues = [];
