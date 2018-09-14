@@ -251,6 +251,18 @@ var igv = (function (igv) {
             menuItems.push(colorByCB(item, selected));
         });
 
+        const groupByMenuItems = [{key: 'none', label: 'none'}];
+        const tagLabel1 = 'tag' + (self.featureSource.groupByTag ? ' (' + self.featureSource.groupByTag + ')' : '');
+        groupByMenuItems.push({key: 'tag', label: tagLabel1});
+        const $e1 = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $e1.text('Group by');
+        menuItems.push({name: undefined, object: $e1, click: undefined, init: undefined});
+
+        groupByMenuItems.forEach(function (item) {
+            const selected1 = (self.featureSource.groupBy === item.key);
+            menuItems.push(groupByCB(item, selected1));
+        });
+
         if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
@@ -324,6 +336,63 @@ var igv = (function (igv) {
 
                     self.alignmentTrack.colorBy = menuItem.key;
                     self.config.colorBy = menuItem.key;
+
+                    self.trackView.repaintViews();
+                }
+
+            };
+
+            return {name: undefined, object: $e, click: clickHandler, init: undefined}
+
+        }
+
+
+        function groupByCB(menuItem, showCheck) {
+
+
+            const $e = igv.createCheckbox(menuItem.label, showCheck);
+
+            const clickHandler = function () {
+
+                if (menuItem.key === self.alignmentTrack.groupBy) {
+
+                    self.alignmentTrack.groupBy = 'none';
+                    self.config.groupBy = 'none';
+                    self.trackView.repaintViews();
+
+                } else if ('tag' === menuItem.key) {
+
+                    const clickFunction = function () {
+
+                        self.alignmentTrack.groupBy = 'tag';
+                        self.config.groupBy = 'tag';
+
+                        const tag = self.trackView.browser.inputDialog.$input.val().trim();
+                        if (tag !== self.alignmentTrack.groupByTag) {
+                            self.alignmentTrack.groupByTag = tag;
+                            self.config.groupByTag = tag;
+
+                            self.featureSource.setGroupBy(menuItem.key, tag);
+                            $('#group-by-tag').text(self.alignmentTrack.groupByTag);
+                        }
+
+                        self.trackView.repaintViews();
+                    };
+
+                    const config =
+                        {
+                            label: 'Tag Name',
+                            input: self.alignmentTrack.groupByTag ? self.alignmentTrack.groupByTag : '',
+                            click: clickFunction
+                        };
+
+                    self.trackView.browser.inputDialog.configure(config);
+                    self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
+
+                } else {
+
+                    self.alignmentTrack.groupBy = menuItem.key;
+                    self.config.groupBy = menuItem.key;
 
                     self.trackView.repaintViews();
                 }
