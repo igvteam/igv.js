@@ -189,15 +189,6 @@
     });
 
 
-    function findTracks(property, value) {
-        var tracks = igv.browser.findTracks(property, value);
-        tracks.forEach(function (track) {
-            console.log(track.name);
-            track.sortSamples("8", 124512906, 124512945, "DESC");
-        })
-    }
-
-
     function bookmark() {
         window.history.pushState({}, "IGV", igv.browser.sessionURL());
     }
