@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+"use strict";
 
-    var sortDirection = "DESC";
+var igv = (function (igv) {
 
     igv.SegTrack = function (config, browser) {
 
@@ -35,8 +35,9 @@ var igv = (function (igv) {
 
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;
-        this.squishedRowHeight = config.sampleSquishHeight ||  config.squishedRowHeight || 2;
+        this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 12;
+
 
         this.posColorScale = config.posColorScale ||
             new igv.GradientColorScale(
@@ -71,11 +72,16 @@ var igv = (function (igv) {
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = new igv.FeatureSource(this.config, browser.genome);
 
+        if (config.sort) {
+            const sort = config.sort;
+            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
+        }
+
     };
 
     igv.SegTrack.prototype.menuItemList = function () {
 
-        var self = this;
+        const self = this;
 
         return [
             {
@@ -125,58 +131,47 @@ var igv = (function (igv) {
 
     igv.SegTrack.prototype.draw = function (options) {
 
-        var self = this, featureList, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd, segment, len, sampleKey,
-            i, y, color, value, px, px1, pw, xScale, sampleHeight, border;
-
-        sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
-        border = ("SQUISHED" === this.displayMode) ? 0 : 1;
-
-        ctx = options.context;
-        pixelWidth = options.pixelWidth;
-        pixelHeight = options.pixelHeight;
+        const self = this;
+        const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+        const border = ("SQUISHED" === this.displayMode) ? 0 : 1;
+        const ctx = options.context;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
         igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        featureList = options.features;
-
-        // Create a map for fast id -> row lookup
-        let samples = {};
-        this.sampleKeys.forEach(function (id, index) {
-            samples[id] = index;
-        })
-
+        const featureList = options.features;
 
         if (featureList) {
 
             if (self.isLog === undefined) checkForLog(featureList);
 
-            bpPerPixel = options.bpPerPixel;
-            bpStart = options.bpStart;
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-            xScale = bpPerPixel;
+            const bpPerPixel = options.bpPerPixel;
+            const bpStart = options.bpStart;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const xScale = bpPerPixel;
 
-            for (i = 0, len = featureList.length; i < len; i++) {
-                sampleKey = featureList[i].sampleKey;
-                if (!samples.hasOwnProperty(sampleKey)) {
-                    this.sampleKeys.push(sampleKey);
-                    samples[sampleKey] = this.sampleKeys.length;
-                }
-            }
+            updateSampleKeys.call(this, featureList);
 
-            for (i = 0, len = featureList.length; i < len; i++) {
+            // Create a map for fast id -> row lookup
+            const samples = {};
+            this.sampleKeys.forEach(function (id, index) {
+                samples[id] = index;
+            })
 
-                segment = featureList[i];
+            for (let segment of featureList) {
 
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
                 segment.row = samples[segment.sampleKey];
-                y = samples[segment.sampleKey] * sampleHeight + border;
+                const y = samples[segment.sampleKey] * sampleHeight + border;
 
-                value = segment.value;
+                let value = segment.value;
                 if (!self.isLog) {
                     value = igv.Math.log2(value / 2);
                 }
 
+                let color;
                 if (value < -0.1) {
                     color = self.negColorScale.getColor(value);
                 }
@@ -187,9 +182,9 @@ var igv = (function (igv) {
                     color = "white";
                 }
 
-                px = Math.round((segment.start - bpStart) / xScale);
-                px1 = Math.round((segment.end - bpStart) / xScale);
-                pw = Math.max(1, px1 - px);
+                const px = Math.round((segment.start - bpStart) / xScale);
+                const px1 = Math.round((segment.end - bpStart) / xScale);
+                const pw = Math.max(1, px1 - px);
 
                 igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
@@ -224,22 +219,11 @@ var igv = (function (igv) {
      */
     igv.SegTrack.prototype.computePixelHeight = function (features) {
 
-        var sampleHeight, i, len, sampleKey;
-
         if (!features) return 0;
 
-        sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+        const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
 
-        // Create a map for fast id -> row lookup
-        let samples = new Set(this.sampleKeys);
-
-        for (i = 0, len = features.length; i < len; i++) {
-            sampleKey = features[i].sampleKey;
-            if (!samples.has(sampleKey)) {
-                samples.add(sampleKey);
-                this.sampleKeys.push(sampleKey);
-            }
-        }
+        updateSampleKeys.call(this, features);
 
         return this.sampleKeys.length * sampleHeight;
     };
@@ -249,41 +233,36 @@ var igv = (function (igv) {
      */
     igv.SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
 
-        var self = this,
-            d2 = (direction === "ASC" ? 1 : -1);
+        const self = this;
+
 
         this.featureSource.getFeatures(chr, bpStart, bpEnd)
+
             .then(function (featureList) {
 
-                var segment,
-                    min,
-                    max,
-                    f,
-                    i,
-                    s,
-                    sampleKeys,
-                    scores = {},
-                    bpLength = bpEnd - bpStart + 1;
+                updateSampleKeys.call(self, featureList);
+
+                const scores = {};
+                const bpLength = bpEnd - bpStart + 1;
 
                 // Compute weighted average score for each sample
-                for (i = 0; i < featureList.length; i++) {
-
-                    segment = featureList[i];
+                for (let segment of featureList) {
 
                     if (segment.end < bpStart) continue;
                     if (segment.start > bpEnd) break;
 
-                    min = Math.max(bpStart, segment.start);
-                    max = Math.min(bpEnd, segment.end);
-                    f = (max - min) / bpLength;
+                    const min = Math.max(bpStart, segment.start);
+                    const max = Math.min(bpEnd, segment.end);
+                    const f = (max - min) / bpLength;
 
-                    s = scores[segment.sampleKey];
-                    if (!s) s = 0;
+                    const s = scores[segment.sampleKey] || 0;
                     scores[segment.sampleKey] = s + f * segment.value;
 
                 }
 
                 // Now sort sample names by score
+
+                const d2 = (direction === "ASC" ? 1 : -1);
                 self.sampleKeys.sort(function (a, b) {
 
                     var s1 = scores[a];
@@ -340,41 +319,70 @@ var igv = (function (igv) {
                 let row = 'SQUISHED' === self.displayMode ? Math.floor(y / self.squishedRowHeight) : Math.floor(y / self.expandedRowHeight);
 
                 return features.filter(function (feature) {
-                    return   feature.row === undefined || row === feature.row;
+                    return feature.row === undefined || row === feature.row;
                 })
             }
         }
     }
 
-    igv.SegTrack.prototype.contextMenuItemList = function (config) {
+    igv.SegTrack.prototype.contextMenuItemList = function (clickState) {
 
-        var self = this,
-            clickHandler;
+        const self = this;
+        const referenceFrame = clickState.viewport.genomicState.referenceFrame;
+        const genomicLocation = clickState.genomicLocation;
+
+        // Define a region 5 "pixels" wide in genomic coordinates
+        const sortDirection = this.config.sort ?
+            (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
+            "DESC";
+        const bpWidth = referenceFrame.toBP(2.5);
+
+        function sortHandler(sort) {
+            self.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
+        }
+
+        return [
+            {
+                label: 'Sort by value', click: function (e) {
 
 
-        clickHandler = function () {
+                    const sort = {
+                        direction: sortDirection,
+                        chr: referenceFrame.chrName,
+                        start: genomicLocation - bpWidth,
+                        end: genomicLocation + bpWidth
 
-            var genomicLocation = config.genomicLocation,
-                referenceFrame = config.viewport.genomicState.referenceFrame;
+                    };
 
-            // Define a region 5 "pixels" wide in genomic coordinates
-            var bpWidth = referenceFrame.toBP(2.5);
+                    sortHandler(sort);
 
-            self.sortSamples(referenceFrame.chrName, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
+                    self.config.sort = sort;
 
-            sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
-
-
-        };
-
-        return [{label: 'Sort by value', click: clickHandler, init: undefined}];
+                }
+            }];
 
     };
-    
+
+
     igv.SegTrack.prototype.supportsWholeGenome = function () {
         return true;
     }
-    
+
+
+    function updateSampleKeys(featureList) {
+
+        const samples = new Set(this.sampleKeys);
+
+        for (let feature of featureList) {
+
+            const sampleKey = feature.sampleKey;
+            if (!samples.has(sampleKey)) {
+                samples.add(sampleKey);
+                this.sampleKeys.push(sampleKey);
+            }
+        }
+    }
+
 
     return igv;
 

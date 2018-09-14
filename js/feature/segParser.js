@@ -32,11 +32,11 @@
  *
  */
 
+"use strict";
 
 var igv = (function (igv) {
 
-    var maxFeatureCount = Number.MAX_VALUE,    // For future use,  controls downsampling
-        sampleKeyColumn = 0,
+    var sampleKeyColumn = 0,
         sampleColumn = 0,
         chrColumn = 1,
         startColumn = 2,
