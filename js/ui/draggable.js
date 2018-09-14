@@ -33,18 +33,22 @@
  */
 var igv = (function (igv) {
 
+    const namespace = ".igv_drag";
+
     let dragData;   // Its assumed we are only dragging one element at a time.
 
     igv.makeDraggable = function (target, handle) {
 
-        handle.addEventListener('mousedown', dragStart.bind(target), true);
+        $(handle).on('mousedown' + namespace, dragStart.bind(target));
 
     }
 
 
     function dragStart(event) {
+
         event.stopPropagation();
         event.preventDefault();
+
         const target = this;
         const x = event.screenX;
         const y = event.screenY;
@@ -61,10 +65,10 @@ var igv = (function (igv) {
                 dy: styleY - y
             };
 
-        document.addEventListener('mousemove', dragFunction);
-        document.addEventListener('mouseup', dragEndFunction);
-        document.addEventListener('mouseleave', dragEndFunction);
-        document.addEventListener('mouseexit', dragEndFunction);
+        $(document).on('mousemove' + namespace, dragFunction);
+        $(document).on('mouseup' + namespace, dragEndFunction);
+        $(document).on('mouseleave' + namespace, dragEndFunction);
+        $(document).on('mouseexit' + namespace, dragEndFunction);
 
     }
 
@@ -103,10 +107,7 @@ var igv = (function (igv) {
         target.style.left = styleX + "px";
         target.style.top = styleY + "px";
 
-        document.removeEventListener('mousemove', dragData.dragFunction);
-        document.removeEventListener('mouseup', dragData.dragEndFunction);
-        document.removeEventListener('mouseleave', dragData.dragEndFunction);
-        document.removeEventListener('mouseexit', dragData.dragEndFunction);
+        $(document).off(namespace);
         dragData = undefined;
     }
 
