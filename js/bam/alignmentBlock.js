@@ -47,7 +47,7 @@ var igv = (function (igv) {
         } else {
 
             const idx = Math.floor(genomicLocation) - this.start;
-            if (idx > 0 && idx < this.seq.length) {
+            if (idx >= 0 && idx < this.seq.length) {
                 return this.seq[idx];
             }
         }
