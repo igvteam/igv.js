@@ -23,10 +23,9 @@
  * THE SOFTWARE.
  */
 
+"use strict";
 
 var igv = (function (igv) {
-
-    "use strict";
 
     var alignmentStartGap = 5;
     var downsampleRowHeight = 5;
@@ -63,18 +62,45 @@ var igv = (function (igv) {
         this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
         this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
 
-        // sort alignment rows
-        this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
-
-        // filter alignments
-        this.filterOption = config.filterOption || {name: "mappingQuality", params: [30, undefined]};
-
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
+        this.currentSorts = {};   // Sort options by viewport.   This is a transient object, used to create session state
+
+        if(config.sort) {
+            if(Array.isArray(config.sort)) {
+                for(let sort of config.sort) {
+                    assignSort(this.currentSorts, sort);
+                }
+            }
+            else {
+                assignSort(this.currentSorts, config.sort);
+            }
+        }
+
+        // Assign sort objects to a genomic state
+        function assignSort(currentSorts, sort) {
+
+            const range = igv.parseLocusString(sort.locus);
+
+            for(let gs of browser.genomicStateList) {
+                const chr = gs.chromosome.name;
+                if(chr === range.chr && range.start >= gs.start && range.start <= gs.end) {
+                    currentSorts[gs.id] = {
+                        chr: range.chr,
+                        position: range.start,
+                        sortOption: sort.option,
+                        direction: sort.direction
+                    }
+                }
+            }
+
+        }
     };
 
-    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+
+
+    igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
         const self = this;
 
@@ -90,6 +116,19 @@ var igv = (function (igv) {
                         self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
                     }
                 }
+
+                const sort = self.currentSorts[viewport.genomicState.id];
+
+                if (sort) {
+                    if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
+
+                        self.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
+
+                    } else {
+                        delete self.currentSorts[viewport.genomicState.id];
+                    }
+                }
+
                 return alignmentContainer;
 
             });
@@ -312,7 +351,7 @@ var igv = (function (igv) {
         }
         else {
             const foregroundColor = igv.nucleotideColorComponents[nucleotide];
-            if(!foregroundColor) {
+            if (!foregroundColor) {
                 return undefined;
             }
 
@@ -336,11 +375,23 @@ var igv = (function (igv) {
      */
     igv.BAMTrack.prototype.getState = function () {
 
-        var config = this.config || {};
+        const config = Object.assign({}, this.config);
 
+        if (this.currentSorts && Object.getOwnPropertyNames(this.currentSorts).length > 0) {
+
+            config.sort = [];
+
+            for (let key in this.currentSorts) {
+                const s = this.currentSorts[key];
+                config.sort.push({
+                    locus: s.chr + ":" + (s.position + 1),
+                    option: s.sortOption,
+                    direction: s.direction
+                });
+            }
+        }
 
         return config;
-
     }
 
     var CoverageTrack = function (config, parent) {
@@ -537,7 +588,7 @@ var igv = (function (igv) {
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
         // sort alignment rows
-        this.sortOption = config.sortOption || {sort: "NUCLEOTIDE"};
+        this.sortOption = config.sortOption || "NUCLEOTIDE";
 
         this.sortDirection = true;
 
@@ -875,24 +926,26 @@ var igv = (function (igv) {
     };
 
 
-    AlignmentTrack.prototype.sortAlignmentRows = function (genomicLocation, sortOption, alignmentContainer) {
+    AlignmentTrack.prototype.sortAlignmentRows = function (options, alignmentContainer) {
 
-        const self = this;
+        const genomicLocation = options.position;
+        const sortOption = options.sortOption;
+        const direction = options.direction
 
         if (alignmentContainer === null) {
             alignmentContainer = this.featureSource.alignmentContainer;
         }
 
-        alignmentContainer.packedAlignmentRows.forEach(function (row) {
-            row.updateScore(genomicLocation, alignmentContainer, sortOption, self.sortDirection);
-        });
+        for(let row of alignmentContainer.packedAlignmentRows) {
+            row.updateScore(genomicLocation, alignmentContainer, sortOption, direction);
+        };
 
         alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-            return true === self.sortDirection ? rowA.score - rowB.score : rowB.score - rowA.score;
-        });
 
-        this.parent.trackView.repaintViews();
-        this.sortDirection = !(this.sortDirection);
+            const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
+
+            return true === direction ? i : -i;
+        });
 
     };
 
@@ -903,34 +956,50 @@ var igv = (function (igv) {
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
-    AlignmentTrack.prototype.contextMenuItemList = function (config) {
+    AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
 
         const self = this;
+        const viewport = clickState.viewport;
+        const genomicState = clickState.viewport.genomicState;
+        const genomicLocation = clickState.genomicLocation;
         const list = [];
 
         list.push({label: 'Sort by base', click: sortRows});
 
-        const alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
-        // Object might be a DownsampledInterval,  or a PairedAlignment
-        const isSingeAlignment = alignment && !alignment.paired && (typeof alignment.isPaired === 'function');
-
-        if (isSingeAlignment && alignment.isMateMapped()) {
+        const clickedObject = this.getClickedObject(clickState.viewport, clickState.y, clickState.genomicLocation);
+        const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
+        if (isSingleAlignment && clickedObject.isMateMapped()) {
             list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
         }
 
         return list;
 
         function sortRows() {
-            if (!config.viewport.tile) return;
-            self.sortOption = {sort: "NUCLEOTIDE"};
-            self.sortAlignmentRows(Math.floor(config.genomicLocation), self.sortOption, config.viewport.getCachedFeatures());
+
+            if (!clickState.viewport.tile) {
+                return;
+            }
+
+            const currentSorts = self.parent.currentSorts;
+            const cs = currentSorts[viewport.genomicState.id];
+            const direction = cs ? !cs.direction : true;
+
+            const options = {
+                chr: genomicState.referenceFrame.chrName,
+                position: Math.floor(clickState.genomicLocation),
+                sortOption: "NUCLEOTIDE",
+                direction: direction
+            };
+            self.sortAlignmentRows(options, clickState.viewport.getCachedFeatures());
+            self.parent.trackView.repaintViews();
+
+            currentSorts[viewport.genomicState.id] = options;
         }
 
         function viewMateInSplitScreen() {
-            if (alignment.mate) {
-                self.highlightedAlignmentReadNamed = alignment.readName;
-                self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(alignment, config.viewport.genomicState);
+            if (clickedObject.mate) {
+                self.highlightedAlignmentReadNamed = clickedObject.readName;
+                self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
             }
         }
     };
@@ -1036,7 +1105,7 @@ var igv = (function (igv) {
                     }
                     else {
 
-                        if(!self.tagColors) {
+                        if (!self.tagColors) {
                             self.tagColors = new igv.PaletteColorTable("Set1");
                         }
                         color = self.tagColors.getColor(tagValue);

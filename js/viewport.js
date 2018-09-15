@@ -712,17 +712,16 @@ var igv = (function (igv) {
 
     function getFeatures(chr, start, end, bpPerPixel) {
 
-        var self = this,
-            track;
+        const self = this;
 
-        track = self.trackView.track;
+        const track = self.trackView.track;
 
         if (self.tile && self.tile.containsRange(chr, start, end, bpPerPixel)) {
             return Promise.resolve(self.tile.features);
         }
         else if (typeof track.getFeatures === "function") {
 
-            return track.getFeatures(chr, start, end, bpPerPixel)
+            return track.getFeatures(chr, start, end, bpPerPixel, self)
 
                 .then(function (features) {
 
