@@ -1407,6 +1407,11 @@ var igv = (function (igv) {
 
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
+                    // assign ids to the state objects
+                    for(let gs of genomicStateList) {
+                        gs.id = igv.guid();
+                    }
+
                     return genomicStateList
 
                 } else {

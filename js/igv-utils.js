@@ -190,7 +190,7 @@ var igv = (function (igv) {
         $fa.on('mouseup', function (e) {
             e.stopPropagation();
         })
-        
+
         $fa.on('touchstart', function (e) {
             e.stopPropagation();
         })
@@ -521,6 +521,31 @@ var igv = (function (igv) {
 
         return Object.assign(defaultOptions, options);
     };
+
+    /**
+     * Parse a locus string and return a range object.  Locus string is of the form chr:start-end.  End is optional
+     *
+     */
+    igv.parseLocusString = function (string) {
+
+        const t1 = string.split(":");
+        const t2 = t1[1].split("-");
+
+        const range = {
+            chr: t1[0],
+            start: Number.parseInt(t2[0]) - 1
+        };
+
+        if (t2.length > 1) {
+            range.end = Number.parseInt(t2[1]);
+        }
+        else {
+            range.end = range.start + 1;
+        }
+
+        return range;
+
+    }
 
     /**
      * Covers string literals and String objects

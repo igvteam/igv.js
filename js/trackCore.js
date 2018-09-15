@@ -793,7 +793,7 @@ var igv = (function (igv) {
          */
         getState: function () {
 
-            const config = this.config;
+            const config = Object.assign({}, this.config);
             const self = this;
 
             Object.keys(config).forEach(function (key) {
