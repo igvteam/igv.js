@@ -695,6 +695,20 @@ var igv = (function (igv) {
             $outerScroll.off(self.namespace);
         }
 
+        function cancelScroll(event) {
+
+        }
+
+        this.$viewportContainer.on("wheel", function(e) {
+
+            e.preventDefault(); 
+            console.log(self.$innerScroll.position().top);
+            console.log(e);   
+            
+            self.moveScrollerBy(-e.originalEvent.deltaY);
+            e.stopPropagation();    
+        }); 
+
     };
 
     TrackScrollbar.prototype.moveScrollerBy = function (delta) {
