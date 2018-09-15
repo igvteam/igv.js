@@ -649,7 +649,7 @@
 
 .zoom-in-notice-container {
   position: absolute;
-  top: 25%;
+  top: 10px;
   left: 50%; }
   .zoom-in-notice-container div {
     position: relative;
