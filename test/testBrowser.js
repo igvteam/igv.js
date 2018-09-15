@@ -26,6 +26,7 @@ function runBrowserTests() {
     });
 
     QUnit.test("Test ruler option", function (assert) {
+
         var done = assert.async();
 
         const options = {
@@ -36,7 +37,7 @@ function runBrowserTests() {
         igv.createBrowser(div, options)
             .then(function (browser) {
                 assert.ok(browser);
-                start();
+                done();
             })
 
             .catch(function (error) {
