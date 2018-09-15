@@ -51,6 +51,31 @@ var igv = (function (igv) {
             // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
 
             self.$guide.css({ left: exe + 'px' });
+
+            var coords,
+                $target,
+                $viewport;
+
+            $target = $(e.target);
+            $viewport = $target.parents('.igv-viewport-div');
+
+            if (0 === _.size($viewport)) {
+                $viewport = undefined;
+                return;
+            }    
+     
+            coords = igv.translateMouseCoordinates(e, $viewport.get(0));
+     
+            // viewport object we are panning
+            // viewport = igv.Viewport.viewportWithID($viewport.data('viewport'));
+            // referenceFrame = viewport.genomicState.referenceFrame;
+            var referenceFrame = self.browser.genomicStateList[0].referenceFrame;
+
+            // show location with comma seperator
+            var ref_num = Math.floor((referenceFrame.start) + referenceFrame.toBP(coords.x));
+            var ref_txt = ref_num.toString();
+            self.$guide.text(ref_txt.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"));
+
         });
 
         if (true === config.showCursorTrackingGuideButton) {
