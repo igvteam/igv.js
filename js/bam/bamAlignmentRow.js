@@ -110,7 +110,9 @@ var igv = (function (igv) {
             if(idx < interval.sequence.length) {
                 reference = interval.sequence.charAt(idx);
             }
-            if(!reference) return undefined;
+            if(!reference) {
+                return undefined;
+            }
 
             if ('N' === base) {
                 return 2;
@@ -123,8 +125,10 @@ var igv = (function (igv) {
                 idx = Math.floor(genomicLocation) - interval.coverageMap.bpStart;
 
                 if(idx > 0 && idx < interval.coverageMap.coverage.length) {
+
                     coverage = interval.coverageMap.coverage[idx];
                     count = coverage["pos" + base] + coverage["neg" + base];
+
                     return - (count + (quality / 1000));
                 } else {
                     return - (1 + quality / 1000);
