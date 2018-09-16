@@ -190,7 +190,8 @@ var igv = (function (igv) {
          */
         decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
-            var blockSize, blockEnd, alignment, blocks, refID, pos, bin_mq_nl, bin, mq, nl, flag_nc, flag, nc, lseq, tlen,
+            var blockSize, blockEnd, alignment, blocks, refID, pos, bin_mq_nl, bin, mq, nl, flag_nc, flag, nc, lseq,
+                tlen,
                 mateChrIdx, matePos, readName, j, p, lengthOnRef, cigar, c, cigarArray, seq, seqBytes, qualArray;
 
             while (offset < ba.length) {
@@ -354,7 +355,7 @@ var igv = (function (igv) {
 
                 if (alignment.chr !== chr) {
                     if (started) break; // Off the right edge, we're done
-                    else  continue; // Possibly to the left, skip but keep looping
+                    else continue; // Possibly to the left, skip but keep looping
                 } else if (alignment.start > max) {
                     break;    // off right edge, we're done
                 }
@@ -451,7 +452,7 @@ var igv = (function (igv) {
                     //isize not recorded.  Need to estimate.  This calculation was validated against an Illumina
                     // -> <- library bam.
                     var estMateEnd = alignment.start < mate.position ?
-                    mate.position + estReadLen : mate.position - estReadLen;
+                        mate.position + estReadLen : mate.position - estReadLen;
                     isize = estMateEnd - alignment.start;
                 }
 
@@ -490,20 +491,16 @@ var igv = (function (igv) {
      */
     function makeBlocks(record, cigarArray) {
 
-        var blocks = [],
-            insertions,
-            seqOffset = 0,
-            pos = record.start,
-            len = cigarArray.length,
-            blockSeq,
-            blockQuals,
-            gapType,
-            minQ = 5,  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN)
-            maxQ = 20; //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX)
+        const blocks = [];
 
-        for (var i = 0; i < len; i++) {
+        let insertions;
+        let seqOffset = 0;
+        let pos = record.start;
 
-            var c = cigarArray[i];
+        for (let c of cigarArray) {
+
+            let blockSeq, blockQuals, gapType;
+
 
             switch (c.ltr) {
                 case 'H' :
@@ -523,9 +520,14 @@ var igv = (function (igv) {
                     gapType = 'D';
                     break;
                 case 'I' :
+
                     blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
-                    if (insertions === undefined) insertions = [];
+
+                    blockQuals = (record.qual && record.qual[0] !== '*') ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
+
+                    if (insertions === undefined) {
+                        insertions = [];
+                    }
                     insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
                     seqOffset += c.len;
                     break;
@@ -535,7 +537,7 @@ var igv = (function (igv) {
                 case 'X' :
 
                     blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
+                    blockQuals = record.qual ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
                     blocks.push(new igv.AlignmentBlock({
                         start: pos,
                         len: c.len,
