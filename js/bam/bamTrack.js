@@ -885,7 +885,8 @@ var igv = (function (igv) {
                             readChar = refChar;
                         }
                         if (readChar === "X" || refChar !== readChar) {
-                            if (block.qual && block.qual.length > i) {
+
+                            if (block.qual !== undefined && block.qual.length > i) {
                                 readQual = block.qual[i];
                                 baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                             }
