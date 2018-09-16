@@ -65,17 +65,19 @@ var igv = (function (igv) {
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
-        this.currentSorts = {};   // Sort options by viewport.   This is a transient object, used to create session state
+        // Transient object, maintains the last sort option per viewport.
+        this.sortObjects = {};
 
-        if(config.sort) {
-            if(Array.isArray(config.sort)) {
-                for(let sort of config.sort) {
-                    assignSort(this.currentSorts, sort);
+        if (config.sort) {
+            if (Array.isArray(config.sort)) {
+                for (let sort of config.sort) {
+                    assignSort(this.sortObjects, sort);
                 }
             }
             else {
-                assignSort(this.currentSorts, config.sort);
+                assignSort(this.sortObjects, config.sort);
             }
+            config.sort = undefined;
         }
 
         // Assign sort objects to a genomic state
@@ -83,21 +85,24 @@ var igv = (function (igv) {
 
             const range = igv.parseLocusString(sort.locus);
 
-            for(let gs of browser.genomicStateList) {
-                const chr = gs.chromosome.name;
-                if(chr === range.chr && range.start >= gs.start && range.start <= gs.end) {
+            // Loop through current genomic states, assign sort to first matching state
+            for (let gs of browser.genomicStateList) {
+
+                if (gs.chromosome.name === range.chr && range.start >= gs.start && range.start <= gs.end) {
+
                     currentSorts[gs.id] = {
                         chr: range.chr,
                         position: range.start,
                         sortOption: sort.option,
                         direction: sort.direction
                     }
+
+                    break;
                 }
             }
 
         }
     };
-
 
 
     igv.BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
@@ -117,7 +122,7 @@ var igv = (function (igv) {
                     }
                 }
 
-                const sort = self.currentSorts[viewport.genomicState.id];
+                const sort = self.sortObjects[viewport.genomicState.id];
 
                 if (sort) {
                     if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
@@ -125,7 +130,7 @@ var igv = (function (igv) {
                         self.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
 
                     } else {
-                        delete self.currentSorts[viewport.genomicState.id];
+                        delete self.sortObjects[viewport.genomicState.id];
                     }
                 }
 
@@ -377,12 +382,15 @@ var igv = (function (igv) {
 
         const config = Object.assign({}, this.config);
 
-        if (this.currentSorts && Object.getOwnPropertyNames(this.currentSorts).length > 0) {
+        config.sort = undefined;
 
-            config.sort = [];
+        for (let gs of this.browser.genomicStateList) {
 
-            for (let key in this.currentSorts) {
-                const s = this.currentSorts[key];
+            const s = this.sortObjects[gs.id];
+
+            if (s) {
+                config.sort = config.sort || [];
+
                 config.sort.push({
                     locus: s.chr + ":" + (s.position + 1),
                     option: s.sortOption,
@@ -586,11 +594,6 @@ var igv = (function (igv) {
         this.colorBy = config.colorBy || "pairOrientation";
         this.colorByTag = config.colorByTag;
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
-
-        // sort alignment rows
-        this.sortOption = config.sortOption || "NUCLEOTIDE";
-
-        this.sortDirection = true;
 
         this.hasPairs = false;   // Until proven otherwise
 
@@ -936,9 +939,10 @@ var igv = (function (igv) {
             alignmentContainer = this.featureSource.alignmentContainer;
         }
 
-        for(let row of alignmentContainer.packedAlignmentRows) {
+        for (let row of alignmentContainer.packedAlignmentRows) {
             row.updateScore(genomicLocation, alignmentContainer, sortOption, direction);
-        };
+        }
+        ;
 
         alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
 
@@ -980,7 +984,7 @@ var igv = (function (igv) {
                 return;
             }
 
-            const currentSorts = self.parent.currentSorts;
+            const currentSorts = self.parent.sortObjects;
             const cs = currentSorts[viewport.genomicState.id];
             const direction = cs ? !cs.direction : true;
 
@@ -1003,13 +1007,6 @@ var igv = (function (igv) {
             }
         }
     };
-
-
-    function parse(locusString) {
-        return locusString.split(/[^a-zA-Z0-9]/).map(function (value, index) {
-            return 0 === index ? value : parseInt(value, 10);
-        });
-    }
 
     AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
