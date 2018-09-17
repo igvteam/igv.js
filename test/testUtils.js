@@ -27,4 +27,15 @@ function runUtilTests() {
 
     });
 
+
+    /**
+     * Test adding "raw" html to menu.
+     */
+    QUnit.test("Track menu helper", function (assert) {
+        const itemList = ['<hr/>'];
+        const result = igv.trackMenuItemListHelper(itemList);
+        assert.equal(result.length, 1);
+    });
+
+
 }

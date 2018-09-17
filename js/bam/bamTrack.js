@@ -93,8 +93,8 @@ var igv = (function (igv) {
                     currentSorts[gs.id] = {
                         chr: range.chr,
                         position: range.start,
-                        sortOption: sort.option,
-                        direction: sort.direction
+                        sortOption: sort.option || "NUCLEOTIDE",
+                        direction: sort.direction || "ASC"
                     }
 
                     break;
