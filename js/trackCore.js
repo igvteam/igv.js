@@ -491,7 +491,7 @@ var igv = (function (igv) {
      */
     igv.trackMenuItemList = function (popover, trackView) {
 
-        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant']);
+        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl']);
 
         let menuItems = [];
 
@@ -545,8 +545,8 @@ var igv = (function (igv) {
                     $e = $('<div>');
                     $e.text(item.label)
                 }
-                else {
-                    $e = $(item.label);
+                else if (typeof item === 'string') {
+                    $e = $(item);
                 }
 
                 if (0 === i) {
@@ -652,7 +652,6 @@ var igv = (function (igv) {
             menuClickHandler;
 
         $e = $('<div>');
-        $e.addClass('igv-track-menu-border-top');
         $e.text('Remove track');
 
         menuClickHandler = function () {
