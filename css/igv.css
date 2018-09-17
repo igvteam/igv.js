@@ -346,8 +346,8 @@
   left: 0;
   right: 0;
   height: auto;
-  margin-left: 10px;
-  margin-right: 10px;
+  margin-left: 20px;
+  margin-right: 20px;
   padding-top: 4px; }
 
 .igv-content-div {
@@ -1070,5 +1070,38 @@
   padding: 0;
   border: 0;
   display: block; }
+
+
+/*newly add for drag bar */
+
+.trackview_div_dragbar {
+   background-color:#000;
+   height:1px;
+   float: right;
+   cursor:row-resize;
+   z-index:128;
+   position: absolute;
+   bottom: 0px;
+   right: 50px;
+   width: 90%;
+   box-shadow: 0.5px 0.5px 0.5px;
+}
+
+
+.trackview_div_dragbar:hover,
+.trackview_div_dragbar:focus,
+.trackview_div_dragbar:active {
+  cursor: row-resize;
+}
+
+#ghostbar{
+    height:1px;
+    background-color:#000;
+    opacity:0.6;
+    position:absolute;
+    cursor:row-resize;
+    z-index:128;
+}
+
 
 /*# sourceMappingURL=igv.css.map */
