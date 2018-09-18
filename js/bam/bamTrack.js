@@ -1052,8 +1052,6 @@ var igv = (function (igv) {
         list.push({label: 'Sort by base', click: sortRows});
         list.push({label: 'Refresh', click: refreshWindow});
 
-	const alignment = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
         const clickedObject = this.getClickedObject(clickState.viewport, clickState.y, clickState.genomicLocation);
 	// Object might be a DownsampledInterval,  or a PairedAlignment
         const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
