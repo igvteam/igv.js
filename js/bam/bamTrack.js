@@ -661,7 +661,7 @@ var igv = (function (igv) {
         this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)";
 
         this.colorBy = config.colorBy || "pairOrientation";
-        this.colorByTag = config.colorByTag;
+        this.colorByTag =  config.colorBy === 'tag' ? config.colorByTag : undefined;
         this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
         this.showSoftclips = config.showSoftclips;
 
