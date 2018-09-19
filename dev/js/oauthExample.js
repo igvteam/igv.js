@@ -5,7 +5,12 @@
 
 function initClient() {
 
-    var scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+    var scope =
+        "https://www.googleapis.com/auth/cloud-platform " +
+        "https://www.googleapis.com/auth/genomics " +
+        "https://www.googleapis.com/auth/devstorage.read_only " +
+        "https://www.googleapis.com/auth/userinfo.profile " +
+        "https://www.googleapis.com/auth/drive.readonly";
 
     igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 

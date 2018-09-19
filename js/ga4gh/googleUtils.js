@@ -60,24 +60,6 @@ var igv = (function (igv) {
 
         },
 
-        addGoogleHeaders: function (headers) {
-            {
-                headers["Cache-Control"] = "no-cache";
-
-                var acToken = igv.oauth.google.access_token;
-                if (!acToken && typeof oauth !== "undefined") {
-                    // Check legacy variable
-                    acToken = oauth.google.access_token;
-                }
-                if (acToken && !headers.hasOwnProperty("Authorization")) {
-                    headers["Authorization"] = "Bearer " + acToken;
-                }
-
-                return headers;
-
-            }
-        },
-
         addApiKey: function (url) {
 
             var apiKey = igv.oauth.google.apiKey,
