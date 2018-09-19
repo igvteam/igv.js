@@ -529,12 +529,13 @@ var igv = (function (igv) {
          * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
          */
         this.$viewport.on('mousedown', function (e) {
+            self.enableClick = true;
             browser.mouseDownOnViewport(e, self);
             mouseDownCoords = igv.pageCoordinates(e);
-
         });
 
         this.$viewport.on('touchstart', function (e) {
+            self.enableClick = true;
             browser.mouseDownOnViewport(e, self);
             mouseDownCoords = igv.pageCoordinates(e);
         });
@@ -545,15 +546,25 @@ var igv = (function (igv) {
          */
         this.$viewport.on('mouseup', handleMouseUp);
 
-        this.$viewport.on('click', handleClick);
+        this.$viewport.on('touchend', handleMouseUp);
+
+        this.$viewport.on('click', function (e) {
+            if(self.enableClick) {
+                handleClick(e);
+            }
+        });
 
         function handleMouseUp(e) {
+
 
             // Any mouse up cancels drag and scrolling
             if (self.browser.isDragging || self.browser.isScrolling) {
                 self.browser.cancelTrackPan();
                 e.preventDefault();
                 e.stopPropagation();
+
+                self.enableClick = false;   // Until next mouse down
+
                 return;
             }
 
@@ -566,9 +577,14 @@ var igv = (function (igv) {
             if (3 === e.which || e.ctrlKey) {
                 return;
             }
-console.log("click");
+
             // Close any currently open popups
             $('.igv-popover').hide();
+
+
+            if(browser.isDragging || browser.isScrolling) {
+                return;
+            }
 
             // // Interpret mouseDown + mouseUp < 5 pixels as a click.
             // if(!mouseDownCoords) {
