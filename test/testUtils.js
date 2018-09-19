@@ -38,4 +38,23 @@ function runUtilTests() {
     });
 
 
+    /**
+     * Parsing a uri => dictionary of parts
+     */
+    QUnit.test("Parse URI", function (assert) {
+
+        const  uri = "https://igv.org/app?session=foo&args=bar";
+
+        const result = igv.parseUri(uri);
+
+        assert.ok(result);
+        assert.equal("igv.org", result.host);
+        assert.equal("/app", result.path);
+        assert.equal("session=foo&args=bar", result.query);
+        assert.equal("https", result.protocol);
+
+
+    })
+
+
 }
