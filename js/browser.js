@@ -598,7 +598,7 @@ var igv = (function (igv) {
 
             if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
-                return igv.Google.getDriveFileInfo(config.url)
+                return igv.google.getDriveFileInfo(config.url)
 
                     .then(function (json) {
 
@@ -611,7 +611,7 @@ var igv = (function (igv) {
                             config.format = igv.inferFileFormat(config.filename);
                         }
                         if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                            config.indexURL = igv.Google.driveDownloadURL(config.indexURL);
+                            config.indexURL = igv.google.driveDownloadURL(config.indexURL);
                         }
 
                         return config;
@@ -646,7 +646,7 @@ var igv = (function (igv) {
 
             if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
-                return igv.Google.getDriveFileInfo(config.url)
+                return igv.google.getDriveFileInfo(config.url)
 
                     .then(function (json) {
 
@@ -659,7 +659,7 @@ var igv = (function (igv) {
                             config.format = igv.inferFileFormat(config.filename);
                         }
                         if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                            config.indexURL = igv.Google.driveDownloadURL(config.indexURL);
+                            config.indexURL = igv.google.driveDownloadURL(config.indexURL);
                         }
 
                         return config;

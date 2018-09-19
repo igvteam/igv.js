@@ -25,13 +25,23 @@
 
 var igv = (function (igv) {
 
-    igv.Google = {
+
+    //@deprecated -- use igv.google.setApiKey
+    igv.setApiKey = function (key) {
+        igv.google.setApiKey(key);
+    }
+
+    igv.google = {
 
         fileInfoCache: {},
 
         // Crude test, this is conservative, nothing bad happens for a false positive
         isGoogleURL: function (url) {
-            return url.includes("googleapis");
+            return (url.includes("googleapis") && !url.includes("urlshortener")) || (url.startsWith("gs://"));
+        },
+
+        setApiKey: function (key) {
+            this.apiKey = key;
         },
 
         translateGoogleCloudURL: function (gsUrl) {
@@ -62,7 +72,7 @@ var igv = (function (igv) {
 
         addApiKey: function (url) {
 
-            var apiKey = igv.oauth.google.apiKey,
+            var apiKey = this.apiKey,
                 paramSeparator = url.includes("?") ? "&" : "?";
 
             if (apiKey !== undefined && !url.includes("key=")) {
@@ -94,26 +104,26 @@ var igv = (function (igv) {
 
         loadGoogleProperties: function (propertiesURL) {
 
+            const self = this;
+
             return igv.xhr.loadArrayBuffer(propertiesURL)
+
                 .then(function (arrayBuffer) {
                     var inflate, plain, str;
 
                     inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
                     plain = inflate.decompress();
                     str = String.fromCharCode.apply(null, plain);
-                    igv.Google.properties = JSON.parse(str);
-                    igv.setGoogleApiKey(igv.Google.properties["api_key"]);
-                    return igv.Google.properties;
+
+                    const properties = JSON.parse(str);
+                    self.setApiKey(properties["api_key"]);
+
+                    self.properties = properties;
+                    return properties;
 
                 })
         }
     }
-
-
-    igv.oauth = {
-        google: {}
-    };
-
 
     function getGoogleDriveFileID(link) {
 
