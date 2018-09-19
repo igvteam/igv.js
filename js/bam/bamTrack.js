@@ -38,6 +38,8 @@ var igv = (function (igv) {
 
         this.browser = browser;
 
+        this.maxRows = config.maxRows || 1000;
+
         this.featureSource = new igv.BamSource(config, browser.genome);
 
         // Override default track height for bams
@@ -597,6 +599,7 @@ var igv = (function (igv) {
 
         this.hasPairs = false;   // Until proven otherwise
 
+        this.maxRows = config.maxRows || 1000;   // Neccessary to avoid freezing browser for deep coverage
     };
 
     AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -660,7 +663,11 @@ var igv = (function (igv) {
 
         if (packedAlignmentRows) {
 
-            packedAlignmentRows.forEach(function renderAlignmentRow(alignmentRow, rowIndex) {
+            const nRows = Math.min(packedAlignmentRows.length, self.maxRows);
+
+            for(let rowIndex=0; rowIndex<nRows; rowIndex++)  {
+
+                const alignmentRow = packedAlignmentRows[rowIndex];
 
                 var yRect,
                     alignmentHeight,
@@ -700,7 +707,7 @@ var igv = (function (igv) {
                     }
 
                 }
-            });
+            }
         }
 
 
