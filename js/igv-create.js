@@ -82,11 +82,11 @@ var igv = (function (igv) {
         browser.dataRangeDialog = new igv.DataRangeDialog(browser.$root, browser);
 
         if (config.apiKey) {
-            igv.setGoogleApiKey(config.apiKey);
+            igv.google.setApiKey(config.apiKey);
         }
 
         if (config.oauthToken) {
-            igv.setOauthToken(config.oauthToken);
+            igv.oauth.setToken(config.oauthToken);
         }
 
 
@@ -190,27 +190,6 @@ var igv = (function (igv) {
         })
     }
 
-    //@deprecated -- user setGoogleApiKey
-    igv.setApiKey = function (key) {
-        igv.oauth.google.apiKey = key;
-    }
-
-    igv.setGoogleApiKey = function (key) {
-        igv.oauth.google.apiKey = key;
-    }
-
-    //@deprecated -- use setGoogleOauthToken
-    igv.setOauthToken = function (token) {
-        igv.oauth.google.access_token = token;
-    }
-
-    igv.setGoogleOauthToken = function (token) {
-        igv.oauth.google.access_token = token;
-    }
-
-    igv.getGoogleOauthToken = function () {
-        return igv.oauth.google.access_token;
-    }
 
     function setTrackOrder(conf) {
 

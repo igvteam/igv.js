@@ -109,8 +109,6 @@ var igv = (function (igv) {
 
         } else {
 
-            // First check for explicit token
-
             let token = (typeof oauthToken === 'function') ? oauthToken() : oauthToken;
 
             if (token.then && (typeof token.then === 'function')) {
@@ -138,7 +136,7 @@ var igv = (function (igv) {
                 var header_keys, key, value, i;
 
                 // Support for GCS paths.
-                url = url.startsWith("gs://") ? igv.Google.translateGoogleCloudURL(url) : url;
+                url = url.startsWith("gs://") ? igv.google.translateGoogleCloudURL(url) : url;
 
                 const headers = options.headers || {};
 
@@ -148,7 +146,7 @@ var igv = (function (igv) {
                 }
 
                 if (isGoogleURL(url)) {
-                    url = igv.Google.addApiKey(url);
+                    url = igv.google.addApiKey(url);
                 }
 
                 const range = options.range;
@@ -431,9 +429,12 @@ var igv = (function (igv) {
 
     function getOauthToken(url) {
 
-        if (isGoogleURL(url)) {
-            return igv.oauth.google.access_token;
+        const host = igv.parseUri(url).host;
+        let token = igv.oauth.getToken(host);
+        if(!token && igv.google.isGoogleURL(url)) {
+            token = igv.oauth.google.access_token;
         }
+        return token;
     }
 
     function addOauthHeaders(headers, acToken) {
@@ -456,7 +457,7 @@ var igv = (function (igv) {
             return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
         }
         else if (url.includes("//drive.google.com")) {
-            return igv.Google.driveDownloadURL(url);
+            return igv.google.driveDownloadURL(url);
         }
         else if (url.includes("//www.broadinstitute.org/igvdata")) {
             return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
@@ -490,7 +491,7 @@ var igv = (function (igv) {
      * Crude test for google urls.
      */
     function isGoogleURL(url) {
-        return (url.includes("googleapis") && !url.includes("urlshortener")) || (url.startsWith("gs://"));
+        return igv.google.isGoogleURL(url);
     }
 
 // Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
