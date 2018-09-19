@@ -499,6 +499,7 @@ $igv-dark-grey-color: #373737;
 }
 
 .igv-track-container-div {
+  user-select: none;
   position: relative;
   clear: both;
 }
