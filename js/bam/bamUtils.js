@@ -24,6 +24,12 @@
  * THE SOFTWARE.
  */
 
+/**
+ * Bits of this code are based on the Biodalliance BAM reader by Thomas Down,  2011
+ *
+ * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
+ */
+
 
 var igv = (function (igv) {
 
