@@ -7,7 +7,7 @@ function initClient() {
 
     var scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
 
-    igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+    igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
         .then(function (properties) {
 
@@ -28,7 +28,7 @@ function initClient() {
             div = $("#myDiv")[0];
             options = {
                 genome: "hg19",
-                apiKey: igv.Google.properties["api_key"],
+                apiKey: igv.google.properties["api_key"],
                 queryParametersSupported: true
             };
 
@@ -81,11 +81,11 @@ function createPicker() {
 
                 picker = new google.picker
                     .PickerBuilder()
-                    .setAppId(igv.Google.properties["project_number"])
+                    .setAppId(igv.google.properties["project_number"])
                     .setOAuthToken(igv.oauth.google.access_token)
                     .addView(view)
                     .addView(view2)
-                    .setDeveloperKey(igv.Google.properties["developer_key"])
+                    .setDeveloperKey(igv.google.properties["developer_key"])
                     .setCallback(pickerCallback)
                     .enableFeature(google.picker.Feature.SUPPORT_TEAM_DRIVES)
                     .build();
