@@ -2,9 +2,6 @@ function runSampleInformationTests() {
 
 
     // mock object
-    if (igv === undefined) {
-        igv = {};
-    }
 
     igv.browser = {
         getFormat: function () {
