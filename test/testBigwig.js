@@ -4,7 +4,6 @@ function runBigwigTests() {
 
     function createMockObjects(bpPerPixel) {
 
-        igv = igv || {};
         igv.browser = igv.browser || {};
         igv.browser.referenceFrame = {bpPerPixel: bpPerPixel};
 

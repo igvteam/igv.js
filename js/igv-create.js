@@ -173,6 +173,8 @@ var igv = (function (igv) {
                     browser.disableZoomWidget();
                 }
 
+                igv.xhr.startup();
+                
                 return browser;
             })
 
