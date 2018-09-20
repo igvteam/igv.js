@@ -422,80 +422,80 @@ var igv = (function (igv) {
 
     CoverageTrack.prototype.draw = function (options) {
 
-        var self = this,
-            alignmentContainer = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            coverageMap = alignmentContainer.coverageMap,
-            bp,
-            x,
-            y,
-            w,
-            h,
-            refBase,
-            i,
-            len,
-            item,
-            accumulatedHeight,
-            sequence;
+        const self = this;
 
+        const ctx = options.context;
+        if (this.top) {
+            ctx.translate(0, top);
+        }
 
-        if (this.top) ctx.translate(0, top);
-
-        if (coverageMap.refSeq) sequence = coverageMap.refSeq.toUpperCase();
-
+        const alignmentContainer = options.features;
+        const coverageMap = alignmentContainer.coverageMap;
         this.dataRange.max = coverageMap.maximum;
 
-        // paint backdrop color for all coverage buckets
-        w = Math.max(1, Math.ceil(1.0 / bpPerPixel));
-        for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
+        let sequence;
+        if (coverageMap.refSeq) {
+            sequence = coverageMap.refSeq.toUpperCase();
+        }
 
-            bp = (coverageMap.bpStart + i);
+        const bpPerPixel = options.bpPerPixel;
+        const bpStart = options.bpStart;
+        const pixelWidth = options.pixelWidth;
+        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
+        // paint for all coverage buckets
+        // If alignment track color is != default, use it
+        let color = this.parent.coverageColor;
+        if (this.parent.color !== DEFAULT_ALIGNMENT_COLOR) {
+            color = igv.Color.darkenLighten(this.parent.color, -35);
+        }
+
+        igv.graphics.setProperties(ctx, {
+            fillStyle: color,
+            strokeStyle: color
+        });
+
+        const w = Math.max(1, Math.ceil(1.0 / bpPerPixel));
+        for (let i = 0, len = coverageMap.coverage.length; i < len; i++) {
+
+            const bp = (coverageMap.bpStart + i);
             if (bp < bpStart) continue;
             if (bp > bpEnd) break;
 
-            item = coverageMap.coverage[i];
+            const item = coverageMap.coverage[i];
             if (!item) continue;
 
-            h = Math.round((item.total / this.dataRange.max) * this.height);
-            y = this.height - h;
-            x = Math.floor((bp - bpStart) / bpPerPixel);
+            const h = Math.round((item.total / this.dataRange.max) * this.height);
+            const y = this.height - h;
+            const x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-            igv.graphics.setProperties(ctx, {
-                fillStyle: this.parent.coverageColor,
-                strokeStyle: this.parent.coverageColor
-            });
             // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
             igv.graphics.fillRect(ctx, x, y, w, h);
         }
 
         // coverage mismatch coloring -- don't try to do this in above loop, color bar will be overwritten when w<1
         if (sequence) {
-            for (i = 0, len = coverageMap.coverage.length; i < len; i++) {
+            for (let i = 0, len = coverageMap.coverage.length; i < len; i++) {
 
-                bp = (coverageMap.bpStart + i);
+                const bp = (coverageMap.bpStart + i);
                 if (bp < bpStart) continue;
                 if (bp > bpEnd) break;
 
-                item = coverageMap.coverage[i];
+                const item = coverageMap.coverage[i];
                 if (!item) continue;
 
-                h = (item.total / this.dataRange.max) * this.height;
-                y = this.height - h;
-                x = Math.floor((bp - bpStart) / bpPerPixel);
+                const h = (item.total / this.dataRange.max) * this.height;
+                let y = this.height - h;
+                const x = Math.floor((bp - bpStart) / bpPerPixel);
 
-                refBase = sequence[i];
+                const refBase = sequence[i];
                 if (item.isMismatch(refBase)) {
 
                     igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
                     igv.graphics.fillRect(ctx, x, y, w, h);
 
-                    accumulatedHeight = 0.0;
+                    let accumulatedHeight = 0.0;
                     ["A", "C", "T", "G"].forEach(function (nucleotide) {
 
                         var count,
@@ -665,7 +665,7 @@ var igv = (function (igv) {
 
             const nRows = Math.min(packedAlignmentRows.length, self.maxRows);
 
-            for(let rowIndex=0; rowIndex<nRows; rowIndex++)  {
+            for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                 const alignmentRow = packedAlignmentRows[rowIndex];
 

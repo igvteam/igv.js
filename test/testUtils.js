@@ -43,7 +43,7 @@ function runUtilTests() {
      */
     QUnit.test("Parse URI", function (assert) {
 
-        const  uri = "https://igv.org/app?session=foo&args=bar";
+        const uri = "https://igv.org/app?session=foo&args=bar";
 
         const result = igv.parseUri(uri);
 
@@ -55,6 +55,22 @@ function runUtilTests() {
 
 
     })
+
+    QUnit.test("Validate IP", function (assert) {
+
+        const ip1 = "192.168.1.11";
+        assert.equal(validateIP(ip1), true);
+
+        const ip2 = "igv.org";
+        assert.equal(validateIP(ip2), false);
+
+    });
+
+
+    function validateIP(address) {
+        const regex = new RegExp(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
+        return regex.test(address);
+    }
 
 
 }
