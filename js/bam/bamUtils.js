@@ -48,7 +48,7 @@ var igv = (function (igv) {
     igv.BamUtils = {
 
         readHeader: function (url, options, genome) {
-            
+
             return igv.xhr.loadArrayBuffer(url, options)
 
                 .then(function (compressedBuffer) {
@@ -502,10 +502,11 @@ var igv = (function (igv) {
         let insertions;
         let seqOffset = 0;
         let pos = record.start;
+        let gapType;
 
         for (let c of cigarArray) {
 
-            let blockSeq, blockQuals, gapType;
+            let blockSeq, blockQuals;
 
 
             switch (c.ltr) {
