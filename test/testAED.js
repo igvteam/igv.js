@@ -1,11 +1,6 @@
 function runAedTests() {
 
 
-    // mock objects
-    if (igv === undefined) {
-        igv = {};
-    }
-
     const genome = {
         getChromosomeName: function (chr) {
             return chr.startsWith("chr") ? chr : "chr" + chr;

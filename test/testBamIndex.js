@@ -1,6 +1,5 @@
 function runBAMIndexTests() {
 
-    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
     // QUnit.test("blocksForRange", function (assert) {
     //

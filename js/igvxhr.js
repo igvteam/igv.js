@@ -88,7 +88,9 @@ var igv = (function (igv) {
             } else {
                 return loadStringFromUrl(path, options);
             }
-        }
+        },
+
+        startup: startup
     }
 
     function loadURL(url, options) {
@@ -212,7 +214,7 @@ var igv = (function (igv) {
 
                         options.retries = 1;
 
-                        return getAccessToken()
+                        return getGoogleAccessToken()
 
                             .then(function (accessToken) {
 
@@ -429,12 +431,17 @@ var igv = (function (igv) {
 
     function getOauthToken(url) {
 
-        const host = igv.parseUri(url).host;
-        let token = igv.oauth.getToken(host);
-        if(!token && igv.google.isGoogleURL(url)) {
-            token = igv.oauth.google.access_token;
+        if(igv) {
+            const host = igv.parseUri(url).host;
+            let token = igv.oauth.getToken(host);
+            if (!token && igv.google.isGoogleURL(url)) {
+                token = igv.oauth.google.access_token;
+            }
+            return token;
         }
-        return token;
+        else {
+            return undefined;
+        }
     }
 
     function addOauthHeaders(headers, acToken) {
@@ -494,20 +501,9 @@ var igv = (function (igv) {
         return igv.google.isGoogleURL(url);
     }
 
-// Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-    const href = window.document.location.href;
-    if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
-        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
-        loadURL.call(this, url).then(function (ignore) {
-            console.log(ignore);
-        }).catch(function (error) {
-            console.log(error);
-        });
-    }
-
     var loginTried = false;
 
-    function getAccessToken() {
+    function getGoogleAccessToken() {
 
         if (igv.oauth.google.access_token || loginTried) {
 
@@ -546,6 +542,20 @@ var igv = (function (igv) {
 
     }
 
+
+    //Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
+
+    function startup() {
+        const href = window.document.location.href;
+        if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
+            var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+            loadURL.call(this, url).then(function (ignore) {
+                console.log(ignore);
+            }).catch(function (error) {
+                console.log(error);
+            });
+        }
+    }
 
     return igv;
 })
