@@ -431,7 +431,7 @@ var igv = (function (igv) {
 
     function getOauthToken(url) {
 
-        if(igv) {
+        if (igv) {
             const host = igv.parseUri(url).host;
             let token = igv.oauth.getToken(host);
             if (!token && igv.google.isGoogleURL(url)) {
@@ -545,16 +545,29 @@ var igv = (function (igv) {
 
     //Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
 
+    let startupCalls = 0;
     function startup() {
+
         const href = window.document.location.href;
-        if (!(href.includes("localhost") || href.includes("127.0.0.1"))) {
+        const host = igv.parseUri(href).host;
+
+        if (startupCalls === 0 && !href.includes("localhost") && !href.includes("127.0.0.1")) {
+            startupCalls++;
+
             var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
             loadURL.call(this, url).then(function (ignore) {
                 console.log(ignore);
             }).catch(function (error) {
                 console.log(error);
             });
+
         }
+    }
+
+    function validateIP(address) {
+
+        const regex = new RegExp(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
+        return regex.test(address);
     }
 
     return igv;
