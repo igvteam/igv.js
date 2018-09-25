@@ -194,7 +194,7 @@ var C2S
     CanvasGradient.prototype.addColorStop = function (offset, color) {
         var stop = this.__ctx.__createElement("stop"), regex, matches;
         stop.setAttribute("offset", offset);
-        if (color.indexOf("rgba") !== -1) {
+        if (color && color.indexOf("rgba") !== -1) {
             //separate alpha value, since webkit can't handle it
             regex = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d?\.?\d*)\s*\)/gi;
             matches = regex.exec(color);
@@ -381,8 +381,8 @@ var C2S
                 else if (value instanceof CanvasGradient) {
                     //gradient
                     currentElement.setAttribute(style.apply, format("url(#{id})", {id:value.__root.getAttribute("id")}));
-                } else if (style.apply.indexOf(type)!==-1 && style.svg !== value) {
-                    if ((style.svgAttr === "stroke" || style.svgAttr === "fill") && value.indexOf("rgba") !== -1) {
+                } else if (style && style.apply.indexOf(type) !== -1 && style.svg !== value) {
+                    if ((style.svgAttr === "stroke" || style.svgAttr === "fill") && value && value.indexOf("rgba") !== -1) {
                         //separate alpha value, since illustrator can't handle it
                         regex = /rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d?\.?\d*)\s*\)/gi;
                         matches = regex.exec(value);
@@ -617,7 +617,7 @@ var C2S
      */
     ctx.prototype.lineTo = function (x, y) {
         this.__currentPosition = {x: x, y: y};
-        if (this.__currentDefaultPath.indexOf('M') > -1) {
+        if (this.__currentDefaultPath && this.__currentDefaultPath.indexOf('M') > -1) {
             this.__addPathCommand(format("L {x} {y}", {x:x, y:y}));
         } else {
             this.__addPathCommand(format("M {x} {y}", {x:x, y:y}));
