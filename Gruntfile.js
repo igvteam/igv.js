@@ -54,6 +54,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
+                    'vender/canvas2svg.js',
                     'es5/**/*.js',
                     'wrapper/footer.js'
                 ],
