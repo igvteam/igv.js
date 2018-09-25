@@ -332,16 +332,13 @@ var igv = (function (igv) {
                     width: pixelWidth,
                     height: pixelHeight,
 
-                    // viewbox
-                    viewbox:
-                        {
-                            x: 0,
-                            y: 0,
-                            w: pixelWidth,
-                            h: pixelHeight
-                        }
                 });
 
+            //ctx.translate(100, 100);
+
+            ctx.rect(0,0,pixelWidth, pixelHeight);
+            ctx.stroke();
+            ctx.clip();
 
             const drawConfiguration =
                 {
