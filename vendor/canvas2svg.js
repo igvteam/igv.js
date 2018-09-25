@@ -268,6 +268,11 @@ var C2S
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
+        if (options.viewbox) {
+            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.w + ' ' + options.viewbox.h;
+            this.__root.setAttribute("viewBox", str);
+        }
+
         //make sure we don't generate the same ids in defs
         this.__ids = {};
 
