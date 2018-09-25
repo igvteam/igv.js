@@ -335,8 +335,8 @@ var igv = (function (igv) {
                         {
                             x: 0,
                             y: -$(this.contentDiv).position().top,
-                            w: pixelWidth,
-                            h: pixelHeight
+                            width: pixelWidth,
+                            height: pixelHeight
                         }
 
                 });

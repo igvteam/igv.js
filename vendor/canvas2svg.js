@@ -269,8 +269,10 @@ var C2S
         this.__root.setAttribute("height", this.height);
 
         if (options.viewbox) {
-            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.w + ' ' + options.viewbox.h;
+            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
             this.__root.setAttribute("viewBox", str);
+
+            this.viewbox = options.viewbox;
         }
 
         //make sure we don't generate the same ids in defs
@@ -790,18 +792,35 @@ var C2S
      * adds a rectangle element
      */
     ctx.prototype.fillRect = function (x, y, width, height) {
+
+        // See if rect instersects current viewbox
+        var r2 = {
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        };
+
+        if (this.viewbox) {
+            if (!intersectRect(this.viewbox, r2)) {
+                return;
+            }
+        }
+
         var rect, parent;
-        rect = this.__createElement("rect", {
-            x : x,
-            y : y,
-            width : width,
-            height : height
-        }, true);
+        rect = this.__createElement("rect", r2, true);
         parent = this.__closestGroupOrSvg();
         parent.appendChild(rect);
         this.__currentElement = rect;
         this.__applyStyleToCurrentElement("fill");
     };
+
+    function intersectRect(rect1, rect2) {
+       return  (rect1.x < rect2.x + rect2.width &&
+           rect1.x + rect1.width > rect2.x &&
+           rect1.y < rect2.y + rect2.height &&
+           rect1.y + rect1.height > rect2.y);
+    }
 
     /**
      * Draws a rectangle with no fill
