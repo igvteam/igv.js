@@ -335,8 +335,8 @@ var igv = (function (igv) {
                     // viewbox
                     viewbox:
                         {
-                            x: -$(this.canvas).position().left,
-                            y: -$(this.contentDiv).position().top,
+                            x: 0,
+                            y: 0,
                             w: pixelWidth,
                             h: pixelHeight
                         }
