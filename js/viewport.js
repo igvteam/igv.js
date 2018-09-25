@@ -331,14 +331,23 @@ var igv = (function (igv) {
                     // svg
                     width: pixelWidth,
                     height: pixelHeight,
+                    viewbox:
+                        {
+                            x: 0,
+                            y: -$(this.contentDiv).position().top,
+                            w: pixelWidth,
+                            h: pixelHeight
+                        }
 
                 });
 
             //ctx.translate(100, 100);
 
-            ctx.rect(0,0,pixelWidth, pixelHeight);
-            ctx.stroke();
-            ctx.clip();
+
+
+          //  ctx.rect(0,0,pixelWidth, pixelHeight);
+         //   ctx.stroke();
+          //  ctx.clip();
 
             const drawConfiguration =
                 {
