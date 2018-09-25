@@ -219,8 +219,10 @@ var igv = (function (igv) {
             const selectedFeatureName = igv.FeatureTrack.selectedGene ? igv.FeatureTrack.selectedGene.toUpperCase() : undefined;
 
             let selectedFeature;
-            for (let i = 0, len = featureList.length; i < len; i++) {
-                const gene = featureList[i];
+            let lastPxEnd = [];
+
+            for (let gene of featureList) {
+
                 if (gene.end < bpStart) continue;
                 if (gene.start > bpEnd) break;
 
@@ -228,7 +230,14 @@ var igv = (function (igv) {
                     selectedFeature = gene;
                 }
                 else {
-                    self.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                    const row = this.displayMode === 'COLLAPSED' ? 0 : gene.row;
+                    const pxEnd = Math.ceil((gene.end - bpStart) / bpPerPixel);
+                    const last = lastPxEnd[row];
+                    if (!last || pxEnd > last) {
+                        self.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+
+                        lastPxEnd[row] = pxEnd;
+                    }
                 }
             }
 
@@ -386,11 +395,11 @@ var igv = (function (igv) {
 
         ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
             const lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
+                {
+                    "COLLAPSED": "Collapse",
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand"
+                };
 
             menuItems.push(
                 {
@@ -552,7 +561,7 @@ var igv = (function (igv) {
             const step = this.arrowSpacing;
             const pixelWidth = options.pixelWidth;
 
-            const xLeft = Math.max(0, coord.px) + step/2;
+            const xLeft = Math.max(0, coord.px) + step / 2;
             const xRight = Math.min(pixelWidth, coord.px1);
             for (let x = xLeft; x < xRight; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
@@ -567,10 +576,10 @@ var igv = (function (igv) {
                 let ePw = Math.max(1, ePx1 - ePx);
                 let ePxU;
 
-                if(ePx + ePw < 0) {
+                if (ePx + ePw < 0) {
                     continue;  // Off the left edge
                 }
-                if(ePx > pixelWidth) {
+                if (ePx > pixelWidth) {
                     break; // Off the right edge
                 }
 
