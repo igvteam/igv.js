@@ -738,6 +738,7 @@ var igv = (function (igv) {
 
             const referenceFrame = viewport.genomicState.referenceFrame;
             const viewportCoords = igv.translateMouseCoordinates(e, viewport.contentDiv);
+            const canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
             const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
             if (undefined === genomicLocation || null === viewport.tile) {
@@ -749,7 +750,9 @@ var igv = (function (igv) {
                 referenceFrame: referenceFrame,
                 genomicLocation: genomicLocation,
                 x: viewportCoords.x,
-                y: viewportCoords.y
+                y: viewportCoords.y,
+                canvasX: canvasCoords.x,
+                canvasY: canvasCoords.y
             }
 
         }

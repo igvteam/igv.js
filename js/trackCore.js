@@ -27,37 +27,34 @@
 // Generic functions applicable to all track types
 
 var igv = (function (igv) {
-    var list;
 
-    list =
-        [
-            "narrowpeak",
-            "broadpeak",
-            "peaks",
-            "bedgraph",
-            "wig",
-            "gff3",
-            "gff",
-            "gtf",
-            "fusionjuncspan",
-            "refflat",
-            "seg",
-            "aed",
-            "bed",
-            "vcf",
-            "bb",
-            "bigbed",
-            "bw",
-            "bigwig",
-            "bam",
-            "tdf",
-            "refgene",
-            "genepred",
-            "genepredext",
-            "bedpe"
-        ];
-
-    igv.knownFileExtensions = new Set(list);
+    igv.knownFileExtensions = new Set( [
+        "narrowpeak",
+        "broadpeak",
+        "peaks",
+        "bedgraph",
+        "wig",
+        "gff3",
+        "gff",
+        "gtf",
+        "fusionjuncspan",
+        "refflat",
+        "seg",
+        "aed",
+        "bed",
+        "vcf",
+        "bb",
+        "bigbed",
+        "bw",
+        "bigwig",
+        "bam",
+        "tdf",
+        "refgene",
+        "genepred",
+        "genepredext",
+        "bedpe",
+        "bp"
+    ]);
 
     /**
      * Return a custom format object with the given name.
@@ -130,7 +127,10 @@ var igv = (function (igv) {
                 return new igv.MergedTrack(trackConfig, browser);
 
             case "interaction":
-                return new igv.InteractionTrack(trackConfig, browser);
+                return igv.trackFactory["interaction"](trackConfig, browser);
+
+            case "bp":
+                return igv.trackFactory["bp"](trackConfig, browser);
 
             default:
                 return undefined;
@@ -778,11 +778,6 @@ var igv = (function (igv) {
 
 
     };
-
-    igv.hasVisibilityWindow = function (trackOrFeatureSource) {
-        return !(-1 === trackOrFeatureSource.visibilityWindow);
-    };
-
 
     const baseProperties = {
         /**
