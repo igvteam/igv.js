@@ -33,35 +33,40 @@ var igv = (function (igv) {
 
     igv.ZoomWidget = function (browser, $parent) {
 
+        let $div,
+            $fa;
+
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
-
-        browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
-
         $parent.append(browser.$zoomContainer);
 
         // zoom out
-        let $div = $('<i>');
+        $div = $('<i>');
         browser.$zoomContainer.append($div);
-        let $fa = igv.createIcon("minus-circle");
+
+        $fa = igv.createIcon("minus-circle");
         $div.append($fa);
+
         $div.on('click', function () {
             browser.zoomOut();
         });
 
         // Range slider
-        // const $slider = $('<input type="range"/>');
-        // $div.append($slider);
-        // this.$slider = $slider;
+        // this.$slider = $('<input type="range"/>');
+        // $div.append(this.$slider);
+
         // this.$slider.on('change', function (e) {
-        //     zoom(browser, e.target.value);
+        //     console.log('slider did change');
+        //     // zoom(browser, e.target.value);
         // });
 
 
         // zoom in
         $div = $('<i>');
         browser.$zoomContainer.append($div);
+
         $fa = igv.createIcon("plus-circle");
         $div.append($fa);
+
         $div.on('click', function () {
             browser.zoomIn();
         });
@@ -73,7 +78,7 @@ var igv = (function (igv) {
         browser.on('locuschange', function () {
             self.updateSlider(browser);
         })
-    }
+    };
 
     // NO-OP for now
     igv.ZoomWidget.prototype.updateSlider = function (browser) {
@@ -106,7 +111,7 @@ var igv = (function (igv) {
         //
         //     this.$slider.show();
         // }
-    }
+    };
 
     function zoom(browser, window) {
 
