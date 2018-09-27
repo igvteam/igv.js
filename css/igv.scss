@@ -351,6 +351,8 @@ $igv-dark-grey-color: #373737;
 
       user-select: none;
 
+      font-size: 20px;
+
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -362,11 +364,11 @@ $igv-dark-grey-color: #373737;
       margin-left: 16px;
       margin-right: 8px;
 
-      div {
-        i {
-          font-size: 24px;
-        }
-      }
+      //div {
+      //  i {
+      //    font-size: 24px;
+      //  }
+      //}
 
     }
 
