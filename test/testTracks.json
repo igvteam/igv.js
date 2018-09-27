@@ -1,5 +1,11 @@
 [
   {
+    "type": "bp",
+    "url": "data/bp/example.bp",
+    "name": "RNA Struct"
+  },
+
+  {
     "format": "bed",
     "name": "Embedded features",
     "type": "annotation",
