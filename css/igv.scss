@@ -353,22 +353,21 @@ $igv-dark-grey-color: #373737;
 
       font-size: 20px;
 
+      width: 44px;
+
+      margin-left: 16px;
+      margin-right: 8px;
+
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
 
-      width: 44px;
-
-      margin-left: 16px;
-      margin-right: 8px;
-
-      //div {
-      //  i {
-      //    font-size: 24px;
-      //  }
-      //}
+      div {
+        cursor: pointer;
+        color: #666666;
+      }
 
     }
 

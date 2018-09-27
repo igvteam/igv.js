@@ -34,17 +34,17 @@ var igv = (function (igv) {
     igv.ZoomWidget = function (browser, $parent) {
 
         let $div,
-            $fa;
+            svg;
 
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
         $parent.append(browser.$zoomContainer);
 
         // zoom out
-        $div = $('<i>');
+        $div = $('<div>');
         browser.$zoomContainer.append($div);
 
-        $fa = igv.createIcon("minus-circle");
-        $div.append($fa);
+        svg = igv.createIcon("minus-circle");
+        $div.append(svg);
 
         $div.on('click', function () {
             browser.zoomOut();
@@ -61,11 +61,11 @@ var igv = (function (igv) {
 
 
         // zoom in
-        $div = $('<i>');
+        $div = $('<div>');
         browser.$zoomContainer.append($div);
 
-        $fa = igv.createIcon("plus-circle");
-        $div.append($fa);
+        svg = igv.createIcon("plus-circle");
+        $div.append(svg);
 
         $div.on('click', function () {
             browser.zoomIn();
