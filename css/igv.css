@@ -250,6 +250,7 @@
         margin-right: 0; }
     .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
       user-select: none;
+      font-size: 20px;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -258,8 +259,6 @@
       width: 44px;
       margin-left: 16px;
       margin-right: 8px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div i {
-        font-size: 24px; }
 
 .igv-nav-bar-button {
   height: 18px;
