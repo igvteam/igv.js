@@ -74,27 +74,10 @@ var igv = (function (igv) {
 
         this.currentChr = undefined;
 
-        const self = this;
+        let self = this;
         browser.on('locuschange', function () {
-            self.updateSlider(browser);
+            browser.updateZoomSlider(self.$slider);
         })
-    };
-
-    igv.ZoomWidget.prototype.updateSlider = function (browser) {
-
-        const viewport = browser.trackViews[0].viewports[0];
-        const referenceFrame = viewport.genomicState.referenceFrame;
-
-        const chromosomeLengthBP = browser.getChromosomeLengthBP(browser.genome, referenceFrame);
-
-        const a = chromosomeLengthBP/viewport.$viewport.width();
-        const b = browser.minimumBases()/viewport.$viewport.width();
-        const percentage = referenceFrame.bpPerPixel/ Math.abs(a - browser.minimumBases()/viewport.$viewport.width());
-
-        const value = Math.round(100 * (1.0 - percentage));
-
-        this.$slider.val(value);
-
     };
 
     return igv;
