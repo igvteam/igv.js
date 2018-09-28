@@ -72,7 +72,6 @@ var igv = (function (igv) {
             browser.zoomIn();
         });
 
-
         this.currentChr = undefined;
 
         const self = this;
@@ -81,67 +80,22 @@ var igv = (function (igv) {
         })
     };
 
-    // NO-OP for now
     igv.ZoomWidget.prototype.updateSlider = function (browser) {
 
-        // const genomicStateList = browser.genomicStateList;
-        //
-        // if (!genomicStateList || genomicStateList.length > 1) {
-        //     this.$slider.hide();
-        // }
-        // else {
-        //     const viewportWidth = browser.viewportWidth();
-        //     const genomicState = genomicStateList[0];
-        //     const chr = genomicState.chromosome.name;
-        //     const chrLength = genomicState.chromosome.bpLength;
-        //
-        //     const window = genomicState.referenceFrame.bpPerPixel * viewportWidth;
-        //
-        //     const slider = this.$slider[0];
-        //
-        //     if (!this.currentChr !== chr) {
-        //         this.min = 40;
-        //         this.max = chrLength;
-        //         this.currentChr = chr;
-        //         slider.max = chrLength.toString();
-        //         slider.min = "40";
-        //         slider.step = ((this.max - this.min) / 100).toString();
-        //     }
-        //
-        //     slider.value = (this.max - window).toString();
-        //
-        //     this.$slider.show();
-        // }
+        const viewport = browser.trackViews[0].viewports[0];
+        const referenceFrame = viewport.genomicState.referenceFrame;
+
+        const chromosomeLengthBP = browser.getChromosomeLengthBP(browser.genome, referenceFrame);
+
+        const a = chromosomeLengthBP/viewport.$viewport.width();
+        const b = browser.minimumBases()/viewport.$viewport.width();
+        const percentage = referenceFrame.bpPerPixel/ Math.abs(a - browser.minimumBases()/viewport.$viewport.width());
+
+        const value = Math.round(100 * (1.0 - percentage));
+
+        this.$slider.val(value);
+
     };
-
-    function zoom(browser, window) {
-
-        const genomicStateList = browser.genomicStateList;
-
-        if (!genomicStateList || genomicStateList.length > 1) {
-            // Ignore, multi locus view
-        }
-        else {
-
-            const viewportWidth = browser.viewportWidth();
-            const genomicState = genomicStateList[0];
-            const referenceFrame = genomicState.referenceFrame;
-
-            // Shift start to maintain center
-            const extent = referenceFrame.bpPerPixel * viewportWidth;
-            const center = referenceFrame.start + extent / 2;
-
-            const newBpPerPixel = window / viewportWidth;
-            const newStart = Math.max(0, center - window / 2);
-
-            referenceFrame.start = newStart;
-            referenceFrame.bpPerPixel =newBpPerPixel;
-
-
-            browser.updateViews(genomicState);
-        }
-    }
-
 
     return igv;
 
