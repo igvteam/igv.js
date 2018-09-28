@@ -1079,6 +1079,22 @@ var igv = (function (igv) {
         this.zoomOutWithViewport(nuthin, nuthin);
     };
 
+
+    igv.Browser.prototype.updateZoomSlider = function ($slider) {
+
+        const viewport = this.trackViews[0].viewports[0];
+        const referenceFrame = viewport.genomicState.referenceFrame;
+
+        const a = this.getChromosomeLengthBP(this.genome, referenceFrame)/viewport.$viewport.width();
+        const b = this.minimumBases()/viewport.$viewport.width();
+        const percentage = referenceFrame.bpPerPixel/ Math.abs(a - b);
+
+        const value = Math.round(100 * (1.0 - percentage));
+
+        $slider.val(value);
+
+    };
+
     igv.Browser.prototype.zoomWithRangePercentage = function (percentage) {
 
         if (this.loadInProgress()) {
