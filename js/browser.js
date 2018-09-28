@@ -1484,7 +1484,7 @@ var igv = (function (igv) {
                                 end: feature.end,
                                 locusSearchString: locus
                             }
-                            igv.Browser.validateLocusExtent(genomicState.chromosome, genomicState, self);
+                            igv.Browser.validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
                             result.push(genomicState);
                             dictionary[locus] = genomicState;
                         }
@@ -1751,7 +1751,7 @@ var igv = (function (igv) {
 
                     }
 
-                    igv.Browser.validateLocusExtent(locusObject.chromosome, locusObject, self);
+                    igv.Browser.validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
 
                     return locusObject;
 
@@ -1761,37 +1761,37 @@ var igv = (function (igv) {
         }
     };
 
-    igv.Browser.validateLocusExtent = function (chromosome, extent, browser) {
+    igv.Browser.validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 
-        const minimumBasesExtent = browser.minimumBases();
         let ss = extent.start;
         let ee = extent.end;
 
         if (undefined === ee) {
 
-            ss -= minimumBases / 2;
-            ee = ss + minimumBases;
+            ss -= minimumBP / 2;
+            ee = ss + minimumBP;
 
-            if (ee > chromosome.bpLength) {
-                ee = chromosome.bpLength;
-                ss = ee - minimumBases;
+            if (ee > chromosomeLengthBP) {
+                ee = chromosomeLengthBP;
+                ss = ee - minimumBP;
             } else if (ss < 0) {
                 ss = 0;
-                ee = minimumBases;
+                ee = minimumBP;
             }
 
-        } else if (ee - ss < browser.minimumBases()) {
+        } else if (ee - ss < minimumBP) {
 
-            center = (ee + ss) / 2;
-            if (center - minimumBases / 2 < 0) {
+            const center = (ee + ss) / 2;
+
+            if (center - minimumBP / 2 < 0) {
                 ss = 0;
-                ee = ss + minimumBases;
-            } else if (center + minimumBases / 2 > chromosome.bpLength) {
-                ee = chromosome.bpLength;
-                ss = ee - minimumBases;
+                ee = ss + minimumBP;
+            } else if (center + minimumBP / 2 > chromosomeLengthBP) {
+                ee = chromosomeLengthBP;
+                ss = ee - minimumBP;
             } else {
-                ss = center - minimumBases / 2;
-                ee = ss + minimumBases;
+                ss = center - minimumBP / 2;
+                ee = ss + minimumBP;
             }
         }
 
