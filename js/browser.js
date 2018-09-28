@@ -1067,21 +1067,24 @@ var igv = (function (igv) {
         return this.config.minimumBases;
     };
 
-
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
         let nuthin = undefined;
         this.zoomInWithViewport(nuthin, nuthin);
     };
 
-    igv.Browser.prototype.zoomInWithViewport = function (viewport, centerBP) {
-        doZoom.call(this, centerBP, viewport, 0.5, zoomWithGenomicStateWithCenter);
-    };
-
     // Zoom out by a factor of 2, keeping the same center location if possible
     igv.Browser.prototype.zoomOut = function () {
         let nuthin = undefined;
         this.zoomOutWithViewport(nuthin, nuthin);
+    };
+
+    igv.Browser.prototype.zoomWithRangePercentage = function (percentage) {
+        console.log('zoom with percentage ' + percentage);
+    };
+
+    igv.Browser.prototype.zoomInWithViewport = function (viewport, centerBP) {
+        doZoom.call(this, centerBP, viewport, 0.5, zoomWithGenomicStateWithCenter);
     };
 
     igv.Browser.prototype.zoomOutWithViewport = function (viewport, centerBP) {
