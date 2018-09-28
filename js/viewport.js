@@ -37,7 +37,7 @@ var igv = (function (igv) {
         this.setWidth(width);
 
 
-        if (trackView.track instanceof igv.SequenceTrack) {
+        if ("sequence" === trackView.track.type) {
             this.$viewport.addClass('igv-viewport-sequence');
         }
 
@@ -76,7 +76,7 @@ var igv = (function (igv) {
 
         }
 
-        if (trackView.track instanceof igv.SequenceTrack) {
+        if ("sequence" === trackView.track.type) {
             // do nuthin
         } else if (trackView.track instanceof igv.RulerTrack) {
             // do nuthin

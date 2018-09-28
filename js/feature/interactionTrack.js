@@ -50,30 +50,29 @@ var igv = (function (igv) {
 
     function defineClass() {
 
-        InteractionTrack = function (config, browser) {
+        InteractionTrack = igv.extend(igv.TrackBase,
 
-            igv.TrackBase.call(this, config, browser);
-            
-            this.theta = config.theta || Math.PI / 4;
-            this.sinTheta = Math.sin(this.theta);
-            this.cosTheta = Math.cos(this.theta);
+            function (config, browser) {
+
+                igv.TrackBase.call(this, config, browser);
+
+                this.theta = config.theta || Math.PI / 4;
+                this.sinTheta = Math.sin(this.theta);
+                this.cosTheta = Math.cos(this.theta);
 
 
-            this.height = config.height || 250;
-            this.autoHeight = true;
+                this.height = config.height || 250;
+                this.autoHeight = true;
 
-            this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation);       // true for up, false for down
-            this.thickness = config.thickness || 2;
-            this.color = config.color || "rgb(180,25,137)"
+                this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation);       // true for up, false for down
+                this.thickness = config.thickness || 2;
+                this.color = config.color || "rgb(180,25,137)"
 
-            this.visibilityWindow = -1;
+                this.visibilityWindow = -1;
 
-            this.colorAlphaCache = {};
+                this.colorAlphaCache = {};
 
-        };
-
-        InteractionTrack.prototype = Object.create(igv.TrackBase.prototype);
-        InteractionTrack.prototype.constructor = InteractionTrack;
+            });
 
         /**
          * Return the current state of the track.  Used to create sessions and bookmarks.

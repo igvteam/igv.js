@@ -31,6 +31,14 @@
 
 var igv = (function (igv) {
 
+
+    igv.extend = function (parent, child) {
+
+        child.prototype = Object.create(parent.prototype);
+        child.prototype.constructor = child;
+        return child;
+    }
+
     /**
      * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
      * by prototype chaining.
