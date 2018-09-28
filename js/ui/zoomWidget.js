@@ -58,8 +58,7 @@ var igv = (function (igv) {
         $div.append(this.$slider);
 
         this.$slider.on('change', function (e) {
-            console.log('zoom ' + e.target.value);
-            // zoom(browser, e.target.value);
+            browser.zoomWithRangePercentage(e.target.value/100.0);
         });
 
         // zoom in
