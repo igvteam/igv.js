@@ -45,21 +45,19 @@ var igv = (function (igv) {
 
     function defineClass() {
 
-        RnaStructTrack = function (config, browser) {
+        RnaStructTrack = igv.extend(igv.TrackBase,
 
-            igv.TrackBase.call(this, config, browser);
+            function (config, browser) {
 
-            // Set defaults
-            config.height = config.height || 300;
+                igv.TrackBase.call(this, config, browser);
 
-            this.arcOrientation = false;
+                // Set defaults
+                config.height = config.height || 300;
 
-            this.theta = Math.PI / 2;
-        };
+                this.arcOrientation = false;
 
-
-        RnaStructTrack.prototype = Object.create(igv.TrackBase.prototype);
-        RnaStructTrack.prototype.constructor = RnaStructTrack;
+                this.theta = Math.PI / 2;
+            });
 
         RnaStructTrack.prototype.getFeatures = function (chr, start, end) {
 
