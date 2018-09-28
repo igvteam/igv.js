@@ -1101,12 +1101,19 @@ var igv = (function (igv) {
             func.call(this, viewport.genomicState, centerBP, viewport.$viewport.width(), scaleFactor);
             this.updateViews(viewport.genomicState);
         } else {
-            let anyViewport = this.trackViews[0].viewports[0];
             let self = this;
-            this.genomicStateList.forEach(function (genomicState) {
-                func.call(self, genomicState, centerBP, anyViewport.$viewport.width(), scaleFactor);
-                self.updateViews(genomicState);
+
+            this.trackViews[0].viewports.forEach((viewport) => {
+                func.call(self, viewport.genomicState, centerBP, viewport.$viewport.width(), scaleFactor);
+                self.updateViews(viewport.genomicState);
+
             });
+
+            // let anyViewport = this.trackViews[0].viewports[0];
+            // this.genomicStateList.forEach(function (genomicState) {
+            //     func.call(self, genomicState, centerBP, anyViewport.$viewport.width(), scaleFactor);
+            //     self.updateViews(genomicState);
+            // });
         }
 
     }
