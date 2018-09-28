@@ -1153,16 +1153,7 @@ var igv = (function (igv) {
         const bpp = Math.min(genomicState.referenceFrame.bpPerPixel * 2.0, bppThreshold);
         const viewportWidthBP = bpp * viewportWidth;
 
-
-
-        genomicState.referenceFrame.start = Math.round(centerBP - (viewportWidthBP/2.0));
-
-        // handle edge cases
-        if (genomicState.referenceFrame.start < 0) {
-            genomicState.referenceFrame.start = 0;
-        } else if (genomicState.referenceFrame.start > chromosomeLengthBP - viewportWidthBP) {
-            genomicState.referenceFrame.start = chromosomeLengthBP - viewportWidthBP;
-        }
+        genomicState.referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP/2.0)), 0, chromosomeLengthBP - viewportWidthBP);
 
         genomicState.referenceFrame.bpPerPixel = bpp;
 
