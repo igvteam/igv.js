@@ -29,106 +29,125 @@
  */
 var igv = (function (igv) {
 
-    igv.MergedTrack = function (config, browser) {
 
-        var self = this;
+    if (!igv.trackFactory) {
+        igv.trackFactory = {};
+    }
 
-        if (!config.tracks) {
-            console.log("Error: not tracks defined for merged track. " + config);
-            return;
+    let MergedTrack;
+
+    igv.trackFactory["merged"] = function (config, browser) {
+
+        if (!MergedTrack) {
+            defineClass();
         }
 
-        if(config.height === undefined) {
-            config.height = 50;
-        }
+        return new MergedTrack(config, browser);
+    }
 
-        igv.configTrack(this, config);
 
-        this.tracks = [];
-        config.tracks.forEach(function (tconf) {
+    function defineClass() {
 
-            if(!tconf.type) igv.inferTrackTypes(tconf);
 
-            var t = igv.createTrack(tconf, browser);
+        MergedTrack = igv.extend(igv.TrackBase, function (config, browser) {
 
-            if (t) {
-                t.autoscale = false;     // Scaling done from merged track
-                self.tracks.push(t);
+            var self = this;
+
+            if (!config.tracks) {
+                console.log("Error: not tracks defined for merged track. " + config);
+                return;
             }
-            else {
-                console.log("Could not create track " + tconf);
+
+            if (config.height === undefined) {
+                config.height = 50;
             }
+
+            igv.TrackBase.call(this, config, browser);
+
+            this.tracks = [];
+            config.tracks.forEach(function (tconf) {
+
+                if (!tconf.type) igv.inferTrackTypes(tconf);
+
+                var t = igv.createTrack(tconf, browser);
+
+                if (t) {
+                    t.autoscale = false;     // Scaling done from merged track
+                    self.tracks.push(t);
+                }
+                else {
+                    console.log("Could not create track " + tconf);
+                }
+            });
         });
 
-    }
+        MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
-    igv.MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+            var promises = this.tracks.map(function (t) {
+                return t.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
+            })
+            return Promise.all(promises);
 
-        var promises = this.tracks.map(function (t) {
-            return t.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
-        })
-        return Promise.all(promises);
-
-    }
-
-
-    igv.MergedTrack.prototype.draw = function (options) {
-
-        var i, len, mergedFeatures, trackOptions, dataRange;
-
-        mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
-
-        dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
-
-        for (i = 0, len = this.tracks.length; i < len; i++) {
-
-            trackOptions = Object.assign({}, options);
-            trackOptions.features = mergedFeatures[i];
-            this.tracks[i].dataRange = dataRange;
-            this.tracks[i].draw(trackOptions);
         }
 
-    }
 
-    igv.MergedTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+        MergedTrack.prototype.draw = function (options) {
 
-        var i, len, autoscale, track;
+            var i, len, mergedFeatures, trackOptions, dataRange;
 
-        autoscale = true;   // Hardcoded for now
+            mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
 
-        for (i = 0, len = this.tracks.length; i < len; i++) {
+            dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
 
-            track = this.tracks[i];
+            for (i = 0, len = this.tracks.length; i < len; i++) {
 
-            if (typeof track.paintAxis === 'function') {
-                track.paintAxis(ctx, pixelWidth, pixelHeight);
-                if (autoscale) break;
+                trackOptions = Object.assign({}, options);
+                trackOptions.features = mergedFeatures[i];
+                this.tracks[i].dataRange = dataRange;
+                this.tracks[i].draw(trackOptions);
+            }
+
+        }
+
+        MergedTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+
+            var i, len, autoscale, track;
+
+            autoscale = true;   // Hardcoded for now
+
+            for (i = 0, len = this.tracks.length; i < len; i++) {
+
+                track = this.tracks[i];
+
+                if (typeof track.paintAxis === 'function') {
+                    track.paintAxis(ctx, pixelWidth, pixelHeight);
+                    if (autoscale) break;
+                }
             }
         }
-    }
 
-    function autoscale(chr, featureArrays) {
+        function autoscale(chr, featureArrays) {
 
 
-        var min = 0,
-            max = -Number.MAX_VALUE,
-            allValues;
+            var min = 0,
+                max = -Number.MAX_VALUE,
+                allValues;
 
-        // if (chr === 'all') {
-        //     allValues = [];
-        //     featureArrays.forEach(function (features) {
-        //         features.forEach(function (f) {
-        //             if (!Number.isNaN(f.value)) {
-        //                 allValues.push(f.value);
-        //             }
-        //         });
-        //     });
-        //
-        //     min = Math.min(0, igv.Math.percentile(allValues, .1));
-        //     max = igv.Math.percentile(allValues, 99.9);
-        //
-        // }
-        // else {
+            // if (chr === 'all') {
+            //     allValues = [];
+            //     featureArrays.forEach(function (features) {
+            //         features.forEach(function (f) {
+            //             if (!Number.isNaN(f.value)) {
+            //                 allValues.push(f.value);
+            //             }
+            //         });
+            //     });
+            //
+            //     min = Math.min(0, igv.Math.percentile(allValues, .1));
+            //     max = igv.Math.percentile(allValues, 99.9);
+            //
+            // }
+            // else {
             featureArrays.forEach(function (features) {
                 features.forEach(function (f) {
                     if (!Number.isNaN(f.value)) {
@@ -137,9 +156,10 @@ var igv = (function (igv) {
                     }
                 });
             });
-      //  }
+            //  }
 
-        return {min: min, max: max};
+            return {min: min, max: max};
+        }
     }
 
     return igv;

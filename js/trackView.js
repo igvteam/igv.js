@@ -448,7 +448,7 @@ var igv = (function (igv) {
                     if (typeof self.track.doAutoscale === 'function') {
                         self.track.doAutoscale(allFeatures);
                     } else {
-                        self.track.dataRange = igv.WIGTrack.doAutoscale(allFeatures);
+                        self.track.dataRange = igv.doAutoscale(allFeatures);
                     }
                 }
 
