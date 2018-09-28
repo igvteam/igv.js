@@ -1092,7 +1092,7 @@ var igv = (function (igv) {
 
             const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width()/2.0);
 
-            const chromosomeLengthBP = getChromosomeLengthBP(self.genome, referenceFrame);
+            const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, referenceFrame);
 
             const bpp = igv.Math.lerp(chromosomeLengthBP/viewport.$viewport.width(), this.minimumBases()/viewport.$viewport.width(), percentage);
 
@@ -1134,7 +1134,7 @@ var igv = (function (igv) {
 
     function zoomWithScaleFactor(genomicState, centerBPOrUndefined, viewportWidth, scaleFactor) {
 
-        const chromosomeLengthBP = getChromosomeLengthBP(this.genome, genomicState.referenceFrame);
+        const chromosomeLengthBP = this.getChromosomeLengthBP(this.genome, genomicState.referenceFrame);
         const bppThreshold = scaleFactor < 1.0 ? this.minimumBases()/viewportWidth : chromosomeLengthBP/viewportWidth;
 
         const centerBP = undefined === centerBPOrUndefined ? (genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportWidth/2.0)) : centerBPOrUndefined;
@@ -1154,7 +1154,7 @@ var igv = (function (igv) {
 
     }
 
-    function getChromosomeLengthBP (genome, referenceFrame) {
+    igv.Browser.prototype.getChromosomeLengthBP =  function (genome, referenceFrame) {
 
         if (genome && genome.getChromosome(referenceFrame.chrName)) {
             return genome.getChromosome(referenceFrame.chrName).bpLength;
@@ -1162,7 +1162,7 @@ var igv = (function (igv) {
             return 250000000;
         }
 
-    }
+    };
 
     igv.Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
 
