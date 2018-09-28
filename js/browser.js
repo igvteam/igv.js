@@ -1063,7 +1063,7 @@ var igv = (function (igv) {
         return vw;
     };
 
-    igv.Browser.prototype.minimumBasesExtent = function () {
+    igv.Browser.prototype.minimumBases = function () {
         return this.config.minimumBases;
     };
 
@@ -1112,18 +1112,19 @@ var igv = (function (igv) {
 
     function magnifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
 
-        var mbe,
-            be,
-            center,
+        var be,
             cBP,
             viewportHalfWidth,
-            delta;
+            bpp;
 
-        // Have we reached the zoom-in threshold yet? If so, bail.
-        mbe = this.minimumBasesExtent();
+        bpp = genomicState.referenceFrame.bpPerPixel;
 
-        be = basesExtent(viewportWidth, genomicState.referenceFrame.bpPerPixel / 2.0);
-        if (mbe > be) {
+        // console.log('magnify - before - extentBP ' + igv.numberFormatter(extentBP(viewportWidth, genomicState.referenceFrame.bpPerPixel)) + ' threshold ' + this.minimumBases());
+        console.log('magnify - before - bpp ' + genomicState.referenceFrame.bpPerPixel + ' threshold ' + 1.0/this.minimumBases());
+
+        be = extentBP(viewportWidth, bpp / 2.0);
+
+        if (this.minimumBases() > be) {
             return;
         }
 
@@ -1138,48 +1139,48 @@ var igv = (function (igv) {
         // which results in base-pair units
         genomicState.referenceFrame.start = cBP - genomicState.referenceFrame.toBP(viewportHalfWidth);
 
+        // console.log('magnify -  after - extentBP ' + igv.numberFormatter(extentBP(viewportWidth, genomicState.referenceFrame.bpPerPixel)) + ' threshold ' + this.minimumBases());
+        console.log('magnify -  after - bpp ' + genomicState.referenceFrame.bpPerPixel + ' threshold ' + 1.0/this.minimumBases());
     }
 
-    function minifyWithGenomicStateWithCenter(genomicState, centerBP, viewportWidth) {
+    function minifyWithGenomicStateWithCenter(genomicState, centerBPOrUndefined, viewportWidth) {
 
-        var bppMinify,
-            chromosomeLengthBP,
-            chromosome,
-            viewportHalfWidth,
-            viewportWidthBP,
-            cBP;
+        const chromosomeLengthBP = getChromosomeLengthBP(this.genome, genomicState.referenceFrame);
+        const bppThreshold = chromosomeLengthBP/viewportWidth;
 
-        viewportHalfWidth = viewportWidth / 2.0;
-        cBP = undefined === centerBP ? genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportHalfWidth) : centerBP;
+        const centerBP = undefined === centerBPOrUndefined ? (genomicState.referenceFrame.start + genomicState.referenceFrame.toBP(viewportWidth/2.0)) : centerBPOrUndefined;
+
+        const bpp = Math.min(genomicState.referenceFrame.bpPerPixel * 2.0, bppThreshold);
+        const viewportWidthBP = bpp * viewportWidth;
 
 
-        bppMinify = 2.0 * genomicState.referenceFrame.bpPerPixel;
-        chromosomeLengthBP = 250000000;
 
-        if (this.genome) {
-            chromosome = this.genome.getChromosome(genomicState.referenceFrame.chrName);
-            if (chromosome) {
-                chromosomeLengthBP = chromosome.bpLength;
-            }
-        }
+        genomicState.referenceFrame.start = Math.round(centerBP - (viewportWidthBP/2.0));
 
-        bppMinify = Math.min(bppMinify, chromosomeLengthBP / viewportWidth);
-        viewportWidthBP = bppMinify * viewportWidth;
-
-        genomicState.referenceFrame.start = Math.round(cBP - viewportWidthBP / 2.0);
-
+        // handle edge cases
         if (genomicState.referenceFrame.start < 0) {
             genomicState.referenceFrame.start = 0;
         } else if (genomicState.referenceFrame.start > chromosomeLengthBP - viewportWidthBP) {
             genomicState.referenceFrame.start = chromosomeLengthBP - viewportWidthBP;
         }
 
-        genomicState.referenceFrame.bpPerPixel = bppMinify;
+        genomicState.referenceFrame.bpPerPixel = bpp;
+
+        console.log('minify widthBP ' + igv.numberFormatter(viewportWidthBP) + ' threshold ' + igv.numberFormatter(chromosomeLengthBP));
+    }
+
+    function getChromosomeLengthBP (genome, referenceFrame) {
+
+        if (genome && genome.getChromosome(referenceFrame.chrName)) {
+            return genome.getChromosome(referenceFrame.chrName).bpLength;
+        } else {
+            return 250000000;
+        }
 
     }
 
-    function basesExtent(width, bpp) {
-        return Math.floor(width * bpp);
+    function extentBP(pixels, bpp) {
+        return Math.floor(pixels * bpp);
     }
 
     igv.Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
@@ -1781,35 +1782,35 @@ var igv = (function (igv) {
 
     igv.Browser.validateLocusExtent = function (chromosome, extent, browser) {
 
-        var ss = extent.start,
-            ee = extent.end,
-            center;
+        const minimumBasesExtent = browser.minimumBases();
+        let ss = extent.start;
+        let ee = extent.end;
 
         if (undefined === ee) {
 
-            ss -= browser.minimumBasesExtent() / 2;
-            ee = ss + browser.minimumBasesExtent();
+            ss -= minimumBases / 2;
+            ee = ss + minimumBases;
 
             if (ee > chromosome.bpLength) {
                 ee = chromosome.bpLength;
-                ss = ee - browser.minimumBasesExtent();
+                ss = ee - minimumBases;
             } else if (ss < 0) {
                 ss = 0;
-                ee = browser.minimumBasesExtent();
+                ee = minimumBases;
             }
 
-        } else if (ee - ss < browser.minimumBasesExtent()) {
+        } else if (ee - ss < browser.minimumBases()) {
 
             center = (ee + ss) / 2;
-            if (center - browser.minimumBasesExtent() / 2 < 0) {
+            if (center - minimumBases / 2 < 0) {
                 ss = 0;
-                ee = ss + browser.minimumBasesExtent();
-            } else if (center + browser.minimumBasesExtent() / 2 > chromosome.bpLength) {
+                ee = ss + minimumBases;
+            } else if (center + minimumBases / 2 > chromosome.bpLength) {
                 ee = chromosome.bpLength;
-                ss = ee - browser.minimumBasesExtent();
+                ss = ee - minimumBases;
             } else {
-                ss = center - browser.minimumBasesExtent() / 2;
-                ee = ss + browser.minimumBasesExtent();
+                ss = center - minimumBases / 2;
+                ee = ss + minimumBases;
             }
         }
 

@@ -51,14 +51,16 @@ var igv = (function (igv) {
         });
 
         // Range slider
-        // this.$slider = $('<input type="range"/>');
-        // $div.append(this.$slider);
+        $div = $('<div>');
+        browser.$zoomContainer.append($div);
 
-        // this.$slider.on('change', function (e) {
-        //     console.log('slider did change');
-        //     // zoom(browser, e.target.value);
-        // });
+        this.$slider = $('<input type="range"/>');
+        $div.append(this.$slider);
 
+        this.$slider.on('change', function (e) {
+            console.log('zoom ' + e.target.value);
+            // zoom(browser, e.target.value);
+        });
 
         // zoom in
         $div = $('<div>');
