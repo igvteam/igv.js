@@ -28,7 +28,7 @@
 
 var igv = (function (igv) {
 
-    igv.knownFileExtensions = new Set( [
+    igv.knownFileExtensions = new Set([
         "narrowpeak",
         "broadpeak",
         "peaks",
@@ -74,66 +74,37 @@ var igv = (function (igv) {
     igv.createTrack = function (config, browser) {
 
         // Lowercase format
-        if(config.format) {
+        if (config.format) {
             config.format = config.format.toLowerCase();
         }
 
 
-        const type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
+        let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
+
+        if ("data" === type) type = "wig";   // deprecated
 
         // add browser to track config
         let trackConfig = Object.assign({}, config);
+
         trackConfig.browser = browser;
 
         switch (type) {
-
-            case "gwas":
-                return new igv.GWASTrack(trackConfig);
-                break;
 
             case "annotation":
             case "genes":
             case "fusionjuncspan":
             case "snp":
-                return new igv.FeatureTrack(trackConfig, browser);
-                break;
 
-            case "variant":
-                return new igv.VariantTrack(trackConfig, browser);
-                break;
-
-            case "alignment":
-                return new igv.BAMTrack(trackConfig, browser);
-                break;
-
-            case "data":  // deprecated
-            case "wig":
-                return new igv.WIGTrack(trackConfig, browser);
-                break;
-
-            case "sequence":
-                return new igv.SequenceTrack(trackConfig, browser);
-                break;
-
-            case "eqtl":
-                return new igv.EqtlTrack(trackConfig, browser);
-                break;
-
-            case "seg":
-                return new igv.SegTrack(trackConfig, browser);
-                break;
-
-            case "merged":
-                return new igv.MergedTrack(trackConfig, browser);
-
-            case "interaction":
-                return igv.trackFactory["interaction"](trackConfig, browser);
-
-            case "bp":
-                return igv.trackFactory["bp"](trackConfig, browser);
+                return igv.trackFactory["feature"](trackConfig, browser);
 
             default:
-                return undefined;
+
+                if (igv.trackFactory.hasOwnProperty(type)) {
+                    return igv.trackFactory[type](trackConfig, browser);
+                }
+                else {
+                    return undefined;
+                }
         }
 
     };
@@ -291,63 +262,6 @@ var igv = (function (igv) {
 
     };
 
-    /**
-     * Set defaults for properties applicable to all tracks.
-     * Insure required "config" properties are set.
-     * @param track
-     * @param config
-     */
-    igv.configTrack = function (track, config) {
-
-        track.config = config;
-        track.url = config.url;
-
-        config.name = config.name || config.label;   // synonym for name, label is deprecated
-        if (config.name) {
-            track.name = config.name;
-        }
-        else {
-            if (igv.isFilePath(config.url)) track.name = config.url.name;
-            else track.name = config.url;
-
-        }
-
-        track.id = config.id || track.name;   // TODO -- remove this property, not used
-
-        track.order = config.order;
-        track.color = config.color || config.defaultColor || "rgb(0,0,150)";
-
-        track.autoscaleGroup = config.autoscaleGroup;
-
-        track.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
-
-        track.height = config.height || 100;
-
-        if (config.autoHeight === undefined)  {
-            config.autoHeight = config.autoheight;
-        } // Some case confusion in the initial releasae
-
-        track.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        track.minHeight = config.minHeight || Math.min(25, track.height);
-        track.maxHeight = config.maxHeight || Math.max(1000, track.height);
-
-        track.visibilityWindow = config.visibilityWindow;
-
-        if (track.type === undefined) {
-            track.type = config.type;
-        }
-
-        // Define some default base functions and properties common to all tracks.   
-        Object.keys(baseProperties).forEach(function (key) {
-            {
-                if (undefined === track[key]) {
-                    track[key] = baseProperties[key];
-                }
-            }
-        });
-
-    };
-
     igv.setTrackLabel = function ($label, track, label) {
 
         var vp,
@@ -468,13 +382,13 @@ var igv = (function (igv) {
             menuItems;
 
         config =
-        {
-            viewport: viewport,
-            genomicState: viewport.genomicState,
-            genomicLocation: genomicLocation,
-            x: xOffset,
-            y: yOffset
-        };
+            {
+                viewport: viewport,
+                genomicState: viewport.genomicState,
+                genomicLocation: genomicLocation,
+                x: xOffset,
+                y: yOffset
+            };
 
         menuItems = [];
         if (typeof viewport.trackView.track.contextMenuItemList === "function") {
@@ -522,7 +436,10 @@ var igv = (function (igv) {
     };
 
     function doProvideColoSwatchWidget(track) {
-        return (track instanceof igv.BAMTrack || track instanceof igv.FeatureTrack || track instanceof igv.VariantTrack || track instanceof igv.WIGTrack);
+        return ("alignment" === track.type ||
+            "feature" === track.type ||
+            "variant" === track.type ||
+            "wig" === track.type);
     };
 
     igv.trackMenuItemListHelper = function (itemList, $popover) {
@@ -691,7 +608,8 @@ var igv = (function (igv) {
 
         return {
             object: $e,
-            click: clickHandler};
+            click: clickHandler
+        };
 
     };
 

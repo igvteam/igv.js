@@ -586,6 +586,33 @@ var igv = (function (igv) {
 
     }
 
+    igv.doAutoscale = function (features) {
+        var min, max;
+
+        if (features.length > 0) {
+            min = Number.MAX_VALUE;
+            max = -Number.MAX_VALUE;
+
+            features.forEach(function (f) {
+                if (!Number.isNaN(f.value)) {
+                    min = Math.min(min, f.value);
+                    max = Math.max(max, f.value);
+                }
+            });
+
+            // Insure we have a zero baseline
+            if (max > 0) min = Math.min(0, min);
+            if (max < 0) max = 0;
+        }
+        else {
+            // No features -- default
+            min = 0;
+            max = 100;
+        }
+
+        return {min: min, max: max};
+    }
+
     return igv;
 
 })(igv || {});
