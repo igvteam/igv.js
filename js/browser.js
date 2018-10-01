@@ -399,7 +399,7 @@ var igv = (function (igv) {
         // multi-locus mode
         if (genomicStateList.length > 1) {
             this.centerGuide.disable();
-            this.enableZoomWidget();
+            this.disableZoomWidget();
         }
         // whole-genome
         else if ('all' === genomicStateList[0].locusSearchString) {
