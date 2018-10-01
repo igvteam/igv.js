@@ -33,109 +33,52 @@ var igv = (function (igv) {
 
     igv.ZoomWidget = function (browser, $parent) {
 
+        let $div,
+            svg;
+
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
-
-        browser.$zoomContainer.css("font-size", "20px");    // TODO -- could be done in style sheet.
-
         $parent.append(browser.$zoomContainer);
 
         // zoom out
-        let $div = $('<i>');
+        $div = $('<div>');
         browser.$zoomContainer.append($div);
-        let $fa = igv.createIcon("minus-circle");
-        $div.append($fa);
+
+        svg = igv.createIcon("minus-circle");
+        $div.append(svg);
+
         $div.on('click', function () {
             browser.zoomOut();
         });
 
         // Range slider
-        // const $slider = $('<input type="range"/>');
-        // $div.append($slider);
-        // this.$slider = $slider;
-        // this.$slider.on('change', function (e) {
-        //     zoom(browser, e.target.value);
-        // });
+        $div = $('<div>');
+        browser.$zoomContainer.append($div);
 
+        this.$slider = $('<input type="range"/>');
+        $div.append(this.$slider);
+
+        this.$slider.on('change', function (e) {
+            browser.zoomWithRangePercentage(e.target.value/100.0);
+        });
 
         // zoom in
-        $div = $('<i>');
+        $div = $('<div>');
         browser.$zoomContainer.append($div);
-        $fa = igv.createIcon("plus-circle");
-        $div.append($fa);
+
+        svg = igv.createIcon("plus-circle");
+        $div.append(svg);
+
         $div.on('click', function () {
             browser.zoomIn();
         });
 
-
         this.currentChr = undefined;
 
-        const self = this;
+        let self = this;
         browser.on('locuschange', function () {
-            self.updateSlider(browser);
+            browser.updateZoomSlider(self.$slider);
         })
-    }
-
-    // NO-OP for now
-    igv.ZoomWidget.prototype.updateSlider = function (browser) {
-
-        // const genomicStateList = browser.genomicStateList;
-        //
-        // if (!genomicStateList || genomicStateList.length > 1) {
-        //     this.$slider.hide();
-        // }
-        // else {
-        //     const viewportWidth = browser.viewportWidth();
-        //     const genomicState = genomicStateList[0];
-        //     const chr = genomicState.chromosome.name;
-        //     const chrLength = genomicState.chromosome.bpLength;
-        //
-        //     const window = genomicState.referenceFrame.bpPerPixel * viewportWidth;
-        //
-        //     const slider = this.$slider[0];
-        //
-        //     if (!this.currentChr !== chr) {
-        //         this.min = 40;
-        //         this.max = chrLength;
-        //         this.currentChr = chr;
-        //         slider.max = chrLength.toString();
-        //         slider.min = "40";
-        //         slider.step = ((this.max - this.min) / 100).toString();
-        //     }
-        //
-        //     slider.value = (this.max - window).toString();
-        //
-        //     this.$slider.show();
-        // }
-    }
-
-    function zoom(browser, window) {
-
-        const genomicStateList = browser.genomicStateList;
-
-        if (!genomicStateList || genomicStateList.length > 1) {
-            // Ignore, multi locus view
-        }
-        else {
-
-            const viewportWidth = browser.viewportWidth();
-            const genomicState = genomicStateList[0];
-            const referenceFrame = genomicState.referenceFrame;
-
-            // Shift start to maintain center
-            const extent = referenceFrame.bpPerPixel * viewportWidth;
-            const center = referenceFrame.start + extent / 2;
-
-            const newBpPerPixel = window / viewportWidth;
-            const newStart = Math.max(0, center - window / 2);
-
-            referenceFrame.start = newStart;
-            referenceFrame.bpPerPixel =newBpPerPixel;
-
-
-            browser.updateViews(genomicState);
-        }
-    }
-
+    };
 
     return igv;
 
