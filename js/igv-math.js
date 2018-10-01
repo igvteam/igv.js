@@ -27,6 +27,10 @@ var igv = (function (igv) {
 
     igv.Math = {
 
+        lerp: (v0, v1, t) => {
+            return (1 - t) * v0 + t * v1;
+        },
+
         mean: function (array) {
 
             var t = 0, n = 0,
@@ -78,11 +82,11 @@ var igv = (function (igv) {
         clamp: function (value, min, max) {
             return Math.min(Math.max(value, min), max);
         },
-        
+
         log2: function (x) {
-                return Math.log(x) / Math.LN2;
+            return Math.log(x) / Math.LN2;
         }
-        
+
     };
 
     igv.Rect = {

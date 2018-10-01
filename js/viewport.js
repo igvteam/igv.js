@@ -705,7 +705,7 @@ var igv = (function (igv) {
                     browser.search(string);
 
                 } else {
-                    browser.zoomInWithViewport(self, centerBP);
+                    browser.zoomWithScaleFactor(centerBP, self, 0.5)
                 }
 
 
