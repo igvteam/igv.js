@@ -192,7 +192,7 @@ var igv = (function (igv) {
 
         $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
 
-            var extent;
+            let extent;
 
             if (true === isMouseDown && true === isMouseIn) {
 
@@ -205,13 +205,13 @@ var igv = (function (igv) {
                 extent.end   = bp.call(self, left + width);
 
                 if (width > threshold) {
-                    // console.log('start | end '+  igv.numberFormatter(extent.start) + ' | ' + igv.numberFormatter(extent.end));
-                    igv.Browser.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName), extent, browser);
-                    var genomicState = self.viewport.genomicState,
-                        referenceFrame = genomicState.referenceFrame;
-                    referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
-                    referenceFrame.start = Math.round(extent.start);
-                    browser.updateViews(genomicState);
+
+                    igv.Browser.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+
+                    self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
+                    self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);
+
+                    browser.updateViews(self.viewport.genomicState);
                 }
 
             }
