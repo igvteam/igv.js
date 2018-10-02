@@ -350,15 +350,13 @@ var igv = (function (igv) {
 
     igv.setTrackLabel = function ($label, track, label) {
 
-        var vp,
-            txt;
-
         track.name = label;
         track.config.name = label;
 
         $label.empty();
         $label.html(track.name);
-        txt = $label.text();
+
+        const txt = $label.text();
         $label.attr('title', txt);
     };
 
@@ -714,7 +712,8 @@ var igv = (function (igv) {
 
                 value = ('' === value || undefined === value) ? 'untitled' : value;
 
-                igv.setTrackLabel(trackView.viewports[0].$trackLabel, trackView.track, value);
+                trackView.browser.setTrackLabelName(trackView, value);
+
             };
 
             trackView.browser.inputDialog.configure({
