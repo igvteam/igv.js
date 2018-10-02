@@ -232,7 +232,6 @@ var igv = (function (igv) {
             logoDiv,
             logoSvg,
             $controls,
-            $karyo,
             $navigation,
             $searchContainer,
             $faSearch;
@@ -338,12 +337,6 @@ var igv = (function (igv) {
         // zoom widget
         browser.zoomWidget = new igv.ZoomWidget(browser, $igv_nav_bar_right_container);
 
-        // $karyo = $('#igvKaryoDiv');
-        // if (undefined === $karyo.get(0)) {
-        //     $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
-        //     $controls.append($karyo);
-        // }
-
         if (false === config.showNavigation) {
             browser.$navigation.hide();
         }
@@ -392,10 +385,6 @@ var igv = (function (igv) {
 
         if (undefined === config.showTrackLabels) {
             config.showTrackLabels = true;
-        }
-
-        if (undefined === config.showKaryo) {
-            config.showKaryo = false;
         }
 
         if (config.showControls === undefined) {
