@@ -911,9 +911,6 @@ var igv = (function (igv) {
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
         }
-        if (this.karyoPanel) {
-            this.karyoPanel.repaint();
-        }
         if (this.centerGuide) {
             this.centerGuide.repaint();
         }
