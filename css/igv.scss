@@ -450,33 +450,6 @@ $igv-dark-grey-color: #373737;
 
 }
 
-// karyo
-.igv-karyo-div {
-  position: relative;
-  left: 0;
-  top: 0;
-  height:200px;
-}
-
-.igv-karyo-hide {
-  height: 0;
-  overflow: hidden;
-}
-
-.igv-karyo-content-div {
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-}
-
-.igv-karyo-canvas {
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-}
-
 // root container
 .igv-root-div {
 
