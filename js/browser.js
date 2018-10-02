@@ -399,7 +399,7 @@ var igv = (function (igv) {
         // multi-locus mode
         if (genomicStateList.length > 1) {
             this.centerGuide.disable();
-            this.enableZoomWidget();
+            this.disableZoomWidget();
         }
         // whole-genome
         else if ('all' === genomicStateList[0].locusSearchString) {
@@ -412,29 +412,48 @@ var igv = (function (igv) {
             this.enableZoomWidget();
         }
 
+        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
+
     };
 
     // track labels
-    igv.Browser.prototype.hideTrackLabels = function () {
+    igv.Browser.prototype.setTrackLabelName = function (trackView, name) {
 
-        this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[0].$trackLabel) {
-                trackView.viewports[0].$trackLabel.hide();
-            }
+        trackView.viewports.forEach((viewport) => {
+            igv.setTrackLabel(viewport.$trackLabel, trackView.track, name);
         });
 
+    };
+
+    igv.Browser.prototype.hideTrackLabels = function () {
         this.trackLabelsVisible = false;
+        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
     };
 
     igv.Browser.prototype.showTrackLabels = function () {
-
-        this.trackViews.forEach(function (trackView) {
-            if (trackView.viewports[0].$trackLabel) {
-                trackView.viewports[0].$trackLabel.show();
-            }
-        });
         this.trackLabelsVisible = true;
+        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
     };
+
+    function toggleTrackLabels (trackViews, isVisible) {
+
+        trackViews.forEach(function (trackView) {
+            trackView.viewports.forEach((viewport, index) => {
+
+                if (viewport.$trackLabel) {
+
+                    if (0 === index && true === isVisible) {
+                        viewport.$trackLabel.show();
+                    } else {
+                        viewport.$trackLabel.hide();
+                    }
+
+                }
+
+            });
+        });
+
+    }
 
     // cursor guide
     igv.Browser.prototype.hideCursorGuide = function () {
@@ -699,6 +718,9 @@ var igv = (function (igv) {
         var trackView;
         trackView = new igv.TrackView(this, $(this.trackContainerDiv), track);
         this.trackViews.push(trackView);
+
+        toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
+
         this.reorderTracks();
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
@@ -888,9 +910,6 @@ var igv = (function (igv) {
 
         if (this.ideoPanel) {
             this.ideoPanel.repaint();
-        }
-        if (this.karyoPanel) {
-            this.karyoPanel.repaint();
         }
         if (this.centerGuide) {
             this.centerGuide.repaint();
