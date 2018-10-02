@@ -117,7 +117,6 @@ var igv = (function (igv) {
                 config.type = config.type || config.featureType;
                 config.featureType = undefined;
             }
-
             if ("bed" === config.type) {
                 config.type = "annotation";
                 config.format = config.format || "bed";
@@ -167,6 +166,7 @@ var igv = (function (igv) {
             if (config.type) return;
 
             if (config.format) {
+
                 switch (config.format.toLowerCase()) {
                     case "bw":
                     case "bigwig":
@@ -187,6 +187,9 @@ var igv = (function (igv) {
                     case "bedpe":
                     case "bedpe-loop":
                         config.type = "interaction";
+                        break;
+                    case "bp":
+                        config.type = "arc"
                         break;
                     default:
                         config.type = "annotation";

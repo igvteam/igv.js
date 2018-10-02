@@ -33,7 +33,7 @@ var igv = (function (igv) {
 
     let RnaStructTrack;
 
-    igv.trackFactory["bp"] = function (config, browser) {
+    igv.trackFactory["arc"] = function (config, browser) {
 
         if (!RnaStructTrack) {
             defineClass();
@@ -154,77 +154,6 @@ var igv = (function (igv) {
             }
         }
 
-        function parseBP(data) {
-
-            if (!data) return null;
-
-            const dataWrapper = igv.getDataWrapper(data);
-
-            let header = true;
-            let line;
-            const colors = [];
-            const descriptors = [];
-            const features = [];
-
-            while (line = dataWrapper.nextLine()) {
-
-                const tokens = line.split('\t');
-
-                if (header && line.startsWith("color:")) {
-                    const color = "rgb(" + tokens[1] + "," + tokens[2] + "," + tokens[3] + ")";
-                    colors.push(color);
-                    if (tokens.length > 4) {
-                        descriptors.push(tokens[4]);
-                    }
-                    // TODO - use label
-                }
-                else {
-                    header = false;
-
-                    const chr = tokens[0];
-                    const startLeftNuc = Number.parseInt(tokens[1]) - 1; // stick to IGV's 0-based coordinate convention
-                    const startRightNuc = Number.parseInt(tokens[2]) - 1;
-                    const endLeftNuc = Number.parseInt(tokens[3]) - 1;
-                    const endRightNuc = Number.parseInt(tokens[4]) - 1;
-                    var colorIdx = Number.parseInt(tokens[5]);
-                    const color = colors[colorIdx];
-
-
-                    let feature;
-                    if (startLeftNuc <= endRightNuc) {
-                        feature = {
-                            chr: chr,
-                            startLeft: Math.min(startLeftNuc, startRightNuc),
-                            startRight: Math.max(startLeftNuc, startRightNuc),
-                            endLeft: Math.min(endLeftNuc, endRightNuc),
-                            endRight: Math.max(endLeftNuc, endRightNuc),
-                            color: color
-                        }
-                    } else {
-                        feature = {
-                            chr: chr,
-                            startLeft: Math.min(endLeftNuc, endRightNuc),
-                            startRight: Math.max(endLeftNuc, endRightNuc),
-                            endLeft: Math.min(startLeftNuc, startRightNuc),
-                            endRight: Math.max(startLeftNuc, startRightNuc),
-                            color: color
-                        }
-                    }
-
-                    feature.start = feature.startLeft;
-                    feature.end = feature.endRight;
-
-                    if (descriptors.length > colorIdx) {
-                        feature.description = descriptors[colorIdx];
-                    }
-
-                    features.push(feature);
-                }
-            }
-
-            return features;
-        }
-
         RnaStructTrack.prototype.popupData = function (clickState) {
 
             // We use the featureCache property rather than method to avoid async load.  If the
@@ -237,19 +166,34 @@ var igv = (function (igv) {
                 let clicked;
                 for (let f of features) {
                     const ds = f.drawState;
+
+                    // Distance from arc radius, or outer arc for type ".bp"
                     const dx1 = (clickState.canvasX - ds.x1);
                     const dy1 = (clickState.canvasY - ds.y1);
                     const d1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+                    const outerLim = ds.r1 + 3;
 
-                    const dx2 = (clickState.canvasX - ds.x2);
-                    const dy2 = (clickState.canvasY - ds.y2);
-                    const d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+                    let d2;
+                    let innerLim
+                    if (ds.x2 === undefined) {
+                        d2 = d1;
+                        innerLim = ds.r1 - 3;
+
+                    } else {
+                        const dx2 = (clickState.canvasX - ds.x2);
+                        const dy2 = (clickState.canvasY - ds.y2);
+                        d2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+                        innerLim = ds.r2 - 3;
+                    }
+
 
                     // Between outer and inner arcs, with some tolerance
-                    if (d1 < ds.r1 + 3 && d2 >= ds.r2 - 3) {
+                    if (d1 < outerLim && d2 > innerLim) {
                         clicked = f;
                         break;
                     }
+
                 }
 
                 if (clicked && clicked.description) {
@@ -291,6 +235,80 @@ var igv = (function (igv) {
             return config;
 
         }
+
+
+    }
+
+
+    function parseBP(data) {
+
+        if (!data) return null;
+
+        const dataWrapper = igv.getDataWrapper(data);
+
+        let header = true;
+        let line;
+        const colors = [];
+        const descriptors = [];
+        const features = [];
+
+        while (line = dataWrapper.nextLine()) {
+
+            const tokens = line.split('\t');
+
+            if (header && line.startsWith("color:")) {
+                const color = "rgb(" + tokens[1] + "," + tokens[2] + "," + tokens[3] + ")";
+                colors.push(color);
+                if (tokens.length > 4) {
+                    descriptors.push(tokens[4]);
+                }
+                // TODO - use label
+            }
+            else {
+                header = false;
+
+                const chr = tokens[0];
+                const startLeftNuc = Number.parseInt(tokens[1]) - 1; // stick to IGV's 0-based coordinate convention
+                const startRightNuc = Number.parseInt(tokens[2]) - 1;
+                const endLeftNuc = Number.parseInt(tokens[3]) - 1;
+                const endRightNuc = Number.parseInt(tokens[4]) - 1;
+                var colorIdx = Number.parseInt(tokens[5]);
+                const color = colors[colorIdx];
+
+
+                let feature;
+                if (startLeftNuc <= endRightNuc) {
+                    feature = {
+                        chr: chr,
+                        startLeft: Math.min(startLeftNuc, startRightNuc),
+                        startRight: Math.max(startLeftNuc, startRightNuc),
+                        endLeft: Math.min(endLeftNuc, endRightNuc),
+                        endRight: Math.max(endLeftNuc, endRightNuc),
+                        color: color
+                    }
+                } else {
+                    feature = {
+                        chr: chr,
+                        startLeft: Math.min(endLeftNuc, endRightNuc),
+                        startRight: Math.max(endLeftNuc, endRightNuc),
+                        endLeft: Math.min(startLeftNuc, startRightNuc),
+                        endRight: Math.max(startLeftNuc, startRightNuc),
+                        color: color
+                    }
+                }
+
+                feature.start = feature.startLeft;
+                feature.end = feature.endRight;
+
+                if (descriptors.length > colorIdx) {
+                    feature.description = descriptors[colorIdx];
+                }
+
+                features.push(feature);
+            }
+        }
+
+        return features;
     }
 
     return igv;
