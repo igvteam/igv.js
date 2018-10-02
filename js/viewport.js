@@ -84,7 +84,7 @@ var igv = (function (igv) {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
         }
 
-        if (trackView.track.name && 0 === self.browser.genomicStateList.indexOf(this.genomicState)) {
+        if (trackView.track.name) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
