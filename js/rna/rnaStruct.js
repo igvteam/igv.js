@@ -250,7 +250,7 @@ var igv = (function (igv) {
          */
         RnaStructTrack.prototype.getState = function () {
 
-            var config = igv.TrackBase.getState.call(this)
+            var config = igv.TrackBase.prototype.getState.call(this)
 
             config.arcOrientation = this.arcOrientation;
             config.thickness = this.thickness;
