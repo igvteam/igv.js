@@ -340,8 +340,8 @@ var igv = (function (igv) {
                     header = false;
 
                     const chr = tokens[0];
-                    const startLeftNuc = Number.parseInt(tokens[1]); 
-                    const startRightNuc = Number.parseInt(tokens[2]);
+                    const startLeftNuc = Number.parseInt(tokens[1]) - 1;
+                    const startRightNuc = Number.parseInt(tokens[2]) - 1;
                     const endLeftNuc = Number.parseInt(tokens[3]);
                     const endRightNuc = Number.parseInt(tokens[4]);
                     var colorIdx = Number.parseInt(tokens[5]);
