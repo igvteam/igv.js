@@ -52,36 +52,25 @@ var igv = (function (igv) {
                 igv.TrackBase.call(this, config, browser);
 
                 // Set defaults
-                config.height = config.height || 300;
+                if (!config.height) {
+                    this.height = 300;
+                }
 
                 this.arcOrientation = false;
 
                 this.theta = Math.PI / 2;
+
+                if ("bp" === config.format) {
+                    this.featureSource = new FeatureSource(config, browser.genome);
+                }
+                else {
+                    this.featureSource = new igv.FeatureSource(config, browser.genome);
+                }
             });
 
         RnaStructTrack.prototype.getFeatures = function (chr, start, end) {
 
-            const self = this;
-            const genome = this.browser.genome;
-
-            if (!this.featureCache) {
-
-                const options = igv.buildOptions(this.config);
-
-                return igv.xhr.loadString(self.config.url, options)
-
-                    .then(function (data) {
-
-                        self.featureCache = new igv.FeatureCache(parseBP(data), genome);
-
-                        return self.featureCache.queryFeatures(chr, start, end);
-
-                    });
-
-            }
-            else {
-                return Promise.resolve(self.featureCache.queryFeatures(chr, start, end));
-            }
+            return this.featureSource.getFeatures(chr, start, end);
 
         }
 
@@ -106,49 +95,83 @@ var igv = (function (igv) {
 
             if (featureList) {
 
+                // Sort by score -- draw lowest scored features first
+                sortByScore(featureList, 1);
+
                 featureList.forEach(function (feature) {
 
-                    let sl = Math.round((feature.startLeft - bpStart) / xScale);
-                    let sr = Math.round((feature.startRight - bpStart) / xScale);
-                    let el = Math.round((feature.endLeft - bpStart) / xScale);
-                    let er = Math.round((feature.endRight - bpStart) / xScale);
+                    if (feature.startLeft) {
 
-                    ctx.fillStyle = feature.color;
+                        let sl = Math.round((feature.startLeft - bpStart) / xScale);
+                        let sr = Math.round((feature.startRight - bpStart) / xScale);
+                        let el = Math.round((feature.endLeft - bpStart) / xScale);
+                        let er = Math.round((feature.endRight - bpStart) / xScale);
 
-                    ctx.beginPath();
+                        ctx.fillStyle = feature.color;
+                        ctx.strokeStyle = feature.color;
+                        ctx.beginPath();
 
-                    // First arc
-                    let x1 = (sl + er) / 2;
-                    let r1 = (er - sl) / 2;
-                    let y1 = self.height;
-                    let sa = Math.PI + (Math.PI / 2 - theta);
-                    let ea = 2 * Math.PI - (Math.PI / 2 - theta);
+                        // First arc
+                        let x1 = (sl + er) / 2;
+                        let r1 = (er - sl) / 2;
+                        let y1 = self.height;
+                        let sa = Math.PI + (Math.PI / 2 - theta);
+                        let ea = 2 * Math.PI - (Math.PI / 2 - theta);
 
-                    if (orienation) {
-                        y1 = 0
-                        ctx.arc(x1, y1, r1, ea, sa);
-                        ctx.lineTo(er, y1);
-                    } else {
-                        ctx.arc(x1, y1, r1, sa, ea);
-                        ctx.lineTo(el, y1);
+                        if (orienation) {
+                            y1 = 0
+                            ctx.arc(x1, y1, r1, ea, sa);
+                            ctx.lineTo(er, y1);
+                        } else {
+                            ctx.arc(x1, y1, r1, sa, ea);
+                            ctx.lineTo(el, y1);
+                        }
+
+                        // Second arc
+                        const x2 = (sr + el) / 2;
+                        const r2 = (el - sr) / 2;
+                        const y2 = y1;                        // Only for theta == pi/2
+
+                        if (orienation) {
+                            ctx.arc(x2, y2, r2, sa, ea, true);
+                            ctx.lineTo(el, y2);
+                        } else {
+                            ctx.arc(x2, y2, r2, ea, sa, true);
+                            ctx.lineTo(sl, y2);
+                        }
+
+                        ctx.stroke();
+                        ctx.fill();
+
+                        feature.drawState = {x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2, sa: sa, ea: ea};
                     }
+                    else {
+                        let s = Math.round((feature.start - bpStart) / xScale);
+                        let e = Math.round((feature.end - bpStart) / xScale);
 
-                    // Second arc
-                    const x2 = (sr + el) / 2;
-                    const r2 = (el - sr) / 2;
-                    const y2 = y1;                        // Only for theta == pi/2
+                        ctx.strokeStyle = feature.color;
 
-                    if (orienation) {
-                        ctx.arc(x2, y2, r2, sa, ea, true);
-                        ctx.lineTo(el, y2);
-                    } else {
-                        ctx.arc(x2, y2, r2, ea, sa, true);
-                        ctx.lineTo(sl, y2);
+                        ctx.beginPath();
+
+                        // First arc
+                        let x = (s + e) / 2;
+                        let r = (e - s) / 2;
+                        let y = self.height;
+                        let sa = Math.PI + (Math.PI / 2 - theta);
+                        let ea = 2 * Math.PI - (Math.PI / 2 - theta);
+
+                        if (orienation) {
+                            y = 0
+                            ctx.arc(x, y, r, ea, sa);
+                        } else {
+                            ctx.arc(x, y, r, sa, ea);
+                        }
+
+                        ctx.stroke();
+
+                        feature.drawState = {x1: x, y1: y, r1: r, sa: sa, ea: ea};
+
                     }
-
-                    ctx.fill();
-
-                    feature.drawState = {x1: x1, y1: y1, r1: r1, x2: x2, y2: y2, r2: r2, sa: sa, ea: ea};
 
                 })
             }
@@ -162,6 +185,9 @@ var igv = (function (igv) {
             let features = this.clickedFeatures(clickState);
 
             if (features && features.length > 0) {
+
+                // Sort by score in descending order   (opposite order than drawn)
+                sortByScore(features, -1);
 
                 let clicked;
                 for (let f of features) {
@@ -196,11 +222,8 @@ var igv = (function (igv) {
 
                 }
 
-                if (clicked && clicked.description) {
-                    return [{name: " ", value: clicked.description}];
-                }
+                return this.extractPopupData(clicked);
 
-                // Do hit test on features
             }
         }
 
@@ -237,78 +260,130 @@ var igv = (function (igv) {
         }
 
 
+        function sortByScore(featureList, direction) {
+
+            featureList.sort(function (a, b) {
+
+                const s1 = a.score === undefined ? -Number.MAX_VALUE : a.score;
+                const s2 = b.score === undefined ? -Number.MAX_VALUE : b.score;
+                const t = s1 - s2;
+                const d = direction === undefined ? 1 : direction;
+
+                return d * (s1 - s2);
+
+
+
+            });
+
+        }
+
+
     }
 
 
-    function parseBP(data) {
+    function FeatureSource(config, genome) {
 
-        if (!data) return null;
+        this.config = config;
+        this.genome = genome;
+    }
 
-        const dataWrapper = igv.getDataWrapper(data);
+    FeatureSource.prototype.getFeatures = function (chr, start, end) {
 
-        let header = true;
-        let line;
-        const colors = [];
-        const descriptors = [];
-        const features = [];
+        const self = this;
+        const genome = this.genome;
 
-        while (line = dataWrapper.nextLine()) {
+        if (!this.featureCache) {
 
-            const tokens = line.split('\t');
+            const options = igv.buildOptions(this.config);
 
-            if (header && line.startsWith("color:")) {
-                const color = "rgb(" + tokens[1] + "," + tokens[2] + "," + tokens[3] + ")";
-                colors.push(color);
-                if (tokens.length > 4) {
-                    descriptors.push(tokens[4]);
-                }
-                // TODO - use label
-            }
-            else {
-                header = false;
+            return igv.xhr.loadString(self.config.url, options)
 
-                const chr = tokens[0];
-                const startLeftNuc = Number.parseInt(tokens[1]) - 1; // stick to IGV's 0-based coordinate convention
-                const startRightNuc = Number.parseInt(tokens[2]) - 1;
-                const endLeftNuc = Number.parseInt(tokens[3]) - 1;
-                const endRightNuc = Number.parseInt(tokens[4]) - 1;
-                var colorIdx = Number.parseInt(tokens[5]);
-                const color = colors[colorIdx];
+                .then(function (data) {
 
+                    self.featureCache = new igv.FeatureCache(parseBP(data), genome);
 
-                let feature;
-                if (startLeftNuc <= endRightNuc) {
-                    feature = {
-                        chr: chr,
-                        startLeft: Math.min(startLeftNuc, startRightNuc),
-                        startRight: Math.max(startLeftNuc, startRightNuc),
-                        endLeft: Math.min(endLeftNuc, endRightNuc),
-                        endRight: Math.max(endLeftNuc, endRightNuc),
-                        color: color
-                    }
-                } else {
-                    feature = {
-                        chr: chr,
-                        startLeft: Math.min(endLeftNuc, endRightNuc),
-                        startRight: Math.max(endLeftNuc, endRightNuc),
-                        endLeft: Math.min(startLeftNuc, startRightNuc),
-                        endRight: Math.max(startLeftNuc, startRightNuc),
-                        color: color
-                    }
-                }
+                    return self.featureCache.queryFeatures(chr, start, end);
 
-                feature.start = feature.startLeft;
-                feature.end = feature.endRight;
+                });
 
-                if (descriptors.length > colorIdx) {
-                    feature.description = descriptors[colorIdx];
-                }
-
-                features.push(feature);
-            }
+        }
+        else {
+            return Promise.resolve(self.featureCache.queryFeatures(chr, start, end));
         }
 
-        return features;
+
+        function parseBP(data) {
+
+            if (!data) return null;
+
+            const dataWrapper = igv.getDataWrapper(data);
+
+            let header = true;
+            let line;
+            const colors = [];
+            const descriptors = [];
+            const features = [];
+
+            while (line = dataWrapper.nextLine()) {
+
+                const tokens = line.split('\t');
+
+                if (header && line.startsWith("color:")) {
+                    const color = "rgb(" + tokens[1] + "," + tokens[2] + "," + tokens[3] + ")";
+                    colors.push(color);
+                    if (tokens.length > 4) {
+                        descriptors.push(tokens[4]);
+                    }
+                    // TODO - use label
+                }
+                else {
+                    header = false;
+
+                    const chr = tokens[0];
+                    const startLeftNuc = Number.parseInt(tokens[1]); 
+                    const startRightNuc = Number.parseInt(tokens[2]);
+                    const endLeftNuc = Number.parseInt(tokens[3]);
+                    const endRightNuc = Number.parseInt(tokens[4]);
+                    var colorIdx = Number.parseInt(tokens[5]);
+                    const color = colors[colorIdx];
+
+
+                    let feature;
+                    if (startLeftNuc <= endRightNuc) {
+                        feature = {
+                            chr: chr,
+                            startLeft: Math.min(startLeftNuc, startRightNuc),
+                            startRight: Math.max(startLeftNuc, startRightNuc),
+                            endLeft: Math.min(endLeftNuc, endRightNuc),
+                            endRight: Math.max(endLeftNuc, endRightNuc),
+                            color: color,
+                            score: colorIdx
+                        }
+                    } else {
+                        feature = {
+                            chr: chr,
+                            startLeft: Math.min(endLeftNuc, endRightNuc),
+                            startRight: Math.max(endLeftNuc, endRightNuc),
+                            endLeft: Math.min(startLeftNuc, startRightNuc),
+                            endRight: Math.max(startLeftNuc, startRightNuc),
+                            color: color,
+                            score: colorIdx
+                        }
+                    }
+
+                    feature.start = feature.startLeft;
+                    feature.end = feature.endRight;
+
+                    if (descriptors.length > colorIdx) {
+                        feature.description = descriptors[colorIdx];
+                    }
+
+                    features.push(feature);
+                }
+            }
+
+            return features;
+        }
     }
 
     return igv;
