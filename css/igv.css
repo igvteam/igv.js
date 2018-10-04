@@ -250,16 +250,18 @@
         margin-right: 0; }
     .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
       user-select: none;
+      font-size: 20px;
+      width: 200px;
+      margin-left: 16px;
+      margin-right: 8px;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
-      align-items: center;
-      width: 44px;
-      margin-left: 16px;
-      margin-right: 8px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div i {
-        font-size: 24px; }
+      align-items: center; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
+        cursor: pointer;
+        color: #666666; }
 
 .igv-nav-bar-button {
   height: 18px;
@@ -319,28 +321,6 @@
     font-weight: 700;
     color: #141414; }
 
-.igv-karyo-div {
-  position: relative;
-  left: 0;
-  top: 0;
-  height: 200px; }
-
-.igv-karyo-hide {
-  height: 0;
-  overflow: hidden; }
-
-.igv-karyo-content-div {
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%; }
-
-.igv-karyo-canvas {
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%; }
-
 .igv-root-div {
   position: relative;
   left: 0;
@@ -356,6 +336,7 @@
   height: 100%; }
 
 .igv-track-container-div {
+  user-select: none;
   position: relative;
   clear: both; }
 
@@ -649,7 +630,7 @@
 
 .zoom-in-notice-container {
   position: absolute;
-  top: 25%;
+  top: 10px;
   left: 50%; }
   .zoom-in-notice-container div {
     position: relative;

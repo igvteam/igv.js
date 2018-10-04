@@ -82,11 +82,11 @@ var igv = (function (igv) {
         browser.dataRangeDialog = new igv.DataRangeDialog(browser.$root, browser);
 
         if (config.apiKey) {
-            igv.setGoogleApiKey(config.apiKey);
+            igv.google.setApiKey(config.apiKey);
         }
 
         if (config.oauthToken) {
-            igv.setOauthToken(config.oauthToken);
+            igv.oauth.setToken(config.oauthToken);
         }
 
 
@@ -173,6 +173,8 @@ var igv = (function (igv) {
                     browser.disableZoomWidget();
                 }
 
+                igv.xhr.startup();
+                
                 return browser;
             })
 
@@ -190,27 +192,6 @@ var igv = (function (igv) {
         })
     }
 
-    //@deprecated -- user setGoogleApiKey
-    igv.setApiKey = function (key) {
-        igv.oauth.google.apiKey = key;
-    }
-
-    igv.setGoogleApiKey = function (key) {
-        igv.oauth.google.apiKey = key;
-    }
-
-    //@deprecated -- use setGoogleOauthToken
-    igv.setOauthToken = function (token) {
-        igv.oauth.google.access_token = token;
-    }
-
-    igv.setGoogleOauthToken = function (token) {
-        igv.oauth.google.access_token = token;
-    }
-
-    igv.getGoogleOauthToken = function () {
-        return igv.oauth.google.access_token;
-    }
 
     function setTrackOrder(conf) {
 
@@ -251,7 +232,6 @@ var igv = (function (igv) {
             logoDiv,
             logoSvg,
             $controls,
-            $karyo,
             $navigation,
             $searchContainer,
             $faSearch;
@@ -357,12 +337,6 @@ var igv = (function (igv) {
         // zoom widget
         browser.zoomWidget = new igv.ZoomWidget(browser, $igv_nav_bar_right_container);
 
-        // $karyo = $('#igvKaryoDiv');
-        // if (undefined === $karyo.get(0)) {
-        //     $karyo = $('<div id="igvKaryoDiv" class="igv-karyo-div">');
-        //     $controls.append($karyo);
-        // }
-
         if (false === config.showNavigation) {
             browser.$navigation.hide();
         }
@@ -411,10 +385,6 @@ var igv = (function (igv) {
 
         if (undefined === config.showTrackLabels) {
             config.showTrackLabels = true;
-        }
-
-        if (undefined === config.showKaryo) {
-            config.showKaryo = false;
         }
 
         if (config.showControls === undefined) {

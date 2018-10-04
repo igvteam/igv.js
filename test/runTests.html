@@ -31,8 +31,9 @@
     <script type="text/javascript" src="testUcscService.js"></script>
     <script type="text/javascript" src="testIgvSession.js"></script>
     <script type="text/javascript" src="testVariant.js"></script>
-    <!-- eweitz 2018-09-11: testBrowser.js consistently fails -->
-    <!-- <script type="text/javascript" src="testBrowser.js"></script> -->
+    <script type="text/javascript" src="testBrowser.js"></script>
+    <script type="text/javascript" src="testUtils.js"></script>
+    <script type="text/javascript" src="testOauth.js"></script>
 
 
 </head>
@@ -62,7 +63,9 @@
         runUcscTests();
         runIgvSessionTests();
         runVariantTests();
-        // runBrowserTests();
+        runBrowserTests();
+        runUtilTests();
+        runOauthTests();
 
     });
 </script>

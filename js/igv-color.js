@@ -57,7 +57,7 @@ var igv = (function (igv) {
                 colorHandler(rgb);
             });
 
-            $swatch.on('touchend',function () {
+            $swatch.on('touchend', function () {
                 colorHandler(rgb);
             });
 
@@ -73,7 +73,7 @@ var igv = (function (igv) {
 
         $fa = igv.createIcon("square", rgbString);
         $swatch.append($fa);
-        
+
         return $swatch;
     };
 
@@ -240,7 +240,7 @@ var igv = (function (igv) {
 
             var isHex = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
 
-            if(color.startsWith("rgba")) {
+            if (color.startsWith("rgba")) {
                 return color;   // TODO -- should replace current alpha with new one
             }
 
@@ -254,7 +254,6 @@ var igv = (function (igv) {
                 console.log(color + " is not an rgb style string");
                 return color;
             }
-
         },
 
 
@@ -281,6 +280,20 @@ var igv = (function (igv) {
                 return token.startsWith("rgb") ? token : "rgb(" + token + ")";
             } else {
                 return token;
+            }
+        },
+
+        darkenLighten: function (color, amt) {
+
+            if (!color.startsWith("rgb(")) {
+                return color;
+            }
+            else {
+                const components = color.replace(")", "").substring(4).split(",")
+                const r = Math.max(0, Math.min(255, Number.parseInt(components[0].trim()) + amt));
+                const g = Math.max(0, Math.min(255, Number.parseInt(components[1].trim()) + amt));
+                const b = Math.max(0, Math.min(255, Number.parseInt(components[2].trim()) + amt));
+                return "rgb(" + r.toString() + "," + g.toString() + "," + b.toString();
             }
         }
     };
@@ -475,8 +488,8 @@ var igv = (function (igv) {
     RColor.prototype.get = function (saturation, value) {
         this.hue += this.goldenRatio;
         this.hue %= 1;
-        if (typeof saturation !== "number")    saturation = 0.5;
-        if (typeof value !== "number")        value = 0.95;
+        if (typeof saturation !== "number") saturation = 0.5;
+        if (typeof value !== "number") value = 0.95;
         var rgb = this.hsvToRgb(this.hue, saturation, value);
 
         return "#" + this.padHex(rgb[0].toString(16))
