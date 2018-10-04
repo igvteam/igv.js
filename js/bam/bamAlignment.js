@@ -275,7 +275,7 @@ var igv = (function (igv) {
 
             for (let i = 0; i < blocks.length; i++) {
                 const block = blocks[i];
-                if (genomicLocation >= block.start && genomicLocation <= block.start + block.len) {
+                if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
                     return block;
                 }
             }
