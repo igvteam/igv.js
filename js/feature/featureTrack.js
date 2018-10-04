@@ -288,9 +288,9 @@ var igv = (function (igv) {
             const genomicLocation = clickState.genomicLocation;
 
             const data = [];
-            features.forEach(function (feature) {
+            for(let feature of features) {
 
-                const featureData = feature.popupData ? feature.popupData(genomicLocation) : extractPopupData(feature);
+                const featureData = feature.popupData ? feature.popupData(genomicLocation) : this.extractPopupData(feature);
 
                 if (featureData) {
                     if (data.length > 0) {
@@ -298,7 +298,7 @@ var igv = (function (igv) {
                     }
                     Array.prototype.push.apply(data, featureData);
                 }
-            });
+            };
 
             return data;
 
@@ -323,77 +323,6 @@ var igv = (function (igv) {
 
         };
 
-        /**
-         * Default popup text function -- just extracts string and number properties in random order.
-         * @param feature
-         * @returns {Array}
-         */
-        function extractPopupData(feature) {
-
-            const filteredProperties = new Set(['row', 'color']);
-            const data = [];
-
-            let alleles, alleleFreqs;
-            for (var property in feature) {
-
-                if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
-                    igv.isSimpleType(feature[property])) {
-
-                    data.push({name: property, value: feature[property]});
-
-                    if (property === "alleles") {
-                        alleles = feature[property];
-                    } else if (property === "alleleFreqs") {
-                        alleleFreqs = feature[property];
-                    }
-                }
-            }
-
-            if (alleles && alleleFreqs) {
-                addCravatLinks(alleles, alleleFreqs, data);
-            }
-
-            return data;
-
-
-            function addCravatLinks(alleles, alleleFreqs, data) {
-
-                if (alleles && alleleFreqs) {
-
-                    if (alleles.endsWith(",")) {
-                        alleles = alleles.substr(0, alleles.length - 1);
-                    }
-                    if (alleleFreqs.endsWith(",")) {
-                        alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
-                    }
-
-                    let a = alleles.split(",");
-                    let af = alleleFreqs.split(",");
-                    if (af.length > 1) {
-                        let b = [];
-                        for (let i = 0; i < af.length; i++) {
-                            b.push({a: a[i], af: Number.parseFloat(af[i])});
-                        }
-                        b.sort(function (x, y) {
-                            return x.af - y.af
-                        });
-
-                        let ref = b[b.length - 1].a;
-                        if (ref.length === 1) {
-                            for (let i = b.length - 2; i >= 0; i--) {
-                                let alt = b[i].a;
-                                if (alt.length === 1) {
-                                    let l = "<a target='_blank' " +
-                                        "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
-                                    data.push("<hr/>");
-                                    data.push(l);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         FeatureTrack.prototype.menuItemList = function () {
 

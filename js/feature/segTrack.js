@@ -312,6 +312,7 @@ var igv = (function (igv) {
 
             const items = [];
 
+            for(let f of featureList) {}
             featureList.forEach(function (f) {
                 extractPopupData(f, items);
 
