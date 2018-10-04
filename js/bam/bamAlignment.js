@@ -23,24 +23,22 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
-    var BAM_MAGIC = 21840194;
-    var BAI_MAGIC = 21578050;
-    var SECRET_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
-    var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
-    var READ_PAIRED_FLAG = 0x1;
-    var PROPER_PAIR_FLAG = 0x2;
-    var READ_UNMAPPED_FLAG = 0x4;
-    var MATE_UNMAPPED_FLAG = 0x8;
-    var READ_STRAND_FLAG = 0x10;
-    var MATE_STRAND_FLAG = 0x20;
-    var FIRST_OF_PAIR_FLAG = 0x40;
-    var SECOND_OF_PAIR_FLAG = 0x80;
-    var SECONDARY_ALIGNMNET_FLAG = 0x100;
-    var READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
-    var DUPLICATE_READ_FLAG = 0x400;
-    var SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
+    const READ_PAIRED_FLAG = 0x1;
+    const PROPER_PAIR_FLAG = 0x2;
+    const READ_UNMAPPED_FLAG = 0x4;
+    const MATE_UNMAPPED_FLAG = 0x8;
+    const READ_STRAND_FLAG = 0x10;
+    const MATE_STRAND_FLAG = 0x20;
+    const FIRST_OF_PAIR_FLAG = 0x40;
+    const SECOND_OF_PAIR_FLAG = 0x80;
+    const SECONDARY_ALIGNMNET_FLAG = 0x100;
+    const READ_FAILS_VENDOR_QUALITY_CHECK_FLAG = 0x200;
+    const DUPLICATE_READ_FLAG = 0x400;
+    const SUPPLEMENTARY_ALIGNMENT_FLAG = 0x800;
 
     /**
      * readName
@@ -250,6 +248,7 @@ var igv = (function (igv) {
         nameValues.push("<hr>");
         nameValues.push({name: 'Genomic Location: ', value: igv.numberFormatter(1 + genomicLocation)});
         nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
+        nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
 
         return nameValues;
 
@@ -270,19 +269,31 @@ var igv = (function (igv) {
         else {
             return undefined;
         }
-
-        function blockAtGenomicLocation(blocks, genomicLocation) {
-
-            for (let i = 0; i < blocks.length; i++) {
-                const block = blocks[i];
-                if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
-                    return block;
-                }
-            }
-            return undefined;
-        }
     }
 
+    igv.BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
+
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
+
+        if (block) {
+            return block.qualityAt(genomicLocation);
+        }
+        else {
+            return undefined;
+        }
+
+    }
+
+    function blockAtGenomicLocation(blocks, genomicLocation) {
+
+        for (let i = 0; i < blocks.length; i++) {
+            const block = blocks[i];
+            if (genomicLocation >= block.start && genomicLocation < block.start + block.len) {
+                return block;
+            }
+        }
+        return undefined;
+    }
 
     function readInt(ba, offset) {
         return (ba[offset + 3] << 24) | (ba[offset + 2] << 16) | (ba[offset + 1] << 8) | (ba[offset]);

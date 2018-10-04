@@ -351,21 +351,22 @@ $igv-dark-grey-color: #373737;
 
       user-select: none;
 
+      font-size: 20px;
+
+      width: 200px;
+
+      margin-left: 16px;
+      margin-right: 8px;
+
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
       justify-content: space-between;
       align-items: center;
 
-      width: 44px;
-
-      margin-left: 16px;
-      margin-right: 8px;
-
       div {
-        i {
-          font-size: 24px;
-        }
+        cursor: pointer;
+        color: #666666;
       }
 
     }
@@ -449,33 +450,6 @@ $igv-dark-grey-color: #373737;
 
 }
 
-// karyo
-.igv-karyo-div {
-  position: relative;
-  left: 0;
-  top: 0;
-  height:200px;
-}
-
-.igv-karyo-hide {
-  height: 0;
-  overflow: hidden;
-}
-
-.igv-karyo-content-div {
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-}
-
-.igv-karyo-canvas {
-  left:0;
-  top:0;
-  width:100%;
-  height:100%;
-}
-
 // root container
 .igv-root-div {
 
@@ -499,6 +473,7 @@ $igv-dark-grey-color: #373737;
 }
 
 .igv-track-container-div {
+  user-select: none;
   position: relative;
   clear: both;
 }
@@ -921,7 +896,7 @@ $igv-dark-grey-color: #373737;
 // zoom-in notice
 .zoom-in-notice-container {
   position: absolute;
-  top: 25%;
+  top: 10px;
   left: 50%;
 
   div {

@@ -72,12 +72,14 @@
     <script src="../js/feature/segTrack.js"></script>
     <script src="../js/feature/dataWrapper.js"></script>
     <script src="../js/feature/interactionTrack.js"></script>
+    <script src="../js/rna/rnaStruct.js"></script>
     <script src="../js/feature/ucscServiceReader.js"></script>
 
     <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
     <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
     <script src="../js/ga4gh/ga4ghHelper.js"></script>
     <script src="../js/ga4gh/googleUtils.js"></script>
+    <script src="../js/oauth.js"></script>
 
     <script src="../js/gtex/eqtlTrack.js"></script>
     <script src="../js/gtex/gtexReader.js"></script>
@@ -137,12 +139,13 @@
     <script src="../js/intervalTree.js"></script>
 
     <script src="../js/trackCore.js"></script>
-
+    <script src="../js/trackBase.js"></script>
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
+    <script src="../vendor/canvas2svg.js"></script>
 
 </head>
 
@@ -164,7 +167,7 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        igv.Google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
             .then(function (google) {
 
@@ -172,7 +175,7 @@
 
                 const options =
                     {
-                        // locus: 'myc',
+                        locus: 'muc1',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
@@ -180,10 +183,10 @@
                     };
 
                 igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    igvdev.createTrackList(document.getElementById('trackList'), browser);
-                    return browser;
-                })
+                    .then(function (browser) {
+                        igvdev.createTrackList(document.getElementById('trackList'), browser);
+                        return browser;
+                    })
 
             })
     });

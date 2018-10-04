@@ -28,7 +28,7 @@ var igv = (function (igv) {
 
 
     const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
-    
+
     /**
      * Class for reading a bam file
      *
@@ -38,7 +38,7 @@ var igv = (function (igv) {
     igv.BamReader = function (config, genome) {
 
         this.config = config;
-        
+
         this.genome = genome;
 
         this.bamPath = config.url;
@@ -47,7 +47,7 @@ var igv = (function (igv) {
         this.baiPath = config.indexURL || igv.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
 
         igv.BamUtils.setReaderDefaults(this, config);
-        
+
     };
 
     igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
@@ -123,14 +123,14 @@ var igv = (function (igv) {
 
         const self = this;
         const genome = this.genome;
-        
+
         return getIndex.call(self)
 
             .then(function (index) {
 
                 const len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
-                
-                const    options = igv.buildOptions(self.config, {range: {start: 0, size: len}});
+
+                const options = igv.buildOptions(self.config, {range: {start: 0, size: len}});
 
                 return igv.BamUtils.readHeader(self.bamPath, options, genome);
             })
