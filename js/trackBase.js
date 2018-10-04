@@ -36,6 +36,7 @@ var igv = (function (igv) {
 
         child.prototype = Object.create(parent.prototype);
         child.prototype.constructor = child;
+        child.prototype._super = Object.getPrototypeOf(child.prototype);
         return child;
     }
 
@@ -122,6 +123,80 @@ var igv = (function (igv) {
 
         return (igv.FeatureUtils.findOverlapping(features, ss, ee));
     };
+
+
+    /**
+     * Default popup text function -- just extracts string and number properties in random order.
+     * @param feature
+     * @returns {Array}
+     */
+    igv.TrackBase.prototype.extractPopupData = function (feature) {
+
+        const filteredProperties = new Set(['row', 'color']);
+        const data = [];
+
+        let alleles, alleleFreqs;
+        for (var property in feature) {
+
+            if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
+                igv.isSimpleType(feature[property])) {
+
+                data.push({name: property, value: feature[property]});
+
+                if (property === "alleles") {
+                    alleles = feature[property];
+                } else if (property === "alleleFreqs") {
+                    alleleFreqs = feature[property];
+                }
+            }
+        }
+
+        if (alleles && alleleFreqs) {
+            addCravatLinks(alleles, alleleFreqs, data);
+        }
+
+        return data;
+
+
+        function addCravatLinks(alleles, alleleFreqs, data) {
+
+            if (alleles && alleleFreqs) {
+
+                if (alleles.endsWith(",")) {
+                    alleles = alleles.substr(0, alleles.length - 1);
+                }
+                if (alleleFreqs.endsWith(",")) {
+                    alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+                }
+
+                let a = alleles.split(",");
+                let af = alleleFreqs.split(",");
+                if (af.length > 1) {
+                    let b = [];
+                    for (let i = 0; i < af.length; i++) {
+                        b.push({a: a[i], af: Number.parseFloat(af[i])});
+                    }
+                    b.sort(function (x, y) {
+                        return x.af - y.af
+                    });
+
+                    let ref = b[b.length - 1].a;
+                    if (ref.length === 1) {
+                        for (let i = b.length - 2; i >= 0; i--) {
+                            let alt = b[i].a;
+                            if (alt.length === 1) {
+                                let l = "<a target='_blank' " +
+                                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                                data.push("<hr/>");
+                                data.push(l);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
 
     return igv;
 

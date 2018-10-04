@@ -109,23 +109,26 @@
     "name": "Bed - Tabix Index"
   },
   {
-    "type": "bed",
+    "type": "annotation",
+    "format": "bed",
     "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
     "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
     "name": "Bed - Tribble Index"
   },
   {
-    "type": "bed",
+    "type": "annotation",
+    "format": "bed",
     "url": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz",
     "indexURL": "https://data.broadinstitute.org/igvdata/annotations/hg19/dbSnp/snp137.hg19.bed.gz.tbi",
     "name": "dbSNP 137 - Tribble index",
     "visibilityWindow": 200000
   },
   {
+    "type": "annotation",
+    "format": "gtf",
     "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
     "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
     "name": "Gencode v24 (gtf)",
-    "format": "gtf",
     "visibilityWindow": 10000000
   },
   {
