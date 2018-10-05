@@ -257,11 +257,16 @@
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: space-between;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
       align-items: center; }
       .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
         cursor: pointer;
         color: #666666; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
+        margin-left: 6px; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
+        margin-right: 6px; }
 
 .igv-nav-bar-button {
   height: 18px;

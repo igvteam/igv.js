@@ -39,38 +39,53 @@ var igv = (function (igv) {
         browser.$zoomContainer = $('<div class="igv-zoom-widget">');
         $parent.append(browser.$zoomContainer);
 
-        // zoom out
-        $div = $('<div>');
-        browser.$zoomContainer.append($div);
 
-        svg = igv.createIcon("minus-circle");
-        $div.append(svg);
 
-        $div.on('click', function () {
-            browser.zoomOut();
+
+
+        // zoom in
+        this.$zoomInButton = $('<div>');
+        browser.$zoomContainer.append(this.$zoomInButton);
+
+        svg = igv.createIcon("plus-circle");
+        this.$zoomInButton.append(svg);
+
+        this.$zoomInButton.on('click', function () {
+            browser.zoomIn();
         });
 
+
+
+
+
         // Range slider
-        $div = $('<div>');
-        browser.$zoomContainer.append($div);
+        this.$rangeSliderContainer = $('<div>');
+        browser.$zoomContainer.append(this.$rangeSliderContainer);
 
         this.$slider = $('<input type="range"/>');
-        $div.append(this.$slider);
+        this.$rangeSliderContainer.append(this.$slider);
 
         this.$slider.on('change', function (e) {
             browser.zoomWithRangePercentage(e.target.value/100.0);
         });
 
-        // zoom in
-        $div = $('<div>');
-        browser.$zoomContainer.append($div);
 
-        svg = igv.createIcon("plus-circle");
-        $div.append(svg);
 
-        $div.on('click', function () {
-            browser.zoomIn();
+
+
+        // zoom out
+        this.$zoomOutButton = $('<div>');
+        browser.$zoomContainer.append(this.$zoomOutButton);
+
+        svg = igv.createIcon("minus-circle");
+        this.$zoomOutButton.append(svg);
+
+        this.$zoomOutButton.on('click', function () {
+            browser.zoomOut();
         });
+
+
+
 
         this.currentChr = undefined;
 

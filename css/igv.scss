@@ -361,12 +361,21 @@ $igv-dark-grey-color: #373737;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
-      justify-content: space-between;
+      flex-direction: row-reverse;
+      justify-content: flex-start;
       align-items: center;
 
       div {
         cursor: pointer;
         color: #666666;
+      }
+
+      div:first-child {
+        margin-left: 6px;
+      }
+
+      div:last-child {
+        margin-right: 6px;
       }
 
     }

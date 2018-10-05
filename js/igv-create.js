@@ -170,7 +170,7 @@ var igv = (function (igv) {
                 // whole-genome
                 else if ('all' === browser.genomicStateList[0].locusSearchString) {
                     browser.centerGuide.disable();
-                    browser.disableZoomWidget();
+                    browser.disableZoomWidget(false);
                 }
 
                 igv.xhr.startup();

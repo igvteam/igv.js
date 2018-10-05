@@ -399,12 +399,12 @@ var igv = (function (igv) {
         // multi-locus mode
         if (genomicStateList.length > 1) {
             this.centerGuide.disable();
-            this.disableZoomWidget();
+            this.disableZoomWidget(true);
         }
         // whole-genome
         else if ('all' === genomicStateList[0].locusSearchString) {
             this.centerGuide.disable();
-            this.disableZoomWidget();
+            this.disableZoomWidget(false);
         }
         // single locus
         else {
@@ -491,12 +491,24 @@ var igv = (function (igv) {
         this.centerGuideVisible = true;
     };
 
-    igv.Browser.prototype.disableZoomWidget = function () {
-        this.$zoomContainer.hide();
+    igv.Browser.prototype.disableZoomWidget = function (doShowButtons = true) {
+
+        this.zoomWidget.$rangeSliderContainer.hide();
+
+        if (false === doShowButtons) {
+            this.zoomWidget.$zoomInButton.hide();
+            this.zoomWidget.$zoomOutButton.hide();
+        } else {
+            this.zoomWidget.$zoomInButton.show();
+            this.zoomWidget.$zoomOutButton.show();
+        }
+
     };
 
     igv.Browser.prototype.enableZoomWidget = function () {
-        this.$zoomContainer.show();
+        this.zoomWidget.$rangeSliderContainer.show();
+        this.zoomWidget.$zoomInButton.show();
+        this.zoomWidget.$zoomOutButton.show();
     };
 
     igv.Browser.prototype.loadTrackList = function (configList) {
