@@ -442,10 +442,10 @@ var C2S
             keys, i, key, value, regexp, xmlns;
 
         //IE search for a duplicate xmnls because they didn't implement setAttributeNS correctly
-        xmlns = /xmlns="http:\/\/www\.w3\.org\/2000\/svg".+xmlns="http:\/\/www\.w3\.org\/2000\/svg/gi;
-        if (xmlns.test(serialized)) {
-            serialized = serialized.replace('xmlns="http://www.w3.org/2000/svg','xmlns:xlink="http://www.w3.org/1999/xlink');
-        }
+        // xmlns = /xmlns="http:\/\/www\.w3\.org\/2000\/svg".+xmlns="http:\/\/www\.w3\.org\/2000\/svg/gi;
+        // if (xmlns.test(serialized)) {
+        //     serialized = serialized.replace('xmlns="http://www.w3.org/2000/svg','xmlns:xlink="http://www.w3.org/1999/xlink');
+        // }
 
         if (fixNamedEntities) {
             keys = Object.keys(namedEntities);

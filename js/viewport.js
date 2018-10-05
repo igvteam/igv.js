@@ -274,7 +274,7 @@ var igv = (function (igv) {
      * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
      * Should be renamed.
      */
-    igv.Viewport.prototype.repaint = function (tile, svg) {
+    igv.Viewport.prototype.repaint = function (tile) {
 
         var self = this;
 
@@ -286,144 +286,156 @@ var igv = (function (igv) {
             return;
         }
 
-        const referenceFrame = this.genomicState.referenceFrame;
-
-        // Create appropriate context and draw configuration
-
-        if(!svg) {
-
-            const pixelWidth = Math.ceil((tile.endBP - tile.startBP) / tile.bpPerPixel);
-            const paintedCanvas = createPaintedCanvas(window.devicePixelRatio, self.canvas.style.top, Math.round((tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel), pixelWidth, self.getContentHeight());
-            const ctx = paintedCanvas.getContext("2d");
-
-            const drawConfiguration =
-                {
-                    viewport: self,
-                    context: ctx,
-                    pixelWidth: pixelWidth,
-                    pixelHeight: self.getContentHeight(),
-                    bpStart: tile.startBP,
-                    bpEnd: tile.endBP,
-                    bpPerPixel: tile.bpPerPixel,
-                    referenceFrame: referenceFrame,
-                    genomicState: this.genomicState,
-                    selection: self.selection,
-                    viewportWidth: self.$viewport.width(),
-                    viewportContainerX: referenceFrame.toPixels(referenceFrame.start - tile.startBP),
-                    viewportContainerWidth: this.browser.viewportContainerWidth()
-                };
-
-            draw(drawConfiguration, tile.features);
-
-            if (this.canvas) {
-                $(this.canvas).remove();
-            }
-
-            this.canvas = paintedCanvas;
-            $(this.contentDiv).append(paintedCanvas);
-        }
-        else {
-            const pixelWidth = this.$viewport.width();
-            const pixelHeight = this.$viewport.height();
-
-            const ctx = new C2S(
-                {
-                    // svg
-                    width: pixelWidth,
-                    height: pixelHeight,
-                    viewbox:
-                        {
-                            x: 0,
-                            y: -$(this.contentDiv).position().top,
-                            width: pixelWidth,
-                            height: pixelHeight
-                        }
-
-                });
-
-            //ctx.translate(100, 100);
+        const genomicState = this.genomicState;
+        const referenceFrame = genomicState.referenceFrame;
+        const bpPerPixel = tile.bpPerPixel;
+        const features = tile.features;
+        const bpStart = tile.startBP;
+        const bpEnd = tile.endBP;
+        const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        const pixelHeight = self.getContentHeight();
 
 
+        const drawConfiguration =
+            {
+                features: features,
+                pixelWidth: pixelWidth,
+                pixelHeight: pixelHeight,
+                bpStart: bpStart,
+                bpEnd: bpEnd,
+                bpPerPixel: bpPerPixel,
+                referenceFrame: referenceFrame,
+                genomicState: genomicState,
+                selection: self.selection,
+                viewport: self,
+                viewportWidth: self.$viewport.width(),
+                viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
+                viewportContainerWidth: this.browser.viewportContainerWidth()
+            };
 
-          //  ctx.rect(0,0,pixelWidth, pixelHeight);
-         //   ctx.stroke();
-          //  ctx.clip();
 
-            const drawConfiguration =
-                {
-                    viewport: self,
-                    context: ctx,
-                    pixelWidth: pixelWidth,
-                    pixelHeight: pixelHeight,
-                    bpStart: referenceFrame.start,
-                    bpEnd: referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel,
-                    bpPerPixel: referenceFrame.bpPerPixel,
-                    referenceFrame: referenceFrame,
-                    genomicState: this.genomicState,
-                    selection: self.selection,
-                    viewportWidth: pixelWidth,
-                    viewportContainerX: 0,
-                    viewportContainerWidth: this.browser.viewportContainerWidth()
-                };
+        const devicePixelRatio = window.devicePixelRatio;
+        const newCanvas = $('<canvas>').get(0);
+        newCanvas.style.width = pixelWidth + "px";
+        newCanvas.style.height = pixelHeight + "px";
+        newCanvas.width = devicePixelRatio * pixelWidth;
+        newCanvas.height = devicePixelRatio * pixelHeight;
+        const ctx = newCanvas.getContext("2d");
+        ctx.scale(devicePixelRatio, devicePixelRatio);
 
-            draw(drawConfiguration, tile.features);
+        const pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+        newCanvas.style.position = 'absolute';
+        newCanvas.style.left = pixelOffset + "px";
+        newCanvas.style.top = self.canvas.style.top + "px";
 
-            return ctx.getSerializedSvg(true);
 
+        drawConfiguration.context = ctx;
+
+        ctx.save();
+
+        draw.call(this, drawConfiguration, features);
+
+        ctx.restore();
+
+        if (self.canvas) {
+            $(self.canvas).remove();
         }
 
-        function createPaintedCanvas(devicePixelRatio, top, left, width, height) {
+        self.canvas = newCanvas;
+        self.ctx = ctx;
+        $(self.contentDiv).append(newCanvas);
 
-            let canvas = $('<canvas>').get(0);
-
-            canvas.style.width =   width + "px";
-            canvas.style.height = height + "px";
-
-            canvas.width =   width * devicePixelRatio;
-            canvas.height = height * devicePixelRatio;
-
-            let ctx = canvas.getContext("2d");
-            ctx.scale(devicePixelRatio, devicePixelRatio);
-
-            canvas.style.position = 'absolute';
-            canvas.style.left = left + "px";
-            canvas.style.top = top + "px";
-
-            return canvas;
-        }
-
-        function draw( drawConfiguration, features) {
-
-            if (features) {
-                drawConfiguration.features = features;
-                self.trackView.track.draw(drawConfiguration);
-            }
-
-            if (self.browser.roi) {
-
-                const roiPromises = self.browser.roi.map(function (r) {
-                    return r.getFeatures(referenceFrame.chrName, tile.startBP, tile.endBP)
-                });
-
-                const browser = self.browser;
-
-                Promise.all(roiPromises)
-
-                    .then(function (roiArray) {
-                        for (var i = 0; i < roiArray.length; i++) {
-                            drawConfiguration.features = roiArray[i];
-                            browser.roi[i].draw(drawConfiguration);
-                        }
-                    })
-                    .catch(function (error) {
-                        console.error(error);
-                        self.loading = false;
-                        browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
-                    })
-            }
-        }
 
     };
+
+    /**
+     *
+     * @param tile - the tile is created whenever features are loaded.  It contains the genomic state
+     * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
+     * Should be renamed.
+     */
+    igv.Viewport.prototype.toSVG = function (tile) {
+
+        const genomicState = this.genomicState;
+        const referenceFrame = genomicState.referenceFrame;
+        const bpPerPixel = tile.bpPerPixel;
+        const features = tile.features;
+        const pixelWidth = this.$viewport.width();
+        const pixelHeight = this.$viewport.height();
+        const bpStart = referenceFrame.start;
+        const bpEnd = referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel;
+
+        const ctx = new C2S(
+            {
+                // svg
+                width: pixelWidth,
+                height: pixelHeight,
+                viewbox:
+                    {
+                        x: 0,
+                        y: -$(this.contentDiv).position().top,
+                        width: pixelWidth,
+                        height: pixelHeight
+                    }
+
+            });
+
+        const drawConfiguration =
+            {
+                viewport: this,
+                context: ctx,
+                pixelWidth: pixelWidth,
+                pixelHeight: pixelHeight,
+                bpStart: bpStart,
+                bpEnd: bpEnd,
+                bpPerPixel: bpPerPixel,
+                referenceFrame: referenceFrame,
+                genomicState: this.genomicState,
+                selection: this.selection,
+                viewportWidth: pixelWidth,
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.viewportContainerWidth()
+            };
+
+        draw.call(this, drawConfiguration, features);
+
+        return ctx.getSerializedSvg(true);
+
+    };
+
+    function draw(drawConfiguration, features) {
+
+
+        if (features) {
+            drawConfiguration.features = features;
+            this.trackView.track.draw(drawConfiguration);
+        }
+
+        const self = this;
+        const browser = this.browser;
+        if (browser.roi) {
+
+            const roiPromises = browser.roi.map(function (r) {
+                return r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd);
+            });
+
+
+
+            Promise.all(roiPromises)
+
+                .then(function (roiArray) {
+                    for(let roi of roiArray) {
+                        drawConfiguration.features = roi;
+                        roi.draw(drawConfiguration);
+                    }
+                })
+                .catch(function (error) {
+                    console.error(error);
+                    self.loading = false;
+                    browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
+                })
+        }
+    }
 
 
     function showZoomInNotice() {
@@ -485,7 +497,7 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.saveSVG = function () {
         const filename = this.$trackLabel.text() + ".svg";
-        const data = this.repaint(this.tile, true);
+        const data = this.toSVG(this.tile);
         igv.download(filename, data);
     };
 
@@ -614,7 +626,7 @@ var igv = (function (igv) {
         this.$viewport.on('touchend', handleMouseUp);
 
         this.$viewport.on('click', function (e) {
-            if(self.enableClick) {
+            if (self.enableClick) {
                 handleClick(e);
             }
         });
@@ -647,7 +659,7 @@ var igv = (function (igv) {
             $('.igv-popover').hide();
 
 
-            if(browser.isDragging || browser.isScrolling) {
+            if (browser.isDragging || browser.isScrolling) {
                 return;
             }
 
