@@ -549,16 +549,14 @@ var igv = (function (igv) {
 
 
     igv.download = function (filename, data) {
-            const element = document.createElement('a');
-             element.setAttribute('href', URL.createObjectURL(new Blob([data], {
-                type: "application/octet-stream"
-            })));
 
-            element.setAttribute('download', filename);
-            element.style.display = 'none';
-            document.body.appendChild(element);
-            element.click();
-            document.body.removeChild(element);
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 
 

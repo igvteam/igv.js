@@ -489,15 +489,18 @@ var igv = (function (igv) {
         exportCtx.putImageData(imageData, 0, 0);
 
         // filename = this.trackView.track.name + ".png";
-        const filename = this.$trackLabel.text() + ".png";
+        const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
         const data = exportCanvas.toDataURL("image/png");
-
         igv.download(filename, data);
     };
 
     igv.Viewport.prototype.saveSVG = function () {
-        const filename = this.$trackLabel.text() + ".svg";
-        const data = this.toSVG(this.tile);
+        const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
+        const filename = str + ".svg";
+        const svg = this.toSVG(this.tile);
+        const data = URL.createObjectURL(new Blob([svg], {
+            type: "application/octet-stream"
+        }));
         igv.download(filename, data);
     };
 
