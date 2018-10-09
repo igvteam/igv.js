@@ -251,7 +251,6 @@
     .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
       user-select: none;
       font-size: 20px;
-      width: 200px;
       margin-left: 16px;
       margin-right: 8px;
       display: flex;
