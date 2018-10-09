@@ -399,7 +399,7 @@ var igv = (function (igv) {
         // multi-locus mode
         if (genomicStateList.length > 1) {
             this.centerGuide.disable();
-            this.disableZoomWidget();
+            this.zoomWidget.hideSlider();
         }
         // whole-genome
         else if ('all' === genomicStateList[0].locusSearchString) {
@@ -410,6 +410,7 @@ var igv = (function (igv) {
         else {
             this.centerGuide.enable();
             this.enableZoomWidget();
+            this.zoomWidget.showSlider();
         }
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
@@ -492,11 +493,11 @@ var igv = (function (igv) {
     };
 
     igv.Browser.prototype.disableZoomWidget = function () {
-        this.$zoomContainer.hide();
+        this.zoomWidget.hide();
     };
 
     igv.Browser.prototype.enableZoomWidget = function () {
-        this.$zoomContainer.show();
+        this.zoomWidget.show();
     };
 
     igv.Browser.prototype.loadTrackList = function (configList) {
@@ -841,6 +842,7 @@ var igv = (function (igv) {
         if (rootWidth < 1000) {
             this.chromosomeSelectWidget.$container.hide();
             this.$root.find(".igv-nav-bar-toggle-button-container").hide();
+            this.zoomWidget.hide();
         }
         else {
             if (this.config.showChromosomeWidget) {
@@ -848,6 +850,7 @@ var igv = (function (igv) {
             }
             this.$root.find(".igv-nav-bar-toggle-button-container").show();
             this.$root.find(".igv-right-hand-gutter").show();
+            this.zoomWidget.show();
             //this.$root.find(".igv-track-manipulation-handle").show();
         }
 
