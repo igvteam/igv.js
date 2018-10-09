@@ -305,19 +305,17 @@ var igv = (function (igv) {
 
             .then(function (genomicStateList) {
 
-                var errorString;
-
                 self.genomicStateList = genomicStateList;
 
                 if (self.genomicStateList.length > 0) {
 
-                    if (!self.rulerTrack) { //} && config.showRuler) {
+                    if (false !== self.config.showRuler) {
                         self.rulerTrack = new igv.RulerTrack(self);
                         self.addTrack(self.rulerTrack);
                     }
 
                 } else {
-                    errorString = 'Unrecognized locus ' + config.locus;
+                    let errorString = 'Unrecognized locus ' + self.config.locus;
                     self.presentAlert(errorString, undefined);
                 }
 
@@ -1897,10 +1895,11 @@ var igv = (function (igv) {
             "reference": this.genome.toJSON()
         };
 
-        // Use rulerTrack to get current loci.   This is really obtuse and fragile
+        // Use first available trackView.
         const locus = [];
         const gtexSelections = {};
-        this.rulerTrack.trackView.viewports.forEach(function (viewport) {
+        let anyTrackView = this.trackViews[ 0 ];
+        anyTrackView.viewports.forEach(function (viewport) {
 
             const genomicState = viewport.genomicState;
             const pixelWidth = viewport.$viewport[0].clientWidth;
