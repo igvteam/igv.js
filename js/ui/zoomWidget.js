@@ -36,12 +36,12 @@ var igv = (function (igv) {
         let $div,
             svg;
 
-        browser.$zoomContainer = $('<div class="igv-zoom-widget">');
-        $parent.append(browser.$zoomContainer);
+        this.$zoomContainer = $('<div class="igv-zoom-widget">');
+        $parent.append(this.$zoomContainer);
 
         // zoom out
-        $div = $('<div>');
-        browser.$zoomContainer.append($div);
+        $div = $('<div style="margin: 5px">');
+        this.$zoomContainer.append($div);
 
         svg = igv.createIcon("minus-circle");
         $div.append(svg);
@@ -52,7 +52,7 @@ var igv = (function (igv) {
 
         // Range slider
         $div = $('<div>');
-        browser.$zoomContainer.append($div);
+        this.$zoomContainer.append($div);
 
         this.$slider = $('<input type="range"/>');
         $div.append(this.$slider);
@@ -62,8 +62,8 @@ var igv = (function (igv) {
         });
 
         // zoom in
-        $div = $('<div>');
-        browser.$zoomContainer.append($div);
+        $div = $('<div style="margin: 5px">');
+        this.$zoomContainer.append($div);
 
         svg = igv.createIcon("plus-circle");
         $div.append(svg);
@@ -79,6 +79,22 @@ var igv = (function (igv) {
             browser.updateZoomSlider(self.$slider);
         })
     };
+
+    igv.ZoomWidget.prototype.hide = function () {
+        this.$zoomContainer.hide();
+    }
+
+    igv.ZoomWidget.prototype.show = function () {
+        this.$zoomContainer.show()
+    }
+
+    igv.ZoomWidget.prototype.hideSlider = function () {
+        this.$slider.hide();
+    }
+
+    igv.ZoomWidget.prototype.showSlider = function () {
+        this.$slider.show();
+    }
 
     return igv;
 
