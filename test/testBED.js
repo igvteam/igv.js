@@ -36,6 +36,35 @@ function runBedTests() {
             });
     });
 
+
+    QUnit.test("UCSC SNP format", function (assert) {
+
+        const done = assert.async();
+
+        const config = {
+            format: "snp",
+            indexed: false,
+            url: "data/snp/ucsc_snp.txt"
+        }
+
+        const reader = new igv.FeatureFileReader(config);
+
+        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+            .then(features => {
+                assert.ok(features);
+                assert.equal(features.length, 3);
+                assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
+                done();
+            })
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false);
+                done;
+            })
+
+
+    })
+
     // eweitz 2018-09-05: Commenting out for now, due to seeming false positive.
     // Chrome DevTools reports http://127.0.0.1:8887/igv.js/test/data/bed/missing_linefeed.bed.gz
     // as having response code 206 Partial Content.  The test does not terminate when run

@@ -1,0 +1,3 @@
+585	chr1	10177	10177	rs367896724	0	+	-	-	-/C	genomic	insertion	by-cluster,by-frequency,by-1000genomes	0.488846	0.073843	near-gene-5	between	1		2	1000GENOMES,BILGI_BIOE,	2	-,C,	2878.000000,2130.000000,	0.574681,0.425319,	maf-5-some-pop,maf-5-all-pops
+585	chr1	10352	10352	rs555500075	0	+	-	-	-/A	genomic	insertion	by-cluster,by-frequency,by-1000genomes	0.492188	0.06201	near-gene-5	between	1		2	1000GENOMES,SSMP,	2	-,A,	2817.000000,2191.000000,	0.562500,0.437500,	maf-5-some-pop,maf-5-all-pops
+585	chr1	11007	11008	rs575272151	0	+	C	C	C/G	genomic	single	by-frequency,by-1000genomes	0.160609	0.233472	near-gene-5	exact	1		1	1000GENOMES,	2	C,G,	4567.000000,441.000000,	0.911941,0.088059,	maf-5-some-pop

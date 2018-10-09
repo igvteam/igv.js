@@ -343,28 +343,22 @@
   {
     "name": "SNP 150 (hg19)",
     "type": "snp",
-    "displayMode": "EXPANDED",
-    "sourceType": "ucscservice",
+    "format": "snp",
     "visibilityWindow": 10000,
     "height": 30,
-    "source": {
-      "url": "https://data.igv.org/ucsc?db=hg19",
-      "method": "GET",
-      "tableName": "snp150Common"
-    }
+    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz",
+    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/snp150Common.txt.gz.tbi"
+
   },
   {
     "name": "SNP 150 (hg38)",
     "type": "snp",
-    "displayMode": "EXPANDED",
-    "sourceType": "ucscservice",
+    "format": "snp",
     "visibilityWindow": 10000,
     "height": 30,
-    "source": {
-      "url": "https://data.igv.org/ucsc?db=hg38",
-      "method": "GET",
-      "tableName": "snp150"
-    }
+    "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
+    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
+
   },
   {
     "name": "Repeat Masker",
