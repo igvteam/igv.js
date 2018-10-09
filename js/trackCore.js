@@ -53,7 +53,8 @@ var igv = (function (igv) {
         "genepred",
         "genepredext",
         "bedpe",
-        "bp"
+        "bp",
+        "snp"
     ]);
 
     /**

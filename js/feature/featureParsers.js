@@ -132,6 +132,10 @@ var igv = (function (igv) {
                     this.skipRows = 1;
                     this.header = {colorColumn: 7};
                     break;
+                case "snp":
+                    this.decode = decodeSNP;
+                    this.delimiter = "\t";
+                    break;
                 default:
 
                     customFormat = igv.getFormat(format);
@@ -149,7 +153,6 @@ var igv = (function (igv) {
         }
 
     };
-
 
     igv.FeatureParser.prototype.parseHeader = function (data) {
 
@@ -214,7 +217,7 @@ var igv = (function (igv) {
         // Double quoted strings can contain newlines in AED
         // "" is an escape for a ".
         // Parse all this, clean it up, split into tokens in a custom way
-        function readTokensAed () {
+        function readTokensAed() {
             var tokens = [],
                 token = "",
                 quotedString = false,
@@ -1056,7 +1059,7 @@ var igv = (function (igv) {
             // Skip columns that are not interesting - you know the sequence, and you can see color
             if (name !== 'sequence' && name !== 'color') {
                 if (featureValue) {
-                    data.push({ name: name, value: featureValue });
+                    data.push({name: name, value: featureValue});
                 }
             }
         }
@@ -1202,7 +1205,7 @@ var igv = (function (igv) {
             value: Number.parseFloat(tokens[5]),
             color: tokens[6]
 
-    }
+        }
 
         feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
 
@@ -1249,9 +1252,56 @@ var igv = (function (igv) {
     }
 
 
+    function decodeSNP(tokens, ignore) {
+
+        const autoSql = [
+            'bin',
+            'chr',
+            'start',
+            'end',
+            'name',
+            'score',
+            'strand',
+            'refNCBI',
+            'refUCSC',
+            'observed',
+            'molType',
+            'class',
+            'valid',
+            'avHet',
+            'avHetSE',
+            'func',
+            'locType',
+            'weight',
+            'exceptions',
+            'submitterCount',
+            'submitters',
+            'alleleFreqCount',
+            'alleles',
+            'alleleNs',
+            'alleleFreqs',
+            'bitfields'
+        ];
+
+        const feature = {
+            chr: tokens[1],
+            start: Number.parseInt(tokens[2]),
+            end: Number.parseInt(tokens[3]),
+            name: tokens[4],
+            score: Number.parseInt(tokens[5])
+        };
+
+        const n = Math.min(tokens.length, autoSql.length);
+        for(let i=6; i < n; i++) {
+            feature[autoSql[i]] = tokens[i];
+        }
+        return feature;
+
+    }
+
 
     /**
-     * Decode the "standard" UCSC bed format
+     *
      * @param tokens
      * @param ignore
      * @returns decoded feature, or null if this is not a valid record
