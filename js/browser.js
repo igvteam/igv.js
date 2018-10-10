@@ -309,16 +309,10 @@ var igv = (function (igv) {
 
                 if (self.genomicStateList.length > 0) {
                     
-                    if (!self.rulerTrack) {
+                    if (!self.rulerTrack && false !== self.config.showRuler) {
                         self.rulerTrack = new igv.RulerTrack(self);
                         self.addTrack(self.rulerTrack);
                     }
-
-                    // if (false !== self.config.showRuler) {
-                    //     self.rulerTrack.show();
-                    // } else {
-                    //     self.rulerTrack.hide();
-                    // }
 
                 } else {
                     let errorString = 'Unrecognized locus ' + self.config.locus;
@@ -1992,6 +1986,8 @@ var igv = (function (igv) {
         }
         bytes = new Zlib.RawInflate(compressedBytes).decompress();
         json = String.fromCharCode.apply(null, bytes);
+
+        console.log(json);
 
         return json;
     }
