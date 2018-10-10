@@ -161,6 +161,10 @@
     "HEADING": "BigWig - BigBed"
   },
   {
+    "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+    "name": "Encode bigwig"
+  },
+  {
     "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
     "name": "Big BigWig"
   },
