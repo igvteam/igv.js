@@ -41,6 +41,26 @@ var igv = (function (igv) {
 
     };
 
+    igv.RulerTrack.prototype.hide = function () {
+        setVisibity(this.trackView.viewports, false);
+    };
+
+    igv.RulerTrack.prototype.show = function () {
+        setVisibity(this.trackView.viewports, true);
+    };
+
+    function setVisibity (viewports, doShow) {
+
+        viewports.forEach((viewport) => {
+            if (true === doShow) {
+                viewport.$viewport.show();
+            } else {
+                viewport.$viewport.hide();
+            }
+        });
+
+    }
+
     igv.RulerTrack.prototype.updateLocusLabel = function () {
         var self = this;
 
