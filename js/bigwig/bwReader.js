@@ -125,11 +125,17 @@ var igv = (function (igv) {
                     for (let item of leafItems) {
                         start = Math.min(start, item.dataOffset);
                         end = Math.max(end, item.dataOffset + item.dataSize);
-                    };
+                    }
+                    ;
 
                     const size = end - start;
 
-                    return igv.xhr.loadArrayBuffer(self.config.url, igv.buildOptions(self.config, {range: {start: start, size: size}}))
+                    return igv.xhr.loadArrayBuffer(self.config.url, igv.buildOptions(self.config, {
+                        range: {
+                            start: start,
+                            size: size
+                        }
+                    }))
 
                         .then(function (arrayBuffer) {
 
@@ -137,7 +143,7 @@ var igv = (function (igv) {
 
                             const buffer = new Uint8Array(arrayBuffer);
 
-                            for(let item of leafItems) {
+                            for (let item of leafItems) {
 
                                 const uint8Array = buffer.subarray(item.dataOffset - start, item.dataOffset + item.dataSize);
 
@@ -261,8 +267,8 @@ var igv = (function (igv) {
 
         function loadZoomHeadersAndChrTree() {
 
-            var startOffset = BBFILE_HEADER_SIZE,
-                self = this;
+            const self = this;
+            const startOffset = BBFILE_HEADER_SIZE;
 
             var range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
@@ -270,19 +276,15 @@ var igv = (function (igv) {
 
                 .then(function (data) {
 
-                    var nZooms = self.header.nZoomLevels,
-                        binaryParser = new igv.BinaryParser(new DataView(data)),
-                        i,
-                        len,
-                        zoomNumber,
-                        zlh;
+                    const nZooms = self.header.nZoomLevels;
+                    const binaryParser = new igv.BinaryParser(new DataView(data));
 
                     self.zoomLevelHeaders = [];
 
                     self.firstZoomDataOffset = Number.MAX_VALUE;
-                    for (i = 1; i <= nZooms; i++) {
-                        zoomNumber = nZooms - i;
-                        zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
+                    for (let i = 1; i <= nZooms; i++) {
+                        const zoomNumber = nZooms - i;
+                        const zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
                         self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
                         self.zoomLevelHeaders[zoomNumber] = zlh;
                     }
@@ -306,6 +308,7 @@ var igv = (function (igv) {
                     }
                     else {
                         // TODO -- this is an error, not expected
+                        throw "BigWig chromosome tree offset <= 0";
                     }
 
                     //Finally total data count
@@ -328,7 +331,7 @@ var igv = (function (igv) {
             return Promise.resolve(rpTree);
         }
         else {
-            rpTree = new RPTree(offset, self.contentLength, self.config, self.littleEndian);
+            rpTree = new RPTree(offset, self.config, self.littleEndian);
             return rpTree.load()
                 .then(function () {
                     self.rpTreeCache[offset] = rpTree;
@@ -346,10 +349,9 @@ var igv = (function (igv) {
 
     }
 
-    function RPTree(fileOffset, contentLength, config, littleEndian) {
+    function RPTree(fileOffset, config, littleEndian) {
 
         this.config = config;
-        this.filesize = contentLength;
         this.fileOffset = fileOffset; // File offset to beginning of tree
         this.path = config.url;
         this.littleEndian = littleEndian;
@@ -360,7 +362,7 @@ var igv = (function (igv) {
         var self = this;
 
         var rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
-            bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
+            bufferedReader = new igv.BufferedReader(self.config,  BUFFER_SIZE);
 
         return self.readNode(rootNodeOffset, bufferedReader)
 
@@ -446,7 +448,7 @@ var igv = (function (igv) {
 
             var leafItems = [],
                 processing = new Set(),
-                bufferedReader = new igv.BufferedReader(self.config, self.filesize, BUFFER_SIZE);
+                bufferedReader = new igv.BufferedReader(self.config, BUFFER_SIZE);
 
             processing.add(0);  // Zero represents the root node
             findLeafItems(self.rootNode, 0);
