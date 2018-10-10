@@ -33,7 +33,6 @@ var igv = (function (igv) {
 
     igv.BufferedReader = function (config, contentLength, bufferSize) {
         this.path = config.url;
-        this.contentLength = contentLength;
         this.bufferSize = bufferSize ? bufferSize : 512000;
         this.range = {start: -1, size: -1};
         this.config = config;
@@ -58,20 +57,16 @@ var igv = (function (igv) {
             return Promise.resolve(subbuffer(self, requestedRange, asUint8));
         }
         else {
-            // If requested range size is specified, expand buffer size if needed, but not beyond content length
-            if(requestedRange.size) {
+            // If requested range size is specified, expand buffer size
+            if (requestedRange.size) {
                 bufferSize = Math.max(self.bufferSize, requestedRange.size);
             }
             else {
                 bufferSize = self.bufferSize;
             }
 
-            if (self.contentLength > 0 && requestedRange.start + bufferSize > self.contentLength) {
-                loadRange = {start: requestedRange.start};
-            }
-            else {
-                loadRange = {start: requestedRange.start, size: bufferSize};
-            }
+            loadRange = {start: requestedRange.start, size: bufferSize};
+
 
             return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
                 .then(function (arrayBuffer) {
