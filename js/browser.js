@@ -308,11 +308,17 @@ var igv = (function (igv) {
                 self.genomicStateList = genomicStateList;
 
                 if (self.genomicStateList.length > 0) {
-
-                    if (false !== self.config.showRuler) {
+                    
+                    if (!self.rulerTrack) {
                         self.rulerTrack = new igv.RulerTrack(self);
                         self.addTrack(self.rulerTrack);
                     }
+
+                    // if (false !== self.config.showRuler) {
+                    //     self.rulerTrack.show();
+                    // } else {
+                    //     self.rulerTrack.hide();
+                    // }
 
                 } else {
                     let errorString = 'Unrecognized locus ' + self.config.locus;
