@@ -407,7 +407,9 @@ var igv = (function (igv) {
      */
     igv.trackMenuItemList = function (popover, trackView) {
 
-        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl']);
+        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp']);
+
+        const hasVizWindow = trackView.track.config && trackView.track.config.visibilityWindow !== undefined;
 
         let menuItems = [];
 
@@ -424,7 +426,7 @@ var igv = (function (igv) {
             menuItems = menuItems.concat(trackView.track.menuItemList());
         }
 
-        if (vizWindowTypes.has(trackView.track.config.type)) {
+        if (hasVizWindow || vizWindowTypes.has(trackView.track.config.type)) {
             menuItems.push('<hr/>');
             menuItems.push(igv.visibilityWindowMenuItem(trackView));
         }
