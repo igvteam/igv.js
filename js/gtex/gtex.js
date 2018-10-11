@@ -113,7 +113,7 @@ var igv = (function (igv) {
                 url: baseURL + '/association/singleTissueEqtlByLocation',
                 tissueName: tissueSummary.tissueSiteDetailId,
                 name: (tissueSummary.tissueSiteDetailId.split('_').join(' ')),
-                visibilityWindow: 1000000
+                visibilityWindow: 250000
             }
 
         }
