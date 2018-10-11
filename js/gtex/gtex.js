@@ -92,23 +92,25 @@ var igv = (function (igv) {
 
     igv.GtexUtils = {
 
-        getTissueInfo: function(datasetId) {
+        getTissueInfo: function(datasetId, baseURL) {
 
-            datasetId = datasetId || "gtex_v7";
+            datasetId = datasetId || 'gtex_v7';
+            baseURL = baseURL || 'https://gtexportal.org/api/b0.9';
 
-            // let depricated_url = 'https://gtexportal.org/rest/v1/dataset/tissueInfo?format=json&datasetId=' + datasetId;
-
-            let url = 'https://gtexportal.org/rest/v1/dataset/tissueSummary?datasetId=' + datasetId;
+            let url = baseURL + '/dataset/tissueSummary?datasetId=' + datasetId;
 
             return igv.xhr.loadJson(url, {})
         },
 
-        trackConfiguration: function (tissueSummary) {
+        //https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation?chromosome=7&start=98358766&end=101523798&tissueName=Liver&datasetId=gtex_v7
+        trackConfiguration: function (tissueSummary, baseURL) {
+
+            baseURL = baseURL || 'https://gtexportal.org/api/b0.9';
 
             return {
                 type: "eqtl",
                 sourceType: "gtex-ws",
-                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                url: baseURL + '/association/singleTissueEqtlByLocation',
                 tissueName: tissueSummary.tissueSiteDetailId,
                 name: (tissueSummary.tissueSiteDetailId.split('_').join(' ')),
                 visibilityWindow: 1000000
