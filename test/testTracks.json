@@ -1,22 +1,22 @@
 [
   {
-    "format": "bed",
-    "name": "Embedded features",
-    "type": "annotation",
-    "features": [
-      {
-        "chr": "1",
-        "start": 7432951,
-        "end": 7438000,
-        "name": "feature 1"
-      },
-      {
-        "chr": "1",
-        "start": 8438000,
-        "end": 8440000,
-        "name": "feature 2"
-      }
-    ]
+    "HEADING": "GTEx"
+  },
+  {
+    "type": "eqtl",
+    "sourceType": "gtex-ws",
+    "url": "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+    "tissueName": "Liver",
+    "name": "Liver - v1 API",
+    "visibilityWindow": 1000000
+  },
+  {
+    "type": "eqtl",
+    "sourceType": "gtex-ws",
+    "url": "https://gtexportal.org/api/b0.9/association/singleTissueEqtlByLocation",
+    "tissueName": "Liver",
+    "name": "Liver - api/b0.9 API",
+    "visibilityWindow": 1000000
   },
   {
     "HEADING": "Platinum Genomes (BAM)"
@@ -97,6 +97,25 @@
   },
   {
     "HEADING": "BED / GTF"
+  },
+  {
+    "format": "bed",
+    "name": "Embedded features",
+    "type": "annotation",
+    "features": [
+      {
+        "chr": "1",
+        "start": 7432951,
+        "end": 7438000,
+        "name": "feature 1"
+      },
+      {
+        "chr": "1",
+        "start": 8438000,
+        "end": 8440000,
+        "name": "feature 2"
+      }
+    ]
   },
   {
     "url": "../test/data/bed/oneFeature.bed",
