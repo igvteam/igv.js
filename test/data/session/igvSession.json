@@ -1,0 +1,40 @@
+{
+  "reference": {
+    "id": "hg19",
+    "name": "Human (CRCh37/hg19)",
+    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+  },
+  "locus": [
+    "chr8:128,747,314-128,754,680"
+  ],
+  "tracks": [
+    {
+      "type": "sequence",
+      "order": -1
+    },
+    {
+      "url": "http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
+      "label": "HG02450",
+      "order": 1,
+      "sourceType": "file",
+      "format": "bam",
+      "type": "alignment",
+      "height": 300,
+      "name": "HG02450",
+      "coverageTrackHeight": 50
+    },
+    {
+      "name": "Refseq Genes",
+      "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.txt.gz",
+      "order": 1000000,
+      "indexed": false,
+      "sourceType": "file",
+      "format": "refgene",
+      "type": "annotation",
+      "height": 50,
+      "maxRows": 500
+    }
+  ]
+}
