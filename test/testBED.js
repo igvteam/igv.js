@@ -61,47 +61,60 @@ function runBedTests() {
                 assert.ok(false);
                 done;
             })
-
-
     })
 
-    // eweitz 2018-09-05: Commenting out for now, due to seeming false positive.
-    // Chrome DevTools reports http://127.0.0.1:8887/igv.js/test/data/bed/missing_linefeed.bed.gz
-    // as having response code 206 Partial Content.  The test does not terminate when run
-    // in the browser, breaking such test runs.
-    // QUnit.test("Missing line feed  - block gzipped", function(assert) {
 
-    //     var done = assert.async();
+    /* 0  bin    585    smallint(5) unsigned    Indexing field to speed chromosome range queries.
+    * 1  swScore    1504    int(10) unsigned    Smith Waterman alignment score
+    * 2  milliDiv    13    int(10) unsigned    Base mismatches in parts per thousand
+    * 3  milliDel    4    int(10) unsigned    Bases deleted in parts per thousand
+    * 4  milliIns    13    int(10) unsigned    Bases inserted in parts per thousand
+    * 5  genoName    chr1    varchar(255)    Genomic sequence name
+    * 6  genoStart    10000    int(10) unsigned    Start in genomic sequence
+    * 7  genoEnd    10468    int(10) unsigned    End in genomic sequence
+    * 8  genoLeft    -249240153    int(11)    -#bases after match in genomic sequence
+    * 9  strand    +    char(1)    Relative orientation + or -
+    * 10 repName    (CCCTAA)n    varchar(255)    Name of repeat
+    * 11 repClass    Simple_repeat    varchar(255)    Class of repeat
+    * 12 repFamily    Simple_repeat    varchar(255)    Family of repeat
+    * 13 repStart    1    int(11)    Start (if strand is +) or -#bases after match (if strand is -) in repeat sequence
+    * 14 repEnd    463    int(11)    End in repeat sequence
+    * 15 repLeft    0    int(11)    -#bases after match (if strand is +) or start (if strand is -) in repeat sequence
+    * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored. */
+    //24	0	0	0	chr1	46216	46240	-249204381	+	AT_rich	Low_complexity	Low_complexity	1	24	0	4
+    QUnit.test("UCSC repeat masker format", function (assert) {
 
-    //     var config = {
-    //         format: 'bed',
-    //         url: 'data/bed/missing_linefeed.bed.gz',
-    //         indexURL: 'data/bed/missing_linefeed.bed.gz.tbi'
-    //     }
+        const done = assert.async();
 
-    //     var tb = new igv.FeatureFileReader(config);
+        const config = {
+            type: "annotation",
+            format: "rmsk",
+            indexed: false,
+            url: "data/bed/Low_complexity.rmask"
+        }
 
-    //     var chr = "chr1",
-    //         bpStart = 0,
-    //         bpEnd = Number.MAX_VALUE;
+        const reader = new igv.FeatureFileReader(config);
 
-    //     tb.readHeader()
-    //         .then(function (header) {
+        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
 
-    //             tb.readFeatures(chr, bpStart, bpEnd)
-    //                 .then(function (features) {
+            .then(features => {
+                assert.ok(features);
+                assert.equal(features.length, 3);
 
-    //                     assert.equal(4, features.length);   // feature count. Determined by grepping file
+                const f = features[0];
+                assert.equal("chr1", f.chr);
+                assert.equal(46216, f.start);
+                assert.equal(46240, f.end);
+                assert.equal(f.repName, 'AT_rich');
 
-    //                     done();
-    //                 });
-    //         })
-    //         .catch(function (error) {
-    //             console.log(Error('query tabix error: ') + error);
-    //             console.log(error.stack);
-    //         });
-
-    // });
+                done();
+            })
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false);
+                done;
+            })
+    })
 
 
     QUnit.test("BED query", function(assert) {
