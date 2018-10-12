@@ -54,7 +54,8 @@ var igv = (function (igv) {
         "genepredext",
         "bedpe",
         "bp",
-        "snp"
+        "snp",
+        "rmsk"
     ]);
 
     /**
@@ -95,6 +96,7 @@ var igv = (function (igv) {
             case "genes":
             case "fusionjuncspan":
             case "snp":
+            case "rmsk":
 
                 return igv.trackFactory["feature"](trackConfig, browser);
 
