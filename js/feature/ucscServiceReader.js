@@ -30,11 +30,22 @@ var igv = (function (igv) {
 
     igv.UCSCServiceReader = function (config) {
         this.config = config;
+        this.genome = config.genome;
     };
 
     igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
-        const s = Math.floor(start);
-        const e = Math.ceil(end);
+
+        const s = Math.max(0, Math.floor(start));
+        let e = Math.ceil(end);
+
+        if(this.genome) {
+            const c = genome.getChromosome(chr);
+            if(c && e > c.bpLength) {
+                e = c.bpLength;
+            }
+        }
+
+
         const url = this.config.url + '?db=' + this.config.db + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + s + '&end=' + e;
 
         return igv.xhr.loadJson(url, this.config)
