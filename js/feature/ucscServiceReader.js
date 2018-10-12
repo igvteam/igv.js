@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
     igv.UCSCServiceReader = function (config) {
@@ -31,17 +33,18 @@ var igv = (function (igv) {
     };
 
     igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
-        var self = this,
-            url = this.config.url + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + start + '&end=' + end;
+        const s = Math.floor(start);
+        const e = Math.ceil(end);
+        const url = this.config.url + '?db=' + this.config.db + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + s + '&end=' + e;
 
-        return igv.xhr.loadJson(url, self.config)
+        return igv.xhr.loadJson(url, this.config)
             .then(function (data) {
                 if (data) {
                     data.forEach(function (sample) {
-                        if (sample.hasOwnProperty('exonStarts') && 
-                            sample.hasOwnProperty('exonEnds') && 
-                            sample.hasOwnProperty('exonCount') && 
-                            sample.hasOwnProperty('cdsStart') && 
+                        if (sample.hasOwnProperty('exonStarts') &&
+                            sample.hasOwnProperty('exonEnds') &&
+                            sample.hasOwnProperty('exonCount') &&
+                            sample.hasOwnProperty('cdsStart') &&
                             sample.hasOwnProperty('cdsEnd')) {
                             addExons(sample);
                         }
