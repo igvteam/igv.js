@@ -92,7 +92,7 @@ var igv = (function (igv) {
 
         const self = this;
         const genome = this.genome;
-        const    maxRows = this.config.maxRows || 500;
+        const maxRows = this.config.maxRows || 500;
 
 
         if (self.header) {

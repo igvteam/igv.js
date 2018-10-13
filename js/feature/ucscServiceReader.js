@@ -28,9 +28,9 @@
 
 var igv = (function (igv) {
 
-    igv.UCSCServiceReader = function (config) {
+    igv.UCSCServiceReader = function (config, genome) {
         this.config = config;
-        this.genome = config.genome;
+        this.genome = genome;
     };
 
     igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
