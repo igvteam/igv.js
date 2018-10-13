@@ -530,21 +530,17 @@ var igv = (function (igv) {
 
     igv.visibilityWindowMenuItem = function (trackView) {
 
-        var $e,
-            menuClickHandler;
+        const menuClickHandler = function () {
 
-        menuClickHandler = function () {
+            const dialogClickHandler = function () {
 
-            var dialogClickHandler;
-
-            dialogClickHandler = function () {
-                var value;
-
-                value = trackView.browser.inputDialog.$input.val().trim();
+                let value = trackView.browser.inputDialog.$input.val().trim();
 
                 if ('' === value || undefined === value) {
                     value = -1;
                 }
+
+                value = Number.parseInt(value);
 
                 trackView.track.visibilityWindow = value;
                 trackView.track.config.visibilityWindow = value;
@@ -561,7 +557,7 @@ var igv = (function (igv) {
 
         };
 
-        $e = $('<div>');
+        const $e = $('<div>');
         $e.text('Set visibility window');
 
         return {object: $e, click: menuClickHandler};
