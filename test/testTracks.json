@@ -342,7 +342,7 @@
     "id": "BroadHiSeqX_b37/NA12878"
   },
   {
-    "HEADING": "IGV Flask Server"
+    "HEADING": "IGV Flask Server - hg38"
   },
   {
     "name": "Known Genes (UCSC service)",
@@ -409,6 +409,9 @@
     }
   },
   {
+    "HEADING": "IGV Flask Server - hg19"
+  },
+  {
     "name": "sno/miRNA (UCSC service) hg19",
     "type": "annotation",
     "displayMode": "EXPANDED",
@@ -466,18 +469,90 @@
     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
   },
   {
+    "HEADING": "IGV Flask Server - mm10"
+  },
+  {
+    "name": "UCSC Genes",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "visibilityWindow": 2000000,
+    "source": {
+      "url": "https://data.igv.org/ucsc",
+      "db": "mm10",
+      "method": "GET",
+      "tableName": "knownGene"
+    }
+  },
+  {
     "name": "Repeat Masker",
     "type": "annotation",
     "displayMode": "EXPANDED",
     "sourceType": "ucscservice",
+    "visibilityWindow": 100000,
     "source": {
-      "url": "https://data.igv.org/ucsc?db=hg19",
+      "url": "https://data.igv.org/ucsc",
+      "db": "mm10",
       "method": "GET",
       "tableName": "rmsk"
     }
   },
   {
-    "HEADING": "IGV CRAM Server (http: only)"
+    "name": "Common SNPs (142)",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "visibilityWindow": 100000,
+    "source": {
+      "url": "https://data.igv.org/ucsc",
+      "db": "mm10",
+      "method": "GET",
+      "tableName": "snp142Common"
+    }
+  },
+  {
+    "HEADING": "IGV Flask Server - danRer11"
+  },
+  {
+    "name": "RefSeq Genes",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "source": {
+      "url": "https://data.igv.org/ucsc",
+      "db": "danRer11",
+      "method": "GET",
+      "tableName": "ncbiRefSeq"
+    }
+  },
+  {
+    "name": "Ensembl Genes",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "source": {
+      "url": "https://data.igv.org/ucsc",
+      "db": "danRer11",
+      "method": "GET",
+      "tableName": "ensGene"
+    }
+  },
+  {
+    "name": "Repeat Masker",
+    "type": "annotation",
+    "displayMode": "EXPANDED",
+    "sourceType": "ucscservice",
+    "visibilityWindow": 100000,
+    "source": {
+      "url": "https://data.igv.org/ucsc",
+      "db": "danRer11",
+      "method": "GET",
+      "tableName": "rmsk"
+    }
+  },
+
+  {
+    "HEADING": "IGV CRAM Server "
   },
   {
     "name": "CRAM file (flask server)",
