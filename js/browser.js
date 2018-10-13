@@ -1765,6 +1765,10 @@ var igv = (function (igv) {
 
                         locusObject.start = parseInt(numeric, 10) - 1;
 
+                        if(isNaN(locusObject.start)) {
+                            return undefined;
+                        }
+
                         if (2 === b.length) {
 
                             numeric = b[1].replace(/\,/g, '');
