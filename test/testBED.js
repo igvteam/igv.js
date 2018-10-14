@@ -8,43 +8,70 @@ function runBedTests() {
         }
     }
 
+    //
+    // QUnit.test("Missing line feed  - gzipped", function(assert) {
+    //
+    //     var done = assert.async();
+    //
+    //     var chr = "chr1",
+    //         bpStart = 0,
+    //         bpEnd = Number.MAX_VALUE,
+    //         featureSource = new igv.FeatureSource({
+    //                 format: 'bed',
+    //                 indexed: false,
+    //                 url: 'data/bed/missing_linefeed.bed.gz'
+    //             },
+    //             genome);
+    //
+    //     // Must get file header first
+    //     featureSource.getFeatures(chr, bpStart, bpEnd)
+    //         .then(function (features) {
+    //
+    //             assert.equal(4, features.length);   // feature count. Determined by grepping file
+    //
+    //             done();
+    //         })
+    //         .catch(function (error) {
+    //             console.log(error);
+    //         });
+    // });
+    //
+    //
+    // QUnit.test("UCSC SNP format", function (assert) {
+    //
+    //     const done = assert.async();
+    //
+    //     const config = {
+    //         format: "snp",
+    //         indexed: false,
+    //         url: "data/snp/ucsc_snp.txt"
+    //     }
+    //
+    //     const reader = new igv.FeatureFileReader(config);
+    //
+    //     reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+    //         .then(features => {
+    //             assert.ok(features);
+    //             assert.equal(features.length, 3);
+    //             assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
+    //             done();
+    //         })
+    //         .catch(function (error) {
+    //             console.error(error);
+    //             assert.ok(false);
+    //             done;
+    //         })
+    // })
 
-    QUnit.test("Missing line feed  - gzipped", function(assert) {
+    QUnit.test("GWAS Catalog format", function (assert) {
 
-        var done = assert.async();
-
-        var chr = "chr1",
-            bpStart = 0,
-            bpEnd = Number.MAX_VALUE,
-            featureSource = new igv.FeatureSource({
-                    format: 'bed',
-                    indexed: false,
-                    url: 'data/bed/missing_linefeed.bed.gz'
-                },
-                genome);
-
-        // Must get file header first
-        featureSource.getFeatures(chr, bpStart, bpEnd)
-            .then(function (features) {
-
-                assert.equal(4, features.length);   // feature count. Determined by grepping file
-
-                done();
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-    });
-
-
-    QUnit.test("UCSC SNP format", function (assert) {
-
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
         const done = assert.async();
 
         const config = {
-            format: "snp",
+            format: "gwasCatalog",
             indexed: false,
-            url: "data/snp/ucsc_snp.txt"
+            url: "data/bed/gwasCatalog.test.txt"
         }
 
         const reader = new igv.FeatureFileReader(config);
@@ -53,7 +80,61 @@ function runBedTests() {
             .then(features => {
                 assert.ok(features);
                 assert.equal(features.length, 3);
-                assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
+                assert.equal(features[0].name, 'rs141175086');
+                done();
+            })
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false);
+                done;
+            })
+    })
+
+    QUnit.test("wgRna format", function (assert) {
+
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
+        const done = assert.async();
+
+        const config = {
+            format: "wgRna",
+            indexed: false,
+            url: "data/bed/wgRna.test.txt"
+        }
+
+        const reader = new igv.FeatureFileReader(config);
+
+        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+            .then(features => {
+                assert.ok(features);
+                assert.equal(features.length, 3);
+                assert.equal(features[0].name, 'hsa-mir-1302-2');
+                done();
+            })
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false);
+                done;
+            })
+    })
+
+    QUnit.test("cpgIslandExt format", function (assert) {
+
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
+        const done = assert.async();
+
+        const config = {
+            format: "cpgIslandExt",
+            indexed: false,
+            url: "data/bed/cpgIslandExt.test.txt"
+        }
+
+        const reader = new igv.FeatureFileReader(config);
+
+        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+            .then(features => {
+                assert.ok(features);
+                assert.equal(features.length, 3);
+                assert.equal(features[0].name, 'CpG: 111');
                 done();
             })
             .catch(function (error) {
