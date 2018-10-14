@@ -1131,6 +1131,11 @@ var igv = (function (igv) {
 
     };
 
+    igv.Browser.prototype.zoom = function (scaleFactor) {
+        let nuthin = undefined;
+        this.zoomWithScaleFactor(nuthin, nuthin, scaleFactor)
+    };
+
     // Zoom in by a factor of 2, keeping the same center location
     igv.Browser.prototype.zoomIn = function () {
         let nuthin = undefined;
