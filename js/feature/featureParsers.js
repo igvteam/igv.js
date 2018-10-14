@@ -1374,18 +1374,6 @@ var igv = (function (igv) {
         //if(!this.format.chr && this.format.start) {
         //}
 
-        if(!format.chr) {
-            const fields = format.fields;
-            const keys = ['chr', 'start', 'end'];
-
-            for (let i = 0; i < fields.length; i++) {
-                for (let key of keys) {
-                    if (key === fields[i]) {
-                        format[key] = i;
-                    }
-                }
-            }
-        }
 
         const chr = tokens[format.chr];
         const start = parseInt(tokens[format.start]) - coords;
@@ -1408,6 +1396,23 @@ var igv = (function (igv) {
 
         return feature;
 
+    }
+
+
+    function expandFormat(format) {
+
+        const fields = format.fields;
+        const keys = ['chr', 'start', 'end'];
+
+        for (let i = 0; i < fields.length; i++) {
+            for (let key of keys) {
+                if (key === fields[i]) {
+                    format[key] = i;
+                }
+            }
+        }
+
+        return format;
     }
 
 

@@ -67,14 +67,32 @@ var igv = (function (igv) {
     igv.getFormat = function (name) {
 
         if (igv.browser && igv.browser.formats && igv.browser.format[name]) {
-            return igv.browser.formats[name];
+
+            return expandFormat(igv.browser.formats[name]);
+
         } else if (igv.FileFormats && igv.FileFormats[name]) {
-            return igv.FileFormats[name];
+
+            return expandFormat(igv.FileFormats[name]);
         }
         else {
             return undefined;
         }
 
+        function expandFormat(format) {
+
+            const fields = format.fields;
+            const keys = ['chr', 'start', 'end'];
+
+            for (let i = 0; i < fields.length; i++) {
+                for (let key of keys) {
+                    if (key === fields[i]) {
+                        format[key] = i;
+                    }
+                }
+            }
+
+            return format;
+        }
     };
 
     igv.createTrack = function (config, browser) {
