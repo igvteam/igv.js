@@ -187,9 +187,7 @@ var igv = (function (igv) {
                         return [];
                     }
                     else {
-                        const wgFeatureCache = self.getWGFeatureCache(featureCache.getAllFeatures());
-                        return wgFeatureCache.queryFeatures("all", bpStart, bpEnd);
-
+                        return self.getWGFeatures(featureCache.getAllFeatures());
                     }
                 }
                 else {
@@ -339,35 +337,35 @@ var igv = (function (igv) {
     }
 
     // TODO -- filter by pixel size
-    igv.FeatureSource.prototype.getWGFeatureCache = function (features) {
+    igv.FeatureSource.prototype.getWGFeatures = function (features) {
 
         const genome = this.genome;
-        
-        if (!this.wgFeatureCache) {
 
-            const wgChromosomeNames = new Set(genome.wgChromosomeNames);
+        const wgChromosomeNames = new Set(genome.wgChromosomeNames);
 
-            const wgFeatures = [];
+        const wgFeatures = [];
 
-            features.forEach(function (f) {
+        for(let f of features) {
 
-                let queryChr = genome.getChromosomeName(f.chr);
+            let queryChr = genome.getChromosomeName(f.chr);
 
-                if (wgChromosomeNames.has(queryChr)) {
+            if (wgChromosomeNames.has(queryChr)) {
 
-                    let wg = Object.assign({}, f);
-                    wg.chr = "all";
-                    wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                    wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                const wg = Object.assign({}, f);
+                wg.chr = "all";
+                wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
-                    wgFeatures.push(wg);
-                }
-            });
-
-            this.wgFeatureCache = new igv.FeatureCache(wgFeatures, genome);
+                wgFeatures.push(wg);
+            }
         }
 
-        return this.wgFeatureCache;
+        wgFeatures.sort(function(a, b) {
+            return a.start - b.start;
+        });
+
+        return wgFeatures;
+
     }
 
 
