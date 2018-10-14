@@ -1369,6 +1369,24 @@ var igv = (function (igv) {
 
         const format = this.format;         // "this" refers to FeatureParser instance
         const coords = format.coords || 0;
+
+        // Insure that chr and start fields are defined.
+        //if(!this.format.chr && this.format.start) {
+        //}
+
+        if(!format.chr) {
+            const fields = format.fields;
+            const keys = ['chr', 'start', 'end'];
+
+            for (let i = 0; i < fields.length; i++) {
+                for (let key of keys) {
+                    if (key === fields[i]) {
+                        format[key] = i;
+                    }
+                }
+            }
+        }
+
         const chr = tokens[format.chr];
         const start = parseInt(tokens[format.start]) - coords;
         const end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1;
