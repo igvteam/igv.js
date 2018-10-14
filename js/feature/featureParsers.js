@@ -142,7 +142,7 @@ var igv = (function (igv) {
                     break;
                 default:
 
-                    customFormat = igv.getFormat(format);
+                    customFormat = igv.getFormat(this.format);
                     if (customFormat !== undefined) {
                         this.decode = decodeCustom;
                         this.format = customFormat;
@@ -1354,6 +1354,7 @@ var igv = (function (igv) {
 
 
     /**
+     * Decode a custom columnar format.  Required columns are 'chr' and 'start'
      *
      * @param tokens
      * @param ignore
@@ -1361,22 +1362,22 @@ var igv = (function (igv) {
      */
     function decodeCustom(tokens, ignore) {
 
-        var feature,
-            chr, start, end,
-            format = this.format,         // "this" refers to FeatureParser instance
-            coords = format.coords || 0;
+        const format = this.format;         // "this" refers to FeatureParser instance
+        const coords = format.coords || 0;
+        const chr = tokens[format.chr];
+        const start = parseInt(tokens[format.start]) - coords;
+        const end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1;
 
-        if (tokens.length < 3) return null;
-
-        chr = tokens[format.chr];
-        start = parseInt(tokens[format.start]) - coords;
-        end = format.end !== undefined ? parseInt(tokens[format.end]) : start + 1;
-
-        feature = {chr: chr, start: start, end: end};
+        const feature = {chr: chr, start: start, end: end};
 
         if (format.fields) {
+
             format.fields.forEach(function (field, index) {
-                if (index != format.chr && index != format.start && index != format.end) {
+
+                if (index != format.chr &&
+                    index != format.start &&
+                    index != format.end) {
+
                     feature[field] = tokens[index];
                 }
             });

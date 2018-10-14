@@ -29,6 +29,7 @@
 var igv = (function (igv) {
 
     igv.knownFileExtensions = new Set([
+
         "narrowpeak",
         "broadpeak",
         "peaks",
@@ -65,10 +66,13 @@ var igv = (function (igv) {
      */
     igv.getFormat = function (name) {
 
-        if (undefined === igv.browser || undefined === igv.browser.formats) {
-            return undefined;
-        } else {
+        if (igv.browser && igv.browser.formats && igv.browser.format[name]) {
             return igv.browser.formats[name];
+        } else if (igv.FileFormats && igv.FileFormats[name]) {
+            return igv.FileFormats[name];
+        }
+        else {
+            return undefined;
         }
 
     };
@@ -96,7 +100,6 @@ var igv = (function (igv) {
             case "genes":
             case "fusionjuncspan":
             case "snp":
-            case "rmsk":
 
                 return igv.trackFactory["feature"](trackConfig, browser);
 

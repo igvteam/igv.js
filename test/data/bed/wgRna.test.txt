@@ -1,0 +1,3 @@
+585	chr1	30365	30503	hsa-mir-1302-2	0	+	0	0	miRNA
+593	chr1	1167103	1167198	hsa-mir-200b	0	+	0	0	miRNA
+593	chr1	1167862	1167952	hsa-mir-200a	0	+	0	0	miRNA
