@@ -27,9 +27,7 @@ module.exports = function (grunt) {
           }
         },
         babel: {
-            options: {
-                presets: ['env']
-            },
+
             dist: {
                 files: [
                     {
