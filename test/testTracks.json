@@ -409,45 +409,31 @@
     }
   },
   {
-    "HEADING": "IGV Flask Server - hg19"
+    "HEADING": "UCSC Formats - hg19"
   },
   {
     "name": "sno/miRNA (UCSC service) hg19",
     "type": "annotation",
+    "format": "wgRna",
     "displayMode": "EXPANDED",
-    "sourceType": "ucscservice",
-    "source": {
-      "url": "https://data.igv.org/ucsc",
-      "db": "hg19",
-      "method": "GET",
-      "tableName": "wgRna"
-    }
+    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/annotations/wgRna.txt.gz"
   },
   {
     "name": "GWAS hg19",
     "type": "annotation",
+    "format": "gwasCatalog",
     "displayMode": "EXPANDED",
-    "sourceType": "ucscservice",
-    "visibilityWindow": 1000000,
-    "source": {
-      "url": "https://data.igv.org/ucsc",
-      "db": "hg19",
-      "method": "GET",
-      "tableName": "gwasCatalog"
-    }
+    "visibilityWindow": -1,
+    "url" : "https://s3.amazonaws.com/igv.org.genomes/hg19/annotations/gwasCatalog.txt.gz",
+    "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/annotations/gwasCatalog.txt.gz.tbi"
   },
   {
     "name": "CPG Islands hg19",
     "type": "annotation",
+    "format": "cpgIslandExt",
     "displayMode": "EXPANDED",
-    "sourceType": "ucscservice",
-    "visibilityWindow": 2000000,
-    "source": {
-      "url": "https://data.igv.org/ucsc",
-      "db": "hg19",
-      "method": "GET",
-      "tableName": "cpgIslandExt"
-    }
+    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/annotations/cpgIslandExt.txt.gz"
+
   },
 
   {
