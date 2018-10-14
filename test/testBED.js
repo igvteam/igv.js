@@ -144,6 +144,33 @@ function runBedTests() {
             })
     })
 
+    QUnit.test("ensgene format", function (assert) {
+
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
+        const done = assert.async();
+
+        const config = {
+            format: "ensgene",
+            indexed: false,
+            url: "data/bed/ensgene.test.txt"
+        }
+
+        const reader = new igv.FeatureFileReader(config);
+
+        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+            .then(features => {
+                assert.ok(features);
+                assert.equal(features.length, 3);
+                assert.equal(features[0].name, 'ENSDART00000164359.1');
+                done();
+            })
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false);
+                done;
+            })
+    })
+
 
     /* 0  bin    585    smallint(5) unsigned    Indexing field to speed chromosome range queries.
     * 1  swScore    1504    int(10) unsigned    Smith Waterman alignment score
