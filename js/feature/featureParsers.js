@@ -103,6 +103,11 @@ var igv = (function (igv) {
                     this.decode = decodeGenePredExt;
                     this.delimiter = /\s+/;
                     break;
+                case "ensgene":
+                    this.decode = decodeGenePred
+                    this.shift = 1;
+                    this.delimiter = /\s+/;
+                    break;
                 case "refgene":
                     this.decode = decodeGenePredExt;
                     this.delimiter = /\s+/;
