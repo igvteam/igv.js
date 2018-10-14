@@ -146,13 +146,12 @@ function runBedTests() {
 
     QUnit.test("ensgene format", function (assert) {
 
-        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
         const done = assert.async();
 
         const config = {
             format: "ensgene",
             indexed: false,
-            url: "data/bed/ensgene.test.txt"
+            url: "data/bed/ensGene.test.txt"
         }
 
         const reader = new igv.FeatureFileReader(config);
