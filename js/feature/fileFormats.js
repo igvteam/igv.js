@@ -5,14 +5,11 @@ var igv = (function (igv) {
     igv.FileFormats = {
 
         gwascatalog: {
-            chr: 1,
-            start: 2,
-            end: 3,
             fields: [
                 'bin',
-                'chrom',
-                'chromStart',
-                'chromEnd',
+                'chr',
+                'start',
+                'end',
                 'name',
                 'pubMedID',
                 'author',
@@ -36,44 +33,38 @@ var igv = (function (igv) {
         },
 
         wgrna: {
-            chr: 1,
-            start: 2,
-            end: 3,
-            fields: [
-                'bin',
-                'chrom',
-                'chromStart',
-                'chromEnd',
-                'name',
-                'score',
-                'strand',
-                'thickStart',
-                'thickEnd',
-                'type'
-            ]
+            fields:
+                [
+                    'bin',
+                    'chr',
+                    'start',
+                    'end',
+                    'name',
+                    'score',
+                    'strand',
+                    'thickStart',
+                    'thickEnd',
+                    'type'
+                ]
         },
 
         cpgislandext: {
+            fields:
 
-            chr: 1,
-            start: 2,
-            end: 3,
-            fields: [
-                'bin',
-                'chrom',
-                'chromStart',
-                'chromEnd',
-                'name',
-                'length',
-                'cpgNum',
-                'gcNum',
-                'perCpg',
-                'perGc',
-                'obsExp'
-            ]
-
+                [
+                    'bin',
+                    'chr',
+                    'start',
+                    'end',
+                    'name',
+                    'length',
+                    'cpgNum',
+                    'gcNum',
+                    'perCpg',
+                    'perGc',
+                    'obsExp'
+                ]
         }
-
     }
 
 
