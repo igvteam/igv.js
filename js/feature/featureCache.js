@@ -90,6 +90,11 @@ var igv = (function (igv) {
 
     };
 
+    /**
+     * Returns all features, unsorted.
+     *
+     * @returns {Array}
+     */
     igv.FeatureCache.prototype.getAllFeatures = function () {
 
 
@@ -106,10 +111,6 @@ var igv = (function (igv) {
                 }
             }
         }
-
-        allFeatures.sort(function (a, b) {
-            return a.start - b.start;
-        });
 
         return allFeatures;
 
