@@ -171,6 +171,7 @@ var igv = (function (igv) {
     igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
         const self = this;
+        const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
         const maxRows = self.config.maxRows || 500;
@@ -214,7 +215,8 @@ var igv = (function (igv) {
             }
             else {
 
-                // If a visibility window is defined, expand query interval
+                // If a visibility window is defined, potentially expand query interval.
+                // This can save re-queries as we zoom out.
 
                 if (-1 !== visibilityWindow) {
                     if (visibilityWindow <= 0) {
@@ -223,7 +225,7 @@ var igv = (function (igv) {
                         intervalEnd = Number.MAX_VALUE;
                     }
                     else {
-                        if (visibilityWindow > (bpEnd - bpStart)) {
+                        if ((reader.expandQueryInterval !== false) && visibilityWindow > (bpEnd - bpStart)) {
                             intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
                             intervalEnd = bpStart + visibilityWindow;
                         }
@@ -232,11 +234,11 @@ var igv = (function (igv) {
                 }
 
 
-                return self.reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+                return reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
                     .then(function (featureList) {
 
-                        if (self.queryable === undefined) self.queryable = self.reader.indexed;
+                        if (self.queryable === undefined) self.queryable = reader.indexed;
 
                         if (featureList) {
 

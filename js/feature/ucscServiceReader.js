@@ -31,6 +31,7 @@ var igv = (function (igv) {
     igv.UCSCServiceReader = function (config, genome) {
         this.config = config;
         this.genome = genome;
+        this.expandQueryInterval = false;
     };
 
     igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
