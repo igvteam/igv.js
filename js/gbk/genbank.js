@@ -40,7 +40,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.GenbankParser.parseFeatures = function (data) {
+    igv.GenbankParser.prototype.parseFeatures = function (data) {
 
         var line, locusName, accession, sequence, aliases, chr;
 
