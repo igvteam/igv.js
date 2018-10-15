@@ -1051,4 +1051,22 @@
   border: 0;
   display: block; }
 
+@media (max-width: 1100px) {
+  .igv-navbar .igv-nav-bar-left-container .igv-logo {
+    margin-right: 8px; }
+
+  .igv-navbar .igv-nav-bar-left-container .igv-current_genome {
+    margin-right: 8px; }
+
+  .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container {
+    font-size: 8px;
+    width: 72px; }
+  .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container {
+    font-size: 8px;
+    width: 150px; }
+
+  .igv-nav-bar-button {
+    min-width: 64px;
+    font-size: 8px; } }
+
 /*# sourceMappingURL=igv.css.map */
