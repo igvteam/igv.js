@@ -3,6 +3,8 @@
     "type": "annotation",
     "sourceType": "civic-ws",
     "url": "https://civicdb.org/api",
+    "indexed": false,
+    "queryable": false,
     "name": "CIViC"
   },
   {
