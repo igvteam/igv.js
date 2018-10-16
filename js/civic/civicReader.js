@@ -71,7 +71,7 @@ var igv = (function (igv) {
             }
 
             this.locationString = (this.chr + ":" +
-                igv.numberFormatter(this.start + 1) + ":" +
+                igv.numberFormatter(this.start + 1) + "-" +
                 igv.numberFormatter(this.end));
 
             // Color based on actionability score
@@ -115,7 +115,7 @@ var igv = (function (igv) {
 
             }
 
-            pd.push(createLink("Gene", "https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + this.entrezName));
+            pd.push({name: "Entrez", value: createLink(this.entrezName, "https://ghr.nlm.nih.gov/gene/" + this.entrezName)});
             pd.push({name: "Name", value: this.name});
 
             if (this.variant_types && this.variant_types.length > 0) {
