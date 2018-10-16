@@ -355,7 +355,9 @@ var igv = (function (igv) {
 
             if (wgChromosomeNames.has(queryChr)) {
 
-                const wg = Object.assign({}, f);
+                const wg = Object.create(Object.getPrototypeOf(f));
+                Object.assign(wg, f);
+
                 wg.chr = "all";
                 wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                 wg.end = genome.getGenomeCoordinate(f.chr, f.end);
