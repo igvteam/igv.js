@@ -65,7 +65,14 @@ var igv = (function (igv) {
         }
 
         this.order = config.order;
-        this.color = config.color || config.defaultColor || "rgb(0,0,150)";
+
+        if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
+            this.color = "rgb(155,20,20)";
+        }
+        else {
+            this.color = config.color || config.defaultColor || "rgb(0,0,150)";
+        }
+
 
         this.autoscaleGroup = config.autoscaleGroup;
 
