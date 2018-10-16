@@ -72,6 +72,10 @@ var igv = (function (igv) {
             this.reader = new igv.CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
         }
+        else if ("civic-ws" === config.sourceType) {
+            this.reader = new igv.CivicReader(config);
+            this.queryable = false;
+        }
         else {
             this.reader = new igv.FeatureFileReader(config, genome);
             if (config.queryable != undefined) {
