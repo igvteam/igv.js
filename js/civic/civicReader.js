@@ -112,7 +112,6 @@ var igv = (function (igv) {
             pd.push({name: "Name", value: this.name});
             pd.push({name: "Entrez Name", value: this.entrezName});
             pd.push({name: "Actionability Score", value: this.actionabilityScore});
-            pd.push("<hr/>");
             pd.push({name: "Location", value:
                     (this.chr + ":" +
                         igv.numberFormatter(this.start + 1) + ":" +
