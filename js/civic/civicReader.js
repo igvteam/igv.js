@@ -103,12 +103,11 @@ var igv = (function (igv) {
             }
 
             const pd = [link];
-            pd.push("<hr/>");
-
+            
             if (cravatLink) {
                 pd.push(cravatLink);
+
             }
-            pd.push("<hr/>");
 
             pd.push({name: "Name", value: this.name});
             pd.push({name: "Entrez Name", value: this.entrezName});
