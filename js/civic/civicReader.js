@@ -68,10 +68,7 @@ var igv = (function (igv) {
             }
 
             // Color based on actionability score
-            if (this.actionabilityScore === undefined) {
-                this.color = "lightgray";
-            }
-            else {
+            if (this.actionabilityScore !== undefined) {
                 let alpha;
                 if (this.actionabilityScore <= 10) {
                     alpha = 0.2;
@@ -80,7 +77,7 @@ var igv = (function (igv) {
                     const v = Math.min(30, this.actionabilityScore);
                     alpha = 0.2 + 0.8 * Math.log10((v - 10) / 2);
                 }
-                this.color = igv.Color.addAlpha("rgb(50,0, 200)", alpha);
+                this.alpha = alpha;
             }
 
 
