@@ -836,6 +836,7 @@ var igv = (function (igv) {
         const self = this;
 
         // Minimal attempt at responsiveness
+        /*
         const rootWidth = this.$root.width();
         if (rootWidth < 1000) {
             this.chromosomeSelectWidget.$container.hide();
@@ -851,8 +852,8 @@ var igv = (function (igv) {
             this.zoomWidget.show();
             //this.$root.find(".igv-track-manipulation-handle").show();
         }
-
-
+        */
+        
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         const viewportWidth = this.viewportWidth();
 
