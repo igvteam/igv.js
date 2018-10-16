@@ -1,5 +1,11 @@
 [
   {
+    "type": "annotation",
+    "sourceType": "civic-ws",
+    "url": "https://civicdb.org/api",
+    "name": "CIViC"
+  },
+  {
     "HEADING": "GTEx"
   },
   {

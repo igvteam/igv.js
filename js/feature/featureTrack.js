@@ -68,7 +68,8 @@ var igv = (function (igv) {
                 if ('bigwig' === format || 'bigbed' === format) {
                     this.featureSource = new igv.BWSource(config, browser.genome);
 
-                } else {
+                }
+                else {
                     this.featureSource = new igv.FeatureSource(config, browser.genome);
                 }
 
@@ -288,7 +289,7 @@ var igv = (function (igv) {
             const genomicLocation = clickState.genomicLocation;
 
             const data = [];
-            for(let feature of features) {
+            for (let feature of features) {
 
                 const featureData = feature.popupData ? feature.popupData(genomicLocation) : this.extractPopupData(feature);
 
@@ -298,7 +299,8 @@ var igv = (function (igv) {
                     }
                     Array.prototype.push.apply(data, featureData);
                 }
-            };
+            }
+            ;
 
             return data;
 
