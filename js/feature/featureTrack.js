@@ -469,12 +469,19 @@ var igv = (function (igv) {
             const browser = this.browser;
 
             let color = this.color;  // default
+
+            if(feature.alpha && feature.alpha !== 1) {
+                color = igv.Color.addAlpha(this.color, feature.alpha);
+            }
+
+
             if (this.config.colorBy) {
                 const colorByValue = feature[this.config.colorBy.field];
                 if (colorByValue) {
                     color = this.config.colorBy.pallete[colorByValue];
                 }
             }
+
             else if (feature.color) {
                 color = feature.color;
             }

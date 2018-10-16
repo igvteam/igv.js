@@ -463,8 +463,9 @@ var igv = (function (igv) {
     };
 
     function doProvideColoSwatchWidget(track) {
-        return ("alignment" === track.type ||
-            "feature" === track.type ||
+        return (
+            "alignment" === track.type ||
+            "annotation" === track.type ||
             "variant" === track.type ||
             "wig" === track.type);
     };
