@@ -50,6 +50,10 @@ var igv = (function (igv) {
      */
     igv.TrackBase = function (config, browser) {
 
+        if(config.displayMode) {
+            config.displayMode = config.displayMode.toUpperCase();
+        }
+
         this.config = config;
         this.browser = browser;
         this.url = config.url;
