@@ -66,6 +66,13 @@ var igv = (function (igv) {
             if (record.coordinates.variant_bases) {
                 this.altBases = record.coordinates.variant_bases
             }
+            if (record.variant_types) {
+                this.variant_types = record.variant_types;
+            }
+
+            this.locationString = (this.chr + ":" +
+                igv.numberFormatter(this.start + 1) + ":" +
+                igv.numberFormatter(this.end));
 
             // Color based on actionability score
             if (this.actionabilityScore !== undefined) {
@@ -86,7 +93,7 @@ var igv = (function (igv) {
         CivicVariant.prototype.popupData = function () {
 
 
-            const link = "<a target='_blank' href='https://civicdb.org/links/variants/" + this.id + "'>CIViC</a>";
+            const link = createLink("CIViC", "https://civicdb.org/links/variants/" + this.id);
 
             let cravatLink;
             const isSnp =
@@ -97,27 +104,43 @@ var igv = (function (igv) {
             if (isSnp) {
                 const ref = this.refBases;
                 const alt = this.altBases;
-                cravatLink = "<a target='_blank' " +
-                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>CRAVAT " + ref + "->" + alt + "</a>";
+                cravatLink = createLink("CRAVAT", "http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt);
 
             }
 
             const pd = [link];
-            
+
             if (cravatLink) {
                 pd.push(cravatLink);
 
             }
 
+            pd.push(createLink("Gene", "https://www.genecards.org/cgi-bin/carddisp.pl?gene=" + this.entrezName));
             pd.push({name: "Name", value: this.name});
-            pd.push({name: "Entrez Name", value: this.entrezName});
-            pd.push({name: "Actionability Score", value: this.actionabilityScore});
-            pd.push({name: "Location", value:
-                    (this.chr + ":" +
-                        igv.numberFormatter(this.start + 1) + ":" +
-                        igv.numberFormatter(this.end))});
+
+            if (this.variant_types && this.variant_types.length > 0) {
+
+                const name = this.variant_types.length === 1 ? "Type" : "Types";
+                let typeString;
+                for (let vt of this.variant_types) {
+                    if (!typeString) typeString = vt.display_name;
+                    else typeString += ", " + vt.display_name;
+                }
+                ;
+                pd.push({name: name, value: typeString});
+            }
+
+            pd.push({name: "Actionability", value: this.actionabilityScore});
+
+
+            pd.push({name: "Location", value: this.locationString});
 
             return pd;
+
+
+            function createLink(text, href) {
+                return "<a target='_blank' " + "href='" + href + "'>" + text + "</a>"
+            }
 
         }
 
