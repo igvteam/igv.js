@@ -86,6 +86,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.RulerTrack.prototype.computePixelHeight = function (ignore) {
+        return this.height;
+    }
+
     igv.RulerTrack.prototype.draw = function (options) {
         var key,
             rulerSweeper,
