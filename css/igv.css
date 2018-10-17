@@ -143,13 +143,6 @@
   border-width: thin;
   border-color: #bfbfbf;
   background-color: #f3f3f3; }
-  .igv-navbar i {
-    cursor: pointer;
-    color: #666666; }
-  .igv-navbar i:hover,
-  .igv-navbar i:focus,
-  .igv-navbar i:active {
-    color: #434343; }
   .igv-navbar .igv-nav-bar-left-container {
     display: flex;
     flex-flow: row;
@@ -179,6 +172,7 @@
         width: 100px;
         margin-right: 4px; }
         .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container select {
+          cursor: pointer;
           width: 100%;
           height: 75%;
           outline: none;
@@ -202,6 +196,7 @@
           justify-content: flex-start;
           align-items: center; }
           .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container input {
+            cursor: text;
             width: 85%;
             height: 75%;
             padding-left: 8px;
@@ -244,6 +239,7 @@
         margin-right: 0; }
     .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
       height: 100%;
+      color: #737373;
       font-size: 18px;
       user-select: none;
       margin-left: 16px;
@@ -1064,10 +1060,8 @@
       width: 150px; }
       .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container input {
         font-size: 10px; }
-    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
-      font-size: 14px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
-        width: 72px; }
+    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
+      width: 72px; }
 
   .igv-nav-bar-button {
     min-width: 64px;
@@ -1075,7 +1069,9 @@
 @media (max-width: 800px) {
   .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
     display: none; }
-  .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
-    display: none; } }
+  .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
+    font-size: 24px; }
+    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
+      display: none; } }
 
 /*# sourceMappingURL=igv.css.map */

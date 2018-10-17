@@ -163,17 +163,6 @@ $igv-dark-grey-color: #373737;
   border-color: $igv-border-color;
   background-color: $igv-navbar-toggle-light-color;
 
-  i {
-    cursor: pointer;
-    color: #666666;
-  }
-
-  i:hover,
-  i:focus,
-  i:active  {
-    color: #434343;
-  }
-
   .igv-nav-bar-left-container {
 
     display: flex;
@@ -188,21 +177,15 @@ $igv-dark-grey-color: #373737;
     .igv-logo {
       width: 34px;
       height: $igv-navbar-height;
-
       margin-left: 8px;
       margin-right: 32px;
     }
 
     .igv-current_genome {
-
       height: $igv-navbar-height;
-
       margin-right: 16px;
-
       user-select: none;
-
       text-align: center;
-
     }
 
     // chromosome select widget | chromosome select widget | locus goto | search icon | window size
@@ -218,11 +201,13 @@ $igv-dark-grey-color: #373737;
 
       // chromosome select widget
       .igv-chromosome-select-widget-container {
+
         height: 100%;
         width: 100px;
         margin-right: 4px;
 
         select {
+          cursor: pointer;
           width: 100%;
           height: 75%;
           outline: none;
@@ -230,7 +215,6 @@ $igv-dark-grey-color: #373737;
           font-size: $igv-navbar-font-size;
           font-family: $igv-default-font-face;
           font-weight: 400;
-
         }
 
       }
@@ -258,6 +242,7 @@ $igv-dark-grey-color: #373737;
 
           // locus goto
           input {
+            cursor: text;
             width: 85%;
             height: 75%;
 
@@ -338,6 +323,8 @@ $igv-dark-grey-color: #373737;
     .igv-zoom-widget {
 
       height: 100%;
+
+      color: $igv-navbar-toggle-dark-dark;
 
       font-size: 18px;
 
@@ -1509,7 +1496,6 @@ $igv-dark-grey-color: #373737;
     .igv-nav-bar-right-container {
 
       .igv-zoom-widget {
-        font-size: 14px;
         div {
           input {
             width: 72px;
@@ -1539,6 +1525,8 @@ $igv-dark-grey-color: #373737;
       }
 
       .igv-zoom-widget {
+
+        font-size: 24px;
 
         div {
           input {
