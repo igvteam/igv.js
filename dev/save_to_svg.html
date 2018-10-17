@@ -156,7 +156,10 @@
 
 <div id="trackList"></div>
 
-<div id='igv-app-container'></div>
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
 
 <div id='igv-draw-svg-button-container'>
     <button id='igv-draw-svg-button' type="button">
@@ -179,6 +182,8 @@
 
                 const options =
                     {
+                        showCursorTrackingGuideButton: false,
+                        showCenterGuideButton: false,
                         locus: 'muc1',
                         // locus: 'chr1:155,161,396-155,161,448',
                         genome: 'hg19',
