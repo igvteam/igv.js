@@ -138,6 +138,8 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_esm', 'uglify:igv_esm', 'clean']);
 
+    grunt.registerTask('quick-build', ['concat:css', 'embed-css', 'concat:igv', 'clean']);
+
     grunt.registerTask('doc', ['md2html']);
 
     grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
