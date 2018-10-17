@@ -7,7 +7,7 @@
 #igv-app-container {
   margin-top: 16px;
   width: 1024px;
-  border-color: #242424;
+  border-color: #5ea4e0;
   border-style: solid;
   border-width: thin; }
 
@@ -18,12 +18,12 @@
 #igv-svg-container {
   margin-top: 32px;
   margin-bottom: 64px;
-  border-color: #ff01c7;
+  border-color: #aaed08;
   border-style: solid;
   border-width: thin; }
 
 .igv-content-div {
-  border-color: #242424;
+  border-color: rgba(255, 0, 0, 0.5);
   border-style: solid;
   border-width: thin; }
 
