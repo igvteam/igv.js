@@ -64,7 +64,7 @@ var igv = (function (igv) {
         } else {
             addMouseHandlers.call(this);
 
-            const dimen = Math.min(32, this.$viewport.height());
+            const dimen = 32;
             const $spinnerContainer = $('<div class="igv-viewport-spinner">');
             $spinnerContainer.css({'font-size': dimen + 'px'});
 
@@ -294,7 +294,12 @@ var igv = (function (igv) {
         const bpEnd = tile.endBP;
         const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
         const pixelHeight = self.getContentHeight();
-
+        if(pixelWidth == 0 || pixelHeight === 0) {
+            if (self.canvas) {
+                $(self.canvas).remove();
+            }
+            return;
+        }
 
         const drawConfiguration =
             {
@@ -327,8 +332,6 @@ var igv = (function (igv) {
         newCanvas.style.position = 'absolute';
         newCanvas.style.left = pixelOffset + "px";
         newCanvas.style.top = self.canvas.style.top + "px";
-
-
         drawConfiguration.context = ctx;
 
         ctx.save();

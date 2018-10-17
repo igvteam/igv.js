@@ -836,6 +836,7 @@ var igv = (function (igv) {
         const self = this;
 
         // Minimal attempt at responsiveness
+        // TODO -- remove this when media queries are working
         const rootWidth = this.$root.width();
         if (rootWidth < 1000) {
             this.chromosomeSelectWidget.$container.hide();
@@ -855,6 +856,10 @@ var igv = (function (igv) {
 
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         const viewportWidth = this.viewportWidth();
+
+        if(viewportWidth === 0) {
+            return;
+        }
 
         if (this.genomicStateList && viewportWidth > 0) {
             this.genomicStateList.forEach(function (gstate) {
@@ -882,6 +887,8 @@ var igv = (function (igv) {
             this.updateLocusSearchWidget(this.genomicStateList[0]);
             this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
         }
+
+        this.updateViews();
 
         function resizeWillExceedChromosomeLength(genomicState) {
 
