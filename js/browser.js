@@ -124,29 +124,32 @@ var igv = (function (igv) {
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
         const anyViewportBBox = this.trackViews[ 0 ].viewports[ 0 ].$viewport.get(0).getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
+        const ideoPanelBBox = this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect();
+
+        const w = anyViewportContainerBBox.width;
+        const h = trackContainerBBox.height + ideoPanelBBox.height;
 
         let svgContext = new C2S(
             {
-                // width: anyViewportBBox.width,
-                width: anyViewportContainerBBox.width,
 
-                height: trackContainerBBox.height,
+                // width: anyViewportBBox.width,
+                width: w,
+                height: h,
 
                 viewbox:
                     {
                         x: 0,
                         y: 0,
+
                         // width: anyViewportBBox.width,
-                        width: anyViewportContainerBBox.width,
-                        height: trackContainerBBox.height
+                        width: w,
+                        height: h
                     }
 
             });
 
         // ideoPanel group
-        this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX: -trackContainerBBox.x, deltaY: 0 });
-
-        const ideoPanelBBox = this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect();
+        this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX:0, deltaY: 0 });
 
         // console.log('---');
         this.trackViews
@@ -156,7 +159,7 @@ var igv = (function (igv) {
 
                 return accumulation;
 
-            }, { ctx: svgContext, deltaX: 0, deltaY: (ideoPanelBBox.height - trackContainerBBox.y) });
+            }, { ctx: svgContext, deltaX:0, deltaY:(ideoPanelBBox.height - trackContainerBBox.y) });
 
         let svg = svgContext.getSerializedSvg(true);
 
