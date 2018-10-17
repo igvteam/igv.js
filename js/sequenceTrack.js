@@ -310,6 +310,10 @@ var igv = (function (igv) {
         SequenceTrack.prototype.supportsWholeGenome = function () {
             return false;
         }
+
+        SequenceTrack.prototype.computePixelHeight = function (ignore) {
+            return this.height;
+        }
     }
 
     return igv;
