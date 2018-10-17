@@ -282,9 +282,14 @@ var C2S
         this.__defs = this.__document.createElementNS("http://www.w3.org/2000/svg", "defs");
         this.__root.appendChild(this.__defs);
 
-        //also add a group child. the svg element can't use the transform attribute
-        this.__currentElement = this.__document.createElementNS("http://www.w3.org/2000/svg", "g");
-        this.__root.appendChild(this.__currentElement);
+        // background color
+        this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
+
+        // root group
+        this.__rootGroup = this.__createElement('g', { id: 'root group' });
+        this.__root.appendChild(this.__rootGroup);
+
+        this.__currentElement = this.__rootGroup;
     };
 
 
@@ -523,6 +528,20 @@ var C2S
         }
         transform += t;
         this.__currentElement.setAttribute("transform", transform);
+    };
+
+    ctx.prototype.addRootParentedGroupWithTranslation = function (x, y) {
+
+        let group = this.__createElement("g");
+        this.__rootGroup.appendChild(group);
+
+        let translation = format("translate({x},{y})", {x:x,y:y});
+        group.setAttribute("transform", translation);
+
+        group.setAttribute("id", ('group(' + x + ', ' + y + ')'));
+
+        this.__currentElement = group;
+
     };
 
     /**

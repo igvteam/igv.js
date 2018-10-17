@@ -25,6 +25,10 @@
 
 var igv = (function (igv) {
 
+    igv.domRectDescription = ({ x, y, width, height }) => {
+        return 'x ' + Math.round(x) + ' y ' + Math.round(y) + ' w ' + igv.numberFormatter(Math.round(width)) + ' h ' + igv.numberFormatter(Math.round(height));
+    };
+
     igv.genericContainer = function ($parent, config, closeHandler) {
 
         var $generic_container,

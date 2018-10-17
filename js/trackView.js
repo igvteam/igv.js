@@ -110,6 +110,28 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.renderSVGContext = function (config) {
+
+        let viewportConfig = { ...config };
+        let self = this;
+        this.viewports
+            .reduce(function(accumulation, viewport) {
+
+                const bbox = viewport.$viewport.get(0).getBoundingClientRect();
+
+                accumulation.deltaX = viewport.browser.genomicStateList.indexOf(viewport.genomicState) * viewport.$viewport.width();
+                accumulation.deltaY = config.deltaY + bbox.y;
+
+
+                // console.log((self.track.id || self.track.name) + ' y ' + Math.round(accumulation.deltaY) + ' bbox-height ' + Math.round(bbox.height) + ' viewport-height ' + viewport.$viewport.height());
+
+                viewport.renderSVGContext(accumulation);
+
+                return accumulation;
+            }, viewportConfig);
+
+    };
+
     igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
