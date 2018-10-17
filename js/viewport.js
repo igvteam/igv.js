@@ -294,7 +294,7 @@ var igv = (function (igv) {
         const bpEnd = tile.endBP;
         const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
         const pixelHeight = self.getContentHeight();
-        if(pixelWidth == 0 || pixelHeight === 0) {
+        if(pixelWidth === 0 || pixelHeight === 0) {
             if (self.canvas) {
                 $(self.canvas).remove();
             }
@@ -495,6 +495,54 @@ var igv = (function (igv) {
         const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
         const data = exportCanvas.toDataURL("image/png");
         igv.download(filename, data);
+    };
+
+    igv.Viewport.prototype.renderSVGContext = function (config) {
+
+        const contentBBox = this.contentDiv.getBoundingClientRect();
+        const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
+
+        console.log((this.trackView.track.name || this.trackView.track.id) + '  content bbox ' + igv.domRectDescription(contentBBox));
+        console.log((this.trackView.track.name || this.trackView.track.id) + ' viewport bbox ' + igv.domRectDescription(viewportBBox));
+
+        config.ctx.addRootParentedGroupWithTranslation(config.deltaX, config.deltaY);
+
+        const pixelWidth = this.$viewport.width();
+        const pixelHeight = this.$viewport.height();
+
+        let referenceFrame = this.genomicState.referenceFrame;
+
+        config.ctx.save();
+
+        const drawConfig =
+            {
+                context: config.ctx,
+
+                viewport: this,
+
+                referenceFrame: referenceFrame,
+
+                genomicState: this.genomicState,
+
+                pixelWidth: pixelWidth,
+                pixelHeight: pixelHeight,
+
+                viewportWidth: pixelWidth,
+
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
+
+                bpStart: referenceFrame.start,
+                bpEnd: referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel,
+
+                bpPerPixel: referenceFrame.bpPerPixel,
+
+                selection: this.selection
+            };
+
+        draw.call(this, drawConfig, this.tile.features);
+
+        config.ctx.restore();
     };
 
     igv.Viewport.prototype.saveSVG = function () {

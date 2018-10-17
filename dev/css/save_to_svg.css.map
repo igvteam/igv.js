@@ -1,0 +1,7 @@
+{
+"version": 3,
+"mappings": "AAAA,8BAA+B;EAC7B,WAAW,EAAE,IAAI;EACjB,UAAU,EAAE,IAAI;;AAGlB,kBAAmB;EAGjB,UAAU,EAAE,IAAI;EAEhB,YAAY,EAAE,OAAO;EACrB,YAAY,EAAE,KAAK;EACnB,YAAY,EAAE,IAAI;;AAMpB,gBAAiB;EACf,YAAY,EAAE,OAAO;EACrB,YAAY,EAAE,KAAK;EACnB,YAAY,EAAE,IAAI",
+"sources": ["save_to_svg.scss"],
+"names": [],
+"file": "save_to_svg.css"
+}

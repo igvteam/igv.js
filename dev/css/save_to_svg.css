@@ -1,0 +1,16 @@
+#igv-draw-svg-button-container {
+  margin-left: 64px;
+  margin-top: 32px; }
+
+#igv-svg-container {
+  margin-top: 32px;
+  border-color: #ff01c7;
+  border-style: solid;
+  border-width: thin; }
+
+.igv-content-div {
+  border-color: #242424;
+  border-style: solid;
+  border-width: thin; }
+
+/*# sourceMappingURL=save_to_svg.css.map */

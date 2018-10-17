@@ -25,6 +25,70 @@
 
 var igv = (function (igv) {
 
+<<<<<<< HEAD
+=======
+    igv.domRectDescription = ({ x, y, width, height }) => {
+        return 'x ' + Math.round(x) + ' y ' + Math.round(y) + ' w ' + igv.numberFormatter(Math.round(width)) + ' h ' + igv.numberFormatter(Math.round(height));
+    };
+
+    igv.genericContainer = function ($parent, config, closeHandler) {
+
+        var $generic_container,
+            $header,
+            $fa;
+
+        $generic_container = $('<div>', {class: 'igv-generic-container'});
+        $parent.append($generic_container);
+
+        // width
+        if (config && config.width) {
+            $generic_container.width(config.width);
+        }
+
+        // height
+        if (config && config.height) {
+            $generic_container.height(config.height);
+        }
+
+        // height
+        if (config && config.classes) {
+            $generic_container.addClass(config.classes.join(' '));
+        }
+
+        // header
+        $header = $('<div>');
+        $generic_container.append($header);
+
+        // close button
+        $fa = igv.createIcon("times");
+        $header.append($fa);
+
+        $fa.on('mousedown', function (e) {
+            e.stopPropagation();
+        })
+
+        $fa.on('mouseup', function (e) {
+            e.stopPropagation();
+        })
+
+        $fa.on('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeHandler(e);
+        });
+        $fa.on('touchend', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            closeHandler(e);
+        });
+
+        // $generic_container.draggable({handle: $header.get(0)});
+        igv.makeDraggable($generic_container.get(0), $header.get(0));
+        return $generic_container;
+    };
+
+
+>>>>>>> svg edits
     igv.getExtension = function (config) {
         var path,
             filename,

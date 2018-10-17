@@ -119,6 +119,54 @@ var igv = (function (igv) {
         return igv.knownFileExtensions.has(extension);
     };
 
+    igv.Browser.prototype.renderSVG = function ($container) {
+
+        const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+        const anyViewportBBox = this.trackViews[ 0 ].viewports[ 0 ].$viewport.get(0).getBoundingClientRect();
+        const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
+
+        let svgContext = new C2S(
+            {
+                // width: anyViewportBBox.width,
+                width: anyViewportContainerBBox.width,
+
+                height: trackContainerBBox.height,
+
+                viewbox:
+                    {
+                        x: 0,
+                        y: 0,
+                        // width: anyViewportBBox.width,
+                        width: anyViewportContainerBBox.width,
+                        height: trackContainerBBox.height
+                    }
+
+            });
+
+        // ideoPanel group
+        this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX: -trackContainerBBox.x, deltaY: 0 });
+
+        const ideoPanelBBox = this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect();
+
+        // console.log('---');
+        this.trackViews
+            .reduce(function(accumulation, trackView) {
+
+                trackView.renderSVGContext(accumulation);
+
+                return accumulation;
+
+            }, { ctx: svgContext, deltaX: 0, deltaY: (ideoPanelBBox.height - trackContainerBBox.y) });
+
+        let svg = svgContext.getSerializedSvg(true);
+
+        $container.empty();
+        // $container.width(anyViewportBBox.width);
+        $container.width(anyViewportContainerBBox.width);
+        $container.append( svg );
+
+    };
+
 
     /**
      * Load a session
