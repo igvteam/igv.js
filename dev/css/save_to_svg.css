@@ -1,3 +1,16 @@
+#igv-centering-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center; }
+
+#igv-app-container {
+  margin-top: 16px;
+  width: 1024px;
+  border-color: #242424;
+  border-style: solid;
+  border-width: thin; }
+
 #igv-draw-svg-button-container {
   margin-left: 64px;
   margin-top: 32px; }
