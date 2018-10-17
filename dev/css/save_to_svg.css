@@ -4,6 +4,7 @@
 
 #igv-svg-container {
   margin-top: 32px;
+  margin-bottom: 64px;
   border-color: #ff01c7;
   border-style: solid;
   border-width: thin; }

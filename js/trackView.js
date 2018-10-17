@@ -108,12 +108,10 @@ var igv = (function (igv) {
             .reduce(function(accumulation, viewport) {
 
                 const bbox = viewport.$viewport.get(0).getBoundingClientRect();
+                const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
 
-                accumulation.deltaX = viewport.browser.genomicStateList.indexOf(viewport.genomicState) * viewport.$viewport.width();
+                accumulation.deltaX = config.deltaX + index * viewport.$viewport.width();
                 accumulation.deltaY = config.deltaY + bbox.y;
-
-
-                // console.log((self.track.id || self.track.name) + ' y ' + Math.round(accumulation.deltaY) + ' bbox-height ' + Math.round(bbox.height) + ' viewport-height ' + viewport.$viewport.height());
 
                 viewport.renderSVGContext(accumulation);
 
