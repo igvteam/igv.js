@@ -361,6 +361,9 @@ var igv = (function (igv) {
             viewport.setWidth(width);
         });
 
+        var $leftHandGutter = $(this.leftHandGutter);
+        resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
+
         this.updateViews(true);
 
     };
