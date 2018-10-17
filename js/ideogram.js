@@ -42,7 +42,8 @@ var igv = (function (igv) {
 
         this.panels.forEach((panel, i) => {
 
-            config.ctx.addRootParentedGroupWithTranslation((i * panel.$canvas.width()), config.deltaY);
+            const bbox = panel.$ideogram.get(0).getBoundingClientRect();
+            config.ctx.addTrackGroupWithTranslationAndClipRect('ideogram', (i * panel.$canvas.width()), config.deltaY, bbox.width, bbox.height);
 
             let paintConfig =
                 {

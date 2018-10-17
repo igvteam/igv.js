@@ -11,7 +11,7 @@
  *  Copyright (c) 2014 Gliffy Inc.
  */
 
-var C2S
+var C2S;
 
 (function () {
     "use strict";
@@ -278,16 +278,18 @@ var C2S
         //make sure we don't generate the same ids in defs
         this.__ids = {};
 
-        //defs tag
+        // defs
         this.__defs = this.__document.createElementNS("http://www.w3.org/2000/svg", "defs");
         this.__root.appendChild(this.__defs);
 
-        // background color
+
+        // svg background color
         this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
 
         // root group
-        this.__rootGroup = this.__createElement('g', { id: 'root group' });
+        this.__rootGroup = this.__createElement('g', { id:'root-group' });
         this.__root.appendChild(this.__rootGroup);
+
 
         this.__currentElement = this.__rootGroup;
     };
@@ -530,15 +532,21 @@ var C2S
         this.__currentElement.setAttribute("transform", transform);
     };
 
-    ctx.prototype.addRootParentedGroupWithTranslation = function (x, y) {
+    ctx.prototype.addTrackGroupWithTranslationAndClipRect = function (id, x, y, width = 0, height = 0) {
 
-        let group = this.__createElement("g");
+        // clip rect
+        const clip_id = id + '_clip_rect';
+        let clipPath = this.__createElement('clipPath', { id:clip_id });
+
+        this.__defs.appendChild( clipPath );
+        clipPath.appendChild( this.__createElement('rect', { x:x.toString(), y:y.toString(), width:width.toString(), height:height.toString() }) );
+
+        let group = this.__createElement('g');
         this.__rootGroup.appendChild(group);
 
-        let translation = format("translate({x},{y})", {x:x,y:y});
-        group.setAttribute("transform", translation);
-
-        group.setAttribute("id", ('group(' + x + ', ' + y + ')'));
+        group.setAttribute('transform', format('translate({x},{y})', { x:x, y:y }));
+        group.setAttribute('id', ('group(' + x + ', ' + y + ')'));
+        group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
 
         this.__currentElement = group;
 

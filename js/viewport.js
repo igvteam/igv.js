@@ -502,10 +502,9 @@ var igv = (function (igv) {
         const contentBBox = this.contentDiv.getBoundingClientRect();
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
 
-        console.log((this.trackView.track.name || this.trackView.track.id) + '  content bbox ' + igv.domRectDescription(contentBBox));
-        console.log((this.trackView.track.name || this.trackView.track.id) + ' viewport bbox ' + igv.domRectDescription(viewportBBox));
-
-        config.ctx.addRootParentedGroupWithTranslation(config.deltaX, config.deltaY);
+        let str = this.trackView.track.name || this.trackView.track.id;
+        str = str.split(' ').join('_');
+        config.ctx.addTrackGroupWithTranslationAndClipRect(str, config.deltaX, config.deltaY, viewportBBox.width, viewportBBox.height);
 
         const pixelWidth = this.$viewport.width();
         const pixelHeight = this.$viewport.height();
