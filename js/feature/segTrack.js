@@ -199,14 +199,14 @@ var igv = (function (igv) {
                         color = self.posColorScale.getColor(value);
                     }
                     else {
-                        color = "white";
+                        color = "rgb(255, 255, 255)";
                     }
 
                     const px = Math.round((segment.start - bpStart) / xScale);
                     const px1 = Math.round((segment.end - bpStart) / xScale);
                     const pw = Math.max(1, px1 - px);
 
-                    igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+                    igv.graphics.fillRect(ctx, Math.max(0, px), Math.max(0, y), pw, sampleHeight - 2 * border, { fillStyle: color });
 
                 }
             }
