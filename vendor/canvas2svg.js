@@ -268,12 +268,12 @@ var C2S;
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
-        if (options.viewbox) {
-            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
-            this.__root.setAttribute("viewBox", str);
-
-            this.viewbox = options.viewbox;
-        }
+        // if (options.viewbox) {
+        //     const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
+        //     this.__root.setAttribute("viewBox", str);
+        //
+        //     this.viewbox = options.viewbox;
+        // }
 
         //make sure we don't generate the same ids in defs
         this.__ids = {};
@@ -284,7 +284,7 @@ var C2S;
 
 
         // svg background color
-        this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
+        // this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
 
         // root group
         this.__rootGroup = this.__createElement('g', { id:'root-group' });
@@ -548,7 +548,7 @@ var C2S;
         group.setAttribute('id', (id + '_group'));
 
         // add clip rect
-        // group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
+        group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
 
         this.__currentElement = group;
 
