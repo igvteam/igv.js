@@ -260,37 +260,37 @@ var C2S;
         this.__stack = [this.__getStyleState()];
         this.__groupStack = [];
 
-        //the root svg element
-        this.__root = this.__document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this.__root.setAttribute("version", 1.1);
-        this.__root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        this.__root.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+        // root svg element
+        this.__root = this.__createElement("svg");
+        // this.__root.setAttribute("version", 1.1);
+        // this.__root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+        // this.__root.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
-        // if (options.viewbox) {
-        //     const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
-        //     this.__root.setAttribute("viewBox", str);
-        //
-        //     this.viewbox = options.viewbox;
-        // }
+        // viewbox
+        if (options.viewbox) {
+            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
+            this.__root.setAttribute("viewBox", str);
 
-        //make sure we don't generate the same ids in defs
+            this.viewbox = options.viewbox;
+        }
+
+        // make sure we don't generate the same ids in defs
         this.__ids = {};
 
         // defs
-        this.__defs = this.__document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        this.__defs = this.__createElement("defs");
         this.__root.appendChild(this.__defs);
 
-
         // svg background color
-        // this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
+        this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
 
         // root group
         this.__rootGroup = this.__createElement('g', { id:'root-group' });
         this.__root.appendChild(this.__rootGroup);
 
-
+        // point current element to root group
         this.__currentElement = this.__rootGroup;
     };
 
@@ -300,21 +300,23 @@ var C2S;
      * @private
      */
     ctx.prototype.__createElement = function (elementName, properties, resetFill) {
+
         if (typeof properties === "undefined") {
             properties = {};
         }
 
-        var element = this.__document.createElementNS("http://www.w3.org/2000/svg", elementName),
-            keys = Object.keys(properties), i, key;
+        let element = this.__document.createElementNS("http://www.w3.org/2000/svg", elementName);
+
         if (resetFill) {
             //if fill or stroke is not specified, the svg element should not display. By default SVG's fill is black.
             element.setAttribute("fill", "none");
             element.setAttribute("stroke", "none");
         }
-        for (i=0; i<keys.length; i++) {
-            key = keys[i];
-            element.setAttribute(key, properties[key]);
+
+        for (let key of Object.keys(properties)) {
+            element.setAttribute(key, properties[ key ]);
         }
+
         return element;
     };
 
@@ -1218,13 +1220,16 @@ var C2S;
      * Generates a pattern tag
      */
     ctx.prototype.createPattern = function (image, repetition) {
-        var pattern = this.__document.createElementNS("http://www.w3.org/2000/svg", "pattern"), id = randomString(this.__ids),
-            img;
+
+        let pattern = this.__document.__createElement("pattern");
+        let id = randomString(this.__ids);
+        let img;
+
         pattern.setAttribute("id", id);
         pattern.setAttribute("width", image.width);
         pattern.setAttribute("height", image.height);
         if (image.nodeName === "CANVAS" || image.nodeName === "IMG") {
-            img = this.__document.createElementNS("http://www.w3.org/2000/svg", "image");
+            img = this.__createElement("image");
             img.setAttribute("width", image.width);
             img.setAttribute("height", image.height);
             img.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href",
