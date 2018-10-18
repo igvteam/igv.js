@@ -748,7 +748,6 @@ var igv = (function (igv) {
                 }
 
                 igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: alignmentColor});
-
                 igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
             }
@@ -764,7 +763,7 @@ var igv = (function (igv) {
                     diagnosticColor;
 
                 alignmentColor = getAlignmentColor.call(self, alignment);
-                outlineColor = 'alignmentColor';
+                outlineColor = alignmentColor;
                 blocks = alignment.blocks;
 
                 if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
@@ -772,7 +771,8 @@ var igv = (function (igv) {
                 }
 
                 if (alignment.mq <= 0) {
-                    alignmentColor = igv.Color.addAlpha(alignmentColor, "0.15");
+                    let alpha = 0.15;
+                    alignmentColor = igv.Color.addAlpha(alignmentColor, alpha);
                 }
 
                 igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
@@ -785,7 +785,7 @@ var igv = (function (igv) {
                     // Somewhat complex test, neccessary to insure gaps are drawn.
                     // If this is not the last block, and the next block starts before the orign (off screen to left)
                     // then skip.
-                    if((b != blocks.length - 1) && blocks[b+1].start < bpStart) continue;
+                    if((b !== blocks.length - 1) && blocks[b+1].start < bpStart) continue;
                     
                     drawBlock(block);
 
