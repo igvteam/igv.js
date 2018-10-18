@@ -532,7 +532,7 @@ var C2S;
         this.__currentElement.setAttribute("transform", transform);
     };
 
-    ctx.prototype.addTrackGroupWithTranslationAndClipRect = function (id, x, y, width = 0, height = 0) {
+    ctx.prototype.addTrackGroupWithTranslationAndClipRect = function (id, x, y, width, height) {
 
         // clip rect
         const clip_id = id + '_clip_rect';
@@ -545,8 +545,10 @@ var C2S;
         this.__rootGroup.appendChild(group);
 
         group.setAttribute('transform', format('translate({x},{y})', { x:x, y:y }));
-        group.setAttribute('id', ('group(' + x + ', ' + y + ')'));
-        group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
+        group.setAttribute('id', (id + '_group'));
+
+        // add clip rect
+        // group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
 
         this.__currentElement = group;
 
