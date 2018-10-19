@@ -1,5 +1,6 @@
-$igv-color-swatch-size: 24px;
-$igv-color-swatch-border-width: 1px;
+//$igv-color-swatch-size: 24px;
+$igv-color-swatch-size: 48px;
+$igv-color-swatch-border-width: 2px;
 
 .igv-color-swatch {
 
@@ -16,22 +17,26 @@ $igv-color-swatch-border-width: 1px;
   border-width: $igv-color-swatch-border-width;
   border-color: transparent;
 
-  i.fa {
-    display: block;
-  }
+  border-radius: 4px;
 
-  i.fa:hover,
-  i.fa:focus,
-  i.fa:active {
-    cursor: pointer;
-    color: #0f0f0f;
-  }
+  margin: 4px;
+
+  //i.fa {
+  //  display: block;
+  //}
+  //
+  //i.fa:hover,
+  //i.fa:focus,
+  //i.fa:active {
+  //  cursor: pointer;
+  //  color: #0f0f0f;
+  //}
 }
 
 .igv-color-swatch:hover,
 .igv-color-swatch:focus,
 .igv-color-swatch:active {
-  border-color: #dddddd;
+  border-color: #7f7f7f;
 }
 
 .igv-colorpicker-menu-close-button {

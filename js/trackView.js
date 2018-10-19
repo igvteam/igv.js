@@ -92,18 +92,23 @@ var igv = (function (igv) {
         // Create color picker.
         config =
             {
-                // width = (29 * swatch-width) + border-width + border-width
-                width: ((29 * 24) + 1 + 1),
-                classes: ['igv-position-absolute']
+                bbox: this.trackDiv.getBoundingClientRect(),
+
+                $parent: this.browser.$root,
+
+                // width = 13 * (swatch-width + margin-width + margin-width + border-width + border-width
+                width: 13 * (48 + (4 + 4) + (2 + 2)),
+
+                closeHandler: () => {
+                    self.$colorpicker_container.toggle();
+                }
             };
 
-        this.$colorpicker_container = igv.genericContainer($track, config, function () {
-            self.$colorpicker_container.toggle();
-        });
+        this.$colorpicker_container = igv.genericContainer(config);
 
         createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
             self.setColor(rgb);
-            self.$colorpicker_container.hide();
+            // self.$colorpicker_container.hide();
         });
 
         this.$colorpicker_container.hide();
@@ -639,7 +644,24 @@ var igv = (function (igv) {
 
     let createColorSwatchSelector = ($genericContainer, colorHandler) => {
 
-        let rgbs = igv.Color.rgbListFromHSV();
+        // let rgbs = igv.Color.rgbListFromHSV();
+
+        let rgbs =
+            [
+                '#007bff',
+                '#17a2b8',
+                '#20c997',
+                '#28a745',
+                '#404EB0',
+                '#6610f2',
+                '#e83e8c',
+                '#dc3545',
+                '#fd7e14',
+                '#ffc107',
+                '#343a40',
+                '#6c757d',
+                '#ffffff'
+            ];
 
         for (let rgb of rgbs) {
 
@@ -662,8 +684,10 @@ var igv = (function (igv) {
 
         let $swatch = $('<div>', {class: 'igv-color-swatch'});
 
-        let $fa = igv.createIcon("square", rgbString);
-        $swatch.append($fa);
+        // let $fa = igv.createIcon("square", rgbString);
+        // $swatch.append($fa);
+
+        $swatch.css('background-color', rgbString);
 
         return $swatch;
     };

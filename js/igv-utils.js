@@ -25,28 +25,27 @@
 
 var igv = (function (igv) {
 
-    igv.genericContainer = function ($parent, config, closeHandler) {
+    igv.genericContainer = function ({ $parent, bbox, width, height, closeHandler }) {
 
-        var $generic_container,
+        var self = this,
+            $generic_container,
             $header,
             $fa;
 
+        this.namespace = '.generic_container_' + igv.guid();
+
         $generic_container = $('<div>', {class: 'igv-generic-container'});
         $parent.append($generic_container);
+        $generic_container.offset( { left:bbox.left, top:bbox.top } );
 
         // width
-        if (config && config.width) {
-            $generic_container.width(config.width);
+        if (width) {
+            $generic_container.width(width);
         }
 
         // height
-        if (config && config.height) {
-            $generic_container.height(config.height);
-        }
-
-        // height
-        if (config && config.classes) {
-            $generic_container.addClass(config.classes.join(' '));
+        if (height) {
+            $generic_container.height(height);
         }
 
         // header
@@ -57,30 +56,37 @@ var igv = (function (igv) {
         $fa = igv.createIcon("times");
         $header.append($fa);
 
-        $fa.on('mousedown', function (e) {
+        $fa.on('mousedown' + self.namespace, function (e) {
             e.stopPropagation();
-        })
-
-        $fa.on('mouseup', function (e) {
-            e.stopPropagation();
-        })
-
-        $fa.on('click', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            closeHandler(e);
-        });
-        $fa.on('touchend', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            closeHandler(e);
         });
 
-        // $generic_container.draggable({handle: $header.get(0)});
+        $fa.on('mouseup' + self.namespace, function (e) {
+            e.stopPropagation();
+        });
+
+        $fa.on('click' + self.namespace, function (e) {
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            $generic_container.offset( { left:bbox.left, top:bbox.top } );
+
+            closeHandler(e);
+        });
+
+        $fa.on('touchend' + self.namespace, function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            $generic_container.offset( { left:bbox.left, top:bbox.top } );
+
+            closeHandler(e);
+        });
+
         igv.makeDraggable($generic_container.get(0), $header.get(0));
+
         return $generic_container;
     };
-
 
     igv.getExtension = function (config) {
         var path,
