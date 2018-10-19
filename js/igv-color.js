@@ -28,56 +28,25 @@
  */
 var igv = (function (igv) {
 
-    igv.createColorSwatchSelector = function ($genericContainer, colorHandler) {
-
-        var rgbs,
-            dev_null,
-            s;
-
-        s = 1;
-        rgbs = [];
-        for (var v = 1; v >= 0.5; v -= .1) {
-            for (var r, h = 0; h < 1; h += 1 / 28) {
-                r = "rgb(" + igv.Color.hsvToRgb(h, s, v).join(",") + ")";
-                rgbs.push(r);
-            }
-        }
-
-        // add black
-        dev_null = rgbs.pop();
-        rgbs.push(igv.Color.rgbColor(16, 16, 16));
-
-        rgbs.forEach(function (rgb) {
-            var $swatch;
-
-            $swatch = igv.colorSwatch(rgb);
-            $genericContainer.append($swatch);
-
-            $swatch.click(function () {
-                colorHandler(rgb);
-            });
-
-            $swatch.on('touchend', function () {
-                colorHandler(rgb);
-            });
-
-        });
-
-    };
-
-    igv.colorSwatch = function (rgbString) {
-        var $swatch,
-            $fa;
-
-        $swatch = $('<div>', {class: 'igv-color-swatch'});
-
-        $fa = igv.createIcon("square", rgbString);
-        $swatch.append($fa);
-
-        return $swatch;
-    };
-
     igv.Color = {
+
+        rgbListFromHSV: () => {
+
+            let s = 1;
+            let accumulation = [];
+            for (let v = 1; v >= 0.5; v -= .1) {
+                for (let h = 0; h < 1; h += 1 / 28) {
+                    const r = "rgb(" + igv.Color.hsvToRgb(h, s, v).join(",") + ")";
+                    accumulation.push(r);
+                }
+            }
+
+            // add black
+            accumulation.pop();
+            accumulation.push(igv.Color.rgbColor(16, 16, 16));
+
+            return accumulation;
+        },
 
         rgbToHex: function (rgb) {
             rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
@@ -168,12 +137,21 @@ var igv = (function (igv) {
                 var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
                 var p = 2 * l - q;
 
-                r = hue2rgb(p, q, h + 1 / 3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1 / 3);
+                r = igv.Color.hue2rgb(p, q, h + 1 / 3);
+                g = igv.Color.hue2rgb(p, q, h);
+                b = igv.Color.hue2rgb(p, q, h - 1 / 3);
             }
 
             return [r * 255, g * 255, b * 255];
+        },
+
+        hue2rgb: (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
         },
 
         rgbaColor: function (r, g, b, a) {
@@ -298,15 +276,6 @@ var igv = (function (igv) {
         }
     };
 
-    function hue2rgb(p, q, t) {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1 / 6) return p + (q - p) * 6 * t;
-        if (t < 1 / 2) return q;
-        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-        return p;
-    }
-
     igv.nucleotideColorComponents = {
         "A": [0, 200, 0],
         "C": [0, 0, 200],
@@ -329,33 +298,205 @@ var igv = (function (igv) {
         "g": "rgb(209, 113,   5)"
     };
 
+    const colorPalettes = {
 
-    // Color scale objects.  Implement a single method,  getColor(value)
+        Set1:
+            [
+                "rgb(228,26,28)",
+                "rgb(55,126,184)",
+                "rgb(77,175,74)",
+                "rgb(166,86,40)",
+                "rgb(152,78,163)",
+                "rgb(255,127,0)",
+                "rgb(247,129,191)",
+                "rgb(153,153,153)",
+                "rgb(255,255,51)"
+            ],
+
+        Dark2:
+            [
+                "rgb(27,158,119)",
+                "rgb(217,95,2)",
+                "rgb(117,112,179)",
+                "rgb(231,41,138)",
+                "rgb(102,166,30)",
+                "rgb(230,171,2)",
+                "rgb(166,118,29)",
+                "rgb(102,102,102)"
+            ],
+
+        Set2:
+            [
+                "rgb(102, 194,165)",
+                "rgb(252,141,98)",
+                "rgb(141,160,203)",
+                "rgb(231,138,195)",
+                "rgb(166,216,84)",
+                "rgb(255,217,47)",
+                "rgb(229,196,148)",
+                "rgb(179,179,179)"
+            ],
+
+        Set3:
+            [
+                "rgb(141,211,199)",
+                "rgb(255,255,179)",
+                "rgb(190,186,218)",
+                "rgb(251,128,114)",
+                "rgb(128,177,211)",
+                "rgb(253,180,98)",
+                "rgb(179,222,105)",
+                "rgb(252,205,229)",
+                "rgb(217,217,217)",
+                "rgb(188,128,189)",
+                "rgb(204,235,197)",
+                "rgb(255,237,111)"
+            ],
+
+        Pastel1:
+            [
+                "rgb(251,180,174)",
+                "rgb(179,205,227)",
+                "rgb(204,235,197)",
+                "rgb(222,203,228)",
+                "rgb(254,217,166)",
+                "rgb(255,255,204)",
+                "rgb(229,216,189)",
+                "rgb(253,218,236)"
+            ],
+
+        Pastel2:
+            [
+                "rgb(173,226,207)",
+                "rgb(253,205,172)",
+                "rgb(203,213,232)",
+                "rgb(244,202,228)",
+                "rgb(230,245,201)",
+                "rgb(255,242,174)",
+                "rgb(243,225,206)"
+            ],
+
+        Accent:
+            [
+                "rgb(127,201,127)",
+                "rgb(190,174,212)",
+                "rgb(253,192,134)",
+                "rgb(255,255,153)",
+                "rgb(56,108,176)",
+                "rgb(240,2,127)",
+                "rgb(191,91,23)"
+            ]
+    };
+
+    igv.PaletteColorTable = function (palette) {
+
+        this.colors = colorPalettes[palette];
+
+        if (!Array.isArray(this.colors)) this.colors = [];
+        this.colorTable = {};
+        this.nextIdx = 0;
+        this.colorGenerator = new RandomColorGenerator();
+
+    };
+
+    igv.PaletteColorTable.prototype.getColor = function (key) {
+
+        if (!this.colorTable.hasOwnProperty(key)) {
+            if (this.nextIdx < this.colors.length) {
+                this.colorTable[key] = this.colors[this.nextIdx];
+            } else {
+                this.colorTable[key] = this.colorGenerator.get();
+            }
+            this.nextIdx++;
+        }
+        return this.colorTable[key];
+    };
+
+    // Random color generator from https://github.com/sterlingwes/RandomColor/blob/master/rcolor.js
+    // Free to use & distribute under the MIT license
+    // Wes Johnson (@SterlingWes)
+    //
+    // inspired by http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+    var RandomColorGenerator = function () {
+        this.hue = Math.random();
+        this.goldenRatio = 0.618033988749895;
+        this.hexwidth = 2;
+    };
+
+    RandomColorGenerator.prototype.hsvToRgb = function (h, s, v) {
+        var h_i = Math.floor(h * 6),
+            f = h * 6 - h_i,
+            p = v * (1 - s),
+            q = v * (1 - f * s),
+            t = v * (1 - (1 - f) * s),
+            r = 255,
+            g = 255,
+            b = 255;
+        switch (h_i) {
+            case 0:
+                r = v, g = t, b = p;
+                break;
+            case 1:
+                r = q, g = v, b = p;
+                break;
+            case 2:
+                r = p, g = v, b = t;
+                break;
+            case 3:
+                r = p, g = q, b = v;
+                break;
+            case 4:
+                r = t, g = p, b = v;
+                break;
+            case 5:
+                r = v, g = p, b = q;
+                break;
+        }
+        return [Math.floor(r * 256), Math.floor(g * 256), Math.floor(b * 256)];
+    };
+
+    RandomColorGenerator.prototype.padHex = function (str) {
+        if (str.length > this.hexwidth) return str;
+        return new Array(this.hexwidth - str.length + 1).join('0') + str;
+    };
+
+    RandomColorGenerator.prototype.get = function (saturation, value) {
+        this.hue += this.goldenRatio;
+        this.hue %= 1;
+        if (typeof saturation !== "number") saturation = 0.5;
+        if (typeof value !== "number") value = 0.95;
+        var rgb = this.hsvToRgb(this.hue, saturation, value);
+
+        return "#" + this.padHex(rgb[0].toString(16))
+            + this.padHex(rgb[1].toString(16))
+            + this.padHex(rgb[2].toString(16));
+
+    };
+
 
     /**
      *
-     * @param thresholds - array of threshold values defining bin boundaries in ascending order
-     * @param colors - array of colors for bins  (length == thresholds.length + 1)
+     * @param cs - object containing
+     * 1) array of threshold values defining bin boundaries in ascending order
+     * 2) array of colors for bins  (length == thresholds.length + 1)
      * @constructor
      */
     igv.BinnedColorScale = function (cs) {
         this.thresholds = cs.thresholds;
         this.colors = cs.colors;
-    }
+    };
 
     igv.BinnedColorScale.prototype.getColor = function (value) {
 
-        var i, len = this.thresholds.length;
-
-        for (i = 0; i < len; i++) {
-            if (value < this.thresholds[i]) {
-                return this.colors[i];
+        for (let threshold of this.thresholds) {
+            if (value < threshold) {
+                return this.colors[ this.thresholds.indexOf(threshold) ];
             }
         }
 
         return this.colors[this.colors.length - 1];
 
-    }
+    };
 
     /**
      *
@@ -394,110 +535,6 @@ var igv = (function (igv) {
 
         return "rgb(" + r + "," + g + "," + b + ")";
     }
-
-    var colorPalettes = {
-        Set1: ["rgb(228,26,28)", "rgb(55,126,184)", "rgb(77,175,74)", "rgb(166,86,40)",
-            "rgb(152,78,163)", "rgb(255,127,0)", "rgb(247,129,191)", "rgb(153,153,153)",
-            "rgb(255,255,51)"],
-        Dark2: ["rgb(27,158,119)", "rgb(217,95,2)", "rgb(117,112,179)", "rgb(231,41,138)",
-            "rgb(102,166,30)", "rgb(230,171,2)", "rgb(166,118,29)", "rgb(102,102,102)"],
-        Set2: ["rgb(102, 194,165)", "rgb(252,141,98)", "rgb(141,160,203)", "rgb(231,138,195)",
-            "rgb(166,216,84)", "rgb(255,217,47)", "rgb(229,196,148)", "rgb(179,179,179)"],
-        Set3: ["rgb(141,211,199)", "rgb(255,255,179)", "rgb(190,186,218)", "rgb(251,128,114)",
-            "rgb(128,177,211)", "rgb(253,180,98)", "rgb(179,222,105)", "rgb(252,205,229)",
-            "rgb(217,217,217)", "rgb(188,128,189)", "rgb(204,235,197)", "rgb(255,237,111)"],
-        Pastel1: ["rgb(251,180,174)", "rgb(179,205,227)", "rgb(204,235,197)", "rgb(222,203,228)",
-            "rgb(254,217,166)", "rgb(255,255,204)", "rgb(229,216,189)", "rgb(253,218,236)"],
-        Pastel2: ["rgb(173,226,207)", "rgb(253,205,172)", "rgb(203,213,232)", "rgb(244,202,228)",
-            "rgb(230,245,201)", "rgb(255,242,174)", "rgb(243,225,206)"],
-        Accent: ["rgb(127,201,127)", "rgb(190,174,212)", "rgb(253,192,134)", "rgb(255,255,153)",
-            "rgb(56,108,176)", "rgb(240,2,127)", "rgb(191,91,23)"]
-    }
-
-    igv.PaletteColorTable = function (palette) {
-        this.colors = colorPalettes[palette];
-        if (!Array.isArray(this.colors)) this.colors = [];
-        this.colorTable = {};
-        this.nextIdx = 0;
-        this.colorGenerator = new RColor();
-    }
-
-    igv.PaletteColorTable.prototype.getColor = function (key) {
-
-        if (!this.colorTable.hasOwnProperty(key)) {
-            if (this.nextIdx < this.colors.length) {
-                this.colorTable[key] = this.colors[this.nextIdx];
-            } else {
-                this.colorTable[key] = this.colorGenerator.get();
-            }
-            this.nextIdx++;
-        }
-        return this.colorTable[key];
-    }
-
-
-    // Random color generator from https://github.com/sterlingwes/RandomColor/blob/master/rcolor.js
-    // Free to use & distribute under the MIT license
-    // Wes Johnson (@SterlingWes)
-    //
-    // inspired by http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-
-    var RColor = function () {
-        this.hue = Math.random(),
-            this.goldenRatio = 0.618033988749895;
-        this.hexwidth = 2;
-    }
-
-    RColor.prototype.hsvToRgb = function (h, s, v) {
-        var h_i = Math.floor(h * 6),
-            f = h * 6 - h_i,
-            p = v * (1 - s),
-            q = v * (1 - f * s),
-            t = v * (1 - (1 - f) * s),
-            r = 255,
-            g = 255,
-            b = 255;
-        switch (h_i) {
-            case 0:
-                r = v, g = t, b = p;
-                break;
-            case 1:
-                r = q, g = v, b = p;
-                break;
-            case 2:
-                r = p, g = v, b = t;
-                break;
-            case 3:
-                r = p, g = q, b = v;
-                break;
-            case 4:
-                r = t, g = p, b = v;
-                break;
-            case 5:
-                r = v, g = p, b = q;
-                break;
-        }
-        return [Math.floor(r * 256), Math.floor(g * 256), Math.floor(b * 256)];
-    };
-
-    RColor.prototype.padHex = function (str) {
-        if (str.length > this.hexwidth) return str;
-        return new Array(this.hexwidth - str.length + 1).join('0') + str;
-    };
-
-    RColor.prototype.get = function (saturation, value) {
-        this.hue += this.goldenRatio;
-        this.hue %= 1;
-        if (typeof saturation !== "number") saturation = 0.5;
-        if (typeof value !== "number") value = 0.95;
-        var rgb = this.hsvToRgb(this.hue, saturation, value);
-
-        return "#" + this.padHex(rgb[0].toString(16))
-            + this.padHex(rgb[1].toString(16))
-            + this.padHex(rgb[2].toString(16));
-
-    };
-
 
     return igv;
 

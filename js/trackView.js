@@ -101,7 +101,7 @@ var igv = (function (igv) {
             self.$colorpicker_container.toggle();
         });
 
-        igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+        createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
             self.setColor(rgb);
             self.$colorpicker_container.hide();
         });
@@ -630,12 +630,43 @@ var igv = (function (igv) {
             self[key] = undefined;
         })
 
-    }
+    };
 
 
     igv.TrackView.prototype.scrollBy = function (delta) {
         this.scrollbar.moveScrollerBy(delta);
-    }
+    };
+
+    let createColorSwatchSelector = ($genericContainer, colorHandler) => {
+
+        let rgbs = igv.Color.rgbListFromHSV();
+
+        for (let rgb of rgbs) {
+
+            let $swatch = colorSwatch(rgb);
+            $genericContainer.append($swatch);
+
+            $swatch.click(function () {
+                colorHandler(rgb);
+            });
+
+            $swatch.on('touchend', function () {
+                colorHandler(rgb);
+            });
+
+        }
+
+    };
+
+    let colorSwatch = (rgbString) => {
+
+        let $swatch = $('<div>', {class: 'igv-color-swatch'});
+
+        let $fa = igv.createIcon("square", rgbString);
+        $swatch.append($fa);
+
+        return $swatch;
+    };
 
     const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 
