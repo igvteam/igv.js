@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Local Bam</title>
+
+
+    <script type="text/javascript" src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<div>
+    <h1>Local BAM file example</h1>
+    <p>
+        <label>BAM file and index
+            <input id="fileWidget" type="file" multiple="true" accept=".bam,.bai" onchange="load()"/>
+        </label>
+    </p>
+
+    <p>
+    <div id="fileNameDiv"></div>
+    </p>
+
+    <p>
+        <label>Goto
+            <input id="locationInput" type="text"/>
+            <button onclick="goto()">Go</button>
+        </label>
+
+    </p>
+
+</div>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+</div>
+
+
+<script type="text/javascript">
+
+    "use strict";
+
+    var igvBrowser;
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var div = document.getElementById("myDiv");
+
+        var options = {
+            locus: "SLC25A3",       // OPTIONAL, open at a specific location
+            genome: "hg19"
+        };
+
+        igv.createBrowser(div, options)
+            .then(function (b) {
+                igvBrowser = b;
+            })
+
+    })
+
+    function goto() {
+        var locus = document.getElementById("locationInput").value;
+        igv.browser.search(locus);
+    }
+
+    function load() {
+
+        var fileWidget = document.getElementById("fileWidget");
+        var files = fileWidget.files;
+
+        var fileTxt = "<ul>";
+        for (let file of files) {
+            fileTxt += "<li>" + file.name + "</li>";
+        }
+        fileTxt += "</ul>";
+        document.getElementById("fileNameDiv").innerHTML = fileTxt;
+
+
+        // Find BAM files and cache index files.  Note there are 2 index naming conventions, .bam.bai and .bai
+        // This scheme catches both.
+        var bamFiles = [];
+        var indexFiles = {};
+
+        for (let file of files) {
+            if (file.name.endsWith(".bam")) {
+                bamFiles.push(file);
+            }
+            else if (file.name.endsWith(".bai")) {
+                var key = getKey(file.name);
+                indexFiles[key] = file;
+            }
+            else {
+                alert("Unsupported file type: " + file.name);
+            }
+        }
+
+        // Create track objects
+        var trackConfigs = [];
+
+        for (let file of bamFiles) {
+
+            var key = getKey(file.name);
+            var indexFile = indexFiles[key];
+            if (indexFile) {
+                trackConfigs.push({
+                    name: file.name,
+                    type: "alignment",
+                    format: "bam",
+                    url: file,
+                    indexURL: indexFile
+                })
+            }
+            else {
+                alert("No index file for: " + file.name);
+            }
+        }
+
+        if (trackConfigs.length > 0) {
+
+            igvBrowser.loadTrackList(trackConfigs);
+
+        }
+
+
+        function getKey(filename) {
+
+            var idx = filename.indexOf(".");
+            if (idx < 0) {
+                console.error("File with no extension: " + filename);
+            }
+            else {
+                return filename.substring(0, idx);
+            }
+
+        }
+
+        // igv.browser.loadSession(sessionFile)
+        //     .catch(function (error) {
+        //         alert("Error loading session file");
+        //     })
+
+    }
+
+
+</script>
+
+</body>
+
+</html>
