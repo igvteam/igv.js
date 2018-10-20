@@ -490,11 +490,11 @@ var igv = (function (igv) {
             plain = new Uint8Array(arraybuffer);
         }
 
-        if(TextDecoder) {
+        if('TextDecoder' in igv.getGlobalObject()) {
             return new TextDecoder().decode(plain);
         }
         else {
-            return decodeUtf8(plain);
+            return decodeUTF8(plain);
         }
 
     };
@@ -585,7 +585,7 @@ var igv = (function (igv) {
      * @param octets
      * @returns {string}
      */
-    decodeUtf8 = function (octets) {
+    decodeUTF8 = function (octets) {
         var string = "";
         var i = 0;
         while (i < octets.length) {

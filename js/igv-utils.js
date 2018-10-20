@@ -611,6 +611,18 @@ var igv = (function (igv) {
         return {min: min, max: max};
     }
 
+    igv.getGlobalObject = function () {
+        if (typeof self !== 'undefined') {
+            return self;
+        }
+        if (typeof global !== 'undefined') {
+            return global;
+        }
+        else {
+            return window;
+        }
+    }
+
     return igv;
 
 })(igv || {});
