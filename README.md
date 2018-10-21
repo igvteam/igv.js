@@ -15,6 +15,11 @@ igv.js is an embeddable interactive genome visualization component developed by 
 ***[Multiple regions](http://igv.org/web/test/examples/multi-locus.html)***
 
 ***[More](http://igv.org/web/test/examples)***
+
+# Supported Browsers
+
+igv-webapp and igv.js require a modern web browser with support for Javascript ECMAScript 2015. We test on the latest versions of Chrome, Safari, Firefox, and Edge. Internet Explorer (IE) is not supported.
+
  
 # Quickstart
 
