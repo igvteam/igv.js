@@ -213,44 +213,32 @@ var C2S;
 
     /**
      * The mock canvas context
-     * @param o - options include:
+     * @param config - options include:
      * ctx - existing Context2D to wrap around
      * width - width of your canvas (defaults to 500)
      * height - height of your canvas (defaults to 500)
      * enableMirroring - enables canvas mirroring (get image data) (defaults to false)
      * document - the document object (defaults to the current document)
      */
-    ctx = function (o) {
-        var defaultOptions = { width:500, height:500, enableMirroring : false}, options;
-
-        //keep support for this way of calling C2S: new C2S(width,height)
-        if (arguments.length > 1) {
-            options = defaultOptions;
-            options.width = arguments[0];
-            options.height = arguments[1];
-        } else if ( !o ) {
-            options = defaultOptions;
-        } else {
-            options = o;
-        }
+    ctx = function (config) {
 
         if (!(this instanceof ctx)) {
             //did someone call this without new?
-            return new ctx(options);
+            return new ctx(config);
         }
 
         //setup options
-        this.width = options.width || defaultOptions.width;
-        this.height = options.height || defaultOptions.height;
-        this.enableMirroring = options.enableMirroring !== undefined ? options.enableMirroring : defaultOptions.enableMirroring;
+        this.width = config.width;
+        this.height = config.height;
+        this.enableMirroring = config.enableMirroring || false;
 
         this.canvas = this;   ///point back to this instance!
-        this.__document = options.document || document;
+        this.__document = document;
 
         // allow passing in an existing context to wrap around
         // if a context is passed in, we know a canvas already exist
-        if (options.ctx) {
-            this.__ctx = options.ctx;
+        if (config.ctx) {
+            this.__ctx = config.ctx;
         } else {
             this.__canvas = this.__document.createElement("canvas");
             this.__ctx = this.__canvas.getContext("2d");
@@ -262,18 +250,15 @@ var C2S;
 
         // root svg element
         this.__root = this.__createElement("svg");
-        // this.__root.setAttribute("version", 1.1);
-        // this.__root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        // this.__root.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
         // viewbox
-        if (options.viewbox) {
-            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
+        if (config.viewbox) {
+            const str = config.viewbox.x + ' ' + config.viewbox.y + ' ' + config.viewbox.width + ' ' + config.viewbox.height;
             this.__root.setAttribute("viewBox", str);
 
-            this.viewbox = options.viewbox;
+            this.viewbox = config.viewbox;
         }
 
         // make sure we don't generate the same ids in defs

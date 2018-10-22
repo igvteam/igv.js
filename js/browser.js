@@ -128,22 +128,20 @@ var igv = (function (igv) {
 
         const w = anyViewportContainerBBox.width;
         const h = trackContainerBBox.height + ideoPanelBBox.height;
+        const humungous = 4000;
 
         let svgContext = new C2S(
             {
 
-                // width: anyViewportBBox.width,
                 width: w,
-                height: h,
+                height: humungous,
 
                 viewbox:
                     {
                         x: 0,
                         y: 0,
-
-                        // width: anyViewportBBox.width,
                         width: w,
-                        height: h
+                        height: humungous
                     }
 
             });
