@@ -499,12 +499,14 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.renderSVGContext = function (config) {
 
-        const contentBBox = this.contentDiv.getBoundingClientRect();
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
 
         let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.split(' ').join('_');
-        config.ctx.addTrackGroupWithTranslationAndClipRect(str, config.deltaX, config.deltaY, viewportBBox.width, viewportBBox.height);
+        str = str.split(' ').join('_').toLowerCase();
+
+        // handle vertical scroll
+        const translationYOffset = $(this.contentDiv).position().top;
+        config.ctx.addTrackGroupWithTranslationAndClipRect(str, config.deltaX, config.deltaY + translationYOffset, viewportBBox.width, viewportBBox.height, -translationYOffset);
 
         const pixelWidth = this.$viewport.width();
         const pixelHeight = this.$viewport.height();

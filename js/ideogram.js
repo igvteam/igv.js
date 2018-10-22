@@ -43,7 +43,7 @@ var igv = (function (igv) {
         this.panels.forEach((panel, i) => {
 
             const bbox = panel.$ideogram.get(0).getBoundingClientRect();
-            config.ctx.addTrackGroupWithTranslationAndClipRect('ideogram', (i * panel.$canvas.width()), config.deltaY, bbox.width, bbox.height);
+            config.ctx.addTrackGroupWithTranslationAndClipRect('ideogram', (i * panel.$canvas.width()), config.deltaY, bbox.width, bbox.height, 0);
 
             let paintConfig =
                 {

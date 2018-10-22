@@ -18,10 +18,9 @@
 #igv-svg-container {
   margin-top: 32px;
   margin-bottom: 64px;
-  border-color: rgba(170, 237, 8, 0.51);
+  border-color: rgba(36, 36, 36, 0.51);
   border-style: solid;
-  border-width: thin;
-  background-color: rgba(170, 237, 8, 0.51); }
+  border-width: thin; }
 
 .igv-content-div {
   border-color: rgba(255, 0, 0, 0.5);
