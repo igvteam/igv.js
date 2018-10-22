@@ -124,7 +124,7 @@ var igv = (function (igv) {
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
         const anyViewportBBox = this.trackViews[ 0 ].viewports[ 0 ].$viewport.get(0).getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
-        const ideoPanelBBox = this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect();
+        const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
 
         const w = anyViewportContainerBBox.width;
         const h = trackContainerBBox.height + ideoPanelBBox.height;
@@ -149,7 +149,9 @@ var igv = (function (igv) {
             });
 
         // ideoPanel group
-        this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX:0, deltaY: 0 });
+        if (this.ideoPanel) {
+            this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX:0, deltaY: 0 });
+        }
 
         // console.log('---');
         this.trackViews
