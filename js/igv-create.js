@@ -183,8 +183,7 @@ var igv = (function (igv) {
 
     /**
      * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
-     * made visible from a tab, accordion, or similar widget.   There are no events to catch for this case,
-     * igv has to be told.
+     * made visible from a tab, accordion, or similar widget.
      */
     igv.visibilityChange = function () {
         allBrowsers.forEach(function (browser) {
