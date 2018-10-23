@@ -499,18 +499,14 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.renderSVGContext = function (config) {
 
+
+        const yScrollDelta = $(this.contentDiv).position().top;
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
+        const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
+        config.ctx.addTrackGroupWithTranslationAndClipRect(id, config.deltaX, config.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-        let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.split(' ').join('_').toLowerCase();
-
-        // handle vertical scroll
-        const contentBBox = this.contentDiv.getBoundingClientRect();
-        const translationYOffset = $(this.contentDiv).position().top;
-        config.ctx.addTrackGroupWithTranslationAndClipRect(str, config.deltaX, config.deltaY + translationYOffset, viewportBBox.width, viewportBBox.height, -translationYOffset);
-
-        const pixelWidth = this.$viewport.width();
-        const pixelHeight = this.$viewport.height();
+        const width = this.$viewport.width();
+        const height = this.$viewport.height();
 
         let referenceFrame = this.genomicState.referenceFrame;
 
@@ -526,16 +522,16 @@ var igv = (function (igv) {
 
                 genomicState: this.genomicState,
 
-                pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight,
+                pixelWidth: width,
+                pixelHeight: height,
 
-                viewportWidth: pixelWidth,
+                viewportWidth: width,
 
                 viewportContainerX: 0,
                 viewportContainerWidth: this.browser.viewportContainerWidth(),
 
                 bpStart: referenceFrame.start,
-                bpEnd: referenceFrame.start + pixelWidth * referenceFrame.bpPerPixel,
+                bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
 
                 bpPerPixel: referenceFrame.bpPerPixel,
 
