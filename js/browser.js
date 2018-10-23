@@ -436,22 +436,17 @@ var igv = (function (igv) {
 
     function toggleTrackLabels (trackViews, isVisible) {
 
-        trackViews.forEach(function (trackView) {
-            trackView.viewports.forEach((viewport, index) => {
-
+        for (let trackView of trackViews) {
+            for (let viewport of trackView.viewports) {
                 if (viewport.$trackLabel) {
-
-                    if (0 === index && true === isVisible) {
+                    if (0 === trackView.viewports.indexOf(viewport) && true === isVisible) {
                         viewport.$trackLabel.show();
                     } else {
                         viewport.$trackLabel.hide();
                     }
-
                 }
-
-            });
-        });
-
+            }
+        }
     }
 
     // cursor guide
