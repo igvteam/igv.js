@@ -122,26 +122,24 @@ var igv = (function (igv) {
     igv.Browser.prototype.renderSVG = function ($container) {
 
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
-        const anyViewportBBox = this.trackViews[ 0 ].viewports[ 0 ].$viewport.get(0).getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
         const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
 
         const w = anyViewportContainerBBox.width;
         const h = trackContainerBBox.height + ideoPanelBBox.height;
-        const humungous = 4000;
 
         let svgContext = new C2S(
             {
 
                 width: w,
-                height: humungous,
+                height: h,
 
                 viewbox:
                     {
                         x: 0,
                         y: 0,
                         width: w,
-                        height: humungous
+                        height: h
                     }
 
             });
