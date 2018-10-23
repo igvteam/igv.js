@@ -2,7 +2,10 @@
 [![Build Status](https://travis-ci.org/igvteam/igv.js.svg?branch=master)](https://travis-ci.org/igvteam/igv.js)
 
 igv.js is an embeddable interactive genome visualization component developed by the 
- [Integrative Genomics Viewer (IGV)](https://igv.org) team.
+ [Integrative Genomics Viewer (IGV)](https://igv.org) team. 
+ 
+Below are examples and a quickstart guide.  See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.  
+
  
 # Examples
  
@@ -15,10 +18,6 @@ igv.js is an embeddable interactive genome visualization component developed by 
 ***[Multiple regions](http://igv.org/web/test/examples/multi-locus.html)***
 
 ***[More](http://igv.org/web/test/examples)***
-
-# Supported Browsers
-
-igv-webapp and igv.js require a modern web browser with support for Javascript ECMAScript 2015. We test on the latest versions of Chrome, Safari, Firefox, and Edge. Internet Explorer (IE) is not supported.
 
  
 # Quickstart
@@ -139,7 +138,11 @@ To run the examples start an [http-server](https://www.npmjs.com/package/http-se
 Then open [http://localhost:8080/index.html](http://localhost:8080/index.html).
 
 
-## License
+# Supported Browsers
+
+igv-webapp and igv.js require a modern web browser with support for Javascript ECMAScript 2015. We test on the latest versions of Chrome, Safari, Firefox, and Edge. Internet Explorer (IE) is not supported.
+
+# License
 
 igv.js is [MIT](/LICENSE) licensed.
 
