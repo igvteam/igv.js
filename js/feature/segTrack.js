@@ -165,11 +165,6 @@ var igv = (function (igv) {
 
                 if (self.isLog === undefined) checkForLog(featureList);
 
-                const bpPerPixel = options.bpPerPixel;
-                const bpStart = options.bpStart;
-                const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-                const xScale = bpPerPixel;
-
                 updateSampleKeys.call(this, featureList);
 
                 // Create a map for fast id -> row lookup
@@ -178,13 +173,13 @@ var igv = (function (igv) {
                     samples[id] = index;
                 })
 
+                const bpEnd = options.bpStart + pixelWidth * options.bpPerPixel + 1;
                 for (let segment of featureList) {
 
-                    if (segment.end < bpStart) continue;
+                    if (segment.end < options.bpStart) continue;
                     if (segment.start > bpEnd) break;
 
                     segment.row = samples[segment.sampleKey];
-                    const y = samples[segment.sampleKey] * sampleHeight + border;
 
                     let value = segment.value;
                     if (!self.isLog) {
@@ -202,11 +197,21 @@ var igv = (function (igv) {
                         color = "rgb(255, 255, 255)";
                     }
 
-                    const px = Math.round((segment.start - bpStart) / xScale);
-                    const px1 = Math.round((segment.end - bpStart) / xScale);
-                    const pw = Math.max(1, px1 - px);
+                    const segmentStart = Math.max(segment.start, options.bpStart);
+                    const x0 = Math.round((segmentStart - options.bpStart) / options.bpPerPixel);
 
-                    igv.graphics.fillRect(ctx, Math.max(0, px), Math.max(0, y), pw, sampleHeight - 2 * border, { fillStyle: color });
+                    const segmentEnd = Math.min(segment.end, bpEnd);
+                    const x1 = Math.round((segmentEnd - options.bpStart) / options.bpPerPixel);
+
+                    const width = Math.max(1, x1 - x0);
+
+                    const y = samples[segment.sampleKey] * sampleHeight + border;
+
+                    const height = sampleHeight - 2 * border;
+
+                    // console.log('seg draw - x ' + igv.numberFormatter(x0) + ' w ' + igv.numberFormatter(width));
+
+                    igv.graphics.fillRect(ctx, x0, y, width, height, { fillStyle: color });
 
                 }
             }
