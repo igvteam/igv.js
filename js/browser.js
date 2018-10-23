@@ -126,20 +126,21 @@ var igv = (function (igv) {
         const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
 
         const w = anyViewportContainerBBox.width;
-        const h = trackContainerBBox.height + ideoPanelBBox.height;
+        const h_output = trackContainerBBox.height + ideoPanelBBox.height;
+        const h_render = 8000;
 
         let svgContext = new C2S(
             {
 
                 width: w,
-                height: h,
+                height: h_render,
 
                 viewbox:
                     {
                         x: 0,
                         y: 0,
                         width: w,
-                        height: h
+                        height: h_render
                     }
 
             });
@@ -158,6 +159,9 @@ var igv = (function (igv) {
                 return accumulation;
 
             }, { ctx: svgContext, deltaX:0, deltaY:(ideoPanelBBox.height - trackContainerBBox.y) });
+
+        // set output height
+        svgContext.setHeight(h_output);
 
         let svg = svgContext.getSerializedSvg(true);
 

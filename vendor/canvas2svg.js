@@ -227,6 +227,8 @@ var C2S;
             return new ctx(config);
         }
 
+        this.config = { ...config };
+
         //setup options
         this.width = config.width;
         this.height = config.height;
@@ -282,6 +284,25 @@ var C2S;
         this.__currentElement = this.__rootGroup;
     };
 
+    ctx.prototype.setWidth = function(width) {
+
+        this.width = width;
+        this.__root.setAttribute("width", this.width);
+
+        const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + width + ' ' + this.config.viewbox.height;
+        this.__root.setAttribute("viewBox", str);
+
+    };
+
+    ctx.prototype.setHeight = function(height) {
+
+        this.height = height;
+        this.__root.setAttribute("height", this.height);
+
+        const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + this.config.viewbox.width + ' ' + height;
+        this.__root.setAttribute("viewBox", str);
+
+    };
 
     /**
      * Creates the specified svg element
