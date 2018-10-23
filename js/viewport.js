@@ -505,6 +505,7 @@ var igv = (function (igv) {
         str = str.split(' ').join('_').toLowerCase();
 
         // handle vertical scroll
+        const contentBBox = this.contentDiv.getBoundingClientRect();
         const translationYOffset = $(this.contentDiv).position().top;
         config.ctx.addTrackGroupWithTranslationAndClipRect(str, config.deltaX, config.deltaY + translationYOffset, viewportBBox.width, viewportBBox.height, -translationYOffset);
 

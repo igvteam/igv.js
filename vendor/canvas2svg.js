@@ -253,6 +253,9 @@ var C2S;
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
+        // allow contents to overflow svg bbox
+        this.__root.setAttribute('overflow', 'visible');
+
         // viewbox
         if (config.viewbox) {
             const str = config.viewbox.x + ' ' + config.viewbox.y + ' ' + config.viewbox.width + ' ' + config.viewbox.height;
