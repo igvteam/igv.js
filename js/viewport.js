@@ -512,6 +512,8 @@ var igv = (function (igv) {
 
         config.ctx.save();
 
+        console.log(id + ' bp start ' + igv.numberFormatter(referenceFrame.start));
+
         const drawConfig =
             {
                 context: config.ctx,

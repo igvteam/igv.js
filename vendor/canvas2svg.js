@@ -228,7 +228,7 @@ var C2S;
         }
 
         // clone config
-        this.config = JSON.parse(JSON.stringify(config));
+        this.config = config;
 
         //setup options
         this.width = config.width;
