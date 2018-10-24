@@ -25,9 +25,7 @@ $igv-button-cancel-hover-color: #7f7f7f;
 
 $igv-border-color: #bfbfbf;
 
-//$igv-ideogram-height: 14px;
 $igv-ideogram-height: 16px;
-//$igv-ideogram-height: 32px;
 
 $igv-panel-border-width: 1px;
 $igv-panel-border-color: #292929;
@@ -84,12 +82,12 @@ $igv-dark-grey-color: #373737;
   .igv-ideogram-shim {
     height: 100%;
     width: 50px;
-    background-color: white;
+    background-color: rgb(255,255,255);
   }
 
   .igv-ideogram-content {
     height: 100%;
-    background-color: white;
+    background-color: rgb(255,255,255);
   }
 
   .igv-ideogram-content-border-right {
