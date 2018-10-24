@@ -49,8 +49,8 @@ var igv = (function (igv) {
         event.stopPropagation();
         event.preventDefault();
 
-        const styleX = Math.round(parseFloat(this.style.left.replace("px", "")));
-        const styleY = Math.round(parseFloat(this.style.top.replace("px", "")));
+        const styleX = igv.Math.left(this.style.left);
+        const styleY = igv.Math.top(this.style.top);
         const dragFunction = drag.bind(this);
         const dragEndFunction = dragEnd.bind(this);
 

@@ -627,7 +627,7 @@ var igv = (function (igv) {
         $e.text('Set track color');
 
         clickHandler = function () {
-            trackView.$colorpicker_container.toggle();
+            trackView.presentColorPicker();
         };
 
         return {

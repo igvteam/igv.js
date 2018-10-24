@@ -89,29 +89,7 @@ var igv = (function (igv) {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
         }
 
-        // Create color picker.
-        config =
-            {
-                bbox: this.trackDiv.getBoundingClientRect(),
-
-                $parent: this.browser.$root,
-
-                // width = 13 * (swatch-width + margin-width + margin-width + border-width + border-width
-                width: 13 * (48 + (4 + 4) + (2 + 2)),
-
-                closeHandler: () => {
-                    self.$colorpicker_container.toggle();
-                }
-            };
-
-        this.$colorpicker_container = igv.genericContainer(config);
-
-        createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
-            self.setColor(rgb);
-            // self.$colorpicker_container.hide();
-        });
-
-        this.$colorpicker_container.hide();
+        this.createColorPicker();
 
     };
 
@@ -308,6 +286,37 @@ var igv = (function (igv) {
         this.track.color = color;
         this.track.config.color = color;
         this.repaintViews(true);
+    };
+
+    igv.TrackView.prototype.createColorPicker = function () {
+
+        let self = this;
+
+        const config =
+            {
+                $parent: $(this.trackDiv),
+
+                // width = 13 * (swatch-width + margin-width + margin-width + border-width + border-width
+                width: 13 * (48 + (4 + 4) + (2 + 2)),
+
+                closeHandler: () => {
+                    self.$colorpicker_container.hide();
+                }
+            };
+
+        this.$colorpicker_container = igv.genericContainer(config);
+
+        createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+            self.setColor(rgb);
+            // self.$colorpicker_container.hide();
+        });
+
+        this.$colorpicker_container.hide();
+
+    };
+
+    igv.TrackView.prototype.presentColorPicker = function () {
+        this.$colorpicker_container.show();
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {

@@ -25,7 +25,7 @@
 
 var igv = (function (igv) {
 
-    igv.genericContainer = function ({ $parent, bbox, width, height, closeHandler }) {
+    igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
 
         var self = this,
             $generic_container,
@@ -36,7 +36,15 @@ var igv = (function (igv) {
 
         $generic_container = $('<div>', {class: 'igv-generic-container'});
         $parent.append($generic_container);
-        $generic_container.offset( { left:bbox.left, top:bbox.top } );
+
+        let parentBBox = $parent.parent().get(0).getBoundingClientRect();
+        let bbox = $parent.get(0).getBoundingClientRect();
+
+        // let origin = { x: bbox.x - parentBBox.x, y: bbox.y - parentBBox.y };
+        let origin = { x: bbox.x, y: bbox.y };
+
+        $generic_container.offset( { left: origin.x, top: origin.y } );
+
 
         // width
         if (width) {
@@ -69,7 +77,7 @@ var igv = (function (igv) {
             e.preventDefault();
             e.stopPropagation();
 
-            $generic_container.offset( { left:bbox.left, top:bbox.top } );
+            $generic_container.offset( { left:origin.x, top:origin.y } );
 
             closeHandler(e);
         });
@@ -78,7 +86,7 @@ var igv = (function (igv) {
             e.preventDefault();
             e.stopPropagation();
 
-            $generic_container.offset( { left:bbox.left, top:bbox.top } );
+            $generic_container.offset( { left:origin.x, top:origin.y } );
 
             closeHandler(e);
         });

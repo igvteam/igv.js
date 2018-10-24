@@ -27,6 +27,16 @@ var igv = (function (igv) {
 
     igv.Math = {
 
+        left: style => {
+            let str = style.left;
+            return Math.round(parseFloat(str.replace('px', '')));
+        },
+
+        top: style => {
+            let str = style.top;
+            return Math.round(parseFloat(str.replace('px', '')));
+        },
+
         lerp: (v0, v1, t) => {
             return (1 - t) * v0 + t * v1;
         },
