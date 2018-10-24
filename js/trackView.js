@@ -300,23 +300,25 @@ var igv = (function (igv) {
                 width: 13 * (48 + (4 + 4) + (2 + 2)),
 
                 closeHandler: () => {
-                    self.$colorpicker_container.hide();
+                    self.colorPicker.$container.hide();
                 }
             };
 
-        this.$colorpicker_container = igv.genericContainer(config);
+        this.colorPicker = new igv.genericContainer(config);
 
-        createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
+        createColorSwatchSelector(this.colorPicker.$container, function (rgb) {
             self.setColor(rgb);
-            // self.$colorpicker_container.hide();
         });
 
-        this.$colorpicker_container.hide();
+        self.colorPicker.$container.hide();
 
     };
 
     igv.TrackView.prototype.presentColorPicker = function () {
-        this.$colorpicker_container.show();
+        const bbox = this.trackDiv.getBoundingClientRect();
+        this.colorPicker.origin = { x: bbox.x, y: 0 };
+        this.colorPicker.$container.offset( { left: this.colorPicker.origin.x, top: this.colorPicker.origin.y } );
+        this.colorPicker.$container.show();
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
