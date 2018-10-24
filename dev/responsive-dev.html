@@ -1,17 +1,14 @@
-<!doctype html>
+<!DOCTYPE html>
+<html lang="en">
 <head>
-
-    <!-- Adapted from https://www.elated.com/res/File/articles/development/javascript/document-object-model/javascript-tabs/javascript-tabs.html -->
-
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>igv.js</title>
+    <title>IGV - Dev</title>
 
-    <!-- IGV JS-->
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
@@ -154,181 +151,40 @@
     <script src="../vendor/rbtree.js"></script>
     <script src="../vendor/canvas2svg.js"></script>
 
-
-    <style type="text/css">
-        body {
-            font-size: 80%;
-            font-family: 'Lucida Grande', Verdana, Arial, Sans-Serif;
-        }
-
-        ul#tabs {
-            list-style-type: none;
-            margin: 30px 0 0 0;
-            padding: 0 0 0.3em 0;
-        }
-
-        ul#tabs li {
-            display: inline;
-        }
-
-        ul#tabs li a {
-            color: #42454a;
-            background-color: #dedbde;
-            border: 1px solid #c9c3ba;
-            border-bottom: none;
-            padding: 0.3em;
-            text-decoration: none;
-        }
-
-        ul#tabs li a:hover {
-            background-color: #f1f0ee;
-        }
-
-        ul#tabs li a.selected {
-            color: #000;
-            background-color: #f1f0ee;
-            font-weight: bold;
-            padding: 0.7em 0.3em 0.38em 0.3em;
-        }
-
-        div.tabContent {
-            border: 1px solid #c9c3ba;
-            padding: 0.5em;
-        }
-
-        div.tabContent.hide {
-            display: none;
-        }
-    </style>
-
 </head>
 
 <body>
 
-<h1>IGV tabs example</h1>
-
-<ul id="tabs">
-    <li><a href="#firstTab">First Tab</a></li>
-    <li><a href="#igvTab">IGV Tab</a></li>
-</ul>
-
-<div id="firstTab">
-    <ul>
-        <li> When this tab (really, just a div) comes first in the document, the igv.js div has display:none, width == 0
-        <li> Clicking the IGV Tab does not generate any events that igv can listen to. So to inform IGV of the
-            visibility
-            change clients must call igv.visibilityChange(), as shown above in the showTabs function.
-    </ul>
-</div>
-
-<div id="igvTab">
-    <div id="igvDiv"></div>
-</div>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-        initTabs();
-        initIGV();
-    });
 
-    function initIGV() {
+        igv.google
+            .loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+            .then(function (google) {
 
-        var igvDiv, options;
-        igvDiv = document.getElementById("igvDiv");
-        options =
-            {
-<<<<<<< HEAD
-                locus: "chr18:24,439,290-24,439,534",
-=======
-                locus: "AQP4",
->>>>>>> Fix for tabs visibility problem
-                genome: "hg19",
-                tracks: [
+                const options =
                     {
-                        type: 'alignment',
-                        format: 'bam',
-                        url: 'https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
-                        name: 'HG02450'
-                    }
+                        // showRuler: false,
+                        locus: 'muc1',
+                        genome: "hg19",
+                        flanking: 1000,
+                        queryParametersSupported: true,
 
-                ]
+                    };
 
-            };
-        igv.createBrowser(igvDiv, options);
-    }
+                igv.createBrowser(document.getElementById("igvDiv"), options)
+                    .then(function (browser) {
+                        // do stuff
+                    })
 
-    function initTabs() {
-
-        var tabs = [];
-
-        // Grab the tab links and content divs from the page
-        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function(item) {
-            return item.nodeName === 'LI'
-        });
-
-        var tabLinks = liItems.map(function (li) {
-            return getFirstChildWithTagName(li, 'A');
-        })
-
-        tabLinks.forEach(function (tabLink) {
-            tabLink.onclick = showTab;
-            tabLink.onfocus = function () {
-                this.blur()
-            };
-            var id = getHash(tabLink.getAttribute('href'));
-            var contentDiv = document.getElementById(id);
-            tabs.push({
-                id: id,
-                link: tabLink,
-                content: contentDiv
-            });
-        })
-
-        tabs[0].content.className = 'tabContent';
-        tabs[0].link.className = 'selected';
-        for (var i = 1; i < tabs.length; i++) {
-            tabs[i].link.className = '';
-            tabs[i].content.className = 'tabContent hide'
-        }
-
-        function showTab() {
-
-            var selectedId = getHash(this.getAttribute('href'));
-
-            tabs.forEach(function (tab) {
-
-                if (tab.id == selectedId) {
-                    tab.link.className = 'selected';
-                    tab.content.className = 'tabContent';
-                } else {
-                    tab.link.className = '';
-                    tab.content.className = 'tabContent hide';
-                }
-            });
-
-            igv.visibilityChange();
-
-            // Stop the browser following the link
-            return false;
-        }
-
-
-        function getFirstChildWithTagName(element, tagName) {
-            for (var i = 0; i < element.childNodes.length; i++) {
-                if (element.childNodes[i].nodeName == tagName) return element.childNodes[i];
-            }
-        }
-
-        function getHash(url) {
-            var hashPos = url.lastIndexOf('#');
-            return url.substring(hashPos + 1);
-        }
-    }
-
+            })
+    });
 
 </script>
 
-
 </body>
+
 </html>
