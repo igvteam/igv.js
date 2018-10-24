@@ -141,6 +141,12 @@ $igv-dark-grey-color: #373737;
   justify-content: space-between;
   align-items: center;
 
+  color: #444;
+  font-size: $igv-navbar-font-size;
+  font-family: $igv-default-font-face;
+  font-weight: 400;
+  line-height: $igv-navbar-height;
+
   margin-top: 2px;
   margin-bottom: 4px;
 
@@ -157,17 +163,6 @@ $igv-dark-grey-color: #373737;
   border-color: $igv-border-color;
   background-color: $igv-navbar-toggle-light-color;
 
-  i {
-    cursor: pointer;
-    color: #666666;
-  }
-
-  i:hover,
-  i:focus,
-  i:active  {
-    color: #434343;
-  }
-
   .igv-nav-bar-left-container {
 
     display: flex;
@@ -182,27 +177,15 @@ $igv-dark-grey-color: #373737;
     .igv-logo {
       width: 34px;
       height: $igv-navbar-height;
-
       margin-left: 8px;
       margin-right: 32px;
     }
 
     .igv-current_genome {
-
       height: $igv-navbar-height;
-
       margin-right: 16px;
-
       user-select: none;
-
-      color: #444;
-      font-family: $igv-default-font-face;
-      font-size: $igv-navbar-font-size;
-      font-weight: 400;
-      line-height: $igv-navbar-height;
       text-align: center;
-
-      //background-color: rgba(0, 191, 255, 0.51);
     }
 
     // chromosome select widget | chromosome select widget | locus goto | search icon | window size
@@ -214,29 +197,26 @@ $igv-dark-grey-color: #373737;
       justify-content: space-between;
       align-items: center;
 
-      height: $igv-navbar-height;
+      height: 100%;
 
       // chromosome select widget
       .igv-chromosome-select-widget-container {
-        width: 96px;
+
+        height: 100%;
+        width: 100px;
         margin-right: 4px;
 
-        height: 70%;
-
         select {
-
-          display: block;
-
+          cursor: pointer;
+          width: 100%;
+          height: 75%;
           outline: none;
 
-          font-family: $igv-default-font-face;
           font-size: $igv-navbar-font-size;
+          font-family: $igv-default-font-face;
           font-weight: 400;
-          color: #444;
-
-          width: 100%;
-          height: 100%;
         }
+
       }
 
       .igv-locus-size-group {
@@ -246,11 +226,13 @@ $igv-dark-grey-color: #373737;
         justify-content: space-between;
         align-items: center;
 
-        height: 75%;
+        margin-left: 8px;
+        height: 100%;
 
         // locus goto | search icon
         .igv-search-container {
           width: 260px;
+          height: 100%;
 
           display: flex;
           flex-flow: row;
@@ -260,21 +242,21 @@ $igv-dark-grey-color: #373737;
 
           // locus goto
           input {
-            display: block;
+            cursor: text;
             width: 85%;
+            height: 75%;
 
             padding-left: 8px;
             margin-right: 8px;
 
-            line-height: 20px;
             text-align: left;
 
-            font-family: $igv-default-font-face;
-            font-size: $igv-navbar-font-size;
-            font-weight: 400;
-            color: #444;
-
             outline: none;
+
+            font-size: $igv-navbar-font-size;
+            font-family: $igv-default-font-face;
+            font-weight: 400;
+
 
             border-style: solid;
             border-radius: 3px;
@@ -287,26 +269,14 @@ $igv-dark-grey-color: #373737;
           // search icon
           div {
             height: 100%;
-            //width: 32px;
-
-            i {
-              font-size: 18px;
-            }
 
           }
 
         }
 
-        // window size panel
         .igv-windowsizepanel-content-div {
           margin-left: 4px;
-
           user-select: none;
-
-          font-family: $igv-default-font-face;
-          font-size: $igv-navbar-font-size;
-          font-weight: 400;
-          color: #444;
         }
 
       }
@@ -323,6 +293,8 @@ $igv-dark-grey-color: #373737;
     justify-content: space-between;
     align-items: center;
 
+    height: 100%;
+
     // toggle buttons
     .igv-nav-bar-toggle-button-container {
 
@@ -332,6 +304,7 @@ $igv-dark-grey-color: #373737;
       justify-content: space-between;
       align-items: center;
 
+      height: 100%;
       margin-right: 8px;
 
       div {
@@ -349,9 +322,13 @@ $igv-dark-grey-color: #373737;
     // nav bar - zoom
     .igv-zoom-widget {
 
-      user-select: none;
+      height: 100%;
 
-      font-size: 20px;
+      color: $igv-navbar-toggle-dark-dark;
+
+      font-size: 18px;
+
+      user-select: none;
 
       margin-left: 16px;
       margin-right: 8px;
@@ -363,15 +340,19 @@ $igv-dark-grey-color: #373737;
       align-items: center;
 
       div {
+        height: 100%;
         cursor: pointer;
-        color: #666666;
+
+        input {
+          margin-top: 9px;
+          width: 128px;
+        }
       }
 
     }
 
   }
 }
-
 
 // drag & drop file upload button
 .igv-nav-bar-button {
@@ -1393,9 +1374,9 @@ $igv-dark-grey-color: #373737;
     text-align: center;
     line-height: 100%;
 
-      cursor: pointer;
-      color: #444;
-      font-size: small;
+    cursor: pointer;
+    color: #444;
+    font-size: small;
 
   }
 
@@ -1467,4 +1448,97 @@ $igv-dark-grey-color: #373737;
   padding: 0;
   border: 0;
   display: block;
+}
+
+@media (max-width: 1100px) {
+
+  .igv-navbar {
+
+    font-size: 10px;
+
+    .igv-nav-bar-left-container {
+
+      .igv-logo {
+        margin-right: 10px;
+      }
+
+      .igv-current_genome {
+        margin-right: 10px;
+      }
+
+      .igv-genomic-location {
+
+        .igv-chromosome-select-widget-container {
+          width: 84px;
+
+          select {
+            font-size: 10px;
+          }
+
+        }
+
+        .igv-locus-size-group {
+
+          .igv-search-container {
+            width: 150px;
+
+            input {
+              font-size: 10px;
+            }
+          }
+
+        }
+
+      }
+
+    }
+
+    .igv-nav-bar-right-container {
+
+      .igv-zoom-widget {
+        div {
+          input {
+            width: 72px;
+          }
+        }
+      }
+
+    }
+
+  }
+
+  .igv-nav-bar-button {
+    min-width: 64px;
+    font-size: 10px;
+  }
+
+}
+
+@media (max-width: 800px) {
+
+  .igv-navbar {
+
+    .igv-nav-bar-right-container {
+
+      .igv-nav-bar-toggle-button-container {
+          display: none;
+      }
+
+      .igv-zoom-widget {
+
+        font-size: 24px;
+
+        div {
+          input {
+            display: none;
+          }
+        }
+      }
+
+    }
+
+  }
+
+
+
 }

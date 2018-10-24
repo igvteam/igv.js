@@ -835,25 +835,6 @@ var igv = (function (igv) {
 
         const self = this;
 
-        // Minimal attempt at responsiveness
-        // TODO -- remove this when media queries are working
-        const rootWidth = this.$root.width();
-        if (rootWidth < 1000) {
-            this.chromosomeSelectWidget.$container.hide();
-            this.$root.find(".igv-nav-bar-toggle-button-container").hide();
-            this.zoomWidget.hide();
-        }
-        else {
-            if (this.config.showChromosomeWidget) {
-                this.chromosomeSelectWidget.$container.show();
-            }
-            this.$root.find(".igv-nav-bar-toggle-button-container").show();
-            this.$root.find(".igv-right-hand-gutter").show();
-            this.zoomWidget.show();
-            //this.$root.find(".igv-track-manipulation-handle").show();
-        }
-
-
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         const viewportWidth = this.viewportWidth();
 
