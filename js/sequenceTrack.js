@@ -208,58 +208,50 @@ var igv = (function (igv) {
 
         SequenceTrack.prototype.draw = function (options) {
 
-            var self = this,
-                sequence = options.features,
-                ctx = options.context,
-                bpPerPixel = options.bpPerPixel,
-                bpStart = options.bpStart,
-                pixelWidth = options.pixelWidth,
-                bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-                len, w, y, pos, offset, b, p0, p1, pc, c, h;
-            var transSeq, aaS;
+            var self = this;
 
-            if (sequence) {
+            if (options.features) {
 
-                len = sequence.length;
-                w = 1 / bpPerPixel;
+                const sequence = options.features;
 
-                h = 15; //Separate sequence height from view height.
-                for (pos = bpStart; pos <= bpEnd; pos++) {
+                let color;
+                let ctx = options.context;
 
-                    offset = pos - bpStart;
-                    if (offset < len) {
-                        b = sequence[offset];
+                let bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
+
+                let sequenceLength = sequence.length;
+
+                let height = 15;
+                for (let bp = options.bpStart; bp <= bpEnd; bp++) {
+
+                    let offsetBP = bp - options.bpStart;
+                    if (offsetBP < sequenceLength) {
+                        let letter = sequence[offsetBP];
 
                         if (this.reversed) {
-                            b = this.complement[b.toUpperCase()];
+                            letter = this.complement[letter.toUpperCase()];
                         }
 
-                        p0 = Math.floor(offset * w);
-                        p1 = Math.floor((offset + 1) * w);
-                        pc = Math.round((p0 + p1) / 2);
+                        let aPixel = Math.floor( offsetBP      / options.bpPerPixel);
+                        let bPixel = Math.floor((offsetBP + 1) / options.bpPerPixel);
 
-                        if (this.color) {
-                            c = this.color;
-                        }
-                        else if ("dna" === this.sequenceType) {
-                            c = igv.nucleotideColors[b];
+                        color = fillColor.call(this, letter);
+
+                        if (options.bpPerPixel > 1/10) {
+                            // console.log('sequence track ' + igv.numberFormatter(aPixel));
+                            igv.graphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                         }
                         else {
-                            c = "rgb(0, 0, 150)";
-                        }
-
-                        if (!c) c = "gray";
-
-                        if (bpPerPixel > 1 / 10) {
-                            igv.graphics.fillRect(ctx, p0, 5, p1 - p0, h - 5, {fillStyle: c});
-                        }
-                        else {
-                            igv.graphics.strokeText(ctx, b, pc - (ctx.measureText(b).width / 2), h, {strokeStyle: c});
+                            let xPixel = Math.round(0.5 * (aPixel + bPixel - ctx.measureText(letter).width));
+                            // console.log('sequence track ' + igv.numberFormatter(xPixel));
+                            igv.graphics.strokeText(ctx, letter, xPixel, height, { strokeStyle: color });
                         }
                     }
                 }
+                /*
                 if (this.frameTranslate) {
 
+                    let transSeq;
                     if (this.reversed) {
                         transSeq = sequence.split('').map(function (cv) {
                             return self.complement[cv];
@@ -269,47 +261,64 @@ var igv = (function (igv) {
                         transSeq = sequence;
                     }
 
-                    y = h;
+                    let y = height;
                     this.translateSequence(transSeq).forEach(function (arr, i) {
                         var fNum = i;
                         var h = 25;
                         y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
                         arr.forEach(function (cv, idx) {
+                            let aaS;
                             var xSeed = (idx + fNum) + (2 * idx);
                             if (idx % 2 === 0) {
-                                c = 'rgb(160,160,160)';
+                                color = 'rgb(160,160,160)';
                             } else {
-                                c = 'rgb(224,224,224)';
+                                color = 'rgb(224,224,224)';
                             }
-                            p0 = Math.floor(xSeed * w);
-                            p1 = Math.floor((xSeed + 3) * w);
-                            pc = Math.round((p0 + p1) / 2);
+                            let p0 = Math.floor(xSeed * width);
+                            let p1 = Math.floor((xSeed + 3) * width);
+                            let pc = Math.round((p0 + p1) / 2);
                             if (cv.aminoA.indexOf('STOP') > -1) {
-                                c = 'rgb(255, 0, 0)';
+                                color = 'rgb(255, 0, 0)';
                                 aaS = 'STOP'; //Color blind accessible
                             } else {
                                 aaS = cv.aminoA;
                             }
                             if (cv.aminoA === 'M') {
-                                c = 'rgb(0, 153, 0)';
+                                color = 'rgb(0, 153, 0)';
                                 aaS = 'START'; //Color blind accessible
                             }
+
                             ctx.fillRect(p0, y, p1 - p0, h);
-                            igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: c});
-                            if (bpPerPixel <= 1 / 10) {
+
+                            igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
+
+                            if (options.bpPerPixel <= 1 / 10) {
                                 igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15); //centers text in rect
                             }
 
                         });
                     });
                 }
+                */
             }
 
         };
 
+        function fillColor(index) {
+
+            if (this.color) {
+                return this.color;
+            } else if ("dna" === this.sequenceType) {
+                return igv.nucleotideColors[ index ] || 'gray';
+            } else {
+                return 'rgb(0, 0, 150)';
+            }
+
+        }
+
         SequenceTrack.prototype.supportsWholeGenome = function () {
             return false;
-        }
+        };
 
         SequenceTrack.prototype.computePixelHeight = function (ignore) {
             return this.height;

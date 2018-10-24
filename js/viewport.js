@@ -512,7 +512,7 @@ var igv = (function (igv) {
 
         config.ctx.save();
 
-        console.log(id + ' bp start ' + igv.numberFormatter(referenceFrame.start));
+        console.log('viewport ' + id + ' bp start ' + igv.numberFormatter(referenceFrame.start));
 
         const drawConfig =
             {
