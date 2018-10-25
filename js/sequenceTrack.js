@@ -248,7 +248,7 @@ var igv = (function (igv) {
                         }
                     }
                 }
-                /*
+
                 if (this.frameTranslate) {
 
                     let transSeq;
@@ -299,7 +299,7 @@ var igv = (function (igv) {
                         });
                     });
                 }
-                */
+
             }
 
         };
