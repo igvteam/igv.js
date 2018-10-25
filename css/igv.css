@@ -85,26 +85,22 @@
   position: relative; }
 
 .igv-content-header {
-  position: relative;
-  height: 16px;
-  clear: both;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
   margin-top: 10px;
-  white-space: nowrap; }
-  .igv-content-header .igv-ideogram-left-shim {
-    position: relative;
+  height: 16px;
+  width: 100%; }
+  .igv-content-header .igv-ideogram-shim {
     height: 100%;
     width: 50px;
-    display: inline-block;
     background-color: white; }
-  .igv-content-header .igv-ideogram-content-div {
-    position: relative;
+  .igv-content-header .igv-ideogram-content {
     height: 100%;
-    display: inline-block;
     background-color: white; }
-    .igv-content-header .igv-ideogram-content-div canvas {
-      width: 100%;
-      height: 100%; }
-  .igv-content-header .igv-ideogram-content-div-border-right {
+  .igv-content-header .igv-ideogram-content-border-right {
     border-right-color: #292929;
     border-right-style: solid;
     border-right-width: 1px; }

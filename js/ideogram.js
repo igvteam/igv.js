@@ -40,7 +40,7 @@ var igv = (function (igv) {
 
         var self = this;
 
-        $parent.append($('<div class="igv-ideogram-left-shim"></div>'));
+        $parent.append($('<div class="igv-ideogram-shim"></div>'));
 
         this.panels = this.browser.genomicStateList.map(function (genomicState) {
             return panelWithGenomicState.call(self, $parent, genomicState, width)
@@ -136,7 +136,7 @@ var igv = (function (igv) {
 
         panel.genomicState = genomicState;
 
-        panel.$ideogram = $('<div class="igv-ideogram-content-div"></div>');
+        panel.$ideogram = $('<div class="igv-ideogram-content"></div>');
 
         $parent.append(panel.$ideogram);
 
@@ -161,9 +161,9 @@ var igv = (function (igv) {
     function addBorder($ideogram, index, length) {
 
         if (index < length && (1 + index !== length)) {
-            $ideogram.addClass('igv-ideogram-content-div-border-right');
+            $ideogram.addClass('igv-ideogram-content-border-right');
         } else {
-            $ideogram.removeClass('igv-ideogram-content-div-border-right');
+            $ideogram.removeClass('igv-ideogram-content-border-right');
         }
 
     }
@@ -173,9 +173,9 @@ var igv = (function (igv) {
         panels.forEach(function (panel, p) {
 
             if (1 === panels.length || (1 + p) === panels.length) {
-                panel.$ideogram.removeClass('igv-ideogram-content-div-border-right');
+                panel.$ideogram.removeClass('igv-ideogram-content-border-right');
             } else {
-                panel.$ideogram.addClass('igv-ideogram-content-div-border-right');
+                panel.$ideogram.addClass('igv-ideogram-content-border-right');
             }
 
         });
