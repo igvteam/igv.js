@@ -497,26 +497,24 @@ var igv = (function (igv) {
         igv.download(filename, data);
     };
 
-    igv.Viewport.prototype.renderSVGContext = function (config) {
-
+    igv.Viewport.prototype.renderSVGContext = function (context, offset) {
 
         const yScrollDelta = $(this.contentDiv).position().top;
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
         const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
-        config.ctx.addTrackGroupWithTranslationAndClipRect(id, config.deltaX, config.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
+
+        context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
         const width = this.$viewport.width();
         const height = this.$viewport.height();
 
         let referenceFrame = this.genomicState.referenceFrame;
 
-        config.ctx.save();
-
-        console.log('viewport ' + id + ' bp start ' + igv.numberFormatter(referenceFrame.start));
+        context.save();
 
         const drawConfig =
             {
-                context: config.ctx,
+                context: context,
 
                 viewport: this,
 
@@ -542,7 +540,7 @@ var igv = (function (igv) {
 
         draw.call(this, drawConfig, this.tile.features);
 
-        config.ctx.restore();
+        context.restore();
     };
 
     igv.Viewport.prototype.saveSVG = function () {

@@ -100,24 +100,21 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackView.prototype.renderSVGContext = function (config) {
+    igv.TrackView.prototype.renderSVGContext = function (context, offset) {
 
-        // clone config
-        let viewportConfig = Object.assign({}, config);
+        for (let viewport of this.viewports) {
 
-        this.viewports
-            .reduce(function(accumulation, viewport) {
+            const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
+            const bbox = viewport.$viewport.get(0).getBoundingClientRect();
 
-                const bbox = viewport.$viewport.get(0).getBoundingClientRect();
-                const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
+            let o =
+                {
+                    deltaX: offset.deltaX + index * viewport.$viewport.width(),
+                    deltaY: offset.deltaY + bbox.y
+                };
 
-                accumulation.deltaX = config.deltaX + index * viewport.$viewport.width();
-                accumulation.deltaY = config.deltaY + bbox.y;
-
-                viewport.renderSVGContext(accumulation);
-
-                return accumulation;
-            }, viewportConfig);
+            viewport.renderSVGContext(context, o);
+        }
 
     };
 

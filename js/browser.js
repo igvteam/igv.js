@@ -145,28 +145,23 @@ var igv = (function (igv) {
 
             });
 
-        // ideoPanel group
+        // accumulate svg rendering in svg context
+        // ideoPanel -> SVG
         if (this.ideoPanel) {
-            this.ideoPanel.renderSVGContext({ ctx: svgContext, deltaX:0, deltaY: 0 });
+            this.ideoPanel.renderSVGContext(svgContext, { deltaX: 0, deltaY: 0 });
         }
 
-        // console.log('---');
-        this.trackViews
-            .reduce(function(accumulation, trackView) {
+        // tracks -> SVG
+        for (let trackView of this.trackViews) {
+            trackView.renderSVGContext(svgContext, {deltaX: 0, deltaY: (ideoPanelBBox.height - trackContainerBBox.y)});
+        }
 
-                trackView.renderSVGContext(accumulation);
-
-                return accumulation;
-
-            }, { ctx: svgContext, deltaX:0, deltaY:(ideoPanelBBox.height - trackContainerBBox.y) });
-
-        // set output height
+        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         svgContext.setHeight(h_output);
 
         let svg = svgContext.getSerializedSvg(true);
 
         $container.empty();
-        // $container.width(anyViewportBBox.width);
         $container.width(anyViewportContainerBBox.width);
         $container.append( svg );
 

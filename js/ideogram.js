@@ -36,18 +36,20 @@ var igv = (function (igv) {
 
     };
 
-    igv.IdeoPanel.prototype.renderSVGContext = function (config) {
+    igv.IdeoPanel.prototype.renderSVGContext = function (context, offset) {
 
         let self = this;
 
         this.panels.forEach((panel, i) => {
 
             const bbox = panel.$ideogram.get(0).getBoundingClientRect();
-            config.ctx.addTrackGroupWithTranslationAndClipRect('ideogram', (i * panel.$canvas.width()), config.deltaY, bbox.width, bbox.height, 0);
+            context.addTrackGroupWithTranslationAndClipRect('ideogram', (i * panel.$canvas.width()), offset.deltaY, bbox.width, bbox.height, 0);
+
+            context.save();
 
             let paintConfig =
                 {
-                    ctx: config.ctx,
+                    ctx: context,
                     width: panel.$canvas.width(),
                     height: panel.$canvas.height(),
                     genome: self.browser.genome,
@@ -55,9 +57,10 @@ var igv = (function (igv) {
                     ideogramWidth: panel.$ideogram.width()
                 };
 
-            config.ctx.save();
+
             repaintContext(paintConfig);
-            config.ctx.restore();
+
+            context.restore();
         });
 
     };
