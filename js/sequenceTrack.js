@@ -218,14 +218,12 @@ var igv = (function (igv) {
                 let ctx = options.context;
 
                 let bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
-
-                let sequenceLength = sequence.length;
-
+                
                 let height = 15;
                 for (let bp = options.bpStart; bp <= bpEnd; bp++) {
 
                     let offsetBP = bp - options.bpStart;
-                    if (offsetBP < sequenceLength) {
+                    if (offsetBP < sequence.length) {
                         let letter = sequence[offsetBP];
 
                         if (this.reversed) {
@@ -238,12 +236,9 @@ var igv = (function (igv) {
                         color = fillColor.call(this, letter);
 
                         if (options.bpPerPixel > 1/10) {
-                            // console.log('sequence track ' + igv.numberFormatter(aPixel));
                             igv.graphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
-                        }
-                        else {
+                        } else {
                             let xPixel = Math.round(0.5 * (aPixel + bPixel - ctx.measureText(letter).width));
-                            // console.log('sequence track ' + igv.numberFormatter(xPixel));
                             igv.graphics.strokeText(ctx, letter, xPixel, height, { strokeStyle: color });
                         }
                     }
@@ -262,42 +257,48 @@ var igv = (function (igv) {
                     }
 
                     let y = height;
-                    this.translateSequence(transSeq).forEach(function (arr, i) {
-                        var fNum = i;
-                        var h = 25;
+                    let translatedSequence = this.translateSequence(transSeq);
+                    for (let arr of translatedSequence) {
+
+                        let i = translatedSequence.indexOf(arr);
+                        let fNum = i;
+                        let h = 25;
+
                         y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
-                        arr.forEach(function (cv, idx) {
+
+                        for (let cv of arr) {
+
                             let aaS;
-                            var xSeed = (idx + fNum) + (2 * idx);
-                            if (idx % 2 === 0) {
-                                color = 'rgb(160,160,160)';
-                            } else {
-                                color = 'rgb(224,224,224)';
-                            }
-                            let p0 = Math.floor(xSeed * width);
-                            let p1 = Math.floor((xSeed + 3) * width);
+                            let idx = arr.indexOf(cv);
+                            let xSeed = (idx + fNum) + (2 * idx);
+                            let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)';
+
+                            let p0 = Math.floor(xSeed / options.bpPerPixel);
+                            let p1 = Math.floor((xSeed + 3) / options.bpPerPixel);
                             let pc = Math.round((p0 + p1) / 2);
+
                             if (cv.aminoA.indexOf('STOP') > -1) {
                                 color = 'rgb(255, 0, 0)';
                                 aaS = 'STOP'; //Color blind accessible
                             } else {
                                 aaS = cv.aminoA;
                             }
+
                             if (cv.aminoA === 'M') {
                                 color = 'rgb(0, 153, 0)';
                                 aaS = 'START'; //Color blind accessible
                             }
 
-                            ctx.fillRect(p0, y, p1 - p0, h);
-
-                            igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
+                            igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, { fillStyle: color });
 
                             if (options.bpPerPixel <= 1 / 10) {
-                                igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15); //centers text in rect
+                                igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
                             }
 
-                        });
-                    });
+                        }
+
+                    }
+
                 }
 
             }
