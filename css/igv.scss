@@ -25,9 +25,7 @@ $igv-button-cancel-hover-color: #7f7f7f;
 
 $igv-border-color: #bfbfbf;
 
-//$igv-ideogram-height: 14px;
 $igv-ideogram-height: 16px;
-//$igv-ideogram-height: 32px;
 
 $igv-panel-border-width: 1px;
 $igv-panel-border-color: #292929;
@@ -70,45 +68,30 @@ $igv-dark-grey-color: #373737;
 
 .igv-content-header {
 
-  position: relative;
-  height: $igv-ideogram-height;
-  clear: both;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
 
   margin-top: 10px;
 
-  white-space: nowrap;
+  height: 16px;
+  width: 100%;
 
-  .igv-ideogram-left-shim {
-    position: relative;
-
+  .igv-ideogram-shim {
     height: 100%;
     width: 50px;
-
-    display: inline-block;
-
-    background-color: white;
-
+    background-color: rgb(255,255,255);
   }
 
-  .igv-ideogram-content-div {
-    position: relative;
-
+  .igv-ideogram-content {
     height: 100%;
-
-    display: inline-block;
-
-    background-color: white;
-
-    canvas {
-      width:100%;
-      height:100%;
-    }
-
+    background-color: rgb(255,255,255);
   }
 
-  .igv-ideogram-content-div-border-right {
+  .igv-ideogram-content-border-right {
     border-right-color: $igv-panel-border-color;
-    //border-right-color: #ff0000;
     border-right-style: solid;
     border-right-width: $igv-panel-border-width;
   }
