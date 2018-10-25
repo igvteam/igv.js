@@ -63,6 +63,10 @@
     <button onclick="bookmark();">Bookmark</button>
 </div>
 
+<div>
+    <button id='igv-save-svg'>Save SVG</button>
+</div>
+
 <h3>Example tracks - click to load</h3>
 
 <div id="trackList"></div>
@@ -84,15 +88,18 @@
         igv.createBrowser(igvDiv, options)
 
             .then(function (browser) {
+
+                document.getElementById('igv-save-svg').addEventListener('click', (e) => {
+                    browser.renderSVG();
+                });
                 return igvtest.createTrackList(document.getElementById('trackList'), browser)
             })
 
-            .then(function (igore) {
+            .then(function (ignore) {
                 return igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
             })
 
     });
-
 
     function bookmark() {
         window.history.pushState({}, "IGV", igv.browser.sessionURL());
