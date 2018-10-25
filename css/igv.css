@@ -4,18 +4,13 @@
   flex-wrap: wrap;
   justify-content: center;
   align-items: center;
-  width: 48px;
-  height: 48px;
+  width: 32px;
+  height: 32px;
   border-style: solid;
   border-width: 2px;
-  border-color: transparent;
+  border-color: white;
   border-radius: 4px;
-  margin: 4px; }
-
-.igv-color-swatch:hover,
-.igv-color-swatch:focus,
-.igv-color-swatch:active {
-  border-color: #7f7f7f; }
+  margin: 2px; }
 
 .igv-colorpicker-menu-close-button {
   display: flex;
@@ -43,7 +38,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  width: 256px;
+  max-width: 256px;
   border-style: solid;
   border-width: thin;
   border-color: #dddddd;

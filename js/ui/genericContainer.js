@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
+igv.genericContainer = function ({ $parent, closeHandler }) {
 
     var self = this,
         $header,
@@ -38,16 +38,6 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
     let bbox = $parent.get(0).getBoundingClientRect();
     this.origin = { x: bbox.x, y: bbox.y };
     this.$container.offset( { left: this.origin.x, top: this.origin.y } );
-
-    // width
-    if (width) {
-        this.$container.width(width);
-    }
-
-    // height
-    if (height) {
-        this.$container.height(height);
-    }
 
     // header
     $header = $('<div>');

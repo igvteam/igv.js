@@ -297,7 +297,7 @@ var igv = (function (igv) {
                 $parent: $(this.trackDiv),
 
                 // width = 13 * (swatch-width + margin-width + margin-width + border-width + border-width
-                width: 13 * (48 + (4 + 4) + (2 + 2)),
+                // width: 13 * (48 + (4 + 4) + (2 + 2)),
 
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
@@ -669,15 +669,24 @@ var igv = (function (igv) {
                 '#dc3545',
                 '#fd7e14',
                 '#ffc107',
+                'white',
                 '#343a40',
-                '#6c757d',
-                '#ffffff'
+                '#6c757d'
             ];
 
         for (let rgb of rgbs) {
 
-            let $swatch = colorSwatch(rgb);
+            let $swatch = $('<div>', { class: 'igv-color-swatch' });
             $genericContainer.append($swatch);
+
+            $swatch.css('background-color', rgb);
+
+            $swatch.hover(() => {
+                    $swatch.get(0).style.borderColor = 'white' === rgb ? 'rgba(0, 0, 0, 0.71)' : rgb;
+                },
+                () => {
+                    $swatch.get(0).style.borderColor = 'white';
+            });
 
             $swatch.click(function () {
                 colorHandler(rgb);
@@ -689,18 +698,6 @@ var igv = (function (igv) {
 
         }
 
-    };
-
-    let colorSwatch = (rgbString) => {
-
-        let $swatch = $('<div>', {class: 'igv-color-swatch'});
-
-        // let $fa = igv.createIcon("square", rgbString);
-        // $swatch.append($fa);
-
-        $swatch.css('background-color', rgbString);
-
-        return $swatch;
     };
 
     const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
