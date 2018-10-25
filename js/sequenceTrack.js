@@ -197,13 +197,19 @@ var igv = (function (igv) {
 
             const browser = this.browser;
 
-            return new Promise(function (fulfill, reject) {
+
                 if (bpPerPixel && bpPerPixel > 1) {
-                    fulfill(null);
+                    return Promise.resolve(null);
                 } else {
-                    browser.genome.sequence.getSequence(chr, bpStart, bpEnd).then(fulfill).catch(reject);
+                    return browser.genome.sequence.getSequence(chr, bpStart, bpEnd)
+                        .then(function (sequence) {
+                           return {
+                               bpStart: bpStart,
+                               sequence: sequence
+                           }
+                        });
                 }
-            });
+
         };
 
         SequenceTrack.prototype.draw = function (options) {
@@ -212,33 +218,36 @@ var igv = (function (igv) {
 
             if (options.features) {
 
-                const sequence = options.features;
+                const sequence = options.features.sequence;
+                const sequenceBpStart = options.features.bpStart;
 
-                let color;
-                let ctx = options.context;
+
 
                 let bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
                 
                 let height = 15;
                 for (let bp = options.bpStart; bp <= bpEnd; bp++) {
 
-                    let offsetBP = bp - options.bpStart;
-                    if (offsetBP < sequence.length) {
-                        let letter = sequence[offsetBP];
+                    let seqOffsetBp = Math.floor(bp - sequenceBpStart);
+
+                    if (seqOffsetBp < sequence.length) {
+                        let letter = sequence[seqOffsetBp];
 
                         if (this.reversed) {
                             letter = this.complement[letter.toUpperCase()];
                         }
 
-                        let aPixel = Math.floor( offsetBP      / options.bpPerPixel);
-                        let bPixel = Math.floor((offsetBP + 1) / options.bpPerPixel);
+                        let offsetBP = bp - options.bpStart;
+                        let aPixel = offsetBP      / options.bpPerPixel;
+                        let bPixel = (offsetBP + 1) / options.bpPerPixel;
 
-                        color = fillColor.call(this, letter);
+                        let color = fillColor.call(this, letter);
 
+                        let ctx = options.context;
                         if (options.bpPerPixel > 1/10) {
                             igv.graphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                         } else {
-                            let xPixel = Math.round(0.5 * (aPixel + bPixel - ctx.measureText(letter).width));
+                            let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
                             igv.graphics.strokeText(ctx, letter, xPixel, height, { strokeStyle: color });
                         }
                     }
