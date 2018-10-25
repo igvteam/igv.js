@@ -489,22 +489,17 @@ var igv = (function (igv) {
 
     function toggleTrackLabels (trackViews, isVisible) {
 
-        trackViews.forEach(function (trackView) {
-            trackView.viewports.forEach((viewport, index) => {
-
+        for (let trackView of trackViews) {
+            for (let viewport of trackView.viewports) {
                 if (viewport.$trackLabel) {
-
-                    if (0 === index && true === isVisible) {
+                    if (0 === trackView.viewports.indexOf(viewport) && true === isVisible) {
                         viewport.$trackLabel.show();
                     } else {
                         viewport.$trackLabel.hide();
                     }
-
                 }
-
-            });
-        });
-
+            }
+        }
     }
 
     // cursor guide
@@ -887,25 +882,6 @@ var igv = (function (igv) {
     igv.Browser.prototype.resize = function () {
 
         const self = this;
-
-        // Minimal attempt at responsiveness
-        // TODO -- remove this when media queries are working
-        const rootWidth = this.$root.width();
-        if (rootWidth < 1000) {
-            this.chromosomeSelectWidget.$container.hide();
-            this.$root.find(".igv-nav-bar-toggle-button-container").hide();
-            this.zoomWidget.hide();
-        }
-        else {
-            if (this.config.showChromosomeWidget) {
-                this.chromosomeSelectWidget.$container.show();
-            }
-            this.$root.find(".igv-nav-bar-toggle-button-container").show();
-            this.$root.find(".igv-right-hand-gutter").show();
-            this.zoomWidget.show();
-            //this.$root.find(".igv-track-manipulation-handle").show();
-        }
-
 
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         const viewportWidth = this.viewportWidth();
