@@ -161,9 +161,11 @@ var igv = (function (igv) {
 
         let svg = svgContext.getSerializedSvg(true);
 
-        $container.empty();
-        $container.width(anyViewportContainerBBox.width);
-        $container.append( svg );
+        if ($container) {
+            $container.empty();
+            $container.width(anyViewportContainerBBox.width);
+            $container.append( svg );
+        }
 
         const filename = 'igv.svg';
         const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
