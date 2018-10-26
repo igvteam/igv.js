@@ -10,7 +10,7 @@
   border-width: 2px;
   border-color: white;
   border-radius: 4px;
-  margin: 2px; }
+  margin: 1px; }
 
 .igv-colorpicker-menu-close-button {
   display: flex;
@@ -38,7 +38,6 @@
   position: absolute;
   top: 0;
   left: 0;
-  max-width: 256px;
   border-style: solid;
   border-width: thin;
   border-color: #dddddd;

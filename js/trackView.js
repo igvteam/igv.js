@@ -302,7 +302,8 @@ var igv = (function (igv) {
         const config =
             {
                 $parent: $(this.trackDiv),
-
+                width: 768,
+                height: undefined,
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
                 }
@@ -659,47 +660,36 @@ var igv = (function (igv) {
 
     function createColorSwatchSelector($genericContainer, colorHandler) {
 
-        // let rgbs = igv.Color.rgbListFromHSV();
+        let colors = igv.colorPickerPalette.slice();
 
-        let rgbs =
-            [
-                '#007bff',
-                '#17a2b8',
-                '#20c997',
-                '#28a745',
-                '#404EB0',
-                '#6610f2',
-                '#e83e8c',
-                '#dc3545',
-                '#fd7e14',
-                '#ffc107',
-                'white',
-                '#343a40',
-                '#6c757d'
-            ];
+        if (this.track.color){
+            let obj = {};
+            obj[ this.track.color ] = igv.Color.rgbToHex(this.track.color);
+            colors.unshift(obj);
+        }
 
-        rgbs.unshift(this.track.color);
-
-        for (let rgb of rgbs) {
+        for (let c of colors) {
 
             let $swatch = $('<div>', { class: 'igv-color-swatch' });
             $genericContainer.append($swatch);
 
-            $swatch.css('background-color', rgb);
+            let color = Object.keys(c).pop();
+
+            $swatch.css('background-color', color);
 
             $swatch.hover(() => {
-                    $swatch.get(0).style.borderColor = 'white' === rgb ? 'rgba(0, 0, 0, 0.71)' : rgb;
+                    $swatch.get(0).style.borderColor = 'white' === color ? 'rgba(0, 0, 0, 0.71)' : color;
                 },
                 () => {
                     $swatch.get(0).style.borderColor = 'white';
-            });
+                });
 
             $swatch.click(function () {
-                colorHandler(rgb);
+                colorHandler(color);
             });
 
             $swatch.on('touchend', function () {
-                colorHandler(rgb);
+                colorHandler(color);
             });
 
         }
