@@ -89,7 +89,14 @@ var igv = (function (igv) {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
         }
 
-        this.createColorPicker();
+        if ("sequence" === this.track.type) {
+            // do nothing
+        } else if (this.track instanceof igv.RulerTrack) {
+            // do nothing
+        } else {
+            this.createColorPicker();
+        }
+
 
     };
 
@@ -296,9 +303,6 @@ var igv = (function (igv) {
             {
                 $parent: $(this.trackDiv),
 
-                // width = 13 * (swatch-width + margin-width + margin-width + border-width + border-width
-                // width: 13 * (48 + (4 + 4) + (2 + 2)),
-
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
                 }
@@ -306,7 +310,7 @@ var igv = (function (igv) {
 
         this.colorPicker = new igv.genericContainer(config);
 
-        createColorSwatchSelector(this.colorPicker.$container, function (rgb) {
+        createColorSwatchSelector.call(this, this.colorPicker.$container, function (rgb) {
             self.setColor(rgb);
         });
 
@@ -653,7 +657,7 @@ var igv = (function (igv) {
         this.scrollbar.moveScrollerBy(delta);
     };
 
-    let createColorSwatchSelector = ($genericContainer, colorHandler) => {
+    function createColorSwatchSelector($genericContainer, colorHandler) {
 
         // let rgbs = igv.Color.rgbListFromHSV();
 
@@ -673,6 +677,8 @@ var igv = (function (igv) {
                 '#343a40',
                 '#6c757d'
             ];
+
+        rgbs.unshift(this.track.color);
 
         for (let rgb of rgbs) {
 
@@ -698,7 +704,7 @@ var igv = (function (igv) {
 
         }
 
-    };
+    }
 
     const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 
