@@ -722,51 +722,5 @@ var igv = (function (igv) {
 
     };
 
-    const baseProperties = {
-        /**
-         * Default implementation -- return the current state of the "this" object, which should be a track.  Used
-         * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
-         * current state.  Only simple properties (string, number, boolean) are updated.
-         */
-        getState: function () {
-
-            const config = Object.assign({}, this.config);
-            const self = this;
-
-            Object.keys(config).forEach(function (key) {
-                const value = self[key];
-                if (value && (igv.isSimpleType(value) || typeof value === "boolean")) {
-                    config[key] = value;
-                }
-            })
-
-            return config;
-        },
-
-        clickedFeatures: function (clickState) {
-
-            // We use the cached features rather than method to avoid async load.  If the
-            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-            const features = clickState.viewport.getCachedFeatures();
-
-            if (!features || features.length === 0) {
-                return [];
-            }
-
-            const genomicLocation = clickState.genomicLocation;
-
-            // We need some tolerance around genomicLocation
-            const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
-            const ss = Math.floor(genomicLocation) - tolerance;
-            const ee = Math.ceil(genomicLocation) + tolerance;
-
-            return (igv.FeatureUtils.findOverlapping(features, ss, ee));
-        },
-
-        supportsWholeGenome: function () {
-            return false;
-        }
-    }
-
     return igv;
 })(igv || {});
