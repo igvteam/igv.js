@@ -133,7 +133,7 @@ var igv = (function (igv) {
 
         if (!config) config = {};
 
-        self.removeAllTracks();
+        self.removeAllTracks(true);
 
         igv.TrackView.DisableUpdates = true;
 
@@ -777,20 +777,23 @@ var igv = (function (igv) {
     /**
      * API function
      */
-    igv.Browser.prototype.removeAllTracks = function () {
+    igv.Browser.prototype.removeAllTracks = function (removeSequence) {
         var self = this,
             newTrackViews = [];
 
-        this.trackViews.forEach(function (tv) {
+        for(let tv of this.trackViews) {
 
-            if (!(tv.track.id === 'sequence' || tv.track.id === 'ruler')) {
+
+
+            if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
                 self.trackContainerDiv.removeChild(tv.trackDiv);
                 self.fireEvent('trackremoved', [tv.track]);
                 tv.dispose();
             } else {
                 newTrackViews.push(tv);
             }
-        });
+        }
+
         this.trackViews = newTrackViews;
 
     }
