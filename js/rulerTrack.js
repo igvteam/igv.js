@@ -216,8 +216,15 @@ var igv = (function (igv) {
             floored;
 
         // major ticks
+        if (options.context.isSVG) {
+            this.majorTick *= 2;
+            this.halfTick *= 2;
+        }
         numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
+        labelWidth = 0;
+        labelX = 0;
         pixel = 0;
+        let counter = 0;
         while (pixel < options.pixelWidth) {
 
             bp = Math.floor(numberOfTicks * this.majorTick);
@@ -225,15 +232,16 @@ var igv = (function (igv) {
 
             label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
             labelWidth = options.context.measureText(label).width;
-            labelX = pixel - labelWidth / 2;
-            igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
 
+            labelX = Math.round(pixel - labelWidth / 2);
+
+            igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
             igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
 
             ++numberOfTicks;
         }
 
-        // major ticks
+        // half ticks
         numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
         pixel = 0;
         while (pixel < options.pixelWidth) {
@@ -242,7 +250,7 @@ var igv = (function (igv) {
             pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
             numer = bp / this.unitMultiplier;
             floored = Math.floor(numer);
-            // console.log(numer - floored);
+
             if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
                 label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
                 labelWidth = options.context.measureText(label).width;

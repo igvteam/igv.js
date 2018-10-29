@@ -247,6 +247,9 @@ var C2S;
             this.__ctx = this.__canvas.getContext("2d");
         }
 
+        // give this canvas a type
+        this.isSVG = true;
+
         this.__setDefaultStyles();
         this.__stack = [this.__getStyleState()];
         this.__groupStack = [];
