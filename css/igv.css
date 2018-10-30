@@ -248,9 +248,16 @@
       .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
         height: 100%;
         cursor: pointer; }
-        .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
-          margin-top: 9px;
-          width: 128px; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
+        margin-top: 12px;
+        margin-right: 4px; }
+        .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child svg {
+          display: block; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
+        margin-top: 12px;
+        margin-left: 4px; }
+        .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child svg {
+          display: block; }
 
 .igv-nav-bar-button {
   height: 18px;

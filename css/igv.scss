@@ -325,10 +325,21 @@ $igv-dark-grey-color: #373737;
       div {
         height: 100%;
         cursor: pointer;
+      }
 
-        input {
-          margin-top: 9px;
-          width: 128px;
+      div:first-child {
+        margin-top: 12px;
+        margin-right: 4px;
+        svg {
+          display: block;
+        }
+      }
+
+      div:last-child {
+        margin-top: 12px;
+        margin-left: 4px;
+        svg {
+          display: block;
         }
       }
 
