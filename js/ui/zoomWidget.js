@@ -40,7 +40,7 @@ var igv = (function (igv) {
         $parent.append(this.$zoomContainer);
 
         // zoom out
-        $div = $('<div style="margin: 5px">');
+        $div = $('<div>');
         this.$zoomContainer.append($div);
 
         svg = igv.createIcon("minus-circle");
@@ -62,7 +62,7 @@ var igv = (function (igv) {
         });
 
         // zoom in
-        $div = $('<div style="margin: 5px">');
+        $div = $('<div>');
         this.$zoomContainer.append($div);
 
         svg = igv.createIcon("plus-circle");
