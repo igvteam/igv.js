@@ -503,6 +503,19 @@ var igv = (function (igv) {
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
         const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
 
+        // if present, paint axis canvas
+        if (typeof this.trackView.track.paintAxis === 'function') {
+
+            const w = $(this.trackView.controlCanvas).width();
+            const h = $(this.trackView.controlCanvas).height();
+
+            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - w, offset.deltaY, w, h, 0);
+
+            context.save();
+            this.trackView.track.paintAxis(context, w, h);
+            context.restore();
+        }
+
         context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
         const width = this.$viewport.width();
@@ -541,6 +554,8 @@ var igv = (function (igv) {
         draw.call(this, drawConfig, this.tile.features);
 
         context.restore();
+
+
     };
 
     igv.Viewport.prototype.saveSVG = function () {

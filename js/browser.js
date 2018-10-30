@@ -125,7 +125,7 @@ var igv = (function (igv) {
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
         const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
 
-        const w = anyViewportContainerBBox.width;
+        const w = trackContainerBBox.width;
         const h_output = trackContainerBBox.height + ideoPanelBBox.height;
         const h_render = 8000;
 
@@ -145,15 +145,17 @@ var igv = (function (igv) {
 
             });
 
-        // accumulate svg rendering in svg context
+        const dx = anyViewportContainerBBox.x - trackContainerBBox.x;
+
         // ideoPanel -> SVG
         if (this.ideoPanel) {
-            this.ideoPanel.renderSVGContext(svgContext, { deltaX: 0, deltaY: 0 });
+
+            this.ideoPanel.renderSVGContext(svgContext, { deltaX: dx, deltaY: 0 });
         }
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(svgContext, {deltaX: 0, deltaY: (ideoPanelBBox.height - trackContainerBBox.y)});
+            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: (ideoPanelBBox.height - trackContainerBBox.y)});
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
@@ -163,13 +165,13 @@ var igv = (function (igv) {
 
         if ($container) {
             $container.empty();
-            $container.width(anyViewportContainerBBox.width);
+            $container.width(trackContainerBBox.width);
             $container.append( svg );
         }
 
-        const filename = 'igv.svg';
-        const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
-        igv.download(filename, data);
+        // const filename = 'igv.svg';
+        // const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
+        // igv.download(filename, data);
 
     };
 
