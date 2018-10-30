@@ -4,30 +4,6 @@ function runFastaTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-//    QUnit.test("Fasta index", function (assert) {
-//
-//        var sequence = igv.FastaSequence.ance();
-//
-//        sequence.loadIndex(function (index) {
-//
-//            assert.ok(index, "Expected non-nil index.  Got: " + index);
-//
-//            var indexEntry = index["chr22"];
-//
-//            assert.equal(indexEntry.size, 51304566, "indexEntry size");
-//            assert.equal(indexEntry.position, 7, "indexEntry position");
-//            assert.equal(indexEntry.basesPerLine, 50, "indexEntry basesPerLine");
-//            assert.equal(indexEntry.bytesPerLine, 51, "indexEntry bytesPerLine");
-//            done();
-//        });
-//
-//    });
-
-    function handleError(error) {
-        console.log(error);
-        assert.ok(false);
-    }
-
     QUnit.test("FastaSequence - Test fasata with no index", function (assert) {
         var done = assert.async();
 
@@ -38,19 +14,28 @@ function runFastaTests() {
             }
         );
 
-        sequence.init().then(function () {
+        sequence.init()
 
-            // Note -- coordinates are UCSC style
-            // chr22:29565177-29565216
-            var expectedSequence = "GCTGC";
-            sequence.getSequence("CACNG6--RPLP2", 60, 65).then(function (seq) {
+            .then(function () {
 
-                assert.equal(seq, expectedSequence);
-                done();
-            }).catch(function (error) {
-                console.log(error);
+                // Note -- coordinates are UCSC style
+                // chr22:29565177-29565216
+                var expectedSequence = "GCTGC";
+
+                sequence.getSequence("CACNG6--RPLP2", 60, 65)
+
+                    .then(function (seq) {
+
+                        assert.equal(seq, expectedSequence);
+                        done();
+                    }).catch(function (error) {
+                    console.log(error);
+
+                    assert.ok(false);
+
+                    done();
+                })
             })
-        }).catch(handleError)
     })
 
     QUnit.test("FastaSequence - Test getSequence", function (assert) {
@@ -58,21 +43,30 @@ function runFastaTests() {
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
-        sequence.init().then(function () {
+        sequence.init()
+            .then(function () {
 
-            // Note -- coordinates are UCSC style
-            // chr22:29565177-29565216
-            sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
+                // Note -- coordinates are UCSC style
+                // chr22:29565177-29565216
+                sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
-                assert.ok(sequence, "sequence");
+                    assert.ok(sequence, "sequence");
 
-                var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
+                    var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
+                        seqString = sequence.toUpperCase();
 
-                assert.equal(seqString, expectedSeqString);
+                    assert.equal(seqString, expectedSeqString);
+
+                    done();
+                })
+            })
+            .catch(function (error) {
+                console.log(error);
+
+                assert.ok(false);
 
                 done();
             })
-        }).catch(handleError)
     })
 
     QUnit.test("FastaSequence - Test readSequence", function (assert) {
@@ -80,21 +74,31 @@ function runFastaTests() {
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
-        sequence.init().then(function () {
+        sequence.init()
 
-            // Note -- coordinates are UCSC style
-            // chr22:29565177-29565216
-            sequence.readSequence("chr22", 29565176, 29565216).then(function (sequence) {
+            .then(function () {
 
-                assert.ok(sequence, "sequence");
+                // Note -- coordinates are UCSC style
+                // chr22:29565177-29565216
+                sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
 
-                var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA", seqString = sequence.toUpperCase();
+                    assert.ok(sequence, "sequence");
 
-                assert.equal(seqString, expectedSeqString);
+                    var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
+                        seqString = sequence.toUpperCase();
 
-                done();
-            }).catch(handleError)
-        })
+                    assert.equal(seqString, expectedSeqString);
+
+                    done();
+                })
+                    .catch(function (error) {
+                        console.log(error);
+
+                        assert.ok(false);
+
+                        done();
+                    })
+            })
     })
 
     QUnit.test("FastaSequence - Test readSequence - with unknown sequence", function (assert) {
@@ -102,20 +106,84 @@ function runFastaTests() {
 
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
-        sequence.init().then(function () {
+        sequence.init()
+            .then(function () {
 
-            // Note -- coordinates are UCSC style
-            // chr22:29565177-29565216
-            sequence.readSequence("noSuchChromosome", 29565176, 29565216).then(function (nullSeq) {
+                // Note -- coordinates are UCSC style
+                // chr22:29565177-29565216
+                sequence.getSequence("noSuchChromosome", 29565176, 29565216).then(function (nullSeq) {
 
-                assert.ok(!nullSeq);
-                done();
-            }).catch(function (error) {
-                console.log(error);
+                    assert.ok(!nullSeq);
+                    done();
+                }).catch(function (error) {
+                    console.log(error);
+                })
             })
-        }).catch(handleError)
+            .catch(function (error) {
+                console.log(error);
+
+                assert.ok(false);
+
+                done();
+            })
     })
 
-}
+    QUnit.test("FastaSequence - Test fasta with start offset", function (assert) {
 
+        var done = assert.async();
+
+        var sequence = new igv.FastaSequence({fastaURL: "data/fasta/offset.fasta", indexed: false});
+
+        sequence.init()
+
+            .then(function () {
+
+                let expected = "GGGGCCTGCT";
+
+                sequence.getSequence("chr", 499, 509)
+
+                    .then(function (seq) {
+
+                        assert.equal(seq, expected);
+
+                    })
+            })
+            .then(function () {
+
+                // Off left side
+                let expected = "*****GGGGC";
+
+                sequence.getSequence("chr", 494, 504)
+
+                    .then(function (seq) {
+
+                        assert.equal(seq, expected);
+
+                    })
+
+            })
+            .then(function () {
+
+                // way....   Off left side
+                let expected = "**********";
+
+                sequence.getSequence("chr", 10, 20)
+
+                    .then(function (seq) {
+
+                        assert.equal(seq, expected);
+
+                        done();
+                    })
+
+            })
+            .catch(function (error) {
+                console.log(error);
+
+                assert.ok(false);
+
+                done();
+            })
+    })
+}
 
