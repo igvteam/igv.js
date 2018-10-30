@@ -189,10 +189,23 @@ $igv-dark-grey-color: #373737;
         width: 100px;
         margin-right: 4px;
 
+
+        display: flex;
+        flex-flow: column;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        align-items: center;
+
+
         select {
+
+          display: block;
+
           cursor: pointer;
+
           width: 100%;
           height: 75%;
+
           outline: none;
 
           font-size: $igv-navbar-font-size;
@@ -315,6 +328,7 @@ $igv-dark-grey-color: #373737;
 
       margin-left: 16px;
       margin-right: 8px;
+      margin-top: 12px;
 
       display: flex;
       flex-flow: row;
@@ -328,19 +342,19 @@ $igv-dark-grey-color: #373737;
       }
 
       div:first-child {
-        margin-top: 12px;
         margin-right: 4px;
-        svg {
-          display: block;
-        }
       }
 
       div:last-child {
-        margin-top: 12px;
         margin-left: 4px;
-        svg {
-          display: block;
-        }
+      }
+
+      input {
+        display: block;
+      }
+
+      svg {
+        display: block;
       }
 
     }
