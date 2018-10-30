@@ -1944,7 +1944,7 @@ var igv = (function (igv) {
 
         json["tracks"] = trackJson;
 
-        return JSON.stringify(json);
+        return json;        // This is an object, not a json string
 
     }
 
@@ -1952,7 +1952,7 @@ var igv = (function (igv) {
 
         var json, bytes, deflate, compressedBytes, compressedString, enc;
 
-        json = this.toJSON();
+        json = JSON.stringify(this.toJSON());
         bytes = [];
         for (var i = 0; i < json.length; i++) {
             bytes.push(json.charCodeAt(i));
