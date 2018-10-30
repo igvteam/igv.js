@@ -166,8 +166,14 @@
       .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container {
         height: 100%;
         width: 100px;
-        margin-right: 4px; }
+        margin-right: 4px;
+        display: flex;
+        flex-flow: column;
+        flex-wrap: nowrap;
+        justify-content: space-around;
+        align-items: center; }
         .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container select {
+          display: block;
           cursor: pointer;
           width: 100%;
           height: 75%;
@@ -240,6 +246,7 @@
       user-select: none;
       margin-left: 16px;
       margin-right: 8px;
+      margin-top: 12px;
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -248,9 +255,14 @@
       .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
         height: 100%;
         cursor: pointer; }
-        .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div input {
-          margin-top: 9px;
-          width: 128px; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
+        margin-right: 4px; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
+        margin-left: 4px; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget input {
+        display: block; }
+      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget svg {
+        display: block; }
 
 .igv-nav-bar-button {
   height: 18px;
