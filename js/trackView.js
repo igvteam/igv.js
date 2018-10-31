@@ -302,7 +302,7 @@ var igv = (function (igv) {
         const config =
             {
                 $parent: $(this.trackDiv),
-                width: 768,
+                width: 456,
                 height: undefined,
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
@@ -660,20 +660,16 @@ var igv = (function (igv) {
 
     function createColorSwatchSelector($genericContainer, colorHandler) {
 
-        let colors = igv.colorPickerPalette.slice();
+        let appleColors = Object.values(igv.appleCrayonPalette);
 
         if (this.track.color){
-            let obj = {};
-            obj[ this.track.color ] = igv.Color.rgbToHex(this.track.color);
-            colors.unshift(obj);
+            appleColors.push( igv.Color.rgbToHex(this.track.color) );
         }
 
-        for (let c of colors) {
+        for (let color of appleColors) {
 
             let $swatch = $('<div>', { class: 'igv-color-swatch' });
             $genericContainer.append($swatch);
-
-            let color = Object.keys(c).pop();
 
             $swatch.css('background-color', color);
 

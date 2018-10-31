@@ -82,12 +82,14 @@ $igv-dark-grey-color: #373737;
   .igv-ideogram-shim {
     height: 100%;
     width: 50px;
-    background-color: rgb(255,255,255);
+    //background-color: rgb(255,255,255);
+    background-color: white;
   }
 
   .igv-ideogram-content {
     height: 100%;
-    background-color: rgb(255,255,255);
+    //background-color: rgb(255,255,255);
+      background-color: white;
   }
 
   .igv-ideogram-content-border-right {
