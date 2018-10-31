@@ -85,6 +85,8 @@ var igv = (function (igv) {
 
                 this.paintAxis = igv.paintAxis;
 
+                this.graphType = config.graphType || "bar";
+
             });
 
         WigTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
@@ -194,6 +196,9 @@ var igv = (function (igv) {
 
                     featureValueRange = featureValueMaximum - featureValueMinimum;
 
+                    if (renderFeature.end < bpStart) return;
+                    if (renderFeature.start > bpEnd) return;
+
                     features.forEach(renderFeature);
 
                     // If the track includes negative values draw a baseline
@@ -211,17 +216,12 @@ var igv = (function (igv) {
 
             function renderFeature(feature) {
 
-                var yUnitless, y, yb, y2, heightUnitLess, x, width, color, rectEnd;
+                const x = Math.floor((feature.start - bpStart) / bpPerPixel);
+                const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
+                const width = Math.max(1, rectEnd - x);
+                const y = (featureValueMaximum - feature.value) / (featureValueRange);
 
-                if (feature.end < bpStart) return;
-                if (feature.start > bpEnd) return;
-
-                x = Math.floor((feature.start - bpStart) / bpPerPixel);
-                rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-                width = Math.max(1, rectEnd - x);
-
-                y = (featureValueMaximum - feature.value) / (featureValueRange);
-
+                let yb;
                 if (featureValueMinimum > 0) {
                     yb = 1;
                 } else if (featureValueMaximum < 0) {
@@ -230,15 +230,25 @@ var igv = (function (igv) {
                     yb = featureValueMaximum / featureValueRange;
                 }
 
-                yUnitless = Math.min(y, yb);
-                y2 = Math.max(y, yb);
-                heightUnitLess = y2 - yUnitless;
+                const yUnitless = Math.min(y, yb);
+                const y2 = Math.max(y, yb);
+                const heightUnitLess = y2 - yUnitless;
 
                 if (yUnitless >= 1 || y2 <= 0) return;      //  Value < minimum
 
-                color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
+                const color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
 
-                igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+                if (self.graphType === "points") {
+                    const pointSize = self.config.pointSize || 3;
+                    const py = feature.value < 0 ?
+                        (yUnitless + heightUnitLess) * pixelHeight :
+                        yUnitless * pixelHeight;
+                    const px = x + width / 2;
+                    igv.graphics.fillCircle(ctx, px, py, pointSize / 2);
+                }
+                else {
+                    igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+                }
 
             }
 
