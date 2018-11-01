@@ -662,10 +662,12 @@ var igv = (function (igv) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);
 
-        // Remove 'snow' color. Add default color.
-        appleColors.splice(11,1);
-
         if (this.track.color){
+
+            // Remove 'snow' color.
+            appleColors.splice(11,1);
+
+            // Add default color.
             appleColors.unshift( igv.Color.rgbToHex(this.track.color) );
         }
 
@@ -676,20 +678,27 @@ var igv = (function (igv) {
 
             $swatch.css('background-color', color);
 
-            $swatch.hover(() => {
-                    $swatch.get(0).style.borderColor = color;
-                },
-                () => {
-                    $swatch.get(0).style.borderColor = 'white';
+            if ('white' === color) {
+                // do nothing
+                console.log('-');
+            } else {
+
+                $swatch.hover(() => {
+                        $swatch.get(0).style.borderColor = color;
+                    },
+                    () => {
+                        $swatch.get(0).style.borderColor = 'white';
+                    });
+
+                $swatch.click(function () {
+                    colorHandler(color);
                 });
 
-            $swatch.click(function () {
-                colorHandler(color);
-            });
+                $swatch.on('touchend', function () {
+                    colorHandler(color);
+                });
 
-            $swatch.on('touchend', function () {
-                colorHandler(color);
-            });
+            }
 
         }
 
