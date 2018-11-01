@@ -227,7 +227,7 @@ var igv = (function (igv) {
                 {
                     name: "Set track color",
                     click: function () {
-                        self.trackView.$colorpicker_container.toggle();
+                        self.trackView.presentColorPicker();
                     }
                 }
 

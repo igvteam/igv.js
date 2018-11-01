@@ -662,8 +662,11 @@ var igv = (function (igv) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);
 
+        // Remove 'snow' color. Add default color.
+        appleColors.splice(11,1);
+
         if (this.track.color){
-            appleColors.push( igv.Color.rgbToHex(this.track.color) );
+            appleColors.unshift( igv.Color.rgbToHex(this.track.color) );
         }
 
         for (let color of appleColors) {
@@ -674,7 +677,7 @@ var igv = (function (igv) {
             $swatch.css('background-color', color);
 
             $swatch.hover(() => {
-                    $swatch.get(0).style.borderColor = 'white' === color ? 'rgba(0, 0, 0, 0.71)' : color;
+                    $swatch.get(0).style.borderColor = color;
                 },
                 () => {
                     $swatch.get(0).style.borderColor = 'white';
