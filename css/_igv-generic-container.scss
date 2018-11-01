@@ -1,20 +1,17 @@
-.igv-position-absolute {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
 
 .igv-generic-container {
 
-  width: 256px;
-
-  z-index: 5000;
-
-  background-color: white;
+  position: absolute;
+  top: 0;
+  left:0;
 
   border-style: solid;
   border-width: thin;
   border-color: #dddddd;
+
+  z-index: 2048;
+
+  background-color: white;
 
   cursor: pointer;
 
@@ -26,6 +23,10 @@
 
   // header bar
   div:first-child {
+    padding-right: 8px;
+
+    cursor: move;
+
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -39,6 +40,7 @@
 
     // close button
     i.fa {
+      cursor: pointer;
       margin-right: 4px;
       display: block;
       color: #5f5f5f;

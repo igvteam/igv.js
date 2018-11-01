@@ -41,7 +41,7 @@ var igv = (function (igv) {
 
         $(handle).on('mousedown' + namespace, dragStart.bind(target));
 
-    }
+    };
 
 
     function dragStart(event) {
@@ -49,20 +49,17 @@ var igv = (function (igv) {
         event.stopPropagation();
         event.preventDefault();
 
-        const target = this;
-        const x = event.screenX;
-        const y = event.screenY;
-        const styleX = Math.round(parseFloat(target.style.left.replace("px", "")));
-        const styleY = Math.round(parseFloat(target.style.top.replace("px", "")));
+        const styleX = Math.round(parseFloat(this.style.left.replace("px", "")));
+        const styleY = Math.round(parseFloat(this.style.top.replace("px", "")));
+        const dragFunction = drag.bind(this);
+        const dragEndFunction = dragEnd.bind(this);
 
-        const dragFunction = drag.bind(target);
-        const dragEndFunction = dragEnd.bind(target);
         dragData =
             {
                 dragFunction: dragFunction,
                 dragEndFunction: dragEndFunction,
-                dx: styleX - x,
-                dy: styleY - y
+                dx: styleX - event.screenX,
+                dy: styleY - event.screenY
             };
 
         $(document).on('mousemove' + namespace, dragFunction);
@@ -75,37 +72,35 @@ var igv = (function (igv) {
     function drag(event) {
 
         if(!dragData) {
-            console.log("No drag data!")
+            console.log("No drag data!");
             return;
         }
 
         event.stopPropagation();
         event.preventDefault();
-        const target = this;
-        const x = event.screenX;
-        const y = event.screenY;
-        const styleX = dragData.dx + x;
-        const styleY = dragData.dy + y;
-        target.style.left = styleX + "px";
-        target.style.top = styleY + "px";
+
+        const styleX = dragData.dx + event.screenX;
+        const styleY = dragData.dy + event.screenY;
+
+        this.style.left = styleX + "px";
+        this.style.top = styleY + "px";
     }
 
     function dragEnd(event) {
 
         if(!dragData) {
-            console.log("No drag data!")
+            console.log("No drag data!");
             return;
         }
 
         event.stopPropagation();
         event.preventDefault();
-        const target = this;
-        const x = event.screenX;
-        const y = event.screenY;
-        const styleX = dragData.dx + x;
-        const styleY = dragData.dy + y;
-        target.style.left = styleX + "px";
-        target.style.top = styleY + "px";
+
+        const styleX = dragData.dx + event.screenX;
+        const styleY = dragData.dy + event.screenY;
+
+        this.style.left = styleX + "px";
+        this.style.top = styleY + "px";
 
         $(document).off(namespace);
         dragData = undefined;
