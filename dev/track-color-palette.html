@@ -165,7 +165,7 @@
 <div id="trackList"></div>
 
 
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igv-app-container" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
 <script type="text/javascript">
@@ -176,19 +176,32 @@
 
             .then(function (google) {
 
-                const igvDiv = document.getElementById("igvDiv");
-
-                const options =
+                const config =
                     {
-                        // showRuler: false,
                         locus: 'muc1',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
-
+                        trackColorPalette:
+                        [
+                            '#007bff',
+                            '#17a2b8',
+                            '#20c997',
+                            '#28a745',
+                            '#404EB0',
+                            '#6610f2',
+                            '#e83e8c',
+                            '#dc3545',
+                            '#fd7e14',
+                            '#ffc107',
+                            '#343a40',
+                            '#6c757d',
+                            '#ffffff'
+                        ]
                     };
 
-                igv.createBrowser(igvDiv, options)
+                igv
+                    .createBrowser(document.getElementById('igv-app-container'), config)
                     .then(function (browser) {
                         igvdev.createTrackList(document.getElementById('trackList'), browser);
                         return browser;

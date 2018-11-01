@@ -89,24 +89,14 @@ var igv = (function (igv) {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
         }
 
-        // Create color picker.
-        config =
-            {
-                // width = (29 * swatch-width) + border-width + border-width
-                width: ((29 * 24) + 1 + 1),
-                classes: ['igv-position-absolute']
-            };
+        if ("sequence" === this.track.type) {
+            // do nothing
+        } else if (this.track instanceof igv.RulerTrack) {
+            // do nothing
+        } else {
+            this.createColorPicker();
+        }
 
-        this.$colorpicker_container = igv.genericContainer($track, config, function () {
-            self.$colorpicker_container.toggle();
-        });
-
-        igv.createColorSwatchSelector(this.$colorpicker_container, function (rgb) {
-            self.setColor(rgb);
-            self.$colorpicker_container.hide();
-        });
-
-        this.$colorpicker_container.hide();
 
     };
 
@@ -303,6 +293,37 @@ var igv = (function (igv) {
         this.track.color = color;
         this.track.config.color = color;
         this.repaintViews(true);
+    };
+
+    igv.TrackView.prototype.createColorPicker = function () {
+
+        let self = this;
+
+        const config =
+            {
+                $parent: $(this.trackDiv),
+                width: 456,
+                height: undefined,
+                closeHandler: () => {
+                    self.colorPicker.$container.hide();
+                }
+            };
+
+        this.colorPicker = new igv.genericContainer(config);
+
+        createColorSwatchSelector.call(this, this.colorPicker.$container, function (rgb) {
+            self.setColor(rgb);
+        });
+
+        self.colorPicker.$container.hide();
+
+    };
+
+    igv.TrackView.prototype.presentColorPicker = function () {
+        const bbox = this.trackDiv.getBoundingClientRect();
+        this.colorPicker.origin = { x: bbox.x, y: 0 };
+        this.colorPicker.$container.offset( { left: this.colorPicker.origin.x, top: this.colorPicker.origin.y } );
+        this.colorPicker.$container.show();
     };
 
     igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
@@ -630,11 +651,57 @@ var igv = (function (igv) {
             self[key] = undefined;
         })
 
-    }
+    };
 
 
     igv.TrackView.prototype.scrollBy = function (delta) {
         this.scrollbar.moveScrollerBy(delta);
+    };
+
+    function createColorSwatchSelector($genericContainer, colorHandler) {
+
+        let appleColors = Object.values(igv.appleCrayonPalette);
+
+        if (this.track.color){
+
+            // Remove 'snow' color.
+            appleColors.splice(11,1);
+
+            // Add default color.
+            appleColors.unshift( igv.Color.rgbToHex(this.track.color) );
+        }
+
+        for (let color of appleColors) {
+
+            let $swatch = $('<div>', { class: 'igv-color-swatch' });
+            $genericContainer.append($swatch);
+
+            $swatch.css('background-color', color);
+
+            if ('white' === color) {
+                // do nothing
+                console.log('-');
+            } else {
+
+                $swatch.hover(() => {
+                        $swatch.get(0).style.borderColor = color;
+                    },
+                    () => {
+                        $swatch.get(0).style.borderColor = 'white';
+                    });
+
+                $swatch.click(function () {
+                    colorHandler(color);
+                });
+
+                $swatch.on('touchend', function () {
+                    colorHandler(color);
+                });
+
+            }
+
+        }
+
     }
 
     const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {

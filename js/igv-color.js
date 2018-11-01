@@ -28,56 +28,25 @@
  */
 var igv = (function (igv) {
 
-    igv.createColorSwatchSelector = function ($genericContainer, colorHandler) {
-
-        var rgbs,
-            dev_null,
-            s;
-
-        s = 1;
-        rgbs = [];
-        for (var v = 1; v >= 0.5; v -= .1) {
-            for (var r, h = 0; h < 1; h += 1 / 28) {
-                r = "rgb(" + igv.Color.hsvToRgb(h, s, v).join(",") + ")";
-                rgbs.push(r);
-            }
-        }
-
-        // add black
-        dev_null = rgbs.pop();
-        rgbs.push(igv.Color.rgbColor(16, 16, 16));
-
-        rgbs.forEach(function (rgb) {
-            var $swatch;
-
-            $swatch = igv.colorSwatch(rgb);
-            $genericContainer.append($swatch);
-
-            $swatch.click(function () {
-                colorHandler(rgb);
-            });
-
-            $swatch.on('touchend', function () {
-                colorHandler(rgb);
-            });
-
-        });
-
-    };
-
-    igv.colorSwatch = function (rgbString) {
-        var $swatch,
-            $fa;
-
-        $swatch = $('<div>', {class: 'igv-color-swatch'});
-
-        $fa = igv.createIcon("square", rgbString);
-        $swatch.append($fa);
-
-        return $swatch;
-    };
-
     igv.Color = {
+
+        rgbListFromHSV: () => {
+
+            let s = 1;
+            let accumulation = [];
+            for (let v = 1; v >= 0.5; v -= .1) {
+                for (let h = 0; h < 1; h += 1 / 28) {
+                    const r = "rgb(" + igv.Color.hsvToRgb(h, s, v).join(",") + ")";
+                    accumulation.push(r);
+                }
+            }
+
+            // add black
+            accumulation.pop();
+            accumulation.push(igv.Color.rgbColor(16, 16, 16));
+
+            return accumulation;
+        },
 
         rgbToHex: function (rgb) {
             rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
@@ -168,12 +137,21 @@ var igv = (function (igv) {
                 var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
                 var p = 2 * l - q;
 
-                r = hue2rgb(p, q, h + 1 / 3);
-                g = hue2rgb(p, q, h);
-                b = hue2rgb(p, q, h - 1 / 3);
+                r = igv.Color.hue2rgb(p, q, h + 1 / 3);
+                g = igv.Color.hue2rgb(p, q, h);
+                b = igv.Color.hue2rgb(p, q, h - 1 / 3);
             }
 
             return [r * 255, g * 255, b * 255];
+        },
+
+        hue2rgb: (p, q, t) => {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
         },
 
         rgbaColor: function (r, g, b, a) {
@@ -298,14 +276,70 @@ var igv = (function (igv) {
         }
     };
 
-    function hue2rgb(p, q, t) {
-        if (t < 0) t += 1;
-        if (t > 1) t -= 1;
-        if (t < 1 / 6) return p + (q - p) * 6 * t;
-        if (t < 1 / 2) return q;
-        if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
-        return p;
-    }
+    // Used to generate color list
+    // let hexs = [];
+    // for (let rgbList of Object.values(igv.colorPalettes)) {
+    //     for (let rgb of rgbList) {
+    //         let obj = {};
+    //         obj[ rgb ] = igv.Color.rgbToHex(rgb);
+    //         hexs.push(obj);
+    //     }
+    // }
+
+    igv.appleCrayonPalette =
+        {
+            licorice: "#000000",
+            lead: "#1e1e1e",
+            tungsten: "#3a3a3a",
+            iron: "#545453",
+            steel: "#6e6e6e",
+            tin: "#878687",
+            nickel: "#888787",
+            aluminum: "#a09fa0",
+            magnesium: "#b8b8b8",
+            silver: "#d0d0d0",
+            mercury: "#e8e8e8",
+            snow: "white",
+            //
+            cayenne: "#891100",
+            mocha: "#894800",
+            aspargus: "#888501",
+            fern: "#458401",
+            clover: "#028401",
+            moss: "#018448",
+            teal: "#008688",
+            ocean: "#004a88",
+            midnight: "#001888",
+            eggplant: "#491a88",
+            plum: "#891e88",
+            maroon: "#891648",
+            //
+            maraschino: "#ff2101",
+            tangerine: "#ff8802",
+            lemon: "#fffa03",
+            lime: "#83f902",
+            spring: "#05f802",
+            seam_foam: "#03f987",
+            turquoise: "#00fdff",
+            aqua: "#008cff",
+            blueberry: "#002eff",
+            grape: "#8931ff",
+            magenta: "#ff39ff",
+            strawberry: "#ff2987",
+            //
+            salmon: "#ff726e",
+            cantaloupe: "#ffce6e",
+            banana: "#fffb6d",
+            honeydew: "#cefa6e",
+            flora: "#68f96e",
+            spindrift: "#68fbd0",
+            ice: "#68fdff",
+            sky: "#6acfff",
+            orchid: "#6e76ff",
+            lavender: "#d278ff",
+            bubblegum: "#ff7aff",
+            carnation: "#ff7fd3"
+    };
 
     igv.nucleotideColorComponents = {
         "A": [0, 200, 0],
@@ -316,7 +350,7 @@ var igv = (function (igv) {
         "c": [0, 0, 200],
         "t": [255, 0, 0],
         "g": [209, 113, 5]
-    }
+    };
 
     igv.nucleotideColors = {
         "A": "rgb(  0, 200,   0)",
@@ -329,33 +363,403 @@ var igv = (function (igv) {
         "g": "rgb(209, 113,   5)"
     };
 
+    let bootstrapPalette =
+        [
+            '#007bff',
+            '#17a2b8',
+            '#20c997',
+            '#28a745',
+            '#404EB0',
+            '#6610f2',
+            '#e83e8c',
+            '#dc3545',
+            '#fd7e14',
+            '#ffc107',
+            'white',
+            '#343a40',
+            '#6c757d'
+        ];
 
-    // Color scale objects.  Implement a single method,  getColor(value)
+    let colorPalettes_concat_RGB2Hex =
+        [
+            {
+                "rgb(228,26,28)": "#e41a1c"
+            },
+            {
+                "rgb(55,126,184)": "#377eb8"
+            },
+            {
+                "rgb(77,175,74)": "#4daf4a"
+            },
+            {
+                "rgb(166,86,40)": "#a65628"
+            },
+            {
+                "rgb(152,78,163)": "#984ea3"
+            },
+            {
+                "rgb(255,127,0)": "#ff7f00"
+            },
+            {
+                "rgb(247,129,191)": "#f781bf"
+            },
+            {
+                "rgb(153,153,153)": "#999999"
+            },
+            {
+                "rgb(255,255,51)": "#ffff33"
+            },
+            {
+                "rgb(27,158,119)": "#1b9e77"
+            },
+            {
+                "rgb(217,95,2)": "#d95f02"
+            },
+            {
+                "rgb(117,112,179)": "#7570b3"
+            },
+            {
+                "rgb(231,41,138)": "#e7298a"
+            },
+            {
+                "rgb(102,166,30)": "#66a61e"
+            },
+            {
+                "rgb(230,171,2)": "#e6ab02"
+            },
+            {
+                "rgb(166,118,29)": "#a6761d"
+            },
+            {
+                "rgb(102,102,102)": "#666666"
+            },
+            {
+                "rgb(102, 194,165)": "#66c2a5"
+            },
+            {
+                "rgb(252,141,98)": "#fc8d62"
+            },
+            {
+                "rgb(141,160,203)": "#8da0cb"
+            },
+            {
+                "rgb(231,138,195)": "#e78ac3"
+            },
+            {
+                "rgb(166,216,84)": "#a6d854"
+            },
+            {
+                "rgb(255,217,47)": "#ffd92f"
+            },
+            {
+                "rgb(229,196,148)": "#e5c494"
+            },
+            {
+                "rgb(179,179,179)": "#b3b3b3"
+            },
+            {
+                "rgb(141,211,199)": "#8dd3c7"
+            },
+            {
+                "rgb(255,255,179)": "#ffffb3"
+            },
+            {
+                "rgb(190,186,218)": "#bebada"
+            },
+            {
+                "rgb(251,128,114)": "#fb8072"
+            },
+            {
+                "rgb(128,177,211)": "#80b1d3"
+            },
+            {
+                "rgb(253,180,98)": "#fdb462"
+            },
+            {
+                "rgb(179,222,105)": "#b3de69"
+            },
+            {
+                "rgb(252,205,229)": "#fccde5"
+            },
+            {
+                "rgb(217,217,217)": "#d9d9d9"
+            },
+            {
+                "rgb(188,128,189)": "#bc80bd"
+            },
+            {
+                "rgb(204,235,197)": "#ccebc5"
+            },
+            {
+                "rgb(255,237,111)": "#ffed6f"
+            },
+            {
+                "rgb(251,180,174)": "#fbb4ae"
+            },
+            {
+                "rgb(179,205,227)": "#b3cde3"
+            },
+            {
+                "rgb(204,235,197)": "#ccebc5"
+            },
+            {
+                "rgb(222,203,228)": "#decbe4"
+            },
+            {
+                "rgb(254,217,166)": "#fed9a6"
+            },
+            {
+                "rgb(255,255,204)": "#ffffcc"
+            },
+            {
+                "rgb(229,216,189)": "#e5d8bd"
+            },
+            {
+                "rgb(253,218,236)": "#fddaec"
+            },
+            {
+                "rgb(173,226,207)": "#ade2cf"
+            },
+            {
+                "rgb(253,205,172)": "#fdcdac"
+            },
+            {
+                "rgb(203,213,232)": "#cbd5e8"
+            },
+            {
+                "rgb(244,202,228)": "#f4cae4"
+            },
+            {
+                "rgb(230,245,201)": "#e6f5c9"
+            },
+            {
+                "rgb(255,242,174)": "#fff2ae"
+            },
+            {
+                "rgb(243,225,206)": "#f3e1ce"
+            },
+            {
+                "rgb(127,201,127)": "#7fc97f"
+            },
+            {
+                "rgb(190,174,212)": "#beaed4"
+            },
+            {
+                "rgb(253,192,134)": "#fdc086"
+            },
+            {
+                "rgb(255,255,153)": "#ffff99"
+            },
+            {
+                "rgb(56,108,176)": "#386cb0"
+            },
+            {
+                "rgb(240,2,127)": "#f0027f"
+            },
+            {
+                "rgb(191,91,23)": "#bf5b17"
+            }
+        ];
+
+    igv.colorPalettes = {
+
+        Set1:
+            [
+                "rgb(228,26,28)",
+                "rgb(55,126,184)",
+                "rgb(77,175,74)",
+                "rgb(166,86,40)",
+                "rgb(152,78,163)",
+                "rgb(255,127,0)",
+                "rgb(247,129,191)",
+                "rgb(153,153,153)",
+                "rgb(255,255,51)"
+            ],
+
+        Dark2:
+            [
+                "rgb(27,158,119)",
+                "rgb(217,95,2)",
+                "rgb(117,112,179)",
+                "rgb(231,41,138)",
+                "rgb(102,166,30)",
+                "rgb(230,171,2)",
+                "rgb(166,118,29)",
+                "rgb(102,102,102)"
+            ],
+
+        Set2:
+            [
+                "rgb(102, 194,165)",
+                "rgb(252,141,98)",
+                "rgb(141,160,203)",
+                "rgb(231,138,195)",
+                "rgb(166,216,84)",
+                "rgb(255,217,47)",
+                "rgb(229,196,148)",
+                "rgb(179,179,179)"
+            ],
+
+        Set3:
+            [
+                "rgb(141,211,199)",
+                "rgb(255,255,179)",
+                "rgb(190,186,218)",
+                "rgb(251,128,114)",
+                "rgb(128,177,211)",
+                "rgb(253,180,98)",
+                "rgb(179,222,105)",
+                "rgb(252,205,229)",
+                "rgb(217,217,217)",
+                "rgb(188,128,189)",
+                "rgb(204,235,197)",
+                "rgb(255,237,111)"
+            ],
+
+        Pastel1:
+            [
+                "rgb(251,180,174)",
+                "rgb(179,205,227)",
+                "rgb(204,235,197)",
+                "rgb(222,203,228)",
+                "rgb(254,217,166)",
+                "rgb(255,255,204)",
+                "rgb(229,216,189)",
+                "rgb(253,218,236)"
+            ],
+
+        Pastel2:
+            [
+                "rgb(173,226,207)",
+                "rgb(253,205,172)",
+                "rgb(203,213,232)",
+                "rgb(244,202,228)",
+                "rgb(230,245,201)",
+                "rgb(255,242,174)",
+                "rgb(243,225,206)"
+            ],
+
+        Accent:
+            [
+                "rgb(127,201,127)",
+                "rgb(190,174,212)",
+                "rgb(253,192,134)",
+                "rgb(255,255,153)",
+                "rgb(56,108,176)",
+                "rgb(240,2,127)",
+                "rgb(191,91,23)"
+            ]
+    };
+
+    igv.PaletteColorTable = function (palette) {
+
+        this.colors = igv.colorPalettes[palette];
+
+        if (!Array.isArray(this.colors)) this.colors = [];
+        this.colorTable = {};
+        this.nextIdx = 0;
+        this.colorGenerator = new RandomColorGenerator();
+
+    };
+
+    igv.PaletteColorTable.prototype.getColor = function (key) {
+
+        if (!this.colorTable.hasOwnProperty(key)) {
+            if (this.nextIdx < this.colors.length) {
+                this.colorTable[key] = this.colors[this.nextIdx];
+            } else {
+                this.colorTable[key] = this.colorGenerator.get();
+            }
+            this.nextIdx++;
+        }
+        return this.colorTable[key];
+    };
+
+    // Random color generator from https://github.com/sterlingwes/RandomColor/blob/master/rcolor.js
+    // Free to use & distribute under the MIT license
+    // Wes Johnson (@SterlingWes)
+    //
+    // inspired by http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
+    var RandomColorGenerator = function () {
+        this.hue = Math.random();
+        this.goldenRatio = 0.618033988749895;
+        this.hexwidth = 2;
+    };
+
+    RandomColorGenerator.prototype.hsvToRgb = function (h, s, v) {
+        var h_i = Math.floor(h * 6),
+            f = h * 6 - h_i,
+            p = v * (1 - s),
+            q = v * (1 - f * s),
+            t = v * (1 - (1 - f) * s),
+            r = 255,
+            g = 255,
+            b = 255;
+        switch (h_i) {
+            case 0:
+                r = v, g = t, b = p;
+                break;
+            case 1:
+                r = q, g = v, b = p;
+                break;
+            case 2:
+                r = p, g = v, b = t;
+                break;
+            case 3:
+                r = p, g = q, b = v;
+                break;
+            case 4:
+                r = t, g = p, b = v;
+                break;
+            case 5:
+                r = v, g = p, b = q;
+                break;
+        }
+        return [Math.floor(r * 256), Math.floor(g * 256), Math.floor(b * 256)];
+    };
+
+    RandomColorGenerator.prototype.padHex = function (str) {
+        if (str.length > this.hexwidth) return str;
+        return new Array(this.hexwidth - str.length + 1).join('0') + str;
+    };
+
+    RandomColorGenerator.prototype.get = function (saturation, value) {
+        this.hue += this.goldenRatio;
+        this.hue %= 1;
+        if (typeof saturation !== "number") saturation = 0.5;
+        if (typeof value !== "number") value = 0.95;
+        var rgb = this.hsvToRgb(this.hue, saturation, value);
+
+        return "#" + this.padHex(rgb[0].toString(16))
+            + this.padHex(rgb[1].toString(16))
+            + this.padHex(rgb[2].toString(16));
+
+    };
+
 
     /**
      *
-     * @param thresholds - array of threshold values defining bin boundaries in ascending order
-     * @param colors - array of colors for bins  (length == thresholds.length + 1)
+     * @param cs - object containing
+     * 1) array of threshold values defining bin boundaries in ascending order
+     * 2) array of colors for bins  (length == thresholds.length + 1)
      * @constructor
      */
     igv.BinnedColorScale = function (cs) {
         this.thresholds = cs.thresholds;
         this.colors = cs.colors;
-    }
+    };
 
     igv.BinnedColorScale.prototype.getColor = function (value) {
 
-        var i, len = this.thresholds.length;
-
-        for (i = 0; i < len; i++) {
-            if (value < this.thresholds[i]) {
-                return this.colors[i];
+        for (let threshold of this.thresholds) {
+            if (value < threshold) {
+                return this.colors[ this.thresholds.indexOf(threshold) ];
             }
         }
 
         return this.colors[this.colors.length - 1];
 
-    }
+    };
 
     /**
      *
@@ -394,110 +798,6 @@ var igv = (function (igv) {
 
         return "rgb(" + r + "," + g + "," + b + ")";
     }
-
-    var colorPalettes = {
-        Set1: ["rgb(228,26,28)", "rgb(55,126,184)", "rgb(77,175,74)", "rgb(166,86,40)",
-            "rgb(152,78,163)", "rgb(255,127,0)", "rgb(247,129,191)", "rgb(153,153,153)",
-            "rgb(255,255,51)"],
-        Dark2: ["rgb(27,158,119)", "rgb(217,95,2)", "rgb(117,112,179)", "rgb(231,41,138)",
-            "rgb(102,166,30)", "rgb(230,171,2)", "rgb(166,118,29)", "rgb(102,102,102)"],
-        Set2: ["rgb(102, 194,165)", "rgb(252,141,98)", "rgb(141,160,203)", "rgb(231,138,195)",
-            "rgb(166,216,84)", "rgb(255,217,47)", "rgb(229,196,148)", "rgb(179,179,179)"],
-        Set3: ["rgb(141,211,199)", "rgb(255,255,179)", "rgb(190,186,218)", "rgb(251,128,114)",
-            "rgb(128,177,211)", "rgb(253,180,98)", "rgb(179,222,105)", "rgb(252,205,229)",
-            "rgb(217,217,217)", "rgb(188,128,189)", "rgb(204,235,197)", "rgb(255,237,111)"],
-        Pastel1: ["rgb(251,180,174)", "rgb(179,205,227)", "rgb(204,235,197)", "rgb(222,203,228)",
-            "rgb(254,217,166)", "rgb(255,255,204)", "rgb(229,216,189)", "rgb(253,218,236)"],
-        Pastel2: ["rgb(173,226,207)", "rgb(253,205,172)", "rgb(203,213,232)", "rgb(244,202,228)",
-            "rgb(230,245,201)", "rgb(255,242,174)", "rgb(243,225,206)"],
-        Accent: ["rgb(127,201,127)", "rgb(190,174,212)", "rgb(253,192,134)", "rgb(255,255,153)",
-            "rgb(56,108,176)", "rgb(240,2,127)", "rgb(191,91,23)"]
-    }
-
-    igv.PaletteColorTable = function (palette) {
-        this.colors = colorPalettes[palette];
-        if (!Array.isArray(this.colors)) this.colors = [];
-        this.colorTable = {};
-        this.nextIdx = 0;
-        this.colorGenerator = new RColor();
-    }
-
-    igv.PaletteColorTable.prototype.getColor = function (key) {
-
-        if (!this.colorTable.hasOwnProperty(key)) {
-            if (this.nextIdx < this.colors.length) {
-                this.colorTable[key] = this.colors[this.nextIdx];
-            } else {
-                this.colorTable[key] = this.colorGenerator.get();
-            }
-            this.nextIdx++;
-        }
-        return this.colorTable[key];
-    }
-
-
-    // Random color generator from https://github.com/sterlingwes/RandomColor/blob/master/rcolor.js
-    // Free to use & distribute under the MIT license
-    // Wes Johnson (@SterlingWes)
-    //
-    // inspired by http://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically/
-
-    var RColor = function () {
-        this.hue = Math.random(),
-            this.goldenRatio = 0.618033988749895;
-        this.hexwidth = 2;
-    }
-
-    RColor.prototype.hsvToRgb = function (h, s, v) {
-        var h_i = Math.floor(h * 6),
-            f = h * 6 - h_i,
-            p = v * (1 - s),
-            q = v * (1 - f * s),
-            t = v * (1 - (1 - f) * s),
-            r = 255,
-            g = 255,
-            b = 255;
-        switch (h_i) {
-            case 0:
-                r = v, g = t, b = p;
-                break;
-            case 1:
-                r = q, g = v, b = p;
-                break;
-            case 2:
-                r = p, g = v, b = t;
-                break;
-            case 3:
-                r = p, g = q, b = v;
-                break;
-            case 4:
-                r = t, g = p, b = v;
-                break;
-            case 5:
-                r = v, g = p, b = q;
-                break;
-        }
-        return [Math.floor(r * 256), Math.floor(g * 256), Math.floor(b * 256)];
-    };
-
-    RColor.prototype.padHex = function (str) {
-        if (str.length > this.hexwidth) return str;
-        return new Array(this.hexwidth - str.length + 1).join('0') + str;
-    };
-
-    RColor.prototype.get = function (saturation, value) {
-        this.hue += this.goldenRatio;
-        this.hue %= 1;
-        if (typeof saturation !== "number") saturation = 0.5;
-        if (typeof value !== "number") value = 0.95;
-        var rgb = this.hsvToRgb(this.hue, saturation, value);
-
-        return "#" + this.padHex(rgb[0].toString(16))
-            + this.padHex(rgb[1].toString(16))
-            + this.padHex(rgb[2].toString(16));
-
-    };
-
 
     return igv;
 
