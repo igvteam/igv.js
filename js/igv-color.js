@@ -28,271 +28,6 @@
  */
 var igv = (function (igv) {
 
-
-    // Used to generate color list
-    // let hexs = [];
-    // for (let rgbList of Object.values(igv.colorPalettes)) {
-    //     for (let rgb of rgbList) {
-    //         let obj = {};
-    //         obj[ rgb ] = igv.Color.rgbToHex(rgb);
-    //         hexs.push(obj);
-    //     }
-    // }
-
-    igv.appleCrayonPalette =
-        {
-            licorice: "#000000",
-            lead: "#1e1e1e",
-            tungsten: "#3a3a3a",
-            iron: "#545453",
-            steel: "#6e6e6e",
-            tin: "#878687",
-            nickel: "#888787",
-            aluminum: "#a09fa0",
-            magnesium: "#b8b8b8",
-            silver: "#d0d0d0",
-            mercury: "#e8e8e8",
-            snow: "white",
-            //
-            cayenne: "#891100",
-            mocha: "#894800",
-            aspargus: "#888501",
-            fern: "#458401",
-            clover: "#028401",
-            moss: "#018448",
-            teal: "#008688",
-            ocean: "#004a88",
-            midnight: "#001888",
-            eggplant: "#491a88",
-            plum: "#891e88",
-            maroon: "#891648",
-            //
-            maraschino: "#ff2101",
-            tangerine: "#ff8802",
-            lemon: "#fffa03",
-            lime: "#83f902",
-            spring: "#05f802",
-            seam_foam: "#03f987",
-            turquoise: "#00fdff",
-            aqua: "#008cff",
-            blueberry: "#002eff",
-            grape: "#8931ff",
-            magenta: "#ff39ff",
-            strawberry: "#ff2987",
-            //
-            salmon: "#ff726e",
-            cantaloupe: "#ffce6e",
-            banana: "#fffb6d",
-            honeydew: "#cefa6e",
-            flora: "#68f96e",
-            spindrift: "#68fbd0",
-            ice: "#68fdff",
-            sky: "#6acfff",
-            orchid: "#6e76ff",
-            lavender: "#d278ff",
-            bubblegum: "#ff7aff",
-            carnation: "#ff7fd3"
-    };
-
-    igv.colorPickerPalette =
-        [
-            {
-                "rgb(228,26,28)": "#e41a1c"
-            },
-            {
-                "rgb(55,126,184)": "#377eb8"
-            },
-            {
-                "rgb(77,175,74)": "#4daf4a"
-            },
-            {
-                "rgb(166,86,40)": "#a65628"
-            },
-            {
-                "rgb(152,78,163)": "#984ea3"
-            },
-            {
-                "rgb(255,127,0)": "#ff7f00"
-            },
-            {
-                "rgb(247,129,191)": "#f781bf"
-            },
-            {
-                "rgb(153,153,153)": "#999999"
-            },
-            {
-                "rgb(255,255,51)": "#ffff33"
-            },
-            {
-                "rgb(27,158,119)": "#1b9e77"
-            },
-            {
-                "rgb(217,95,2)": "#d95f02"
-            },
-            {
-                "rgb(117,112,179)": "#7570b3"
-            },
-            {
-                "rgb(231,41,138)": "#e7298a"
-            },
-            {
-                "rgb(102,166,30)": "#66a61e"
-            },
-            {
-                "rgb(230,171,2)": "#e6ab02"
-            },
-            {
-                "rgb(166,118,29)": "#a6761d"
-            },
-            {
-                "rgb(102,102,102)": "#666666"
-            },
-            {
-                "rgb(102, 194,165)": "#66c2a5"
-            },
-            {
-                "rgb(252,141,98)": "#fc8d62"
-            },
-            {
-                "rgb(141,160,203)": "#8da0cb"
-            },
-            {
-                "rgb(231,138,195)": "#e78ac3"
-            },
-            {
-                "rgb(166,216,84)": "#a6d854"
-            },
-            {
-                "rgb(255,217,47)": "#ffd92f"
-            },
-            {
-                "rgb(229,196,148)": "#e5c494"
-            },
-            {
-                "rgb(179,179,179)": "#b3b3b3"
-            },
-            {
-                "rgb(141,211,199)": "#8dd3c7"
-            },
-            {
-                "rgb(255,255,179)": "#ffffb3"
-            },
-            {
-                "rgb(190,186,218)": "#bebada"
-            },
-            {
-                "rgb(251,128,114)": "#fb8072"
-            },
-            {
-                "rgb(128,177,211)": "#80b1d3"
-            },
-            {
-                "rgb(253,180,98)": "#fdb462"
-            },
-            {
-                "rgb(179,222,105)": "#b3de69"
-            },
-            {
-                "rgb(252,205,229)": "#fccde5"
-            },
-            {
-                "rgb(217,217,217)": "#d9d9d9"
-            },
-            {
-                "rgb(188,128,189)": "#bc80bd"
-            },
-            {
-                "rgb(204,235,197)": "#ccebc5"
-            },
-            {
-                "rgb(255,237,111)": "#ffed6f"
-            },
-            {
-                "rgb(251,180,174)": "#fbb4ae"
-            },
-            {
-                "rgb(179,205,227)": "#b3cde3"
-            },
-            {
-                "rgb(204,235,197)": "#ccebc5"
-            },
-            {
-                "rgb(222,203,228)": "#decbe4"
-            },
-            {
-                "rgb(254,217,166)": "#fed9a6"
-            },
-            {
-                "rgb(255,255,204)": "#ffffcc"
-            },
-            {
-                "rgb(229,216,189)": "#e5d8bd"
-            },
-            {
-                "rgb(253,218,236)": "#fddaec"
-            },
-            {
-                "rgb(173,226,207)": "#ade2cf"
-            },
-            {
-                "rgb(253,205,172)": "#fdcdac"
-            },
-            {
-                "rgb(203,213,232)": "#cbd5e8"
-            },
-            {
-                "rgb(244,202,228)": "#f4cae4"
-            },
-            {
-                "rgb(230,245,201)": "#e6f5c9"
-            },
-            {
-                "rgb(255,242,174)": "#fff2ae"
-            },
-            {
-                "rgb(243,225,206)": "#f3e1ce"
-            },
-            {
-                "rgb(127,201,127)": "#7fc97f"
-            },
-            {
-                "rgb(190,174,212)": "#beaed4"
-            },
-            {
-                "rgb(253,192,134)": "#fdc086"
-            },
-            {
-                "rgb(255,255,153)": "#ffff99"
-            },
-            {
-                "rgb(56,108,176)": "#386cb0"
-            },
-            {
-                "rgb(240,2,127)": "#f0027f"
-            },
-            {
-                "rgb(191,91,23)": "#bf5b17"
-            }
-        ];
-
-
-    let bootstrap_colors =
-        [
-            '#007bff',
-            '#17a2b8',
-            '#20c997',
-            '#28a745',
-            '#404EB0',
-            '#6610f2',
-            '#e83e8c',
-            '#dc3545',
-            '#fd7e14',
-            '#ffc107',
-            'white',
-            '#343a40',
-            '#6c757d'
-        ];
-
     igv.Color = {
 
         rgbListFromHSV: () => {
@@ -541,6 +276,71 @@ var igv = (function (igv) {
         }
     };
 
+    // Used to generate color list
+    // let hexs = [];
+    // for (let rgbList of Object.values(igv.colorPalettes)) {
+    //     for (let rgb of rgbList) {
+    //         let obj = {};
+    //         obj[ rgb ] = igv.Color.rgbToHex(rgb);
+    //         hexs.push(obj);
+    //     }
+    // }
+
+    igv.appleCrayonPalette =
+        {
+            licorice: "#000000",
+            lead: "#1e1e1e",
+            tungsten: "#3a3a3a",
+            iron: "#545453",
+            steel: "#6e6e6e",
+            tin: "#878687",
+            nickel: "#888787",
+            aluminum: "#a09fa0",
+            magnesium: "#b8b8b8",
+            silver: "#d0d0d0",
+            mercury: "#e8e8e8",
+            snow: "white",
+            //
+            cayenne: "#891100",
+            mocha: "#894800",
+            aspargus: "#888501",
+            fern: "#458401",
+            clover: "#028401",
+            moss: "#018448",
+            teal: "#008688",
+            ocean: "#004a88",
+            midnight: "#001888",
+            eggplant: "#491a88",
+            plum: "#891e88",
+            maroon: "#891648",
+            //
+            maraschino: "#ff2101",
+            tangerine: "#ff8802",
+            lemon: "#fffa03",
+            lime: "#83f902",
+            spring: "#05f802",
+            seam_foam: "#03f987",
+            turquoise: "#00fdff",
+            aqua: "#008cff",
+            blueberry: "#002eff",
+            grape: "#8931ff",
+            magenta: "#ff39ff",
+            strawberry: "#ff2987",
+            //
+            salmon: "#ff726e",
+            cantaloupe: "#ffce6e",
+            banana: "#fffb6d",
+            honeydew: "#cefa6e",
+            flora: "#68f96e",
+            spindrift: "#68fbd0",
+            ice: "#68fdff",
+            sky: "#6acfff",
+            orchid: "#6e76ff",
+            lavender: "#d278ff",
+            bubblegum: "#ff7aff",
+            carnation: "#ff7fd3"
+    };
+
     igv.nucleotideColorComponents = {
         "A": [0, 200, 0],
         "C": [0, 0, 200],
@@ -550,7 +350,7 @@ var igv = (function (igv) {
         "c": [0, 0, 200],
         "t": [255, 0, 0],
         "g": [209, 113, 5]
-    }
+    };
 
     igv.nucleotideColors = {
         "A": "rgb(  0, 200,   0)",
@@ -562,6 +362,204 @@ var igv = (function (igv) {
         "t": "rgb(255,   0,   0)",
         "g": "rgb(209, 113,   5)"
     };
+
+    let bootstrapPalette =
+        [
+            '#007bff',
+            '#17a2b8',
+            '#20c997',
+            '#28a745',
+            '#404EB0',
+            '#6610f2',
+            '#e83e8c',
+            '#dc3545',
+            '#fd7e14',
+            '#ffc107',
+            'white',
+            '#343a40',
+            '#6c757d'
+        ];
+
+    let colorPalettes_concat_RGB2Hex =
+        [
+            {
+                "rgb(228,26,28)": "#e41a1c"
+            },
+            {
+                "rgb(55,126,184)": "#377eb8"
+            },
+            {
+                "rgb(77,175,74)": "#4daf4a"
+            },
+            {
+                "rgb(166,86,40)": "#a65628"
+            },
+            {
+                "rgb(152,78,163)": "#984ea3"
+            },
+            {
+                "rgb(255,127,0)": "#ff7f00"
+            },
+            {
+                "rgb(247,129,191)": "#f781bf"
+            },
+            {
+                "rgb(153,153,153)": "#999999"
+            },
+            {
+                "rgb(255,255,51)": "#ffff33"
+            },
+            {
+                "rgb(27,158,119)": "#1b9e77"
+            },
+            {
+                "rgb(217,95,2)": "#d95f02"
+            },
+            {
+                "rgb(117,112,179)": "#7570b3"
+            },
+            {
+                "rgb(231,41,138)": "#e7298a"
+            },
+            {
+                "rgb(102,166,30)": "#66a61e"
+            },
+            {
+                "rgb(230,171,2)": "#e6ab02"
+            },
+            {
+                "rgb(166,118,29)": "#a6761d"
+            },
+            {
+                "rgb(102,102,102)": "#666666"
+            },
+            {
+                "rgb(102, 194,165)": "#66c2a5"
+            },
+            {
+                "rgb(252,141,98)": "#fc8d62"
+            },
+            {
+                "rgb(141,160,203)": "#8da0cb"
+            },
+            {
+                "rgb(231,138,195)": "#e78ac3"
+            },
+            {
+                "rgb(166,216,84)": "#a6d854"
+            },
+            {
+                "rgb(255,217,47)": "#ffd92f"
+            },
+            {
+                "rgb(229,196,148)": "#e5c494"
+            },
+            {
+                "rgb(179,179,179)": "#b3b3b3"
+            },
+            {
+                "rgb(141,211,199)": "#8dd3c7"
+            },
+            {
+                "rgb(255,255,179)": "#ffffb3"
+            },
+            {
+                "rgb(190,186,218)": "#bebada"
+            },
+            {
+                "rgb(251,128,114)": "#fb8072"
+            },
+            {
+                "rgb(128,177,211)": "#80b1d3"
+            },
+            {
+                "rgb(253,180,98)": "#fdb462"
+            },
+            {
+                "rgb(179,222,105)": "#b3de69"
+            },
+            {
+                "rgb(252,205,229)": "#fccde5"
+            },
+            {
+                "rgb(217,217,217)": "#d9d9d9"
+            },
+            {
+                "rgb(188,128,189)": "#bc80bd"
+            },
+            {
+                "rgb(204,235,197)": "#ccebc5"
+            },
+            {
+                "rgb(255,237,111)": "#ffed6f"
+            },
+            {
+                "rgb(251,180,174)": "#fbb4ae"
+            },
+            {
+                "rgb(179,205,227)": "#b3cde3"
+            },
+            {
+                "rgb(204,235,197)": "#ccebc5"
+            },
+            {
+                "rgb(222,203,228)": "#decbe4"
+            },
+            {
+                "rgb(254,217,166)": "#fed9a6"
+            },
+            {
+                "rgb(255,255,204)": "#ffffcc"
+            },
+            {
+                "rgb(229,216,189)": "#e5d8bd"
+            },
+            {
+                "rgb(253,218,236)": "#fddaec"
+            },
+            {
+                "rgb(173,226,207)": "#ade2cf"
+            },
+            {
+                "rgb(253,205,172)": "#fdcdac"
+            },
+            {
+                "rgb(203,213,232)": "#cbd5e8"
+            },
+            {
+                "rgb(244,202,228)": "#f4cae4"
+            },
+            {
+                "rgb(230,245,201)": "#e6f5c9"
+            },
+            {
+                "rgb(255,242,174)": "#fff2ae"
+            },
+            {
+                "rgb(243,225,206)": "#f3e1ce"
+            },
+            {
+                "rgb(127,201,127)": "#7fc97f"
+            },
+            {
+                "rgb(190,174,212)": "#beaed4"
+            },
+            {
+                "rgb(253,192,134)": "#fdc086"
+            },
+            {
+                "rgb(255,255,153)": "#ffff99"
+            },
+            {
+                "rgb(56,108,176)": "#386cb0"
+            },
+            {
+                "rgb(240,2,127)": "#f0027f"
+            },
+            {
+                "rgb(191,91,23)": "#bf5b17"
+            }
+        ];
 
     igv.colorPalettes = {
 
