@@ -1504,11 +1504,11 @@ $igv-dark-grey-color: #373737;
     .igv-nav-bar-right-container {
 
       .igv-zoom-widget {
-        div {
-          input {
-            width: 72px;
-          }
+
+        input {
+          width: 72px;
         }
+
       }
 
     }
@@ -1534,19 +1534,17 @@ $igv-dark-grey-color: #373737;
 
       .igv-zoom-widget {
 
+        margin-top: 6px;
         font-size: 24px;
 
-        div {
-          input {
-            display: none;
-          }
+        input {
+          display: none;
         }
+
       }
 
     }
 
   }
-
-
 
 }
