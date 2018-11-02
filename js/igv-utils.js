@@ -25,8 +25,6 @@
 
 var igv = (function (igv) {
 
-<<<<<<< HEAD
-=======
     igv.domRectDescription = ({ x, y, width, height }) => {
         return 'x ' + Math.round(x) + ' y ' + Math.round(y) + ' w ' + igv.numberFormatter(Math.round(width)) + ' h ' + igv.numberFormatter(Math.round(height));
     };
@@ -87,8 +85,6 @@ var igv = (function (igv) {
         return $generic_container;
     };
 
-
->>>>>>> svg edits
     igv.getExtension = function (config) {
         var path,
             filename,
