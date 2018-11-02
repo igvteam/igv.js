@@ -206,7 +206,8 @@ var igv = (function (igv) {
                     const px1 = Math.round((segment.end - bpStart) / xScale);
                     const pw = Math.max(1, px1 - px);
 
-                    igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+                    // igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+                    igv.graphics.fillRect(ctx, Math.max(0, px), Math.max(0, y), pw, sampleHeight - 2 * border, { fillStyle: color });
 
                 }
             }
