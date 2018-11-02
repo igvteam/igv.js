@@ -238,11 +238,7 @@
         igvDiv = document.getElementById("igvDiv");
         options =
             {
-<<<<<<< HEAD
-                locus: "chr18:24,439,290-24,439,534",
-=======
                 locus: "AQP4",
->>>>>>> Fix for tabs visibility problem
                 genome: "hg19",
                 tracks: [
                     {
@@ -263,7 +259,7 @@
         var tabs = [];
 
         // Grab the tab links and content divs from the page
-        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function(item) {
+        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function (item) {
             return item.nodeName === 'LI'
         });
 
