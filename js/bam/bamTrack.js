@@ -744,7 +744,7 @@ var igv = (function (igv) {
                 }
 
                 if (alignment.mq <= 0) {
-                    alignmentColor = igv.Color.addAlpha(alignmentColor, "0.15");
+                    alignmentColor = igv.Color.addAlpha(alignmentColor, 0.15);
                 }
 
                 igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: alignmentColor});
@@ -764,7 +764,7 @@ var igv = (function (igv) {
                     diagnosticColor;
 
                 alignmentColor = getAlignmentColor.call(self, alignment);
-                outlineColor = 'alignmentColor';
+                outlineColor = alignmentColor;
                 blocks = alignment.blocks;
 
                 if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
@@ -772,7 +772,7 @@ var igv = (function (igv) {
                 }
 
                 if (alignment.mq <= 0) {
-                    alignmentColor = igv.Color.addAlpha(alignmentColor, "0.15");
+                    alignmentColor = igv.Color.addAlpha(alignmentColor, 0.15);
                 }
 
                 igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
