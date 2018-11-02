@@ -501,7 +501,12 @@ var igv = (function (igv) {
 
         const yScrollDelta = $(this.contentDiv).position().top;
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
-        const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
+
+        // input.replace(/\W/g, '')
+        let str = this.trackView.track.name || this.trackView.track.id;
+        str = str.replace(/\W/g, '');
+        // const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
+        const id = str.toLowerCase();
 
         // if present, paint axis canvas
         if (typeof this.trackView.track.paintAxis === 'function') {

@@ -785,7 +785,7 @@ var igv = (function (igv) {
                     // Somewhat complex test, neccessary to insure gaps are drawn.
                     // If this is not the last block, and the next block starts before the orign (off screen to left)
                     // then skip.
-                    if((b != blocks.length - 1) && blocks[b+1].start < bpStart) continue;
+                    if((b !== blocks.length - 1) && blocks[b+1].start < bpStart) continue;
                     
                     drawBlock(block);
 

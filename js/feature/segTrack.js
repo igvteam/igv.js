@@ -183,9 +183,6 @@ var igv = (function (igv) {
                     if (segment.end < bpStart) continue;
                     if (segment.start > bpEnd) break;
 
-                    const segmentStart = Math.max(segment.start, bpStart);
-                    const segmentEnd = Math.min(segment.end, bpEnd);
-
                     segment.row = samples[segment.sampleKey];
                     const y = samples[segment.sampleKey] * sampleHeight + border;
 
@@ -205,10 +202,17 @@ var igv = (function (igv) {
                         color = "white";
                     }
 
+                    // const segmentStart = Math.max(segment.start, bpStart);
+                    const segmentStart = segment.start;
                     const px = Math.round((segmentStart - bpStart) / xScale);
+
+                    // const segmentEnd = Math.min(segment.end, bpEnd);
+                    const segmentEnd = segment.end;
                     const px1 = Math.round((segmentEnd - bpStart) / xScale);
+
                     const pw = Math.max(1, px1 - px);
 
+                    console.log('x ' + px + ' width ' + pw);
                     igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
                 }

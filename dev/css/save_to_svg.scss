@@ -9,10 +9,12 @@
 #igv-app-container {
   margin-top: 16px;
 
-  width: 100%;
-  width: -moz-available;
-  width: -webkit-fill-available;
-  width: fill-available;
+  //width: 100%;
+  //width: -moz-available;
+  //width: -webkit-fill-available;
+  //width: fill-available;
+
+  width: 1024px;
 
   border-color: #5ea4e0;
   border-style: solid;
