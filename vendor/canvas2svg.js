@@ -11,7 +11,7 @@
  *  Copyright (c) 2014 Gliffy Inc.
  */
 
-var C2S
+var C2S;
 
 (function () {
     "use strict";
@@ -213,101 +213,123 @@ var C2S
 
     /**
      * The mock canvas context
-     * @param o - options include:
+     * @param config - options include:
      * ctx - existing Context2D to wrap around
      * width - width of your canvas (defaults to 500)
      * height - height of your canvas (defaults to 500)
      * enableMirroring - enables canvas mirroring (get image data) (defaults to false)
      * document - the document object (defaults to the current document)
      */
-    ctx = function (o) {
-        var defaultOptions = { width:500, height:500, enableMirroring : false}, options;
-
-        //keep support for this way of calling C2S: new C2S(width,height)
-        if (arguments.length > 1) {
-            options = defaultOptions;
-            options.width = arguments[0];
-            options.height = arguments[1];
-        } else if ( !o ) {
-            options = defaultOptions;
-        } else {
-            options = o;
-        }
+    ctx = function (config) {
 
         if (!(this instanceof ctx)) {
             //did someone call this without new?
-            return new ctx(options);
+            return new ctx(config);
         }
 
+        // clone config
+        this.config = config;
+
         //setup options
-        this.width = options.width || defaultOptions.width;
-        this.height = options.height || defaultOptions.height;
-        this.enableMirroring = options.enableMirroring !== undefined ? options.enableMirroring : defaultOptions.enableMirroring;
+        this.width = config.width;
+        this.height = config.height;
+        this.enableMirroring = config.enableMirroring || false;
 
         this.canvas = this;   ///point back to this instance!
-        this.__document = options.document || document;
+        this.__document = document;
 
         // allow passing in an existing context to wrap around
         // if a context is passed in, we know a canvas already exist
-        if (options.ctx) {
-            this.__ctx = options.ctx;
+        if (config.ctx) {
+            this.__ctx = config.ctx;
         } else {
             this.__canvas = this.__document.createElement("canvas");
             this.__ctx = this.__canvas.getContext("2d");
         }
 
+        // give this canvas a type
+        this.isSVG = true;
+
         this.__setDefaultStyles();
         this.__stack = [this.__getStyleState()];
         this.__groupStack = [];
 
-        //the root svg element
-        this.__root = this.__document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        this.__root.setAttribute("version", 1.1);
-        this.__root.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-        this.__root.setAttributeNS("http://www.w3.org/2000/xmlns/", "xmlns:xlink", "http://www.w3.org/1999/xlink");
+        // root svg element
+        this.__root = this.__createElement("svg");
         this.__root.setAttribute("width", this.width);
         this.__root.setAttribute("height", this.height);
 
-        if (options.viewbox) {
-            const str = options.viewbox.x + ' ' + options.viewbox.y + ' ' + options.viewbox.width + ' ' + options.viewbox.height;
+        // allow contents to overflow svg bbox
+        this.__root.setAttribute('overflow', 'visible');
+
+        // viewbox
+        if (config.viewbox) {
+            const str = config.viewbox.x + ' ' + config.viewbox.y + ' ' + config.viewbox.width + ' ' + config.viewbox.height;
             this.__root.setAttribute("viewBox", str);
 
-            this.viewbox = options.viewbox;
+            this.viewbox = config.viewbox;
         }
 
-        //make sure we don't generate the same ids in defs
+        // make sure we don't generate the same ids in defs
         this.__ids = {};
 
-        //defs tag
-        this.__defs = this.__document.createElementNS("http://www.w3.org/2000/svg", "defs");
+        // defs
+        this.__defs = this.__createElement("defs");
         this.__root.appendChild(this.__defs);
 
-        //also add a group child. the svg element can't use the transform attribute
-        this.__currentElement = this.__document.createElementNS("http://www.w3.org/2000/svg", "g");
-        this.__root.appendChild(this.__currentElement);
+        // svg background color
+        this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
+
+        // root group
+        this.__rootGroup = this.__createElement('g', { id:'root-group' });
+        this.__root.appendChild(this.__rootGroup);
+
+        // point current element to root group
+        this.__currentElement = this.__rootGroup;
     };
 
+    ctx.prototype.setWidth = function(width) {
+
+        this.width = width;
+        this.__root.setAttribute("width", this.width);
+
+        const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + width + ' ' + this.config.viewbox.height;
+        this.__root.setAttribute("viewBox", str);
+
+    };
+
+    ctx.prototype.setHeight = function(height) {
+
+        this.height = height;
+        this.__root.setAttribute("height", this.height);
+
+        const str = this.config.viewbox.x + ' ' + this.config.viewbox.y + ' ' + this.config.viewbox.width + ' ' + height;
+        this.__root.setAttribute("viewBox", str);
+
+    };
 
     /**
      * Creates the specified svg element
      * @private
      */
     ctx.prototype.__createElement = function (elementName, properties, resetFill) {
+
         if (typeof properties === "undefined") {
             properties = {};
         }
 
-        var element = this.__document.createElementNS("http://www.w3.org/2000/svg", elementName),
-            keys = Object.keys(properties), i, key;
+        let element = this.__document.createElementNS("http://www.w3.org/2000/svg", elementName);
+
         if (resetFill) {
             //if fill or stroke is not specified, the svg element should not display. By default SVG's fill is black.
             element.setAttribute("fill", "none");
             element.setAttribute("stroke", "none");
         }
-        for (i=0; i<keys.length; i++) {
-            key = keys[i];
-            element.setAttribute(key, properties[key]);
+
+        for (let key of Object.keys(properties)) {
+            element.setAttribute(key, properties[ key ]);
         }
+
         return element;
     };
 
@@ -523,6 +545,28 @@ var C2S
         }
         transform += t;
         this.__currentElement.setAttribute("transform", transform);
+    };
+
+    ctx.prototype.addTrackGroupWithTranslationAndClipRect = function (id, tx, ty, width, height, clipYOffset) {
+
+        // clip rect
+        const clip_id = id + '_clip_rect';
+        let clipPath = this.__createElement('clipPath', { id:clip_id });
+
+        this.__defs.appendChild( clipPath );
+        clipPath.appendChild( this.__createElement('rect', { x:'0', y:clipYOffset.toString(), width:width.toString(), height:height.toString() }) );
+
+        let group = this.__createElement('g');
+        this.__rootGroup.appendChild(group);
+
+        group.setAttribute('transform', format('translate({x},{y})', { x:tx, y:ty }));
+        group.setAttribute('id', (id + '_group'));
+
+        // add clip rect
+        group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
+
+        this.__currentElement = group;
+
     };
 
     /**
@@ -1189,13 +1233,16 @@ var C2S
      * Generates a pattern tag
      */
     ctx.prototype.createPattern = function (image, repetition) {
-        var pattern = this.__document.createElementNS("http://www.w3.org/2000/svg", "pattern"), id = randomString(this.__ids),
-            img;
+
+        let pattern = this.__document.__createElement("pattern");
+        let id = randomString(this.__ids);
+        let img;
+
         pattern.setAttribute("id", id);
         pattern.setAttribute("width", image.width);
         pattern.setAttribute("height", image.height);
         if (image.nodeName === "CANVAS" || image.nodeName === "IMG") {
-            img = this.__document.createElementNS("http://www.w3.org/2000/svg", "image");
+            img = this.__createElement("image");
             img.setAttribute("width", image.width);
             img.setAttribute("height", image.height);
             img.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href",
