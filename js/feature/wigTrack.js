@@ -203,12 +203,14 @@ var igv = (function (igv) {
 
                     // If the track includes negative values draw a baseline
                     if (featureValueMaximum > 0 && featureValueMinimum < 0) {
-                        var alpha = ctx.lineWidth;
+                        let alpha = ctx.lineWidth;
                         ctx.lineWidth = 5;
-                        var basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
+                        let basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
                         ctx.lineWidth = alpha;
+
+                        igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
                     }
-                    igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+
 
                 }
             }

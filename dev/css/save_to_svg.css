@@ -1,0 +1,30 @@
+#igv-centering-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center; }
+
+#igv-app-container {
+  margin-top: 16px;
+  width: 1024px;
+  border-color: #5ea4e0;
+  border-style: solid;
+  border-width: thin; }
+
+#igv-draw-svg-button-container {
+  margin-left: 64px;
+  margin-top: 32px; }
+
+#igv-svg-container {
+  margin-top: 32px;
+  margin-bottom: 64px;
+  border-color: rgba(36, 36, 36, 0.51);
+  border-style: solid;
+  border-width: thin; }
+
+.igv-content-div {
+  border-color: rgba(255, 0, 0, 0.5);
+  border-style: solid;
+  border-width: thin; }
+
+/*# sourceMappingURL=save_to_svg.css.map */
