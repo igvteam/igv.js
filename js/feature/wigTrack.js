@@ -205,21 +205,12 @@ var igv = (function (igv) {
                     if (featureValueMaximum > 0 && featureValueMinimum < 0) {
                         let alpha = ctx.lineWidth;
                         ctx.lineWidth = 5;
-
+                        let basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
                         ctx.lineWidth = alpha;
+
+                        igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
                     }
 
-                    let basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
-
-                    // if (isNaN(basepx)) {
-                    //     console.log('wig track NaN - basepx');
-                    // }
-                    //
-                    // if (isNaN(options.pixelWidth)) {
-                    //     console.log('wig track NaN - pixelWidth');
-                    // }
-
-                    igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
 
                 }
             }

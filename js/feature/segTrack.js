@@ -212,8 +212,8 @@ var igv = (function (igv) {
 
                     const pw = Math.max(1, px1 - px);
 
-                    const sign = px < 0 ? '-' : '+';
-                    console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
+                    // const sign = px < 0 ? '-' : '+';
+                    // console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
                     igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
                 }
