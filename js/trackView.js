@@ -100,6 +100,24 @@ var igv = (function (igv) {
 
     };
 
+    igv.TrackView.prototype.renderSVGContext = function (context, offset) {
+
+        for (let viewport of this.viewports) {
+
+            const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
+            const bbox = viewport.$viewport.get(0).getBoundingClientRect();
+
+            let o =
+                {
+                    deltaX: offset.deltaX + index * viewport.$viewport.width(),
+                    deltaY: offset.deltaY + bbox.y
+                };
+
+            viewport.renderSVGContext(context, o);
+        }
+
+    };
+
     igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
