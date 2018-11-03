@@ -119,7 +119,7 @@ var igv = (function (igv) {
         return igv.knownFileExtensions.has(extension);
     };
 
-    igv.Browser.prototype.renderSVG = function ($container) {
+    igv.Browser.prototype.renderSVG = function (config) {
 
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
@@ -163,15 +163,15 @@ var igv = (function (igv) {
 
         let svg = svgContext.getSerializedSvg(true);
 
-        if ($container) {
-            $container.empty();
-            $container.width(trackContainerBBox.width);
-            $container.append( svg );
+        if (config.$container) {
+            config.$container.empty();
+            config.$container.width(trackContainerBBox.width);
+            config.$container.append( svg );
         }
 
-        const filename = 'igv.svg';
+        const path = config.filename ? config.filename : 'igv-app.svg';
         const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
-        igv.download(filename, data);
+        igv.download(path, data);
 
     };
 
