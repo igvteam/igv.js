@@ -497,6 +497,72 @@ var igv = (function (igv) {
         igv.download(filename, data);
     };
 
+    igv.Viewport.prototype.renderSVGContext = function (context, offset) {
+
+        const yScrollDelta = $(this.contentDiv).position().top;
+        const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
+
+        // input.replace(/\W/g, '')
+        let str = this.trackView.track.name || this.trackView.track.id;
+        str = str.replace(/\W/g, '');
+        // const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
+        const id = str.toLowerCase();
+
+        // if present, paint axis canvas
+        if (typeof this.trackView.track.paintAxis === 'function') {
+
+            const w = $(this.trackView.controlCanvas).width();
+            const h = $(this.trackView.controlCanvas).height();
+
+            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - w, offset.deltaY, w, h, 0);
+
+            context.save();
+            this.trackView.track.paintAxis(context, w, h);
+            context.restore();
+        }
+
+        context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
+
+        const width = this.$viewport.width();
+        const height = this.$viewport.height();
+
+        let referenceFrame = this.genomicState.referenceFrame;
+
+        context.save();
+
+        const drawConfig =
+            {
+                context: context,
+
+                viewport: this,
+
+                referenceFrame: referenceFrame,
+
+                genomicState: this.genomicState,
+
+                pixelWidth: width,
+                pixelHeight: height,
+
+                viewportWidth: width,
+
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
+
+                bpStart: referenceFrame.start,
+                bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
+
+                bpPerPixel: referenceFrame.bpPerPixel,
+
+                selection: this.selection
+            };
+
+        draw.call(this, drawConfig, this.tile.features);
+
+        context.restore();
+
+
+    };
+
     igv.Viewport.prototype.saveSVG = function () {
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
         const filename = str + ".svg";

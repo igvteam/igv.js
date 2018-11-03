@@ -119,6 +119,61 @@ var igv = (function (igv) {
         return igv.knownFileExtensions.has(extension);
     };
 
+    igv.Browser.prototype.renderSVG = function ($container) {
+
+        const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+        const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
+        const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
+
+        const w = trackContainerBBox.width;
+        const h_output = trackContainerBBox.height + ideoPanelBBox.height;
+        const h_render = 8000;
+
+        let svgContext = new C2S(
+            {
+
+                width: w,
+                height: h_render,
+
+                viewbox:
+                    {
+                        x: 0,
+                        y: 0,
+                        width: w,
+                        height: h_render
+                    }
+
+            });
+
+        const dx = anyViewportContainerBBox.x - trackContainerBBox.x;
+
+        // ideoPanel -> SVG
+        if (this.ideoPanel) {
+
+            this.ideoPanel.renderSVGContext(svgContext, { deltaX: dx, deltaY: 0 });
+        }
+
+        // tracks -> SVG
+        for (let trackView of this.trackViews) {
+            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: (ideoPanelBBox.height - trackContainerBBox.y)});
+        }
+
+        // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
+        svgContext.setHeight(h_output);
+
+        let svg = svgContext.getSerializedSvg(true);
+
+        if ($container) {
+            $container.empty();
+            $container.width(trackContainerBBox.width);
+            $container.append( svg );
+        }
+
+        const filename = 'igv.svg';
+        const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
+        igv.download(filename, data);
+
+    };
 
     /**
      * Load a session
