@@ -169,9 +169,9 @@ var igv = (function (igv) {
             $container.append( svg );
         }
 
-        // const filename = 'igv.svg';
-        // const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
-        // igv.download(filename, data);
+        const filename = 'igv.svg';
+        const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
+        igv.download(filename, data);
 
     };
 
