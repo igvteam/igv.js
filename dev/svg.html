@@ -202,7 +202,7 @@
                         igvdev.createTrackList(document.getElementById('trackList'), browser);
 
                         $('#igv-draw-svg-button').on('click', (e) => {
-                            browser.renderSVG($('#igv-svg-container'));
+                            browser.renderSVG({ $container: $('#igv-svg-container') });
                         });
 
                         return browser;
