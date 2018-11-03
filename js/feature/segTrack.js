@@ -202,17 +202,18 @@ var igv = (function (igv) {
                         color = "white";
                     }
 
-                    // const segmentStart = Math.max(segment.start, bpStart);
-                    const segmentStart = segment.start;
+                    const segmentStart = Math.max(segment.start, bpStart);
+                    // const segmentStart = segment.start;
                     const px = Math.round((segmentStart - bpStart) / xScale);
 
-                    // const segmentEnd = Math.min(segment.end, bpEnd);
-                    const segmentEnd = segment.end;
+                    const segmentEnd = Math.min(segment.end, bpEnd);
+                    // const segmentEnd = segment.end;
                     const px1 = Math.round((segmentEnd - bpStart) / xScale);
 
                     const pw = Math.max(1, px1 - px);
 
-                    console.log('x ' + px + ' width ' + pw);
+                    const sign = px < 0 ? '-' : '+';
+                    console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
                     igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
                 }
