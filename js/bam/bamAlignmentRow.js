@@ -114,6 +114,9 @@ var igv = (function (igv) {
                 return undefined;
             }
 
+            if(undefined === base) {
+                return Number.MAX_VALUE;
+            }
             if ('N' === base) {
                 return 2;
 
