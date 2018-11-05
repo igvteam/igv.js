@@ -556,7 +556,9 @@ var igv = (function (igv) {
                 selection: this.selection
             };
 
-        draw.call(this, drawConfig, this.tile.features);
+        const features = this.tile ? this.tile.features : [];
+
+        draw.call(this, drawConfig, features);
 
         context.restore();
 
