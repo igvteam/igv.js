@@ -560,28 +560,28 @@ var igv = (function (igv) {
 
                 // A
                 let tmp = coverage.posA + coverage.negA;
-                if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
+                if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
                 nameValues.push({name: 'A', value: tmp});
 
 
                 // C
                 tmp = coverage.posC + coverage.negC;
-                if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
+                if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posC + "+, " + coverage.negC + "- )";
                 nameValues.push({name: 'C', value: tmp});
 
                 // G
                 tmp = coverage.posG + coverage.negG;
-                if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
+                if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posG + "+, " + coverage.negG + "- )";
                 nameValues.push({name: 'G', value: tmp});
 
                 // T
                 tmp = coverage.posT + coverage.negT;
-                if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
+                if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posT + "+, " + coverage.negT + "- )";
                 nameValues.push({name: 'T', value: tmp});
 
                 // N
                 tmp = coverage.posN + coverage.negN;
-                if (tmp > 0) tmp = tmp.toString() + " (" + Math.floor((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
+                if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
                 nameValues.push({name: 'N', value: tmp});
 
             }
