@@ -226,7 +226,7 @@ var igv = (function (igv) {
 
         chunks.forEach(function (chunk) {
 
-            if (chunk.maxv.isGreaterThan(lowest)) {
+            if (!lowest || chunk.maxv.isGreaterThan(lowest)) {
                 if (lastChunk === null) {
                     mergedChunks.push(chunk);
                     lastChunk = chunk;
