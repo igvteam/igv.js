@@ -43,6 +43,9 @@ var igv = (function (igv) {
 
         if (undefined === config) config = {};
 
+        // Path to genomes.json file.   This is globally shared among all browser objects
+        igv.GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+
         setDefaults(config);
 
         // Explicit parameters have priority

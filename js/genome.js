@@ -71,24 +71,37 @@ var igv = (function (igv) {
 
         getKnownGenomes: function () {
 
+            const genomeList = igv.GenomeUtils.genomeList;
+
             if (KNOWN_GENOMES) {
-                return Promise.resolve(KNOWN_GENOMES)
+                return Promise.resolve(KNOWN_GENOMES);
+            } else if (!genomeList) {
+                return Promise.resolve({});
             }
-            else {
-                return igv.xhr.loadJson("https://s3.amazonaws.com/igv.org.genomes/genomes.json", {})
+            else if (typeof genomeList === 'string') {
+
+                return igv.xhr.loadJson(genomeList, {})
+
                     .then(function (jsonArray) {
-
-                        var table = {};
-
-                        jsonArray.forEach(function (json) {
-                            table[json.id] = json;
-                        });
-
-                        KNOWN_GENOMES = table;
-
-                        return table;
+                        return processJson(jsonArray);
                     })
 
+            }
+            else {
+                return Promise.resolve(processJson(genomeList));
+            }
+
+            function processJson(jsonArray) {
+
+                var table = {};
+
+                jsonArray.forEach(function (json) {
+                    table[json.id] = json;
+                });
+
+                KNOWN_GENOMES = table;
+
+                return table;
             }
         }
     };
