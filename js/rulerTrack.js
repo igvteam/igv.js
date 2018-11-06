@@ -88,36 +88,41 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.computePixelHeight = function (ignore) {
         return this.height;
-    }
+    };
+
+
+    igv.RulerTrack.prototype.getRulerSweeper = function(genomicState) {
+
+        let key = this.browser.genomicStateList.indexOf(genomicState).toString();
+        return this.rulerSweepers[key];
+
+    };
 
     igv.RulerTrack.prototype.draw = function (options) {
-        var key,
-            rulerSweeper,
-            $viewportContent,
+        var rulerSweeper,
             pixelWidthBP,
             tick,
             shim,
             tickHeight;
 
-        key = this.browser.genomicStateList.indexOf(options.genomicState).toString();
-        rulerSweeper = this.rulerSweepers[key];
+        rulerSweeper = this.getRulerSweeper(options.genomicState);
         if (!rulerSweeper) {
-            //console.log("No rulerSweeper for key: " + key);
             return;
         }
 
+        if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-        $viewportContent = $(rulerSweeper.viewport.contentDiv);
+            $(this.canvas).hide();
+            rulerSweeper.viewport.$wholeGenomeContainer.show();
 
-        if ('all' === options.referenceFrame.chrName.toLowerCase()) {
+            createWholeGenomeRectList(rulerSweeper.viewport.$wholeGenomeContainer);
 
-            $viewportContent.find('canvas').hide();
-            $viewportContent.find('.igv-whole-genome-container').show();
             rulerSweeper.disableMouseHandlers();
         } else {
 
-            $viewportContent.find('.igv-whole-genome-container').hide();
-            $viewportContent.find('canvas').show();
+            rulerSweeper.viewport.$wholeGenomeContainer.hide();
+            $(this.canvas).show();
+
             rulerSweeper.addMouseHandlers();
 
             tickHeight = 6;
@@ -134,9 +139,17 @@ var igv = (function (igv) {
 
     };
 
+    function createWholeGenomeRectList($wholeGenomeContainer) {
+
+        $wholeGenomeContainer.find('div').each(function( i ) {
+            let element = $(this).get(0);
+            // console.log(i);
+        });
+    }
+
     igv.RulerTrack.prototype.supportsWholeGenome = function () {
         return true;
-    }
+    };
 
     igv.RulerTrack.prototype.dispose = function () {
 
@@ -144,7 +157,7 @@ var igv = (function (igv) {
             sweeper.dispose();
         })
 
-    }
+    };
 
     const Tick = function (pixelWidthBP, options) {
 
