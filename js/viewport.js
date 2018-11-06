@@ -571,30 +571,71 @@ var igv = (function (igv) {
 
     };
 
-    function drawWholeGenomeRuler (context, group) {
+    function drawWholeGenomeRuler (svgContext, group) {
 
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const rulerSweeper = this.trackView.track.rulerSweepers[ index ];
 
         let dx;
         let dy;
-        rulerSweeper.viewport.$wholeGenomeContainer.find('div').each(function (i) {
-            let domRect = $(this).get(0).getBoundingClientRect();
+        let $selection = rulerSweeper.viewport.$wholeGenomeContainer.find('div');
+        $selection.each(function (i) {
+            const domRect = $(this).get(0).getBoundingClientRect();
 
             if (0 === i) {
                 dx = domRect.x;
                 dy = domRect.y;
             }
 
-            let bbox =
+            let x = domRect.x - dx;
+            let y = domRect.y - dy;
+            let  w = domRect.width;
+            let  h = domRect.height;
+
+            let stroke_dash_array;
+            if (i === $selection.length - 1) {
+                stroke_dash_array = '0 ' + w + ' 0 ' + h + ' 0 ' + w + ' 0 ' + h;
+            } else {
+                stroke_dash_array = '0 ' + w + ' ' + h + ' ' + w + ' 0 ' + h;
+            }
+
+            const stroke_width = 1;
+            let rect_settings =
                 {
-                    x: domRect.x - dx,
-                    width: domRect.width,
-                    y: domRect.y - dy,
-                    height: domRect.height
+                    x: x,
+                    width: w,
+                    y: y,
+                    height: h,
+
+                    // fill: igv.Color.randomRGB(200, 255),
+                    fill: 'white',
+
+                    'stroke-width': stroke_width,
+                    'stroke': 'black',
+                    'stroke-dasharray': stroke_dash_array
                 };
 
-            console.log(bbox);
+            let rect = svgContext.__createElement('rect', rect_settings, true);
+            group.appendChild(rect);
+
+            let text_settings =
+                {
+                    "font-family" : 'sans-serif',
+                    "font-size" : '10px',
+                    "font-style" : 'normal',
+                    "font-weight" : 'normal',
+                    "text-anchor": 'middle',
+                    "dominant-baseline": 'middle',
+                    x: x + w/2,
+                    y: y + h/2,
+                    fill: 'grey'
+                };
+
+            let text = svgContext.__createElement('text', text_settings, true);
+            group.appendChild(text);
+
+            let str = $(this).find('span').text();
+            text.appendChild(svgContext.__document.createTextNode(str));
 
         });
 
