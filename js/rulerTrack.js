@@ -38,6 +38,7 @@ var igv = (function (igv) {
         this.order = -Number.MAX_VALUE;
         this.rulerSweepers = [];
         this.removable = false;
+        this.type = 'ruler';
 
     };
 

@@ -41,7 +41,7 @@ var igv = (function (igv) {
             this.$viewport.addClass('igv-viewport-sequence');
         }
 
-        if (trackView.track instanceof igv.RulerTrack) {
+        if ('ruler' === trackView.track.type) {
 
             this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
             $(this.contentDiv).append(this.$wholeGenomeContainer);
@@ -49,6 +49,13 @@ var igv = (function (igv) {
             const rulerSweeper = new igv.RulerSweeper(this);
             trackView.track.rulerSweepers.push(rulerSweeper);
             rulerSweeper.layoutWholeGenome();
+
+            // make list of bboxes for SVG output
+            this.svgRenderBBoxList = [];
+            rulerSweeper.viewport.$wholeGenomeContainer.find('div').each(function (i) {
+                let bbox = $(this).get(0).getBoundingClientRect();
+                self.svgRenderBBoxList.push(bbox);
+            });
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
@@ -78,7 +85,7 @@ var igv = (function (igv) {
 
         if ("sequence" === trackView.track.type) {
             // do nuthin
-        } else if (trackView.track instanceof igv.RulerTrack) {
+        } else if ('ruler' === trackView.track.type) {
             // do nuthin
         } else {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
