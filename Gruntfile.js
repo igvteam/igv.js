@@ -52,7 +52,6 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'vendor/canvas2svg.js',
                     'es5/**/*.js',
                     'wrapper/footer.js'
                 ],
@@ -69,7 +68,6 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'vendor/canvas2svg.js',
                     'js/**/*.js',
                     'wrapper/footer-esm.js'
                 ],
@@ -86,7 +84,6 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
-                    'vendor/canvas2svg.js',
                     'js/**/*.js',
                     'wrapper/footer.js'
                 ],
