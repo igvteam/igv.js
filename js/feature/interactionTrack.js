@@ -201,7 +201,7 @@ var igv = (function (igv) {
                         max = Math.max(max, pixelEnd - pixelStart);
                     }
                 });
-                let a = Math.min(pixelWidth, max) / 2;
+                let a = Math.min(viewportWidth, max) / 2;
                 if (max > 0) {
                     let coa = pixelHeight / a;
                     self.theta = estimateTheta(coa);
