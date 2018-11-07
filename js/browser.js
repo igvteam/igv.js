@@ -131,7 +131,11 @@ var igv = (function (igv) {
         const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
         const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
 
-        const w = trackContainerBBox.width;
+        // multi-locus inter-panel gap
+        const multiLocusGap = 8;
+
+        const w = trackContainerBBox.width  + (this.genomicStateList.length - 1) * multiLocusGap;
+
         const h_output = trackContainerBBox.height + ideoPanelBBox.height;
         const h_render = 8000;
 
@@ -140,6 +144,10 @@ var igv = (function (igv) {
 
                 width: w,
                 height: h_render,
+
+                backdropColor: 'white',
+
+                multiLocusGap: multiLocusGap,
 
                 viewbox:
                     {

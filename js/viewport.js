@@ -523,7 +523,9 @@ var igv = (function (igv) {
             context.restore();
         }
 
-        let group = context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
+        const dx = offset.deltaX + (index * context.multiLocusGap);
+        const dy = offset.deltaY + yScrollDelta;
+        let group = context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
         if ('ruler' === this.trackView.track.type && igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
             drawWholeGenomeRuler.call(this, context, group);
