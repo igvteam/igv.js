@@ -110,6 +110,12 @@ var igv = (function (igv) {
         }
     }
 
+    igv.isWholeGenomeView = function (referenceFrame) {
+        let chromosomeName = referenceFrame.chrName.toLowerCase();
+
+        return 'all' === chromosomeName;
+    };
+
     igv.hasKnownFileExtension = function (config) {
         var extension = igv.getExtension(config);
 
