@@ -41,7 +41,7 @@ var igv = (function (igv) {
             this.$viewport.addClass('igv-viewport-sequence');
         }
 
-        if (trackView.track instanceof igv.RulerTrack) {
+        if ('ruler' === trackView.track.type) {
 
             this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
             $(this.contentDiv).append(this.$wholeGenomeContainer);
@@ -78,7 +78,7 @@ var igv = (function (igv) {
 
         if ("sequence" === trackView.track.type) {
             // do nuthin
-        } else if (trackView.track instanceof igv.RulerTrack) {
+        } else if ('ruler' === trackView.track.type) {
             // do nuthin
         } else {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
@@ -521,49 +521,125 @@ var igv = (function (igv) {
             context.restore();
         }
 
-        context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
+        let group = context.addTrackGroupWithTranslationAndClipRect(id, offset.deltaX, offset.deltaY + yScrollDelta, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-        const width = this.$viewport.width();
-        const height = this.$viewport.height();
+        if ('ruler' === this.trackView.track.type && igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
+            drawWholeGenomeRuler.call(this, context, group);
+        } else {
 
-        let referenceFrame = this.genomicState.referenceFrame;
+            const width = this.$viewport.width();
+            const height = this.$viewport.height();
 
-        context.save();
+            let referenceFrame = this.genomicState.referenceFrame;
 
-        const drawConfig =
-            {
-                context: context,
+            context.save();
 
-                viewport: this,
+            const drawConfig =
+                {
+                    context: context,
 
-                referenceFrame: referenceFrame,
+                    viewport: this,
 
-                genomicState: this.genomicState,
+                    referenceFrame: referenceFrame,
 
-                pixelWidth: width,
-                pixelHeight: height,
+                    genomicState: this.genomicState,
 
-                viewportWidth: width,
+                    pixelWidth: width,
+                    pixelHeight: height,
 
-                viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth(),
+                    viewportWidth: width,
 
-                bpStart: referenceFrame.start,
-                bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
+                    viewportContainerX: 0,
+                    viewportContainerWidth: this.browser.viewportContainerWidth(),
 
-                bpPerPixel: referenceFrame.bpPerPixel,
+                    bpStart: referenceFrame.start,
+                    bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
 
-                selection: this.selection
-            };
+                    bpPerPixel: referenceFrame.bpPerPixel,
 
-        const features = this.tile ? this.tile.features : [];
+                    selection: this.selection
+                };
 
-        draw.call(this, drawConfig, features);
+            const features = this.tile ? this.tile.features : [];
 
-        context.restore();
+            draw.call(this, drawConfig, features);
+
+            context.restore();
+
+        }
 
 
     };
+
+    function drawWholeGenomeRuler (svgContext, group) {
+
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const rulerSweeper = this.trackView.track.rulerSweepers[ index ];
+
+        let dx;
+        let dy;
+        let $selection = rulerSweeper.viewport.$wholeGenomeContainer.find('div');
+        $selection.each(function (i) {
+            const domRect = $(this).get(0).getBoundingClientRect();
+
+            if (0 === i) {
+                dx = domRect.x;
+                dy = domRect.y;
+            }
+
+            let x = domRect.x - dx;
+            let y = domRect.y - dy;
+            let  w = domRect.width;
+            let  h = domRect.height;
+
+            let stroke_dash_array;
+            if (i === $selection.length - 1) {
+                stroke_dash_array = '0 ' + w + ' 0 ' + h + ' 0 ' + w + ' 0 ' + h;
+            } else {
+                stroke_dash_array = '0 ' + w + ' ' + h + ' ' + w + ' 0 ' + h;
+            }
+
+            const stroke_width = 1;
+            let rect_settings =
+                {
+                    x: x,
+                    width: w,
+                    y: y,
+                    height: h,
+
+                    // fill: igv.Color.randomRGB(200, 255),
+                    fill: 'white',
+
+                    'stroke-width': stroke_width,
+                    'stroke': 'black',
+                    'stroke-dasharray': stroke_dash_array
+                };
+
+            let rect = svgContext.__createElement('rect', rect_settings, true);
+            group.appendChild(rect);
+
+            let text_settings =
+                {
+                    "font-family" : 'sans-serif',
+                    "font-size" : '10px',
+                    "font-style" : 'normal',
+                    "font-weight" : 'normal',
+                    "text-anchor": 'middle',
+                    "dominant-baseline": 'middle',
+                    x: x + w/2,
+                    y: y + h/2,
+                    fill: 'grey'
+                };
+
+            let text = svgContext.__createElement('text', text_settings, true);
+            group.appendChild(text);
+
+            let str = $(this).find('span').text();
+            text.appendChild(svgContext.__document.createTextNode(str));
+
+        });
+
+    }
 
     igv.Viewport.prototype.saveSVG = function () {
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
