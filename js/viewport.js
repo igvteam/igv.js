@@ -502,14 +502,16 @@ var igv = (function (igv) {
         const yScrollDelta = $(this.contentDiv).position().top;
         const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
 
-        // input.replace(/\W/g, '')
+
         let str = this.trackView.track.name || this.trackView.track.id;
         str = str.replace(/\W/g, '');
-        // const id = (this.trackView.track.name || this.trackView.track.id).split(' ').join('_').toLowerCase();
-        const id = str.toLowerCase();
 
-        // if present, paint axis canvas
-        if (typeof this.trackView.track.paintAxis === 'function') {
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const id = str.toLowerCase() + '_genomic_index_' + index;
+
+        // If present, paint axis canvas. Only in first multi-locus panel
+
+        if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
 
             const w = $(this.trackView.controlCanvas).width();
             const h = $(this.trackView.controlCanvas).height();
