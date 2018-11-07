@@ -567,6 +567,8 @@ var C2S;
 
         this.__currentElement = group;
 
+        return group;
+
     };
 
     /**
