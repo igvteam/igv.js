@@ -29,7 +29,7 @@ var igv = (function (igv) {
 
     igv.BinaryParser = function (dataView, littleEndian) {
 
-        this.littleEndian = (littleEndian ? littleEndian : true);
+        this.littleEndian = littleEndian !== undefined ? littleEndian : true
         this.position = 0;
         this.view = dataView;
         this.length = dataView.byteLength;
