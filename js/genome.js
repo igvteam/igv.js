@@ -111,6 +111,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.id = config.id;
+        this.name = config.name;
         this.sequence = sequence;
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
