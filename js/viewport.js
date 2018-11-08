@@ -286,17 +286,24 @@ var igv = (function (igv) {
             return;
         }
 
+        const isWGV = igv.isWholeGenomeView(this.genomicState.referenceFrame);
+
+        const features = tile.features;
+
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-        const bpPerPixel = tile.bpPerPixel;
-        const features = tile.features;
-        const bpStart = tile.startBP;
-        const bpEnd = tile.endBP;
-        const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
-        const pixelHeight = self.getContentHeight();
-        if(pixelWidth == 0 || pixelHeight === 0) {
-            if (self.canvas) {
-                $(self.canvas).remove();
+
+        const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
+        const bpStart = isWGV ? 0 : tile.startBP;
+        const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
+
+        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        
+        const pixelHeight = this.getContentHeight();
+
+        if(0 === pixelWidth || 0 === pixelHeight) {
+            if (this.canvas) {
+                $(this.canvas).remove();
             }
             return;
         }
@@ -304,16 +311,21 @@ var igv = (function (igv) {
         const drawConfiguration =
             {
                 features: features,
+
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
+
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
+
                 referenceFrame: referenceFrame,
                 genomicState: genomicState,
-                selection: self.selection,
-                viewport: self,
-                viewportWidth: self.$viewport.width(),
+
+                selection: this.selection,
+
+                viewport: this,
+                viewportWidth: this.$viewport.width(),
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
