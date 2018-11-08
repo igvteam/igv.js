@@ -351,8 +351,8 @@ var igv = (function (igv) {
 
                 genomeChange = self.genome && (self.genome.id !== genome.id);
                 self.genome = genome;
-                self.$current_genome.text(genome.id || '');
-                self.$current_genome.attr('title', genome.id || '');
+                self.$current_genome.text(genome.name || genome.id || '');
+                self.$current_genome.attr('title', genome.name || genome.id || '');
                 self.chromosomeSelectWidget.update(genome);
 
                 if (genomeChange) {
