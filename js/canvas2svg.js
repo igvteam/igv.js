@@ -277,8 +277,19 @@ var C2S;
         this.__defs = this.__createElement("defs");
         this.__root.appendChild(this.__defs);
 
+        this.multiLocusGap = config.multiLocusGap;
+
         // svg background color
-        this.__root.appendChild( this.__createElement('rect', { id:'backdrop', width:'100%', height:'100%', fill:'white' }) );
+        let backdropConfig =
+            {
+                id:'svg_output_backdrop',
+                width:'100%',
+                height:'100%',
+                fill: config.backdropColor || 'white'
+            };
+
+        let backdropRect = this.__createElement('rect', backdropConfig);
+        this.__root.appendChild( backdropRect );
 
         // root group
         this.__rootGroup = this.__createElement('g', { id:'root-group' });
