@@ -43,7 +43,10 @@ var igv = (function (igv) {
         this.panels.forEach((panel, i) => {
 
             const bbox = panel.$ideogram.get(0).getBoundingClientRect();
-            context.addTrackGroupWithTranslationAndClipRect('ideogram', offset.deltaX + (i * panel.$canvas.width()), offset.deltaY, bbox.width, bbox.height, 0);
+
+            const dx = offset.deltaX + (i * (panel.$canvas.width() + context.multiLocusGap));
+            const dy = offset.deltaY;
+            context.addTrackGroupWithTranslationAndClipRect('ideogram', dx, dy, bbox.width, bbox.height, 0);
 
             context.save();
 
