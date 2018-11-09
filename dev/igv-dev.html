@@ -164,11 +164,18 @@
 
 <div id="trackList"></div>
 
-
+<button onclick="printLocus()">Print Locus</button>
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
+
 <script type="text/javascript">
+
+    let b;
+    function printLocus() {
+    console.log(b.currentLocusString());
+
+    }
 
     document.addEventListener("DOMContentLoaded", function () {
 
@@ -189,6 +196,7 @@
 
                 igv.createBrowser(igvDiv, options)
                     .then(function (browser) {
+                        b = browser;
                         igvdev.createTrackList(document.getElementById('trackList'), browser);
                         return browser;
                     })
