@@ -170,15 +170,33 @@
     document.addEventListener("DOMContentLoaded", function () {
 
 
-
         const options = {
-            genome: "hg19"
+            genome: "hg19",
+            tracks: [
+                {
+                    name: "CNA",
+                    type: "seg",
+                    displayMode: "SQUISHED",
+                    sourceType: "custom",
+                    squishedRowHeight: 1,
+                    source: {
+                        url: "http://www.cbioportal.org/api-legacy/copynumbersegments",
+                        method: "POST",
+                        contentType: "application/x-www-form-urlencoded",
+                        body: "cancerStudyId=msk_impact_2017&chromosomes=17&sampleListId=msk_impact_2017_cnaseq",
+                        mappings: {
+                            sampleKey: "sample"
+                        }
+                    },
+                }
+            ]
         }
 
+
         igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    cBio.initMenu(document.getElementById('trackList'), browser);
-                })
+            .then(function (browser) {
+              //  cBio.initMenu(document.getElementById('trackList'), browser);
+            })
 
 
     });
