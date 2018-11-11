@@ -53,6 +53,8 @@ var igv = (function (igv) {
 
                 this.isLog = config.isLog;
 
+                this.supportHiDPI = (config.supportHiDPI !== undefined) ? config.supportHiDPI : false;
+
                 this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
                 this.maxHeight = config.maxHeight || 500;
                 this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
