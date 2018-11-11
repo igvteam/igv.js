@@ -8,7 +8,9 @@ var igv = (function (igv) {
 
     "use strict";
 
-    var NOT_LOADED_MESSAGE = 'Error loading track data';
+    const NOT_LOADED_MESSAGE = 'Error loading track data';
+    const MAX_PIXEL_HEIGHT = 32000;
+    const MAX_PIXEL_COUNT = 200000000;
 
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
@@ -292,14 +294,25 @@ var igv = (function (igv) {
         const features = tile.features;
         const bpStart = tile.startBP;
         const bpEnd = tile.endBP;
-        const pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
-        const pixelHeight = self.getContentHeight();
-        if(pixelWidth == 0 || pixelHeight === 0) {
+        let pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        let pixelHeight = self.getContentHeight();
+        if (pixelWidth == 0 || pixelHeight === 0) {
             if (self.canvas) {
                 $(self.canvas).remove();
             }
             return;
         }
+
+        // Set limits on canvas size.  See https://github.com/igvteam/igv.js/issues/792
+        const devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
+        const origPixelHeight = pixelHeight;
+        pixelHeight = Math.min(Math.floor(MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)), pixelHeight);
+        pixelHeight = Math.min(Math.floor(MAX_PIXEL_HEIGHT) / (devicePixelRatio * devicePixelRatio), pixelHeight);
+        if(pixelHeight < origPixelHeight) {
+            console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
+        }
+
+        console.log(pixelHeight);
 
         const drawConfiguration =
             {
@@ -319,7 +332,7 @@ var igv = (function (igv) {
             };
 
 
-        const devicePixelRatio = window.devicePixelRatio;
+
         const newCanvas = $('<canvas>').get(0);
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
@@ -423,11 +436,10 @@ var igv = (function (igv) {
             });
 
 
-
             Promise.all(roiPromises)
 
                 .then(function (roiArray) {
-                    for(let roi of roiArray) {
+                    for (let roi of roiArray) {
                         drawConfiguration.features = roi;
                         roi.draw(drawConfiguration);
                     }
@@ -575,10 +587,10 @@ var igv = (function (igv) {
 
     };
 
-    function drawWholeGenomeRuler (svgContext, group) {
+    function drawWholeGenomeRuler(svgContext, group) {
 
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
-        const rulerSweeper = this.trackView.track.rulerSweepers[ index ];
+        const rulerSweeper = this.trackView.track.rulerSweepers[index];
 
         let dx;
         let dy;
@@ -593,8 +605,8 @@ var igv = (function (igv) {
 
             let x = domRect.x - dx;
             let y = domRect.y - dy;
-            let  w = domRect.width;
-            let  h = domRect.height;
+            let w = domRect.width;
+            let h = domRect.height;
 
             let stroke_dash_array;
             if (i === $selection.length - 1) {
@@ -624,14 +636,14 @@ var igv = (function (igv) {
 
             let text_settings =
                 {
-                    "font-family" : 'sans-serif',
-                    "font-size" : '10px',
-                    "font-style" : 'normal',
-                    "font-weight" : 'normal',
+                    "font-family": 'sans-serif',
+                    "font-size": '10px',
+                    "font-style": 'normal',
+                    "font-weight": 'normal',
                     "text-anchor": 'middle',
                     "dominant-baseline": 'middle',
-                    x: x + w/2,
-                    y: y + h/2,
+                    x: x + w / 2,
+                    y: y + h / 2,
                     fill: 'grey'
                 };
 
