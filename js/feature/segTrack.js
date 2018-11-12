@@ -185,6 +185,7 @@ var igv = (function (igv) {
 
                 case "COMPRESSED":
                     sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    console.log(sampleHeight);
                     break;
 
                 case "SQUISHED":
@@ -197,7 +198,7 @@ var igv = (function (igv) {
             }
 
 
-            const border = ("SQUISHED" === this.displayMode) ? 0 : 1;
+            const border = ("EXPANDED" === this.displayMode) ? 1 : 0;
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
             const pixelHeight = options.pixelHeight;
@@ -258,7 +259,11 @@ var igv = (function (igv) {
 
                     // const sign = px < 0 ? '-' : '+';
                     // console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
-                    igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+
+                    ctx.fillStyle = color;
+                    ctx.fillRect(px, y, pw, sampleHeight - 2 * border);
+
+                    //igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
                 }
             }
