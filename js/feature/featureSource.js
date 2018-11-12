@@ -177,6 +177,7 @@ var igv = (function (igv) {
         const self = this;
         const reader = this.reader;
         const genome = this.genome;
+        const supportWholeGenome = this.config.supportWholeGenome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
         const maxRows = self.config.maxRows || 500;
 

@@ -236,9 +236,9 @@ var igv = (function (igv) {
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
 
-        const pixelWidth = $(self.contentDiv).width() * 3;
+        const pixelWidth = $(self.contentDiv).width() * 2;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 2));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
 
@@ -303,12 +303,19 @@ var igv = (function (igv) {
             return;
         }
 
+        // Always use high DPI if in compressed display mode, otherwise use preference setting;
+        let devicePixelRatio;
+        if ("COMPRESSED" === this.trackView.track.displayMode) {
+            devicePixelRatio = window.devicePixelRatio;
+        } else {
+            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
+        }
+
         // Set limits on canvas size.  See https://github.com/igvteam/igv.js/issues/792
-        const devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         const origPixelHeight = pixelHeight;
         pixelHeight = Math.min(Math.floor(MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)), pixelHeight);
         pixelHeight = Math.min(Math.floor(MAX_PIXEL_HEIGHT) / (devicePixelRatio * devicePixelRatio), pixelHeight);
-        if(pixelHeight < origPixelHeight) {
+        if (pixelHeight < origPixelHeight) {
             console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
         }
 
@@ -330,7 +337,6 @@ var igv = (function (igv) {
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
-
 
 
         const newCanvas = $('<canvas>').get(0);
@@ -1025,7 +1031,12 @@ var igv = (function (igv) {
 
         let track = this.trackView.track;
 
-        if (typeof track.computePixelHeight === 'function') {
+        if ("COMPRESSED" === track.displayMode) {
+            this.setContentHeight(this.$viewport.height())
+        }
+
+        else if (typeof track.computePixelHeight === 'function') {
+
             let features = this.cachedFeatures;
 
             if (features) {

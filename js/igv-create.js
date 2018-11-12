@@ -49,7 +49,7 @@ var igv = (function (igv) {
         setDefaults(config);
 
         // Explicit parameters have priority
-        if (config.queryParametersSupported) {
+        if (config.queryParametersSupported !== false) {
             extractQuery(config);
         }
 

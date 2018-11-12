@@ -176,9 +176,9 @@
                 {
                     name: "CNA",
                     type: "seg",
-                    displayMode: "SQUISHED",
+                    displayMode: "COMPRESSED",
                     sourceType: "custom",
-                    squishedRowHeight: 2,
+                    height: 600,
                     source: {
                         url: "http://www.cbioportal.org/api-legacy/copynumbersegments",
                         method: "POST",
@@ -186,7 +186,8 @@
                         body: "cancerStudyId=msk_impact_2017&chromosomes=17&sampleListId=msk_impact_2017_cnaseq",
                         mappings: {
                             sampleKey: "sample"
-                        }
+                        },
+                        queryable: false
                     },
                 }
             ]

@@ -105,23 +105,47 @@ var igv = (function (igv) {
 
             const self = this;
 
-            return [
-                {
-                    name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
-                    click: function () {
-                        self.toggleSampleHeight();
-                    }
-                }
-            ];
+            const menuItems = [];
+
+                ["COMPRESSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+                    const lut =
+                        {
+                            "COMPRESSED": "Compress",
+                            "SQUISHED": "Squish",
+                            "EXPANDED": "Expand"
+                        };
+
+                    menuItems.push(
+                        {
+                            object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                            click: function () {
+                                self.browser.popover.hide();
+                                self.displayMode = displayMode;
+                                self.config.displayMode = displayMode;
+                                self.trackView.checkContentHeight();
+                                self.trackView.repaintViews();
+                            }
+                        });
+                })
+
+            return menuItems;
+                //
+                // {
+                //     name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
+                //     click: function () {
+                //         self.toggleSampleHeight();
+                //     }
+                // }
+
 
         };
-
-        SegTrack.prototype.toggleSampleHeight = function () {
-
-            this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        };
+        //
+        // SegTrack.prototype.toggleSampleHeight = function () {
+        //
+        //     this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
+        //     this.trackView.checkContentHeight();
+        //     this.trackView.repaintViews();
+        // };
 
         SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
@@ -154,7 +178,25 @@ var igv = (function (igv) {
         SegTrack.prototype.draw = function (options) {
 
             const self = this;
-            const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+
+           // const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+            let sampleHeight;
+            switch (this.displayMode) {
+
+                case "COMPRESSED":
+                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    break;
+
+                case "SQUISHED":
+                    sampleHeight = this.squishedRowHeight;
+                    break;
+
+                default:   // EXPANDED
+                    sampleHeight = this.expandedRowHeight;
+
+            }
+
+
             const border = ("SQUISHED" === this.displayMode) ? 0 : 1;
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
