@@ -110,8 +110,6 @@ var igv = (function (igv) {
             return;
         }
 
-        igv.graphics.fillRect(options.context, 0, 0, options.context.canvas.width, options.context.canvas.height, { 'fillStyle' : 'white' });
-
         if (igv.isWholeGenomeView(options.referenceFrame)) {
 
             rulerSweeper.disableMouseHandlers();
@@ -138,11 +136,13 @@ var igv = (function (igv) {
 
         options.context.save();
 
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
+
         const browser = this.browser;
         
         let x = 0;
         let y = 0;
-        let h = options.context.canvas.height;
+        let h = options.pixelHeight;
 
         options.context.textAlign = 'center';
         options.context.textBaseline = 'middle';
@@ -154,16 +154,16 @@ var igv = (function (igv) {
 
             const percentage = chr.bpLength / options.referenceFrame.initialEnd;
 
-            const w = Math.round(percentage * options.viewportWidth);
+            const w = Math.round(percentage * options.pixelWidth);
 
             igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
 
             const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
             if (w > options.context.measureText(shortName).width) {
                 options.fillStyle = 'rgb(128,128,128)';
-                options.context.fillText(shortName, x + w/2, y + h/2);
+                options.context.fillText(shortName, (x + (w/2)), (y + (h/2)));
             }
-            
+
             x += w;
 
         }
