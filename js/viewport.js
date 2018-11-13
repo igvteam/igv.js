@@ -278,15 +278,20 @@ var igv = (function (igv) {
             return;
         }
 
+        const isWGV = igv.isWholeGenomeView(this.genomicState.referenceFrame);
+
+        const features = tile.features;
+
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-        const bpPerPixel = tile.bpPerPixel;
-        const features = tile.features;
-        const bpStart = tile.startBP;
-        const bpEnd = tile.endBP;
-        let pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+
+        const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
+        const bpStart = isWGV ? 0 : tile.startBP;
+        const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
+        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+
         let pixelHeight = self.getContentHeight();
-        if (pixelWidth == 0 || pixelHeight === 0) {
+        if (0 === pixelWidth || 0 === pixelHeight) {
             if (self.canvas) {
                 $(self.canvas).remove();
             }
@@ -302,19 +307,24 @@ var igv = (function (igv) {
             console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
         }
 
-        console.log(pixelHeight);
+        // console.log(pixelHeight);
 
         const drawConfiguration =
             {
                 features: features,
+
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
+
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
+
                 referenceFrame: referenceFrame,
                 genomicState: genomicState,
+
                 selection: self.selection,
+
                 viewport: self,
                 viewportWidth: self.$viewport.width(),
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),

@@ -136,11 +136,18 @@ var igv = (function (igv) {
 
     function drawWholeGenome(options) {
 
+        options.context.save();
+
         const browser = this.browser;
         
         let x = 0;
         let y = 0;
         let h = options.context.canvas.height;
+
+        options.context.textAlign = 'center';
+        options.context.textBaseline = 'middle';
+        options.context.font = '9px sans-serif';
+
         for (let name of browser.genome.wgChromosomeNames) {
 
             const chr = browser.genome.getChromosome(name);
@@ -148,17 +155,26 @@ var igv = (function (igv) {
             const percentage = chr.bpLength / options.referenceFrame.initialEnd;
 
             const w = Math.round(percentage * options.viewportWidth);
-            const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+
             igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
 
+            const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+            if (w > options.context.measureText(shortName).width) {
+                options.fillStyle = 'rgb(128,128,128)';
+                options.context.fillText(shortName, x + w/2, y + h/2);
+            }
+            
             x += w;
 
         }
 
+        options.context.restore();
+
     }
 
     function toggleColor (value) {
-        return 0 === value % 2 ? 'rgb(255,0,0)' : 'rgb(0,255,0)';
+        // return 'rgb(200,200,200)';
+        return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
     }
 
     igv.RulerTrack.prototype.supportsWholeGenome = function () {
