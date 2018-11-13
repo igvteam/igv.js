@@ -36,7 +36,6 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-        this.rulerSweepers = [];
         this.removable = false;
         this.type = 'ruler';
     };
@@ -76,10 +75,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
-        this.rulerSweepers.splice(index, 1);
-    };
-
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         return Promise.resolve([]);
@@ -90,14 +85,6 @@ var igv = (function (igv) {
         return this.height;
     };
 
-
-    igv.RulerTrack.prototype.getRulerSweeper = function(genomicState) {
-
-        let key = this.browser.genomicStateList.indexOf(genomicState).toString();
-        return this.rulerSweepers[key];
-
-    };
-
     igv.RulerTrack.prototype.draw = function (options) {
         var rulerSweeper,
             pixelWidthBP,
@@ -105,18 +92,16 @@ var igv = (function (igv) {
             shim,
             tickHeight;
 
-        rulerSweeper = this.getRulerSweeper(options.genomicState);
-        if (!rulerSweeper) {
-            return;
-        }
+        const index = this.browser.genomicStateList.indexOf(options.genomicState);
+        const viewport = this.trackView.viewports[ index ];
 
         if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-            rulerSweeper.disableMouseHandlers();
+            viewport.rulerSweeper.disableMouseHandlers();
             drawWholeGenome.call(this, options);
         } else {
 
-            rulerSweeper.addMouseHandlers();
+            viewport.rulerSweeper.addMouseHandlers();
 
             tickHeight = 6;
             shim = 2;
@@ -182,11 +167,7 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.dispose = function () {
-
-        for (let rulerSweeper of this.rulerSweepers) {
-            rulerSweeper.dispose();
-        }
-
+        // do stuff
     };
 
     const Tick = function (pixelWidthBP, options) {

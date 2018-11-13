@@ -44,8 +44,7 @@ var igv = (function (igv) {
 
         } else if ('ruler' === trackView.track.type) {
 
-            const rulerSweeper = new igv.RulerSweeper(this);
-            trackView.track.rulerSweepers.push(rulerSweeper);
+            this.rulerSweeper = new igv.RulerSweeper(this);
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
@@ -537,52 +536,48 @@ var igv = (function (igv) {
 
         const dx = offset.deltaX + (index * context.multiLocusGap);
         const dy = offset.deltaY + yScrollDelta;
-        let group = context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-        if ('ruler' === this.trackView.track.type && igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
-            drawWholeGenomeRuler.call(this, context, group);
-        } else {
+        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-            const width = this.$viewport.width();
-            const height = this.$viewport.height();
+        const width = this.$viewport.width();
+        const height = this.$viewport.height();
 
-            let referenceFrame = this.genomicState.referenceFrame;
+        let referenceFrame = this.genomicState.referenceFrame;
 
-            context.save();
+        context.save();
 
-            const drawConfig =
-                {
-                    context: context,
+        const drawConfig =
+            {
+                context: context,
 
-                    viewport: this,
+                viewport: this,
 
-                    referenceFrame: referenceFrame,
+                referenceFrame: referenceFrame,
 
-                    genomicState: this.genomicState,
+                genomicState: this.genomicState,
 
-                    pixelWidth: width,
-                    pixelHeight: height,
+                pixelWidth: width,
+                pixelHeight: height,
 
-                    viewportWidth: width,
+                viewportWidth: width,
 
-                    viewportContainerX: 0,
-                    viewportContainerWidth: this.browser.viewportContainerWidth(),
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
 
-                    bpStart: referenceFrame.start,
-                    bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
+                bpStart: referenceFrame.start,
+                bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
 
-                    bpPerPixel: referenceFrame.bpPerPixel,
+                bpPerPixel: referenceFrame.bpPerPixel,
 
-                    selection: this.selection
-                };
+                selection: this.selection
+            };
 
-            const features = this.tile ? this.tile.features : [];
+        const features = this.tile ? this.tile.features : [];
 
-            draw.call(this, drawConfig, features);
+        draw.call(this, drawConfig, features);
 
-            context.restore();
+        context.restore();
 
-        }
 
 
     };
