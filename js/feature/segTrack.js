@@ -181,24 +181,25 @@ var igv = (function (igv) {
 
            // const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
             let sampleHeight;
+            let border;
             switch (this.displayMode) {
 
                 case "COMPRESSED":
                     sampleHeight = options.pixelHeight / this.sampleKeys.length;
-                    console.log(sampleHeight);
+                    border = 0
                     break;
 
                 case "SQUISHED":
                     sampleHeight = this.squishedRowHeight;
+                    border = 0;
                     break;
 
                 default:   // EXPANDED
                     sampleHeight = this.expandedRowHeight;
+                    border = 1;
 
             }
 
-
-            const border = ("EXPANDED" === this.displayMode) ? 1 : 0;
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
             const pixelHeight = options.pixelHeight;
