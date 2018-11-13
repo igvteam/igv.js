@@ -38,19 +38,14 @@ var igv = (function (igv) {
 
         this.setWidth(width);
 
-
         if ("sequence" === trackView.track.type) {
+
             this.$viewport.addClass('igv-viewport-sequence');
-        }
 
-        if ('ruler' === trackView.track.type) {
-
-            this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
-            $(this.contentDiv).append(this.$wholeGenomeContainer);
+        } else if ('ruler' === trackView.track.type) {
 
             const rulerSweeper = new igv.RulerSweeper(this);
             trackView.track.rulerSweepers.push(rulerSweeper);
-            rulerSweeper.layoutWholeGenome();
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
@@ -66,23 +61,18 @@ var igv = (function (igv) {
         } else {
             addMouseHandlers.call(this);
 
-            const dimen = 32;
             const $spinnerContainer = $('<div class="igv-viewport-spinner">');
+            const dimen = 32;
             $spinnerContainer.css({'font-size': dimen + 'px'});
 
             this.$spinner = igv.createIcon("spinner");
             $spinnerContainer.append(this.$spinner);
+
             this.$viewport.append($spinnerContainer);
             this.stopSpinner();
+
             this.popover = new igv.Popover(self.browser.$content);
 
-        }
-
-        if ("sequence" === trackView.track.type) {
-            // do nuthin
-        } else if ('ruler' === trackView.track.type) {
-            // do nuthin
-        } else {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
         }
 

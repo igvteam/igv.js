@@ -39,7 +39,6 @@ var igv = (function (igv) {
         this.rulerSweepers = [];
         this.removable = false;
         this.type = 'ruler';
-
     };
 
     igv.RulerTrack.prototype.updateLocusLabel = function () {
@@ -111,18 +110,13 @@ var igv = (function (igv) {
             return;
         }
 
+        igv.graphics.fillRect(options.context, 0, 0, options.context.canvas.width, options.context.canvas.height, { 'fillStyle' : 'white' });
+
         if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-            $(this.canvas).hide();
-            rulerSweeper.viewport.$wholeGenomeContainer.show();
-
-            createWholeGenomeRectList(rulerSweeper.viewport.$wholeGenomeContainer);
-
             rulerSweeper.disableMouseHandlers();
+            drawWholeGenome.call(this, options);
         } else {
-
-            rulerSweeper.viewport.$wholeGenomeContainer.hide();
-            $(this.canvas).show();
 
             rulerSweeper.addMouseHandlers();
 
@@ -140,12 +134,31 @@ var igv = (function (igv) {
 
     };
 
-    function createWholeGenomeRectList($wholeGenomeContainer) {
+    function drawWholeGenome(options) {
 
-        $wholeGenomeContainer.find('div').each(function( i ) {
-            let element = $(this).get(0);
-            // console.log(i);
-        });
+        const browser = this.browser;
+        
+        let x = 0;
+        let y = 0;
+        let h = options.context.canvas.height;
+        for (let name of browser.genome.wgChromosomeNames) {
+
+            const chr = browser.genome.getChromosome(name);
+
+            const percentage = chr.bpLength / options.referenceFrame.initialEnd;
+
+            const w = Math.round(percentage * options.viewportWidth);
+            const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+            igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
+
+            x += w;
+
+        }
+
+    }
+
+    function toggleColor (value) {
+        return 0 === value % 2 ? 'rgb(255,0,0)' : 'rgb(0,255,0)';
     }
 
     igv.RulerTrack.prototype.supportsWholeGenome = function () {
@@ -154,9 +167,9 @@ var igv = (function (igv) {
 
     igv.RulerTrack.prototype.dispose = function () {
 
-        this.rulerSweepers.forEach(function (sweeper) {
-            sweeper.dispose();
-        })
+        for (let rulerSweeper of this.rulerSweepers) {
+            rulerSweeper.dispose();
+        }
 
     };
 

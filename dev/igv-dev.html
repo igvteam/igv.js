@@ -183,20 +183,15 @@
 
             .then(function (google) {
 
-                const igvDiv = document.getElementById("igvDiv");
-
                 const options =
                     {
-                        // showRuler: false,
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
-
                     };
 
-                igv.createBrowser(igvDiv, options)
+                igv.createBrowser(document.getElementById('igvDiv'), options)
                     .then(function (browser) {
-                        b = browser;
                         igvdev.createTrackList(document.getElementById('trackList'), browser);
                         return browser;
                     })

@@ -41,12 +41,12 @@ var igv = (function (igv) {
         this.addMouseHandlers();
     };
 
-    igv.RulerSweeper.prototype.layoutWholeGenome = function () {
+    igv.RulerSweeper.prototype.DEPRICATE_layoutWholeGenome = function () {
 
         const self = this;
         const browser = this.browser;
 
-        const nameLast = _.last(this.browser.genome.wgChromosomeNames);
+        const nameLast = this.browser.genome.wgChromosomeNames[ this.browser.genome.wgChromosomeNames.length - 1 ];
         const chrLast = this.browser.genome.getChromosome(nameLast);
         const extent = Math.floor(chrLast.bpLength/1000) + this.browser.genome.getCumulativeOffset(nameLast);
         const pixels = this.viewport.$viewport.width();
@@ -227,7 +227,7 @@ var igv = (function (igv) {
 
     igv.RulerSweeper.prototype.dispose = function () {
         this.disableMouseHandlers();
-    }
+    };
 
 
     function bp(pixel) {
