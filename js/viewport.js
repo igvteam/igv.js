@@ -56,6 +56,11 @@ var igv = (function (igv) {
 
             $(this.contentDiv).append(this.$rulerLabel);
 
+            if (true === igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
+                enableRulerTrackMouseHandlers.call(this);
+            } else {
+                disableRulerTrackMouseHandlers.call(this);
+            }
 
         } else {
             addMouseHandlers.call(this);
@@ -451,7 +456,6 @@ var igv = (function (igv) {
         }
     }
 
-
     function showZoomInNotice() {
 
         const referenceFrame = this.genomicState.referenceFrame;
@@ -467,6 +471,48 @@ var igv = (function (igv) {
         return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
     }
 
+    function enableRulerTrackMouseHandlers() {
+
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const namespace = '.ruler_track_viewport_' + index;
+
+        console.log(' enable ruler mouse handler ' + index);
+
+        let self = this;
+        this.$viewport.on('click' + namespace, (e) => {
+
+            const pixel = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+            const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
+
+            let searchString;
+
+            if (1 === self.browser.genomicStateList.length) {
+                searchString = self.browser.genome.getChromosomeCoordinate(bp).chr;
+            } else {
+
+                let loci = self.browser.genomicStateList.map((genomicState) => { return genomicState.locusSearchString; });
+
+                loci[ self.browser.genomicStateList.indexOf(self.genomicState) ] = self.browser.genome.getChromosomeCoordinate(bp).chr;
+
+                searchString = loci.join(' ');
+            }
+
+            self.browser.search(searchString);
+        });
+
+
+    }
+
+    function disableRulerTrackMouseHandlers() {
+
+
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const namespace = '.ruler_track_viewport_' + index;
+
+        console.log('disable ruler mouse handler ' + index);
+
+        this.$viewport.off(namespace);
+    }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms

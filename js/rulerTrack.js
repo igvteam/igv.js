@@ -38,6 +38,7 @@ var igv = (function (igv) {
         this.order = -Number.MAX_VALUE;
         this.removable = false;
         this.type = 'ruler';
+
     };
 
     igv.RulerTrack.prototype.updateLocusLabel = function () {
@@ -86,31 +87,23 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.draw = function (options) {
-        var rulerSweeper,
-            pixelWidthBP,
-            tick,
-            shim,
-            tickHeight;
-
-        const index = this.browser.genomicStateList.indexOf(options.genomicState);
-        const viewport = this.trackView.viewports[ index ];
 
         if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-            viewport.rulerSweeper.disableMouseHandlers();
+            options.viewport.rulerSweeper.disableMouseHandlers();
+
             drawWholeGenome.call(this, options);
+
         } else {
 
-            viewport.rulerSweeper.addMouseHandlers();
+            options.viewport.rulerSweeper.addMouseHandlers();
 
-            tickHeight = 6;
-            shim = 2;
-
-            pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tick = new Tick(pixelWidthBP, options);
+            const tickHeight = 6;
+            const shim = 2;
+            const pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
+            const tick = new Tick(pixelWidthBP, options);
 
             tick.drawTicks(options, tickHeight, shim, this.height);
-
             igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
         }
