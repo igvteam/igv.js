@@ -312,7 +312,7 @@ var igv = (function (igv) {
             console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
         }
 
-        console.log(pixelHeight);
+        // console.log(pixelHeight);
 
         const drawConfiguration =
             {
