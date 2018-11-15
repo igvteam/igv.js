@@ -490,7 +490,7 @@ var igv = (function (igv) {
             plain = new Uint8Array(arraybuffer);
         }
 
-        if('TextDecoder' in igv.getGlobalObject()) {
+        if ('TextDecoder' in igv.getGlobalObject()) {
             return new TextDecoder().decode(plain);
         }
         else {
@@ -531,17 +531,23 @@ var igv = (function (igv) {
 
                 loginTried = true;
 
+                return new Promise(function (resolve, reject) {
 
-                return gapi.auth2.getAuthInstance().signIn(options)
+                    igv.browser.presentMessageWithCallback("Google Login required", function () {
 
-                    .then(function (user) {
+                        gapi.auth2.getAuthInstance().signIn(options)
 
-                        var authResponse = user.getAuthResponse();
+                            .then(function (user) {
 
-                        igv.setGoogleOauthToken(authResponse["access_token"]);
+                                var authResponse = user.getAuthResponse();
 
-                        return authResponse["access_token"];
+                                igv.setGoogleOauthToken(authResponse["access_token"]);
+
+                                resolve(authResponse["access_token"]);
+                            })
+                            .catch(reject);
                     })
+                })
             }
         }
 
