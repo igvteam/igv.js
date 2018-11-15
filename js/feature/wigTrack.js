@@ -236,13 +236,16 @@ var igv = (function (igv) {
 
                 if (self.graphType === "points") {
                     const pointSize = self.config.pointSize || 3;
-                    const py = feature.value < 0 ?
-                        (yUnitless + heightUnitLess) * pixelHeight :
-                        yUnitless * pixelHeight;
+                    const py = feature.value < 0 ? (yUnitless + heightUnitLess) * pixelHeight : yUnitless * pixelHeight;
                     const px = x + width / 2;
-                    igv.graphics.fillCircle(ctx, px, py, pointSize / 2);
-                }
-                else {
+
+                    if (isNaN(x)) {
+                        console.log('isNaN(x). feature start ' + igv.numberFormatter(feature.start) + ' bp start ' + igv.numberFormatter(bpStart));
+                    } else {
+                        igv.graphics.fillCircle(ctx, px, py, pointSize / 2);
+                    }
+
+                } else {
                     igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
                 }
 
