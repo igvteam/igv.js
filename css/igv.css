@@ -651,16 +651,16 @@
   border-right-width: thin; }
 
 .igv-center-guide-wide {
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
   border-left-color: rgba(127, 127, 127, 0.51);
   border-right-color: rgba(127, 127, 127, 0.51); }
 
 .igv-center-guide-thin {
   left: 50%;
   width: 1px;
-  background-color: transparent;
+  background-color: rgba(0, 0, 0, 0);
   border-left-color: rgba(127, 127, 127, 0.51);
-  border-right-color: transparent;
+  border-right-color: rgba(0, 0, 0, 0);
   /*background-color: rgba(127, 127, 127, 0.51);*/
   /*border-left-color: rgba(0,0,0,0);*/
   /*border-right-color: rgba(0,0,0,0);*/ }
