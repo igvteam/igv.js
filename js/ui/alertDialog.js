@@ -62,6 +62,7 @@ var igv = (function (igv) {
         // ok
         this.$ok = $("<div>");
         $ok_container.append(this.$ok);
+
         this.$ok.text('OK');
 
         this.$ok.on('click', function () {
@@ -71,7 +72,7 @@ var igv = (function (igv) {
         });
 
         //this.$container.draggable({ handle:$header.get(0) });
-igv.makeDraggable(this.$container.get(0), $header.get(0));
+        igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };
@@ -79,6 +80,34 @@ igv.makeDraggable(this.$container.get(0), $header.get(0));
     igv.AlertDialog.prototype.configure = function (config) {
         this.$label.html(config.label);
     };
+
+    igv.AlertDialog.prototype.presentMessageWithCallback = function (message, callback) {
+
+        this.$label.text(message);
+
+        let css =
+            {
+                left: (this.$parent.width() - this.$container.width())/2,
+                top: (this.$parent.height() - this.$container.height())/2
+            };
+        this.$container.css(css);
+
+        this.$container.show();
+
+        this.$ok.text('OK');
+
+        let self = this;
+        this.$ok.on('click', function () {
+
+            callback('OK');
+
+            self.$label.html('');
+            self.$container.offset( { left:0, top:0 } );
+            self.$container.hide();
+        });
+
+    };
+
 
     igv.AlertDialog.prototype.present = function ($alternativeParent) {
 
