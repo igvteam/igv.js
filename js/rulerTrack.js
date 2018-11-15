@@ -117,22 +117,21 @@ var igv = (function (igv) {
         igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
 
         const browser = this.browser;
-        
-        let x = 0;
-        let y = 0;
-        let h = options.pixelHeight;
 
         options.context.textAlign = 'center';
         options.context.textBaseline = 'middle';
         options.context.font = '9px sans-serif';
 
+        let y = 0;
+        let h = options.pixelHeight;
+
         for (let name of browser.genome.wgChromosomeNames) {
 
-            const chr = browser.genome.getChromosome(name);
+            let xBP = browser.genome.getCumulativeOffset(name);
+            let wBP = browser.genome.getChromosome(name).bpLength;
 
-            const percentage = chr.bpLength / options.referenceFrame.initialEnd;
-
-            const w = Math.round(percentage * options.pixelWidth);
+            let x = Math.round(xBP / options.bpPerPixel);
+            let w = Math.round(wBP / options.bpPerPixel);
 
             igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
 
@@ -142,8 +141,6 @@ var igv = (function (igv) {
                 options.context.fillText(shortName, (x + (w/2)), (y + (h/2)));
             }
 
-            x += w;
-
         }
 
         options.context.restore();
@@ -151,7 +148,6 @@ var igv = (function (igv) {
     }
 
     function toggleColor (value) {
-        // return 'rgb(200,200,200)';
         return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
     }
 
