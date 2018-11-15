@@ -2075,7 +2075,7 @@ var igv = (function (igv) {
             "404": "Not found"
         };
 
-    igv.Browser.prototype.presentAlert = function (alert, $parent) {
+    igv.Browser.prototype.presentAlert = function (alert, $parent, callback) {
 
         var string;
 
@@ -2087,6 +2087,10 @@ var igv = (function (igv) {
 
         this.alertDialog.configure({label: string});
         this.alertDialog.present($parent);
+    };
+
+    igv.Browser.prototype.presentMessageWithCallback = function (message, callback) {
+        this.alertDialog.presentMessageWithCallback(message, callback);
     };
 
 
