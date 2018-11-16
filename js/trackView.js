@@ -132,10 +132,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
 
-        if (this.track instanceof igv.RulerTrack) {
-            this.track.removeRulerSweeperWithLocusIndex(index);
-        }
-
         this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
 

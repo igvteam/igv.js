@@ -1414,14 +1414,8 @@ var igv = (function (igv) {
         this.$contentHeader.empty();
 
         this.trackViews.forEach(function (trackView) {
-
-            if (trackView.track instanceof igv.RulerTrack) {
-                trackView.track.rulerSweepers = [];
-            }
-
             trackView.viewports = [];
             trackView.scrollbar = undefined;
-
         });
 
     };
