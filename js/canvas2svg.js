@@ -577,9 +577,6 @@ var C2S;
         group.setAttribute('clip-path', format('url(#{id})', { id:clip_id }));
 
         this.__currentElement = group;
-
-        return group;
-
     };
 
     /**

@@ -41,88 +41,6 @@ var igv = (function (igv) {
         this.addMouseHandlers();
     };
 
-    igv.RulerSweeper.prototype.layoutWholeGenome = function () {
-
-        const self = this;
-        const browser = this.browser;
-
-        const nameLast = _.last(this.browser.genome.wgChromosomeNames);
-        const chrLast = this.browser.genome.getChromosome(nameLast);
-        const extent = Math.floor(chrLast.bpLength/1000) + this.browser.genome.getCumulativeOffset(nameLast);
-        const pixels = this.viewport.$viewport.width();
-
-        let scraps = 0;
-        this.browser.genome.wgChromosomeNames.forEach(function (name) {
-            var chr,
-                w,
-                percentage,
-                shortName;
-
-            chr = browser.genome.getChromosome(name);
-
-            percentage = chr.bpLength/extent;
-
-            if (percentage * pixels < 1.0) {
-                scraps += percentage;
-            } else {
-                const $div = $('<div>');
-                self.viewport.$wholeGenomeContainer.append($div);
-
-                w = Math.floor(percentage * pixels);
-                $div.width(w);
-
-                const $e = $('<span>');
-                $div.append($e);
-
-                shortName = (name.startsWith("chr")) ? name.substring(3) : name;
-                $e.text(shortName);
-
-                $div.on('click', handleClick);
-                $div.on('touchend', handleClick);
-
-                function handleClick(e) {
-
-                    var locusString,
-                        loci;
-
-                    self.viewport.$wholeGenomeContainer.hide();
-                    $(self.viewport.canvas).hide();
-
-                    if (1 === browser.genomicStateList.length) {
-                        locusString = name;
-                    } else {
-                        loci = _.map(browser.genomicStateList, function (g) {
-                            return g.locusSearchString;
-                        });
-
-                        loci[ browser.genomicStateList.indexOf(self.viewport.genomicState) ] = name;
-                        locusString = loci.join(' ');
-                    }
-
-                    browser.search(locusString);
-                }
-            }
-
-        });
-
-        scraps *= pixels;
-        scraps = Math.floor(scraps);
-        if (scraps >= 1) {
-
-            const $div = $('<div>');
-            self.viewport.$wholeGenomeContainer.append($div);
-
-            $div.width(scraps);
-
-            const $e = $('<span>');
-            $div.append($e);
-
-            $e.text('-');
-
-        }
-
-    };
-
     igv.RulerSweeper.prototype.disableMouseHandlers = function () {
 
         $(document).off(this.namespace);
@@ -227,7 +145,7 @@ var igv = (function (igv) {
 
     igv.RulerSweeper.prototype.dispose = function () {
         this.disableMouseHandlers();
-    }
+    };
 
 
     function bp(pixel) {
