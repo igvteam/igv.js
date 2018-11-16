@@ -36,7 +36,6 @@ var igv = (function (igv) {
         this.disableButtons = true;
         this.ignoreTrackMenu = true;
         this.order = -Number.MAX_VALUE;
-        this.rulerSweepers = [];
         this.removable = false;
         this.type = 'ruler';
 
@@ -77,10 +76,6 @@ var igv = (function (igv) {
 
     };
 
-    igv.RulerTrack.prototype.removeRulerSweeperWithLocusIndex = function (index) {
-        this.rulerSweepers.splice(index, 1);
-    };
-
     igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         return Promise.resolve([]);
@@ -91,61 +86,69 @@ var igv = (function (igv) {
         return this.height;
     };
 
-
-    igv.RulerTrack.prototype.getRulerSweeper = function(genomicState) {
-
-        let key = this.browser.genomicStateList.indexOf(genomicState).toString();
-        return this.rulerSweepers[key];
-
-    };
-
     igv.RulerTrack.prototype.draw = function (options) {
-        var rulerSweeper,
-            pixelWidthBP,
-            tick,
-            shim,
-            tickHeight;
-
-        rulerSweeper = this.getRulerSweeper(options.genomicState);
-        if (!rulerSweeper) {
-            return;
-        }
 
         if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-            $(this.canvas).hide();
-            rulerSweeper.viewport.$wholeGenomeContainer.show();
+            options.viewport.rulerSweeper.disableMouseHandlers();
 
-            createWholeGenomeRectList(rulerSweeper.viewport.$wholeGenomeContainer);
+            drawWholeGenome.call(this, options);
 
-            rulerSweeper.disableMouseHandlers();
         } else {
 
-            rulerSweeper.viewport.$wholeGenomeContainer.hide();
-            $(this.canvas).show();
+            options.viewport.rulerSweeper.addMouseHandlers();
 
-            rulerSweeper.addMouseHandlers();
-
-            tickHeight = 6;
-            shim = 2;
-
-            pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            tick = new Tick(pixelWidthBP, options);
+            const tickHeight = 6;
+            const shim = 2;
+            const pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
+            const tick = new Tick(pixelWidthBP, options);
 
             tick.drawTicks(options, tickHeight, shim, this.height);
-
             igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
 
         }
 
     };
 
-    function createWholeGenomeRectList($wholeGenomeContainer) {
+    function drawWholeGenome(options) {
 
-        $wholeGenomeContainer.find('div').each(function( i ) {
-            let element = $(this).get(0);
-            // console.log(i);
-        });
+        options.context.save();
+
+        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
+
+        const browser = this.browser;
+
+        options.context.textAlign = 'center';
+        options.context.textBaseline = 'middle';
+        options.context.font = '9px sans-serif';
+
+        let y = 0;
+        let h = options.pixelHeight;
+
+        for (let name of browser.genome.wgChromosomeNames) {
+
+            let xBP = browser.genome.getCumulativeOffset(name);
+            let wBP = browser.genome.getChromosome(name).bpLength;
+
+            let x = Math.round(xBP / options.bpPerPixel);
+            let w = Math.round(wBP / options.bpPerPixel);
+
+            igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
+
+            const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+            if (w > options.context.measureText(shortName).width) {
+                options.fillStyle = 'rgb(128,128,128)';
+                options.context.fillText(shortName, (x + (w/2)), (y + (h/2)));
+            }
+
+        }
+
+        options.context.restore();
+
+    }
+
+    function toggleColor (value) {
+        return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
     }
 
     igv.RulerTrack.prototype.supportsWholeGenome = function () {
@@ -153,11 +156,7 @@ var igv = (function (igv) {
     };
 
     igv.RulerTrack.prototype.dispose = function () {
-
-        this.rulerSweepers.forEach(function (sweeper) {
-            sweeper.dispose();
-        })
-
+        // do stuff
     };
 
     const Tick = function (pixelWidthBP, options) {
