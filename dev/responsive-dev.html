@@ -13,6 +13,7 @@
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link rel="stylesheet" type="text/css" href="css/responsive-navbar.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
@@ -156,32 +157,28 @@
 
 <body>
 
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igv-centering-container">
+    <div id='igv-shim-container'></div>
+    <div id='igv-app-container'></div>
+</div>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        igv.google
-            .loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-            .then(function (google) {
+        const options =
+            {
+                // locus: 'muc1',
+                genome: "hg19",
+                flanking: 1000,
+                queryParametersSupported: true,
+            };
 
-                const options =
-                    {
-                        // showRuler: false,
-                        locus: 'muc1',
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true,
-
-                    };
-
-                igv.createBrowser(document.getElementById("igvDiv"), options)
-                    .then(function (browser) {
-                        // do stuff
-                    })
-
+        igv.createBrowser(document.getElementById('igv-app-container'), options)
+            .then(function (browser) {
+                // do stuff
             })
+
     });
 
 </script>

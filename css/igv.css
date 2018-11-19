@@ -129,130 +129,155 @@
   border-width: thin;
   border-color: #bfbfbf;
   background-color: #f3f3f3; }
-  .igv-navbar .igv-nav-bar-left-container {
+
+.igv-nav-bar-left-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  height: 32px; }
+  .igv-nav-bar-left-container .igv-logo {
+    width: 34px;
+    height: 32px;
+    margin-left: 8px;
+    margin-right: 8px; }
+  .igv-nav-bar-left-container .igv-current-genome {
+    height: 32px;
+    margin-right: 8px;
+    user-select: none;
+    text-align: center; }
+
+.igv-nav-bar-genomic-location {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%; }
+
+.igv-chromosome-select-widget-container {
+  height: 100%;
+  width: 100px;
+  margin-right: 4px;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: space-around;
+  align-items: center; }
+  .igv-chromosome-select-widget-container select {
+    display: block;
+    cursor: pointer;
+    width: 100%;
+    height: 75%;
+    outline: none;
+    font-size: 12px;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400; }
+
+.igv-locus-size-group {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  margin-left: 8px;
+  height: 100%; }
+  .igv-locus-size-group .igv-search-container {
+    width: 200px;
+    height: 100%;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-    height: 32px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-logo {
-      width: 34px;
-      height: 32px;
-      margin-left: 8px;
-      margin-right: 32px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-current_genome {
-      height: 32px;
-      margin-right: 16px;
-      user-select: none;
-      text-align: center; }
-    .igv-navbar .igv-nav-bar-left-container .igv-genomic-location {
-      display: flex;
-      flex-flow: row;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-      align-items: center;
-      height: 100%; }
-      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container {
-        height: 100%;
-        width: 100px;
-        margin-right: 4px;
-        display: flex;
-        flex-flow: column;
-        flex-wrap: nowrap;
-        justify-content: space-around;
-        align-items: center; }
-        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container select {
-          display: block;
-          cursor: pointer;
-          width: 100%;
-          height: 75%;
-          outline: none;
-          font-size: 12px;
-          font-family: "Open Sans", sans-serif;
-          font-weight: 400; }
-      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group {
-        display: flex;
-        flex-flow: row;
-        flex-wrap: nowrap;
-        justify-content: space-between;
-        align-items: center;
-        margin-left: 8px;
-        height: 100%; }
-        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container {
-          width: 260px;
-          height: 100%;
-          display: flex;
-          flex-flow: row;
-          flex-wrap: nowrap;
-          justify-content: flex-start;
-          align-items: center; }
-          .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container input {
-            cursor: text;
-            width: 85%;
-            height: 75%;
-            padding-left: 8px;
-            margin-right: 8px;
-            text-align: left;
-            outline: none;
-            font-size: 12px;
-            font-family: "Open Sans", sans-serif;
-            font-weight: 400;
-            border-style: solid;
-            border-radius: 3px;
-            border-width: thin;
-            border-color: #bfbfbf;
-            background-color: white; }
-          .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container div {
-            height: 100%; }
-        .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-windowsizepanel-content-div {
-          margin-left: 4px;
-          user-select: none; }
-  .igv-navbar .igv-nav-bar-right-container {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-    height: 100%; }
-    .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
-      display: flex;
-      flex-flow: row;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-      align-items: center;
-      height: 100%;
-      margin-right: 8px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
-        margin-left: 0;
-        margin-right: 4px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div:last-child {
-        margin-left: 0;
-        margin-right: 0; }
-    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
-      height: 100%;
-      color: #737373;
-      font-size: 18px;
-      user-select: none;
-      margin-left: 16px;
+    justify-content: flex-start;
+    align-items: center; }
+    .igv-locus-size-group .igv-search-container input {
+      cursor: text;
+      width: 85%;
+      height: 75%;
+      padding-left: 8px;
       margin-right: 8px;
-      margin-top: 12px;
-      display: flex;
-      flex-flow: row;
-      flex-wrap: nowrap;
-      justify-content: space-between;
-      align-items: center; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
-        height: 100%;
-        cursor: pointer; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
-        margin-right: 4px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
-        margin-left: 4px; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget input {
-        display: block; }
-      .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget svg {
-        display: block; }
+      text-align: left;
+      outline: none;
+      font-size: 12px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      border-style: solid;
+      border-radius: 3px;
+      border-width: thin;
+      border-color: #bfbfbf;
+      background-color: white; }
+    .igv-locus-size-group .igv-search-container div {
+      height: 100%; }
+  .igv-locus-size-group .igv-windowsizepanel-content-div {
+    margin-left: 4px;
+    user-select: none; }
+
+.igv-nav-bar-right-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: space-between;
+  align-items: center;
+  height: 100%; }
+  .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    height: 100%;
+    margin-right: 8px; }
+    .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
+      margin-left: 0;
+      margin-right: 4px; }
+    .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div:last-child {
+      margin-left: 0;
+      margin-right: 0; }
+  .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container-900 {
+    display: none; }
+  .igv-nav-bar-right-container .igv-zoom-widget {
+    color: #737373;
+    font-size: 18px;
+    user-select: none;
+    margin-left: 16px;
+    margin-right: 8px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center; }
+    .igv-nav-bar-right-container .igv-zoom-widget div {
+      cursor: pointer; }
+    .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
+      margin-right: 4px; }
+    .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
+      margin-left: 4px; }
+    .igv-nav-bar-right-container .igv-zoom-widget input {
+      display: block; }
+    .igv-nav-bar-right-container .igv-zoom-widget svg {
+      display: block; }
+  .igv-nav-bar-right-container .igv-zoom-widget-900 {
+    color: #737373;
+    font-size: 24px;
+    user-select: none;
+    margin-left: 16px;
+    margin-right: 8px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center; }
+    .igv-nav-bar-right-container .igv-zoom-widget-900 div {
+      cursor: pointer; }
+    .igv-nav-bar-right-container .igv-zoom-widget-900 div:first-child {
+      margin-right: 4px; }
+    .igv-nav-bar-right-container .igv-zoom-widget-900 div:last-child {
+      margin-left: 4px; }
+    .igv-nav-bar-right-container .igv-zoom-widget-900 input {
+      display: none; }
+    .igv-nav-bar-right-container .igv-zoom-widget-900 svg {
+      display: block; }
 
 .igv-nav-bar-button {
   height: 18px;
@@ -1042,35 +1067,5 @@
   padding: 0;
   border: 0;
   display: block; }
-
-@media (max-width: 1100px) {
-  .igv-navbar {
-    font-size: 10px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-logo {
-      margin-right: 10px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-current_genome {
-      margin-right: 10px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container {
-      width: 84px; }
-      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-chromosome-select-widget-container select {
-        font-size: 10px; }
-    .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container {
-      width: 150px; }
-      .igv-navbar .igv-nav-bar-left-container .igv-genomic-location .igv-locus-size-group .igv-search-container input {
-        font-size: 10px; }
-    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget input {
-      width: 72px; }
-
-  .igv-nav-bar-button {
-    min-width: 64px;
-    font-size: 10px; } }
-@media (max-width: 800px) {
-  .igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
-    display: none; }
-  .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
-    margin-top: 6px;
-    font-size: 24px; }
-    .igv-navbar .igv-nav-bar-right-container .igv-zoom-widget input {
-      display: none; } }
 
 /*# sourceMappingURL=igv.css.map */

@@ -1,0 +1,68 @@
+
+#igv-centering-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: center;
+
+  background-color: rgba(0, 255, 0, 0.18);
+
+  border-color: rgba(0, 207, 0, 0.69);
+  border-style: solid;
+  border-width: thin;
+
+}
+
+#igv-shim-container {
+  width: 512px;
+
+  background-color: rgba(255, 1, 199, 0.18);
+
+  border-color: rgba(131, 1, 108, 0.46);
+  border-style: solid;
+  border-width: thin;
+
+
+}
+#igv-app-container {
+  margin-top: 16px;
+
+  width: 100%;
+  width: -moz-available;
+  width: -webkit-fill-available;
+  width: fill-available;
+
+  //width: 1024px;
+
+  background-color: white;
+
+  border-color: #7e7e7e;
+  border-style: solid;
+  border-width: thin;
+
+}
+
+#igv-draw-svg-button-container {
+  margin-left: 64px;
+  margin-top: 32px;
+}
+
+#igv-svg-container {
+
+  //margin-left: 50px;
+  margin-top: 32px;
+  margin-bottom: 64px;
+
+  border-color: rgba(36, 36, 36, 0.51);
+  border-style: solid;
+  border-width: thin;
+
+  //background-color: rgba(170, 237, 8, 0.51);
+
+}
+
+.igv-content-div {
+  border-color: rgba(255, 0, 0, 0.5);
+  border-style: solid;
+  border-width: thin;
+}

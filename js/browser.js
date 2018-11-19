@@ -110,6 +110,26 @@ var igv = (function (igv) {
         }
     }
 
+    igv.isMultiLocusMode = function () {
+       return  this.genomicStateList && this.genomicStateList.length > 1;
+    };
+
+    igv.isMultiLocusWholeGenomeView = function () {
+
+        if (undefined === this.genomicStateList || 1 === this.genomicStateList.length) {
+            return false;
+        }
+
+        for (let genomicState of this.genomicStateList) {
+            const chromosomeName = genomicState.referenceFrame.chrName.toLowerCase();
+            if ('all' === chromosomeName) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
     igv.isWholeGenomeView = function (referenceFrame) {
         let chromosomeName = referenceFrame.chrName.toLowerCase();
 
@@ -456,25 +476,20 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.isMultiLocus = function () {
+    igv.Browser.prototype.isMultiLocusMode = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
     };
 
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-        // multi-locus mode
-        if (genomicStateList.length > 1) {
-            this.centerGuide.disable();
-            this.zoomWidget.hideSlider();
-        }
-        // whole-genome
-        else if ('all' === genomicStateList[0].locusSearchString) {
+        if (igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame)) {
             this.centerGuide.disable();
             this.disableZoomWidget();
-        }
-        // single locus
-        else {
+        } else if (igv.isMultiLocusMode()) {
+            this.centerGuide.disable();
+            this.zoomWidget.hideSlider();
+        } else {
             this.centerGuide.enable();
             this.enableZoomWidget();
             this.zoomWidget.showSlider();
@@ -910,6 +925,20 @@ var igv = (function (igv) {
         }
 
         if (this.genomicStateList && viewportWidth > 0) {
+
+            console.log('browser.resize ' + igv.numberFormatter(viewportWidth));
+
+            const isNormalMode = false === igv.isMultiLocusMode();
+
+            let isWGV = false;
+            if (isNormalMode) {
+                isWGV = igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame);
+            }
+
+            if (false === isWGV) {
+                updateResponsiveNavbar.call(this, viewportWidth);
+            }
+
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
                 if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.initialEnd) {
@@ -947,6 +976,21 @@ var igv = (function (igv) {
         }
 
     };
+
+    function updateResponsiveNavbar(viewportWidth) {
+
+        this.$toggle_button_container.removeClass();
+        this.zoomWidget.$zoomContainer.removeClass();
+
+        if (viewportWidth > 900) {
+            this.$toggle_button_container.addClass('igv-nav-bar-toggle-button-container');
+            this.zoomWidget.$zoomContainer.addClass('igv-zoom-widget');
+        } else if (900 >= viewportWidth) {
+            this.$toggle_button_container.addClass('igv-nav-bar-toggle-button-container-900');
+            this.zoomWidget.$zoomContainer.addClass('igv-zoom-widget-900');
+        }
+
+    }
 
     igv.Browser.prototype.updateViews = function (genomicState, views) {
 

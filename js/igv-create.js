@@ -256,12 +256,12 @@ var igv = (function (igv) {
         $igv_nav_bar_left_container.append(logoDiv);
 
         // current genome
-        browser.$current_genome = $('<div>', {class: 'igv-current_genome'});
+        browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
         $igv_nav_bar_left_container.append(browser.$current_genome);
         browser.$current_genome.text('');
 
         //
-        $genomic_location = $('<div>', {class: 'igv-genomic-location'});
+        $genomic_location = $('<div>', {class: 'igv-nav-bar-genomic-location'});
         $igv_nav_bar_left_container.append($genomic_location);
 
         // chromosome select widget
@@ -324,6 +324,7 @@ var igv = (function (igv) {
 
         $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
         $igv_nav_bar_right_container.append($toggle_button_container);
+        browser.$toggle_button_container = $toggle_button_container;
 
         // cursor guide
         browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
