@@ -278,6 +278,8 @@
       display: none; }
     .igv-nav-bar-right-container .igv-zoom-widget-900 svg {
       display: block; }
+  .igv-nav-bar-right-container .igv-zoom-widget-hidden {
+    display: none; }
 
 .igv-nav-bar-button {
   height: 18px;

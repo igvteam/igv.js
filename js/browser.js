@@ -483,16 +483,26 @@ var igv = (function (igv) {
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
+        const viewportWidth = this.viewportWidth();
+
+        // console.log('browser.updateUI ' + igv.numberFormatter(viewportWidth));
+
+        this.responsiveClasses = this.responsiveSchedule(viewportWidth);
+        this.zoomWidget[ '$zoomContainer' ].removeClass();
+        this.zoomWidget[ '$zoomContainer' ].addClass(this.responsiveClasses[ '$zoomContainer' ]);
+
+
+        // WGV. In either single or multi-panel mode
         if (igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame)) {
             this.centerGuide.disable();
-            this.disableZoomWidget();
-        } else if (igv.isMultiLocusMode()) {
+        }
+        // multi-panel model
+        else if (igv.isMultiLocusMode()) {
             this.centerGuide.disable();
-            this.zoomWidget.hideSlider();
-        } else {
+        }
+        // single panel mode
+        else {
             this.centerGuide.enable();
-            this.enableZoomWidget();
-            this.zoomWidget.showSlider();
         }
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
@@ -551,7 +561,6 @@ var igv = (function (igv) {
     //     self.$cursorTrackingGuide.css({left: exe + 'px'});
     // }, 10));
 
-
     igv.Browser.prototype.showCursorGuide = function () {
         this.cursorGuide.$guide.show();
         this.cursorGuideVisible = true;
@@ -567,14 +576,6 @@ var igv = (function (igv) {
         this.centerGuide.$container.show();
         this.centerGuide.resize();
         this.centerGuideVisible = true;
-    };
-
-    igv.Browser.prototype.disableZoomWidget = function () {
-        this.zoomWidget.hide();
-    };
-
-    igv.Browser.prototype.enableZoomWidget = function () {
-        this.zoomWidget.show();
     };
 
     igv.Browser.prototype.loadTrackList = function (configList) {
@@ -615,7 +616,6 @@ var igv = (function (igv) {
                 return loadedTracks;
             })
     };
-
 
     function knowHowToLoad(config) {
 
@@ -911,7 +911,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.visibilityChange = function () {
         this.resize();
-    }
+    };
 
     igv.Browser.prototype.resize = function () {
 
@@ -926,18 +926,11 @@ var igv = (function (igv) {
 
         if (this.genomicStateList && viewportWidth > 0) {
 
-            console.log('browser.resize ' + igv.numberFormatter(viewportWidth));
+            // console.log('browser.resize ' + igv.numberFormatter(viewportWidth));
 
-            const isNormalMode = false === igv.isMultiLocusMode();
+            this.responsiveClasses = this.responsiveSchedule(viewportWidth);
 
-            let isWGV = false;
-            if (isNormalMode) {
-                isWGV = igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame);
-            }
-
-            if (false === isWGV) {
-                updateResponsiveNavbar.call(this, viewportWidth);
-            }
+            updateResponsiveNavbar.call(this, this.responsiveClasses);
 
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
@@ -977,20 +970,33 @@ var igv = (function (igv) {
 
     };
 
-    function updateResponsiveNavbar(viewportWidth) {
+    function updateResponsiveNavbar(responsiveClasses) {
 
-        this.$toggle_button_container.removeClass();
-        this.zoomWidget.$zoomContainer.removeClass();
+        this[ '$toggle_button_container' ].removeClass();
+        this[ '$toggle_button_container' ].addClass(responsiveClasses[ '$toggle_button_container' ]);
 
-        if (viewportWidth > 900) {
-            this.$toggle_button_container.addClass('igv-nav-bar-toggle-button-container');
-            this.zoomWidget.$zoomContainer.addClass('igv-zoom-widget');
-        } else if (900 >= viewportWidth) {
-            this.$toggle_button_container.addClass('igv-nav-bar-toggle-button-container-900');
-            this.zoomWidget.$zoomContainer.addClass('igv-zoom-widget-900');
+        this.zoomWidget[ '$zoomContainer' ].removeClass();
+        this.zoomWidget[ '$zoomContainer' ].addClass(responsiveClasses[ '$zoomContainer' ]);
+    }
+
+    igv.Browser.prototype.responsiveSchedule = function(viewportWidth) {
+
+        let candidates = {};
+
+        if (viewportWidth <= 900) {
+            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-900';
+            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+        } else {
+            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
+            candidates['$zoomContainer'] = 'igv-zoom-widget';
         }
 
-    }
+        if (igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame)) {
+            candidates['$zoomContainer'] = 'igv-zoom-widget-hidden';
+        }
+
+        return candidates;
+    };
 
     igv.Browser.prototype.updateViews = function (genomicState, views) {
 

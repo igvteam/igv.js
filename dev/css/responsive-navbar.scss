@@ -11,6 +11,8 @@
   border-style: solid;
   border-width: thin;
 
+  padding: 2px;
+
 }
 
 #igv-shim-container {
@@ -22,6 +24,7 @@
   border-style: solid;
   border-width: thin;
 
+  margin: 4px;
 
 }
 #igv-app-container {
@@ -37,32 +40,6 @@
   background-color: white;
 
   border-color: #7e7e7e;
-  border-style: solid;
-  border-width: thin;
-
-}
-
-#igv-draw-svg-button-container {
-  margin-left: 64px;
-  margin-top: 32px;
-}
-
-#igv-svg-container {
-
-  //margin-left: 50px;
-  margin-top: 32px;
-  margin-bottom: 64px;
-
-  border-color: rgba(36, 36, 36, 0.51);
-  border-style: solid;
-  border-width: thin;
-
-  //background-color: rgba(170, 237, 8, 0.51);
-
-}
-
-.igv-content-div {
-  border-color: rgba(255, 0, 0, 0.5);
   border-style: solid;
   border-width: thin;
 }

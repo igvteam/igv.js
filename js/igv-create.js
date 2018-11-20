@@ -128,52 +128,47 @@ var igv = (function (igv) {
 
             .then(function (ignore) {
 
+                const viewportWidth = browser.viewportWidth();
+
+                // console.log('igv-create ' + igv.numberFormatter(viewportWidth));
+
+                browser.responsiveClasses = browser.responsiveSchedule(viewportWidth);
+                browser.zoomWidget[ '$zoomContainer' ].removeClass();
+                browser.zoomWidget[ '$zoomContainer' ].addClass(browser.responsiveClasses[ '$zoomContainer' ]);
+
                 if (false === config.showTrackLabels) {
-
                     browser.hideTrackLabels();
-
                 } else {
-
                     browser.showTrackLabels();
-
                     if (browser.trackLabelControl) {
                         browser.trackLabelControl.setState(browser.trackLabelsVisible);
                     }
                 }
 
                 if (false === config.showCursorTrackingGuide) {
-
                     browser.hideCursorGuide();
-
                 } else {
-
                     browser.showCursorGuide();
                     browser.cursorGuide.setState(browser.cursorGuideVisible);
-
                 }
 
                 if (false === config.showCenterGuide) {
-
                     browser.hideCenterGuide();
-
                 } else {
-
                     browser.showCenterGuide();
                     browser.centerGuide.setState(browser.centerGuideVisible);
-
                 }
 
                 // multi-locus mode
-                if (browser.genomicStateList.length > 1) {
+                if (igv.isMultiLocusMode()) {
 
                     // TODO: This is temporary until implement multi-locus center guides
                     browser.centerGuide.disable();
 
                 }
                 // whole-genome
-                else if ('all' === browser.genomicStateList[0].locusSearchString) {
+                else if (igv.isMultiLocusWholeGenomeView() || igv.isMultiLocusWholeGenomeView(browser.genomicStateList[0].referenceFrame)) {
                     browser.centerGuide.disable();
-                    browser.disableZoomWidget();
                 }
 
                 igv.xhr.startup();
