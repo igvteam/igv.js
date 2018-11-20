@@ -591,7 +591,7 @@ var igv = (function (igv) {
      * @param octets
      * @returns {string}
      */
-    decodeUTF8 = function (octets) {
+    function decodeUTF8 (octets) {
         var string = "";
         var i = 0;
         while (i < octets.length) {
