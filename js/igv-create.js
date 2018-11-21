@@ -128,11 +128,9 @@ var igv = (function (igv) {
 
             .then(function (ignore) {
 
-                const viewportWidth = browser.viewportWidth();
+                console.log('igv-create ' + igv.numberFormatter(browser.$navigation.width()));
+                browser.responsiveClasses = browser.responsiveSchedule(browser.$navigation.width());
 
-                // console.log('igv-create ' + igv.numberFormatter(viewportWidth));
-
-                browser.responsiveClasses = browser.responsiveSchedule(viewportWidth);
                 browser.zoomWidget[ '$zoomContainer' ].removeClass();
                 browser.zoomWidget[ '$zoomContainer' ].addClass(browser.responsiveClasses[ '$zoomContainer' ]);
 

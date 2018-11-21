@@ -483,11 +483,9 @@ var igv = (function (igv) {
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-        const viewportWidth = this.viewportWidth();
+        console.log('browser.updateUI ' + igv.numberFormatter(this.$navigation.width()));
+        this.responsiveClasses = this.responsiveSchedule(this.$navigation.width());
 
-        // console.log('browser.updateUI ' + igv.numberFormatter(viewportWidth));
-
-        this.responsiveClasses = this.responsiveSchedule(viewportWidth);
         this.zoomWidget[ '$zoomContainer' ].removeClass();
         this.zoomWidget[ '$zoomContainer' ].addClass(this.responsiveClasses[ '$zoomContainer' ]);
 
@@ -926,9 +924,8 @@ var igv = (function (igv) {
 
         if (this.genomicStateList && viewportWidth > 0) {
 
-            // console.log('browser.resize ' + igv.numberFormatter(viewportWidth));
-
-            this.responsiveClasses = this.responsiveSchedule(viewportWidth);
+            console.log('browser.resize ' + igv.numberFormatter(this.$navigation.width()));
+            this.responsiveClasses = this.responsiveSchedule(this.$navigation.width());
 
             updateResponsiveNavbar.call(this, this.responsiveClasses);
 
@@ -979,19 +976,24 @@ var igv = (function (igv) {
         this.zoomWidget[ '$zoomContainer' ].addClass(responsiveClasses[ '$zoomContainer' ]);
     }
 
-    igv.Browser.prototype.responsiveSchedule = function(viewportWidth) {
+    igv.Browser.prototype.responsiveSchedule = function (navbarWidth) {
+
+        const isWGV = igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
 
         let candidates = {};
 
-        if (viewportWidth <= 900) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-900';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-        } else {
+        if (navbarWidth > 990) {
             candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
             candidates['$zoomContainer'] = 'igv-zoom-widget';
+        } else if (navbarWidth > 860) {
+            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
+            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+        } else {
+            candidates['$toggle_button_container'] = isWGV ? 'igv-nav-bar-toggle-button-container' : 'igv-nav-bar-toggle-button-container-750';
+            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
         }
 
-        if (igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame)) {
+        if (isWGV) {
             candidates['$zoomContainer'] = 'igv-zoom-widget-hidden';
         }
 
