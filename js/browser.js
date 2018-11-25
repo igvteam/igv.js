@@ -547,18 +547,6 @@ var igv = (function (igv) {
         this.cursorGuideVisible = false;
     };
 
-    // // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-    // $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
-    //     var exe;
-    //
-    //     e.preventDefault();
-    //
-    //     exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
-    //     exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
-    //
-    //     self.$cursorTrackingGuide.css({left: exe + 'px'});
-    // }, 10));
-
     igv.Browser.prototype.showCursorGuide = function () {
         this.cursorGuide.$guide.show();
         this.cursorGuideVisible = true;
@@ -989,7 +977,8 @@ var igv = (function (igv) {
             candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
             candidates['$zoomContainer'] = 'igv-zoom-widget-900';
         } else {
-            candidates['$toggle_button_container'] = isWGV ? 'igv-nav-bar-toggle-button-container' : 'igv-nav-bar-toggle-button-container-750';
+            // candidates['$toggle_button_container'] = isWGV ? 'igv-nav-bar-toggle-button-container' : 'igv-nav-bar-toggle-button-container-750';
+            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
             candidates['$zoomContainer'] = 'igv-zoom-widget-900';
         }
 
