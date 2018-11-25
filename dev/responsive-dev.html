@@ -153,6 +153,8 @@
     <script src="../vendor/rbtree.js"></script>
     <script src="../js/canvas2svg.js"></script>
 
+    <script src="../js/navbarManager.js"></script>
+
 </head>
 
 <body>
@@ -169,7 +171,11 @@
         const options =
             {
                 // showCursorTrackingGuideButton: false,
-                locus: 'muc1',
+
+                // locus: 'muc1',
+                // locus: 'all',
+                locus: [ '2', '4 '],
+
                 genome: "hg19",
                 flanking: 1000,
                 queryParametersSupported: true,

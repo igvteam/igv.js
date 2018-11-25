@@ -128,12 +128,6 @@ var igv = (function (igv) {
 
             .then(function (ignore) {
 
-                console.log('igv-create ' + igv.numberFormatter(browser.$navigation.width()));
-                browser.responsiveClasses = browser.responsiveSchedule(browser.$navigation.width());
-
-                browser.zoomWidget[ '$zoomContainer' ].removeClass();
-                browser.zoomWidget[ '$zoomContainer' ].addClass(browser.responsiveClasses[ '$zoomContainer' ]);
-
                 if (false === config.showTrackLabels) {
                     browser.hideTrackLabels();
                 } else {
@@ -144,33 +138,30 @@ var igv = (function (igv) {
                 }
 
                 if (false === config.showCursorTrackingGuide) {
-                    browser.hideCursorGuide();
+                    browser.cursorGuide.doHide();
                 } else {
-                    browser.showCursorGuide();
-                    browser.cursorGuide.setState(browser.cursorGuideVisible);
+                    browser.cursorGuide.doShow();
                 }
 
                 if (false === config.showCenterGuide) {
-                    browser.hideCenterGuide();
+                    browser.centerGuide.doHide();
                 } else {
-                    browser.showCenterGuide();
-                    browser.centerGuide.setState(browser.centerGuideVisible);
+                    browser.centerGuide.doShow();
                 }
 
-                // multi-locus mode
-                if (igv.isMultiLocusMode()) {
+                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[ 0 ].referenceFrame);
 
-                    // TODO: This is temporary until implement multi-locus center guides
-                    browser.centerGuide.disable();
-
-                }
-                // whole-genome
-                else if (igv.isMultiLocusWholeGenomeView() || igv.isMultiLocusWholeGenomeView(browser.genomicStateList[0].referenceFrame)) {
-                    browser.centerGuide.disable();
+                // multi-locus mode or isWGV
+                if (browser.isMultiLocusMode() || isWGV) {
+                    browser.centerGuide.forcedHide();
+                } else {
+                    browser.centerGuide.forcedShow();
                 }
 
                 igv.xhr.startup();
-                
+
+                browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
+
                 return browser;
             })
 
@@ -236,6 +227,7 @@ var igv = (function (igv) {
         $navigation = $('<div>', {class: 'igv-navbar'});
         $controls.append($navigation);
         browser.$navigation = $navigation;
+        browser.navbarManager = new igv.NavbarManager(browser);
 
         $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
         $navigation.append($igv_nav_bar_left_container);
@@ -363,20 +355,20 @@ var igv = (function (igv) {
             config.showCursorTrackingGuideButton = true;
         }
 
-        if (undefined === config.showCursorTrackingGuide) {
-            config.showCursorTrackingGuide = false;
-        }
-
         if (undefined === config.showCenterGuideButton) {
             config.showCenterGuideButton = true;
         }
 
-        if (undefined === config.showCenterGuide) {
-            config.showCenterGuide = false;
-        }
-
         if (undefined === config.showTrackLabelButton) {
             config.showTrackLabelButton = true;
+        }
+
+        if (undefined === config.showCursorTrackingGuide) {
+            config.showCursorTrackingGuide = false;
+        }
+
+        if (undefined === config.showCenterGuide) {
+            config.showCenterGuide = false;
         }
 
         if (undefined === config.showTrackLabels) {

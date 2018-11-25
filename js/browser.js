@@ -43,7 +43,7 @@ var igv = (function (igv) {
         this.trackViews = [];
 
         this.trackLabelsVisible = true;
-        this.centerGuideVisible = false;
+        this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
 
         this.featureDB = {};   // Hash of name -> feature, used for search function.
@@ -110,11 +110,11 @@ var igv = (function (igv) {
         }
     }
 
-    igv.isMultiLocusMode = function () {
-       return  this.genomicStateList && this.genomicStateList.length > 1;
+    igv.Browser.prototype.isMultiLocusMode = function () {
+        return this.genomicStateList && this.genomicStateList.length > 1;
     };
 
-    igv.isMultiLocusWholeGenomeView = function () {
+    igv.Browser.prototype.isMultiLocusWholeGenomeView = function () {
 
         if (undefined === this.genomicStateList || 1 === this.genomicStateList.length) {
             return false;
@@ -475,33 +475,18 @@ var igv = (function (igv) {
         }
     };
 
-
-    igv.Browser.prototype.isMultiLocusMode = function () {
-        return this.genomicStateList && this.genomicStateList.length > 1;
-    };
-
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-        console.log('browser.updateUI ' + igv.numberFormatter(this.$navigation.width()));
-        this.responsiveClasses = this.responsiveSchedule(this.$navigation.width());
+        const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame));
 
-        this.zoomWidget[ '$zoomContainer' ].removeClass();
-        this.zoomWidget[ '$zoomContainer' ].addClass(this.responsiveClasses[ '$zoomContainer' ]);
+        if (isWGV || this.isMultiLocusMode()) {
+            this.centerGuide.forcedHide();
+        } else {
+            this.centerGuide.forcedShow();
+        }
 
-
-        // WGV. In either single or multi-panel mode
-        if (igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame)) {
-            this.centerGuide.disable();
-        }
-        // multi-panel model
-        else if (igv.isMultiLocusMode()) {
-            this.centerGuide.disable();
-        }
-        // single panel mode
-        else {
-            this.centerGuide.enable();
-        }
+        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
@@ -555,13 +540,13 @@ var igv = (function (igv) {
     // center guide
     igv.Browser.prototype.hideCenterGuide = function () {
         this.centerGuide.$container.hide();
-        this.centerGuideVisible = false;
+        this.isCenterGuideVisible = false;
     };
 
     igv.Browser.prototype.showCenterGuide = function () {
         this.centerGuide.$container.show();
         this.centerGuide.resize();
-        this.centerGuideVisible = true;
+        this.isCenterGuideVisible = true;
     };
 
     igv.Browser.prototype.loadTrackList = function (configList) {
@@ -912,10 +897,15 @@ var igv = (function (igv) {
 
         if (this.genomicStateList && viewportWidth > 0) {
 
-            console.log('browser.resize ' + igv.numberFormatter(this.$navigation.width()));
-            this.responsiveClasses = this.responsiveSchedule(this.$navigation.width());
+            const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
 
-            updateResponsiveNavbar.call(this, this.responsiveClasses);
+            if (isWGV) {
+                this.centerGuide.forcedHide();
+            } else {
+                this.centerGuide.forcedShow();
+            }
+
+            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
@@ -953,40 +943,6 @@ var igv = (function (igv) {
             return (bp > genomicState.chromosome.bpLength);
         }
 
-    };
-
-    function updateResponsiveNavbar(responsiveClasses) {
-
-        this[ '$toggle_button_container' ].removeClass();
-        this[ '$toggle_button_container' ].addClass(responsiveClasses[ '$toggle_button_container' ]);
-
-        this.zoomWidget[ '$zoomContainer' ].removeClass();
-        this.zoomWidget[ '$zoomContainer' ].addClass(responsiveClasses[ '$zoomContainer' ]);
-    }
-
-    igv.Browser.prototype.responsiveSchedule = function (navbarWidth) {
-
-        const isWGV = igv.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
-
-        let candidates = {};
-
-        if (navbarWidth > 990) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
-            candidates['$zoomContainer'] = 'igv-zoom-widget';
-        } else if (navbarWidth > 860) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-        } else {
-            // candidates['$toggle_button_container'] = isWGV ? 'igv-nav-bar-toggle-button-container' : 'igv-nav-bar-toggle-button-container-750';
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-        }
-
-        if (isWGV) {
-            candidates['$zoomContainer'] = 'igv-zoom-widget-hidden';
-        }
-
-        return candidates;
     };
 
     igv.Browser.prototype.updateViews = function (genomicState, views) {
@@ -1072,8 +1028,7 @@ var igv = (function (igv) {
             })
         }
     };
-
-
+    
     igv.Browser.prototype.loadInProgress = function () {
         var i;
         for (i = 0; i < this.trackViews.length; i++) {
