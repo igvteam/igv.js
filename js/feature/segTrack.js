@@ -106,15 +106,14 @@ var igv = (function (igv) {
             const self = this;
 
             const menuItems = [];
+            const lut =
+                {
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand",
+                    "FILL": "Fill",
+                };
 
-                ["COMPRESSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
-                    const lut =
-                        {
-                            "COMPRESSED": "Compress",
-                            "SQUISHED": "Squish",
-                            "EXPANDED": "Expand"
-                        };
-
+                ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
                     menuItems.push(
                         {
                             object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
@@ -211,7 +210,7 @@ var igv = (function (igv) {
                 let border;
                 switch (this.displayMode) {
 
-                    case "COMPRESSED":
+                    case "FILL":
                         sampleHeight = options.pixelHeight / this.sampleKeys.length;
                         border = 0
                         break;
@@ -266,10 +265,10 @@ var igv = (function (igv) {
 
                     ctx.fillStyle = color;
 
-                    // Enhance the contrast of sub-pixel displays (compressed mode) by adjusting sample height.
+                    // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                     let sh = sampleHeight;
                     if(sampleHeight < 0.25) {
-                       const f = 0.1 + 1.9 * Math.abs(value);
+                       const f = 0.1 + 3 * Math.abs(value);
                        sh = Math.min(1, f * sampleHeight);
                     }
                     ctx.fillRect(px, y, pw, sh - 2 * border);

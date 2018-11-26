@@ -305,7 +305,7 @@ var igv = (function (igv) {
 
         // Always use high DPI if in compressed display mode, otherwise use preference setting;
         let devicePixelRatio;
-        if ("COMPRESSED" === this.trackView.track.displayMode) {
+        if ("FILL" === this.trackView.track.displayMode) {
             devicePixelRatio = window.devicePixelRatio;
         } else {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
@@ -1031,7 +1031,7 @@ var igv = (function (igv) {
 
         let track = this.trackView.track;
 
-        if ("COMPRESSED" === track.displayMode) {
+        if ("FILL" === track.displayMode) {
             this.setContentHeight(this.$viewport.height())
         }
 
