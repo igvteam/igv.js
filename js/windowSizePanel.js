@@ -42,13 +42,6 @@ var igv = (function (igv) {
     };
 
     igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-
-        if (1 === this.browser.genomicStateList.length && genomicState.locusSearchString && 'all' !== genomicState.locusSearchString.toLowerCase()) {
-            this.show();
-        } else {
-            this.hide();
-        }
-
         this.$content.text( igv.prettyBasePairNumber(Math.round( this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
     };
 

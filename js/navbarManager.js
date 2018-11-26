@@ -29,7 +29,7 @@ var igv = (function (igv) {
     };
 
     igv.NavbarManager.prototype.navbarDidResize = function (width, isWholeGenomeView) {
-        updateNavbar.call(this, responsiveClassSchedule(width, isWholeGenomeView));
+        updateNavbar.call(this, createResponsiveClassSchedule.call(this, width, isWholeGenomeView));
     };
 
     function updateNavbar (responsiveClassSchedule) {
@@ -41,9 +41,15 @@ var igv = (function (igv) {
         this.browser.zoomWidget[ '$zoomContainer' ].addClass(responsiveClassSchedule[ '$zoomContainer' ]);
     }
 
-    function responsiveClassSchedule(navbarWidth, isWholeGenomeView) {
+    function createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
 
         let candidates = {};
+
+        if (isWholeGenomeView) {
+            this.browser.windowSizePanel.hide();
+        } else {
+            this.browser.windowSizePanel.show();
+        }
 
         if (navbarWidth > 990) {
             candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
@@ -51,9 +57,13 @@ var igv = (function (igv) {
         } else if (navbarWidth > 860) {
             candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
             candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+        } else if (navbarWidth > 540) {
+            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
+            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
         } else {
             candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
             candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+            this.browser.windowSizePanel.hide();
         }
 
         if (isWholeGenomeView) {
