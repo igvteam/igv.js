@@ -142,12 +142,12 @@ var igv = (function (igv) {
 
         // igv.graphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
 
-        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: igv.Color.greyScale(128) });
+        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: igv.Color.greyScale(191) });
 
         const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
 
         if (w > ctx.measureText(shortName).width) {
-            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: igv.Color.greyScale(64) });
+            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: igv.Color.greyScale(68) });
         }
 
     }
