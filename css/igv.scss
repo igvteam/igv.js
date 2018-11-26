@@ -349,7 +349,8 @@ $igv-dark-grey-color: #373737;
     }
 
     input {
-      display: block;
+      //display: block;
+      width: 100%;
     }
 
     svg {
@@ -657,6 +658,9 @@ $igv-dark-grey-color: #373737;
 }
 
 .igv-viewport-ruler {
+
+  cursor: pointer;
+
   font-family: $igv-default-font-face;
   font-size: 10px;
   font-weight: 200;

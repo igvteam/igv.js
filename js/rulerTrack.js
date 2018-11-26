@@ -116,8 +116,6 @@ var igv = (function (igv) {
 
         igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
 
-        const browser = this.browser;
-
         options.context.textAlign = 'center';
         options.context.textBaseline = 'middle';
         options.context.font = '9px sans-serif';
@@ -125,25 +123,32 @@ var igv = (function (igv) {
         let y = 0;
         let h = options.pixelHeight;
 
-        for (let name of browser.genome.wgChromosomeNames) {
+        for (let name of this.browser.genome.wgChromosomeNames) {
 
-            let xBP = browser.genome.getCumulativeOffset(name);
-            let wBP = browser.genome.getChromosome(name).bpLength;
+            let xBP = this.browser.genome.getCumulativeOffset(name);
+            let wBP = this.browser.genome.getChromosome(name).bpLength;
 
             let x = Math.round(xBP / options.bpPerPixel);
             let w = Math.round(wBP / options.bpPerPixel);
 
-            igv.graphics.fillRect(options.context, x, y, w, h, { 'fillStyle' : toggleColor(browser.genome.wgChromosomeNames.indexOf(name)) });
-
-            const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
-            if (w > options.context.measureText(shortName).width) {
-                options.fillStyle = 'rgb(128,128,128)';
-                options.context.fillText(shortName, (x + (w/2)), (y + (h/2)));
-            }
-
+            renderChromosomeRect.call(this, options.context, x, y, w, h, name);
         }
 
         options.context.restore();
+
+    }
+
+    function renderChromosomeRect(ctx, x, y, w, h, name) {
+
+        // igv.graphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
+
+        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { fillStyle: 'rgb(128,128,128)' });
+
+        const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+
+        if (w > ctx.measureText(shortName).width) {
+            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: 'rgb(128,128,128)' });
+        }
 
     }
 
