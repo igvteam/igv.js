@@ -328,6 +328,8 @@ $igv-dark-grey-color: #373737;
     margin-left: 16px;
     margin-right: 8px;
 
+    width: 180px;
+
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -366,6 +368,8 @@ $igv-dark-grey-color: #373737;
 
     margin-left: 16px;
     margin-right: 8px;
+
+    width: unset;
 
     display: flex;
     flex-flow: row;

@@ -242,6 +242,7 @@
     user-select: none;
     margin-left: 16px;
     margin-right: 8px;
+    width: 180px;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -263,6 +264,7 @@
     user-select: none;
     margin-left: 16px;
     margin-right: 8px;
+    width: unset;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
