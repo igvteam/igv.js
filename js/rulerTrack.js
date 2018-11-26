@@ -142,7 +142,7 @@ var igv = (function (igv) {
 
         // igv.graphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
 
-        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { fillStyle: 'rgb(128,128,128)' });
+        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: 'rgb(128,128,128)' });
 
         const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
 
