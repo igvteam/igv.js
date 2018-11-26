@@ -268,7 +268,7 @@ var igv = (function (igv) {
                     // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                     let sh = sampleHeight;
                     if(sampleHeight < 0.25) {
-                       const f = 0.1 + 3 * Math.abs(value);
+                       const f = 0.1 + 2 * Math.abs(value);
                        sh = Math.min(1, f * sampleHeight);
                     }
                     ctx.fillRect(px, y, pw, sh - 2 * border);
