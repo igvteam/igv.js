@@ -179,26 +179,7 @@ var igv = (function (igv) {
 
             const self = this;
 
-           // const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
-            let sampleHeight;
-            let border;
-            switch (this.displayMode) {
-
-                case "COMPRESSED":
-                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
-                    border = 0
-                    break;
-
-                case "SQUISHED":
-                    sampleHeight = this.squishedRowHeight;
-                    border = 0;
-                    break;
-
-                default:   // EXPANDED
-                    sampleHeight = this.expandedRowHeight;
-                    border = 1;
-
-            }
+            const v2 = igv.Math.log2(2);
 
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
@@ -223,6 +204,28 @@ var igv = (function (igv) {
                 this.sampleKeys.forEach(function (id, index) {
                     samples[id] = index;
                 })
+
+
+                // const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+                let sampleHeight;
+                let border;
+                switch (this.displayMode) {
+
+                    case "COMPRESSED":
+                        sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                        border = 0
+                        break;
+
+                    case "SQUISHED":
+                        sampleHeight = this.squishedRowHeight;
+                        border = 0;
+                        break;
+
+                    default:   // EXPANDED
+                        sampleHeight = this.expandedRowHeight;
+                        border = 1;
+
+                }
 
                 for (let segment of featureList) {
 
@@ -262,7 +265,14 @@ var igv = (function (igv) {
                     // console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
 
                     ctx.fillStyle = color;
-                    ctx.fillRect(px, y, pw, sampleHeight - 2 * border);
+
+                    // Enhance the contrast of sub-pixel displays (compressed mode) by adjusting sample height.
+                    let sh = sampleHeight;
+                    if(sampleHeight < 0.25) {
+                       const f = 0.1 + 1.9 * Math.abs(value);
+                       sh = Math.min(1, f * sampleHeight);
+                    }
+                    ctx.fillRect(px, y, pw, sh - 2 * border);
 
                     //igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
