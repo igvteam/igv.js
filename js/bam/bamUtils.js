@@ -30,6 +30,7 @@
  * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
  */
 
+"use strict";
 
 var igv = (function (igv) {
 
@@ -196,24 +197,17 @@ var igv = (function (igv) {
          */
         decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
-            var blockSize, blockEnd, alignment, blocks, refID, pos, bin_mq_nl, bin, mq, nl, flag_nc, flag, nc, lseq,
-                tlen,
-                mateChrIdx, matePos, readName, j, p, lengthOnRef, cigar, c, cigarArray, seq, seqBytes, qualArray;
-
             while (offset < ba.length) {
 
-                blockSize = readInt(ba, offset);
-                blockEnd = offset + blockSize + 4;
+                const blockSize = readInt(ba, offset);
+                const blockEnd = offset + blockSize + 4;
+                const alignment = new igv.BamAlignment();
+                const refID = readInt(ba, offset + 4);
+                const pos = readInt(ba, offset + 8);
 
                 if (blockEnd > ba.length) {
                     return;
                 }
-
-                alignment = new igv.BamAlignment();
-
-                refID = readInt(ba, offset + 4);
-                pos = readInt(ba, offset + 8);
-
                 if (refID < 0) {
                     offset = blockEnd;
                     continue;   // unmapped read
@@ -223,34 +217,34 @@ var igv = (function (igv) {
                 }
                 else if (chrIdx && (refID < chrIdx)) {
                     offset = blockEnd;
-                    continue;   // to left of start, not sure this is possible
+                    continue;   // ref ID to left of start, not sure this is possible
                 }
 
-                bin_mq_nl = readInt(ba, offset + 12);
-                bin = (bin_mq_nl & 0xffff0000) >> 16;
-                mq = (bin_mq_nl & 0xff00) >> 8;
-                nl = bin_mq_nl & 0xff;
+                const bin_mq_nl = readInt(ba, offset + 12);
+                const bin = (bin_mq_nl & 0xffff0000) >> 16;
+                const mq = (bin_mq_nl & 0xff00) >> 8;
+                const nl = bin_mq_nl & 0xff;
 
-                flag_nc = readInt(ba, offset + 16);
-                flag = (flag_nc & 0xffff0000) >> 16;
-                nc = flag_nc & 0xffff;
+                const flag_nc = readInt(ba, offset + 16);
+                const flag = (flag_nc & 0xffff0000) >> 16;
+                const nc = flag_nc & 0xffff;
 
-                lseq = readInt(ba, offset + 20);
-                mateChrIdx = readInt(ba, offset + 24);
-                matePos = readInt(ba, offset + 28);
-                tlen = readInt(ba, offset + 32);
+                const lseq = readInt(ba, offset + 20);
+                const mateChrIdx = readInt(ba, offset + 24);
+                const matePos = readInt(ba, offset + 28);
+                const tlen = readInt(ba, offset + 32);
 
-                readName = [];
-                for (j = 0; j < nl - 1; ++j) {
+                let readName = [];
+                for (let j = 0; j < nl - 1; ++j) {
                     readName.push(String.fromCharCode(ba[offset + 36 + j]));
                 }
                 readName = readName.join('');
 
-                lengthOnRef = 0;
-                cigar = '';
-                p = offset + 36 + nl;
-                cigarArray = [];
-                for (c = 0; c < nc; ++c) {
+                let lengthOnRef = 0;
+                let cigar = '';
+                let p = offset + 36 + nl;
+                const cigarArray = [];
+                for (let c = 0; c < nc; ++c) {
                     var cigop = readInt(ba, p);
                     var opLen = (cigop >> 4);
                     var opLtr = CIGAR_DECODER[cigop & 0xf];
@@ -282,9 +276,9 @@ var igv = (function (igv) {
                 }  // Record out-of-range "to the left", skip to next one
 
 
-                seq = [];
-                seqBytes = (lseq + 1) >> 1;
-                for (j = 0; j < seqBytes; ++j) {
+                let seq = [];
+                const seqBytes = (lseq + 1) >> 1;
+                for (let j = 0; j < seqBytes; ++j) {
                     var sb = ba[p + j];
                     seq.push(SEQ_DECODER[(sb & 0xf0) >> 4]);
                     seq.push(SEQ_DECODER[(sb & 0x0f)]);
@@ -293,11 +287,12 @@ var igv = (function (igv) {
                 p += seqBytes;
 
 
+                let qualArray;
                 if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === '*') {
                     // TODO == how to represent this?
                 } else {
                     qualArray = [];
-                    for (j = 0; j < lseq; ++j) {
+                    for (let j = 0; j < lseq; ++j) {
                         qualArray.push(ba[p + j]);
                     }
                 }
@@ -318,15 +313,12 @@ var igv = (function (igv) {
 
                 this.setPairOrientation(alignment);
 
-                if (!min || alignment.start <= max &&
-                    alignment.start + alignment.lengthOnRef >= min &&
-                    (undefined === filter || filter.pass(alignment))) {
-                    if (chrIdx === undefined || refID == chrIdx) {
-                        blocks = makeBlocks(alignment, cigarArray);
-                        alignment.blocks = blocks.blocks;
-                        alignment.insertions = blocks.insertions;
-                        alignmentContainer.push(alignment);
-                    }
+                if ((undefined === filter || filter.pass(alignment))) {
+                    const blocks = makeBlocks(alignment, cigarArray);
+                    alignment.blocks = blocks.blocks;
+                    alignment.insertions = blocks.insertions;
+                    alignmentContainer.push(alignment);
+
                 }
                 offset = blockEnd;
             }
@@ -488,8 +480,6 @@ var igv = (function (igv) {
      * its portion of the read sequence and base quality strings.  A read sequence or base quality string
      * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
      * and quality string (block.qual) must == the block length.
-     *
-     * NOTE: Insertions are not yet treated // TODO
      *
      * @param record
      * @param cigarArray
