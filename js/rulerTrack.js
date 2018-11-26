@@ -116,10 +116,6 @@ var igv = (function (igv) {
 
         igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
 
-        options.context.textAlign = 'center';
-        options.context.textBaseline = 'middle';
-        options.context.font = '9px sans-serif';
-
         let y = 0;
         let h = options.pixelHeight;
 
@@ -140,14 +136,18 @@ var igv = (function (igv) {
 
     function renderChromosomeRect(ctx, x, y, w, h, name) {
 
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = '12px sans-serif';
+
         // igv.graphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
 
-        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: 'rgb(128,128,128)' });
+        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: igv.Color.greyScale(128) });
 
         const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
 
         if (w > ctx.measureText(shortName).width) {
-            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: 'rgb(128,128,128)' });
+            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: igv.Color.greyScale(64) });
         }
 
     }
