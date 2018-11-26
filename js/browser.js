@@ -898,8 +898,8 @@ var igv = (function (igv) {
         if (this.genomicStateList && viewportWidth > 0) {
 
             const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
-
-            if (isWGV) {
+            
+            if (isWGV || this.isMultiLocusMode()) {
                 this.centerGuide.forcedHide();
             } else {
                 this.centerGuide.forcedShow();
