@@ -204,6 +204,8 @@ var igv = (function (igv) {
 
         makeBlocks(alignment, record);
 
+        return alignment;
+
     }
 
 
