@@ -187,7 +187,7 @@ var igv = (function (igv) {
 
             const featureList = options.features;
 
-            if (featureList) {
+            if (featureList && featureList.length > 0) {
 
                 if (self.isLog === undefined) checkForLog(featureList);
 
