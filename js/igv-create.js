@@ -129,55 +129,39 @@ var igv = (function (igv) {
             .then(function (ignore) {
 
                 if (false === config.showTrackLabels) {
-
                     browser.hideTrackLabels();
-
                 } else {
-
                     browser.showTrackLabels();
-
                     if (browser.trackLabelControl) {
                         browser.trackLabelControl.setState(browser.trackLabelsVisible);
                     }
                 }
 
                 if (false === config.showCursorTrackingGuide) {
-
-                    browser.hideCursorGuide();
-
+                    browser.cursorGuide.doHide();
                 } else {
-
-                    browser.showCursorGuide();
-                    browser.cursorGuide.setState(browser.cursorGuideVisible);
-
+                    browser.cursorGuide.doShow();
                 }
 
                 if (false === config.showCenterGuide) {
-
-                    browser.hideCenterGuide();
-
+                    browser.centerGuide.doHide();
                 } else {
-
-                    browser.showCenterGuide();
-                    browser.centerGuide.setState(browser.centerGuideVisible);
-
+                    browser.centerGuide.doShow();
                 }
 
-                // multi-locus mode
-                if (browser.genomicStateList.length > 1) {
+                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[ 0 ].referenceFrame);
 
-                    // TODO: This is temporary until implement multi-locus center guides
-                    browser.centerGuide.disable();
-
-                }
-                // whole-genome
-                else if ('all' === browser.genomicStateList[0].locusSearchString) {
-                    browser.centerGuide.disable();
-                    browser.disableZoomWidget();
+                // multi-locus mode or isWGV
+                if (browser.isMultiLocusMode() || isWGV) {
+                    browser.centerGuide.forcedHide();
+                } else {
+                    browser.centerGuide.forcedShow();
                 }
 
                 igv.xhr.startup();
-                
+
+                browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
+
                 return browser;
             })
 
@@ -243,6 +227,7 @@ var igv = (function (igv) {
         $navigation = $('<div>', {class: 'igv-navbar'});
         $controls.append($navigation);
         browser.$navigation = $navigation;
+        browser.navbarManager = new igv.NavbarManager(browser);
 
         $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
         $navigation.append($igv_nav_bar_left_container);
@@ -256,12 +241,12 @@ var igv = (function (igv) {
         $igv_nav_bar_left_container.append(logoDiv);
 
         // current genome
-        browser.$current_genome = $('<div>', {class: 'igv-current_genome'});
+        browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
         $igv_nav_bar_left_container.append(browser.$current_genome);
         browser.$current_genome.text('');
 
         //
-        $genomic_location = $('<div>', {class: 'igv-genomic-location'});
+        $genomic_location = $('<div>', {class: 'igv-nav-bar-genomic-location'});
         $igv_nav_bar_left_container.append($genomic_location);
 
         // chromosome select widget
@@ -324,6 +309,7 @@ var igv = (function (igv) {
 
         $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
         $igv_nav_bar_right_container.append($toggle_button_container);
+        browser.$toggle_button_container = $toggle_button_container;
 
         // cursor guide
         browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
@@ -369,20 +355,20 @@ var igv = (function (igv) {
             config.showCursorTrackingGuideButton = true;
         }
 
-        if (undefined === config.showCursorTrackingGuide) {
-            config.showCursorTrackingGuide = false;
-        }
-
         if (undefined === config.showCenterGuideButton) {
             config.showCenterGuideButton = true;
         }
 
-        if (undefined === config.showCenterGuide) {
-            config.showCenterGuide = false;
-        }
-
         if (undefined === config.showTrackLabelButton) {
             config.showTrackLabelButton = true;
+        }
+
+        if (undefined === config.showCursorTrackingGuide) {
+            config.showCursorTrackingGuide = false;
+        }
+
+        if (undefined === config.showCenterGuide) {
+            config.showCenterGuide = false;
         }
 
         if (undefined === config.showTrackLabels) {
