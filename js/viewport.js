@@ -476,7 +476,7 @@ var igv = (function (igv) {
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const namespace = '.ruler_track_viewport_' + index;
 
-        console.log(' enable ruler mouse handler ' + index);
+        // console.log(' enable ruler mouse handler ' + index);
 
         let self = this;
         this.$viewport.on('click' + namespace, (e) => {
@@ -509,7 +509,7 @@ var igv = (function (igv) {
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const namespace = '.ruler_track_viewport_' + index;
 
-        console.log('disable ruler mouse handler ' + index);
+        // console.log('disable ruler mouse handler ' + index);
 
         this.$viewport.off(namespace);
     }

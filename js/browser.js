@@ -43,7 +43,7 @@ var igv = (function (igv) {
         this.trackViews = [];
 
         this.trackLabelsVisible = true;
-        this.centerGuideVisible = false;
+        this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
 
         this.featureDB = {};   // Hash of name -> feature, used for search function.
@@ -109,6 +109,26 @@ var igv = (function (igv) {
             }
         }
     }
+
+    igv.Browser.prototype.isMultiLocusMode = function () {
+        return this.genomicStateList && this.genomicStateList.length > 1;
+    };
+
+    igv.Browser.prototype.isMultiLocusWholeGenomeView = function () {
+
+        if (undefined === this.genomicStateList || 1 === this.genomicStateList.length) {
+            return false;
+        }
+
+        for (let genomicState of this.genomicStateList) {
+            const chromosomeName = genomicState.referenceFrame.chrName.toLowerCase();
+            if ('all' === chromosomeName) {
+                return true;
+            }
+        }
+
+        return false;
+    };
 
     igv.isWholeGenomeView = function (referenceFrame) {
         let chromosomeName = referenceFrame.chrName.toLowerCase();
@@ -455,30 +475,18 @@ var igv = (function (igv) {
         }
     };
 
-
-    igv.Browser.prototype.isMultiLocus = function () {
-        return this.genomicStateList && this.genomicStateList.length > 1;
-    };
-
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-        // multi-locus mode
-        if (genomicStateList.length > 1) {
-            this.centerGuide.disable();
-            this.zoomWidget.hideSlider();
+        const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame));
+
+        if (isWGV || this.isMultiLocusMode()) {
+            this.centerGuide.forcedHide();
+        } else {
+            this.centerGuide.forcedShow();
         }
-        // whole-genome
-        else if ('all' === genomicStateList[0].locusSearchString) {
-            this.centerGuide.disable();
-            this.disableZoomWidget();
-        }
-        // single locus
-        else {
-            this.centerGuide.enable();
-            this.enableZoomWidget();
-            this.zoomWidget.showSlider();
-        }
+
+        this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
@@ -524,19 +532,6 @@ var igv = (function (igv) {
         this.cursorGuideVisible = false;
     };
 
-    // // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-    // $(this.trackContainerDiv).on('mousemove.cursorTrackingGuide', igv.throttle(function (e) {
-    //     var exe;
-    //
-    //     e.preventDefault();
-    //
-    //     exe = Math.max(50, igv.translateMouseCoordinates(e, self.trackContainerDiv).x);
-    //     exe = Math.min(self.trackContainerDiv.clientWidth - 65, exe);
-    //
-    //     self.$cursorTrackingGuide.css({left: exe + 'px'});
-    // }, 10));
-
-
     igv.Browser.prototype.showCursorGuide = function () {
         this.cursorGuide.$guide.show();
         this.cursorGuideVisible = true;
@@ -545,21 +540,13 @@ var igv = (function (igv) {
     // center guide
     igv.Browser.prototype.hideCenterGuide = function () {
         this.centerGuide.$container.hide();
-        this.centerGuideVisible = false;
+        this.isCenterGuideVisible = false;
     };
 
     igv.Browser.prototype.showCenterGuide = function () {
         this.centerGuide.$container.show();
         this.centerGuide.resize();
-        this.centerGuideVisible = true;
-    };
-
-    igv.Browser.prototype.disableZoomWidget = function () {
-        this.zoomWidget.hide();
-    };
-
-    igv.Browser.prototype.enableZoomWidget = function () {
-        this.zoomWidget.show();
+        this.isCenterGuideVisible = true;
     };
 
     igv.Browser.prototype.loadTrackList = function (configList) {
@@ -600,7 +587,6 @@ var igv = (function (igv) {
                 return loadedTracks;
             })
     };
-
 
     function knowHowToLoad(config) {
 
@@ -896,7 +882,7 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.visibilityChange = function () {
         this.resize();
-    }
+    };
 
     igv.Browser.prototype.resize = function () {
 
@@ -910,6 +896,17 @@ var igv = (function (igv) {
         }
 
         if (this.genomicStateList && viewportWidth > 0) {
+
+            const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
+            
+            if (isWGV || this.isMultiLocusMode()) {
+                this.centerGuide.forcedHide();
+            } else {
+                this.centerGuide.forcedShow();
+            }
+
+            this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
+
             this.genomicStateList.forEach(function (gstate) {
                 const referenceFrame = gstate.referenceFrame;
                 if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.initialEnd) {
@@ -1031,8 +1028,7 @@ var igv = (function (igv) {
             })
         }
     };
-
-
+    
     igv.Browser.prototype.loadInProgress = function () {
         var i;
         for (i = 0; i < this.trackViews.length; i++) {
