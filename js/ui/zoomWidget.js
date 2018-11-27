@@ -82,19 +82,19 @@ var igv = (function (igv) {
 
     igv.ZoomWidget.prototype.hide = function () {
         this.$zoomContainer.hide();
-    }
+    };
 
     igv.ZoomWidget.prototype.show = function () {
         this.$zoomContainer.show()
-    }
+    };
 
     igv.ZoomWidget.prototype.hideSlider = function () {
         this.$slider.hide();
-    }
+    };
 
     igv.ZoomWidget.prototype.showSlider = function () {
         this.$slider.show();
-    }
+    };
 
     return igv;
 

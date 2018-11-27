@@ -220,7 +220,7 @@ var igv = (function (igv) {
 
         BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
-            if (this.browser.isMultiLocus()) {
+            if (this.browser.isMultiLocusMode()) {
                 ctx.clearRect(0, 0, pixelWidth, pixelHeight);
             }
             else {
