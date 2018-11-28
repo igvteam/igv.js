@@ -9,8 +9,7 @@
   border-style: solid;
   border-width: 2px;
   border-color: white;
-  border-radius: 4px;
-  margin: 1px; }
+  border-radius: 4px; }
 
 .igv-colorpicker-menu-close-button {
   display: flex;
@@ -38,9 +37,6 @@
   position: absolute;
   top: 0;
   left: 0;
-  border-style: solid;
-  border-width: thin;
-  border-color: #dddddd;
   z-index: 2048;
   background-color: white;
   cursor: pointer;
