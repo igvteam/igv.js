@@ -453,7 +453,7 @@ var igv = (function (igv) {
 
 
         SegTrack.prototype.supportsWholeGenome = function () {
-            return true;
+            return this.featureSource.supportsWholeGenome();
         }
 
 

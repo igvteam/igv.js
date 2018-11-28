@@ -92,6 +92,10 @@ var igv = (function (igv) {
 
     };
 
+    igv.FeatureSource.prototype.supportsWholeGenome = function () {
+        return !this.queryable;
+    }
+
     igv.FeatureSource.prototype.getFileHeader = function () {
 
         const self = this;
@@ -188,7 +192,7 @@ var igv = (function (igv) {
                 const isQueryable = self.queryable;
 
                 if ("all" === chr.toLowerCase()) {
-                    if (isQueryable) {
+                    if (isQueryable) {    // Strange test -- what it really means is are we querying for specific regions
                         return [];
                     }
                     else {

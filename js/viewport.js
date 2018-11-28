@@ -202,6 +202,22 @@ var igv = (function (igv) {
         }
 
         return true;
+
+
+        function showZoomInNotice() {
+
+            const referenceFrame = this.genomicState.referenceFrame;
+
+            if(referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+                return true;
+            }
+            else {
+                return (
+                    this.trackView.track.visibilityWindow !== undefined &&
+                    this.trackView.track.visibilityWindow > 0 &&
+                    (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow));
+            }
+        }
     }
 
     igv.Viewport.prototype.shift = function () {
@@ -461,16 +477,6 @@ var igv = (function (igv) {
         }
     }
 
-    function showZoomInNotice() {
-
-        const referenceFrame = this.genomicState.referenceFrame;
-
-        return (
-            this.trackView.track.visibilityWindow !== undefined &&
-            this.trackView.track.visibilityWindow > 0 &&
-            (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow)) ||
-            (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome());
-    }
 
     function viewIsReady() {
         return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
