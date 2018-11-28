@@ -113,28 +113,28 @@ var igv = (function (igv) {
                     "FILL": "Fill",
                 };
 
-                ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
-                    menuItems.push(
-                        {
-                            object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                            click: function () {
-                                self.browser.popover.hide();
-                                self.displayMode = displayMode;
-                                self.config.displayMode = displayMode;
-                                self.trackView.checkContentHeight();
-                                self.trackView.repaintViews();
-                            }
-                        });
-                })
+            ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
+                menuItems.push(
+                    {
+                        object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                        click: function () {
+                            self.browser.popover.hide();
+                            self.displayMode = displayMode;
+                            self.config.displayMode = displayMode;
+                            self.trackView.checkContentHeight();
+                            self.trackView.repaintViews();
+                        }
+                    });
+            })
 
             return menuItems;
-                //
-                // {
-                //     name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
-                //     click: function () {
-                //         self.toggleSampleHeight();
-                //     }
-                // }
+            //
+            // {
+            //     name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
+            //     click: function () {
+            //         self.toggleSampleHeight();
+            //     }
+            // }
 
 
         };
@@ -205,7 +205,6 @@ var igv = (function (igv) {
                 })
 
 
-                // const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
                 let sampleHeight;
                 let border;
                 switch (this.displayMode) {
@@ -267,10 +266,12 @@ var igv = (function (igv) {
 
                     // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                     let sh = sampleHeight;
-                    if(sampleHeight < 0.25) {
-                       const f = 0.1 + 2 * Math.abs(value);
-                       sh = Math.min(1, f * sampleHeight);
+                    if (sampleHeight < 0.25) {
+                        const f = 0.1 + 2 * Math.abs(value);
+                        sh = Math.min(1, f * sampleHeight);
                     }
+
+                    segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
                     ctx.fillRect(px, y, pw, sh - 2 * border);
 
                     //igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
@@ -283,11 +284,11 @@ var igv = (function (igv) {
 
 
             function checkForLog(featureList) {
-                var i;
-                if (self.isLog === undefined) {
+
+                if (self.isLog === undefined && featureList.length > 10) {
                     self.isLog = false;
-                    for (i = 0; i < featureList.length; i++) {
-                        if (featureList[i].value < 0) {
+                    for (let feature of featureList) {
+                        if (feature.value < 0) {
                             self.isLog = true;
                             return;
                         }
@@ -347,6 +348,7 @@ var igv = (function (igv) {
 
                     }
 
+
                     // Now sort sample names by score
 
                     const d2 = (direction === "ASC" ? 1 : -1);
@@ -354,8 +356,8 @@ var igv = (function (igv) {
 
                         var s1 = scores[a];
                         var s2 = scores[b];
-                        if (!s1) s1 = Number.MAX_VALUE;
-                        if (!s2) s2 = Number.MAX_VALUE;
+                        if (!s1) s1 = d2 * Number.MAX_VALUE;
+                        if (!s2) s2 = d2 * Number.MAX_VALUE;
 
                         if (s1 == s2) return 0;
                         else if (s1 > s2) return d2;
@@ -379,7 +381,8 @@ var igv = (function (igv) {
 
             const items = [];
 
-            for(let f of featureList) {}
+            for (let f of featureList) {
+            }
             featureList.forEach(function (f) {
                 extractPopupData(f, items);
 
@@ -400,16 +403,12 @@ var igv = (function (igv) {
             }
 
             function filterByRow(features, y) {
-                if (!features || 'COLLAPSED' === self.displayMode) {
-                    return features;
-                }
-                else {
-                    let row = 'SQUISHED' === self.displayMode ? Math.floor(y / self.squishedRowHeight) : Math.floor(y / self.expandedRowHeight);
 
                     return features.filter(function (feature) {
-                        return feature.row === undefined || row === feature.row;
-                    })
-                }
+                        const rect = feature.pixelRect;
+                        return rect && y >= rect.y && y <= (rect.y + rect.h);
+                    });
+
             }
         }
 
@@ -471,6 +470,7 @@ var igv = (function (igv) {
             }
         }
     }
+
 
     return igv;
 
