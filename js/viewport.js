@@ -538,6 +538,10 @@ var igv = (function (igv) {
         return $(this.contentDiv).height();
     };
 
+    igv.Viewport.prototype.getContentTop = function () {
+        return this.contentDiv.offsetTop;
+    }
+
     igv.Viewport.prototype.isLoading = function () {
         return this.loading;
     };
