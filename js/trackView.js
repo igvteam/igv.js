@@ -316,7 +316,9 @@ var igv = (function (igv) {
         const config =
             {
                 $parent: $(this.trackDiv),
-                width: 456,
+
+                width: 384,
+                
                 height: undefined,
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
