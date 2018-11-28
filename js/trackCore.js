@@ -491,7 +491,12 @@ var igv = (function (igv) {
                     $e.text(item.label)
                 }
                 else if (typeof item === 'string') {
-                    $e = $(item);
+
+                    if (item.startsWith("<")) {
+                        $e = $(item);
+                    } else {
+                        $e = $("<div>" + item + "</div>");
+                    }
                 }
 
                 if (0 === i) {

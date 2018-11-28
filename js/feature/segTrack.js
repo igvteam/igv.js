@@ -113,6 +113,9 @@ var igv = (function (igv) {
                     "FILL": "Fill",
                 };
 
+            menuItems.push("<hr/>");
+            menuItems.push("Sample Height");
+
             ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
                 menuItems.push(
                     {
@@ -128,23 +131,9 @@ var igv = (function (igv) {
             })
 
             return menuItems;
-            //
-            // {
-            //     name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
-            //     click: function () {
-            //         self.toggleSampleHeight();
-            //     }
-            // }
-
 
         };
-        //
-        // SegTrack.prototype.toggleSampleHeight = function () {
-        //
-        //     this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
-        //     this.trackView.checkContentHeight();
-        //     this.trackView.repaintViews();
-        // };
+
 
         SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
