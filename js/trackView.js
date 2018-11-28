@@ -672,6 +672,13 @@ var igv = (function (igv) {
         this.scrollbar.moveScrollerBy(delta);
     };
 
+    igv.TrackView.prototype.resetScroll = function () {
+        this.viewports.forEach(function (viewport) {
+            $(viewport.contentDiv).css("top", "0px");
+        });
+        this.scrollbar.update();
+    }
+
     igv.createColorSwatchSelector = function($genericContainer, colorHandler, defaultColor) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);

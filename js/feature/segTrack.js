@@ -121,6 +121,7 @@ var igv = (function (igv) {
                             self.browser.popover.hide();
                             self.displayMode = displayMode;
                             self.config.displayMode = displayMode;
+                            self.trackView.resetScroll();
                             self.trackView.checkContentHeight();
                             self.trackView.repaintViews();
                         }
