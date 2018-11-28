@@ -132,10 +132,6 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
 
-        if (this.track instanceof igv.RulerTrack) {
-            this.track.removeRulerSweeperWithLocusIndex(index);
-        }
-
         this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
 
@@ -320,7 +316,9 @@ var igv = (function (igv) {
         const config =
             {
                 $parent: $(this.trackDiv),
-                width: 456,
+
+                width: 384,
+                
                 height: undefined,
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
@@ -329,9 +327,7 @@ var igv = (function (igv) {
 
         this.colorPicker = new igv.genericContainer(config);
 
-        createColorSwatchSelector.call(this, this.colorPicker.$container, function (rgb) {
-            self.setColor(rgb);
-        });
+        igv.createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
 
         self.colorPicker.$container.hide();
 
@@ -676,17 +672,17 @@ var igv = (function (igv) {
         this.scrollbar.moveScrollerBy(delta);
     };
 
-    function createColorSwatchSelector($genericContainer, colorHandler) {
+    igv.createColorSwatchSelector = function($genericContainer, colorHandler, defaultColor) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);
 
-        if (this.track.color){
+        if (defaultColor){
 
             // Remove 'snow' color.
             appleColors.splice(11,1);
 
             // Add default color.
-            appleColors.unshift( igv.Color.rgbToHex(this.track.color) );
+            appleColors.unshift( igv.Color.rgbToHex(defaultColor) );
         }
 
         for (let color of appleColors) {
@@ -720,7 +716,7 @@ var igv = (function (igv) {
 
         }
 
-    }
+    };
 
     const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 

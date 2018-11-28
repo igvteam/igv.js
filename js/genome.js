@@ -235,32 +235,27 @@ var igv = (function (igv) {
      */
     Genome.prototype.getChromosomeCoordinate = function (genomeCoordinate) {
 
-        var self = this,
-            lastChr,
-            lastCoord,
-            i,
-            name,
-            cumulativeOffset;
+        if (this.cumulativeOffsets === undefined) {
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
+        }
 
-        if (this.cumulativeOffsets === undefined) computeCumulativeOffsets.call(this);
+        let lastChr = undefined;
+        let lastCoord = 0;
+        for (let name of this.wgChromosomeNames) {
 
-        // Use a for loop, not a forEach, so we can break (return)
-        for (i = 0; i < this.wgChromosomeNames.length; i++) {
-            name = this.wgChromosomeNames[i];
-            cumulativeOffset = self.cumulativeOffsets[name];
-
+            const cumulativeOffset = this.cumulativeOffsets[name];
             if (cumulativeOffset > genomeCoordinate) {
-                var position = genomeCoordinate - lastCoord;
-                return {chr: lastChr, position: position};
+                const position = genomeCoordinate - lastCoord;
+                return { chr: lastChr, position: position };
             }
             lastChr = name;
             lastCoord = cumulativeOffset;
         }
 
         // If we get here off the end
-        return {chr: _.last(this.chromosomeNames), position: 0};
+        return { chr: this.chromosomeNames[ this.chromosomeNames.length - 1 ], position: 0 };
 
-    }
+    };
 
 
     /**
@@ -268,26 +263,30 @@ var igv = (function (igv) {
      * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
      */
     Genome.prototype.getCumulativeOffset = function (chr) {
-
-        var self = this,
-            queryChr = this.getChromosomeName(chr);
-
+        
         if (this.cumulativeOffsets === undefined) {
-            computeCumulativeOffsets.call(this);
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
         }
+
+        const queryChr = this.getChromosomeName(chr);
         return this.cumulativeOffsets[queryChr];
+    };
 
-        function computeCumulativeOffsets() {
-            var cumulativeOffsets = {},
-                offset = 0;
+    function computeCumulativeOffsets() {
 
-            self.wgChromosomeNames.forEach(function (name) {
-                cumulativeOffsets[name] = Math.floor(offset);
-                var chromosome = self.getChromosome(name);
-                offset += chromosome.bpLength;
-            });
-            self.cumulativeOffsets = cumulativeOffsets;
+        let self = this;
+        let acc = {};
+        let offset = 0;
+        for (let name of self.wgChromosomeNames) {
+
+            acc[name] = Math.floor(offset);
+
+            const chromosome = self.getChromosome(name);
+
+            offset += chromosome.bpLength;
         }
+
+        return acc;
     }
 
     /**

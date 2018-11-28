@@ -152,6 +152,8 @@
     <script src="../vendor/rbtree.js"></script>
     <script src="../js/canvas2svg.js"></script>
 
+    <script src="../js/navbarManager.js"></script>
+
 </head>
 
 <body>
@@ -183,20 +185,16 @@
 
             .then(function (google) {
 
-                const igvDiv = document.getElementById("igvDiv");
-
                 const options =
                     {
-                        // showRuler: false,
+                        // locus: 'egfr',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
-
                     };
 
-                igv.createBrowser(igvDiv, options)
+                igv.createBrowser(document.getElementById('igvDiv'), options)
                     .then(function (browser) {
-                        b = browser;
                         igvdev.createTrackList(document.getElementById('trackList'), browser);
                         return browser;
                     })

@@ -38,19 +38,13 @@ var igv = (function (igv) {
 
         this.setWidth(width);
 
-
         if ("sequence" === trackView.track.type) {
+
             this.$viewport.addClass('igv-viewport-sequence');
-        }
 
-        if ('ruler' === trackView.track.type) {
+        } else if ('ruler' === trackView.track.type) {
 
-            this.$wholeGenomeContainer = $('<div>', {class: 'igv-whole-genome-container'});
-            $(this.contentDiv).append(this.$wholeGenomeContainer);
-
-            const rulerSweeper = new igv.RulerSweeper(this);
-            trackView.track.rulerSweepers.push(rulerSweeper);
-            rulerSweeper.layoutWholeGenome();
+            this.rulerSweeper = new igv.RulerSweeper(this);
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
@@ -62,27 +56,27 @@ var igv = (function (igv) {
 
             $(this.contentDiv).append(this.$rulerLabel);
 
+            if (true === igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
+                enableRulerTrackMouseHandlers.call(this);
+            } else {
+                disableRulerTrackMouseHandlers.call(this);
+            }
 
         } else {
             addMouseHandlers.call(this);
 
-            const dimen = 32;
             const $spinnerContainer = $('<div class="igv-viewport-spinner">');
+            const dimen = 32;
             $spinnerContainer.css({'font-size': dimen + 'px'});
 
             this.$spinner = igv.createIcon("spinner");
             $spinnerContainer.append(this.$spinner);
+
             this.$viewport.append($spinnerContainer);
             this.stopSpinner();
+
             this.popover = new igv.Popover(self.browser.$content);
 
-        }
-
-        if ("sequence" === trackView.track.type) {
-            // do nuthin
-        } else if ('ruler' === trackView.track.type) {
-            // do nuthin
-        } else {
             self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
         }
 
@@ -288,15 +282,20 @@ var igv = (function (igv) {
             return;
         }
 
+        const isWGV = igv.isWholeGenomeView(this.genomicState.referenceFrame);
+
+        const features = tile.features;
+
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-        const bpPerPixel = tile.bpPerPixel;
-        const features = tile.features;
-        const bpStart = tile.startBP;
-        const bpEnd = tile.endBP;
-        let pixelWidth = Math.ceil((bpEnd - bpStart) / bpPerPixel);
+
+        const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
+        const bpStart = isWGV ? 0 : tile.startBP;
+        const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
+        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+
         let pixelHeight = self.getContentHeight();
-        if (pixelWidth == 0 || pixelHeight === 0) {
+        if (0 === pixelWidth || 0 === pixelHeight) {
             if (self.canvas) {
                 $(self.canvas).remove();
             }
@@ -319,17 +318,23 @@ var igv = (function (igv) {
             console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
         }
 
+
         const drawConfiguration =
             {
                 features: features,
+
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
+
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
+
                 referenceFrame: referenceFrame,
                 genomicState: genomicState,
+
                 selection: self.selection,
+
                 viewport: self,
                 viewportWidth: self.$viewport.width(),
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
@@ -456,7 +461,6 @@ var igv = (function (igv) {
         }
     }
 
-
     function showZoomInNotice() {
 
         const referenceFrame = this.genomicState.referenceFrame;
@@ -472,6 +476,48 @@ var igv = (function (igv) {
         return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
     }
 
+    function enableRulerTrackMouseHandlers() {
+
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const namespace = '.ruler_track_viewport_' + index;
+
+        // console.log(' enable ruler mouse handler ' + index);
+
+        let self = this;
+        this.$viewport.on('click' + namespace, (e) => {
+
+            const pixel = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+            const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
+
+            let searchString;
+
+            if (1 === self.browser.genomicStateList.length) {
+                searchString = self.browser.genome.getChromosomeCoordinate(bp).chr;
+            } else {
+
+                let loci = self.browser.genomicStateList.map((genomicState) => { return genomicState.locusSearchString; });
+
+                loci[ self.browser.genomicStateList.indexOf(self.genomicState) ] = self.browser.genome.getChromosomeCoordinate(bp).chr;
+
+                searchString = loci.join(' ');
+            }
+
+            self.browser.search(searchString);
+        });
+
+
+    }
+
+    function disableRulerTrackMouseHandlers() {
+
+
+        const index = this.browser.genomicStateList.indexOf(this.genomicState);
+        const namespace = '.ruler_track_viewport_' + index;
+
+        // console.log('disable ruler mouse handler ' + index);
+
+        this.$viewport.off(namespace);
+    }
 
     igv.Viewport.prototype.setContentHeight = function (contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
@@ -525,8 +571,7 @@ var igv = (function (igv) {
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const id = str.toLowerCase() + '_genomic_index_' + index;
 
-        // If present, paint axis canvas. Only in first multi-locus panel
-
+        // If present, paint axis canvas. Only in first multi-locus panel.
         if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
 
             const w = $(this.trackView.controlCanvas).width();
@@ -541,125 +586,51 @@ var igv = (function (igv) {
 
         const dx = offset.deltaX + (index * context.multiLocusGap);
         const dy = offset.deltaY + yScrollDelta;
-        let group = context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-        if ('ruler' === this.trackView.track.type && igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
-            drawWholeGenomeRuler.call(this, context, group);
-        } else {
+        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
 
-            const width = this.$viewport.width();
-            const height = this.$viewport.height();
+        const width = this.$viewport.width();
+        const height = this.$viewport.height();
 
-            let referenceFrame = this.genomicState.referenceFrame;
+        let referenceFrame = this.genomicState.referenceFrame;
 
-            context.save();
+        context.save();
 
-            const drawConfig =
-                {
-                    context: context,
+        const drawConfig =
+            {
+                context: context,
 
-                    viewport: this,
+                viewport: this,
 
-                    referenceFrame: referenceFrame,
+                referenceFrame: referenceFrame,
 
-                    genomicState: this.genomicState,
+                genomicState: this.genomicState,
 
-                    pixelWidth: width,
-                    pixelHeight: height,
+                pixelWidth: width,
+                pixelHeight: height,
 
-                    viewportWidth: width,
+                viewportWidth: width,
 
-                    viewportContainerX: 0,
-                    viewportContainerWidth: this.browser.viewportContainerWidth(),
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
 
-                    bpStart: referenceFrame.start,
-                    bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
+                bpStart: referenceFrame.start,
+                bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
 
-                    bpPerPixel: referenceFrame.bpPerPixel,
+                bpPerPixel: referenceFrame.bpPerPixel,
 
-                    selection: this.selection
-                };
+                selection: this.selection
+            };
 
-            const features = this.tile ? this.tile.features : [];
+        const features = this.tile ? this.tile.features : [];
 
-            draw.call(this, drawConfig, features);
+        draw.call(this, drawConfig, features);
 
-            context.restore();
+        context.restore();
 
-        }
 
 
     };
-
-    function drawWholeGenomeRuler(svgContext, group) {
-
-        const index = this.browser.genomicStateList.indexOf(this.genomicState);
-        const rulerSweeper = this.trackView.track.rulerSweepers[index];
-
-        let dx;
-        let dy;
-        let $selection = rulerSweeper.viewport.$wholeGenomeContainer.find('div');
-        $selection.each(function (i) {
-            const domRect = $(this).get(0).getBoundingClientRect();
-
-            if (0 === i) {
-                dx = domRect.x;
-                dy = domRect.y;
-            }
-
-            let x = domRect.x - dx;
-            let y = domRect.y - dy;
-            let w = domRect.width;
-            let h = domRect.height;
-
-            let stroke_dash_array;
-            if (i === $selection.length - 1) {
-                stroke_dash_array = '0 ' + w + ' 0 ' + h + ' 0 ' + w + ' 0 ' + h;
-            } else {
-                stroke_dash_array = '0 ' + w + ' ' + h + ' ' + w + ' 0 ' + h;
-            }
-
-            const stroke_width = 1;
-            let rect_settings =
-                {
-                    x: x,
-                    width: w,
-                    y: y,
-                    height: h,
-
-                    // fill: igv.Color.randomRGB(200, 255),
-                    fill: 'white',
-
-                    'stroke-width': stroke_width,
-                    'stroke': 'black',
-                    'stroke-dasharray': stroke_dash_array
-                };
-
-            let rect = svgContext.__createElement('rect', rect_settings, true);
-            group.appendChild(rect);
-
-            let text_settings =
-                {
-                    "font-family": 'sans-serif',
-                    "font-size": '10px',
-                    "font-style": 'normal',
-                    "font-weight": 'normal',
-                    "text-anchor": 'middle',
-                    "dominant-baseline": 'middle',
-                    x: x + w / 2,
-                    y: y + h / 2,
-                    fill: 'grey'
-                };
-
-            let text = svgContext.__createElement('text', text_settings, true);
-            group.appendChild(text);
-
-            let str = $(this).find('span').text();
-            text.appendChild(svgContext.__document.createTextNode(str));
-
-        });
-
-    }
 
     igv.Viewport.prototype.saveSVG = function () {
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
