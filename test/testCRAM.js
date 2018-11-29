@@ -52,6 +52,33 @@ function runCRAMTests() {
             });
     });
 
+    QUnit.test("CRAM alignments", function (assert) {
+
+        var done = assert.async();
+
+        const cramReader = new igv.CramReader({
+                url: 'data/cram/na12889.cram',
+                indexURL: 'data/cram/na12889.cram.crai'
+            },
+            genome);
+
+
+        cramReader.readAlignments('chr1', 155140000, 155150000)
+
+            .then(function (alignmentContainer) {
+
+                assert.ok(alignmentContainer);
+
+
+                done();
+            })
+
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false, error);  // failed
+
+            });
+    });
 
 }
 

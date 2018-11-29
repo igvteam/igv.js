@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
 
@@ -78,15 +80,15 @@ var igv = (function (igv) {
 
                 const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
-                const chrId = chrToIndex[queryChr];
+                const chrIdx =  header.chrToIndex[queryChr];
 
                 const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                if (chrId === undefined) {
+                if (chrIdx === undefined) {
                     return Promise.resolve(alignmentContainer);
 
                 } else {
-                    return self.indexedCramFile.getRecordsForRange(chrId, bpStart, bpEnd)
+                    return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
 
                         .then(function (records) {
 
@@ -99,17 +101,17 @@ var igv = (function (igv) {
                                 if (refID < 0) {
                                     continue;   // unmapped read
                                 }
-                                else if (chrIdx && (refID > chrIdx || pos > max)) {
+                                else if (refID > chrIdx || pos > bpEnd) {
                                     return;    // off right edge, we're done
                                 }
-                                else if (chrIdx && (refID < chrIdx)) {
+                                else if (refID < chrIdx) {
                                     continue;   // Sequence to left of start, not sure this is possible
                                 }
-                                if (alignmentEnd < min) {
+                                if (alignmentEnd < bpStart) {
                                     continue;
                                 }  // Record out-of-range "to the left", skip to next one
 
-                                const alignment = decodeCramRecord(record, chr);
+                                const alignment = decodeCramRecord(record, header.chrNames);
 
                                 //  if (filter.pass(alignment)) {
                                 alignmentContainer.push(alignment);
@@ -194,7 +196,7 @@ var igv = (function (igv) {
             };
         }
 
-        alignment.seq = record.record.readBases;
+        alignment.seq = record.readBases;
         alignment.qual = record.qualityScores;
         alignment.tagDict = record.tags;
         alignment.pairOrientation = record.getPairOrientation();
@@ -202,7 +204,7 @@ var igv = (function (igv) {
         // TODO -- cigar encoded in tag
         // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
-        makeBlocks(alignment, record);
+        //makeBlocks(alignment, record);
 
         return alignment;
 
