@@ -2041,8 +2041,6 @@ var igv = (function (igv) {
         bytes = new Zlib.RawInflate(compressedBytes).decompress();
         json = String.fromCharCode.apply(null, bytes);
 
-        console.log(json);
-
         return json;
     }
 
