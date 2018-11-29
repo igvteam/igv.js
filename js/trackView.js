@@ -318,7 +318,7 @@ var igv = (function (igv) {
                 $parent: $(this.trackDiv),
 
                 width: 384,
-                
+
                 height: undefined,
                 closeHandler: () => {
                     self.colorPicker.$container.hide();
@@ -335,8 +335,8 @@ var igv = (function (igv) {
 
     igv.TrackView.prototype.presentColorPicker = function () {
         const bbox = this.trackDiv.getBoundingClientRect();
-        this.colorPicker.origin = { x: bbox.x, y: 0 };
-        this.colorPicker.$container.offset( { left: this.colorPicker.origin.x, top: this.colorPicker.origin.y } );
+        this.colorPicker.origin = {x: bbox.x, y: 0};
+        this.colorPicker.$container.offset({left: this.colorPicker.origin.x, top: this.colorPicker.origin.y});
         this.colorPicker.$container.show();
     };
 
@@ -596,7 +596,15 @@ var igv = (function (igv) {
         else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
             this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
         }
+
         if (this.scrollbar) {
+            const currentTop = this.viewports[0].getContentTop();
+            const newTop =  Math.min(0, minContentHeight(this.viewports) - this.$viewportContainer.height());
+            if(currentTop < newTop) {
+                this.viewports.forEach(function (viewport) {
+                    $(viewport.contentDiv).css("top", newTop + "px");
+                });
+            }
             this.scrollbar.update();
         }
     }
@@ -606,13 +614,15 @@ var igv = (function (igv) {
     }
 
     function maxContentHeight(viewports) {
-        var height = 0;
-        viewports.forEach(function (viewport) {
-            var hgt = viewport.getContentHeight();
-            height = Math.max(hgt, height);
-        });
+        return Math.max(viewports.map(function (viewport) {
+            return viewport.getContentHeight();
+        }))
+    }
 
-        return height;
+    function minContentHeight(viewports) {
+        return Math.min(viewports.map(function (viewport) {
+            return viewport.getContentHeight();
+        }))
     }
 
     /**
@@ -672,22 +682,22 @@ var igv = (function (igv) {
         this.scrollbar.moveScrollerBy(delta);
     };
 
-    igv.createColorSwatchSelector = function($genericContainer, colorHandler, defaultColor) {
+    igv.createColorSwatchSelector = function ($genericContainer, colorHandler, defaultColor) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);
 
-        if (defaultColor){
+        if (defaultColor) {
 
             // Remove 'snow' color.
-            appleColors.splice(11,1);
+            appleColors.splice(11, 1);
 
             // Add default color.
-            appleColors.unshift( igv.Color.rgbToHex(defaultColor) );
+            appleColors.unshift(igv.Color.rgbToHex(defaultColor));
         }
 
         for (let color of appleColors) {
 
-            let $swatch = $('<div>', { class: 'igv-color-swatch' });
+            let $swatch = $('<div>', {class: 'igv-color-swatch'});
             $genericContainer.append($swatch);
 
             $swatch.css('background-color', color);
@@ -783,11 +793,17 @@ var igv = (function (igv) {
 
     TrackScrollbar.prototype.moveScrollerBy = function (delta) {
 
+        const y = this.$innerScroll.position().top + delta;
+        this.moveScrollerTo(y);
+
+    }
+
+    TrackScrollbar.prototype.moveScrollerTo = function (y) {
+
 
         const outerScrollHeight = this.$outerScroll.height();
         const innerScrollHeight = this.$innerScroll.height();
 
-        const y = this.$innerScroll.position().top + delta;
         const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
 
         const contentDivHeight = maxContentHeight(this.viewports);
