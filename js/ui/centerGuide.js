@@ -48,7 +48,7 @@ var igv = (function (igv) {
             this.$centerGuideToggle.text('center line');
 
             this.$centerGuideToggle.on('click', function () {
-                if (true === browser.centerGuideVisible) {
+                if (true === browser.isCenterGuideVisible) {
                     self.doHide();
                 } else {
                     self.doShow();
@@ -75,11 +75,11 @@ var igv = (function (igv) {
         this.browser.showCenterGuide();
     };
 
-    igv.CenterGuide.prototype.setState = function (centerGuideVisible) {
+    igv.CenterGuide.prototype.setState = function (isCenterGuideVisible) {
 
         if (this.$centerGuideToggle) {
 
-            if (true === centerGuideVisible) {
+            if (true === isCenterGuideVisible) {
                 this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
             } else {
                 this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
@@ -89,15 +89,28 @@ var igv = (function (igv) {
 
     };
 
-    igv.CenterGuide.prototype.disable = function () {
-        this.doHide();
-        this.$centerGuideToggle.hide();
+    igv.CenterGuide.prototype.forcedHide = function () {
+
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.hide();
+        }
+
+        if (true === this.browser.isCenterGuideVisible) {
+            this.$container.hide();
+        }
+
     };
 
-    igv.CenterGuide.prototype.enable = function () {
+    igv.CenterGuide.prototype.forcedShow = function () {
+
         if (this.$centerGuideToggle) {
             this.$centerGuideToggle.show();
         }
+
+        if (true === this.browser.isCenterGuideVisible) {
+            this.$container.show();
+        }
+
     };
 
     igv.CenterGuide.prototype.repaint = function () {

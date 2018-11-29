@@ -202,6 +202,22 @@ var igv = (function (igv) {
         }
 
         return true;
+
+
+        function showZoomInNotice() {
+
+            const referenceFrame = this.genomicState.referenceFrame;
+
+            if(referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+                return true;
+            }
+            else {
+                return (
+                    this.trackView.track.visibilityWindow !== undefined &&
+                    this.trackView.track.visibilityWindow > 0 &&
+                    (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow));
+            }
+        }
     }
 
     igv.Viewport.prototype.shift = function () {
@@ -230,9 +246,9 @@ var igv = (function (igv) {
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
 
-        const pixelWidth = $(self.contentDiv).width() * 3;
+        const pixelWidth = $(self.contentDiv).width() * 2;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 2));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
 
@@ -302,16 +318,22 @@ var igv = (function (igv) {
             return;
         }
 
+        // Always use high DPI if in compressed display mode, otherwise use preference setting;
+        let devicePixelRatio;
+        if ("FILL" === this.trackView.track.displayMode) {
+            devicePixelRatio = window.devicePixelRatio;
+        } else {
+            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
+        }
+
         // Set limits on canvas size.  See https://github.com/igvteam/igv.js/issues/792
-        const devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         const origPixelHeight = pixelHeight;
         pixelHeight = Math.min(Math.floor(MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)), pixelHeight);
         pixelHeight = Math.min(Math.floor(MAX_PIXEL_HEIGHT) / (devicePixelRatio * devicePixelRatio), pixelHeight);
-        if(pixelHeight < origPixelHeight) {
+        if (pixelHeight < origPixelHeight) {
             console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
         }
 
-        // console.log(pixelHeight);
 
         const drawConfiguration =
             {
@@ -334,7 +356,6 @@ var igv = (function (igv) {
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
-
 
 
         const newCanvas = $('<canvas>').get(0);
@@ -456,16 +477,6 @@ var igv = (function (igv) {
         }
     }
 
-    function showZoomInNotice() {
-
-        const referenceFrame = this.genomicState.referenceFrame;
-
-        return (
-            this.trackView.track.visibilityWindow !== undefined &&
-            this.trackView.track.visibilityWindow > 0 &&
-            (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow)) ||
-            (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome());
-    }
 
     function viewIsReady() {
         return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
@@ -476,7 +487,7 @@ var igv = (function (igv) {
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const namespace = '.ruler_track_viewport_' + index;
 
-        console.log(' enable ruler mouse handler ' + index);
+        // console.log(' enable ruler mouse handler ' + index);
 
         let self = this;
         this.$viewport.on('click' + namespace, (e) => {
@@ -509,7 +520,7 @@ var igv = (function (igv) {
         const index = this.browser.genomicStateList.indexOf(this.genomicState);
         const namespace = '.ruler_track_viewport_' + index;
 
-        console.log('disable ruler mouse handler ' + index);
+        // console.log('disable ruler mouse handler ' + index);
 
         this.$viewport.off(namespace);
     }
@@ -526,6 +537,10 @@ var igv = (function (igv) {
     igv.Viewport.prototype.getContentHeight = function () {
         return $(this.contentDiv).height();
     };
+
+    igv.Viewport.prototype.getContentTop = function () {
+        return this.contentDiv.offsetTop;
+    }
 
     igv.Viewport.prototype.isLoading = function () {
         return this.loading;
@@ -995,7 +1010,12 @@ var igv = (function (igv) {
 
         let track = this.trackView.track;
 
-        if (typeof track.computePixelHeight === 'function') {
+        if ("FILL" === track.displayMode) {
+            this.setContentHeight(this.$viewport.height())
+        }
+
+        else if (typeof track.computePixelHeight === 'function') {
+
             let features = this.cachedFeatures;
 
             if (features) {

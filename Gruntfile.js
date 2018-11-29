@@ -6,28 +6,33 @@ module.exports = function (grunt) {
         pkg: grunt.file.readJSON('package.json'),
 
         qunit_puppeteer: {
-          test: {
-            options: {
-              headless: true,
-              traceSettings: {
-                outputConsole: false,
-                outputAllAssertions: false
-              },
-              qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
+            test: {
+                options: {
+                    headless: true,
+                    traceSettings: {
+                        outputConsole: false,
+                        outputAllAssertions: false
+                    },
+                    qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
+                }
             }
-          }
         },
 
         connect: {
-          server: {
-            options: {
-              port: 8000,
-              base: '.'
+            server: {
+                options: {
+                    port: 8000,
+                    base: '.'
+                }
             }
-          }
         },
         babel: {
+            options: {
+                sourceMap: true,
+                presets: ['@babel/preset-env'],
+                plugins: [["transform-remove-console", {"exclude": ["error", "warn"]}]]
 
+            },
             dist: {
                 files: [
                     {

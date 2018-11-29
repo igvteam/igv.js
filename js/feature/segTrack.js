@@ -105,23 +105,35 @@ var igv = (function (igv) {
 
             const self = this;
 
-            return [
+            const menuItems = [];
+            const lut =
                 {
-                    name: ("SQUISHED" === this.displayMode) ? "Expand sample hgt" : "Squish sample hgt",
-                    click: function () {
-                        self.toggleSampleHeight();
-                    }
-                }
-            ];
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand",
+                    "FILL": "Fill",
+                };
+
+            menuItems.push("<hr/>");
+            menuItems.push("Sample Height");
+
+            ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
+                menuItems.push(
+                    {
+                        object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                        click: function () {
+                            self.browser.popover.hide();
+                            self.displayMode = displayMode;
+                            self.config.displayMode = displayMode;
+                            self.trackView.checkContentHeight();
+                            self.trackView.repaintViews();
+                        }
+                    });
+            })
+
+            return menuItems;
 
         };
 
-        SegTrack.prototype.toggleSampleHeight = function () {
-
-            this.displayMode = ("SQUISHED" === this.displayMode) ? "EXPANDED" : "SQUISHED";
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        };
 
         SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
@@ -154,8 +166,9 @@ var igv = (function (igv) {
         SegTrack.prototype.draw = function (options) {
 
             const self = this;
-            const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
-            const border = ("SQUISHED" === this.displayMode) ? 0 : 1;
+
+            const v2 = igv.Math.log2(2);
+
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
             const pixelHeight = options.pixelHeight;
@@ -163,7 +176,7 @@ var igv = (function (igv) {
 
             const featureList = options.features;
 
-            if (featureList) {
+            if (featureList && featureList.length > 0) {
 
                 if (self.isLog === undefined) checkForLog(featureList);
 
@@ -179,6 +192,27 @@ var igv = (function (igv) {
                 this.sampleKeys.forEach(function (id, index) {
                     samples[id] = index;
                 })
+
+
+                let sampleHeight;
+                let border;
+                switch (this.displayMode) {
+
+                    case "FILL":
+                        sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                        border = 0
+                        break;
+
+                    case "SQUISHED":
+                        sampleHeight = this.squishedRowHeight;
+                        border = 0;
+                        break;
+
+                    default:   // EXPANDED
+                        sampleHeight = this.expandedRowHeight;
+                        border = 1;
+
+                }
 
                 for (let segment of featureList) {
 
@@ -216,7 +250,20 @@ var igv = (function (igv) {
 
                     // const sign = px < 0 ? '-' : '+';
                     // console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
-                    igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+
+                    ctx.fillStyle = color;
+
+                    // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
+                    let sh = sampleHeight;
+                    if (sampleHeight < 0.25) {
+                        const f = 0.1 + 2 * Math.abs(value);
+                        sh = Math.min(1, f * sampleHeight);
+                    }
+
+                    segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
+                    ctx.fillRect(px, y, pw, sh - 2 * border);
+
+                    //igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
                 }
             }
@@ -226,11 +273,11 @@ var igv = (function (igv) {
 
 
             function checkForLog(featureList) {
-                var i;
-                if (self.isLog === undefined) {
+
+                if (self.isLog === undefined && featureList.length > 10) {
                     self.isLog = false;
-                    for (i = 0; i < featureList.length; i++) {
-                        if (featureList[i].value < 0) {
+                    for (let feature of featureList) {
+                        if (feature.value < 0) {
                             self.isLog = true;
                             return;
                         }
@@ -290,6 +337,7 @@ var igv = (function (igv) {
 
                     }
 
+
                     // Now sort sample names by score
 
                     const d2 = (direction === "ASC" ? 1 : -1);
@@ -297,8 +345,8 @@ var igv = (function (igv) {
 
                         var s1 = scores[a];
                         var s2 = scores[b];
-                        if (!s1) s1 = Number.MAX_VALUE;
-                        if (!s2) s2 = Number.MAX_VALUE;
+                        if (!s1) s1 = d2 * Number.MAX_VALUE;
+                        if (!s2) s2 = d2 * Number.MAX_VALUE;
 
                         if (s1 == s2) return 0;
                         else if (s1 > s2) return d2;
@@ -322,7 +370,8 @@ var igv = (function (igv) {
 
             const items = [];
 
-            for(let f of featureList) {}
+            for (let f of featureList) {
+            }
             featureList.forEach(function (f) {
                 extractPopupData(f, items);
 
@@ -343,16 +392,12 @@ var igv = (function (igv) {
             }
 
             function filterByRow(features, y) {
-                if (!features || 'COLLAPSED' === self.displayMode) {
-                    return features;
-                }
-                else {
-                    let row = 'SQUISHED' === self.displayMode ? Math.floor(y / self.squishedRowHeight) : Math.floor(y / self.expandedRowHeight);
 
                     return features.filter(function (feature) {
-                        return feature.row === undefined || row === feature.row;
-                    })
-                }
+                        const rect = feature.pixelRect;
+                        return rect && y >= rect.y && y <= (rect.y + rect.h);
+                    });
+
             }
         }
 
@@ -396,7 +441,7 @@ var igv = (function (igv) {
 
 
         SegTrack.prototype.supportsWholeGenome = function () {
-            return true;
+            return this.featureSource.supportsWholeGenome();
         }
 
 
@@ -414,6 +459,7 @@ var igv = (function (igv) {
             }
         }
     }
+
 
     return igv;
 

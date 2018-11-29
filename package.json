@@ -37,22 +37,19 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@babel/cli": "^7.0.0",
-    "@babel/core": "^7.0.0",
-    "@babel/polyfill": "^7.0.0",
-    "@babel/preset-env": "^7.0.0",
-    "babel-core": "^6.26.3",
+    "@babel/core": "^7.1.6",
+    "@babel/preset-env": "^7.1.6",
     "babel-plugin-transform-remove-console": "^6.9.4",
-    "babel-preset-env": "^1.7.0",
     "grunt": "^1.0.3",
-    "grunt-babel": "^7.0.0",
+    "grunt-babel": "^8.0.0",
     "grunt-contrib-clean": "^1.1.0",
     "grunt-contrib-concat": "^1.0.1",
     "grunt-contrib-connect": "^1.0.2",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify-es": "^3.3.0",
-    "grunt-qunit-puppeteer": "^1.0.10",
+    "grunt-qunit-puppeteer": "^1.0.13",
+    "gulp-babel": "^8.0.0",
     "http-server": "^0.11.1",
-    "shelljs": "^0.8.2"
+    "shelljs": "^0.8.3"
   }
 }
