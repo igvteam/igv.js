@@ -103,6 +103,9 @@
   border-right-width: 1px; }
 
 .igv-navbar {
+  position: relative;
+  top: 0;
+  left: 0;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -115,9 +118,6 @@
   line-height: 32px;
   margin-top: 2px;
   margin-bottom: 4px;
-  position: relative;
-  top: 0;
-  left: 0;
   height: 32px;
   width: 100%;
   border-style: solid;
@@ -132,7 +132,8 @@
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  height: 32px; }
+  height: 32px;
+  line-height: 32px; }
   .igv-nav-bar-left-container .igv-logo {
     width: 34px;
     height: 32px;
@@ -215,15 +216,15 @@
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  height: 100%; }
+  height: 32px;
+  line-height: 32px; }
   .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    height: 100%;
-    margin-right: 8px; }
+    height: 100%; }
     .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
       margin-left: 0;
       margin-right: 4px; }
@@ -235,23 +236,34 @@
   .igv-nav-bar-right-container .igv-zoom-widget {
     color: #737373;
     font-size: 18px;
-    user-select: none;
-    margin-left: 16px;
+    width: 190px;
+    height: 32px;
+    line-height: 32px;
+    margin-left: 8px;
     margin-right: 8px;
-    width: 180px;
+    user-select: none;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
     .igv-nav-bar-right-container .igv-zoom-widget div {
-      cursor: pointer; }
+      cursor: pointer;
+      margin-left: unset;
+      margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
-      margin-right: 4px; }
+      height: auto;
+      margin-left: unset;
+      margin-right: 8px; }
     .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
-      margin-left: 4px; }
+      height: auto;
+      margin-left: 8px;
+      margin-right: unset; }
+    .igv-nav-bar-right-container .igv-zoom-widget div:nth-child(even) {
+      height: fit-content; }
     .igv-nav-bar-right-container .igv-zoom-widget input {
-      width: 100%; }
+      display: block;
+      width: 125px; }
     .igv-nav-bar-right-container .igv-zoom-widget svg {
       display: block; }
   .igv-nav-bar-right-container .igv-zoom-widget-900 {
