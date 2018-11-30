@@ -22,10 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+"use strict";
 
 var igv = (function (igv) {
 
-    "use strict";
 
     igv.BamSource = function (config, genome) {
 
@@ -59,6 +59,7 @@ var igv = (function (igv) {
         }
 
         this.viewAsPairs = config.viewAsPairs;
+        this.showSoftClips = config.showSoftClips;
     };
 
     igv.BamSource.prototype.setViewAsPairs = function (bool) {
@@ -81,26 +82,52 @@ var igv = (function (igv) {
 
             }
         }
+
     };
+
+    igv.BamSource.prototype.setShowSoftClips = function (bool) {
+
+        if (this.showSoftClips !== bool) {
+
+            this.showSoftClips = bool;
+
+            if (this.alignmentContainer) {
+                const alignments = allAlignments(this.alignmentContainer.packedAlignmentRows);
+                const alignmentContainer = this.alignmentContainer;
+                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, this.maxRows, bool);
+
+            }
+        }
+
+        function allAlignments(rows) {
+            let result = [];
+            for (let row of rows) {
+                for(let alignment of row.alignments) {
+                    result.push(alignment);
+                }
+            }
+            return result;
+        }
+    }
 
     igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
 
         const self = this;
         const genome = this.genome;
-
+        const showSoftClips = this.showSoftClips;
 
         if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-            
+
             return Promise.resolve(self.alignmentContainer);
-            
+
         } else {
-            
+
             return self.bamReader.readAlignments(chr, bpStart, bpEnd)
 
                 .then(function (alignmentContainer) {
 
                     const maxRows = self.config.maxRows || 500;
-                     let   alignments = alignmentContainer.alignments;
+                    let alignments = alignmentContainer.alignments;
 
                     if (!self.viewAsPairs) {
                         alignments = unpairAlignments([{alignments: alignments}]);
@@ -108,19 +135,19 @@ var igv = (function (igv) {
 
                     const hasAlignments = alignments.length > 0;
 
-                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows);
+                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows, showSoftClips);
 
                     alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
                     self.alignmentContainer = alignmentContainer;
-                    
+
                     if (!hasAlignments) {
-                        
+
                         return alignmentContainer;
-                        
+
                     }
                     else {
-                        
+
                         return genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
 
                             .then(function (sequence) {
@@ -137,6 +164,7 @@ var igv = (function (igv) {
                     }
                 })
         }
+
     }
 
     function pairAlignments(rows) {
@@ -196,7 +224,7 @@ var igv = (function (igv) {
             (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
     }
 
-    function packAlignmentRows(alignments, start, end, maxRows) {
+    function packAlignmentRows(alignments, start, end, maxRows, showSoftClips) {
 
         if (!alignments) return;
 
@@ -219,18 +247,19 @@ var igv = (function (igv) {
 
 
             alignments.sort(function (a, b) {
-                //return a.start - b.start;
-                return a.scStart - b.scStart;
+                return showSoftClips ? a.scStart - b.scStart : a.start - b.start;
             });
 
-           // bucketStart = Math.max(start, alignments[0].start);
-            bucketStart = Math.max(start, alignments[0].scStart);
+            // bucketStart = Math.max(start, alignments[0].start);
+            const firstAlignment = alignments[0];
+            bucketStart = Math.max(start, showSoftClips ? firstAlignment.scStart : firstAlignment.start);
             nextStart = bucketStart;
 
             alignments.forEach(function (alignment) {
 
                 //var buckListIndex = Math.max(0, alignment.start - bucketStart);
-                var buckListIndex = Math.max(0, alignment.scStart - bucketStart);
+                const s = showSoftClips ? alignment.scStart : alignment.start;
+                var buckListIndex = Math.max(0, s - bucketStart);
                 if (bucketList[buckListIndex] === undefined) {
                     bucketList[buckListIndex] = [];
                 }
@@ -266,8 +295,10 @@ var igv = (function (igv) {
                     }
 
                     alignmentRow.alignments.push(alignment);
-                    //nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
-                    nextStart = alignment.scStart + alignment.scLengthOnRef + alignmentSpace;
+
+                    nextStart = showSoftClips ?
+                        alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
+                        alignment.start + alignment.lengthOnRef + alignmentSpace;
                     ++allocatedCount;
 
                 } // while (nextStart)
@@ -287,6 +318,7 @@ var igv = (function (igv) {
             return packedAlignmentRows;
         }
     }
+
 
     return igv;
 

@@ -82,6 +82,8 @@ var igv = (function (igv) {
 
                 this.pairsSupported = (undefined === config.pairsSupported);
 
+                this.showSoftClips = config.showSoftClips;
+
                 this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
                 this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
 
@@ -248,10 +250,7 @@ var igv = (function (igv) {
 
             const self = this;
 
-
             const menuItems = [];
-            // sort by @ center line
-            //menuItems.push(sortMenuItem());
 
             const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
 
@@ -297,6 +296,26 @@ var igv = (function (igv) {
                     }
                 });
             }
+
+            menuItems.push({
+                object: igv.createCheckbox("Show soft clips", self.showSoftClips),
+                click: function () {
+
+                    const $fa = $(this).find('i');
+
+                    self.showSoftClips = !self.showSoftClips;
+
+                    if (true === self.showSoftClips) {
+                        $fa.removeClass('igv-fa-check-hidden');
+                    } else {
+                        $fa.addClass('igv-fa-check-hidden');
+                    }
+
+                    self.config.showSoftClips = self.showSoftClips;
+                    self.featureSource.setShowSoftClips(self.showSoftClips);
+                    self.trackView.updateViews(true);
+                }
+            });
 
             return menuItems;
 
@@ -648,6 +667,7 @@ var igv = (function (igv) {
                 bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
                 packedAlignmentRows = alignmentContainer.packedAlignmentRows;
 
+            const showSoftClips = this.parent.showSoftClips;
 
             let referenceSequence = alignmentContainer.sequence;
             if (referenceSequence) {
@@ -766,7 +786,7 @@ var igv = (function (igv) {
                 alignmentColor = getAlignmentColor.call(self, alignment);
                 outlineColor = alignmentColor;
 
-                blocks = alignment.blocks; //.filter(b => 'S' !== b.type);
+                blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
 
                 if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
                     return;
@@ -778,7 +798,6 @@ var igv = (function (igv) {
 
                 igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
-                diagnosticColor = 'rgb(255,105,180)';
                 for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
                     block = blocks[b];
@@ -1040,6 +1059,8 @@ var igv = (function (igv) {
 
         AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
 
+            const showSoftClips = this.parent.showSoftClips;
+
             let features = viewport.getCachedFeatures();
             if (!features || features.length === 0) return;
 
@@ -1057,7 +1078,11 @@ var igv = (function (igv) {
 
                 let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
                 let clicked = alignmentRow.alignments.filter(function (alignment) {
-                    return (genomicLocation >= alignment.start && genomicLocation <= (alignment.start + alignment.lengthOnRef));
+
+                    const s = showSoftClips ? alignment.scStart : alignment.start;
+                    const l = showSoftClips ? alignment.scLengthOnRef : alignment.lengthOnRef;
+
+                    return (genomicLocation >= s && genomicLocation <= (s + l));
                 });
 
                 if (clicked.length > 0) return clicked[0];
