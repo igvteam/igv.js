@@ -40,87 +40,42 @@ var igv = (function (igv) {
      */
     igv.CramReader = function (config, genome) {
 
+        const self = this;
+
         this.config = config;
 
         this.genome = genome;
 
         this.cramFile = new gmodCRAM.CramFile({
-            url: config.url
+            url: config.url,
+            seqFetch: seqFetch.bind(this),
+            checkSequenceMD5: false
         })
 
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
                 url: config.indexURL
-            }),
-            // seqFetch: async (seqId, start, end) => {
-            //     // seqFetch should return a promise for a string.
-            //     // this one just returns a fake sequence of all A's of the proper length
-            //     let fakeSeq = ''
-            //     for (let i = start; i <= end; i += 1) {
-            //         fakeSeq += 'A'
-            //     }
-            //     return fakeSeq
-            // },
-            checkSequenceMD5: false
+            })
         });
 
         igv.BamUtils.setReaderDefaults(this, config);
 
     }
 
-    igv.CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
-        var self = this;
+    function seqFetch(seqID, start, end) {
+
+        const sequence = this.genome.sequence;
 
         return this.getHeader()
 
             .then(function (header) {
 
+                const chrName = header.chrNames[seqID];
 
-                const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
+                return sequence.getSequence(chrName, start - 1, end);
 
-                const chrIdx =  header.chrToIndex[queryChr];
-
-                const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
-
-                if (chrIdx === undefined) {
-                    return Promise.resolve(alignmentContainer);
-
-                } else {
-                    return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
-
-                        .then(function (records) {
-
-                            for (let record of records) {
-
-                                const refID = record.sequenceId;
-                                const pos = record.alignmentStart;
-                                const alignmentEnd = pos + record.lengthOnRef;
-
-                                if (refID < 0) {
-                                    continue;   // unmapped read
-                                }
-                                else if (refID > chrIdx || pos > bpEnd) {
-                                    return;    // off right edge, we're done
-                                }
-                                else if (refID < chrIdx) {
-                                    continue;   // Sequence to left of start, not sure this is possible
-                                }
-                                if (alignmentEnd < bpStart) {
-                                    continue;
-                                }  // Record out-of-range "to the left", skip to next one
-
-                                const alignment = decodeCramRecord(record, header.chrNames);
-
-                                //  if (filter.pass(alignment)) {
-                                alignmentContainer.push(alignment);
-                                //  }
-                            }
-
-                            return alignmentContainer;
-                        });
-                }
             });
     }
 
@@ -176,12 +131,69 @@ var igv = (function (igv) {
     }
 
 
+    igv.CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
+
+        var self = this;
+
+        return this.getHeader()
+
+            .then(function (header) {
+
+
+                const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+
+                const chrIdx = header.chrToIndex[queryChr];
+
+                const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+
+                if (chrIdx === undefined) {
+                    return Promise.resolve(alignmentContainer);
+
+                } else {
+                    return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
+
+                        .then(function (records) {
+
+                            for (let record of records) {
+
+                                const refID = record.sequenceId;
+                                const pos = record.alignmentStart;
+                                const alignmentEnd = pos + record.lengthOnRef;
+
+                                if (refID < 0) {
+                                    continue;   // unmapped read
+                                }
+                                else if (refID > chrIdx || pos > bpEnd) {
+                                    return;    // off right edge, we're done
+                                }
+                                else if (refID < chrIdx) {
+                                    continue;   // Sequence to left of start, not sure this is possible
+                                }
+                                if (alignmentEnd < bpStart) {
+                                    continue;
+                                }  // Record out-of-range "to the left", skip to next one
+
+                                const alignment = decodeCramRecord(record, header.chrNames);
+
+                                //  if (filter.pass(alignment)) {
+                                alignmentContainer.push(alignment);
+                                //  }
+                            }
+
+                            alignmentContainer.finish();
+                            return alignmentContainer;
+                        });
+                }
+            });
+    }
+
     function decodeCramRecord(record, chrNames) {
 
         const alignment = new igv.BamAlignment();
         alignment.readName = record.readName || record.uniqueId;
         alignment.chr = chrNames[record.sequenceId];
         alignment.start = record.alignmentStart;
+        alignment.lengthOnRef = record.lengthOnRef;
         alignment.flags = record.flags;
         alignment.strand = !(record.flags & READ_STRAND_FLAG);
         alignment.fragmentLength = record.templateSize;
@@ -196,7 +208,7 @@ var igv = (function (igv) {
             };
         }
 
-        alignment.seq = record.readBases;
+        alignment.seq = record.getReadBases();
         alignment.qual = record.qualityScores;
         alignment.tagDict = record.tags;
         alignment.pairOrientation = record.getPairOrientation();
@@ -204,83 +216,88 @@ var igv = (function (igv) {
         // TODO -- cigar encoded in tag
         // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
-        //makeBlocks(alignment, record);
+        const blocks = makeBlocks(record);
+        if(blocks) {
+            alignment.blocks = blocks.blocks;
+            alignment.insertions = blocks.insertions;
+        }
 
         return alignment;
 
     }
 
 
-    // function makeBlocks(alignment, cramRecord) {
-    //
-    //     const blocks = [];
-    //
-    //     let insertions;
-    //     let seqOffset = 0;
-    //     let pos = record.start;
-    //     let gapType;
-    //
-    //     for (let c of cigarArray) {
-    //
-    //         let blockSeq, blockQuals;
-    //
-    //
-    //         switch (c.ltr) {
-    //             case 'H' :
-    //                 break; // ignore hard clips
-    //             case 'P' :
-    //                 break; // ignore pads
-    //             case 'S' :
-    //                 seqOffset += c.len;
-    //                 gapType = 'S';
-    //                 break; // soft clip read bases
-    //             case 'N' :
-    //                 pos += c.len;
-    //                 gapType = 'N';
-    //                 break;  // reference skip
-    //             case 'D' :
-    //                 pos += c.len;
-    //                 gapType = 'D';
-    //                 break;
-    //             case 'I' :
-    //
-    //                 blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-    //
-    //                 blockQuals = (record.qual && record.qual[0] !== '*') ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
-    //
-    //                 if (insertions === undefined) {
-    //                     insertions = [];
-    //                 }
-    //                 insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
-    //                 seqOffset += c.len;
-    //                 break;
-    //             case 'M' :
-    //             case 'EQ' :
-    //             case '=' :
-    //             case 'X' :
-    //
-    //                 blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-    //                 blockQuals = record.qual ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
-    //                 blocks.push(new igv.AlignmentBlock({
-    //                     start: pos,
-    //                     len: c.len,
-    //                     seq: blockSeq,
-    //                     qual: blockQuals,
-    //                     gapType: gapType
-    //                 }));
-    //                 seqOffset += c.len;
-    //                 pos += c.len;
-    //
-    //                 break;
-    //
-    //             default :
-    //                 console.log('Error processing cigar element: ' + c.len + c.ltr);
-    //         }
-    //     }
-    //
-    //     return {blocks: blocks, insertions: insertions};
-    //
-    // }
+    function makeBlocks(cramRecord) {
+
+        if (cramRecord.readFeatures) {
+
+            const blocks = [];
+
+            let insertions;
+            let seqOffset = 0;
+            let gapType;
+            let currentBlock;
+
+            for(let feature of cramRecord.readFeatures) {
+
+                const code = feature.code;
+                const data = feature.data;
+                const pos = feature.pos;
+                const refPos = feature.refPos;
+
+                switch (code) {
+                    case 'H' :
+                        break; // ignore hard clips
+                    case 'P' :
+                        break; // ignore pads
+                    case 'S' :
+                        seqOffset += data.length;
+                        gapType = 'S';
+                        break; // soft clip read bases
+                    case 'N' :
+                        gapType = 'N';
+                        break;  // reference skip
+                    case 'D' :
+                        gapType = 'D';
+                        break;
+                    case 'I' :
+
+                        if (insertions === undefined) {
+                            insertions = [];
+                        }
+                        insertions.push(new igv.AlignmentBlock({
+                            start: refPos - 1,
+                            len: data.length,
+                            seqOffset: seqOffset
+                        }));
+                        seqOffset += data.length;
+                        gapType = 'I';
+                        break;
+                    case 'M' :
+                    case 'EQ' :
+                    case '=' :
+                    case 'X' :
+
+                        blocks.push(new igv.AlignmentBlock({
+                            start: refPos - 1,
+                            seqOffset: seqOffset,
+                            len: data.length,
+                            gapType: gapType
+                        }));
+                        seqOffset += data.length;
+
+                        break;
+
+                    default :
+                        console.log('Error processing code: ' + code);
+                }
+            }
+
+            return {blocks: blocks, insertions: insertions};
+
+
+        }
+    }
 
 
     /*

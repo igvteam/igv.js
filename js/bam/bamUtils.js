@@ -314,9 +314,7 @@ var igv = (function (igv) {
                 this.setPairOrientation(alignment);
 
                 if ((undefined === filter || filter.pass(alignment))) {
-                    const blocks = makeBlocks(alignment, cigarArray);
-                    alignment.blocks = blocks.blocks;
-                    alignment.insertions = blocks.insertions;
+                    makeBlocks(alignment, cigarArray);
                     alignmentContainer.push(alignment);
 
                 }
@@ -393,9 +391,7 @@ var igv = (function (igv) {
                 this.setPairOrientation(alignment);
 
                 if (undefined === filter || filter.pass(alignment)) {
-                    blocks = makeBlocks(alignment, cigarArray);
-                    alignment.blocks = blocks.blocks;
-                    alignment.insertions = blocks.insertions;
+                    makeBlocks(alignment, cigarArray);
                     alignmentContainer.push(alignment);
                 }
             }
@@ -481,23 +477,23 @@ var igv = (function (igv) {
      * of "*" indicates the value is not recorded.  In all other cases the length of the block sequence (block.seq)
      * and quality string (block.qual) must == the block length.
      *
-     * @param record
+     * @param alignment
      * @param cigarArray
      * @returns array of blocks
      */
-    function makeBlocks(record, cigarArray) {
+    function makeBlocks(alignment, cigarArray) {
 
         const blocks = [];
 
         let insertions;
         let seqOffset = 0;
-        let pos = record.start;
+        let pos = alignment.start;
         let gapType;
 
+        alignment.scStart = alignment.start;
+        alignment.scLengthOnRef = alignment.lengthOnRef;
+
         for (let c of cigarArray) {
-
-            let blockSeq, blockQuals;
-
 
             switch (c.ltr) {
                 case 'H' :
@@ -505,8 +501,22 @@ var igv = (function (igv) {
                 case 'P' :
                     break; // ignore pads
                 case 'S' :
+
+                    let scPos = pos;
+                    alignment.scLengthOnRef += c.len;
+                    if(blocks.length === 0) {
+                        alignment.scStart -= c.len;
+                        scPos -= c.len;
+                    }
+
+                    blocks.push(new igv.AlignmentBlock({
+                        start: scPos,
+                        seqOffset: seqOffset,
+                        len: c.len,
+                        type: 'S'
+                    }));
                     seqOffset += c.len;
-                    gapType = 'S';
+                    gapType = 'I';
                     break; // soft clip read bases
                 case 'N' :
                     pos += c.len;
@@ -518,28 +528,28 @@ var igv = (function (igv) {
                     break;
                 case 'I' :
 
-                    blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-
-                    blockQuals = (record.qual && record.qual[0] !== '*') ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
-
                     if (insertions === undefined) {
                         insertions = [];
                     }
-                    insertions.push({start: pos, len: c.len, seq: blockSeq, qual: blockQuals});
+                    insertions.push(new igv.AlignmentBlock({
+                        start: pos,
+                        len: c.len,
+                        seqOffset: seqOffset,
+                        type: 'I'
+                    }));
                     seqOffset += c.len;
+                    gapType = 'I';
                     break;
                 case 'M' :
                 case 'EQ' :
                 case '=' :
                 case 'X' :
 
-                    blockSeq = record.seq === '*' ? '*' : record.seq.substr(seqOffset, c.len);
-                    blockQuals = record.qual ? record.qual.slice(seqOffset, seqOffset + c.len) : undefined;
                     blocks.push(new igv.AlignmentBlock({
                         start: pos,
+                        seqOffset: seqOffset,
                         len: c.len,
-                        seq: blockSeq,
-                        qual: blockQuals,
+                        type: 'M',
                         gapType: gapType
                     }));
                     seqOffset += c.len;
@@ -552,7 +562,8 @@ var igv = (function (igv) {
             }
         }
 
-        return {blocks: blocks, insertions: insertions};
+        alignment.blocks =  blocks;
+        alignment.insertions = insertions;
 
     }
 

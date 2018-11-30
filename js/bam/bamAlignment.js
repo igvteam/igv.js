@@ -171,18 +171,19 @@ var igv = (function (igv) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
-        var nameValues = [],
-            isFirst,
-            tagDict;
+        const nameValues = [];
 
         // Consert genomic location to int
         genomicLocation = Math.floor(genomicLocation);
 
         if (this.insertions) {
-            for (var i = 0; i < this.insertions.length; i += 1) {
-                var ins_start = this.insertions[i].start;
+
+            const seq = this.seq;
+
+            for(let insertion of this.insertions) {
+                var ins_start = insertion.start;
                 if (genomicLocation === ins_start || genomicLocation === ins_start - 1) {
-                    nameValues.push({name: 'Insertion', value: this.insertions[i].seq});
+                    nameValues.push({name: 'Insertion', value:  seq.substr(insertion.seqOffset, insertion.len)});
                     nameValues.push({name: 'Location', value: ins_start});
                     return nameValues;
                 }
@@ -229,9 +230,10 @@ var igv = (function (igv) {
         }
 
         nameValues.push("<hr>");
-        tagDict = this.tags();
-        isFirst = true;
-        for (var key in tagDict) {
+
+        const tagDict = this.tags();
+        let isFirst = true;
+        for (let key in tagDict) {
 
             if (tagDict.hasOwnProperty(key)) {
 
@@ -264,7 +266,15 @@ var igv = (function (igv) {
         const block = blockAtGenomicLocation(this.blocks, genomicLocation);
 
         if (block) {
-            return block.baseAt(genomicLocation);
+
+            if ("*" === this.seq) {
+                return "*";
+            } else {
+                const idx = block.seqIndexAt(genomicLocation);
+               // if (idx >= 0 && idx < this.seq.length) {
+                    return this.seq[idx];
+              //  }
+            }
         }
         else {
             return undefined;
@@ -276,7 +286,14 @@ var igv = (function (igv) {
         const block = blockAtGenomicLocation(this.blocks, genomicLocation);
 
         if (block) {
-            return block.qualityAt(genomicLocation);
+            if ("*" === this.qual) {
+                return 30;
+            } else {
+                const idx = block.seqIndexAt(genomicLocation);
+              //  if (idx >= 0 && idx < this.qual.length) {
+                    return this.qual[idx];
+              //  }
+            }
         }
         else {
             return undefined;

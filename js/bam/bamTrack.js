@@ -57,75 +57,75 @@ var igv = (function (igv) {
         BAMTrack = igv.extend(igv.TrackBase,
             function (config, browser) {
 
-            this.type = type;
+                this.type = type;
 
-            // Override default track height for bams
-            if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
+                // Override default track height for bams
+                if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
-            igv.TrackBase.call(this, config, browser);
+                igv.TrackBase.call(this, config, browser);
 
-            if (config.coverageTrackHeight === undefined) {
-                config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
-            }
-
-            this.featureSource = new igv.BamSource(config, browser.genome);
-
-            this.maxRows = config.maxRows || 1000;
-
-            this.coverageTrack = new CoverageTrack(config, this);
-
-            this.alignmentTrack = new AlignmentTrack(config, this);
-
-            this.visibilityWindow = config.visibilityWindow || 30000;
-
-            this.viewAsPairs = config.viewAsPairs;
-
-            this.pairsSupported = (undefined === config.pairsSupported);
-
-            this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
-            this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
-
-            this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
-            this.maxFragmentLength = config.maxFragmentLength;
-
-            // Transient object, maintains the last sort option per viewport.
-            this.sortObjects = {};
-
-            if (config.sort) {
-                if (Array.isArray(config.sort)) {
-                    for (let sort of config.sort) {
-                        assignSort(this.sortObjects, sort);
-                    }
+                if (config.coverageTrackHeight === undefined) {
+                    config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
                 }
-                else {
-                    assignSort(this.sortObjects, config.sort);
-                }
-                config.sort = undefined;
-            }
 
-            // Assign sort objects to a genomic state
-            function assignSort(currentSorts, sort) {
+                this.featureSource = new igv.BamSource(config, browser.genome);
 
-                const range = igv.parseLocusString(sort.locus);
+                this.maxRows = config.maxRows || 1000;
 
-                // Loop through current genomic states, assign sort to first matching state
-                for (let gs of browser.genomicStateList) {
+                this.coverageTrack = new CoverageTrack(config, this);
 
-                    if (gs.chromosome.name === range.chr && range.start >= gs.start && range.start <= gs.end) {
+                this.alignmentTrack = new AlignmentTrack(config, this);
 
-                        currentSorts[gs.id] = {
-                            chr: range.chr,
-                            position: range.start,
-                            sortOption: sort.option || "NUCLEOTIDE",
-                            direction: sort.direction || "ASC"
+                this.visibilityWindow = config.visibilityWindow || 30000;
+
+                this.viewAsPairs = config.viewAsPairs;
+
+                this.pairsSupported = (undefined === config.pairsSupported);
+
+                this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
+                this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
+
+                this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
+                this.maxFragmentLength = config.maxFragmentLength;
+
+                // Transient object, maintains the last sort option per viewport.
+                this.sortObjects = {};
+
+                if (config.sort) {
+                    if (Array.isArray(config.sort)) {
+                        for (let sort of config.sort) {
+                            assignSort(this.sortObjects, sort);
                         }
-
-                        break;
                     }
+                    else {
+                        assignSort(this.sortObjects, config.sort);
+                    }
+                    config.sort = undefined;
                 }
 
-            }
-        });
+                // Assign sort objects to a genomic state
+                function assignSort(currentSorts, sort) {
+
+                    const range = igv.parseLocusString(sort.locus);
+
+                    // Loop through current genomic states, assign sort to first matching state
+                    for (let gs of browser.genomicStateList) {
+
+                        if (gs.chromosome.name === range.chr && range.start >= gs.start && range.start <= gs.end) {
+
+                            currentSorts[gs.id] = {
+                                chr: range.chr,
+                                position: range.start,
+                                sortOption: sort.option || "NUCLEOTIDE",
+                                direction: sort.direction || "ASC"
+                            }
+
+                            break;
+                        }
+                    }
+
+                }
+            });
 
         BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
@@ -639,25 +639,24 @@ var igv = (function (igv) {
 
         AlignmentTrack.prototype.draw = function (options) {
 
-            var self = this,
+            const self = this,
                 alignmentContainer = options.features,
                 ctx = options.context,
                 bpPerPixel = options.bpPerPixel,
                 bpStart = options.bpStart,
                 pixelWidth = options.pixelWidth,
-                pixelHeight = options.pixelHeight,
                 bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-                packedAlignmentRows = alignmentContainer.packedAlignmentRows,
-                sequence = alignmentContainer.sequence;
+                packedAlignmentRows = alignmentContainer.packedAlignmentRows;
 
-            var alignmentRowYInset = 0;
 
+            let referenceSequence = alignmentContainer.sequence;
+            if (referenceSequence) {
+                referenceSequence = referenceSequence.toUpperCase();
+            }
+
+            let alignmentRowYInset = 0;
 
             if (this.top) ctx.translate(0, this.top);
-
-            if (sequence) {
-                sequence = sequence.toUpperCase();
-            }
 
             if (alignmentContainer.hasDownsampledIntervals()) {
                 alignmentRowYInset = downsampleRowHeight + alignmentStartGap;
@@ -684,6 +683,7 @@ var igv = (function (igv) {
             if (packedAlignmentRows) {
 
                 const nRows = Math.min(packedAlignmentRows.length, self.maxRows);
+
 
                 for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
@@ -765,7 +765,8 @@ var igv = (function (igv) {
 
                 alignmentColor = getAlignmentColor.call(self, alignment);
                 outlineColor = alignmentColor;
-                blocks = alignment.blocks;
+
+                blocks = alignment.blocks; //.filter(b => 'S' !== b.type);
 
                 if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
                     return;
@@ -785,12 +786,11 @@ var igv = (function (igv) {
                     // Somewhat complex test, neccessary to insure gaps are drawn.
                     // If this is not the last block, and the next block starts before the orign (off screen to left)
                     // then skip.
-                    if((b != blocks.length - 1) && blocks[b+1].start < bpStart) continue;
-                    
+                    if ((b != blocks.length - 1) && blocks[b + 1].start < bpStart) continue;
+
                     drawBlock(block);
 
                     if ((block.start + block.len) > bpEnd) break;  // Do this after drawBlock to insure gaps are drawn
-
 
                     if (alignment.insertions) {
                         alignment.insertions.forEach(function (block) {
@@ -805,32 +805,19 @@ var igv = (function (igv) {
 
                 function drawBlock(block) {
 
-                    var offsetBP,
-                        blockStartPixel,
-                        blockEndPixel,
-                        blockWidthPixel,
-                        arrowHeadWidthPixel,
-                        blockSequence,
-                        refChar,
-                        readChar,
-                        readQual,
-                        xPixel,
-                        widthPixel,
-                        baseColor,
-                        xListPixel,
-                        yListPixel,
-                        yStrokedLine;
 
-                    offsetBP = block.start - alignmentContainer.start;
-                    blockStartPixel = (block.start - bpStart) / bpPerPixel;
-                    blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
-                    blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
-                    arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
-                    blockSequence = block.seq.toUpperCase();
-                    yStrokedLine = yRect + alignmentHeight / 2;
+                    const offsetBP = block.start - alignmentContainer.start;
+                    const blockStartPixel = (block.start - bpStart) / bpPerPixel;
+                    const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
+                    const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
+                    const arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
+                    const yStrokedLine = yRect + alignmentHeight / 2;
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
-                        if ("D" === block.gapType) {
+                        if ("I" === block.gapType) {
+                            // ignore
+                        }
+                        else if ("D" === block.gapType) {
                             igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.deletionColor});
                         }
                         else {
@@ -839,16 +826,16 @@ var igv = (function (igv) {
                     }
                     lastBlockEnd = blockEndPixel;
 
+                    // Last block on + strand ?
                     if (true === alignment.strand && b === blocks.length - 1) {
-                        // Last block on + strand
-                        xListPixel = [
+                        const xListPixel = [
                             blockStartPixel,
                             blockEndPixel,
                             blockEndPixel + arrowHeadWidthPixel,
                             blockEndPixel,
                             blockStartPixel,
                             blockStartPixel];
-                        yListPixel = [
+                        const yListPixel = [
                             yRect,
                             yRect,
                             yRect + (alignmentHeight / 2.0),
@@ -866,16 +853,17 @@ var igv = (function (igv) {
                             igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
                         }
                     }
+
+                    // Last block on - strand ?
                     else if (false === alignment.strand && b === 0) {
-                        // First block on - strand
-                        xListPixel = [
+                        const xListPixel = [
                             blockEndPixel,
                             blockStartPixel,
                             blockStartPixel - arrowHeadWidthPixel,
                             blockStartPixel,
                             blockEndPixel,
                             blockEndPixel];
-                        yListPixel = [
+                        const yListPixel = [
                             yRect,
                             yRect,
                             yRect + (alignmentHeight / 2.0),
@@ -893,6 +881,8 @@ var igv = (function (igv) {
                             igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
                         }
                     }
+
+                    // Internal block
                     else {
                         igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
 
@@ -903,29 +893,38 @@ var igv = (function (igv) {
                             ctx.restore();
                         }
                     }
-                    // Only do mismatch coloring if a refseq exists to do the comparison
-                    if (sequence && blockSequence !== "*") {
-                        for (var i = 0, len = blockSequence.length; i < len; i++) {
+
+
+                    // Mismatch coloring
+                    const isSoftClip = 'S' === block.type;
+                    if (isSoftClip || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
+
+                        const seq = alignment.seq.toUpperCase();
+                        const qual = alignment.qual;
+                        const seqOffset = block.seqOffset;
+
+
+                        for (let i = 0, len = block.len; i < len; i++) {
 
                             if (offsetBP + i < 0) continue;
-
-                            readChar = blockSequence.charAt(i);
-                            refChar = sequence.charAt(offsetBP + i);
+                            let readChar = seq.charAt(seqOffset + i);
+                            const refChar = referenceSequence.charAt(offsetBP + i);
                             if (readChar === "=") {
                                 readChar = refChar;
                             }
-                            if (readChar === "X" || refChar !== readChar) {
+                            if (readChar === "X" || refChar !== readChar || isSoftClip) {
 
-                                if (block.qual !== undefined && block.qual.length > i) {
-                                    readQual = block.qual[i];
+                                let baseColor;
+                                if (qual !== undefined && qual.length > seqOffset + i) {
+                                    const readQual = qual[seqOffset + i];
                                     baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                                 }
                                 else {
                                     baseColor = igv.nucleotideColors[readChar];
                                 }
                                 if (baseColor) {
-                                    xPixel = ((block.start + i) - bpStart) / bpPerPixel;
-                                    widthPixel = Math.max(1, 1 / bpPerPixel);
+                                    const xPixel = ((block.start + i) - bpStart) / bpPerPixel;
+                                    const widthPixel = Math.max(1, 1 / bpPerPixel);
                                     renderBlockOrReadChar(ctx, bpPerPixel, {
                                         x: xPixel,
                                         y: yRect,
@@ -1197,7 +1196,7 @@ var igv = (function (igv) {
             }
         };
     }
-    
+
     return igv;
 
 })

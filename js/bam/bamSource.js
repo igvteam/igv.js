@@ -213,21 +213,24 @@ var igv = (function (igv) {
                 index,
                 bucket,
                 alignment,
-                alignmentSpace = 4 * 2,
+                alignmentSpace = 8,
                 packedAlignmentRows = [],
                 bucketStart;
 
 
             alignments.sort(function (a, b) {
-                return a.start - b.start;
+                //return a.start - b.start;
+                return a.scStart - b.scStart;
             });
 
-            bucketStart = Math.max(start, alignments[0].start);
+           // bucketStart = Math.max(start, alignments[0].start);
+            bucketStart = Math.max(start, alignments[0].scStart);
             nextStart = bucketStart;
 
             alignments.forEach(function (alignment) {
 
-                var buckListIndex = Math.max(0, alignment.start - bucketStart);
+                //var buckListIndex = Math.max(0, alignment.start - bucketStart);
+                var buckListIndex = Math.max(0, alignment.scStart - bucketStart);
                 if (bucketList[buckListIndex] === undefined) {
                     bucketList[buckListIndex] = [];
                 }
@@ -263,7 +266,8 @@ var igv = (function (igv) {
                     }
 
                     alignmentRow.alignments.push(alignment);
-                    nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
+                    //nextStart = alignment.start + alignment.lengthOnRef + alignmentSpace;
+                    nextStart = alignment.scStart + alignment.scLengthOnRef + alignmentSpace;
                     ++allocatedCount;
 
                 } // while (nextStart)

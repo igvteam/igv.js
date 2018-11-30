@@ -1,28 +1,28 @@
 function runCRAMTests() {
 
-    // Mock object
-    const genome = {
-
-        getChromosomeName: function (chr) {
-
-            switch (chr) {
-                case 'CHROMOSOME_I':
-                    return 'chr1';
-                case 'CHROMOSOME_II':
-                    return 'chr2';
-                case 'CHROMOSOME_III':
-                    return 'chr3';
-                case 'CHROMOSOME_IV':
-                    return 'chr4';
-                case 'CHROMOSOME_V':
-                    return 'chr5'
-
-            }
-        }
-    }
-
 
     QUnit.test("CRAM header", function (assert) {
+
+        // Mock object
+        const genome = {
+
+            getChromosomeName: function (chr) {
+
+                switch (chr) {
+                    case 'CHROMOSOME_I':
+                        return 'chr1';
+                    case 'CHROMOSOME_II':
+                        return 'chr2';
+                    case 'CHROMOSOME_III':
+                        return 'chr3';
+                    case 'CHROMOSOME_IV':
+                        return 'chr4';
+                    case 'CHROMOSOME_V':
+                        return 'chr5'
+
+                }
+            }
+        }
 
         var done = assert.async();
 
@@ -56,21 +56,77 @@ function runCRAMTests() {
 
         var done = assert.async();
 
-        const cramReader = new igv.CramReader({
-                url: 'data/cram/na12889.cram',
-                indexURL: 'data/cram/na12889.cram.crai'
-            },
-            genome);
+        const chr = 'chr1';
+        const bpStart = 155140000;
+        const bpEnd = 155160000;
+
+        // Mock genome object
+        const fasta = new igv.FastaSequence({
+            fastaURL: 'data/cram/test.fasta',
+            indexed: false
+        });
 
 
-        cramReader.readAlignments('chr1', 155140000, 155150000)
+        const bamReader = new igv.BamReader({
+            type: 'bam',
+            url: 'data/cram/na12889.bam',
+            indexURL: 'data/cram/na12889.bam.bai'
+        });
 
-            .then(function (alignmentContainer) {
+        let bamAlignments;
 
-                assert.ok(alignmentContainer);
+        bamReader.readAlignments(chr, bpStart, bpEnd)
+
+            .then(function (alignments) {
+
+                bamAlignments = alignments;
+                return alignments;
+
+            })
+            .then(function(ignore) {
+
+                return fasta.init()
+
+            })
+
+            .then(function (ignore) {
+
+                const genome = {
+                    getChromosomeName: function (chr) {
+                        return chr;
+                    },
+                    sequence: fasta};
+
+                const cramReader = new igv.CramReader({
+                        url: 'data/cram/na12889.cram',
+                        indexURL: 'data/cram/na12889.cram.crai'
+                        // ,
+                        // seqFetch: function (seqId, start, end) {
+                        //     var fakeSeq = ''
+                        //     for (let i = start; i <= end; i += 1) {
+                        //         fakeSeq += 'A'
+                        //     }
+                        //     return Promise.resolve(fakeSeq)
+                        // }
+                    },
+                    genome);
 
 
-                done();
+                cramReader.readAlignments('chr1', 155140000, 155160000)
+
+                    .then(function (alignmentContainer) {
+
+                        assert.ok(alignmentContainer);
+
+                        // 2 alignments, 1 paired and 1 single
+                        assert.equal(alignmentContainer.alignments.length, 2);
+
+                        const firstAlignment = alignmentContainer.alignments[0].firstAlignment;
+                        assert.equal(firstAlignment.seq, 'TTCATCTAAAAATCACATTGCAAATTATTCAATATATTTGGGCCTCCATCTCGTTTACATCAATATGTGTTTGTTGAAGTATCTGCCCTGCAATGTCCATA')
+
+                        done();
+                    })
+
             })
 
             .catch(function (error) {
@@ -78,8 +134,8 @@ function runCRAMTests() {
                 assert.ok(false, error);  // failed
 
             });
-    });
 
+    });
 }
 
 
