@@ -118,6 +118,10 @@ $igv-dark-grey-color: #373737;
 // nav bar
 .igv-navbar {
 
+  position: relative;
+  top: 0;
+  left: 0;
+
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -133,9 +137,6 @@ $igv-dark-grey-color: #373737;
   margin-top: 2px;
   margin-bottom: 4px;
 
-  position: relative;
-  top: 0;
-  left: 0;
   height: $igv-navbar-height;
   width: 100%;
 
@@ -156,6 +157,7 @@ $igv-dark-grey-color: #373737;
   align-items: center;
 
   height: $igv-navbar-height;
+  line-height: $igv-navbar-height;
 
   // igv logo
   .igv-logo {
@@ -288,7 +290,8 @@ $igv-dark-grey-color: #373737;
   justify-content: space-between;
   align-items: center;
 
-  height: 100%;
+  height: $igv-navbar-height;
+  line-height: $igv-navbar-height;
 
   .igv-nav-bar-toggle-button-container {
 
@@ -299,7 +302,6 @@ $igv-dark-grey-color: #373737;
     align-items: center;
 
     height: 100%;
-    margin-right: 8px;
 
     div {
       margin-left: 0;
@@ -323,12 +325,14 @@ $igv-dark-grey-color: #373737;
 
     font-size: 18px;
 
-    user-select: none;
+    width: 190px;
+    height: $igv-navbar-height;
+    line-height: $igv-navbar-height;
 
-    margin-left: 16px;
+    margin-left: 8px;
     margin-right: 8px;
 
-    width: 180px;
+    user-select: none;
 
     display: flex;
     flex-flow: row;
@@ -338,19 +342,30 @@ $igv-dark-grey-color: #373737;
 
     div {
       cursor: pointer;
+      margin-left: unset;
+      margin-right: unset;
     }
 
     div:first-child {
-      margin-right: 4px;
+      height: auto;
+      margin-left: unset;
+      margin-right: 8px;
     }
 
     div:last-child {
-      margin-left: 4px;
+      height: auto;
+      margin-left: 8px;
+      margin-right: unset;
+    }
+
+    div:nth-child(even) {
+      height: fit-content;
+      //padding-bottom: 20px;
     }
 
     input {
-      //display: block;
-      width: 100%;
+      display: block;
+      width: 125px;
     }
 
     svg {
