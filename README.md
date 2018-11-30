@@ -27,11 +27,11 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 igv.js consists of a single javascript file with no external dependencies.  To link directly to the current release copy this snippet
 
 ```html
-<script src="https://igv.org/web/release/2.1/dist/igv.min.js"></script>
+<script src="https://igv.org/web/release/2.1.0/dist/igv.min.js"></script>
 ``` 
 
 Pre-built expanded and minified js files for ES5 (igv.js, igv.min.js) and ES6 (igv.esm.js, igv.esm.min.js)
-can be downloaded from [http://igv.org/web/release/2.1/dist](http://igv.org/web/release/2.0.0/dist).   
+can be downloaded from [http://igv.org/web/release/2.1.0/dist](http://igv.org/web/release/2.0.0/dist).   
  
 Alternatively you can install with npm  
  
