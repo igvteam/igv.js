@@ -48,7 +48,7 @@ var igv = (function (igv) {
 
         this.cramFile = new gmodCRAM.CramFile({
             url: config.url,
-            seqFetch: seqFetch.bind(this),
+            seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: false
         })
 
@@ -99,30 +99,34 @@ var igv = (function (igv) {
 
             return this.cramFile.getSamHeader()
 
-                .then(function (header) {
+                .then(function (samHeader) {
 
                     const chrToIndex = {};
                     const chrNames = [];
                     const chrAliasTable = {};
+                    const readGroups = [];
 
-                    for (let line of header) {
-                        let i = 0;
+                    for (let line of samHeader) {
+
                         if ('SQ' === line.tag) {
                             const seq = line.data[0].value;
-                            chrToIndex[seq] = i;
+                            chrToIndex[seq] = chrNames.length;
                             chrNames.push(seq);
                             if (genome) {
                                 const alias = genome.getChromosomeName(seq);
                                 chrAliasTable[alias] = seq;
                             }
-                            i++;
+                        }
+                        else if ('RG' === line.tag) {
+                            readGroups.push(line.data);
                         }
                     }
 
                     self.header = {
                         chrNames: chrNames,
                         chrToIndex: chrToIndex,
-                        chrAliasTable: chrAliasTable
+                        chrAliasTable: chrAliasTable,
+                        readGroups: readGroups
                     }
 
                     return self.header;
@@ -139,11 +143,10 @@ var igv = (function (igv) {
 
             .then(function (header) {
 
+                const readNames = {};   // Hash for recording generated read names for intra slice pairs (lossy crams)
 
                 const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-
                 const chrIdx = header.chrToIndex[queryChr];
-
                 const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
                 if (chrIdx === undefined) {
@@ -184,121 +187,176 @@ var igv = (function (igv) {
                             return alignmentContainer;
                         });
                 }
+
+                function decodeCramRecord(record, chrNames) {
+
+                    const alignment = new igv.BamAlignment();
+
+                    alignment.chr = chrNames[record.sequenceId];
+                    alignment.start = record.alignmentStart - 1;
+                    alignment.lengthOnRef = record.lengthOnRef;
+                    alignment.flags = record.flags;
+                    alignment.strand = !(record.flags & READ_STRAND_FLAG);
+                    alignment.fragmentLength = record.templateSize;
+                    alignment.mq = record.mappingQuality;
+                    alignment.end = record.alignmentStart + record.lengthOnRef;
+                    alignment.readGroupId = record.readGroupId;
+
+                    if (record.mate && record.mate.sequenceId !== undefined) {
+                        alignment.mate = {
+                            chr: chrNames[record.mate.sequenceId],
+                            position: record.mate.alignmentStart,
+                            strand: !(record.flags & MATE_STRAND_FLAG)
+                        };
+                    }
+
+                    alignment.seq = record.getReadBases();
+                    alignment.qual = record.qualityScores;
+                    alignment.tagDict = record.tags;
+                    alignment.pairOrientation = record.getPairOrientation();
+
+                    if(undefined !== record.readName) {
+                        alignment.readName = record.readName;
+                    }
+                    else {
+                        if(record.uniqueId && readNames[record.uniqueId]) {
+                            alignment.readName = readNames[record.uniqueId];
+                            // optional -  delete readNames[record.uniqueId]
+                        }
+                        else if (record.mate) {
+                            if (record.mate.readName !== undefined) {
+                                alignment.readName = record.mate.readName;
+                            }
+                            else if(record.mate.uniqueId) {
+                                alignment.readName = uniqueID();
+                                readNames[record.mate.uniqueId] = alignment.readName;
+                            }
+                        }
+                    }
+
+                    // TODO -- cigar encoded in tag?
+                    // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
+
+                    makeBlocks(record, alignment);
+
+                    return alignment;
+
+                }
+
+                function makeBlocks(cramRecord, alignment) {
+
+                    if (cramRecord.readFeatures) {
+
+                        const blocks = [];
+
+                        let insertions;
+                        let gapType;
+                        let basesUsed = 0;
+
+                        alignment.scStart = alignment.start;
+                        alignment.scLengthOnRef = alignment.lengthOnRef;
+
+
+                        for (let feature of cramRecord.readFeatures) {
+
+                            const code = feature.code;
+                            const data = feature.data;
+                            const readPos = feature.pos - 1;
+                            const refPos = feature.refPos - 1;
+
+
+                            switch (code) {
+                                case 'S' :
+                                case 'I':
+                                case 'i':
+                                case 'N':
+                                case 'D':
+                                    if (readPos > basesUsed) {
+                                        const len = readPos - basesUsed;
+                                        blocks.push(new igv.AlignmentBlock({
+                                            start: refPos,
+                                            seqOffset: basesUsed,
+                                            len: len,
+                                            type: 'M',
+                                            gapType: gapType
+                                        }));
+                                        basesUsed += len;
+
+                                    }
+
+
+                                    if ('S' === code) {
+                                        let scPos = refPos;
+
+                                        alignment.scLengthOnRef += data.length;
+                                        if (readPos === 0) {
+                                            alignment.scStart -= data.length;
+                                            scPos -= data.length;
+                                        }
+
+                                        const len = data.length;
+                                        blocks.push(new igv.AlignmentBlock({
+                                            start: scPos,
+                                            seqOffset: basesUsed,
+                                            len: len,
+                                            type: 'S'
+                                        }));
+                                        basesUsed += len;
+                                        gapType = 'S';
+                                    }
+                                    else if ('I' === code || 'i' === code) {
+                                        if (insertions === undefined) {
+                                            insertions = [];
+                                        }
+                                        const len = 'i' === code ? 1 : data.length;
+                                        insertions.push(new igv.AlignmentBlock({
+                                            start: refPos - 1,
+                                            len: len,
+                                            seqOffset: basesUsed,
+                                            type: 'I'
+                                        }));
+                                        basesUsed += len;
+                                        gapType = 'I';
+                                    } else if ('D' === code || 'N' === code) {
+
+                                        gapType = code;
+                                    }
+                                    break;
+
+                                default :
+                                //  Ignore
+                            }
+
+
+                        }
+
+                        // Last block
+                        const len = cramRecord.readLength - basesUsed;
+                        if (len > 0) {
+                            blocks.push(new igv.AlignmentBlock({
+                                start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
+                                seqOffset: basesUsed,
+                                len: len,
+                                type: 'M',
+                                gapType: gapType
+                            }));
+                        }
+
+
+                        alignment.blocks = blocks;
+                        alignment.insertions = insertions;
+
+
+                    }
+                }
+
             });
     }
 
-    function decodeCramRecord(record, chrNames) {
 
-        const alignment = new igv.BamAlignment();
-        alignment.readName = record.readName || record.uniqueId;
-        alignment.chr = chrNames[record.sequenceId];
-        alignment.start = record.alignmentStart;
-        alignment.lengthOnRef = record.lengthOnRef;
-        alignment.flags = record.flags;
-        alignment.strand = !(record.flags & READ_STRAND_FLAG);
-        alignment.fragmentLength = record.templateSize;
-        alignment.mq = record.mappingQuality;
-        alignment.end = record.alignmentStart + record.lengthOnRef;
-
-        if (record.mate && record.mate.sequenceId !== undefined) {
-            alignment.mate = {
-                chr: chrNames[record.mate.sequenceId],
-                position: record.mate.alignmentStart,
-                strand: !(record.flags & MATE_STRAND_FLAG)
-            };
-        }
-
-        alignment.seq = record.getReadBases();
-        alignment.qual = record.qualityScores;
-        alignment.tagDict = record.tags;
-        alignment.pairOrientation = record.getPairOrientation();
-
-        // TODO -- cigar encoded in tag
-        // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
-
-        const blocks = makeBlocks(record);
-        if(blocks) {
-            alignment.blocks = blocks.blocks;
-            alignment.insertions = blocks.insertions;
-        }
-
-        return alignment;
-
+    function uniqueID() {
+        return Math.random().toString(36).substr(2, 9) + '-' + Math.random().toString(36).substr(2, 9);
     }
-
-
-    function makeBlocks(cramRecord) {
-
-        if (cramRecord.readFeatures) {
-
-            const blocks = [];
-
-            let insertions;
-            let seqOffset = 0;
-            let gapType;
-            let currentBlock;
-
-            for(let feature of cramRecord.readFeatures) {
-
-                const code = feature.code;
-                const data = feature.data;
-                const pos = feature.pos;
-                const refPos = feature.refPos;
-
-                switch (code) {
-                    case 'H' :
-                        break; // ignore hard clips
-                    case 'P' :
-                        break; // ignore pads
-                    case 'S' :
-                        seqOffset += data.length;
-                        gapType = 'S';
-                        break; // soft clip read bases
-                    case 'N' :
-                        gapType = 'N';
-                        break;  // reference skip
-                    case 'D' :
-                        gapType = 'D';
-                        break;
-                    case 'I' :
-
-                        if (insertions === undefined) {
-                            insertions = [];
-                        }
-                        insertions.push(new igv.AlignmentBlock({
-                            start: refPos - 1,
-                            len: data.length,
-                            seqOffset: seqOffset
-                        }));
-                        seqOffset += data.length;
-                        gapType = 'I';
-                        break;
-                    case 'M' :
-                    case 'EQ' :
-                    case '=' :
-                    case 'X' :
-
-                        blocks.push(new igv.AlignmentBlock({
-                            start: refPos - 1,
-                            seqOffset: seqOffset,
-                            len: data.length,
-                            gapType: gapType
-                        }));
-                        seqOffset += data.length;
-
-                        break;
-
-                    default :
-                        console.log('Error processing code: ' + code);
-                }
-            }
-
-            return {blocks: blocks, insertions: insertions};
-
-
-        }
-    }
-
 
     /*
     flags

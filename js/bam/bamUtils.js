@@ -508,7 +508,6 @@ var igv = (function (igv) {
                         alignment.scStart -= c.len;
                         scPos -= c.len;
                     }
-
                     blocks.push(new igv.AlignmentBlock({
                         start: scPos,
                         seqOffset: seqOffset,

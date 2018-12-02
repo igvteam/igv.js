@@ -833,13 +833,10 @@ var igv = (function (igv) {
                     const yStrokedLine = yRect + alignmentHeight / 2;
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
-                        if ("I" === block.gapType) {
-                            // ignore
-                        }
-                        else if ("D" === block.gapType) {
+                        if ("D" === block.gapType) {
                             igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.deletionColor});
                         }
-                        else {
+                        else if ("N" === block.gapType) {
                             igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.skippedColor});
                         }
                     }
