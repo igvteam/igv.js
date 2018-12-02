@@ -237,6 +237,13 @@ var igv = (function (igv) {
             })
 
             .then(function (config) {
+
+                let invalidConfiguration = (undefined === config.reference && undefined === config.genome);
+
+                if (true === invalidConfiguration) {
+                    throw new Error('Invalid session file');
+                }
+
                 return self.loadGenome(config.reference || config.genome, config.locus)
             })
 
