@@ -37,6 +37,8 @@ $igv-light-grey-color: #bfbfbf;
 $igv-grey-color: #7F7F7F;
 $igv-dark-grey-color: #373737;
 
+$igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
+
 @mixin generic-input {
 
   input {
@@ -228,12 +230,13 @@ $igv-dark-grey-color: #373737;
   align-items: center;
 
   margin-left: 8px;
-  height: 100%;
+  height: $igv-locus-search-height;
 
   // locus goto | search icon
   .igv-search-container {
     width: 200px;
-    height: 100%;
+    height: $igv-locus-search-height;
+    line-height: $igv-locus-search-height;
 
     display: flex;
     flex-flow: row;
@@ -244,20 +247,21 @@ $igv-dark-grey-color: #373737;
     // locus goto
     input {
       cursor: text;
+
       width: 85%;
-      height: 75%;
 
-      padding-left: 8px;
-      margin-right: 8px;
-
-      text-align: left;
-
-      outline: none;
+      height: $igv-locus-search-height;
+      line-height: $igv-locus-search-height;
 
       font-size: $igv-navbar-font-size;
       font-family: $igv-default-font-face;
       font-weight: 400;
+      text-align: left;
 
+      padding-left: 8px;
+      margin-right: 8px;
+
+      outline: none;
 
       border-style: solid;
       border-radius: 3px;

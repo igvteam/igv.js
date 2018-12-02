@@ -179,10 +179,11 @@
   justify-content: space-between;
   align-items: center;
   margin-left: 8px;
-  height: 100%; }
+  height: calc(32px - 10px); }
   .igv-locus-size-group .igv-search-container {
     width: 200px;
-    height: 100%;
+    height: calc(32px - 10px);
+    line-height: calc(32px - 10px);
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -191,14 +192,15 @@
     .igv-locus-size-group .igv-search-container input {
       cursor: text;
       width: 85%;
-      height: 75%;
-      padding-left: 8px;
-      margin-right: 8px;
-      text-align: left;
-      outline: none;
+      height: calc(32px - 10px);
+      line-height: calc(32px - 10px);
       font-size: 12px;
       font-family: "Open Sans", sans-serif;
       font-weight: 400;
+      text-align: left;
+      padding-left: 8px;
+      margin-right: 8px;
+      outline: none;
       border-style: solid;
       border-radius: 3px;
       border-width: thin;
