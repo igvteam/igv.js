@@ -78,14 +78,6 @@ function runCRAMTests() {
                 const cramReader = new igv.CramReader({
                         url: 'data/cram/na12889.cram',
                         indexURL: 'data/cram/na12889.cram.crai'
-                        // ,
-                        // seqFetch: function (seqId, start, end) {
-                        //     var fakeSeq = ''
-                        //     for (let i = start; i <= end; i += 1) {
-                        //         fakeSeq += 'A'
-                        //     }
-                        //     return Promise.resolve(fakeSeq)
-                        // }
                     },
                     genome);
 
@@ -257,6 +249,56 @@ function runCRAMTests() {
 
                 done();
             })
+
+            .catch(function (error) {
+                console.error(error);
+                assert.ok(false, error);  // failed
+                done();
+            });
+
+    });
+
+    QUnit.test("CRAM - 1KG pair", function (assert) {
+
+        var done = assert.async();
+
+        const bamReader = new igv.BamReader({
+            url: 'data/cram/hg00096_hg38.bam',
+            indexURL: 'data/cram/hg00096_hg38.bam.bai'
+        });
+
+        const cramReader = new igv.CramReader({
+            url: 'data/cram/hg00096_hg38.cram',
+            indexURL: 'data/cram/hg00096_hg38.cram.crai',
+            seqFetch: function (seqId, start, end) {
+                var fakeSeq = ''
+                for (let i = start; i <= end; i += 1) {
+                    fakeSeq += 'A'
+                }
+                return Promise.resolve(fakeSeq)
+            }
+        });
+
+        let bamAlignment;
+
+        bamReader.readAlignments('chr8', 128749000, 128749999)
+            .then(function (alignmentContainer) {
+                assert.equal(1, alignmentContainer.alignments.length);
+                bamAlignment = alignmentContainer.alignments[0];
+
+                return cramReader.readAlignments('chr8', 128749000, 128749999)
+
+            })
+
+            .then(function (alignmentContainer) {
+
+                assert.equal(1, alignmentContainer.alignments.length);
+
+                const cramAlignment = alignmentContainer.alignments[0];
+
+                done();
+            })
+
 
             .catch(function (error) {
                 console.error(error);

@@ -29,8 +29,11 @@
 var igv = (function (igv) {
 
 
-    var READ_STRAND_FLAG = 0x10;
-    var MATE_STRAND_FLAG = 0x20;
+    const READ_STRAND_FLAG = 0x10;
+    const MATE_STRAND_FLAG = 0x20;
+
+    const CRAM_MATE_STRAND_FLAG = 0x1;
+    const CRAM_MATE_MAPPED_FLAG = 0x2;
 
     /**
      * Class for reading a bam file
@@ -197,23 +200,26 @@ var igv = (function (igv) {
                     alignment.lengthOnRef = record.lengthOnRef;
                     alignment.flags = record.flags;
                     alignment.strand = !(record.flags & READ_STRAND_FLAG);
-                    alignment.fragmentLength = record.templateSize;
+                    alignment.fragmentLength = record.templateLength || record.templateSize;
                     alignment.mq = record.mappingQuality;
                     alignment.end = record.alignmentStart + record.lengthOnRef;
                     alignment.readGroupId = record.readGroupId;
 
                     if (record.mate && record.mate.sequenceId !== undefined) {
+                        const strand = record.mate.flags !== undefined ?
+                            !(record.mate.flags & CRAM_MATE_STRAND_FLAG) :
+                            !(record.flags & MATE_STRAND_FLAG);
+
                         alignment.mate = {
                             chr: chrNames[record.mate.sequenceId],
                             position: record.mate.alignmentStart,
-                            strand: !(record.flags & MATE_STRAND_FLAG)
+                            strand: strand
                         };
                     }
 
                     alignment.seq = record.getReadBases();
                     alignment.qual = record.qualityScores;
                     alignment.tagDict = record.tags;
-                    alignment.pairOrientation = record.getPairOrientation();
 
                     if(undefined !== record.readName) {
                         alignment.readName = record.readName;
@@ -239,19 +245,25 @@ var igv = (function (igv) {
 
                     makeBlocks(record, alignment);
 
+                    if(alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                        alignment.fragmentLength = -alignment.fragmentLength
+                    }
+
+                    igv.BamUtils.setPairOrientation(alignment);
+
                     return alignment;
 
                 }
 
                 function makeBlocks(cramRecord, alignment) {
 
+                    const blocks = [];
+                    let insertions;
+                    let gapType;
+                    let basesUsed = 0;
+
                     if (cramRecord.readFeatures) {
 
-                        const blocks = [];
-
-                        let insertions;
-                        let gapType;
-                        let basesUsed = 0;
 
                         alignment.scStart = alignment.start;
                         alignment.scLengthOnRef = alignment.lengthOnRef;
@@ -329,25 +341,29 @@ var igv = (function (igv) {
 
 
                         }
-
-                        // Last block
-                        const len = cramRecord.readLength - basesUsed;
-                        if (len > 0) {
-                            blocks.push(new igv.AlignmentBlock({
-                                start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
-                                seqOffset: basesUsed,
-                                len: len,
-                                type: 'M',
-                                gapType: gapType
-                            }));
-                        }
-
-
-                        alignment.blocks = blocks;
-                        alignment.insertions = insertions;
-
-
                     }
+
+                    // Last block
+                    const len = cramRecord.readLength - basesUsed;
+                    if (len > 0) {
+                        blocks.push(new igv.AlignmentBlock({
+                            start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
+                            seqOffset: basesUsed,
+                            len: len,
+                            type: 'M',
+                            gapType: gapType
+                        }));
+                    }
+
+
+                    if (blocks.length === 0) {
+                        console.log("Zero length");
+                    }
+
+                    alignment.blocks = blocks;
+                    alignment.insertions = insertions;
+
+
                 }
 
             });

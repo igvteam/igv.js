@@ -49,7 +49,10 @@ var igv = (function (igv) {
             this.bamReader = new igv.HtsgetReader(config, genome);
         } else if ("shardedBam" === config.sourceType) {
             this.bamReader = new igv.ShardedBamReader(config, genome);
-        } else {
+        } else if ("cram" === config.format) {
+            this.bamReader = new igv.CramReader(config, genome);
+        }
+        else {
             if (this.config.indexed === false) {
                 this.bamReader = new igv.BamReaderNonIndexed(config, genome);
             }
@@ -102,7 +105,7 @@ var igv = (function (igv) {
         function allAlignments(rows) {
             let result = [];
             for (let row of rows) {
-                for(let alignment of row.alignments) {
+                for (let alignment of row.alignments) {
                     result.push(alignment);
                 }
             }

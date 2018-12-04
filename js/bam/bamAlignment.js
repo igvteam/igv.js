@@ -58,51 +58,51 @@ var igv = (function (igv) {
     }
 
     igv.BamAlignment.prototype.isMapped = function () {
-        return (this.flags & READ_UNMAPPED_FLAG) == 0;
+        return (this.flags & READ_UNMAPPED_FLAG) === 0;
     }
 
     igv.BamAlignment.prototype.isPaired = function () {
-        return (this.flags & READ_PAIRED_FLAG) != 0;
+        return (this.flags & READ_PAIRED_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isProperPair = function () {
-        return (this.flags & PROPER_PAIR_FLAG) != 0;
+        return (this.flags & PROPER_PAIR_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isFirstOfPair = function () {
-        return (this.flags & FIRST_OF_PAIR_FLAG) != 0;
+        return (this.flags & FIRST_OF_PAIR_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isSecondOfPair = function () {
-        return (this.flags & SECOND_OF_PAIR_FLAG) != 0;
+        return (this.flags & SECOND_OF_PAIR_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isSecondary = function () {
-        return (this.flags & SECONDARY_ALIGNMNET_FLAG) != 0;
+        return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isSupplementary = function () {
-        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) != 0;
+        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isFailsVendorQualityCheck = function () {
-        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) != 0;
+        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isDuplicate = function () {
-        return (this.flags & DUPLICATE_READ_FLAG) != 0;
+        return (this.flags & DUPLICATE_READ_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isMateMapped = function () {
-        return (this.flags & MATE_UNMAPPED_FLAG) == 0;
+        return (this.flags & MATE_UNMAPPED_FLAG) === 0;
     }
 
     igv.BamAlignment.prototype.isNegativeStrand = function () {
-        return (this.flags & READ_STRAND_FLAG) != 0;
+        return (this.flags & READ_STRAND_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.isMateNegativeStrand = function () {
-        return (this.flags & MATE_STRAND_FLAG) != 0;
+        return (this.flags & MATE_STRAND_FLAG) !== 0;
     }
 
     igv.BamAlignment.prototype.tags = function () {

@@ -35,7 +35,6 @@
     <script src="../js/feature/mergedTrack.js"></script>
 
 
-
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
     <script src="../js/bam/bgzf.js"></script>
@@ -166,44 +165,50 @@
     <button onclick="bookmark();">Bookmark</button>
 </div>
 
-<h3>Example tracks - click to load</h3>
-
-<div id="trackList"></div>
-
-<button onclick="printLocus()">Print Locus</button>
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
-
-
+<div id="igvDiv"></div>
 
 <script type="text/javascript">
 
     let b;
+
     function printLocus() {
-    console.log(b.currentLocusString());
+        console.log(b.currentLocusString());
 
     }
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-            .then(function (google) {
-
-                const options =
+        const options =
+            {
+                locus: 'chr8:128,749,421-128,749,582',
+                genome: "hg38",
+                flanking: 1000,
+                queryParametersSupported: true,
+                tracks: [
+                    // {
+                    //     "type": "alignment",
+                    //     "format": "cram",
+                    //     "url": "../test/data/cram/hg00096_hg38.cram",
+                    //     "indexURL": "../test/data/cram/hg00096_hg38.cram.crai",
+                    //     "name": "HG00096"
+                    // },
                     {
-                        // locus: 'egfr',
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true,
-                    };
+                        "type": "alignment",
+                        "format": "cram",
+                        "url": "https://s3.amazonaws.com/1000genomes/data/HG00096/alignment/HG00096.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
+                        "indexURL": "https://s3.amazonaws.com/1000genomes/data/HG00096/alignment/HG00096.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai",
+                        "name": "HG00096"
+                    }
+                ]
+            };
 
-                igv.createBrowser(document.getElementById('igvDiv'), options)
-                    .then(function (browser) {
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
-                        return browser;
-                    })
+        igv.createBrowser(document.getElementById('igvDiv'), options)
+
+            .then(function (browser) {
 
             })
+
     });
 
 
