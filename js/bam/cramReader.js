@@ -52,7 +52,7 @@ var igv = (function (igv) {
         this.cramFile = new gmodCRAM.CramFile({
             url: config.url,
             seqFetch: config.seqFetch || seqFetch.bind(this),
-            checkSequenceMD5: false
+            checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
@@ -261,13 +261,12 @@ var igv = (function (igv) {
                     let insertions;
                     let gapType;
                     let basesUsed = 0;
+                    let cigarString = '';
+
+                    alignment.scStart = alignment.start;
+                    alignment.scLengthOnRef = alignment.lengthOnRef;
 
                     if (cramRecord.readFeatures) {
-
-
-                        alignment.scStart = alignment.start;
-                        alignment.scLengthOnRef = alignment.lengthOnRef;
-
 
                         for (let feature of cramRecord.readFeatures) {
 
@@ -276,6 +275,9 @@ var igv = (function (igv) {
                             const readPos = feature.pos - 1;
                             const refPos = feature.refPos - 1;
 
+                            if(alignment.readName === 'SRR062635.16695874') {
+                                console.log("");
+                            }
 
                             switch (code) {
                                 case 'S' :
@@ -286,7 +288,7 @@ var igv = (function (igv) {
                                     if (readPos > basesUsed) {
                                         const len = readPos - basesUsed;
                                         blocks.push(new igv.AlignmentBlock({
-                                            start: refPos,
+                                            start: refPos - len,
                                             seqOffset: basesUsed,
                                             len: len,
                                             type: 'M',
@@ -294,6 +296,7 @@ var igv = (function (igv) {
                                         }));
                                         basesUsed += len;
 
+                                        cigarString += len + 'M';
                                     }
 
 
@@ -315,6 +318,7 @@ var igv = (function (igv) {
                                         }));
                                         basesUsed += len;
                                         gapType = 'S';
+                                        cigarString += len + code;
                                     }
                                     else if ('I' === code || 'i' === code) {
                                         if (insertions === undefined) {
@@ -329,17 +333,20 @@ var igv = (function (igv) {
                                         }));
                                         basesUsed += len;
                                         gapType = 'I';
+                                        cigarString += len + code;
                                     } else if ('D' === code || 'N' === code) {
-
                                         gapType = code;
+                                        cigarString += data + code;
                                     }
                                     break;
+
+                                case 'H':
+                                case 'P':
+                                    cigarString += data + code;
 
                                 default :
                                 //  Ignore
                             }
-
-
                         }
                     }
 
@@ -353,16 +360,13 @@ var igv = (function (igv) {
                             type: 'M',
                             gapType: gapType
                         }));
-                    }
 
-
-                    if (blocks.length === 0) {
-                        console.log("Zero length");
+                        cigarString += len + 'M';
                     }
 
                     alignment.blocks = blocks;
                     alignment.insertions = insertions;
-
+                    alignment.cigar = cigarString;
 
                 }
 
