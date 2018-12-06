@@ -326,14 +326,17 @@ var igv = (function (igv) {
                 return igv.GenomeUtils.getKnownGenomes()
                     .then(function (g) {
                         knownGenomes = g;
-                        return igv.xhr.loadString(urlOrFile)
+
+                        let path = urlOrFile.url || urlOrFile;
+                        return igv.xhr.loadString(path);
                     })
                     .then(function (string) {
                         return new igv.XMLSession(string, knownGenomes);
                     })
             }
             else if (filename.endsWith(".json")) {
-                return igv.xhr.loadJson(urlOrFile);
+                let path = urlOrFile.url || urlOrFile;
+                return igv.xhr.loadJson(path);
             } else {
                 return Promise.resolve(undefined);
             }
