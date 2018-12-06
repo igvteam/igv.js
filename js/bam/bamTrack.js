@@ -915,7 +915,7 @@ var igv = (function (igv) {
                     const isSoftClip = 'S' === block.type;
                     if (isSoftClip || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
-                        const seq = isSoftClip ? '' : alignment.seq.toUpperCase();
+                        const seq = alignment.seq ?  alignment.seq.toUpperCase() : undefined;
                         const qual = alignment.qual;
                         const seqOffset = block.seqOffset;
 
@@ -924,7 +924,7 @@ var igv = (function (igv) {
 
                             if (offsetBP + i < 0) continue;
 
-                            let readChar = isSoftClip ? '' : seq.charAt(seqOffset + i);
+                            let readChar = seq ? seq.charAt(seqOffset + i) : '';
                             const refChar = referenceSequence.charAt(offsetBP + i);
                             
                             if (readChar === "=") {
@@ -933,7 +933,7 @@ var igv = (function (igv) {
                             if (readChar === "X" || refChar !== readChar || isSoftClip) {
 
                                 let baseColor;
-                                if (qual !== undefined && qual.length > seqOffset + i) {
+                                if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                                     const readQual = qual[seqOffset + i];
                                     baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                                 }
