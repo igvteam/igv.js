@@ -59,7 +59,8 @@ var igv = (function (igv) {
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
                 url: config.indexURL
-            })
+            }),
+            fetchSizeLimit: 30000000
         });
 
         igv.BamUtils.setReaderDefaults(this, config);
