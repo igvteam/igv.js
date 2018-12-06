@@ -196,7 +196,7 @@
 
                 igv.createBrowser(document.getElementById('igvDiv'), options)
                     .then(function (browser) {
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
+                        igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
                         return browser;
                     })
 
