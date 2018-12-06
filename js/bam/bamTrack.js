@@ -915,7 +915,7 @@ var igv = (function (igv) {
                     const isSoftClip = 'S' === block.type;
                     if (isSoftClip || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
-                        const seq = alignment.seq.toUpperCase();
+                        const seq = isSoftClip ? '' : alignment.seq.toUpperCase();
                         const qual = alignment.qual;
                         const seqOffset = block.seqOffset;
 
@@ -923,8 +923,10 @@ var igv = (function (igv) {
                         for (let i = 0, len = block.len; i < len; i++) {
 
                             if (offsetBP + i < 0) continue;
-                            let readChar = seq.charAt(seqOffset + i);
+
+                            let readChar = isSoftClip ? '' : seq.charAt(seqOffset + i);
                             const refChar = referenceSequence.charAt(offsetBP + i);
+                            
                             if (readChar === "=") {
                                 readChar = refChar;
                             }
