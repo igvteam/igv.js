@@ -220,32 +220,14 @@ var igv = (function (igv) {
                     alignment.seq = record.getReadBases();
                     alignment.qual = record.qualityScores;
                     alignment.tagDict = record.tags;
-
-                    if(undefined !== record.readName) {
-                        alignment.readName = record.readName;
-                    }
-                    else {
-                        if(record.uniqueId && readNames[record.uniqueId]) {
-                            alignment.readName = readNames[record.uniqueId];
-                            // optional -  delete readNames[record.uniqueId]
-                        }
-                        else if (record.mate) {
-                            if (record.mate.readName !== undefined) {
-                                alignment.readName = record.mate.readName;
-                            }
-                            else if(record.mate.uniqueId) {
-                                alignment.readName = uniqueID();
-                                readNames[record.mate.uniqueId] = alignment.readName;
-                            }
-                        }
-                    }
+                    alignment.readName = record.readName;
 
                     // TODO -- cigar encoded in tag?
                     // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
                     makeBlocks(record, alignment);
 
-                    if(alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                    if (alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
                         alignment.fragmentLength = -alignment.fragmentLength
                     }
 
@@ -275,7 +257,7 @@ var igv = (function (igv) {
                             const readPos = feature.pos - 1;
                             const refPos = feature.refPos - 1;
 
-                            if(alignment.readName === 'SRR062635.16695874') {
+                            if (alignment.readName === 'SRR062635.16695874') {
                                 console.log("");
                             }
 

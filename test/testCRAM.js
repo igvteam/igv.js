@@ -161,7 +161,8 @@ function runCRAMTests() {
                     fakeSeq += 'A'
                 }
                 return Promise.resolve(fakeSeq)
-            }
+            },
+            checkSequenceMD5: false
         });
 
         cramReader.readAlignments('chr1', 155140000, 155160000)
@@ -197,7 +198,8 @@ function runCRAMTests() {
                     fakeSeq += 'A'
                 }
                 return Promise.resolve(fakeSeq)
-            }
+            },
+            checkSequenceMD5: false
         });
 
         cramReader.readAlignments('chr1', 155150690, 155150700)
@@ -276,7 +278,8 @@ function runCRAMTests() {
                     fakeSeq += 'A'
                 }
                 return Promise.resolve(fakeSeq)
-            }
+            },
+            checkSequenceMD5: false
         });
 
         let bamAlignment;
