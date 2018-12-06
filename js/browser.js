@@ -1266,7 +1266,7 @@ var igv = (function (igv) {
         // create right mate pair reference frame
         rightMatePairGenomicState = {};
         rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-        rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+        rightMatePairGenomicState.referenceFrame = createReferenceFrame(alignment.mate.chr, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
 
         // add right mate panel beside left mate panel
         this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
