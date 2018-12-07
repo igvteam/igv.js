@@ -615,7 +615,7 @@ var igv = (function (igv) {
             this.parent = parent;
             this.featureSource = parent.featureSource;
             this.top = config.coverageTrackHeight == 0 ? 0 : config.coverageTrackHeight + 5;
-            this.alignmentRowHeight = config.alignmentRowHeight || 14;
+            this.alignmentRowHeight = config.alignmentRowHeight || 16;
 
             this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
             this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
@@ -776,7 +776,6 @@ var igv = (function (igv) {
             function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
                 var alignmentColor,
-                    outlineColor,
                     lastBlockEnd,
                     blocks,
                     block,
@@ -784,7 +783,7 @@ var igv = (function (igv) {
                     diagnosticColor;
 
                 alignmentColor = getAlignmentColor.call(self, alignment);
-                outlineColor = alignmentColor;
+                const outlineColor = alignmentColor;
 
                 blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
 
@@ -831,6 +830,16 @@ var igv = (function (igv) {
                     const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
                     const arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
                     const yStrokedLine = yRect + alignmentHeight / 2;
+                    const isSoftClip = 'S' === block.type;
+
+                    const strokeOutline =
+                        alignment.mq <= 0  ||
+                        self.highlightedAlignmentReadNamed === alignment.readName ||
+                        isSoftClip;
+
+                    let blockOutlineColor = outlineColor;
+                    if(self.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
+                    else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                         if ("D" === block.gapType) {
@@ -842,59 +851,53 @@ var igv = (function (igv) {
                     }
                     lastBlockEnd = blockEndPixel;
 
-                    // Last block on + strand ?
-                    if (true === alignment.strand && b === blocks.length - 1) {
-                        const xListPixel = [
-                            blockStartPixel,
-                            blockEndPixel,
-                            blockEndPixel + arrowHeadWidthPixel,
-                            blockEndPixel,
-                            blockStartPixel,
-                            blockStartPixel];
-                        const yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect];
+                    const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1);
+                    const lastBlockReverseStrand = (false === alignment.strand && b === 0);
+                    const lastBlock = lastBlockPositiveStrand | lastBlockReverseStrand;
 
+                    if (lastBlock) {
+                        let xListPixel;
+                        let yListPixel;
+                        if (lastBlockPositiveStrand) {
+                            xListPixel = [
+                                blockStartPixel,
+                                blockEndPixel,
+                                blockEndPixel + arrowHeadWidthPixel,
+                                blockEndPixel,
+                                blockStartPixel,
+                                blockStartPixel];
+                            yListPixel = [
+                                yRect,
+                                yRect,
+                                yRect + (alignmentHeight / 2.0),
+                                yRect + alignmentHeight,
+                                yRect + alignmentHeight,
+                                yRect];
+
+                        }
+
+                        // Last block on - strand ?
+                        else if (lastBlockReverseStrand) {
+                            xListPixel = [
+                                blockEndPixel,
+                                blockStartPixel,
+                                blockStartPixel - arrowHeadWidthPixel,
+                                blockStartPixel,
+                                blockEndPixel,
+                                blockEndPixel];
+                            yListPixel = [
+                                yRect,
+                                yRect,
+                                yRect + (alignmentHeight / 2.0),
+                                yRect + alignmentHeight,
+                                yRect + alignmentHeight,
+                                yRect];
+
+                        }
                         igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
-                        if (self.highlightedAlignmentReadNamed === alignment.readName) {
-                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: 'red'});
-                        }
-
-                        if (alignment.mq <= 0) {
-                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
-                        }
-                    }
-
-                    // Last block on - strand ?
-                    else if (false === alignment.strand && b === 0) {
-                        const xListPixel = [
-                            blockEndPixel,
-                            blockStartPixel,
-                            blockStartPixel - arrowHeadWidthPixel,
-                            blockStartPixel,
-                            blockEndPixel,
-                            blockEndPixel];
-                        const yListPixel = [
-                            yRect,
-                            yRect,
-                            yRect + (alignmentHeight / 2.0),
-                            yRect + alignmentHeight,
-                            yRect + alignmentHeight,
-                            yRect];
-
-                        igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
-
-                        if (self.highlightedAlignmentReadNamed === alignment.readName) {
-                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: 'red'});
-                        }
-
-                        if (alignment.mq <= 0) {
-                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: outlineColor});
+                        if(strokeOutline) {
+                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
                         }
                     }
 
@@ -902,9 +905,9 @@ var igv = (function (igv) {
                     else {
                         igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
 
-                        if (alignment.mq <= 0) {
+                        if (strokeOutline) {
                             ctx.save();
-                            ctx.strokeStyle = outlineColor;
+                            ctx.strokeStyle = blockOutlineColor;
                             ctx.strokeRect(blockStartPixel, yRect, blockWidthPixel, alignmentHeight);
                             ctx.restore();
                         }
@@ -912,10 +915,10 @@ var igv = (function (igv) {
 
 
                     // Mismatch coloring
-                    const isSoftClip = 'S' === block.type;
+
                     if (isSoftClip || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
-                        const seq = alignment.seq ?  alignment.seq.toUpperCase() : undefined;
+                        const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                         const qual = alignment.qual;
                         const seqOffset = block.seqOffset;
 
@@ -926,7 +929,7 @@ var igv = (function (igv) {
 
                             let readChar = seq ? seq.charAt(seqOffset + i) : '';
                             const refChar = referenceSequence.charAt(offsetBP + i);
-                            
+
                             if (readChar === "=") {
                                 readChar = refChar;
                             }
