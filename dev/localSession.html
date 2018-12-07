@@ -169,10 +169,11 @@
 
         var sessionFile = document.getElementById('session').files[0];
 
-        igv.browser.loadSession(sessionFile)
-                .catch(function (error) {
-                    alert("Error loading session file");
-                })
+        igv.browser
+            .loadSession(sessionFile)
+            .catch(function (error) {
+                alert("Error loading session file");
+            })
 
     }
 

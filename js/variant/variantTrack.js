@@ -785,6 +785,8 @@ var igv = (function (igv) {
                 mapped;
 
 
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
             ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
                 var lut =
                     {
