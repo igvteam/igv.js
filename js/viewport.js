@@ -42,7 +42,9 @@ var igv = (function (igv) {
 
             this.$viewport.addClass('igv-viewport-sequence');
 
-        } else if ('ruler' === trackView.track.type) {
+        }
+
+        if ('ruler' === trackView.track.type) {
 
             this.rulerSweeper = new igv.RulerSweeper(this);
 
