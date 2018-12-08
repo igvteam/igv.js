@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainerDiv) {
@@ -148,13 +150,16 @@ var igv = (function (igv) {
     igv.Browser.prototype.renderSVG = function (config) {
 
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
-        const anyViewportContainerBBox = this.trackViews[ 0 ].$viewportContainer.get(0).getBoundingClientRect();
-        const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[ 0 ].$ideogram.get(0).getBoundingClientRect() : { height: 0, width: 0 };
+        const anyViewportContainerBBox = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
+        const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[0].$ideogram.get(0).getBoundingClientRect() : {
+            height: 0,
+            width: 0
+        };
 
         // multi-locus inter-panel gap
         const multiLocusGap = 8;
 
-        const w = trackContainerBBox.width  + (this.genomicStateList.length - 1) * multiLocusGap;
+        const w = trackContainerBBox.width + (this.genomicStateList.length - 1) * multiLocusGap;
 
         const h_output = trackContainerBBox.height + ideoPanelBBox.height;
         const h_render = 8000;
@@ -184,7 +189,7 @@ var igv = (function (igv) {
         // ideoPanel -> SVG
         if (this.ideoPanel) {
 
-            this.ideoPanel.renderSVGContext(svgContext, { deltaX: dx, deltaY: 0 });
+            this.ideoPanel.renderSVGContext(svgContext, {deltaX: dx, deltaY: 0});
         }
 
         // tracks -> SVG
@@ -200,11 +205,11 @@ var igv = (function (igv) {
         if (config.$container) {
             config.$container.empty();
             config.$container.width(trackContainerBBox.width);
-            config.$container.append( svg );
+            config.$container.append(svg);
         }
 
         const path = config.filename ? config.filename : 'igv-app.svg';
-        const data = URL.createObjectURL(new Blob([svg], { type: "application/octet-stream" }));
+        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         igv.download(path, data);
 
     };
@@ -218,7 +223,7 @@ var igv = (function (igv) {
      */
     igv.Browser.prototype.loadSession = function (sessionURL, config) {
 
-        var self = this;
+        const self = this;
 
         if (!config) config = {};
 
@@ -310,42 +315,50 @@ var igv = (function (igv) {
 
         function loadSessionFile(urlOrFile) {
 
-            var filename, knownGenomes;
 
             if (!urlOrFile) {
                 return Promise.resolve(undefined);
             }
 
-            filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
-
-            if (filename.startsWith("blob:") || filename.startsWith("data:")) {
-                var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
+            if (typeof urlOrFile === 'string' && (urlOrFile.startsWith("blob:") || urlOrFile.startsWith("data:"))) {
+                const json = igv.Browser.uncompressSession(urlOrFile);
                 return Promise.resolve(JSON.parse(json));
             }
-            else if (filename.endsWith(".xml")) {
-                return igv.GenomeUtils.getKnownGenomes()
-                    .then(function (g) {
-                        knownGenomes = g;
-                        return igv.xhr.loadString(urlOrFile)
-                    })
-                    .then(function (string) {
-                        return new igv.XMLSession(string, knownGenomes);
-                    })
-            }
-            else if (filename.endsWith(".json")) {
-                return igv.xhr.loadJson(urlOrFile);
-            } else {
-                return Promise.resolve(undefined);
-            }
 
+            else {
+                const filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
+                let knownGenomes;
+
+                if (filename.endsWith(".xml")) {
+
+                    return igv.GenomeUtils.getKnownGenomes()
+
+                        .then(function (g) {
+                            knownGenomes = g;
+                            return igv.xhr.loadString(urlOrFile)
+                        })
+
+                        .then(function (string) {
+                            return new igv.XMLSession(string, knownGenomes);
+                        })
+
+                }
+                else if (filename.endsWith(".json")) {
+
+                    return igv.xhr.loadJson(urlOrFile);
+
+                } else {
+
+                    return Promise.resolve(undefined);
+
+                }
+            }
         }
-
     }
 
     igv.Browser.prototype.loadGenome = function (idOrConfig, initialLocus) {
 
         var self = this,
-            genomeChange,
             genomeConfig;
 
         // idOrConfig might be json
@@ -369,7 +382,7 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
-                genomeChange = self.genome && (self.genome.id !== genome.id);
+                const genomeChange = self.genome && (self.genome.id !== genome.id);
                 self.genome = genome;
                 self.$current_genome.text(genome.id || '');
                 self.$current_genome.attr('title', genome.id || '');
@@ -397,7 +410,7 @@ var igv = (function (igv) {
                 self.genomicStateList = genomicStateList;
 
                 if (self.genomicStateList.length > 0) {
-                    
+
                     if (!self.rulerTrack && false !== self.config.showRuler) {
                         self.rulerTrack = new igv.RulerTrack(self);
                         self.addTrack(self.rulerTrack);
@@ -414,6 +427,7 @@ var igv = (function (igv) {
                     return [];
                 }
             })
+
             .then(function (ignore) {
 
                 self.resize();    // Force recomputation and repaint
@@ -425,7 +439,7 @@ var igv = (function (igv) {
         // Expand a genome id to a reference object, if needed
         function expandReference(conf) {
 
-            var genomeID;
+            let genomeID;
 
             if (igv.isString(conf)) {
                 genomeID = conf;
@@ -440,10 +454,8 @@ var igv = (function (igv) {
 
             if (genomeID) {
                 return igv.GenomeUtils.getKnownGenomes()
-
                     .then(function (knownGenomes) {
-
-                        var reference = knownGenomes[genomeID];
+                        const reference = knownGenomes[genomeID];
                         if (!reference) {
                             self.presentAlert("Uknown genome id: " + genomeID, undefined);
                         }
@@ -478,7 +490,7 @@ var igv = (function (igv) {
     //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-        const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[ 0 ].referenceFrame));
+        const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[0].referenceFrame));
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -511,7 +523,7 @@ var igv = (function (igv) {
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
     };
 
-    function toggleTrackLabels (trackViews, isVisible) {
+    function toggleTrackLabels(trackViews, isVisible) {
 
         for (let trackView of trackViews) {
             for (let viewport of trackView.viewports) {
@@ -836,8 +848,7 @@ var igv = (function (igv) {
         var self = this,
             newTrackViews = [];
 
-        for(let tv of this.trackViews) {
-
+        for (let tv of this.trackViews) {
 
 
             if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
@@ -891,14 +902,14 @@ var igv = (function (igv) {
         // Recompute bpPerPixel -- if previous width was zero this can be infinity
         const viewportWidth = this.viewportWidth();
 
-        if(viewportWidth === 0) {
+        if (viewportWidth === 0) {
             return;
         }
 
         if (this.genomicStateList && viewportWidth > 0) {
 
-            const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[ 0 ].referenceFrame);
-            
+            const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[0].referenceFrame);
+
             if (isWGV || this.isMultiLocusMode()) {
                 this.centerGuide.forcedHide();
             } else {
@@ -1028,7 +1039,7 @@ var igv = (function (igv) {
             })
         }
     };
-    
+
     igv.Browser.prototype.loadInProgress = function () {
         var i;
         for (i = 0; i < this.trackViews.length; i++) {
@@ -1143,9 +1154,9 @@ var igv = (function (igv) {
         const viewport = this.trackViews[0].viewports[0];
         const referenceFrame = viewport.genomicState.referenceFrame;
 
-        const a = this.getChromosomeLengthBP(this.genome, referenceFrame)/viewport.$viewport.width();
-        const b = this.minimumBases()/viewport.$viewport.width();
-        const percentage = referenceFrame.bpPerPixel/ Math.abs(a - b);
+        const a = this.getChromosomeLengthBP(this.genome, referenceFrame) / viewport.$viewport.width();
+        const b = this.minimumBases() / viewport.$viewport.width();
+        const percentage = referenceFrame.bpPerPixel / Math.abs(a - b);
 
         const value = Math.round(100 * (1.0 - percentage));
 
@@ -1164,15 +1175,15 @@ var igv = (function (igv) {
 
             let referenceFrame = viewport.genomicState.referenceFrame;
 
-            const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width()/2.0);
+            const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
 
             const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, referenceFrame);
 
-            const bpp = igv.Math.lerp(chromosomeLengthBP/viewport.$viewport.width(), this.minimumBases()/viewport.$viewport.width(), percentage);
+            const bpp = igv.Math.lerp(chromosomeLengthBP / viewport.$viewport.width(), this.minimumBases() / viewport.$viewport.width(), percentage);
 
             const viewportWidthBP = bpp * viewport.$viewport.width();
 
-            referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP/2.0)), 0, chromosomeLengthBP - viewportWidthBP);
+            referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
 
             referenceFrame.bpPerPixel = bpp;
 
@@ -1207,17 +1218,17 @@ var igv = (function (igv) {
 
         let self = this;
 
-        let viewports = viewportOrUndefined ? [ viewportOrUndefined ] : this.trackViews[0].viewports;
+        let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
         viewports.forEach((viewport) => {
 
             const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, viewport.genomicState.referenceFrame);
-            const bppThreshold = scaleFactor < 1.0 ? self.minimumBases()/viewport.$viewport.width() : chromosomeLengthBP/viewport.$viewport.width();
+            const bppThreshold = scaleFactor < 1.0 ? self.minimumBases() / viewport.$viewport.width() : chromosomeLengthBP / viewport.$viewport.width();
 
-            const centerBP = undefined === centerBPOrUndefined ? (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width()/2.0)) : centerBPOrUndefined;
+            const centerBP = undefined === centerBPOrUndefined ? (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) : centerBPOrUndefined;
 
             let bpp;
 
-            if(scaleFactor < 1.0) {
+            if (scaleFactor < 1.0) {
                 bpp = Math.max(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             } else {
                 bpp = Math.min(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
@@ -1225,7 +1236,7 @@ var igv = (function (igv) {
 
             const viewportWidthBP = bpp * viewport.$viewport.width();
 
-            viewport.genomicState.referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP/2.0)), 0, chromosomeLengthBP - viewportWidthBP);
+            viewport.genomicState.referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
 
             viewport.genomicState.referenceFrame.bpPerPixel = bpp;
 
@@ -1236,7 +1247,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Browser.prototype.getChromosomeLengthBP =  function (genome, referenceFrame) {
+    igv.Browser.prototype.getChromosomeLengthBP = function (genome, referenceFrame) {
 
         if (genome && genome.getChromosome(referenceFrame.chrName)) {
             return genome.getChromosome(referenceFrame.chrName).bpLength;
@@ -1466,7 +1477,7 @@ var igv = (function (igv) {
                     self.buildViewportsWithGenomicStateList(genomicStateList);
 
                     // assign ids to the state objects
-                    for(let gs of genomicStateList) {
+                    for (let gs of genomicStateList) {
                         gs.id = igv.guid();
                     }
 
@@ -1815,7 +1826,7 @@ var igv = (function (igv) {
 
                         locusObject.start = parseInt(numeric, 10) - 1;
 
-                        if(isNaN(locusObject.start)) {
+                        if (isNaN(locusObject.start)) {
                             return undefined;
                         }
 
@@ -1952,7 +1963,7 @@ var igv = (function (igv) {
         // Use first available trackView.
         const locus = [];
         const gtexSelections = {};
-        let anyTrackView = this.trackViews[ 0 ];
+        let anyTrackView = this.trackViews[0];
         anyTrackView.viewports.forEach(function (viewport) {
 
             const genomicState = viewport.genomicState;
@@ -2027,21 +2038,30 @@ var igv = (function (igv) {
         return enc;
     }
 
-    igv.Browser.uncompressSession = function (enc) {
+    igv.Browser.uncompressSession = function (url) {
 
-        var compressedString, compressedBytes, bytes, decompressedString, json, i;
-
-        enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
-
-        compressedString = atob(enc);
-        compressedBytes = [];
-        for (i = 0; i < compressedString.length; i++) {
-            compressedBytes.push(compressedString.charCodeAt(i));
+        let bytes
+        if (url.indexOf('/gzip;base64') > 0) {
+            //Proper dataURI
+            bytes = igv.decodeDataURI(url);
         }
-        bytes = new Zlib.RawInflate(compressedBytes).decompress();
-        json = String.fromCharCode.apply(null, bytes);
+        else {
+
+            let enc = url.substring(5);
+            enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
+
+            const compressedString = atob(enc);
+            const compressedBytes = [];
+            for (let i = 0; i < compressedString.length; i++) {
+                compressedBytes.push(compressedString.charCodeAt(i));
+            }
+            bytes = new Zlib.RawInflate(compressedBytes).decompress();
+        }
+        const json = String.fromCharCode.apply(null, bytes);
 
         return json;
+
+
     }
 
     igv.Browser.prototype.sessionURL = function () {

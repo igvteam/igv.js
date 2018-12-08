@@ -92,37 +92,7 @@ var igv = (function (igv) {
             igv.oauth.setToken(config.oauthToken);
         }
 
-
-        return doPromiseChain(browser, config)
-            .then(function (browser) {
-
-                allBrowsers.push(browser);
-
-                // Backward compatibility -- globally visible.   This will be removed in a future release
-                if (!igv.browser) {
-                    igv.browser = browser;
-                }
-
-                return browser;
-            })
-
-    };
-
-    igv.removeBrowser = function (browser) {
-
-        browser.dispose();
-
-        browser.$root.remove();
-
-        if (browser === igv.browser) {
-            igv.browser = undefined;
-        }
-
-        allBrowsers = allBrowsers.filter(item => item !== browser);
-
-    }
-
-    function doPromiseChain(browser, config) {
+        igv.xhr.startup();
 
         return browser.loadSession(config.sessionURL, config)
 
@@ -149,7 +119,7 @@ var igv = (function (igv) {
                     browser.centerGuide.doShow();
                 }
 
-                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[ 0 ].referenceFrame);
+                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
 
                 // multi-locus mode or isWGV
                 if (browser.isMultiLocusMode() || isWGV) {
@@ -158,15 +128,39 @@ var igv = (function (igv) {
                     browser.centerGuide.forcedShow();
                 }
 
-                igv.xhr.startup();
-
                 browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
                 return browser;
             })
 
-    }
+            .then(function (browser) {
 
+                allBrowsers.push(browser);
+
+                // Backward compatibility -- globally visible.   This will be removed in a future release
+                if (!igv.browser) {
+                    igv.browser = browser;
+                }
+
+                return browser;
+            })
+
+    };
+
+
+    igv.removeBrowser = function (browser) {
+
+        browser.dispose();
+
+        browser.$root.remove();
+
+        if (browser === igv.browser) {
+            igv.browser = undefined;
+        }
+
+        allBrowsers = allBrowsers.filter(item => item !== browser);
+
+    }
 
     /**
      * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
@@ -251,7 +245,7 @@ var igv = (function (igv) {
 
         // chromosome select widget
         browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
-        if(undefined === config.showChromosomeWidget) {
+        if (undefined === config.showChromosomeWidget) {
             config.showChromosomeWidget = true;   // Default to true
         }
         if (true === config.showChromosomeWidget) {

@@ -332,25 +332,9 @@ var igv = (function (igv) {
     };
 
     igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function () {
-        var bytes, inflate, plain, features,
-            split = this.dataURI.split(','),
-            info = split[0].split(':')[1],
-            dataString = split[1];
 
-        if (info.indexOf('base64') >= 0) {
-            dataString = atob(dataString);
-        } else {
-            dataString = decodeURI(dataString);
-        }
-
-        bytes = new Uint8Array(dataString.length);
-        for (var i = 0; i < dataString.length; i++) {
-            bytes[i] = dataString.charCodeAt(i);
-        }
-
-        inflate = new Zlib.Gunzip(bytes);
-        plain = inflate.decompress();
-        features = this.parser.parseFeatures(plain);
+        const plain = igv.decodeDataURI(this.dataURI)
+        const features = this.parser.parseFeatures(plain);
         return Promise.resolve(features);
     };
 

@@ -31,21 +31,19 @@ var igv = (function (igv) {
 
         loadGenome: function (config) {
 
-            var cytobandUrl, cytobands, aliasURL, chrNames, chromosomes, sequence;
+            let cytobands, chrNames, chromosomes;
 
-            cytobandUrl = config.cytobandURL;
-            aliasURL = config.aliasURL;
-            chromosomes = {};
-            sequence = new igv.FastaSequence(config);
+            const cytobandUrl = config.cytobandURL;
+            const aliasURL = config.aliasURL;
+            const sequence = new igv.FastaSequence(config);
 
             return sequence.init()
 
                 .then(function () {
-
                     chrNames = sequence.chromosomeNames;
                     chromosomes = sequence.chromosomes;
-
                 })
+
                 .then(function (ignore) {
                     if (cytobandUrl) {
                         return loadCytobands(cytobandUrl, sequence.config);
@@ -53,10 +51,9 @@ var igv = (function (igv) {
                         return undefined
                     }
                 })
+
                 .then(function (c) {
-
                     cytobands = c;
-
                     if (aliasURL) {
                         return loadAliases(aliasURL, sequence.config);
                     }
@@ -64,6 +61,7 @@ var igv = (function (igv) {
                         return undefined;
                     }
                 })
+
                 .then(function (aliases) {
                     return new Genome(config, sequence, cytobands, aliases);
                 })
@@ -175,12 +173,22 @@ var igv = (function (igv) {
         return Object.assign({}, this.config, {tracks: undefined});
     }
 
+    Genome.prototype.getInitialLocus = function () {
+
+
+    }
+
     Genome.prototype.getHomeChromosomeName = function () {
         if (this.chromosomes.hasOwnProperty("all")) {
             return "all";
         }
         else {
-            return this.chromosomeNames[0];
+            const chromosome = this.chromosomes[this.chromosomeNames[0]];
+            if(chromosome.rangeLocus) {
+                return chromosome.name + ":" + chromosome.rangeLocus;
+            } else {
+                return this.chromosomeNames[0];
+            }
         }
     }
 
@@ -307,10 +315,11 @@ var igv = (function (igv) {
         return this.bpLength;
     }
 
-    igv.Chromosome = function (name, order, bpLength) {
+    igv.Chromosome = function (name, order, bpLength, rangeLocus) {
         this.name = name;
         this.order = order;
         this.bpLength = bpLength;
+        this.rangeLocus = rangeLocus;
     }
 
     igv.Cytoband = function (start, end, name, typestain) {

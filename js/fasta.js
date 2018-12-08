@@ -43,6 +43,10 @@ var igv = (function (igv) {
             }
         }
         this.withCredentials = reference.withCredentials;
+        this.chromosomeNames = [];
+        this.chromosomes = {};
+        this.sequences = {};
+        this.offsets = {};
         this.config = buildConfig(reference);
 
     };
@@ -67,9 +71,7 @@ var igv = (function (igv) {
             return self.getIndex()
 
                 .then(function (index) {
-
                     var order = 0;
-                    self.chromosomes = {};
                     self.chromosomeNames.forEach(function (chrName) {
                         var bpLength = self.index[chrName].size;
                         self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
@@ -84,77 +86,48 @@ var igv = (function (igv) {
     }
 
     igv.FastaSequence.prototype.getSequence = function (chr, start, end) {
-
         if (this.indexed) {
             return getSequenceIndexed.call(this, chr, start, end);
         }
         else {
-            if (this.offset) {
-                start -= this.offset;
-                end -= this.offset;
-            }
-            let prefix = "";
-            if (start < 0) {
-                for (let i = start; i < Math.min(end, 0); i++) {
-                    prefix += "*";
-                }
-            }
-
-            if (end <= 0) {
-                return Promise.resolve(prefix);
-            }
-
-            else {
-                return getSequenceNonIndexed.call(this, chr, start, end)
-
-                    .then(function (seq) {
-                        return prefix + seq;
-                    })
-            }
-
+            return getSequenceNonIndexed.call(this, chr, start, end)
         }
-
     }
 
     function getSequenceIndexed(chr, start, end) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-            var interval = self.interval;
+        var interval = self.interval;
 
-            if (interval && interval.contains(chr, start, end)) {
-
-                fulfill(getSequenceFromInterval(interval, start, end));
+        if (interval && interval.contains(chr, start, end)) {
+            return Promise.resolve(getSequenceFromInterval(interval, start, end));
+        }
+        else {
+            // Expand query, to minimum of 50kb
+            var qstart = start;
+            var qend = end;
+            if ((end - start) < 50000) {
+                var w = (end - start);
+                var center = Math.round(start + w / 2);
+                qstart = Math.max(0, center - 25000);
+                qend = center + 25000;
             }
-            else {
 
-                //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
-
-                // Expand query, to minimum of 100kb
-                var qstart = start;
-                var qend = end;
-                if ((end - start) < 100000) {
-                    var w = (end - start);
-                    var center = Math.round(start + w / 2);
-                    qstart = Math.max(0, center - 50000);
-                    qend = center + 50000;
-                }
-
-
-                self.readSequence(chr, qstart, qend).then(function (seqBytes) {
+            return self.readSequence(chr, qstart, qend)
+                .then(function (seqBytes) {
                     self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
-                    fulfill(getSequenceFromInterval(self.interval, start, end));
-                }).catch(reject);
-            }
+                    return getSequenceFromInterval(self.interval, start, end);
+                })
+        }
 
-            function getSequenceFromInterval(interval, start, end) {
-                var offset = start - interval.start;
-                var n = end - start;
-                var seq = interval.features ? interval.features.substr(offset, n) : null;
-                return seq;
-            }
-        });
+        function getSequenceFromInterval(interval, start, end) {
+            var offset = start - interval.start;
+            var n = end - start;
+            var seq = interval.features ? interval.features.substr(offset, n) : null;
+            return seq;
+        }
+
     }
 
 
@@ -162,64 +135,72 @@ var igv = (function (igv) {
 
         var self = this;
 
-        var seq = self.sequences[chr];
-        if (seq && seq.length >= end) {
-            return Promise.resolve(seq.substring(start, end));
-        } else {
-            return Promise.resolve("");
+        if (this.offsets[chr]) {
+            start -= this.offsets[chr];
+            end -= this.offsets[chr];
+        }
+        let prefix = "";
+        if (start < 0) {
+            for (let i = start; i < Math.min(end, 0); i++) {
+                prefix += "*";
+            }
         }
 
+        if (end <= 0) {
+            return Promise.resolve(prefix);
+        }
 
+        var seq = self.sequences[chr];
+        const seqEnd = Math.min(end, seq.length)
+        return Promise.resolve(prefix + seq.substring(start, end));
     }
 
     igv.FastaSequence.prototype.getIndex = function () {
 
-        var self = this;
+        if (this.index) {
+            return Promise.resolve(this.index);
+        } else {
+            const self = this;
+            return igv.xhr.load(self.indexFile, igv.buildOptions(self.config))
 
-        return new Promise(function (fulfill, reject) {
+                .then(function (data) {
 
-            if (self.index) {
-                fulfill(self.index);
-            } else {
-                igv.xhr.load(self.indexFile, igv.buildOptions(self.config))
-                    .then(function (data) {
-                        var lines = igv.splitLines(data);
-                        var len = lines.length;
-                        var lineNo = 0;
+                    const lines = igv.splitLines(data);
+                    const len = lines.length;
+                    let lineNo = 0;
+                    let order = 0;
+                    self.index = {};
 
-                        self.chromosomeNames = [];     // TODO -- eliminate this side effect !!!!
-                        self.index = {};               // TODO -- ditto
-                        while (lineNo < len) {
+                    while (lineNo < len) {
+                        var tokens = lines[lineNo++].split("\t");
+                        var nTokens = tokens.length;
 
-                            var tokens = lines[lineNo++].split("\t");
-                            var nTokens = tokens.length;
-                            if (nTokens == 5) {
-                                // Parse the index line.
-                                var chr = tokens[0];
-                                var size = parseInt(tokens[1]);
-                                var position = parseInt(tokens[2]);
-                                var basesPerLine = parseInt(tokens[3]);
-                                var bytesPerLine = parseInt(tokens[4]);
+                        if (nTokens == 5) {
+                            // Parse the index line.
+                            var chr = tokens[0];
+                            var size = parseInt(tokens[1]);
+                            var position = parseInt(tokens[2]);
+                            var basesPerLine = parseInt(tokens[3]);
+                            var bytesPerLine = parseInt(tokens[4]);
 
-                                var indexEntry = {
-                                    size: size,
-                                    position: position,
-                                    basesPerLine: basesPerLine,
-                                    bytesPerLine: bytesPerLine
-                                };
+                            var indexEntry = {
+                                size: size,
+                                position: position,
+                                basesPerLine: basesPerLine,
+                                bytesPerLine: bytesPerLine
+                            };
 
-                                self.chromosomeNames.push(chr);
-                                self.index[chr] = indexEntry;
-                            }
+                            self.chromosomeNames.push(chr);
+                            self.index[chr] = indexEntry;
+                            self.chromosomes[chr] = new igv.Chromosome(chr, order++, size);
                         }
+                    }
 
-                        if (fulfill) {
-                            fulfill(self.index);
-                        }
-                    })
-                    .catch(reject);
-            }
-        });
+                    return self.index;
+
+                })
+        }
+
     }
 
     igv.FastaSequence.prototype.loadAll = function () {
@@ -235,16 +216,14 @@ var igv = (function (igv) {
 
         function parseFasta(data) {
 
-            self.chromosomeNames = [];
-            self.chromosomes = {};
-            self.sequences = {};
-
             var lines = igv.splitLines(data),
                 len = lines.length,
                 lineNo = 0,
                 nextLine,
                 currentSeq = "",
                 currentChr,
+                currentRangeLocus = undefined,
+                currentOffset = 0,
                 order = 0;
 
 
@@ -257,15 +236,30 @@ var igv = (function (igv) {
                     if (currentSeq) {
                         self.chromosomeNames.push(currentChr);
                         self.sequences[currentChr] = currentSeq;
-                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset + currentSeq.length, currentRangeLocus);
                     }
 
                     const parts = nextLine.substr(1).split(/\s+/)
-                    currentChr = parts[0];
-                    currentSeq = "";
 
-                    if (parts[1] && parts[1].startsWith("@start=")) {
-                        self.offset = Number.parseInt(parts[1].substr(7)) - 1;
+                    // Check for samtools style locus string.   This is not perfect, and could fail on weird sequence names
+                    const nameParts = parts[0].split(':')
+                    currentChr = nameParts[0];
+                    currentSeq = "";
+                    currentOffset = 0
+                    currentRangeLocus = undefined;
+                    if (nameParts.length > 1 && nameParts[1].indexOf('-') > 0) {
+                        const locusParts = nameParts[1].split('-')
+                        if (locusParts.length === 2 &&
+                            /^[0-9]+$/.test(locusParts[0]) &&
+                            /^[0-9]+$/.test(locusParts[1])) {
+                        }
+                        const from = Number.parseInt(locusParts[0])
+                        const to = Number.parseInt(locusParts[1])
+                        if (to > from) {
+                            currentOffset = from - 1;
+                            self.offsets[currentChr] = currentOffset;
+                            currentRangeLocus = nameParts[1];
+                        }
                     }
                 }
                 else {
@@ -276,7 +270,7 @@ var igv = (function (igv) {
             if (currentSeq) {
                 self.chromosomeNames.push(currentChr);
                 self.sequences[currentChr] = currentSeq;
-                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentSeq.length);
+                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset + currentSeq.length, currentRangeLocus);
             }
         }
     }

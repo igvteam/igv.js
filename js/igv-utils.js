@@ -566,6 +566,36 @@ var igv = (function (igv) {
         }
     }
 
+    /**
+     * @param dataURI
+     * @returns {Array<number>|Uint8Array}
+     */
+    igv.decodeDataURI = function (dataURI) {
+
+        const split = dataURI.split(',');
+        const info = split[0].split(':')[1];
+        let dataString = split[1];
+
+        if (info.indexOf('base64') >= 0) {
+            dataString = atob(dataString);
+        } else {
+            dataString = decodeURI(dataString);
+        }
+
+        // TODO -- test for gzip in info
+        const bytes = new Uint8Array(dataString.length);
+        for (let i = 0; i < dataString.length; i++) {
+            bytes[i] = dataString.charCodeAt(i);
+        }
+
+        const inflate = new Zlib.Gunzip(bytes);
+        const plain = inflate.decompress();
+
+        return plain;
+
+    }
+
+
     return igv;
 
 })(igv || {});
