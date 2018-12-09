@@ -70,14 +70,6 @@ var igv = (function (igv) {
 
             return self.getIndex()
 
-                .then(function (index) {
-                    var order = 0;
-                    self.chromosomeNames.forEach(function (chrName) {
-                        var bpLength = self.index[chrName].size;
-                        self.chromosomes[chrName] = new igv.Chromosome(chrName, order++, bpLength);
-                    });
-                })
-
         }
         else {
             return self.loadAll();
@@ -271,6 +263,7 @@ var igv = (function (igv) {
                 self.chromosomeNames.push(currentChr);
                 self.sequences[currentChr] = currentSeq;
                 self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset + currentSeq.length, currentRangeLocus);
+                self.chromosomes[currentChr].bpStart = currentOffset;
             }
         }
     }

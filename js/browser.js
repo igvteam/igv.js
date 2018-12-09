@@ -216,7 +216,6 @@ var igv = (function (igv) {
 
     /**
      * Load a session
-     *
      * @param sessionURL
      * @param config
      * @returns {*}
@@ -238,6 +237,7 @@ var igv = (function (igv) {
                 if (session) {
                     Object.assign(config, session);
                 }
+                maybeAddSequenceTrack(config);
                 return config;
             })
 
@@ -352,6 +352,17 @@ var igv = (function (igv) {
                     return Promise.resolve(undefined);
 
                 }
+            }
+        }
+
+        /**
+         * Insure that there is a sequence track.
+         * @param session
+         */
+        function maybeAddSequenceTrack(session) {
+            session.tracks = session.tracks || [];
+            if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+                session.tracks.push({type: "sequence", order: -1.7976931348623157e+308})
             }
         }
     }
@@ -487,7 +498,7 @@ var igv = (function (igv) {
         }
     };
 
-    //
+
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[0].referenceFrame));

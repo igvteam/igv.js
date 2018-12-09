@@ -334,6 +334,10 @@ var igv = (function (igv) {
     igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function () {
 
         const plain = igv.decodeDataURI(this.dataURI)
+        this.header = this.parser.parseHeader(plain);
+        if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
+            this.format = 'gff3';
+        }
         const features = this.parser.parseFeatures(plain);
         return Promise.resolve(features);
     };
