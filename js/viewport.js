@@ -248,9 +248,9 @@ var igv = (function (igv) {
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
 
-        const pixelWidth = $(self.contentDiv).width() * 2;
+        const pixelWidth = $(self.contentDiv).width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 2));
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
 
