@@ -238,7 +238,7 @@ var igv = (function (igv) {
 
             if (featureList) {
 
-                const selectedFeatureName = FeatureTrack.selectedGene ? FeatureTrack.selectedGene.toUpperCase() : undefined;
+                const selectedFeatureName = igv.selectedGene ? igv.selectedGene.toUpperCase() : undefined;
 
                 let selectedFeature;
                 let lastPxEnd = [];
@@ -602,7 +602,7 @@ var igv = (function (igv) {
                 boxX, boxX1,    // label should be centered between these two x-coordinates
                 labelX, labelY,
                 textFitsInBox,
-                selectedFeatureName = FeatureTrack.selectedGene ? FeatureTrack.selectedGene.toUpperCase() : undefined;    // <= for juicebox
+                selectedFeatureName = igv.selectedGene ? igv.selectedGene.toUpperCase() : undefined;    // <= for juicebox
 
             // feature outside of viewable window
             if (featureX1 < windowX || featureX > windowX1) {

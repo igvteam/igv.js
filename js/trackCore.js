@@ -56,7 +56,8 @@ var igv = (function (igv) {
         "bedpe",
         "bp",
         "snp",
-        "rmsk"
+        "rmsk",
+        "cram"
     ]);
 
     /**

@@ -295,9 +295,7 @@ var igv = (function (igv) {
                     seqOffset = 0,
                     pos = record.start,
                     len = cigarArray.length,
-                    blockSeq,
-                    gapType,
-                    blockQuals;
+                    gapType;
 
                 for (var i = 0; i < len; i++) {
 
@@ -321,14 +319,11 @@ var igv = (function (igv) {
                             gapType = 'D';
                             break;
                         case 'I' :
-                            blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                            blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                             if (insertions === undefined) insertions = [];
                             insertions.push(new igv.AlignmentBlock({
                                 start: pos,
                                 len: c.len,
-                                seq: blockSeq,
-                                qual: blockQuals
+                                seqOffset: seqOffset
                             }));
                             seqOffset += c.len;
                             break;
@@ -336,14 +331,10 @@ var igv = (function (igv) {
                         case 'EQ' :
                         case '=' :
                         case 'X' :
-
-                            blockSeq = record.seq === "*" ? "*" : record.seq.substr(seqOffset, c.len);
-                            blockQuals = record.qual ? record.qual.slice(seqOffset, c.len) : undefined;
                             blocks.push({
                                 start: pos,
                                 len: c.len,
-                                seq: blockSeq,
-                                qual: blockQuals,
+                                seqOffset: seqOffset,
                                 gapType: gapType
                             });
                             seqOffset += c.len;
