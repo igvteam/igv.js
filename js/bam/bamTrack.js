@@ -615,7 +615,7 @@ var igv = (function (igv) {
             this.parent = parent;
             this.featureSource = parent.featureSource;
             this.top = config.coverageTrackHeight == 0 ? 0 : config.coverageTrackHeight + 5;
-            this.alignmentRowHeight = config.alignmentRowHeight || 16;
+            this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
             this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
             this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
@@ -1249,7 +1249,6 @@ var igv = (function (igv) {
         }
     }
 
-
     const chrColorMap = {
         "chrX": "rgb(204, 153, 0)",
         "chrY": "rgb(153, 204, 0",
@@ -1309,6 +1308,8 @@ var igv = (function (igv) {
         "chr47": "rgb(0, 214, 143)",
         "chr48": "rgb(20, 255, 177)",
     }
+
+
 
     return igv;
 

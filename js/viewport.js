@@ -42,7 +42,9 @@ var igv = (function (igv) {
 
             this.$viewport.addClass('igv-viewport-sequence');
 
-        } else if ('ruler' === trackView.track.type) {
+        }
+
+        if ('ruler' === trackView.track.type) {
 
             this.rulerSweeper = new igv.RulerSweeper(this);
 
@@ -208,7 +210,7 @@ var igv = (function (igv) {
 
             const referenceFrame = this.genomicState.referenceFrame;
 
-            if(referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+            if (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             }
             else {
@@ -246,9 +248,9 @@ var igv = (function (igv) {
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
 
-        const pixelWidth = $(self.contentDiv).width() * 2;
+        const pixelWidth = $(self.contentDiv).width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
-        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 2));
+        const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
 
@@ -456,24 +458,21 @@ var igv = (function (igv) {
         const browser = this.browser;
         if (browser.roi) {
 
-            const roiPromises = browser.roi.map(function (r) {
-                return r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd);
-            });
-
-
-            Promise.all(roiPromises)
-
-                .then(function (roiArray) {
-                    for (let roi of roiArray) {
-                        drawConfiguration.features = roi;
-                        roi.draw(drawConfiguration);
-                    }
-                })
-                .catch(function (error) {
-                    console.error(error);
-                    self.loading = false;
-                    browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
-                })
+            for (let r of browser.roi) {
+                r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd)
+                    .then(function (f) {
+                        if (f && f.length > 0) {
+                            drawConfiguration.features = f;
+                            r.draw(drawConfiguration);
+                        }
+                    })
+            }
+            //
+            // .catch(function (error) {
+            //     console.error(error);
+            //     self.loading = false;
+            //     browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
+            // })
         }
     }
 
@@ -501,9 +500,11 @@ var igv = (function (igv) {
                 searchString = self.browser.genome.getChromosomeCoordinate(bp).chr;
             } else {
 
-                let loci = self.browser.genomicStateList.map((genomicState) => { return genomicState.locusSearchString; });
+                let loci = self.browser.genomicStateList.map((genomicState) => {
+                    return genomicState.locusSearchString;
+                });
 
-                loci[ self.browser.genomicStateList.indexOf(self.genomicState) ] = self.browser.genome.getChromosomeCoordinate(bp).chr;
+                loci[self.browser.genomicStateList.indexOf(self.genomicState)] = self.browser.genome.getChromosomeCoordinate(bp).chr;
 
                 searchString = loci.join(' ');
             }
@@ -637,7 +638,6 @@ var igv = (function (igv) {
         draw.call(this, drawConfig, features);
 
         context.restore();
-
 
 
     };

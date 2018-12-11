@@ -10,15 +10,15 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/test/examples/bam.html)***
+***[Alignments](https://igv.org/web/release/2.1.0/examples/bam.html)***
 
-***[GA4GH](https://igv.org/web/test/examples/ga4gh.html)***
+***[GA4GH](https://igv.org/web/release/2.1.0/examples/ga4gh.html)***
 
-***[Copy number](https://igv.org/web/test/examples/copyNumber.html)***
+***[Copy number](https://igv.org/web/release/2.1.0/examples/copyNumber.html)***
 
-***[Multiple regions](http://igv.org/web/test/examples/multi-locus.html)***
+***[Multiple regions](http://igv.org/release/2.1.0/test/examples/multi-locus.html)***
 
-***[More](http://igv.org/web/test/examples)***
+***[More](http://igv.org/web/release/2.1.0/examples)***
 
  
 # Quickstart
@@ -27,11 +27,11 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 igv.js consists of a single javascript file with no external dependencies.  To link directly to the current release copy this snippet
 
 ```html
-<script src="https://igv.org/web/release/2.0.1/dist/igv.min.js"></script>
+<script src="https://igv.org/web/release/2.1.0/dist/igv.min.js"></script>
 ``` 
 
 Pre-built expanded and minified js files for ES5 (igv.js, igv.min.js) and ES6 (igv.esm.js, igv.esm.min.js)
-can be downloaded from [http://igv.org/web/release/2.0.1/dist](http://igv.org/web/release/2.0.0/dist).   
+can be downloaded from [http://igv.org/web/release/2.1.0/dist](http://igv.org/web/release/2.0.0/dist).   
  
 Alternatively you can install with npm  
  
@@ -45,11 +45,11 @@ To use igv.js include it with a script tag
 
 ***or*** import it as a requirejs module 
 
-```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](http://igv.org/web/release/2.0.0-rc5/examples/igv-require.html))*
+```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](http://igv.org/web/release/2.1.0/examples/igv-require.html))*
 
 ***or*** import it as an es6 module 
 
-```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](http://igv.org/web/release/2.0.0-rc5/examples/igv-esm.html))*
+```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](http://igv.org/web/release/2.1.0/examples/igv-esm.html))*
 
 
 
@@ -94,8 +94,7 @@ For more details see the [Wiki](https://github.com/igvteam/igv.js/wiki) for full
 Building igv.js and running the examples require Linux or MacOS.  Other Unix environments will probably
 work but have not been tested.  
 
-Windows users can use [Cygwin](https://www.cygwin.com/) or 
- [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+Windows users can use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ### Building
 

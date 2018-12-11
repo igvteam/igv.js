@@ -13,7 +13,6 @@
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    <link rel="stylesheet" type="text/css" href="css/responsive-navbar.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
@@ -145,48 +144,63 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
-    <script src="../js/civic/civicReader.js"></script>
-
-    <script src="../js/feature/fileFormats.js"></script>
-
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
     <script src="../js/canvas2svg.js"></script>
-
     <script src="../js/navbarManager.js"></script>
 
 </head>
 
 <body>
 
-<div id="igv-centering-container">
-    <!--<div id='igv-shim-container'></div>-->
-    <div id='igv-app-container'></div>
+<div>
+    <button onclick="bookmark();">Bookmark</button>
 </div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const options =
-            {
-                // showCursorTrackingGuideButton: false,
 
-                locus: 'muc1',
-                // locus: 'all',
-                // locus: [ '2', '4 '],
+        const options = {
+            genome: "hg19",
+            locus: "chr17",
+            tracks: [
+                {
+                    name: "CNA",
+                    type: "seg",
+                    displayMode: "FILL",
+                    sourceType: "custom",
+                    source: {
+                        url: "http://www.cbioportal.org/api-legacy/copynumbersegments",
+                        method: "POST",
+                        contentType: "application/x-www-form-urlencoded",
+                        body: "cancerStudyId=msk_impact_2017&chromosomes=17&sampleListId=msk_impact_2017_cnaseq",
+                        mappings: {
+                            sampleKey: "sample"
+                        }
+                    },
+                    height: 500
+                }
+            ]
+        }
 
-                genome: "hg19",
-                flanking: 1000,
-                queryParametersSupported: true,
-            };
 
-        igv.createBrowser(document.getElementById('igv-app-container'), options)
+        igv.createBrowser(igvDiv, options)
             .then(function (browser) {
-                // do stuff
+              //  cBio.initMenu(document.getElementById('trackList'), browser);
             })
 
+
     });
+
+
+    function bookmark() {
+        window.history.pushState({}, "IGV", igv.browser.sessionURL());
+    }
 
 </script>
 

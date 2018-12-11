@@ -103,6 +103,9 @@
   border-right-width: 1px; }
 
 .igv-navbar {
+  position: relative;
+  top: 0;
+  left: 0;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -115,9 +118,6 @@
   line-height: 32px;
   margin-top: 2px;
   margin-bottom: 4px;
-  position: relative;
-  top: 0;
-  left: 0;
   height: 32px;
   width: 100%;
   border-style: solid;
@@ -132,7 +132,8 @@
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  height: 32px; }
+  height: 32px;
+  line-height: 32px; }
   .igv-nav-bar-left-container .igv-logo {
     width: 34px;
     height: 32px;
@@ -178,10 +179,11 @@
   justify-content: space-between;
   align-items: center;
   margin-left: 8px;
-  height: 100%; }
+  height: calc(32px - 10px); }
   .igv-locus-size-group .igv-search-container {
     width: 200px;
-    height: 100%;
+    height: calc(32px - 10px);
+    line-height: calc(32px - 10px);
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -190,14 +192,15 @@
     .igv-locus-size-group .igv-search-container input {
       cursor: text;
       width: 85%;
-      height: 75%;
-      padding-left: 8px;
-      margin-right: 8px;
-      text-align: left;
-      outline: none;
+      height: calc(32px - 10px);
+      line-height: calc(32px - 10px);
       font-size: 12px;
       font-family: "Open Sans", sans-serif;
       font-weight: 400;
+      text-align: left;
+      padding-left: 8px;
+      margin-right: 8px;
+      outline: none;
       border-style: solid;
       border-radius: 3px;
       border-width: thin;
@@ -215,15 +218,15 @@
   flex-wrap: nowrap;
   justify-content: space-between;
   align-items: center;
-  height: 100%; }
+  height: 32px;
+  line-height: 32px; }
   .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center;
-    height: 100%;
-    margin-right: 8px; }
+    height: 100%; }
     .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
       margin-left: 0;
       margin-right: 4px; }
@@ -235,23 +238,34 @@
   .igv-nav-bar-right-container .igv-zoom-widget {
     color: #737373;
     font-size: 18px;
-    user-select: none;
-    margin-left: 16px;
+    width: 190px;
+    height: 32px;
+    line-height: 32px;
+    margin-left: 8px;
     margin-right: 8px;
-    width: 180px;
+    user-select: none;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
     justify-content: space-between;
     align-items: center; }
     .igv-nav-bar-right-container .igv-zoom-widget div {
-      cursor: pointer; }
+      cursor: pointer;
+      margin-left: unset;
+      margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
-      margin-right: 4px; }
+      height: auto;
+      margin-left: unset;
+      margin-right: 8px; }
     .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
-      margin-left: 4px; }
+      height: auto;
+      margin-left: 8px;
+      margin-right: unset; }
+    .igv-nav-bar-right-container .igv-zoom-widget div:nth-child(even) {
+      height: fit-content; }
     .igv-nav-bar-right-container .igv-zoom-widget input {
-      width: 100%; }
+      display: block;
+      width: 125px; }
     .igv-nav-bar-right-container .igv-zoom-widget svg {
       display: block; }
   .igv-nav-bar-right-container .igv-zoom-widget-900 {
@@ -838,12 +852,14 @@
     .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
       cursor: pointer; }
   .igv-generic-dialog-container .igv-generic-dialog-one-liner {
-    margin-top: 8px;
-    width: 95%;
     color: #373737;
+    width: 95%;
+    height: 24px;
     line-height: 24px;
     text-align: left;
+    margin-top: 8px;
     padding-left: 8px;
+    overflow-wrap: break-word;
     background-color: white; }
   .igv-generic-dialog-container .igv-generic-dialog-label-input {
     margin-top: 8px;

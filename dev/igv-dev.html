@@ -176,7 +176,7 @@
 
     let b;
     function printLocus() {
-    console.log(b.currentLocusString());
+        console.log(b.currentLocusString());
 
     }
 
@@ -188,10 +188,19 @@
 
                 const options =
                     {
-                        // locus: 'egfr',
+                        locus: 'egfr',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
+                        tracks:
+                            [
+                                {
+                                    type: 'variant',
+                                    url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
+                                    name: '1KG variants',
+                                    visibilityWindow: 1000
+                                }
+                            ]
                     };
 
                 igv.createBrowser(document.getElementById('igvDiv'), options)
