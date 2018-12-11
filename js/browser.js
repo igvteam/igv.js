@@ -216,17 +216,28 @@ var igv = (function (igv) {
      * @param config
      * @returns {*}
      */
-    igv.Browser.prototype.loadSession = function (sessionURL, config) {
+    igv.Browser.prototype.loadSession = function (options, config) {
 
         var self = this;
 
         if (!config) config = {};
 
+        // backward compatibility
+        if(typeof options === 'string') {
+            options = {
+                url: options
+            }
+        }   else if (options && options.lastModified) {
+            options = {
+                file: options
+            }
+        }
+
         self.removeAllTracks(true);
 
         igv.TrackView.DisableUpdates = true;
 
-        return loadSessionFile(sessionURL)
+        return loadSessionFile(options)
 
             .then(function (session) {
                 // Merge session json with config object
@@ -308,17 +319,22 @@ var igv = (function (igv) {
                 console.log(error);
             });
 
-        function loadSessionFile(urlOrFile) {
+        function loadSessionFile(options) {
 
-            var filename, knownGenomes;
+            let knownGenomes;
 
-            if (!urlOrFile) {
+            if (!options) {
                 return Promise.resolve(undefined);
             }
 
-            filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
+            const urlOrFile = options.url || options.file
 
-            if (filename.startsWith("blob:") || filename.startsWith("data:")) {
+            let filename = options.filename
+            if(!filename) {
+                filename = (options.url ? igv.getFilename(options.url) : options.file.name)
+            }
+
+            if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
                 var json = igv.Browser.uncompressSession(urlOrFile.substring(5));
                 return Promise.resolve(JSON.parse(json));
             }
