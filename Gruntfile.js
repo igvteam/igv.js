@@ -57,6 +57,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
+                    'vendor/cram-bundle.js',
                     'es5/**/*.js',
                     'wrapper/footer.js'
                 ],
@@ -73,6 +74,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
+                    'vendor/cram-bundle.js',
                     'js/**/*.js',
                     'wrapper/footer-esm.js'
                 ],
@@ -89,6 +91,7 @@ module.exports = function (grunt) {
                     'vendor/jquery.mousewheel.js',
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
+                    'vendor/cram-bundle.js',
                     'js/**/*.js',
                     'wrapper/footer.js'
                 ],
@@ -153,6 +156,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('babel-core');
     grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-contrib-clean');
+    grunt.loadNpmTasks('grunt-contrib-copy');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_esm', 'uglify:igv_esm', 'clean']);

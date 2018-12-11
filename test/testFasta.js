@@ -44,6 +44,7 @@ function runFastaTests() {
         var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init()
+
             .then(function () {
 
                 // Note -- coordinates are UCSC style

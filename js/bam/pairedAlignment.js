@@ -37,35 +37,45 @@ var igv = (function (igv) {
 
         if (firstAlignment.start < firstAlignment.mate.position) {
             this.start = firstAlignment.start;
-            this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
+            this.scStart = firstAlignment.scStart;
             this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef;
             this.connectingEnd = firstAlignment.mate.position;
         }
         else {
             this.start = firstAlignment.mate.position;
-            this.end = firstAlignment.start + firstAlignment.lengthOnRef;
+            this.scStart = this.start;
             this.connectingStart = firstAlignment.mate.position;
             this.connectingEnd = firstAlignment.start;
         }
+
+        this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
         this.lengthOnRef = this.end - this.start;
+
+        let scEnd = Math.max(this.end, firstAlignment.scStart + firstAlignment.scLengthOnRef);
+        this.scLengthOnRef = scEnd - this.scStart;
 
     }
 
-    igv.PairedAlignment.prototype.setSecondAlignment = function (alignment) {
+    igv.PairedAlignment.prototype.setSecondAlignment = function (secondAlignment) {
 
         // TODO -- check the chrs are equal,  error otherwise
-        this.secondAlignment = alignment;
+        this.secondAlignment = secondAlignment;
+        const firstAlignment = this.firstAlignment;
 
-        if (alignment.start > this.firstAlignment.start) {
-            this.end = alignment.start + alignment.lengthOnRef;
-            this.connectingEnd = alignment.start;
+        if (secondAlignment.start > firstAlignment.start) {
+            this.connectingEnd = secondAlignment.start;
         }
         else {
-            this.start = alignment.start;
-            this.connectingStart = alignment.start + alignment.lengthOnRef;
+            this.connectingStart = secondAlignment.start + secondAlignment.lengthOnRef;
         }
+
+        this.start = Math.min(firstAlignment.start, secondAlignment.start);
+        this.end = Math.max(firstAlignment.start + firstAlignment.lengthOnRef, secondAlignment.start + secondAlignment.lengthOnRef)
         this.lengthOnRef = this.end - this.start;
 
+        this.scStart = Math.min(firstAlignment.scStart, secondAlignment.scStart);
+        const scEnd = Math.max(firstAlignment.scStart + firstAlignment.scLengthOnRef, secondAlignment.scStart + secondAlignment.scLengthOnRef);
+        this.scLengthOnRef = scEnd - this.scStart;
 
     }
 
