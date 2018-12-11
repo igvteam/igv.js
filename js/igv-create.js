@@ -124,7 +124,11 @@ var igv = (function (igv) {
 
     function doPromiseChain(browser, config) {
 
-        return browser.loadSession(config.sessionURL, config)
+        return browser.loadSession(
+            {
+                url: config.sessionURL
+            },
+            config)
 
             .then(function (ignore) {
 
@@ -149,7 +153,7 @@ var igv = (function (igv) {
                     browser.centerGuide.doShow();
                 }
 
-                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[ 0 ].referenceFrame);
+                const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
 
                 // multi-locus mode or isWGV
                 if (browser.isMultiLocusMode() || isWGV) {
@@ -251,7 +255,7 @@ var igv = (function (igv) {
 
         // chromosome select widget
         browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
-        if(undefined === config.showChromosomeWidget) {
+        if (undefined === config.showChromosomeWidget) {
             config.showChromosomeWidget = true;   // Default to true
         }
         if (true === config.showChromosomeWidget) {
