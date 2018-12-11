@@ -120,41 +120,42 @@ var igv = (function (igv) {
 
         var self = this;
 
-        return new Promise(function (fulfill, reject) {
-            var interval = self.interval;
+        var interval = self.interval;
 
-            if (interval && interval.contains(chr, start, end)) {
+        if (interval && interval.contains(chr, start, end)) {
 
-                fulfill(getSequenceFromInterval(interval, start, end));
+            return Promise.resolve(getSequenceFromInterval(interval, start, end));
+        }
+        else {
+
+            //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
+
+            // Expand query, to minimum of 100kb
+            var qstart = start;
+            var qend = end;
+            if ((end - start) < 100000) {
+                var w = (end - start);
+                var center = Math.round(start + w / 2);
+                qstart = Math.max(0, center - 50000);
+                qend = center + 50000;
             }
-            else {
-
-                //console.log("Cache miss: " + (interval === undefined ? "nil" : interval.chr + ":" + interval.start + "-" + interval.end));
-
-                // Expand query, to minimum of 100kb
-                var qstart = start;
-                var qend = end;
-                if ((end - start) < 100000) {
-                    var w = (end - start);
-                    var center = Math.round(start + w / 2);
-                    qstart = Math.max(0, center - 50000);
-                    qend = center + 50000;
-                }
 
 
-                self.readSequence(chr, qstart, qend).then(function (seqBytes) {
+            return self.readSequence(chr, qstart, qend)
+
+                .then(function (seqBytes) {
                     self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
-                    fulfill(getSequenceFromInterval(self.interval, start, end));
-                }).catch(reject);
-            }
+                    return getSequenceFromInterval(self.interval, start, end);
+                })
+        }
 
-            function getSequenceFromInterval(interval, start, end) {
-                var offset = start - interval.start;
-                var n = end - start;
-                var seq = interval.features ? interval.features.substr(offset, n) : null;
-                return seq;
-            }
-        });
+        function getSequenceFromInterval(interval, start, end) {
+            var offset = start - interval.start;
+            var n = end - start;
+            var seq = interval.features ? interval.features.substr(offset, n) : null;
+            return seq;
+        }
+
     }
 
 

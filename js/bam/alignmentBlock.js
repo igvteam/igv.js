@@ -33,49 +33,14 @@ var igv = (function (igv) {
 
 
     igv.AlignmentBlock = function (b) {
-        this.start = b.start;
-        this.len = b.len;
-        this.seq = b.seq;
-        this.qual = b.qual;
-        this.gapType = b.gapType;
-    }
-
-    igv.AlignmentBlock.prototype.baseAt = function (genomicLocation) {
-
-        if ("*" === this.seq) {
-            return "*";
-        } else {
-
-            const idx = Math.floor(genomicLocation) - this.start;
-            if (idx >= 0 && idx < this.seq.length) {
-                return this.seq[idx];
-            }
+        if (b) {
+            Object.assign(this, b);
         }
-
-        // Should not be possible to get here
-        return undefined;
-
     }
 
-    igv.AlignmentBlock.prototype.qualityAt = function (genomicLocation) {
-
-        var idx;
-
-        if ("*" === this.qual) {
-            return 30;
-        } else {
-
-            const idx = Math.floor(genomicLocation) - this.start;
-            if (idx >= 0 && idx < this.qual.length) {
-                return this.qual[idx];
-            }
-        }
-
-        // Should not be possible to get here
-        return 0;
-
+    igv.AlignmentBlock.prototype.seqIndexAt = function (genomicLocation) {
+        return Math.floor(genomicLocation) - this.start + this.seqOffset
     }
-
 
     return igv;
 
