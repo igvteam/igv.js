@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
 
@@ -243,19 +245,23 @@ var igv = (function (igv) {
 
             var key,
                 base,
-                i,
-                j,
                 q;
 
-            for (i = block.start - self.bpStart, j = 0; j < block.len; i++, j++) {
+            const seq = alignment.seq;
+            const qual = alignment.qual;
+            const seqOffset = block.seqOffset;
+
+            for (let i = block.start - self.bpStart, j = 0; j < block.len; i++, j++) {
 
                 if (!self.coverage[i]) {
                     self.coverage[i] = new Coverage();
                 }
 
-                base = block.seq.charAt(j);
+                base = seq.charAt(seqOffset + j);
                 key = (alignment.strand) ? "pos" + base : "neg" + base;
-                q = block.qual[j];
+
+
+                q = qual && seqOffset + j < qual.length ? qual[seqOffset + j] : 30;
 
                 self.coverage[i][key] += 1;
                 self.coverage[i]["qual" + base] += q;
@@ -299,17 +305,21 @@ var igv = (function (igv) {
         this.total = 0;
     }
 
+    const threshold = 0.2;
+    const qualityWeight = true;
+
+
     Coverage.prototype.isMismatch = function (refBase) {
 
         var myself = this,
             mismatchQualitySum,
-            threshold = igv.CoverageMap.threshold * ((igv.CoverageMap.qualityWeight && this.qual) ? this.qual : this.total);
+            threshold = threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
 
             if (base !== refBase) {
-                mismatchQualitySum += ((igv.CoverageMap.qualityWeight && myself.qual) ? myself["qual" + base] : (myself["pos" + base] + myself["neg" + base]));
+                mismatchQualitySum += ((qualityWeight && myself.qual) ? myself["qual" + base] : (myself["pos" + base] + myself["neg" + base]));
             }
         });
 

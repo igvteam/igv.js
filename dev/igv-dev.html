@@ -22,9 +22,9 @@
     <!-- Vendor JS -->
     <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
-
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/cram-bundle.js"></script>
 
     <!-- IGV JS -->
     <script src="../js/igv-icons.js"></script>
@@ -32,7 +32,7 @@
     <script src="../js/feature/mergedTrack.js"></script>
 
 
-    <script src="../js/bam/coverageMap.js"></script>
+
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
     <script src="../js/bam/bgzf.js"></script>
@@ -48,6 +48,7 @@
     <script src="../js/bam/htsgetReader.js"></script>
     <script src="../js/bam/alignmentBlock.js"></script>
     <script src="../js/bam/shardedBamReader.js"></script>
+    <script src="../js/bam/cramReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -175,7 +176,7 @@
 
     let b;
     function printLocus() {
-    console.log(b.currentLocusString());
+        console.log(b.currentLocusString());
 
     }
 
@@ -187,15 +188,24 @@
 
                 const options =
                     {
-                        // locus: 'egfr',
+                        locus: 'egfr',
                         genome: "hg19",
                         flanking: 1000,
                         queryParametersSupported: true,
+                        tracks:
+                            [
+                                {
+                                    type: 'variant',
+                                    url: 'https://s3.amazonaws.com/igv.broadinstitute.org/data/hg19/1kg/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz',
+                                    name: '1KG variants',
+                                    visibilityWindow: 1000
+                                }
+                            ]
                     };
 
                 igv.createBrowser(document.getElementById('igvDiv'), options)
                     .then(function (browser) {
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
+                        igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
                         return browser;
                     })
 

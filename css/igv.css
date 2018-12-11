@@ -179,10 +179,11 @@
   justify-content: space-between;
   align-items: center;
   margin-left: 8px;
-  height: 100%; }
+  height: calc(32px - 10px); }
   .igv-locus-size-group .igv-search-container {
     width: 200px;
-    height: 100%;
+    height: calc(32px - 10px);
+    line-height: calc(32px - 10px);
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -191,14 +192,15 @@
     .igv-locus-size-group .igv-search-container input {
       cursor: text;
       width: 85%;
-      height: 75%;
-      padding-left: 8px;
-      margin-right: 8px;
-      text-align: left;
-      outline: none;
+      height: calc(32px - 10px);
+      line-height: calc(32px - 10px);
       font-size: 12px;
       font-family: "Open Sans", sans-serif;
       font-weight: 400;
+      text-align: left;
+      padding-left: 8px;
+      margin-right: 8px;
+      outline: none;
       border-style: solid;
       border-radius: 3px;
       border-width: thin;
@@ -850,12 +852,14 @@
     .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
       cursor: pointer; }
   .igv-generic-dialog-container .igv-generic-dialog-one-liner {
-    margin-top: 8px;
-    width: 95%;
     color: #373737;
+    width: 95%;
+    height: 24px;
     line-height: 24px;
     text-align: left;
+    margin-top: 8px;
     padding-left: 8px;
+    overflow-wrap: break-word;
     background-color: white; }
   .igv-generic-dialog-container .igv-generic-dialog-label-input {
     margin-top: 8px;

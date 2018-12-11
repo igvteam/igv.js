@@ -7,6 +7,8 @@ function initClient() {
 
     var scope = "https://www.googleapis.com/auth/cloud-platform https://www.googleapis.com/auth/genomics https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
 
+    let browser;
+
     igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
         .then(function (properties) {
@@ -23,7 +25,7 @@ function initClient() {
 
         .then(function () {
 
-            var div, options, browser;
+            var div, options;
 
             div = $("#myDiv")[0];
             options = {
@@ -32,7 +34,10 @@ function initClient() {
                 queryParametersSupported: true
             };
 
-            igv.createBrowser(div, options);
+            igv.createBrowser(div, options)
+                .then(function (b) {
+                    igv.browser = b;
+                })
 
             
         })
@@ -148,22 +153,22 @@ function createPicker() {
             name = doc[google.picker.Document.NAME];
             id = doc[google.picker.Document.ID];
 
-            format = igv.inferFileFormat(name);
+           /// format = igv.inferFileFormat(name);
 
-            if (!format) {
-                alert("Unrecognized file format: " + name);
-            }
-            else {
+           // if (!format) {
+           //     alert("Unrecognized file format: " + name);
+           // }
+           // else {
 
                 downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
 
-                igv.browser.loadTrack({
+                igv.browser.loadSession({
                     url: downloadURL,
                     filename: name,
-                    name: name,
-                    format: format
+                    //name: name,
+                    //format: format
                 })
-            }
+           // }
         }
 
     }

@@ -94,7 +94,15 @@ var igv = (function (igv) {
 
         igv.xhr.startup();
 
-        return browser.loadSession(config.sessionURL, config)
+        // Backward compatibility
+        let options;
+        if(typeof config.sessionURL === 'string') {
+            options = {url: config.sessionURL}
+        } else {
+            options = undefined;
+        }
+
+        return browser.loadSession(options, config)
 
             .then(function (ignore) {
 

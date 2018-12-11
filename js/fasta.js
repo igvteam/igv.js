@@ -107,6 +107,7 @@ var igv = (function (igv) {
             }
 
             return self.readSequence(chr, qstart, qend)
+
                 .then(function (seqBytes) {
                     self.interval = new igv.GenomicInterval(chr, qstart, qend, seqBytes);
                     return getSequenceFromInterval(self.interval, start, end);

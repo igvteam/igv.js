@@ -94,8 +94,7 @@ For more details see the [Wiki](https://github.com/igvteam/igv.js/wiki) for full
 Building igv.js and running the examples require Linux or MacOS.  Other Unix environments will probably
 work but have not been tested.  
 
-Windows users can use [Cygwin](https://www.cygwin.com/) or 
- [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
+Windows users can use [Windows Subsystem for Linux](https://docs.microsoft.com/en-us/windows/wsl/install-win10).
 
 ### Building
 

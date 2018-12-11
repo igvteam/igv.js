@@ -168,7 +168,14 @@
 
         var sessionFile = document.getElementById('session').files[0];
 
-        igv.browser.loadSession(sessionFile)
+
+        igv.browser
+            .loadSession(
+                {
+                    file: sessionFile
+                }
+            )
+
             .catch(function (error) {
                 alert("Error loading session file");
             })
