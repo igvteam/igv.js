@@ -84,7 +84,7 @@
         igv.createBrowser(igvDiv, options)
 
             .then(function (browser) {
-                return igvtest.createTrackList(document.getElementById('trackList'), browser)
+                return igvtest.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser)
             })
 
             .then(function (igore) {

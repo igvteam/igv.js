@@ -349,7 +349,8 @@ var igv = (function (igv) {
         "a": [0, 200, 0],
         "c": [0, 0, 200],
         "t": [255, 0, 0],
-        "g": [209, 113, 5]
+        "g": [209, 113, 5],
+        "N": [80, 80, 80]
     };
 
     igv.nucleotideColors = {
@@ -360,7 +361,8 @@ var igv = (function (igv) {
         "a": "rgb(  0, 200,   0)",
         "c": "rgb(  0,   0, 200)",
         "t": "rgb(255,   0,   0)",
-        "g": "rgb(209, 113,   5)"
+        "g": "rgb(209, 113,   5)",
+        "N": "rgb(80, 80, 80)"
     };
 
     let bootstrapPalette =

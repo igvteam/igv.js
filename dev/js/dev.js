@@ -1,9 +1,9 @@
 var igvdev = {
 
-    createTrackList:  function (div, browser) {
+    createTrackList:  function (div, file, browser) {
 
 
-        return igv.xhr.loadJson("../test/testTracks.json")
+        return igv.xhr.loadJson(file)
 
             .then(function (tracks) {
 
