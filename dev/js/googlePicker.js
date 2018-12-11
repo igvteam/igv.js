@@ -148,22 +148,22 @@ function createPicker() {
             name = doc[google.picker.Document.NAME];
             id = doc[google.picker.Document.ID];
 
-            format = igv.inferFileFormat(name);
+           /// format = igv.inferFileFormat(name);
 
-            if (!format) {
-                alert("Unrecognized file format: " + name);
-            }
-            else {
+           // if (!format) {
+           //     alert("Unrecognized file format: " + name);
+           // }
+           // else {
 
                 downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
 
-                igv.browser.loadTrack({
+                igv.browser.loadSession({
                     url: downloadURL,
                     filename: name,
-                    name: name,
-                    format: format
+                    //name: name,
+                    //format: format
                 })
-            }
+           // }
         }
 
     }
