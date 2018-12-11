@@ -32,7 +32,6 @@
     <script src="../js/feature/mergedTrack.js"></script>
 
 
-
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
     <script src="../js/bam/bgzf.js"></script>
@@ -170,7 +169,11 @@
         var sessionFile = document.getElementById('session').files[0];
 
         igv.browser
-            .loadSession(sessionFile)
+            .loadSession(
+                {
+                    file: sessionFile
+                }
+            )
             .catch(function (error) {
                 alert("Error loading session file");
             })
