@@ -216,22 +216,23 @@ var igv = (function (igv) {
 
     /**
      * Load a session
+     *
      * @param sessionURL
      * @param config
      * @returns {*}
      */
     igv.Browser.prototype.loadSession = function (options, config) {
 
-        const self = this;
+        var self = this;
 
         if (!config) config = {};
 
         // backward compatibility
-        if(typeof options === 'string') {
+        if (typeof options === 'string') {
             options = {
                 url: options
             }
-        }   else if (options && options.lastModified) {
+        } else if (options && options.lastModified) {
             options = {
                 file: options
             }
@@ -248,7 +249,13 @@ var igv = (function (igv) {
                 if (session) {
                     Object.assign(config, session);
                 }
-                maybeAddSequenceTrack(config);
+
+                // Insure that there is a sequence track.
+                if(!config.tracks) config.tracks = [];
+                if (config.tracks.filter(track => track.type === 'sequence').length === 0) {
+                    config.tracks.push({type: "sequence", order: -1.7976931348623157e+308})
+                }
+
                 return config;
             })
 
@@ -335,60 +342,37 @@ var igv = (function (igv) {
             const urlOrFile = options.url || options.file
 
             let filename = options.filename
-            if(!filename) {
+            if (!filename) {
                 filename = (options.url ? igv.getFilename(options.url) : options.file.name)
             }
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-                const json = igv.Browser.uncompressSession(options.url.substring(5));
+                var json = igv.Browser.uncompressSession(urlOrFile);
                 return Promise.resolve(JSON.parse(json));
             }
-
-            else {
-                const filename = (typeof urlOrFile === 'string' ? igv.getFilename(urlOrFile) : urlOrFile.name);
-                let knownGenomes;
-
-                if (filename.endsWith(".xml")) {
-
-                    return igv.GenomeUtils.getKnownGenomes()
-
-                        .then(function (g) {
-                            knownGenomes = g;
-                            return igv.xhr.loadString(urlOrFile)
-                        })
-
-                        .then(function (string) {
-                            return new igv.XMLSession(string, knownGenomes);
-                        })
-
-                }
-                else if (filename.endsWith(".json")) {
-
-                    return igv.xhr.loadJson(urlOrFile);
-
-                } else {
-
-                    return Promise.resolve(undefined);
-
-                }
+            else if (filename.endsWith(".xml")) {
+                return igv.GenomeUtils.getKnownGenomes()
+                    .then(function (g) {
+                        knownGenomes = g;
+                        return igv.xhr.loadString(urlOrFile)
+                    })
+                    .then(function (string) {
+                        return new igv.XMLSession(string, knownGenomes);
+                    })
             }
-        }
-
-        /**
-         * Insure that there is a sequence track.
-         * @param session
-         */
-        function maybeAddSequenceTrack(session) {
-            session.tracks = session.tracks || [];
-            if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-                session.tracks.push({type: "sequence", order: -1.7976931348623157e+308})
+            else if (filename.endsWith(".json")) {
+                return igv.xhr.loadJson(urlOrFile);
+            } else {
+                return Promise.resolve(undefined);
             }
         }
     }
 
+
     igv.Browser.prototype.loadGenome = function (idOrConfig, initialLocus) {
 
         var self = this,
+            genomeChange,
             genomeConfig;
 
         // idOrConfig might be json
@@ -412,7 +396,7 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
-                const genomeChange = self.genome && (self.genome.id !== genome.id);
+                genomeChange = self.genome && (self.genome.id !== genome.id);
                 self.genome = genome;
                 self.$current_genome.text(genome.id || '');
                 self.$current_genome.attr('title', genome.id || '');
@@ -457,7 +441,6 @@ var igv = (function (igv) {
                     return [];
                 }
             })
-
             .then(function (ignore) {
 
                 self.resize();    // Force recomputation and repaint
@@ -469,7 +452,7 @@ var igv = (function (igv) {
         // Expand a genome id to a reference object, if needed
         function expandReference(conf) {
 
-            let genomeID;
+            var genomeID;
 
             if (igv.isString(conf)) {
                 genomeID = conf;
@@ -484,8 +467,10 @@ var igv = (function (igv) {
 
             if (genomeID) {
                 return igv.GenomeUtils.getKnownGenomes()
+
                     .then(function (knownGenomes) {
-                        const reference = knownGenomes[genomeID];
+
+                        var reference = knownGenomes[genomeID];
                         if (!reference) {
                             self.presentAlert("Uknown genome id: " + genomeID, undefined);
                         }
@@ -517,7 +502,7 @@ var igv = (function (igv) {
         }
     };
 
-
+    //
     igv.Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[0].referenceFrame));
