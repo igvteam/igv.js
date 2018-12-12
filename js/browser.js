@@ -340,7 +340,7 @@ var igv = (function (igv) {
             }
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-                const json = igv.Browser.uncompressSession(optionsl.url.substring(5));
+                const json = igv.Browser.uncompressSession(options.url.substring(5));
                 return Promise.resolve(JSON.parse(json));
             }
 
