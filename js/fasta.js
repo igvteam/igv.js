@@ -185,7 +185,7 @@ var igv = (function (igv) {
 
                             self.chromosomeNames.push(chr);
                             self.index[chr] = indexEntry;
-                            self.chromosomes[chr] = new igv.Chromosome(chr, order++, size);
+                            self.chromosomes[chr] = new igv.Chromosome(chr, order++, 0, size);
                         }
                     }
 
@@ -229,7 +229,7 @@ var igv = (function (igv) {
                     if (currentSeq) {
                         self.chromosomeNames.push(currentChr);
                         self.sequences[currentChr] = currentSeq;
-                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset + currentSeq.length, currentRangeLocus);
+                        self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
                     }
 
                     const parts = nextLine.substr(1).split(/\s+/)
@@ -263,8 +263,7 @@ var igv = (function (igv) {
             if (currentSeq) {
                 self.chromosomeNames.push(currentChr);
                 self.sequences[currentChr] = currentSeq;
-                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset + currentSeq.length, currentRangeLocus);
-                self.chromosomes[currentChr].bpStart = currentOffset;
+                self.chromosomes[currentChr] = new igv.Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
             }
         }
     }

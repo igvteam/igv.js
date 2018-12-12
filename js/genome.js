@@ -315,9 +315,10 @@ var igv = (function (igv) {
         return this.bpLength;
     }
 
-    igv.Chromosome = function (name, order, bpLength, rangeLocus) {
+    igv.Chromosome = function (name, order, bpStart, bpLength, rangeLocus) {
         this.name = name;
         this.order = order;
+        this.bpStart = bpStart;
         this.bpLength = bpLength;
         this.rangeLocus = rangeLocus;
     }

@@ -251,7 +251,7 @@ var igv = (function (igv) {
                 }
 
                 // Insure that there is a sequence track.
-                if(!config.tracks) config.tracks = [];
+                if (!config.tracks) config.tracks = [];
                 if (config.tracks.filter(track => track.type === 'sequence').length === 0) {
                     config.tracks.push({type: "sequence", order: -1.7976931348623157e+308})
                 }
@@ -1169,63 +1169,61 @@ var igv = (function (igv) {
         const viewport = this.trackViews[0].viewports[0];
         const referenceFrame = viewport.genomicState.referenceFrame;
 
-        const a = this.getChromosomeLengthBP(this.genome, referenceFrame) / viewport.$viewport.width();
-        const b = this.minimumBases() / viewport.$viewport.width();
-        const percentage = referenceFrame.bpPerPixel / Math.abs(a - b);
-
-        const value = Math.round(100 * (1.0 - percentage));
+        const window = viewport.$viewport.width() * referenceFrame.bpPerPixel;
+        const maxWindow = referenceFrame.getChromosome().bpLength;
+        const minWindow = this.minimumBases();
+        const v = (maxWindow - window) / (maxWindow - minWindow)
+        const value = Math.round(100 * v);
 
         $slider.val(value);
 
     };
+
+    igv.Browser.prototype.zoom = function (scaleFactor) {
+        let nuthin = undefined;
+        this.zoomWithScaleFactor(scaleFactor)
+    };
+
+    // Zoom in by a factor of 2, keeping the same center location
+    igv.Browser.prototype.zoomIn = function () {
+        this.zoomWithScaleFactor(0.5)
+    };
+
+    // Zoom out by a factor of 2, keeping the same center location if possible
+    igv.Browser.prototype.zoomOut = function () {
+        this.zoomWithScaleFactor(2.0)
+    };
+
 
     igv.Browser.prototype.zoomWithRangePercentage = function (percentage) {
 
         if (this.loadInProgress()) {
             return;
         }
-
         let self = this;
         this.trackViews[0].viewports.forEach((viewport) => {
 
-            let referenceFrame = viewport.genomicState.referenceFrame;
-
+            const referenceFrame = viewport.genomicState.referenceFrame;
             const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
-
-            const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, referenceFrame);
-
-            const bpp = igv.Math.lerp(chromosomeLengthBP / viewport.$viewport.width(), this.minimumBases() / viewport.$viewport.width(), percentage);
-
+            const chromosome = referenceFrame.getChromosome();
+            const bpp = lerp(
+                (chromosome.bpLength - chromosome.bpStart) / viewport.$viewport.width(),
+                this.minimumBases() / viewport.$viewport.width(),
+                percentage);
             const viewportWidthBP = bpp * viewport.$viewport.width();
 
-            referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
-
+            referenceFrame.start = centerBP - (viewportWidthBP / 2);
             referenceFrame.bpPerPixel = bpp;
-
             self.updateViews(viewport.genomicState);
 
+            function lerp (v0, v1, t) {
+                return (1 - t) * v0 + t * v1;
+            }
+
         });
-
     };
 
-    igv.Browser.prototype.zoom = function (scaleFactor) {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, scaleFactor)
-    };
-
-    // Zoom in by a factor of 2, keeping the same center location
-    igv.Browser.prototype.zoomIn = function () {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, 0.5)
-    };
-
-    // Zoom out by a factor of 2, keeping the same center location if possible
-    igv.Browser.prototype.zoomOut = function () {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, 2.0)
-    };
-
-    igv.Browser.prototype.zoomWithScaleFactor = function (centerBPOrUndefined, viewportOrUndefined, scaleFactor) {
+    igv.Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
 
         if (this.loadInProgress()) {
             return;
@@ -1236,13 +1234,19 @@ var igv = (function (igv) {
         let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
         viewports.forEach((viewport) => {
 
-            const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, viewport.genomicState.referenceFrame);
-            const bppThreshold = scaleFactor < 1.0 ? self.minimumBases() / viewport.$viewport.width() : chromosomeLengthBP / viewport.$viewport.width();
+            const referenceFrame = viewport.genomicState.referenceFrame;
+            const chromosome = referenceFrame.getChromosome();
+            const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
 
-            const centerBP = undefined === centerBPOrUndefined ? (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) : centerBPOrUndefined;
+            const bppThreshold = scaleFactor < 1.0 ?
+                self.minimumBases() / viewport.$viewport.width() :
+                chromosomeLengthBP / viewport.$viewport.width();
+
+            const centerBP = undefined === centerBPOrUndefined ?
+                (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
+                centerBPOrUndefined;
 
             let bpp;
-
             if (scaleFactor < 1.0) {
                 bpp = Math.max(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             } else {
@@ -1250,25 +1254,12 @@ var igv = (function (igv) {
             }
 
             const viewportWidthBP = bpp * viewport.$viewport.width();
-
-            viewport.genomicState.referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
-
+            viewport.genomicState.referenceFrame.start = centerBP - (viewportWidthBP / 2)
             viewport.genomicState.referenceFrame.bpPerPixel = bpp;
-
             self.updateViews(viewport.genomicState);
 
         });
 
-
-    };
-
-    igv.Browser.prototype.getChromosomeLengthBP = function (genome, referenceFrame) {
-
-        if (genome && genome.getChromosome(referenceFrame.chrName)) {
-            return genome.getChromosome(referenceFrame.chrName).bpLength;
-        } else {
-            return 250000000;
-        }
 
     };
 
