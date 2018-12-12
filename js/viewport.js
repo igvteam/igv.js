@@ -41,7 +41,6 @@ var igv = (function (igv) {
         if ("sequence" === trackView.track.type) {
 
             this.$viewport.addClass('igv-viewport-sequence');
-
         }
 
         if ('ruler' === trackView.track.type) {
@@ -77,9 +76,11 @@ var igv = (function (igv) {
             this.$viewport.append($spinnerContainer);
             this.stopSpinner();
 
-            this.popover = new igv.Popover(self.browser.$content);
-
-            self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
+            if("sequence" !==  trackView.track.type)
+            {
+                this.popover = new igv.Popover(self.browser.$content);
+                self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
+            }
         }
 
         if (trackView.track.name) {
