@@ -9,7 +9,7 @@ function runFastaTests() {
 
         var sequence = new igv.FastaSequence(
             {
-                fastaURL: dataURL + "fasta/hg19_test.fasta",
+                fastaURL: dataURL + "fasta/test.fasta",
                 indexed: false
             }
         );
