@@ -93,46 +93,7 @@ var igv = (function (igv) {
         }
 
 
-        return doPromiseChain(browser, config)
-            .then(function (browser) {
-
-                allBrowsers.push(browser);
-
-                // Backward compatibility -- globally visible.   This will be removed in a future release
-                if (!igv.browser) {
-                    igv.browser = browser;
-                }
-
-                return browser;
-            })
-
-    };
-
-    igv.removeBrowser = function (browser) {
-
-        browser.dispose();
-
-        browser.$root.remove();
-
-        if (browser === igv.browser) {
-            igv.browser = undefined;
-        }
-
-        allBrowsers = allBrowsers.filter(item => item !== browser);
-
-    }
-
-    function doPromiseChain(browser, config) {
-
-        // Backward compatibility
-        let options;
-        if(typeof config.sessionURL === 'string') {
-            options = {url: config.sessionURL}
-        } else {
-            options = undefined;
-        }
-
-        return browser.loadSession(options, config)
+        return browser.loadSessionObject(config)
 
             .then(function (ignore) {
 
@@ -172,6 +133,32 @@ var igv = (function (igv) {
 
                 return browser;
             })
+
+            .then(function (browser) {
+
+                allBrowsers.push(browser);
+
+                // Backward compatibility -- globally visible.   This will be removed in a future release
+                if (!igv.browser) {
+                    igv.browser = browser;
+                }
+
+                return browser;
+            })
+
+    };
+
+    igv.removeBrowser = function (browser) {
+
+        browser.dispose();
+
+        browser.$root.remove();
+
+        if (browser === igv.browser) {
+            igv.browser = undefined;
+        }
+
+        allBrowsers = allBrowsers.filter(item => item !== browser);
 
     }
 
