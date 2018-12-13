@@ -223,22 +223,19 @@ var igv = (function (igv) {
             else {
 
                 // If a visibility window is defined, potentially expand query interval.
-                // This can save re-queries as we zoom out.
-
-                if (-1 !== visibilityWindow) {
-                    if (visibilityWindow <= 0) {
-                        // Whole chromosome
-                        intervalStart = 0;
-                        intervalEnd = Number.MAX_VALUE;
-                    }
-                    else {
-                        if ((reader.expandQueryInterval !== false) && visibilityWindow > (bpEnd - bpStart)) {
-                            intervalStart = Math.max(0, (bpStart + bpEnd - visibilityWindow) / 2);
-                            intervalEnd = bpStart + visibilityWindow;
-                        }
-                    }
-                    genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+                // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
+                // indicating whole chromosome should be read at once.
+                if (visibilityWindow <= 0) {
+                    // Whole chromosome
+                    intervalStart = 0;
+                    intervalEnd = Number.MAX_VALUE;
                 }
+                else if (visibilityWindow > (bpEnd - bpStart)) {
+                    const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
+                    intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
+                    intervalEnd = bpStart + expansionWindow;
+                }
+                genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
 
                 return reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
@@ -354,7 +351,7 @@ var igv = (function (igv) {
 
         const wgFeatures = [];
 
-        for(let f of features) {
+        for (let f of features) {
 
             let queryChr = genome.getChromosomeName(f.chr);
 
@@ -371,7 +368,7 @@ var igv = (function (igv) {
             }
         }
 
-        wgFeatures.sort(function(a, b) {
+        wgFeatures.sort(function (a, b) {
             return a.start - b.start;
         });
 
