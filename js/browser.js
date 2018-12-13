@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+"use strict";
+
 var igv = (function (igv) {
 
     igv.Browser = function (options, trackContainerDiv) {
@@ -215,17 +217,13 @@ var igv = (function (igv) {
     /**
      * Load a session from a file.  Public function, should probably be named loadSessionFile
      *
-     * @param sessionURL
+     * @param options
      * @param config
      * @returns {*}
      */
     igv.Browser.prototype.loadSession = function (options) {
 
         var self = this;
-
-        self.removeAllTracks(true);
-
-        igv.TrackView.DisableUpdates = true;
 
         return loadSessionFile(options)
             .then(function (session) {
@@ -244,7 +242,7 @@ var igv = (function (igv) {
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
 
-                var json = igv.Browser.uncompressSession(options.url.substring(5));
+                var json = igv.Browser.uncompressSession(options.url);
                 return Promise.resolve(JSON.parse(json));
 
             } else if (filename.endsWith(".xml")) {
@@ -274,6 +272,8 @@ var igv = (function (igv) {
     igv.Browser.prototype.loadSessionObject = function (session) {
 
         const self = this;
+
+        self.removeAllTracks(true);
 
         return self.loadGenome(session.reference || session.genome, session.locus)
 
@@ -309,9 +309,13 @@ var igv = (function (igv) {
                     });
                 }
 
-                if (session.tracks) {
-                    return self.loadTrackList(session.tracks);
+                if (!session.tracks) session.tracks = [];
+                if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+                    session.tracks.push({type: "sequence", order: -Number.MAX_VALUE})
                 }
+
+                return self.loadTrackList(session.tracks);
+
 
             })
 
@@ -329,11 +333,6 @@ var igv = (function (igv) {
 
                 self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
 
-            })
-
-            .then(function (ignore) {
-
-                igv.TrackView.DisableUpdates = false;
                 // Resize is called to address minor alignment problems with multi-locus view.
                 self.resize();
 
@@ -1145,63 +1144,61 @@ var igv = (function (igv) {
         const viewport = this.trackViews[0].viewports[0];
         const referenceFrame = viewport.genomicState.referenceFrame;
 
-        const a = this.getChromosomeLengthBP(this.genome, referenceFrame) / viewport.$viewport.width();
-        const b = this.minimumBases() / viewport.$viewport.width();
-        const percentage = referenceFrame.bpPerPixel / Math.abs(a - b);
-
-        const value = Math.round(100 * (1.0 - percentage));
+        const window = viewport.$viewport.width() * referenceFrame.bpPerPixel;
+        const maxWindow = referenceFrame.getChromosome().bpLength;
+        const minWindow = this.minimumBases();
+        const v = (maxWindow - window) / (maxWindow - minWindow)
+        const value = Math.round(100 * v);
 
         $slider.val(value);
 
     };
+
+    igv.Browser.prototype.zoom = function (scaleFactor) {
+        let nuthin = undefined;
+        this.zoomWithScaleFactor(scaleFactor)
+    };
+
+    // Zoom in by a factor of 2, keeping the same center location
+    igv.Browser.prototype.zoomIn = function () {
+        this.zoomWithScaleFactor(0.5)
+    };
+
+    // Zoom out by a factor of 2, keeping the same center location if possible
+    igv.Browser.prototype.zoomOut = function () {
+        this.zoomWithScaleFactor(2.0)
+    };
+
 
     igv.Browser.prototype.zoomWithRangePercentage = function (percentage) {
 
         if (this.loadInProgress()) {
             return;
         }
-
         let self = this;
         this.trackViews[0].viewports.forEach((viewport) => {
 
-            let referenceFrame = viewport.genomicState.referenceFrame;
-
+            const referenceFrame = viewport.genomicState.referenceFrame;
             const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
-
-            const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, referenceFrame);
-
-            const bpp = igv.Math.lerp(chromosomeLengthBP / viewport.$viewport.width(), this.minimumBases() / viewport.$viewport.width(), percentage);
-
+            const chromosome = referenceFrame.getChromosome();
+            const bpp = lerp(
+                (chromosome.bpLength - chromosome.bpStart) / viewport.$viewport.width(),
+                this.minimumBases() / viewport.$viewport.width(),
+                percentage);
             const viewportWidthBP = bpp * viewport.$viewport.width();
 
-            referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
-
+            referenceFrame.start = centerBP - (viewportWidthBP / 2);
             referenceFrame.bpPerPixel = bpp;
-
             self.updateViews(viewport.genomicState);
 
+            function lerp(v0, v1, t) {
+                return (1 - t) * v0 + t * v1;
+            }
+
         });
-
     };
 
-    igv.Browser.prototype.zoom = function (scaleFactor) {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, scaleFactor)
-    };
-
-    // Zoom in by a factor of 2, keeping the same center location
-    igv.Browser.prototype.zoomIn = function () {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, 0.5)
-    };
-
-    // Zoom out by a factor of 2, keeping the same center location if possible
-    igv.Browser.prototype.zoomOut = function () {
-        let nuthin = undefined;
-        this.zoomWithScaleFactor(nuthin, nuthin, 2.0)
-    };
-
-    igv.Browser.prototype.zoomWithScaleFactor = function (centerBPOrUndefined, viewportOrUndefined, scaleFactor) {
+    igv.Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
 
         if (this.loadInProgress()) {
             return;
@@ -1212,13 +1209,19 @@ var igv = (function (igv) {
         let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
         viewports.forEach((viewport) => {
 
-            const chromosomeLengthBP = self.getChromosomeLengthBP(self.genome, viewport.genomicState.referenceFrame);
-            const bppThreshold = scaleFactor < 1.0 ? self.minimumBases() / viewport.$viewport.width() : chromosomeLengthBP / viewport.$viewport.width();
+            const referenceFrame = viewport.genomicState.referenceFrame;
+            const chromosome = referenceFrame.getChromosome();
+            const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
 
-            const centerBP = undefined === centerBPOrUndefined ? (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) : centerBPOrUndefined;
+            const bppThreshold = scaleFactor < 1.0 ?
+                self.minimumBases() / viewport.$viewport.width() :
+                chromosomeLengthBP / viewport.$viewport.width();
+
+            const centerBP = undefined === centerBPOrUndefined ?
+                (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
+                centerBPOrUndefined;
 
             let bpp;
-
             if (scaleFactor < 1.0) {
                 bpp = Math.max(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             } else {
@@ -1226,25 +1229,12 @@ var igv = (function (igv) {
             }
 
             const viewportWidthBP = bpp * viewport.$viewport.width();
-
-            viewport.genomicState.referenceFrame.start = igv.Math.clamp(Math.round(centerBP - (viewportWidthBP / 2.0)), 0, chromosomeLengthBP - viewportWidthBP);
-
+            viewport.genomicState.referenceFrame.start = centerBP - (viewportWidthBP / 2)
             viewport.genomicState.referenceFrame.bpPerPixel = bpp;
-
             self.updateViews(viewport.genomicState);
 
         });
 
-
-    };
-
-    igv.Browser.prototype.getChromosomeLengthBP = function (genome, referenceFrame) {
-
-        if (genome && genome.getChromosome(referenceFrame.chrName)) {
-            return genome.getChromosome(referenceFrame.chrName).bpLength;
-        } else {
-            return 250000000;
-        }
 
     };
 
@@ -2029,21 +2019,30 @@ var igv = (function (igv) {
         return enc;
     }
 
-    igv.Browser.uncompressSession = function (enc) {
+    igv.Browser.uncompressSession = function (url) {
 
-        var compressedString, compressedBytes, bytes, decompressedString, json, i;
-
-        enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
-
-        compressedString = atob(enc);
-        compressedBytes = [];
-        for (i = 0; i < compressedString.length; i++) {
-            compressedBytes.push(compressedString.charCodeAt(i));
+        let bytes
+        if (url.indexOf('/gzip;base64') > 0) {
+            //Proper dataURI
+            bytes = igv.decodeDataURI(url);
         }
-        bytes = new Zlib.RawInflate(compressedBytes).decompress();
-        json = String.fromCharCode.apply(null, bytes);
+        else {
+
+            let enc = url.substring(5);
+            enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
+
+            const compressedString = atob(enc);
+            const compressedBytes = [];
+            for (let i = 0; i < compressedString.length; i++) {
+                compressedBytes.push(compressedString.charCodeAt(i));
+            }
+            bytes = new Zlib.RawInflate(compressedBytes).decompress();
+        }
+        const json = String.fromCharCode.apply(null, bytes);
 
         return json;
+
+
     }
 
     igv.Browser.prototype.sessionURL = function () {

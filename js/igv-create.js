@@ -92,8 +92,7 @@ var igv = (function (igv) {
             igv.oauth.setToken(config.oauthToken);
         }
 
-
-        return browser.loadSessionObject(config)
+        return loadSession(config)
 
             .then(function (ignore) {
 
@@ -145,6 +144,18 @@ var igv = (function (igv) {
 
                 return browser;
             })
+
+
+        function loadSession(config) {
+            if(config.sessionURL) {
+                return browser.loadSession({
+                    url: config.sessionURL
+                })
+            }
+            else {
+                return browser.loadSessionObject(config)
+            }
+        }
 
     };
 
