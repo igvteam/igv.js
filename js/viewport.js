@@ -869,7 +869,7 @@ var igv = (function (igv) {
                     browser.search(string);
 
                 } else {
-                    browser.zoomWithScaleFactor(centerBP, self, 0.5)
+                    browser.zoomWithScaleFactor(0.5, centerBP, self)
                 }
 
 
