@@ -184,7 +184,7 @@ var igv = (function (igv) {
         }
         else {
             const chromosome = this.chromosomes[this.chromosomeNames[0]];
-            if(chromosome.rangeLocus) {
+            if (chromosome.rangeLocus) {
                 return chromosome.name + ":" + chromosome.rangeLocus;
             } else {
                 return this.chromosomeNames[0];
@@ -254,14 +254,14 @@ var igv = (function (igv) {
             const cumulativeOffset = this.cumulativeOffsets[name];
             if (cumulativeOffset > genomeCoordinate) {
                 const position = genomeCoordinate - lastCoord;
-                return { chr: lastChr, position: position };
+                return {chr: lastChr, position: position};
             }
             lastChr = name;
             lastCoord = cumulativeOffset;
         }
 
         // If we get here off the end
-        return { chr: this.chromosomeNames[ this.chromosomeNames.length - 1 ], position: 0 };
+        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0};
 
     };
 
@@ -271,7 +271,7 @@ var igv = (function (igv) {
      * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
      */
     Genome.prototype.getCumulativeOffset = function (chr) {
-        
+
         if (this.cumulativeOffsets === undefined) {
             this.cumulativeOffsets = computeCumulativeOffsets.call(this);
         }
@@ -408,24 +408,33 @@ var igv = (function (igv) {
         }
 
         function decodeDataUri(dataUri) {
-            var bytes,
-                split = dataUri.split(','),
-                info = split[0].split(':')[1],
-                dataString = split[1];
 
-            if (info.indexOf('base64') >= 0) {
-                dataString = atob(dataString);
-            } else {
-                dataString = decodeURI(dataString);
+            let plain
+
+            if (dataUri.startsWith("data:application/gzip;base64")) {
+                plain = igv.decodeDataURI(dataUri)
             }
+            else {
 
-            bytes = new Uint8Array(dataString.length);
-            for (var i = 0; i < dataString.length; i++) {
-                bytes[i] = dataString.charCodeAt(i);
+                let bytes,
+                    split = dataUri.split(','),
+                    info = split[0].split(':')[1],
+                    dataString = split[1];
+
+                if (info.indexOf('base64') >= 0) {
+                    dataString = atob(dataString);
+                } else {
+                    dataString = decodeURI(dataString);
+                }
+
+                bytes = new Uint8Array(dataString.length);
+                for (let i = 0; i < dataString.length; i++) {
+                    bytes[i] = dataString.charCodeAt(i);
+                }
+
+                var inflate = new Zlib.Gunzip(bytes);
+                plain = inflate.decompress();
             }
-
-            var inflate = new Zlib.Gunzip(bytes);
-            var plain = inflate.decompress();
 
             let s = "";
             const len = plain.length;
