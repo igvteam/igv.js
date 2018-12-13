@@ -59,14 +59,20 @@ var igv = (function (igv) {
     };
 
     igv.ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
-        this.start += pixels * this.bpPerPixel;
 
+        this.start += pixels * this.bpPerPixel;
+        this.clamp(viewportWidth);
+
+    };
+
+    igv.ReferenceFrame.prototype.clamp = function (viewportWidth) {
         // clamp left
-        this.start = Math.max(0, this.start);
+        const min = this.genome.getChromosome(this.chrName).bpStart || 0
+        this.start = Math.max(min, this.start);
 
         // clamp right
         if (viewportWidth) {
-        
+
             var chromosome = this.genome.getChromosome(this.chrName);
             var maxEnd = chromosome.bpLength;
             var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
@@ -75,7 +81,11 @@ var igv = (function (igv) {
                 this.start = maxStart;
             }
         }
-    };
+    }
+
+    igv.ReferenceFrame.prototype.getChromosome = function () {
+        return this.genome.getChromosome(this.chrName)
+    }
 
     igv.ReferenceFrame.prototype.showLocus = function (pixels) {
 

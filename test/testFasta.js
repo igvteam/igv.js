@@ -129,19 +129,23 @@ function runFastaTests() {
             })
     })
 
+
+    // >chr1:1000001-1000025
+    // GGGCACAGCCTCACCCAGGAAAGCA
+
     QUnit.test("FastaSequence - Test fasta with start offset", function (assert) {
 
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence({fastaURL: "data/fasta/offset.fasta", indexed: false});
+        var sequence = new igv.FastaSequence({fastaURL: "data/fasta/sliced.fasta", indexed: false});
 
         sequence.init()
 
             .then(function () {
 
-                let expected = "GGGGCCTGCT";
+                let expected = "GGGCACAGCCTCACCCAGGAAAGCA";
 
-                sequence.getSequence("chr", 499, 509)
+                sequence.getSequence("chr1", 1000000, 1000025)
 
                     .then(function (seq) {
 
@@ -149,12 +153,24 @@ function runFastaTests() {
 
                     })
             })
+            // .then(function () {
+            //
+            //     // Off right side
+            //     let expected = ""AAGCA*****"";
+            //     sequence.getSequence("chr1", 1000020, 1000030)
+            //
+            //         .then(function (seq) {
+            //
+            //             assert.equal(seq, expected);
+            //
+            //         })
+            //
+            // })
             .then(function () {
 
                 // Off left side
-                let expected = "*****GGGGC";
-
-                sequence.getSequence("chr", 494, 504)
+                let expected = "*****GGGCA";
+                sequence.getSequence("chr1", 999995, 1000005)
 
                     .then(function (seq) {
 
@@ -168,7 +184,7 @@ function runFastaTests() {
                 // way....   Off left side
                 let expected = "**********";
 
-                sequence.getSequence("chr", 10, 20)
+                sequence.getSequence("chr1", 10, 20)
 
                     .then(function (seq) {
 

@@ -43,13 +43,11 @@ var igv = (function (igv) {
         this.panels.forEach((panel, i) => {
 
             const bbox = panel.$ideogram.get(0).getBoundingClientRect();
-
             const dx = offset.deltaX + (i * (panel.$canvas.width() + context.multiLocusGap));
             const dy = offset.deltaY;
             context.addTrackGroupWithTranslationAndClipRect('ideogram', dx, dy, bbox.width, bbox.height, 0);
 
             context.save();
-
             let paintConfig =
                 {
                     ctx: context,
@@ -59,8 +57,6 @@ var igv = (function (igv) {
                     referenceFrame: panel.genomicState.referenceFrame,
                     ideogramWidth: panel.$ideogram.width()
                 };
-
-
             repaintContext(paintConfig);
 
             context.restore();
@@ -233,18 +229,6 @@ var igv = (function (igv) {
     }
 
     function repaintContext ({ ctx, width, height, genome, referenceFrame, ideogramWidth }) {
-        var chromosome,
-            percentWidth,
-            percentX,
-            widthBP,
-            x,
-            xBP,
-            stainColors,
-            xx,
-            yy,
-            ww,
-            hh;
-
 
         if (!(width > 0 && height > 0)) {
             return;
@@ -263,41 +247,47 @@ var igv = (function (igv) {
 
         drawIdeogram({ ctx, referenceFrame, genome, width, height, stainColors });
 
-        chromosome = genome.getChromosome(referenceFrame.chrName);
+        const chromosome = genome.getChromosome(referenceFrame.chrName);
 
-        widthBP = Math.round(referenceFrame.bpPerPixel * ideogramWidth);
-        xBP = referenceFrame.start;
+        const widthBP = Math.round(referenceFrame.bpPerPixel * ideogramWidth);
+        const xBP = referenceFrame.start;
 
-        if (widthBP < chromosome.bpLength) {
+        // Total chromosome length can be > chromosome.bpLength for partial fastas.
+        let chrLength = chromosome.bpLength;
+        const cytobands = genome.getCytobands(referenceFrame.chrName);
+        if(cytobands) {
+            chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
+        }
 
-            let ww;
 
-            percentWidth = widthBP / chromosome.bpLength;
-            percentX = xBP / chromosome.bpLength;
+        if (widthBP < chrLength) {
 
-            x = Math.floor(percentX * width);
-            ww = Math.floor(percentWidth * width);
+            const percentWidth = widthBP / chrLength
+            const percentX = xBP / chrLength
 
-            x = Math.max(0, x);
-            x = Math.min(width - ww, x);
+            let x = Math.floor(percentX * width)
+            let ww = Math.floor(percentWidth * width)
+
+            x = Math.max(0, x)
+            x = Math.min(width - ww, x)
 
             // Push current context
-            ctx.save();
+            ctx.save()
 
             // Draw red box
-            ctx.strokeStyle = "red";
-            ctx.lineWidth = (ww < 2) ? 1 : 2;
+            ctx.strokeStyle = "red"
+            ctx.lineWidth = (ww < 2) ? 1 : 2
 
-            xx = x + (ctx.lineWidth) / 2;
-            ww = (ww < 2) ? 1 : ww - ctx.lineWidth;
+            const xx = x + (ctx.lineWidth) / 2
+            ww = (ww < 2) ? 1 : ww - ctx.lineWidth
 
-            yy = ctx.lineWidth / 2;
-            hh = height - ctx.lineWidth;
+            const yy = ctx.lineWidth / 2
+            const hh = height - ctx.lineWidth
 
-            ctx.strokeRect(xx, yy, ww, hh);
+            ctx.strokeRect(xx, yy, ww, hh)
 
             // Pop current context
-            ctx.restore();
+            ctx.restore()
         }
 
     }

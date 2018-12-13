@@ -436,8 +436,6 @@ var igv = (function (igv) {
 
         if (!(this.browser && this.browser.genomicStateList)) return;
 
-        if (igv.TrackView.DisableUpdates) return;
-
         let self = this, promises, rpV, groupAutoscale;
 
         this.viewports.forEach(function (viewport) {
