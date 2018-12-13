@@ -272,10 +272,10 @@ var igv = (function (igv) {
                 menuItems.push(colorByCB(item, selected));
             });
 
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
             if (self.pairsSupported && self.alignmentTrack.hasPairs) {
-
-                menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
+                
                 menuItems.push({
                     object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                     click: function () {
