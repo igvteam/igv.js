@@ -31,21 +31,19 @@ var igv = (function (igv) {
 
         loadGenome: function (config) {
 
-            var cytobandUrl, cytobands, aliasURL, chrNames, chromosomes, sequence;
+            let cytobands, chrNames, chromosomes;
 
-            cytobandUrl = config.cytobandURL;
-            aliasURL = config.aliasURL;
-            chromosomes = {};
-            sequence = new igv.FastaSequence(config);
+            const cytobandUrl = config.cytobandURL;
+            const aliasURL = config.aliasURL;
+            const sequence = new igv.FastaSequence(config);
 
             return sequence.init()
 
                 .then(function () {
-
                     chrNames = sequence.chromosomeNames;
                     chromosomes = sequence.chromosomes;
-
                 })
+
                 .then(function (ignore) {
                     if (cytobandUrl) {
                         return loadCytobands(cytobandUrl, sequence.config);
@@ -53,10 +51,9 @@ var igv = (function (igv) {
                         return undefined
                     }
                 })
+
                 .then(function (c) {
-
                     cytobands = c;
-
                     if (aliasURL) {
                         return loadAliases(aliasURL, sequence.config);
                     }
@@ -64,6 +61,7 @@ var igv = (function (igv) {
                         return undefined;
                     }
                 })
+
                 .then(function (aliases) {
                     return new Genome(config, sequence, cytobands, aliases);
                 })
@@ -175,12 +173,22 @@ var igv = (function (igv) {
         return Object.assign({}, this.config, {tracks: undefined});
     }
 
+    Genome.prototype.getInitialLocus = function () {
+
+
+    }
+
     Genome.prototype.getHomeChromosomeName = function () {
         if (this.chromosomes.hasOwnProperty("all")) {
             return "all";
         }
         else {
-            return this.chromosomeNames[0];
+            const chromosome = this.chromosomes[this.chromosomeNames[0]];
+            if (chromosome.rangeLocus) {
+                return chromosome.name + ":" + chromosome.rangeLocus;
+            } else {
+                return this.chromosomeNames[0];
+            }
         }
     }
 
@@ -246,14 +254,14 @@ var igv = (function (igv) {
             const cumulativeOffset = this.cumulativeOffsets[name];
             if (cumulativeOffset > genomeCoordinate) {
                 const position = genomeCoordinate - lastCoord;
-                return { chr: lastChr, position: position };
+                return {chr: lastChr, position: position};
             }
             lastChr = name;
             lastCoord = cumulativeOffset;
         }
 
         // If we get here off the end
-        return { chr: this.chromosomeNames[ this.chromosomeNames.length - 1 ], position: 0 };
+        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0};
 
     };
 
@@ -263,7 +271,7 @@ var igv = (function (igv) {
      * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
      */
     Genome.prototype.getCumulativeOffset = function (chr) {
-        
+
         if (this.cumulativeOffsets === undefined) {
             this.cumulativeOffsets = computeCumulativeOffsets.call(this);
         }
@@ -307,10 +315,12 @@ var igv = (function (igv) {
         return this.bpLength;
     }
 
-    igv.Chromosome = function (name, order, bpLength) {
+    igv.Chromosome = function (name, order, bpStart, bpLength, rangeLocus) {
         this.name = name;
         this.order = order;
+        this.bpStart = bpStart;
         this.bpLength = bpLength;
+        this.rangeLocus = rangeLocus;
     }
 
     igv.Cytoband = function (start, end, name, typestain) {
@@ -398,24 +408,33 @@ var igv = (function (igv) {
         }
 
         function decodeDataUri(dataUri) {
-            var bytes,
-                split = dataUri.split(','),
-                info = split[0].split(':')[1],
-                dataString = split[1];
 
-            if (info.indexOf('base64') >= 0) {
-                dataString = atob(dataString);
-            } else {
-                dataString = decodeURI(dataString);
+            let plain
+
+            if (dataUri.startsWith("data:application/gzip;base64")) {
+                plain = igv.decodeDataURI(dataUri)
             }
+            else {
 
-            bytes = new Uint8Array(dataString.length);
-            for (var i = 0; i < dataString.length; i++) {
-                bytes[i] = dataString.charCodeAt(i);
+                let bytes,
+                    split = dataUri.split(','),
+                    info = split[0].split(':')[1],
+                    dataString = split[1];
+
+                if (info.indexOf('base64') >= 0) {
+                    dataString = atob(dataString);
+                } else {
+                    dataString = decodeURI(dataString);
+                }
+
+                bytes = new Uint8Array(dataString.length);
+                for (let i = 0; i < dataString.length; i++) {
+                    bytes[i] = dataString.charCodeAt(i);
+                }
+
+                var inflate = new Zlib.Gunzip(bytes);
+                plain = inflate.decompress();
             }
-
-            var inflate = new Zlib.Gunzip(bytes);
-            var plain = inflate.decompress();
 
             let s = "";
             const len = plain.length;

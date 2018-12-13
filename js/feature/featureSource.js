@@ -43,7 +43,6 @@ var igv = (function (igv) {
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
         if (config.features && Array.isArray(config.features)) {
-
             let features = config.features;
             if (config.mappings) {
                 mapProperties(features, config.mappings)
@@ -51,7 +50,6 @@ var igv = (function (igv) {
             this.queryable = false;
             this.featureCache = new igv.FeatureCache(features, genome);
             this.static = true;
-
         }
         else if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config, genome);
