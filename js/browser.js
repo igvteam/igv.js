@@ -215,70 +215,83 @@ var igv = (function (igv) {
     };
 
     /**
-     * Load a session
+     * Load a session from a file.  Public function, should probably be named loadSessionFile
      *
-     * @param sessionURL
+     * @param options
      * @param config
      * @returns {*}
      */
-    igv.Browser.prototype.loadSession = function (options, config) {
+    igv.Browser.prototype.loadSession = function (options) {
 
         var self = this;
 
-        if (!config) config = {};
+        return loadSessionFile(options)
+            .then(function (session) {
+                    return self.loadSessionObject(session);
+                }
+            )
 
-        // backward compatibility
-        if (typeof options === 'string') {
-            options = {
-                url: options
+        function loadSessionFile(options) {
+
+            const urlOrFile = options.url || options.file
+
+            let filename = options.filename
+            if (!filename) {
+                filename = (options.url ? igv.getFilename(options.url) : options.file.name)
             }
-        } else if (options && options.lastModified) {
-            options = {
-                file: options
+
+            if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
+
+                var json = igv.Browser.uncompressSession(options.url);
+                return Promise.resolve(JSON.parse(json));
+
+            } else if (filename.endsWith(".xml")) {
+
+                let knownGenomes;
+                return igv.GenomeUtils.getKnownGenomes()
+
+                    .then(function (g) {
+                        knownGenomes = g;
+                        return igv.xhr.loadString(urlOrFile)
+                    })
+                    .then(function (string) {
+                        return new igv.XMLSession(string, knownGenomes);
+                    })
+
+            } else if (filename.endsWith(".json")) {
+
+                return igv.xhr.loadJson(urlOrFile);
+            } else {
+
+                return Promise.resolve(undefined);
             }
+
         }
+    }
+
+    igv.Browser.prototype.loadSessionObject = function (session) {
+
+        const self = this;
 
         self.removeAllTracks(true);
 
-        igv.TrackView.DisableUpdates = true;
-
-        return loadSessionFile(options)
-
-            .then(function (session) {
-                // Merge session json with config object
-                if (session) {
-                    Object.assign(config, session);
-                }
-
-                // Insure that there is a sequence track.
-                if (!config.tracks) config.tracks = [];
-                if (config.tracks.filter(track => track.type === 'sequence').length === 0) {
-                    config.tracks.push({type: "sequence", order: -1.7976931348623157e+308})
-                }
-
-                return config;
-            })
-
-            .then(function (config) {
-                return self.loadGenome(config.reference || config.genome, config.locus)
-            })
+        return self.loadGenome(session.reference || session.genome, session.locus)
 
             .then(function (genome) {
 
-                // Restore gtex selections.  
-                if (config.gtexSelections) {
+                // Restore gtex selections.
+                if (session.gtexSelections) {
 
                     const genomicStates = {};
-
                     for (let gs of self.genomicStateList) {
                         genomicStates[gs.locusSearchString] = gs;
                     }
 
-                    for (let s of Object.getOwnPropertyNames(config.gtexSelections)) {
+                    for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
                         const gs = genomicStates[s];
                         if (gs) {
-                            const gene = config.gtexSelections[s].gene;
-                            const snp = config.gtexSelections[s].snp;
+                            const gene = session.gtexSelections[s].gene;
+                            const snp = session.gtexSelections[s].snp;
                             gs.selection = new igv.GtexSelection(gene, snp);
                         }
                     }
@@ -289,16 +302,20 @@ var igv = (function (igv) {
 
             .then(function (genome) {
 
-                if (config.roi) {
+                if (session.roi) {
                     self.roi = [];
-                    config.roi.forEach(function (r) {
+                    session.roi.forEach(function (r) {
                         self.roi.push(new igv.ROI(r, self.genome));
                     });
                 }
 
-                if (config.tracks) {
-                    return self.loadTrackList(config.tracks);
+                if (!session.tracks) session.tracks = [];
+                if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+                    session.tracks.push({type: "sequence", order: -Number.MAX_VALUE})
                 }
+
+                return self.loadTrackList(session.tracks);
+
 
             })
 
@@ -306,7 +323,7 @@ var igv = (function (igv) {
 
                 var panelWidth;
 
-                if (true === config.showIdeogram) {
+                if (true === session.showIdeogram) {
                     panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
                     self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth, self);
                     self.ideoPanel.repaint();
@@ -316,11 +333,6 @@ var igv = (function (igv) {
 
                 self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
 
-            })
-
-            .then(function (ignore) {
-
-                igv.TrackView.DisableUpdates = false;
                 // Resize is called to address minor alignment problems with multi-locus view.
                 self.resize();
 
@@ -330,42 +342,6 @@ var igv = (function (igv) {
                 self.presentAlert(error, undefined);
                 console.log(error);
             });
-
-        function loadSessionFile(options) {
-
-            let knownGenomes;
-
-            if (!options) {
-                return Promise.resolve(undefined);
-            }
-
-            const urlOrFile = options.url || options.file
-
-            let filename = options.filename
-            if (!filename) {
-                filename = (options.url ? igv.getFilename(options.url) : options.file.name)
-            }
-
-            if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-                var json = igv.Browser.uncompressSession(urlOrFile);
-                return Promise.resolve(JSON.parse(json));
-            }
-            else if (filename.endsWith(".xml")) {
-                return igv.GenomeUtils.getKnownGenomes()
-                    .then(function (g) {
-                        knownGenomes = g;
-                        return igv.xhr.loadString(urlOrFile)
-                    })
-                    .then(function (string) {
-                        return new igv.XMLSession(string, knownGenomes);
-                    })
-            }
-            else if (filename.endsWith(".json")) {
-                return igv.xhr.loadJson(urlOrFile);
-            } else {
-                return Promise.resolve(undefined);
-            }
-        }
     }
 
 
@@ -865,7 +841,6 @@ var igv = (function (igv) {
 
         for (let tv of this.trackViews) {
 
-
             if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
                 self.trackContainerDiv.removeChild(tv.trackDiv);
                 self.fireEvent('trackremoved', [tv.track]);
@@ -1216,7 +1191,7 @@ var igv = (function (igv) {
             referenceFrame.bpPerPixel = bpp;
             self.updateViews(viewport.genomicState);
 
-            function lerp (v0, v1, t) {
+            function lerp(v0, v1, t) {
                 return (1 - t) * v0 + t * v1;
             }
 

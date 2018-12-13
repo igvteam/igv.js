@@ -92,17 +92,7 @@ var igv = (function (igv) {
             igv.oauth.setToken(config.oauthToken);
         }
 
-        igv.xhr.startup();
-
-        // Backward compatibility
-        let options;
-        if(typeof config.sessionURL === 'string') {
-            options = {url: config.sessionURL}
-        } else {
-            options = undefined;
-        }
-
-        return browser.loadSession(options, config)
+        return loadSession(config)
 
             .then(function (ignore) {
 
@@ -136,6 +126,8 @@ var igv = (function (igv) {
                     browser.centerGuide.forcedShow();
                 }
 
+                igv.xhr.startup();
+
                 browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
                 return browser;
@@ -153,8 +145,19 @@ var igv = (function (igv) {
                 return browser;
             })
 
-    };
 
+        function loadSession(config) {
+            if(config.sessionURL) {
+                return browser.loadSession({
+                    url: config.sessionURL
+                })
+            }
+            else {
+                return browser.loadSessionObject(config)
+            }
+        }
+
+    };
 
     igv.removeBrowser = function (browser) {
 
@@ -169,6 +172,7 @@ var igv = (function (igv) {
         allBrowsers = allBrowsers.filter(item => item !== browser);
 
     }
+
 
     /**
      * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
