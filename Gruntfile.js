@@ -174,6 +174,7 @@ module.exports = function (grunt) {
             foo;
 
         ping = grunt.file.read('tmp/igv-all.css');
+        ping = ping.replace(/\r\n/g, '\\n');
         pong = ping.replace(/\n/g, '\\n');
         ping = pong.replace(/"/g, '\\"');
 
