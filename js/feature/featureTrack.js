@@ -341,6 +341,9 @@ var igv = (function (igv) {
                         }
                     });
                 });
+
+                menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
             }
 
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
