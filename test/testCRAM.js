@@ -59,7 +59,7 @@ function runCRAMTests() {
 
         // Mock genome object
         const fasta = new igv.FastaSequence({
-            fastaURL: 'data/cram/test.fasta',
+            fastaURL: 'data/cram/hg19_test.fasta',
             indexed: false
         });
 

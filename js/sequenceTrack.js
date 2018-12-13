@@ -214,19 +214,16 @@ var igv = (function (igv) {
 
         SequenceTrack.prototype.draw = function (options) {
 
-            var self = this;
+            const self = this;
 
             if (options.features) {
 
                 const sequence = options.features.sequence;
                 const sequenceBpStart = options.features.bpStart;
-
-
-
-                let bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
+                const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
                 
                 let height = 15;
-                for (let bp = options.bpStart; bp <= bpEnd; bp++) {
+                for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
 
                     let seqOffsetBp = Math.floor(bp - sequenceBpStart);
 
