@@ -36,6 +36,24 @@
     ]
   },
   {
+    "id": "hg18",
+    "name": "Human (hg18)",
+    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta",
+    "indexURL": "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta.fai",
+    "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg18/cytoBandIdeo.txt.gz",
+    "tracks": [
+      {
+        "name": "Refseq Genes",
+        "format": "refgene",
+        "url": "https://s3.amazonaws.com/igv.org.genomes/hg18/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg18/refGene.txt.gz.tbi",
+        "visibilityWindow": -1,
+        "removable": false,
+        "order": 1000000
+      }
+    ]
+  },
+  {
     "id": "mm10",
     "name": "Mouse (GRCm38/mm10)",
     "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/mm10/mm10.fa",
