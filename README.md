@@ -31,13 +31,13 @@ igv.js consists of a single javascript file with no external dependencies.  To l
 ``` 
 
 Pre-built expanded and minified js files for ES5 (igv.js, igv.min.js) and ES6 (igv.esm.js, igv.esm.min.js)
-can be downloaded from [https://www.jsdelivr.com/package/npm/igv?path=dist](https://www.jsdelivr.com/package/npm/igv?path=dist).   
+can be downloaded from [https://igv.org/web/release/2.1.0/dist/](https://igv.org/web/release/2.1.0/dist/).   
  
 Alternatively you can install with npm  
  
  ```npm install igv```
 
-and source one of the files in node_modules/igv/dist.
+and source the appropriate file for your module system (igv.min.js or igv.esm.min.js)  in node_modules/igv/dist.
 
 To use igv.js include it with a script tag
 
