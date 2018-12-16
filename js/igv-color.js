@@ -263,16 +263,16 @@ var igv = (function (igv) {
 
         darkenLighten: function (color, amt) {
 
-            if (!color.startsWith("rgb(")) {
-                return color;
-            }
-            else {
-                const components = color.replace(")", "").substring(4).split(",")
-                const r = Math.max(0, Math.min(255, Number.parseInt(components[0].trim()) + amt));
-                const g = Math.max(0, Math.min(255, Number.parseInt(components[1].trim()) + amt));
-                const b = Math.max(0, Math.min(255, Number.parseInt(components[2].trim()) + amt));
-                return "rgb(" + r.toString() + "," + g.toString() + "," + b.toString();
-            }
+            const src = color.startsWith('rgb(') ? color : igv.Color.hexToRgb(color);
+
+            const components = src.replace(")", "").substring(4).split(",");
+
+            const r = Math.max(0, Math.min(255, Number.parseInt(components[0].trim()) + amt));
+            const g = Math.max(0, Math.min(255, Number.parseInt(components[1].trim()) + amt));
+            const b = Math.max(0, Math.min(255, Number.parseInt(components[2].trim()) + amt));
+
+            return 'rgb(' + r.toString() + ',' + g.toString() + ',' + b.toString() + ')';
+
         }
     };
 

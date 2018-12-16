@@ -46,7 +46,7 @@ var igv = (function (igv) {
 
         this.$select.empty();
 
-        list = genome.chromosomeNames.slice();
+        list = genome.wgChromosomeNames.slice();  // slice used to copy list
         list.unshift('all');
         list.forEach(function (name) {
             var $o;
