@@ -362,6 +362,9 @@ var igv = (function (igv) {
                 wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                 wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
+                // Don't draw exons in whole genome view
+                if(wg["exons"]) delete wg["exons"]
+
                 wgFeatures.push(wg);
             }
         }
