@@ -54,15 +54,32 @@ var igv = (function (igv) {
 
                 if (!isNaN(v)) {
                     t += v;
-                    t2 += v*v;
+                    t2 += v * v;
                     n++;
                 }
             }
-
-            return n > 0 ? {mean: t / n, stdev: Math.sqrt(t2 - t*t / n)} : {mean: 0, stdev: 0};
+            return n > 0 ? {mean: t / n, stdev: Math.sqrt(t2 - t * t / n)} : {mean: 0, stdev: 0};
         },
 
-        // Fast percentile function
+        median: function (numbers) {
+            // median of [3, 5, 4, 4, 1, 1, 2, 3] = 3
+            var median = 0, numsLen = numbers.length;
+            numbers.sort();
+
+            if (
+                numsLen % 2 === 0 // is even
+            ) {
+                // average of two middle numbers
+                median = (numbers[numsLen / 2 - 1] + numbers[numsLen / 2]) / 2;
+            } else { // is odd
+                // middle number only
+                median = numbers[(numsLen - 1) / 2];
+            }
+
+            return median;
+        },
+
+        // Fast percentile function for "p" near edges.  This needs profiled for p in middle (e.g. median)
         percentile: function (array, p) {
 
             if (array.length === 0) return undefined;
@@ -74,10 +91,12 @@ var igv = (function (igv) {
                 });
                 return array[k];
             }
-
-            return selectElement(array, k);
+            else {
+                return selectElement(array, k);
+            }
 
         },
+
 
         clamp: function (value, min, max) {
             return Math.min(Math.max(value, min), max);
@@ -91,7 +110,7 @@ var igv = (function (igv) {
 
     igv.Rect = {
 
-        make: function(x, y, width, height) {
+        make: function (x, y, width, height) {
             var r;
 
             r = this.makeRectZero();
@@ -105,11 +124,11 @@ var igv = (function (igv) {
             return r;
         },
 
-        makeRectZero: function() {
-            return { origin: { x:0, y:0 }, size: { width:0, height:0 } };
+        makeRectZero: function () {
+            return {origin: {x: 0, y: 0}, size: {width: 0, height: 0}};
         },
 
-        makeWithCenterAndSize: function(center, size) {
+        makeWithCenterAndSize: function (center, size) {
             var halfSize,
                 r;
 
@@ -120,12 +139,12 @@ var igv = (function (igv) {
             return r;
         },
 
-        makePoint: function(x, y) {
-            return { x: x, y: y };
+        makePoint: function (x, y) {
+            return {x: x, y: y};
         },
 
-        makeSize: function(width, height) {
-            return { width: width, height: height };
+        makeSize: function (width, height) {
+            return {width: width, height: height};
         }
 
     };
@@ -153,7 +172,6 @@ var igv = (function (igv) {
 
         return heap.content[0];
     }
-
 
 
     function BinaryHeap() {
