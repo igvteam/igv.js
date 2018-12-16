@@ -115,7 +115,7 @@ var igv = (function (igv) {
         this.ideograms = ideograms;
 
         if (Object.keys(sequence.chromosomes).length > 1) {
-            constructWG(this);
+            constructWG(this, config);
         } else {
             this.wgChromosomeNames = [sequence.chromosomeNames[0]];
         }
@@ -464,45 +464,44 @@ var igv = (function (igv) {
     }
 
 
-    function constructWG(genome) {
+    function constructWG(genome, config) {
 
-        var l, lengths, mean, threshold;
+        let wgChromosomes;
+        if (config.chromosomeOrder) {
+            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
+            wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined)
 
+        } else {
 
-        // Now trim chromosomes.  If ideograms are defined use those, otherwise trim chromosomes < 1/50 average length
-        genome.wgChromosomeNames = [];
+            // Trim small chromosomes.
+            const lengths = Object.keys(genome.chromosomes).map(key => genome.chromosomes[key].bpLength)
+            const median = lengths.reduce((a, b) => Math.max(a, b))
+            const threshold = median / 50;
+            wgChromosomes = Object.values(genome.chromosomes).filter(chr => chr.bpLength > threshold)
 
-        if (genome.ideograms) {
-            genome.chromosomeNames.forEach(function (chrName) {
-                var ideo = genome.ideograms[chrName];
-                if (ideo && ideo.length > 0) {
-                    genome.wgChromosomeNames.push(chrName);
-                }
-            });
-        }
-        else {
+            // Sort chromosomes.  First segregate numeric and alpha names, sort numeric, leave alpha as is
+            const numericChromosomes = wgChromosomes.filter(chr => isDigit(chr.name.replace('chr', '')))
+            const alphaChromosomes = wgChromosomes.filter(chr => !isDigit(chr.name.replace('chr', '')))
+            numericChromosomes.sort((a, b) => Number.parseInt(a.name.replace('chr', '')) - Number.parseInt(b.name.replace('chr', '')))
 
-            lengths = Object.keys(genome.chromosomes).map(function (key) {
-                return genome.chromosomes[key].bpLength;
-            });
-
-            mean = igv.Math.mean(lengths);
-            threshold = mean / 50;
-
-            genome.wgChromosomeNames = genome.chromosomeNames.filter(function (key) {
-                return genome.chromosomes[key].bpLength > threshold;
-            });
+            const wgChromosomeNames = numericChromosomes.map(chr => chr.name)
+            for (let chr of alphaChromosomes) {
+                wgChromosomeNames.push(chr.name)
+            }
+            genome.wgChromosomeNames = wgChromosomeNames
         }
 
-        l = 0;
-        genome.wgChromosomeNames.forEach(function (key) {
-            l += genome.chromosomes[key].bpLength;
-        });
 
+        // Compute psuedo-chromosome "all"
+        const l = wgChromosomes.reduce((accumulator, currentValue) => accumulator += currentValue.bpLength, 0)
         genome.chromosomes["all"] = {
             name: "all",
             bpLength: l
         };
+
+        function isDigit(val) {
+            return /^\d+$/.test(val)
+        }
 
     }
 
