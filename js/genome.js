@@ -448,8 +448,8 @@ var igv = (function (igv) {
     function constructWG(genome, config) {
 
         let wgChromosomes;
-        if (config.wgChromosomes) {
-            genome.wgChromosomeNames = config.wgChromosomes.split(',').map(nm => nm.trim())
+        if (config.chromosomeOrder) {
+            genome.wgChromosomeNames = config.chromosomeOrder.split(',').map(nm => nm.trim())
             wgChromosomes = genome.wgChromosomeNames.map(nm => genome.chromosomes[nm]).filter(chr => chr !== undefined)
 
         } else {

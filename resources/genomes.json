@@ -64,9 +64,10 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/mm10/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/mm10/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
+        "visibilityWindow": -1,
         "supportsWholeGenome": false
       }
     ]
@@ -77,6 +78,7 @@
     "fastaURL": "https://s3.amazonaws.com/igv.org.genomes/gorGor4/gorGor4.fa",
     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/gorGor4/gorGor4.fa.fai",
     "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/gorGor4/cytoBandIdeo.txt.gz",
+    "chromosomeOrder": "chr1,chr2A,chr2B,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX",
     "tracks": [
       {
         "name": "Refseq Genes",
@@ -84,7 +86,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/gorGor4/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/gorGor4/refGene.sorted.txt.gz.tbi",
         "order": 1000000,
-        "removable": false
+        "removable": false,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -94,7 +97,7 @@
     "fastaURL": "https://s3.amazonaws.com/igv.org.genomes/panTro4/panTro4.fa",
     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/panTro4/panTro4.fa.fai",
     "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/panTro4/cytoBandIdeo.txt.gz",
-    "wgChromosomes": "chr1,chr2A,chr2B,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
+    "chromosomeOrder": "chr1,chr2A,chr2B,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX,chrY",
     "tracks": [
       {
         "name": "Refseq Genes",
@@ -102,7 +105,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/panTro4/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/panTro4/refGene.sorted.txt.gz.tbi",
         "removable": false,
-        "order": 1000000
+        "order": 1000000,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -112,6 +116,7 @@
     "fastaURL": "https://s3.amazonaws.com/igv.org.genomes/panPan2/panPan2.fa",
     "indexURL": "https://s3.amazonaws.com/igv.org.genomes/panPan2/panPan2.fa.fai",
     "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/panPan2/cytoBandIdeo.txt.gz",
+    "chromosomeOrder": "chr1,chr2A,chr2B,chr3,chr4,chr5,chr6,chr7,chr8,chr9,chr10,chr11,chr12,chr13,chr14,chr15,chr16,chr17,chr18,chr19,chr20,chr21,chr22,chrX",
     "tracks": [
       {
         "name": "Refseq Genes",
@@ -119,7 +124,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/panPan2/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/panPan2/refGene.sorted.txt.gz.tbi",
         "removable": false,
-        "order": 1000000
+        "order": 1000000,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -136,7 +142,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/susScr11/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/susScr11/refGene.sorted.txt.gz.tbi",
         "removable": false,
-        "order": 1000000
+        "order": 1000000,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -153,7 +160,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/bosTau8/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/bosTau8/refGene.sorted.txt.gz.tbi",
         "removable": false,
-        "order": 1000000
+        "order": 1000000,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -170,7 +178,8 @@
         "url": "https://s3.amazonaws.com/igv.org.genomes/canFam3/refGene.sorted.txt.gz",
         "indexURL": "https://s3.amazonaws.com/igv.org.genomes/canFam3/refGene.sorted.txt.gz.tbi",
         "removable": false,
-        "order": 1000000
+        "order": 1000000,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -185,10 +194,11 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/rn6/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/rn6/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
-        "supportsWholeGenome": false
+        "supportsWholeGenome": false,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -203,10 +213,11 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/danRer11/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/danRer11/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
-        "supportsWholeGenome": false
+        "supportsWholeGenome": false,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -221,10 +232,11 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/danRer10/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/danRer10/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
-        "supportsWholeGenome": false
+        "supportsWholeGenome": false,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -238,10 +250,11 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/dm6/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/dm6/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
-        "supportsWholeGenome": false
+        "supportsWholeGenome": false,
+        "visibilityWindow": -1
       }
     ]
   },
@@ -255,10 +268,11 @@
       {
         "name": "Refseq Genes",
         "url": "https://s3.amazonaws.com/igv.org.genomes/ce11/refGene.txt.gz",
+        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/ce11/refGene.txt.gz.tbi",
         "order": 1000000,
         "removable": false,
-        "indexed": false,
-        "supportsWholeGenome": false
+        "supportsWholeGenome": false,
+        "visibilityWindow": -1
       }
     ]
   },
