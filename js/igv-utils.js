@@ -579,19 +579,21 @@ var igv = (function (igv) {
         if (info.indexOf('base64') >= 0) {
             dataString = atob(dataString);
         } else {
-            dataString = decodeURI(dataString);
+            dataString = decodeURI(dataString);      // URL encoded string -- not currently used of tested
         }
-
-        // TODO -- test for gzip in info
         const bytes = new Uint8Array(dataString.length);
         for (let i = 0; i < dataString.length; i++) {
             bytes[i] = dataString.charCodeAt(i);
         }
 
-        const inflate = new Zlib.Gunzip(bytes);
-        const plain = inflate.decompress();
-
-        return plain;
+        let plain
+        if(info.indexOf('gzip') > 0) {
+            const inflate = new Zlib.Gunzip(bytes)
+            plain = inflate.decompress()
+        } else {
+            plain = bytes      // This option (uncompressed) is currently not used of tested
+        }
+        return plain
 
     }
 
