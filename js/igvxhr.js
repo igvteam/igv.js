@@ -38,7 +38,11 @@ var igv = (function (igv) {
             if (url instanceof File) {
                 return loadFileSlice(url, options);
             } else {
-                return loadURL.call(this, url, options);
+                if(url.startsWith("data:")) {
+                    return igv.decodeDataURI(url)
+                } else {
+                    return loadURL.call(this, url, options);
+                }
             }
 
         },
