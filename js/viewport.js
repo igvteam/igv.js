@@ -142,6 +142,10 @@ var igv = (function (igv) {
         return $notice;
     }
 
+    igv.Viewport.prototype.isVisible = function () {
+        return this.$viewport.width()
+    }
+
     igv.Viewport.prototype.setWidth = function (width) {
         this.$viewport.outerWidth(width);
         this.canvas.style.width = (this.$viewport.width() + 'px');
