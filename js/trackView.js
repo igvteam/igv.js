@@ -438,7 +438,9 @@ var igv = (function (igv) {
 
         let self = this, promises, rpV, groupAutoscale;
 
-        this.viewports.forEach(function (viewport) {
+        const visibleViewports = this.viewports.filter(vp => vp.isVisible())
+
+        visibleViewports.forEach(function (viewport) {
             viewport.shift();
         });
 
@@ -465,7 +467,7 @@ var igv = (function (igv) {
                 if (!isDragging && self.track.autoscale) {
 
                     var allFeatures = [];
-                    self.viewports.forEach(function (vp) {
+                    visibleViewports.forEach(function (vp) {
                         var referenceFrame, chr, start, end, cache;
                         referenceFrame = vp.genomicState.referenceFrame;
                         start = referenceFrame.start;
@@ -494,7 +496,7 @@ var igv = (function (igv) {
 
                 // Must repaint all viewports if autoscaling
                 if (!isDragging && (self.track.autoscale || self.track.autoscaleGroup)) {
-                    self.viewports.forEach(function (vp) {
+                    visibleViewports.forEach(function (vp) {
                         vp.repaint();
                     })
                 }
@@ -559,9 +561,11 @@ var igv = (function (igv) {
 
         // List of viewports that need reloading
         rpV = this.viewports.filter(function (viewport) {
-
+            if(!viewport.isVisible()) {
+                return false
+            }
             if (!viewport.checkZoomIn()) {
-                return false;
+                return false
             }
             else {
                 var bpPerPixel, referenceFrame, chr, start, end;
