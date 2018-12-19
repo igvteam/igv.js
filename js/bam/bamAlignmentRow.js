@@ -34,7 +34,7 @@ var igv = (function (igv) {
         this.score = undefined;
     };
 
-    igv.BamAlignmentRow.prototype.findCenterAlignment = function (genomicLocation) {
+    igv.BamAlignmentRow.prototype.findAlignment = function (genomicLocation) {
 
         var centerAlignment, a, i;
 
@@ -59,7 +59,7 @@ var igv = (function (igv) {
         return centerAlignment;
 
         function alignmentContains(a, genomicLocation) {
-            return genomicLocation >= a.start && genomicLocation <= a.start + a.lengthOnRef
+            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef
         }
     }
 
@@ -71,7 +71,7 @@ var igv = (function (igv) {
 
     igv.BamAlignmentRow.prototype.calculateScore = function (genomicLocation, interval, sortOption, sortDirection) {
 
-        const alignment = this.findCenterAlignment(genomicLocation);
+        const alignment = this.findAlignment(genomicLocation);
 
         if (undefined === alignment) {
             return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
@@ -82,7 +82,12 @@ var igv = (function (igv) {
             const readBase = alignment.readBaseAt(genomicLocation);
             const quality = alignment.readBaseQualityAt(genomicLocation);
 
-            return  calculateBaseScore(readBase, quality, interval, genomicLocation);
+            if (!readBase) {
+                return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
+            }
+            else {
+                return calculateBaseScore(readBase, quality, interval, genomicLocation);
+            }
 
         } else if ("STRAND" === sortOption) {
 
@@ -96,8 +101,7 @@ var igv = (function (igv) {
         return Number.MAX_VALUE;
 
 
-
-        function calculateBaseScore(base, quality, interval, genomicLocation)  {
+        function calculateBaseScore(base, quality, interval, genomicLocation) {
             var idx,
                 reference,
                 coverage,
@@ -105,16 +109,15 @@ var igv = (function (igv) {
                 phred;
 
 
-
             idx = Math.floor(genomicLocation) - interval.start;
-            if(idx < interval.sequence.length) {
+            if (idx < interval.sequence.length) {
                 reference = interval.sequence.charAt(idx);
             }
-            if(!reference) {
+            if (!reference) {
                 return undefined;
             }
 
-            if(undefined === base) {
+            if (undefined === base) {
                 return Number.MAX_VALUE;
             }
             if ('N' === base) {
@@ -127,14 +130,14 @@ var igv = (function (igv) {
 
                 idx = Math.floor(genomicLocation) - interval.coverageMap.bpStart;
 
-                if(idx > 0 && idx < interval.coverageMap.coverage.length) {
+                if (idx > 0 && idx < interval.coverageMap.coverage.length) {
 
                     coverage = interval.coverageMap.coverage[idx];
                     count = coverage["pos" + base] + coverage["neg" + base];
 
-                    return - (count + (quality / 1000));
+                    return -(count + (quality / 1000));
                 } else {
-                    return - (1 + quality / 1000);
+                    return -(1 + quality / 1000);
                 }
             }
 
