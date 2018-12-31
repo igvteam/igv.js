@@ -139,26 +139,7 @@ var igv = (function (igv) {
 
             var self = this;
 
-
-            // If no samples are defined, optionally query feature source.  This step was added to support the TCGA BigQuery
-            // if (self.sampleCount === 0 && (typeof self.featureSource.reader.allSamples == "function")) {
-            //
-            //     return self.featureSource.reader.allSamples()
-            //
-            //         .then(function (samples) {
-            //
-            //             samples.forEach(function (sampleKey) {
-            //                 self.samples[sampleKey] = self.sampleCount;
-            //                 self.sampleKeys.push(sampleKey);
-            //                 self.sampleCount++;
-            //             })
-            //
-            //             return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-            //         });
-            // }
-            // else {
             return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-            // }
 
         };
 
@@ -219,8 +200,9 @@ var igv = (function (igv) {
                     if (segment.end < bpStart) continue;
                     if (segment.start > bpEnd) break;
 
-                    segment.row = samples[segment.sampleKey];
-                    const y = samples[segment.sampleKey] * sampleHeight + border;
+                    const sampleKey = segment.sampleKey || segment.sample
+                    segment.row = samples[sampleKey];
+                    const y = samples[sampleKey] * sampleHeight + border;
 
                     let value = segment.value;
                     if (!self.isLog) {
@@ -274,7 +256,7 @@ var igv = (function (igv) {
 
             function checkForLog(featureList) {
 
-                if (self.isLog === undefined && featureList.length > 10) {
+                if (self.isLog === undefined) {
                     self.isLog = false;
                     for (let feature of featureList) {
                         if (feature.value < 0) {
@@ -332,8 +314,9 @@ var igv = (function (igv) {
                         const max = Math.min(bpEnd, segment.end);
                         const f = (max - min) / bpLength;
 
-                        const s = scores[segment.sampleKey] || 0;
-                        scores[segment.sampleKey] = s + f * segment.value;
+                        const sampleKey = segment.sampleKey || segment.sample
+                        const s = scores[sampleKey] || 0;
+                        scores[sampleKey] = s + f * segment.value;
 
                     }
 
@@ -451,7 +434,7 @@ var igv = (function (igv) {
 
             for (let feature of featureList) {
 
-                const sampleKey = feature.sampleKey;
+                const sampleKey = feature.sampleKey || feature.sample;
                 if (!samples.has(sampleKey)) {
                     samples.add(sampleKey);
                     this.sampleKeys.push(sampleKey);
