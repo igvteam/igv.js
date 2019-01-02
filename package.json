@@ -37,8 +37,8 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "@babel/core": "^7.2.0",
-    "@babel/preset-env": "^7.2.0",
+    "@babel/core": "^7.2.2",
+    "@babel/preset-env": "^7.2.3",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "grunt": "^1.0.3",
     "grunt-babel": "^8.0.0",
