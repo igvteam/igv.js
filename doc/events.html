@@ -42,8 +42,6 @@
                             <dl class="dl-horizontal">
                                 <dt>referenceFrame</dt>
                                 <dd>{object} frame state</dd>
-                                <dt>label</dt>
-                                <dd>{string} human-readable coordinates</dd>
                             </dl>
                         </div>
                     </td>
@@ -113,8 +111,8 @@
 
     var browser = igv.createBrowser(div, options);
 
-    var onLocusChange = function (referenceFrame, label) {
-        alert("Locus changed to: " + label);
+    var onLocusChange = function (referenceFrame) {
+        alert("Locus changed to: " + referenceFrame.label);
     };
 
     browser.on("locuschange", onLocusChange);

@@ -1081,7 +1081,7 @@ var igv = (function (igv) {
                     this.$searchInput.val(str);
                 }
 
-                this.fireEvent('locuschange', [referenceFrame, str]);
+                this.fireEvent('locuschange', [{chr: referenceFrame.chrName, start: ss, end: ee, label: str}]);
             }
 
         } else {
