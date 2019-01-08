@@ -28,9 +28,7 @@
  */
 var igv = (function (igv) {
 
-    igv.TrackGearPopover = function ($parent, browser) {
-
-        this.browser = browser;
+    igv.TrackGearPopover = function ($parent) {
 
         // popover container
         this.$popover = $('<div>', { class: 'igv-trackgear-popover' });
@@ -42,16 +40,17 @@ var igv = (function (igv) {
 
         let self = this;
         igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
-            self.$popover().hide();
+            self.$popover.hide();
         });
 
         this.$popoverContent = $('<div>');
         this.$popover.append(this.$popoverContent);
 
-        igv.makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
+        dragElement(this.$popover.get(0), $popoverHeader.get(0));
+
     };
 
-    igv.TrackGearPopover.prototype.presentMenuList = function (pageX, pageY, menuItemList) {
+    igv.TrackGearPopover.prototype.presentMenuList = function (dx, dy, menuItemList) {
 
         var self = this,
             $container;
@@ -74,7 +73,7 @@ var igv = (function (igv) {
                 $container.append(item.object);
             });
 
-            this.$popover.css({ left: (pageX + 'px'), top: (pageY + 'px') });
+            this.$popover.css({ left: (dx + 'px'), top: (dy + 'px') });
             this.$popover.show();
 
         }
@@ -87,6 +86,45 @@ var igv = (function (igv) {
             this[key] = undefined;
         })
     };
+
+    function dragElement(element, handle) {
+        let pos1 = 0;
+        let pos2 = 0;
+        let pos3 = 0;
+        let pos4 = 0;
+
+        handle.onmousedown = dragMouseDown;
+
+        function dragMouseDown(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // get the mouse cursor position at startup:
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            document.onmouseup = closeDragElement;
+            // call a function whenever the cursor moves:
+            document.onmousemove = elementDrag;
+        }
+
+        function elementDrag(e) {
+            e = e || window.event;
+            e.preventDefault();
+            // calculate the new cursor position:
+            pos1 = pos3 - e.clientX;
+            pos2 = pos4 - e.clientY;
+            pos3 = e.clientX;
+            pos4 = e.clientY;
+            // set the element's new position:
+            element.style.top = (element.offsetTop - pos2) + "px";
+            element.style.left = (element.offsetLeft - pos1) + "px";
+        }
+
+        function closeDragElement() {
+            // stop moving when mouse button is released:
+            document.onmouseup = null;
+            document.onmousemove = null;
+        }
+    }
 
     return igv;
 
