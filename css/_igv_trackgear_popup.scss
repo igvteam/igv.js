@@ -5,8 +5,6 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 .igv-trackgear-popover {
 
   position: absolute;
-  top: 0;
-  left: 0;
 
   min-width: 128px;
 
@@ -27,6 +25,8 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
 .igv-trackgear-popover-header {
 
+  position: relative;
+
   width: 100%;
   height: 20px;
 
@@ -39,7 +39,6 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   background-color: #eee;
 
   div {
-
     position: absolute;
     top: 3px;
     right: 3px;

@@ -207,14 +207,14 @@ var igv = (function (igv) {
         let $cog = igv.createIcon('cog', 'grey');
         $cogContainer.append( $cog );
 
-        this.trackGearPopover = new igv.TrackGearPopover($cogContainer, this.browser);
+        this.trackGearPopover = new igv.TrackGearPopover($parent);
         this.trackGearPopover.$popover.hide();
 
         let self = this;
         $cogContainer.click(function (e) {
             const page = igv.pageCoordinates(e);
             // page.x, page.y
-            self.trackGearPopover.presentMenuList(0, 0, igv.trackMenuItemList(self.browser.popover, self), self.browser);
+            self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
         });
 
     }
