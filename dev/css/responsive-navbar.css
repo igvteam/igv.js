@@ -2,7 +2,7 @@
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: center;
+  justify-content: flex-start;
   background-color: rgba(0, 255, 0, 0.18);
   border-color: rgba(0, 207, 0, 0.69);
   border-style: solid;
