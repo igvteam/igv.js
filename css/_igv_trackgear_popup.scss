@@ -1,0 +1,63 @@
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+.igv-trackgear-popover {
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  min-width: 128px;
+
+  z-index: 4096;
+
+  font-family: $igv-trackgear-default-font-face;
+  font-size: small;
+  font-weight: 400;
+  color: #444;
+
+  background: white;
+
+  border-radius: $igv-trackgear-popover-border-radius;
+  border-color: $igv-trackgear-grey-color;
+  border-style: solid;
+  border-width: thin;
+}
+
+.igv-trackgear-popover-header {
+
+  width: 100%;
+  height: 20px;
+
+  border-top-left-radius: $igv-trackgear-popover-border-radius;
+  border-top-right-radius: $igv-trackgear-popover-border-radius;
+  border-bottom-color: $igv-trackgear-grey-color;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+
+  background-color: #eee;
+
+  div {
+
+    position: absolute;
+    top: 3px;
+    right: 3px;
+
+    height: 100%;
+    width: 16px;
+
+    text-align: center;
+    line-height: 100%;
+
+    cursor: pointer;
+    color: #444;
+    font-size: small;
+
+  }
+
+  div:hover {
+    color: white;
+  }
+
+}

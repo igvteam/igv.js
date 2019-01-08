@@ -1,6 +1,7 @@
 
 @import "igv-colorpicker";
 @import "igv-generic-container";
+@import "igv_trackgear_popup";
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
@@ -734,20 +735,18 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   background: white;
   text-align: center;
 
-  i {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .igv-cog-container {
+    position: relative;
+
     padding-right: 6px;
+
     font-size: 20px;
-    cursor: pointer;
     color: grey;
   }
 
-  i:hover,
-  i:focus,
-  i:active  {
-    color: rgba(51, 51, 51, 1);
+  .igv-cog-container:hover {
+    cursor: pointer;
+    color: red;
   }
 
 }
@@ -768,6 +767,8 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 // track menu
 .igv-track-menu-container {
 
+  all: unset;
+
   background-color: white;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px;
@@ -778,10 +779,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
     padding-top: 2px;
     padding-bottom: 2px;
     background-color: white;
-
-    i {
-      padding-right: 2px;
-    }
 
   }
 
@@ -797,6 +794,10 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
     text-decoration: none;
   }
 
+}
+
+i.igv-track-menu-icon {
+  padding-right: 2px;
 }
 
 .igv-track-menu-border-top {
@@ -1502,8 +1503,14 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   z-index: 512;
 }
 
+.igv-fa-check-visible {
+  color: inherit;
+  padding-right: 2px;
+}
+
 .igv-fa-check-hidden {
-  color: rgba(255, 255, 255, 0);
+  color: transparent;
+  padding-right: 2px;
 }
 
 .validateTips {

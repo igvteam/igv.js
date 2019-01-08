@@ -275,7 +275,7 @@ var igv = (function (igv) {
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
             if (self.pairsSupported && self.alignmentTrack.hasPairs) {
-                
+
                 menuItems.push({
                     object: igv.createCheckbox("View as pairs", self.viewAsPairs),
                     click: function () {
@@ -286,7 +286,9 @@ var igv = (function (igv) {
 
                         if (true === self.viewAsPairs) {
                             $fa.removeClass('igv-fa-check-hidden');
+                            $fa.addClass('igv-fa-check-visible');
                         } else {
+                            $fa.removeClass('igv-fa-check-visible');
                             $fa.addClass('igv-fa-check-hidden');
                         }
 
@@ -307,7 +309,9 @@ var igv = (function (igv) {
 
                     if (true === self.showSoftClips) {
                         $fa.removeClass('igv-fa-check-hidden');
+                        $fa.addClass('igv-fa-check-visible');
                     } else {
+                        $fa.removeClass('igv-fa-check-visible');
                         $fa.addClass('igv-fa-check-hidden');
                     }
 
