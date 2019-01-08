@@ -67,6 +67,45 @@
       cursor: pointer;
       color: #0f0f0f; }
 
+.igv-trackgear-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 128px;
+  z-index: 4096;
+  font-family: "Open Sans", sans-serif;
+  font-size: small;
+  font-weight: 400;
+  color: #444;
+  background: white;
+  border-radius: 4px;
+  border-color: #7F7F7F;
+  border-style: solid;
+  border-width: thin; }
+
+.igv-trackgear-popover-header {
+  width: 100%;
+  height: 20px;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  background-color: #eee; }
+  .igv-trackgear-popover-header div {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    height: 100%;
+    width: 16px;
+    text-align: center;
+    line-height: 100%;
+    cursor: pointer;
+    color: #444;
+    font-size: small; }
+  .igv-trackgear-popover-header div:hover {
+    color: white; }
+
 .igvControlDiv {
   position: relative; }
 
@@ -518,18 +557,14 @@
   height: 100%;
   background: white;
   text-align: center; }
-  .igv-right-hand-gutter i {
-    position: absolute;
-    top: 0;
-    right: 0;
+  .igv-right-hand-gutter .igv-cog-container {
+    position: relative;
     padding-right: 6px;
     font-size: 20px;
-    cursor: pointer;
     color: grey; }
-  .igv-right-hand-gutter i:hover,
-  .igv-right-hand-gutter i:focus,
-  .igv-right-hand-gutter i:active {
-    color: #333333; }
+  .igv-right-hand-gutter .igv-cog-container:hover {
+    cursor: pointer;
+    color: red; }
 
 .igv-left-hand-gutter {
   position: absolute;
@@ -540,6 +575,7 @@
     position: absolute; }
 
 .igv-track-menu-container {
+  all: unset;
   background-color: white;
   border-bottom-left-radius: 4px;
   border-bottom-right-radius: 4px; }
@@ -549,8 +585,6 @@
     padding-top: 2px;
     padding-bottom: 2px;
     background-color: white; }
-    .igv-track-menu-container div i {
-      padding-right: 2px; }
   .igv-track-menu-container div:hover,
   .igv-track-menu-container div:focus,
   .igv-track-menu-container div:active {
@@ -559,6 +593,9 @@
   .igv-track-menu-container a {
     color: inherit;
     text-decoration: none; }
+
+i.igv-track-menu-icon {
+  padding-right: 2px; }
 
 .igv-track-menu-border-top {
   border-top-color: #a2a2a2;
@@ -1067,8 +1104,13 @@
   font-size: 24px;
   z-index: 512; }
 
+.igv-fa-check-visible {
+  color: inherit;
+  padding-right: 2px; }
+
 .igv-fa-check-hidden {
-  color: rgba(255, 255, 255, 0); }
+  color: transparent;
+  padding-right: 2px; }
 
 .validateTips {
   border: 1px solid transparent;

@@ -192,23 +192,30 @@ var igv = (function (igv) {
 
     function appendRightHandGutter($parent) {
 
-        var self = this,
-            $gearButton, $fa;
+        let $div = $('<div class="igv-right-hand-gutter">');
+        $parent.append($div);
 
-        const browser = this.browser;
+        createTrackGearPopover.call(this, $div);
+    }
 
-        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-        $parent.append($(this.rightHandGutter));
 
-        $gearButton = igv.createWrappedIcon("cog");
-        $(this.rightHandGutter).append($gearButton);
+    function createTrackGearPopover($parent) {
 
-        $gearButton.click(handleClick);
+        let $cogContainer = $("<div>", { class:'igv-cog-container' });
+        $parent.append($cogContainer);
 
-        function handleClick(e) {
+        let $cog = igv.createIcon('cog', 'grey');
+        $cogContainer.append( $cog );
+
+        this.trackGearPopover = new igv.TrackGearPopover($cogContainer, this.browser);
+        this.trackGearPopover.$popover.hide();
+
+        let self = this;
+        $cogContainer.click(function (e) {
             const page = igv.pageCoordinates(e);
-            browser.popover.presentTrackGearMenu(page.x, page.y, self, browser);
-        }
+            // page.x, page.y
+            self.trackGearPopover.presentMenuList(0, 0, igv.trackMenuItemList(self.browser.popover, self), self.browser);
+        });
 
     }
 
