@@ -85,7 +85,7 @@ var igv = (function (igv) {
         this.style.left = styleX + "px";
         this.style.top = styleY + "px";
 
-        console.log('drag ' + 'x ' + styleX + ' y ' + styleY);
+        // console.log('drag ' + 'x ' + styleX + ' y ' + styleY);
     }
 
     function dragEnd(event) {
@@ -102,7 +102,7 @@ var igv = (function (igv) {
         const styleX = dragData.dx + event.screenX;
         const styleY = dragData.dy + event.screenY;
 
-        console.log('drag end ' + 'x ' + styleX + ' y ' + styleY);
+        // console.log('drag end ' + 'x ' + styleX + ' y ' + styleY);
 
         this.style.left = styleX + "px";
         this.style.top = styleY + "px";
