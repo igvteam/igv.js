@@ -1,4 +1,15 @@
 
+* {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+}
+
+svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
+
 @import "igv-colorpicker";
 @import "igv-generic-container";
 @import "igv_trackgear_popup";

@@ -1,3 +1,12 @@
+* {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important; }
+
+svg {
+  max-width: 100% !important;
+  height: auto !important; }
+
 .igv-color-swatch {
   display: flex;
   flex-flow: row;
@@ -120,6 +129,9 @@
   .igv-trackgear-popover-check-container div:first-child {
     width: 12px;
     height: 12px; }
+    .igv-trackgear-popover-check-container div:first-child svg {
+      max-width: 100%;
+      height: auto; }
 
 .igvControlDiv {
   position: relative; }
