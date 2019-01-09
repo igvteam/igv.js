@@ -52,7 +52,6 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     cursor: pointer;
     color: #444;
     font-size: small;
-
   }
 
   div:hover {
@@ -80,8 +79,15 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   }
 
   div:first-child {
+
     width: 12px;
     height: 12px;
+
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
   }
 
 }
