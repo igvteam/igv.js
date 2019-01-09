@@ -105,6 +105,22 @@
   .igv-trackgear-popover-header div:hover {
     color: white; }
 
+.igv-trackgear-popover-check-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  background-color: transparent; }
+  .igv-trackgear-popover-check-container div {
+    padding-top: 2px;
+    padding-left: 8px; }
+  .igv-trackgear-popover-check-container div:first-child {
+    width: 12px;
+    height: 12px; }
+
 .igvControlDiv {
   position: relative; }
 

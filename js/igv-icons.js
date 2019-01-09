@@ -32,7 +32,6 @@
 
 var igv = (function (igv) {
 
-
     igv.createIcon = function (name, color) {
         return $(iconMarkup(name, color));
     };
@@ -44,7 +43,7 @@ var igv = (function (igv) {
         return wrapper;
     };
 
-    igv.createCheckbox = function (name, initialState) {
+    igv.DEPRICATED_createCheckbox = function (name, initialState) {
 
         var html = [];
         html.push("<div>");
@@ -57,16 +56,33 @@ var igv = (function (igv) {
         return $(html.join(''));
     };
 
+    igv.createCheckbox = function (name, initialState) {
+
+        let $container = $('<div>', { class: 'igv-trackgear-popover-check-container' });
+
+        let $div = $('<div>');
+        $container.append($div);
+
+        let $svg = iconMarkup('check', (true === initialState ? '#444' : 'transparent'));
+        $div.append($svg);
+
+        let $label = $('<div>'/*, { class: 'igv-some-label-class' }*/);
+        $label.text(name);
+        $container.append($label);
+
+        return $container;
+    };
+
     function iconMarkup(name, color) {
 
-        var icon = icons[name];
-        var width = icon[0];
-        var height = icon[1];
-        var data = icon[4];
-
+        let icon = icons[name];
         color = color || "currentColor";
 
-        return '<svg ' + 'class="svg-inline--fa5" ' + 'viewBox="0 0 ' + width + ' ' + height + '">' + '<path fill="' + color + '" ' + 'd="' + data + '">' + '</path></svg>';
+        let svg = '<svg ' + 'viewBox="0 0 ' + icon[ 0 ] + ' ' + icon[ 1 ] + '">';
+        svg += '<path fill="' + color + '" ' + 'd="' + icon[ 4 ] + '">' + '</path>';
+        svg += '</svg>';
+
+        return svg;
 
     }
 
@@ -692,6 +708,3 @@ var igv = (function (igv) {
     return igv
 
 })(igv || {});
-
-// <svg class="svg-inline--fa fa-plus-circle fa-w-16" aria-hidden="true" data-prefix="fa" data-icon="plus-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"></path></svg>
-// <svg class="svg-inline--fa fa-spinner fa-w-16 fa-fw fa-spin" style="" aria-hidden="true" data-prefix="fa" data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path></svg>
