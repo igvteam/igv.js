@@ -30,45 +30,41 @@ var igv = (function (igv) {
 
     igv.UserFeedback = function ($parent) {
 
-        var myself = this;
-
-        this.userFeedback = $('<div class="igv-user-feedback">');
-        $parent.append(this.userFeedback[0]);
+        this.$userFeedback = $('<div class="igv-user-feedback">');
+        $parent.append(this.$userFeedback);
 
         // header
-        this.userFeedbackHeader = $('<div>');
-        this.userFeedback.append(this.userFeedbackHeader[0]);
+        let $userFeedbackHeader = $('<div>');
+        this.$userFeedback.append($userFeedbackHeader);
 
         // alert
-        this.userFeedbackAlert = igv.createWrappedIcon("exclamation-triangle");
-        this.userFeedbackHeader.append(this.userFeedbackAlert[0]);
+        $userFeedbackHeader.append( igv.createIcon("exclamation-triangle") );
 
         // dismiss
-        this.userFeedbackDismiss = $('<div>');
-        this.userFeedback.append(igv.createWrappedIcon("times-circle"));
-        this.userFeedbackHeader.append(this.userFeedbackDismiss[0]);
+        let $userFeedbackDismiss = $('<div>');
+        $userFeedbackHeader.append($userFeedbackDismiss);
 
-        this.userFeedbackDismiss.click(function () {
-            myself.userFeedbackBodyCopy.html("");
-            myself.userFeedback.hide();
-        });
+        $userFeedbackDismiss.append(igv.createWrappedIcon("times-circle"));
 
         // copy
-        this.userFeedbackBodyCopy = $('<div>');
-        this.userFeedback.append(this.userFeedbackBodyCopy[0]);
+        let $userFeedbackBodyCopy = $('<div>');
+        this.$userFeedback.append($userFeedbackBodyCopy);
+        $userFeedbackBodyCopy.text('i am user feedback');
+
+        let self;
+        $userFeedbackDismiss.click(function () {
+            $userFeedbackBodyCopy.html("");
+            self.$userFeedback.hide();
+        });
 
     };
 
     igv.UserFeedback.prototype.show = function () {
-        this.userFeedback.show();
+        this.$userFeedback.show();
     };
 
     igv.UserFeedback.prototype.hide = function () {
-        this.userFeedback.hide();
-    };
-
-    igv.UserFeedback.prototype.bodyCopy = function (htmlString) {
-        this.userFeedbackBodyCopy.html(htmlString);
+        this.$userFeedback.hide();
     };
 
     return igv;
