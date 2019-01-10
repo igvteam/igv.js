@@ -63,12 +63,10 @@ var igv = (function (igv) {
 
         $viewport.addClass('igv-viewport-ruler');
 
-        $close = $('<div class="igv-viewport-fa-close">');
+        $close = $('<div class="igv-multi-locus-panel-close-container">');
         $viewport.append($close);
 
-        $closeButton = $('<div>');
-        $closeButton.append(igv.createIcon("times-circle"));
-        $close.append($closeButton);
+        $close.append(igv.createIcon("times-circle"));
 
         $close.click(function (e) {
             browser.removeMultiLocusPanelWithGenomicState(genomicState, true);

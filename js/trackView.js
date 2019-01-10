@@ -147,10 +147,10 @@ var igv = (function (igv) {
             $viewport = viewport.$viewport;
 
             if (self.viewports.length > 1) {
-                $viewport.find('.igv-viewport-fa-close').show();
+                $viewport.find('.igv-multi-locus-panel-close-container').show();
                 $viewport.find('.igv-viewport-content-ruler-div').show();
             } else {
-                $viewport.find('.igv-viewport-fa-close').hide();
+                $viewport.find('.igv-multi-locus-panel-close-container').hide();
                 $viewport.find('.igv-viewport-content-ruler-div').hide();
             }
 
@@ -204,8 +204,7 @@ var igv = (function (igv) {
         let $cogContainer = $("<div>", { class:'igv-cog-container' });
         $parent.append($cogContainer);
 
-        let $cog = igv.createIcon('cog', 'grey');
-        $cogContainer.append( $cog );
+        $cogContainer.append( igv.createIcon('cog', 'grey') );
 
         this.trackGearPopover = new igv.TrackGearPopover($parent);
         this.trackGearPopover.$popover.hide();
