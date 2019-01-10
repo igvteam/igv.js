@@ -114,29 +114,25 @@ var igv = (function (igv) {
 
     igv.attachDialogCloseHandlerWithParent = function ($parent, closeHandler) {
 
-        var $container,
-            $fa;
-
-        $container = $('<div>');
+        var $container = $('<div>');
         $parent.append($container);
 
-        $fa = igv.createIcon("times");
-        $container.append($fa);
+        $container.append(igv.createIcon("times"));
 
-        $fa.on('click', closeHandler);
-        $fa.on('touchend', closeHandler);
+        $container.on('click', closeHandler);
+        $container.on('touchend', closeHandler);
 
-        $fa.on('mousedown', function (e) {
+        $container.on('mousedown', function (e) {
             e.stopPropagation();
-        })
+        });
 
-        $fa.on('mouseup', function (e) {
+        $container.on('mouseup', function (e) {
             e.stopPropagation();
-        })
+        });
 
-        $fa.on('touchstart', function (e) {
+        $container.on('touchstart', function (e) {
             e.stopPropagation();
-        })
+        });
 
     };
 

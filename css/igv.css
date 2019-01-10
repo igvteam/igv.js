@@ -513,15 +513,16 @@ svg {
   border-right-style: solid;
   border-right-width: 1px; }
 
-.igv-viewport-fa-close {
+.igv-multi-locus-panel-close-container {
   position: absolute;
   top: 4px;
   right: 4px;
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
   color: #666666;
   z-index: 1000; }
 
-.igv-viewport-fa-close:hover {
+.igv-multi-locus-panel-close-container:hover {
   cursor: pointer;
   color: #434343; }
 
@@ -563,12 +564,14 @@ svg {
   text-align: center; }
 
 .igv-viewport-spinner {
-  pointer-events: none;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1024;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
   color: #737373; }
 
 .igv-ruler-sweeper-div {
