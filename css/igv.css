@@ -91,6 +91,11 @@ svg {
   border-width: thin; }
 
 .igv-trackgear-popover-header {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
   position: relative;
   width: 100%;
   height: 20px;
@@ -101,18 +106,13 @@ svg {
   border-bottom-width: thin;
   background-color: #eee; }
   .igv-trackgear-popover-header div {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    height: 100%;
-    width: 16px;
-    text-align: center;
-    line-height: 100%;
-    cursor: pointer;
-    color: #444;
-    font-size: small; }
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: #444; }
   .igv-trackgear-popover-header div:hover {
-    color: white; }
+    cursor: pointer;
+    color: #444; }
 
 .igv-trackgear-popover-check-container {
   display: flex;
@@ -586,12 +586,12 @@ svg {
   text-align: center; }
   .igv-right-hand-gutter .igv-cog-container {
     position: relative;
-    padding-right: 6px;
-    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
     color: grey; }
   .igv-right-hand-gutter .igv-cog-container:hover {
-    cursor: pointer;
-    color: red; }
+    cursor: pointer; }
 
 .igv-left-hand-gutter {
   position: absolute;
@@ -600,26 +600,6 @@ svg {
   height: 100%; }
   .igv-left-hand-gutter canvas {
     position: absolute; }
-
-.igv-track-menu-container {
-  background-color: white;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px; }
-  .igv-track-menu-container div {
-    padding-left: 4px;
-    padding-right: 4px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: white; }
-  .igv-track-menu-container div:hover {
-    cursor: pointer;
-    background-color: #efefef; }
-  .igv-track-menu-container a {
-    color: inherit;
-    text-decoration: none; }
-
-i.igv-track-menu-icon {
-  padding-right: 2px; }
 
 .igv-track-menu-border-top {
   border-top-color: #a2a2a2;
