@@ -25,6 +25,12 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
 .igv-trackgear-popover-header {
 
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+
   position: relative;
 
   width: 100%;
@@ -39,23 +45,15 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   background-color: #eee;
 
   div {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-
-    height: 100%;
-    width: 16px;
-
-    text-align: center;
-    line-height: 100%;
-
-    cursor: pointer;
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
     color: #444;
-    font-size: small;
   }
 
   div:hover {
-    color: white;
+    cursor: pointer;
+    color: #444;
   }
 
 }

@@ -748,16 +748,14 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
   .igv-cog-container {
     position: relative;
-
-    padding-right: 6px;
-
-    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-left: 4px;
     color: grey;
   }
 
   .igv-cog-container:hover {
     cursor: pointer;
-    color: red;
   }
 
 }
@@ -773,38 +771,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
     position: absolute;
   }
 
-}
-
-// track menu
-.igv-track-menu-container {
-
-  background-color: white;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-
-  div {
-    padding-left: 4px;
-    padding-right: 4px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: white;
-
-  }
-
-  div:hover {
-    cursor: pointer;
-    background-color: rgb(239, 239, 239);
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
-  }
-
-}
-
-i.igv-track-menu-icon {
-  padding-right: 2px;
 }
 
 .igv-track-menu-border-top {
