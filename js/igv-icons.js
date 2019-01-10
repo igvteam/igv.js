@@ -32,15 +32,15 @@
 
 var igv = (function (igv) {
 
-    igv.createIcon = function (name, color) {
-        return $(iconMarkup(name, color));
-    };
-
     igv.createWrappedIcon = function (name, color) {
         var svg = igv.createIcon(name, color);
         var wrapper = $('<i>');
         wrapper.append(svg);
         return wrapper;
+    };
+
+    igv.createIcon = function (name, color) {
+        return $(iconMarkup(name, color));
     };
 
     igv.createCheckbox = function (name, initialState) {
