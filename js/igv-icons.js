@@ -43,19 +43,6 @@ var igv = (function (igv) {
         return wrapper;
     };
 
-    igv.DEPRICATED_createCheckbox = function (name, initialState) {
-
-        var html = [];
-        html.push("<div>");
-        html.push(true === initialState ? '<i class="igv-fa-check-visible">' : '<i class="igv-fa-check-hidden">');
-        html.push(iconMarkup("check"));
-        html.push('</i>');
-        html.push(name);
-        html.push('</div>');
-        var str = html.join('');
-        return $(html.join(''));
-    };
-
     igv.createCheckbox = function (name, initialState) {
 
         let $container = $('<div>', { class: 'igv-trackgear-popover-check-container' });
@@ -75,9 +62,9 @@ var igv = (function (igv) {
 
     function iconMarkup(name, color) {
 
-        let icon = icons[name];
         color = color || "currentColor";
 
+        let icon = icons[name];
         let svg = '<svg ' + 'viewBox="0 0 ' + icon[ 0 ] + ' ' + icon[ 1 ] + '">';
         svg += '<path fill="' + color + '" ' + 'd="' + icon[ 4 ] + '">' + '</path>';
         svg += '</svg>';
