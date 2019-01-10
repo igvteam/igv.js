@@ -283,10 +283,11 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
       background-color: white;
     }
 
-    // search icon
+    // search icon container
     div {
-      height: 100%;
-
+      cursor: pointer;
+      height: 16px;
+      width: 16px;
     }
 
   }
@@ -363,13 +364,15 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
     }
 
     div:first-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: unset;
       margin-right: 8px;
     }
 
     div:last-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: 8px;
       margin-right: unset;
     }

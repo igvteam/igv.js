@@ -80,6 +80,7 @@ svg {
   position: absolute;
   min-width: 128px;
   z-index: 4096;
+  cursor: pointer;
   font-family: "Open Sans", sans-serif;
   font-size: small;
   font-weight: 400;
@@ -273,7 +274,9 @@ svg {
       border-color: #bfbfbf;
       background-color: white; }
     .igv-locus-size-group .igv-search-container div {
-      height: 100%; }
+      cursor: pointer;
+      height: 16px;
+      width: 16px; }
   .igv-locus-size-group .igv-windowsizepanel-content-div {
     margin-left: 4px;
     user-select: none; }
@@ -320,11 +323,13 @@ svg {
       margin-left: unset;
       margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: unset;
       margin-right: 8px; }
     .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: 8px;
       margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:nth-child(even) {
