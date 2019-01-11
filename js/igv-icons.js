@@ -33,10 +33,12 @@
 var igv = (function (igv) {
 
     igv.createWrappedIcon = function (name, color) {
-        var svg = igv.createIcon(name, color);
-        var wrapper = $('<i>');
-        wrapper.append(svg);
-        return wrapper;
+
+        let $svg = igv.createIcon(name, color);
+
+        let $wrapper = $('<i>');
+        $wrapper.append($svg);
+        return $wrapper;
     };
 
     igv.createCheckbox = function (name, initialState) {

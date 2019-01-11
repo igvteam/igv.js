@@ -146,11 +146,11 @@ svg {
     width: 100%;
     height: 24px;
     cursor: move;
-    border-color: #c4c4c4;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
-    border-style: solid;
-    border-width: thin;
+    border-bottom-color: #7F7F7F;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
     background-color: #c4c4c4;
     display: flex;
     flex-flow: row;
@@ -161,12 +161,10 @@ svg {
       height: 24px;
       width: 16px;
       margin-right: 6px;
-      text-align: center;
-      line-height: 24px;
-      color: #444;
-      font-size: medium; }
+      color: #444; }
     .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
-      cursor: pointer; }
+      cursor: pointer;
+      color: white; }
   .igv-generic-dialog-container .igv-generic-dialog-one-liner {
     color: #373737;
     width: 95%;
@@ -1037,29 +1035,27 @@ svg {
   display: none; }
 
 .igv-popover-header {
-  position: relative;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 20px;
+  height: 24px;
+  cursor: move;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
   border-bottom-color: #7F7F7F;
   border-bottom-style: solid;
   border-bottom-width: thin;
-  background-color: #eee; }
+  background-color: #c4c4c4;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center; }
   .igv-popover-header div {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    height: 100%;
+    height: 24px;
     width: 16px;
-    text-align: center;
-    line-height: 100%;
-    cursor: pointer;
-    color: #444;
-    font-size: small; }
+    margin-right: 6px;
+    color: #444; }
   .igv-popover-header div:hover {
+    cursor: pointer;
     color: white; }
 
 .igv-popover-track-popup-content {
