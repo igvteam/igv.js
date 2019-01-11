@@ -104,7 +104,6 @@ svg {
   justify-content: flex-start;
   align-items: center; }
   .igv-generic-container div:first-child {
-    padding-right: 8px;
     cursor: move;
     display: flex;
     flex-flow: row;
@@ -114,16 +113,196 @@ svg {
     height: 24px;
     width: 100%;
     background-color: #dddddd; }
-    .igv-generic-container div:first-child i.fa {
-      cursor: pointer;
-      margin-right: 4px;
+    .igv-generic-container div:first-child i {
       display: block;
-      color: #5f5f5f; }
-    .igv-generic-container div:first-child i.fa:hover,
-    .igv-generic-container div:first-child i.fa:focus,
-    .igv-generic-container div:first-child i.fa:active {
+      color: #5f5f5f;
       cursor: pointer;
-      color: #0f0f0f; }
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      margin-bottom: 4px; }
+
+.igv-generic-dialog-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 200px;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  border-color: #7F7F7F;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+  z-index: 2048;
+  background-color: white;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-generic-dialog-container .igv-generic-dialog-header {
+    width: 100%;
+    height: 24px;
+    cursor: move;
+    border-color: #c4c4c4;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-style: solid;
+    border-width: thin;
+    background-color: #c4c4c4;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div {
+      height: 24px;
+      width: 16px;
+      margin-right: 6px;
+      text-align: center;
+      line-height: 24px;
+      color: #444;
+      font-size: medium; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
+      cursor: pointer; }
+  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
+    color: #373737;
+    width: 95%;
+    height: 24px;
+    line-height: 24px;
+    text-align: left;
+    margin-top: 8px;
+    padding-left: 8px;
+    overflow-wrap: break-word;
+    background-color: white; }
+  .igv-generic-dialog-container .igv-generic-dialog-label-input {
+    margin-top: 8px;
+    width: 95%;
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    padding-left: 8px;
+    background-color: white;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
+      width: 30%;
+      height: 100%;
+      font-size: 16px;
+      text-align: right;
+      padding-right: 8px;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      width: 50%;
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-input {
+    margin-top: 8px;
+    width: calc(100% - 16px);
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
+      margin-top: 32px;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      width: 75px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-color: transparent;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 2px; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
+      margin-left: 32px;
+      margin-right: 0;
+      background-color: #5ea4e0; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
+      margin-left: 0;
+      margin-right: 32px;
+      background-color: #c4c4c4; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
+      cursor: pointer;
+      background-color: #3b5c7f; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
+      cursor: pointer;
+      background-color: #7f7f7f; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok {
+    width: 100%;
+    height: 36px;
+    margin-top: 32px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div {
+      width: 98px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: medium;
+      font-weight: 400;
+      border-color: white;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+      background-color: #2B81AF; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {
+      cursor: pointer;
+      background-color: #25597f; }
 
 .igv-trackgear-popover {
   position: absolute;
@@ -575,27 +754,23 @@ svg {
   cursor: pointer;
   color: #434343; }
 
-.igv-viewport-content-ruler-div {
+.igv-multi-locus-panel-label-div {
   position: absolute;
   left: 50%;
   top: 25%;
   transform: translate(-50%, -25%);
   font-family: "Open Sans", sans-serif;
-  font-size: 8px;
-  font-weight: 200;
+  font-size: 12px;
+  font-weight: 400;
   text-align: center;
   min-width: 16px;
   z-index: 64;
-  color: #0066ff;
+  color: #373737;
   background-color: white;
   padding: 1px; }
 
-.igv-viewport-content-ruler-div:hover,
-.igv-viewport-content-ruler-div:focus,
-.igv-viewport-content-ruler-div:active {
-  cursor: pointer;
-  color: white;
-  background-color: #0066ff; }
+.igv-multi-locus-panel-label-div:hover {
+  cursor: pointer; }
 
 .igv-viewport-ruler {
   cursor: pointer;
@@ -843,188 +1018,6 @@ svg {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; }
-
-.igv-generic-dialog-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 200px;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 200;
-  border-color: #7F7F7F;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  z-index: 2048;
-  background-color: white;
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center; }
-  .igv-generic-dialog-container .igv-generic-dialog-header {
-    width: 100%;
-    height: 24px;
-    cursor: move;
-    border-color: #c4c4c4;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-style: solid;
-    border-width: thin;
-    background-color: #c4c4c4;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-header div {
-      height: 24px;
-      width: 16px;
-      margin-right: 6px;
-      text-align: center;
-      line-height: 24px;
-      color: #444;
-      font-size: medium; }
-    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
-      cursor: pointer; }
-  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
-    color: #373737;
-    width: 95%;
-    height: 24px;
-    line-height: 24px;
-    text-align: left;
-    margin-top: 8px;
-    padding-left: 8px;
-    overflow-wrap: break-word;
-    background-color: white; }
-  .igv-generic-dialog-container .igv-generic-dialog-label-input {
-    margin-top: 8px;
-    width: 95%;
-    height: 24px;
-    color: #373737;
-    line-height: 24px;
-    padding-left: 8px;
-    background-color: white;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
-      width: 30%;
-      height: 100%;
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
-      display: block;
-      height: 100%;
-      width: 100%;
-      padding-left: 4px;
-      font-family: "Open Sans", sans-serif;
-      font-weight: 400;
-      color: #373737;
-      text-align: left;
-      outline: none;
-      border-style: solid;
-      border-width: thin;
-      border-color: #7F7F7F;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
-      width: 50%;
-      font-size: 16px; }
-  .igv-generic-dialog-container .igv-generic-dialog-input {
-    margin-top: 8px;
-    width: calc(100% - 16px);
-    height: 24px;
-    color: #373737;
-    line-height: 24px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-input input {
-      display: block;
-      height: 100%;
-      width: 100%;
-      padding-left: 4px;
-      font-family: "Open Sans", sans-serif;
-      font-weight: 400;
-      color: #373737;
-      text-align: left;
-      outline: none;
-      border-style: solid;
-      border-width: thin;
-      border-color: #7F7F7F;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-input input {
-      font-size: 16px; }
-  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
-    width: 100%;
-    height: 28px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
-      margin-top: 32px;
-      color: white;
-      font-family: "Open Sans", sans-serif;
-      font-size: 14px;
-      font-weight: 200;
-      width: 75px;
-      height: 28px;
-      line-height: 28px;
-      text-align: center;
-      border-color: transparent;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 2px; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
-      margin-left: 32px;
-      margin-right: 0;
-      background-color: #5ea4e0; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
-      margin-left: 0;
-      margin-right: 32px;
-      background-color: #c4c4c4; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
-      cursor: pointer;
-      background-color: #3b5c7f; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
-      cursor: pointer;
-      background-color: #7f7f7f; }
-  .igv-generic-dialog-container .igv-generic-dialog-ok {
-    width: 100%;
-    height: 36px;
-    margin-top: 32px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok div {
-      width: 98px;
-      height: 36px;
-      line-height: 36px;
-      text-align: center;
-      color: white;
-      font-family: "Open Sans", sans-serif;
-      font-size: medium;
-      font-weight: 200;
-      border-color: white;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 4px;
-      background-color: #2B81AF; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {
-      cursor: pointer;
-      background-color: #25597f; }
 
 .igv-popover {
   position: absolute;

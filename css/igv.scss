@@ -47,11 +47,6 @@ $igv-dark-grey-color: #373737;
 
 $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
-@import "igv-user-feedback";
-@import "igv-colorpicker";
-@import "igv-generic-container";
-@import "igv-trackgear-popup";
-
 @mixin generic-input {
 
   input {
@@ -76,6 +71,12 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   }
 
 }
+
+@import "igv-user-feedback";
+@import "igv-colorpicker";
+@import "igv-generic-container";
+@import "igv-generic-dialog-container";
+@import "igv-trackgear-popup";
 
 .igvControlDiv {
   position: relative;
@@ -663,7 +664,7 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   color: #434343;
 }
 
-.igv-viewport-content-ruler-div {
+.igv-multi-locus-panel-label-div {
   position: absolute;
 
   left:50%;
@@ -671,8 +672,8 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   transform: translate(-50%, -25%);
 
   font-family: $igv-default-font-face;
-  font-size: 8px;
-  font-weight: 200;
+  font-size: 12px;
+  font-weight: 400;
 
   text-align: center;
   min-width: 16px;
@@ -680,18 +681,16 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
   z-index:64;
 
-  color: $igv-ruler-blue-color;
+  color: $igv-dark-grey-color;
   background-color: white;
 
   padding: 1px;
 }
 
-.igv-viewport-content-ruler-div:hover,
-.igv-viewport-content-ruler-div:focus,
-.igv-viewport-content-ruler-div:active  {
+.igv-multi-locus-panel-label-div:hover {
   cursor: pointer;
-  color: white;
-  background-color: $igv-ruler-blue-color;
+  //color: white;
+  //background-color: $igv-ruler-blue-color;
 }
 
 .igv-viewport-ruler {
@@ -1048,254 +1047,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-// generic dialog
-.igv-generic-dialog-container {
-
-  position: absolute;
-  top: 0;
-  left:0;
-
-  width:300px;
-  height:200px;
-
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 200;
-
-  border-color: $igv-grey-color;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-
-  z-index: 2048;
-
-  background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
-
-  // header
-  .igv-generic-dialog-header {
-    width: 100%;
-    height: 24px;
-
-    cursor: move;
-
-    border-color: rgb(196, 196, 196);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-style: solid;
-    border-width: thin;
-
-    background-color: rgb(196, 196, 196);
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-
-    // close button container
-    div {
-      height: 24px;
-      width: 16px;
-      margin-right: 6px;
-
-      text-align: center;
-      line-height: 24px;
-
-      color: #444;
-      font-size: medium;
-    }
-
-    div:hover {
-      cursor: pointer;
-    }
-
-  }
-
-  // one-liner
-  .igv-generic-dialog-one-liner {
-
-    color: $igv-dark-grey-color;
-
-    width: 95%;
-    height: 24px;
-    line-height: 24px;
-
-    text-align: left;
-    margin-top: 8px;
-    padding-left: 8px;
-
-    overflow-wrap: break-word;
-
-    background-color: white;
-  }
-
-  // labeled input
-  .igv-generic-dialog-label-input {
-    margin-top: 8px;
-
-    width: 95%;
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-    padding-left: 8px;
-
-    background-color: white;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
-    div {
-      width: 30%;
-      height: 100%;
-
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-
-      background-color: white;
-    }
-
-    @include generic-input;
-    input {
-      width: 50%;
-      font-size: 16px;
-    }
-
-  }
-
-  // input
-  .igv-generic-dialog-input {
-    margin-top: 8px;
-
-    width: calc(100% - 16px);
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    @include generic-input;
-    input {
-      font-size: 16px;
-    }
-
-  }
-
-  // ok | cancel - container
-  .igv-generic-dialog-ok-cancel {
-
-    width: 100%;
-    height: $igv-button-height;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    div {
-      margin-top: 32px;
-
-      color: white;
-      font-family: $igv-default-font-face;
-      font-size: 14px;
-      font-weight: 200;
-
-      width: $igv-button-width;
-      height: $igv-button-height;
-
-      line-height: $igv-button-height;
-      text-align: center;
-
-      border-color: transparent;
-      border-style: solid;
-      border-width: thin;
-      border-radius: $igv-button-border-radius;
-
-    }
-
-    div:first-child {
-      margin-left: 32px;
-      margin-right: 0;
-      background-color: $igv-button-ok-color;
-    }
-
-    div:last-child {
-      margin-left: 0;
-      margin-right: 32px;
-      background-color: $igv-button-cancel-color;
-    }
-
-    div:first-child:hover {
-      cursor: pointer;
-      background-color: $igv-button-ok-hover-color;
-    }
-
-    div:last-child:hover {
-      cursor: pointer;
-      background-color: $igv-button-cancel-hover-color;
-    }
-
-  }
-
-  // ok - container
-  .igv-generic-dialog-ok {
-
-    width: 100%;
-    height: 36px;
-
-    margin-top: 32px;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    div {
-      width: 98px;
-      height: 36px;
-
-      line-height: 36px;
-      text-align: center;
-      color: white;
-      font-family: $igv-default-font-face;
-      font-size: medium;
-      font-weight: 200;
-
-      border-color: white;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 4px;
-      background-color: #2B81AF;
-    }
-
-    div:hover {
-      cursor: pointer;
-      background-color: #25597f;
-    }
-
-  }
-
 }
 
 // popover

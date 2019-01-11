@@ -148,10 +148,10 @@ var igv = (function (igv) {
 
             if (self.viewports.length > 1) {
                 $viewport.find('.igv-multi-locus-panel-close-container').show();
-                $viewport.find('.igv-viewport-content-ruler-div').show();
+                $viewport.find('.igv-multi-locus-panel-label-div').show();
             } else {
                 $viewport.find('.igv-multi-locus-panel-close-container').hide();
-                $viewport.find('.igv-viewport-content-ruler-div').hide();
+                $viewport.find('.igv-multi-locus-panel-label-div').hide();
             }
 
             if (index < self.viewports.length && (1 + index) !== self.viewports.length) {

@@ -19,7 +19,6 @@
 
   // header bar
   div:first-child {
-    padding-right: 8px;
 
     cursor: move;
 
@@ -34,19 +33,14 @@
 
     background-color: #dddddd;
 
-    // close button
-    i.fa {
-      cursor: pointer;
-      margin-right: 4px;
+    i {
       display: block;
       color: #5f5f5f;
-    }
-
-    i.fa:hover,
-    i.fa:focus,
-    i.fa:active {
       cursor: pointer;
-      color: #0f0f0f;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      margin-bottom: 4px;
     }
 
   }

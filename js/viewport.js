@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
-            this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
+            this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
 
             this.$rulerLabel.click(function (e) {
                 self.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
