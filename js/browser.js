@@ -147,7 +147,8 @@ var igv = (function (igv) {
         return igv.knownFileExtensions.has(extension);
     };
 
-    igv.Browser.prototype.renderSVG = function (config) {
+
+    igv.Browser.prototype.toSVG = function (config) {
 
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
@@ -201,6 +202,14 @@ var igv = (function (igv) {
         svgContext.setHeight(h_output);
 
         let svg = svgContext.getSerializedSvg(true);
+
+        return svg;
+
+    };
+
+    igv.Browser.prototype.renderSVG = function (config) {
+
+        let svg = this.toSVG(config)
 
         if (config.$container) {
             config.$container.empty();
