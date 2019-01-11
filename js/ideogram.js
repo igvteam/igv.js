@@ -238,7 +238,7 @@ var igv = (function (igv) {
             return;
         }
 
-        stainColors = [];
+        const stainColors = [];
         igv.graphics.fillRect(ctx, 0, 0, width, height, {fillStyle: igv.Color.greyScale(255)});
 
         if (referenceFrame.chrName.toLowerCase() === "all") {
