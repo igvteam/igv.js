@@ -1,0 +1,78 @@
+
+.igv-user-feedback {
+
+  position:fixed;
+  top: 50%;
+  left: 50%;
+
+  transform: translate(-50%, -50%);
+
+  width: 512px;
+  height: 360px;
+
+  z-index: 2048;
+
+  background-color: white;
+
+  border-color: #a2a2a2;
+  border-style: solid;
+  border-width: thin;
+
+  font-family: $igv-default-font-face;
+  font-size: medium;
+  font-weight: 400;
+  color: #444;
+
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  // header
+  div:first-child {
+    position: relative;
+
+    height: 24px;
+    width: 100%;
+
+    background-color: white;
+
+    border-bottom-color: #a2a2a2;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+    // icon container
+    div {
+      position: absolute;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: transparent;
+    }
+
+    div:first-child {
+      left: 8px;
+    }
+
+    div:last-child {
+      cursor: pointer;
+      right: 8px;
+    }
+  }
+
+  // body copy
+  div:last-child {
+    width: 100%;
+    height: calc(100% - 24px);
+
+    border-width: 0;
+
+    div {
+      width: auto;
+      height: auto;
+      margin: 8px;
+    }
+  }
+
+}

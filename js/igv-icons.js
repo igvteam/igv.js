@@ -39,10 +39,6 @@ var igv = (function (igv) {
         return wrapper;
     };
 
-    igv.createIcon = function (name, color) {
-        return $(iconMarkup(name, color));
-    };
-
     igv.createCheckbox = function (name, initialState) {
 
         let $container = $('<div>', { class: 'igv-trackgear-popover-check-container' });
@@ -58,6 +54,10 @@ var igv = (function (igv) {
         $container.append($label);
 
         return $container;
+    };
+
+    igv.createIcon = function (name, color) {
+        return $(iconMarkup(name, color));
     };
 
     function iconMarkup(name, color) {

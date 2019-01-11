@@ -10,10 +10,6 @@ svg {
   height: auto !important;
 }
 
-@import "igv-colorpicker";
-@import "igv-generic-container";
-@import "igv_trackgear_popup";
-
 $igv-default-font-face: 'Open Sans', sans-serif;
 
 $igv-navbar-font-size: 12px;
@@ -50,6 +46,11 @@ $igv-grey-color: #7F7F7F;
 $igv-dark-grey-color: #373737;
 
 $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
+
+@import "igv-user-feedback";
+@import "igv-colorpicker";
+@import "igv-generic-container";
+@import "igv-trackgear-popup";
 
 @mixin generic-input {
 
@@ -1040,87 +1041,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   border-width: thin;
 
   background-color: #7f7f7f;
-
-}
-
-// user feedback
-.igv-user-feedback {
-
-  position:fixed;
-  top: 50%;
-  left: 50%;
-
-  width:36em;
-  height:27em;
-
-  margin-top: -9em; /*set to a negative number 1/2 of your height*/
-  margin-left: -15em; /*set to a negative number 1/2 of your width*/
-
-  background-color: white;
-
-  border-color: #a2a2a2;
-  border-style: solid;
-  border-width: thin;
-
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 400;
-  color: #444;
-
-  div:first-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 32px;
-
-    border-bottom-color: #a2a2a2;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: white;
-
-    i {
-      font-size: 20px;
-    }
-
-    i:first-child {
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 8px;
-      color: red;
-    }
-
-    i:last-child {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 8px;
-      cursor: pointer;
-      color: grey;
-    }
-
-    i:last-child:hover,
-    i:last-child:focus,
-    i:last-child:active  {
-      color: rgba(51, 51, 51, 1);
-    }
-
-  }
-
-  div:last-child {
-    padding-left: 48px;
-    padding-top: 8px;
-    padding-right: 48px;
-    padding-bottom: 8px;
-    position: absolute;
-    top: 33px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: white;
-  }
 
 }
 

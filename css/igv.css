@@ -7,6 +7,55 @@ svg {
   max-width: 100% !important;
   height: auto !important; }
 
+.igv-user-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 512px;
+  height: 360px;
+  z-index: 2048;
+  background-color: white;
+  border-color: #a2a2a2;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-user-feedback div:first-child {
+    position: relative;
+    height: 24px;
+    width: 100%;
+    background-color: white;
+    border-bottom-color: #a2a2a2;
+    border-bottom-style: solid;
+    border-bottom-width: thin; }
+    .igv-user-feedback div:first-child div {
+      position: absolute;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: transparent; }
+    .igv-user-feedback div:first-child div:first-child {
+      left: 8px; }
+    .igv-user-feedback div:first-child div:last-child {
+      cursor: pointer;
+      right: 8px; }
+  .igv-user-feedback div:last-child {
+    width: 100%;
+    height: calc(100% - 24px);
+    border-width: 0; }
+    .igv-user-feedback div:last-child div {
+      width: auto;
+      height: auto;
+      margin: 8px; }
+
 .igv-color-swatch {
   display: flex;
   flex-flow: row;
@@ -789,66 +838,6 @@ svg {
   border-style: solid;
   border-width: thin;
   background-color: #7f7f7f; }
-
-.igv-user-feedback {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 36em;
-  height: 27em;
-  margin-top: -9em;
-  /*set to a negative number 1/2 of your height*/
-  margin-left: -15em;
-  /*set to a negative number 1/2 of your width*/
-  background-color: white;
-  border-color: #a2a2a2;
-  border-style: solid;
-  border-width: thin;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 400;
-  color: #444; }
-  .igv-user-feedback div:first-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 32px;
-    border-bottom-color: #a2a2a2;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: white; }
-    .igv-user-feedback div:first-child i {
-      font-size: 20px; }
-    .igv-user-feedback div:first-child i:first-child {
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 8px;
-      color: red; }
-    .igv-user-feedback div:first-child i:last-child {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 8px;
-      cursor: pointer;
-      color: grey; }
-    .igv-user-feedback div:first-child i:last-child:hover,
-    .igv-user-feedback div:first-child i:last-child:focus,
-    .igv-user-feedback div:first-child i:last-child:active {
-      color: #333333; }
-  .igv-user-feedback div:last-child {
-    padding-left: 48px;
-    padding-top: 8px;
-    padding-right: 48px;
-    padding-bottom: 8px;
-    position: absolute;
-    top: 33px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: white; }
 
 .igv-ellipsis {
   white-space: nowrap;

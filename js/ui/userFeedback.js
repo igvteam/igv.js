@@ -30,41 +30,49 @@ var igv = (function (igv) {
 
     igv.UserFeedback = function ($parent) {
 
-        this.$userFeedback = $('<div class="igv-user-feedback">');
-        $parent.append(this.$userFeedback);
+        this.$container = $('<div class="igv-user-feedback">');
+        $parent.append(this.$container);
 
         // header
-        let $userFeedbackHeader = $('<div>');
-        this.$userFeedback.append($userFeedbackHeader);
+        let $header = $('<div>');
+        this.$container.append($header);
 
         // alert
-        $userFeedbackHeader.append( igv.createIcon("exclamation-triangle") );
+        let $exclamation = $('<div>');
+        $header.append($exclamation);
+
+        let $a = igv.createIcon("exclamation-triangle", 'red');
+        $exclamation.append( $a );
 
         // dismiss
-        let $userFeedbackDismiss = $('<div>');
-        $userFeedbackHeader.append($userFeedbackDismiss);
+        let $dismiss = $('<div>');
+        $header.append($dismiss);
 
-        $userFeedbackDismiss.append(igv.createWrappedIcon("times-circle"));
+        let $b = igv.createIcon("times-circle", 'grey');
+        $dismiss.append( $b );
 
-        // copy
-        let $userFeedbackBodyCopy = $('<div>');
-        this.$userFeedback.append($userFeedbackBodyCopy);
-        $userFeedbackBodyCopy.text('i am user feedback');
+        // body copy
+        let $bodyCopyContainer = $('<div>');
+        this.$container.append($bodyCopyContainer);
+
+        let $bodyCopy = $('<div>');
+        $bodyCopyContainer.append($bodyCopy);
+        $bodyCopy.text('i am user feedback');
 
         let self;
-        $userFeedbackDismiss.click(function () {
-            $userFeedbackBodyCopy.html("");
-            self.$userFeedback.hide();
+        $dismiss.click(function () {
+            $bodyCopy.html('');
+            self.$container.hide();
         });
 
     };
 
     igv.UserFeedback.prototype.show = function () {
-        this.$userFeedback.show();
+        this.$container.show();
     };
 
     igv.UserFeedback.prototype.hide = function () {
-        this.$userFeedback.hide();
+        this.$container.hide();
     };
 
     return igv;
