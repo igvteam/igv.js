@@ -147,11 +147,11 @@ var igv = (function (igv) {
             $viewport = viewport.$viewport;
 
             if (self.viewports.length > 1) {
-                $viewport.find('.igv-viewport-fa-close').show();
-                $viewport.find('.igv-viewport-content-ruler-div').show();
+                $viewport.find('.igv-multi-locus-panel-close-container').show();
+                $viewport.find('.igv-multi-locus-panel-label-div').show();
             } else {
-                $viewport.find('.igv-viewport-fa-close').hide();
-                $viewport.find('.igv-viewport-content-ruler-div').hide();
+                $viewport.find('.igv-multi-locus-panel-close-container').hide();
+                $viewport.find('.igv-multi-locus-panel-label-div').hide();
             }
 
             if (index < self.viewports.length && (1 + index) !== self.viewports.length) {
@@ -192,23 +192,29 @@ var igv = (function (igv) {
 
     function appendRightHandGutter($parent) {
 
-        var self = this,
-            $gearButton, $fa;
+        let $div = $('<div class="igv-right-hand-gutter">');
+        $parent.append($div);
 
-        const browser = this.browser;
+        createTrackGearPopover.call(this, $div);
+    }
 
-        this.rightHandGutter = $('<div class="igv-right-hand-gutter">')[0];
-        $parent.append($(this.rightHandGutter));
 
-        $gearButton = igv.createWrappedIcon("cog");
-        $(this.rightHandGutter).append($gearButton);
+    function createTrackGearPopover($parent) {
 
-        $gearButton.click(handleClick);
+        let $cogContainer = $("<div>", { class:'igv-trackgear-container' });
+        $parent.append($cogContainer);
 
-        function handleClick(e) {
+        $cogContainer.append( igv.createIcon('cog') );
+
+        this.trackGearPopover = new igv.TrackGearPopover($parent);
+        this.trackGearPopover.$popover.hide();
+
+        let self = this;
+        $cogContainer.click(function (e) {
             const page = igv.pageCoordinates(e);
-            browser.popover.presentTrackGearMenu(page.x, page.y, self, browser);
-        }
+            // page.x, page.y
+            self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
+        });
 
     }
 
