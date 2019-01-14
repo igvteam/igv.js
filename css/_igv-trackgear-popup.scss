@@ -1,0 +1,105 @@
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: $igv-trackgear-grey-color;
+}
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444;
+}
+
+.igv-trackgear-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  min-width: 128px;
+
+  z-index: 4096;
+
+  cursor: pointer;
+
+  font-family: $igv-trackgear-default-font-face;
+  font-size: small;
+  font-weight: 400;
+  color: $igv-trackgear-font-color;
+
+  background: white;
+
+  border-radius: $igv-trackgear-popover-border-radius;
+  border-color: $igv-trackgear-grey-color;
+  border-style: solid;
+  border-width: thin;
+}
+
+.igv-trackgear-popover-header {
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+
+  position: relative;
+  width: 100%;
+  height: 24px;
+
+  cursor: move;
+
+  border-top-left-radius: $igv-trackgear-popover-border-radius;
+  border-top-right-radius: $igv-trackgear-popover-border-radius;
+  border-bottom-color: $igv-trackgear-grey-color;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+
+  background-color: #eee;
+
+  div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: $igv-trackgear-grey-color;
+  }
+
+  div:hover {
+    cursor: pointer;
+    color: #444;
+  }
+
+}
+
+.igv-trackgear-popover-check-container {
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  width: 100%;
+  height: 20px;
+
+  background-color: transparent;
+
+  div {
+    padding-top: 2px;
+    padding-left: 8px;
+  }
+
+  div:first-child {
+
+    width: 12px;
+    height: 12px;
+
+    svg {
+      max-width: 100%;
+      height: auto;
+    }
+
+  }
+
+}

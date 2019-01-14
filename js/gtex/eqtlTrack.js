@@ -308,7 +308,9 @@ var igv = (function (igv) {
 
                     if (true === self.autoscale) {
                         $fa.removeClass('igv-fa-check-hidden');
+                        $fa.addClass('igv-fa-check-visible');
                     } else {
+                        $fa.removeClass('igv-fa-check-visible');
                         $fa.addClass('igv-fa-check-hidden');
                     }
 

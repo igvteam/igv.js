@@ -49,7 +49,7 @@ var igv = (function (igv) {
 
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
-            this.$rulerLabel = $('<div class = "igv-viewport-content-ruler-div">');
+            this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
 
             this.$rulerLabel.click(function (e) {
                 self.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
@@ -66,14 +66,14 @@ var igv = (function (igv) {
         } else {
             addMouseHandlers.call(this);
 
-            const $spinnerContainer = $('<div class="igv-viewport-spinner">');
-            const dimen = 32;
-            $spinnerContainer.css({'font-size': dimen + 'px'});
+            // const $spinnerContainer = $('<div class="igv-viewport-spinner">');
+            // const dimen = 32;
+            // $spinnerContainer.css({'font-size': dimen + 'px'});
 
-            this.$spinner = igv.createIcon("spinner");
-            $spinnerContainer.append(this.$spinner);
+            this.$spinner = $('<div class="igv-viewport-spinner">');
+            this.$spinner.append(igv.createIcon("spinner"));
 
-            this.$viewport.append($spinnerContainer);
+            this.$viewport.append(this.$spinner);
             this.stopSpinner();
 
             if("sequence" !==  trackView.track.type)
@@ -152,11 +152,8 @@ var igv = (function (igv) {
         this.canvas.setAttribute('width', this.$viewport.width());
     };
 
-    //.fa5-spin {
-    //    -webkit-animation: fa5-spin 2s infinite linear;
-    //    animation: fa5-spin 2s infinite linear; }
-
     igv.Viewport.prototype.startSpinner = function () {
+
         const $spinner = this.$spinner;
         if ($spinner) {
             $spinner.addClass("fa5-spin");
@@ -165,6 +162,7 @@ var igv = (function (igv) {
     };
 
     igv.Viewport.prototype.stopSpinner = function () {
+
         const $spinner = this.$spinner;
         if ($spinner) {
             $spinner.hide();
@@ -174,18 +172,18 @@ var igv = (function (igv) {
 
     igv.Viewport.prototype.showMessage = function (message) {
         if (!this.messageDiv) {
-            this.messageDiv = document.createElement('div')
-            this.messageDiv.className = 'igv-viewport-message'
+            this.messageDiv = document.createElement('div');
+            this.messageDiv.className = 'igv-viewport-message';
             this.contentDiv.append(this.messageDiv)
         }
-        this.messageDiv.textContent = message
+        this.messageDiv.textContent = message;
         this.messageDiv.style.display = 'inline-block'
-    }
+    };
 
     igv.Viewport.prototype.hideMessage = function (message) {
         if (this.messageDiv)
             this.messageDiv.style.display = 'none'
-    }
+    };
 
 
     igv.Viewport.prototype.checkZoomIn = function () {

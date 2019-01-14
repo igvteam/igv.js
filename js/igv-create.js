@@ -287,14 +287,18 @@ var igv = (function (igv) {
                 });
         });
 
-        // search icon
-        $div = $('<i>');
+        // search icon container
+        $div = $('<div>');
         $searchContainer.append($div);
+
+        // search icon svg
         $div.append(igv.createIcon("search"));
+
         $div.click(function () {
             browser.search(browser.$searchInput.val());
         });
-        $searchContainer.append($faSearch);
+
+        // $searchContainer.append($faSearch);
 
         // TODO: Currently not used
         // search results presented in table

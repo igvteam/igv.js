@@ -31,7 +31,7 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
 
     this.namespace = '.generic_container_' + igv.guid();
 
-    let $container = $('<div>', {class: 'igv-generic-container'});
+    let $container = $('<div>', { class: 'igv-generic-container' });
     $parent.append($container);
     this.$container = $container;
 
@@ -52,24 +52,26 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
     this.$container.append($header);
 
     // close button
-    $fa = igv.createIcon("times");
-    $header.append($fa);
+    let $div = $('<i>');
+    $header.append($div);
 
-    $fa.on('mousedown' + self.namespace, function (e) {
+    $div.append( igv.createIcon("times") );
+
+    $div.on('mousedown' + self.namespace, function (e) {
         e.stopPropagation();
     });
 
-    $fa.on('mouseup' + self.namespace, function (e) {
+    $div.on('mouseup' + self.namespace, function (e) {
         e.stopPropagation();
     });
 
-    $fa.on('click' + self.namespace, function (e) {
+    $div.on('click' + self.namespace, function (e) {
         e.preventDefault();
         e.stopPropagation();
         closeHandler(e);
     });
 
-    $fa.on('touchend' + self.namespace, function (e) {
+    $div.on('touchend' + self.namespace, function (e) {
         e.preventDefault();
         e.stopPropagation();
         closeHandler(e);
