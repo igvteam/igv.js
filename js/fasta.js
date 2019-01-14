@@ -316,7 +316,8 @@ var igv = (function (igv) {
 
 
                     if (byteCount <= 0) {
-                        return null;
+                        console.error("No sequence for " + chr + ":" + qstart + "-" + qend)
+                        return "";
                     }
                     else {
                         return igv.xhr.load(self.file, igv.buildOptions(self.config, {
