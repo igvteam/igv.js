@@ -201,10 +201,10 @@ var igv = (function (igv) {
 
     function createTrackGearPopover($parent) {
 
-        let $cogContainer = $("<div>", { class:'igv-cog-container' });
+        let $cogContainer = $("<div>", { class:'igv-trackgear-container' });
         $parent.append($cogContainer);
 
-        $cogContainer.append( igv.createIcon('cog', 'grey') );
+        $cogContainer.append( igv.createIcon('cog') );
 
         this.trackGearPopover = new igv.TrackGearPopover($parent);
         this.trackGearPopover.$popover.hide();

@@ -1,10 +1,21 @@
-$igv-trackgear-grey-color: #7F7F7F;
-$igv-trackgear-popover-border-radius: 4px;
-$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: $igv-trackgear-grey-color;
+}
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444;
+}
 
 .igv-trackgear-popover {
-
   position: absolute;
+  top: 0;
+  left: 0;
 
   min-width: 128px;
 
@@ -15,7 +26,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   font-family: $igv-trackgear-default-font-face;
   font-size: small;
   font-weight: 400;
-  color: #444;
+  color: $igv-trackgear-font-color;
 
   background: white;
 
@@ -34,9 +45,10 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   align-items: center;
 
   position: relative;
-
   width: 100%;
-  height: 20px;
+  height: 24px;
+
+  cursor: move;
 
   border-top-left-radius: $igv-trackgear-popover-border-radius;
   border-top-right-radius: $igv-trackgear-popover-border-radius;
@@ -50,7 +62,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     margin-right: 4px;
     height: 12px;
     width: 12px;
-    color: #444;
+    color: $igv-trackgear-grey-color;
   }
 
   div:hover {
