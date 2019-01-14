@@ -71,12 +71,13 @@ var igv = (function (igv) {
     function seqFetch(seqID, start, end) {
 
         const sequence = this.genome.sequence;
+        const genome = this.genome;
 
         return this.getHeader()
 
             .then(function (header) {
 
-                const chrName = header.chrNames[seqID];
+                const chrName = genome.getChromosomeName(header.chrNames[seqID])
 
                 return sequence.getSequence(chrName, start - 1, end);
 
@@ -228,7 +229,7 @@ var igv = (function (igv) {
 
                     makeBlocks(record, alignment);
 
-                    if (alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                    if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
                         alignment.fragmentLength = -alignment.fragmentLength
                     }
 
