@@ -67,42 +67,6 @@ var igv = (function (igv) {
         this.$popover.hide();
     };
 
-    igv.Popover.prototype.presentTrackGearMenu = function (pageX, pageY, trackView, browser) {
-
-        var self = this,
-            $container,
-            menuItems;
-
-        // Only 1 popover open at a time
-        $('.igv-popover').hide();
-
-        menuItems = igv.trackMenuItemList(this, trackView);
-        if (menuItems.length > 0) {
-
-            menuItems = igv.trackMenuItemListHelper(menuItems, self.$popover);
-
-            this.$popoverContent.empty();
-            this.$popoverContent.removeClass("igv-popover-track-popup-content");
-
-            $container = $('<div class="igv-track-menu-container">');
-            this.$popoverContent.append($container);
-
-            menuItems.forEach(function (item) {
-
-                if (item.init) {
-                    item.init();
-                }
-
-                $container.append(item.object);
-            });
-
-            this.$popover.css(clampPopoverLocation(pageX, pageY, this));
-            this.$popover.show();
-            this.$popover.offset(igv.constrainBBox(this.$popover, $(browser.trackContainerDiv)));
-
-        }
-    };
-
     igv.Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
 
         var $container,

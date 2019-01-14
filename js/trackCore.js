@@ -426,10 +426,9 @@ var igv = (function (igv) {
 
     /**
      * Configure item list for track "gear" menu.
-     * @param popover
      * @param trackView
      */
-    igv.trackMenuItemList = function (popover, trackView) {
+    igv.trackMenuItemList = function (trackView) {
 
         const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp']);
 

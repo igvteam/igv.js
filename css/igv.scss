@@ -1,6 +1,14 @@
 
-@import "igv-colorpicker";
-@import "igv-generic-container";
+* {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important;
+}
+
+svg {
+  max-width: 100% !important;
+  height: auto !important;
+}
 
 $igv-default-font-face: 'Open Sans', sans-serif;
 
@@ -39,6 +47,11 @@ $igv-dark-grey-color: #373737;
 
 $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
+$igv-trackgear-grey-color: #7F7F7F;
+$igv-trackgear-popover-border-radius: 4px;
+$igv-trackgear-font-color: #4b4b4b;
+$igv-trackgear-default-font-face: 'Open Sans', sans-serif;
+
 @mixin generic-input {
 
   input {
@@ -63,6 +76,13 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   }
 
 }
+
+@import "igv-user-feedback";
+@import "igv-colorpicker";
+@import "igv-generic-container";
+@import "igv-generic-dialog-container";
+@import "igv-popover";
+@import "igv-trackgear-popup";
 
 .igvControlDiv {
   position: relative;
@@ -271,10 +291,11 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
       background-color: white;
     }
 
-    // search icon
+    // search icon container
     div {
-      height: 100%;
-
+      cursor: pointer;
+      height: 16px;
+      width: 16px;
     }
 
   }
@@ -351,13 +372,15 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
     }
 
     div:first-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: unset;
       margin-right: 8px;
     }
 
     div:last-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: 8px;
       margin-right: unset;
     }
@@ -628,24 +651,26 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   border-right-width: $igv-panel-border-width;
 }
 
-.igv-viewport-fa-close {
+.igv-multi-locus-panel-close-container {
   position: absolute;
   top: 4px;
   right: 4px;
 
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
+
   color: #666666;
 
   z-index: 1000;
 
 }
 
-.igv-viewport-fa-close:hover {
+.igv-multi-locus-panel-close-container:hover {
   cursor: pointer;
   color: #434343;
 }
 
-.igv-viewport-content-ruler-div {
+.igv-multi-locus-panel-label-div {
   position: absolute;
 
   left:50%;
@@ -653,8 +678,8 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   transform: translate(-50%, -25%);
 
   font-family: $igv-default-font-face;
-  font-size: 8px;
-  font-weight: 200;
+  font-size: 12px;
+  font-weight: 400;
 
   text-align: center;
   min-width: 16px;
@@ -662,18 +687,16 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
   z-index:64;
 
-  color: $igv-ruler-blue-color;
+  color: $igv-dark-grey-color;
   background-color: white;
 
   padding: 1px;
 }
 
-.igv-viewport-content-ruler-div:hover,
-.igv-viewport-content-ruler-div:focus,
-.igv-viewport-content-ruler-div:active  {
+.igv-multi-locus-panel-label-div:hover {
   cursor: pointer;
-  color: white;
-  background-color: $igv-ruler-blue-color;
+  //color: white;
+  //background-color: $igv-ruler-blue-color;
 }
 
 .igv-viewport-ruler {
@@ -698,12 +721,17 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 }
 
 .igv-viewport-spinner {
-  pointer-events:none;
+
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1024;
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events:none;
   color: $igv-navbar-toggle-dark-dark;
 }
 
@@ -724,7 +752,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   background-color: $igv-ruler-sweeper-color;
 }
 
-// right hand gutter
 .igv-right-hand-gutter {
   position: absolute;
   right: 0;
@@ -733,22 +760,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
   background: white;
   text-align: center;
-
-  i {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding-right: 6px;
-    font-size: 20px;
-    cursor: pointer;
-    color: grey;
-  }
-
-  i:hover,
-  i:focus,
-  i:active  {
-    color: rgba(51, 51, 51, 1);
-  }
 
 }
 
@@ -761,40 +772,6 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
   canvas {
     position: absolute;
-  }
-
-}
-
-// track menu
-.igv-track-menu-container {
-
-  background-color: white;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px;
-
-  div {
-    padding-left: 4px;
-    padding-right: 4px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: white;
-
-    i {
-      padding-right: 2px;
-    }
-
-  }
-
-  div:hover,
-  div:focus,
-  div:active  {
-    cursor: pointer;
-    background-color: rgb(239, 239, 239);
-  }
-
-  a {
-    color: inherit;
-    text-decoration: none;
   }
 
 }
@@ -1059,437 +1036,10 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
 
 }
 
-// user feedback
-.igv-user-feedback {
-
-  position:fixed;
-  top: 50%;
-  left: 50%;
-
-  width:36em;
-  height:27em;
-
-  margin-top: -9em; /*set to a negative number 1/2 of your height*/
-  margin-left: -15em; /*set to a negative number 1/2 of your width*/
-
-  background-color: white;
-
-  border-color: #a2a2a2;
-  border-style: solid;
-  border-width: thin;
-
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 400;
-  color: #444;
-
-  div:first-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 32px;
-
-    border-bottom-color: #a2a2a2;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: white;
-
-    i {
-      font-size: 20px;
-    }
-
-    i:first-child {
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 8px;
-      color: red;
-    }
-
-    i:last-child {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 8px;
-      cursor: pointer;
-      color: grey;
-    }
-
-    i:last-child:hover,
-    i:last-child:focus,
-    i:last-child:active  {
-      color: rgba(51, 51, 51, 1);
-    }
-
-  }
-
-  div:last-child {
-    padding-left: 48px;
-    padding-top: 8px;
-    padding-right: 48px;
-    padding-bottom: 8px;
-    position: absolute;
-    top: 33px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: white;
-  }
-
-}
-
 .igv-ellipsis {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-// generic dialog
-.igv-generic-dialog-container {
-
-  position: absolute;
-  top: 0;
-  left:0;
-
-  width:300px;
-  height:200px;
-
-  font-family: $igv-default-font-face;
-  font-size: medium;
-  font-weight: 200;
-
-  border-color: $igv-grey-color;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-
-  z-index: 2048;
-
-  background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
-
-  // header
-  .igv-generic-dialog-header {
-    width: 100%;
-    height: 24px;
-
-    cursor: move;
-
-    border-color: rgb(196, 196, 196);
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-style: solid;
-    border-width: thin;
-
-    background-color: rgb(196, 196, 196);
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-
-    // close button container
-    div {
-      height: 24px;
-      width: 16px;
-      margin-right: 6px;
-
-      text-align: center;
-      line-height: 24px;
-
-      color: #444;
-      font-size: medium;
-    }
-
-    div:hover {
-      cursor: pointer;
-    }
-
-  }
-
-  // one-liner
-  .igv-generic-dialog-one-liner {
-
-    color: $igv-dark-grey-color;
-
-    width: 95%;
-    height: 24px;
-    line-height: 24px;
-
-    text-align: left;
-    margin-top: 8px;
-    padding-left: 8px;
-
-    overflow-wrap: break-word;
-
-    background-color: white;
-  }
-
-  // labeled input
-  .igv-generic-dialog-label-input {
-    margin-top: 8px;
-
-    width: 95%;
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-    padding-left: 8px;
-
-    background-color: white;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
-    div {
-      width: 30%;
-      height: 100%;
-
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-
-      background-color: white;
-    }
-
-    @include generic-input;
-    input {
-      width: 50%;
-      font-size: 16px;
-    }
-
-  }
-
-  // input
-  .igv-generic-dialog-input {
-    margin-top: 8px;
-
-    width: calc(100% - 16px);
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    @include generic-input;
-    input {
-      font-size: 16px;
-    }
-
-  }
-
-  // ok | cancel - container
-  .igv-generic-dialog-ok-cancel {
-
-    width: 100%;
-    height: $igv-button-height;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    div {
-      margin-top: 32px;
-
-      color: white;
-      font-family: $igv-default-font-face;
-      font-size: 14px;
-      font-weight: 200;
-
-      width: $igv-button-width;
-      height: $igv-button-height;
-
-      line-height: $igv-button-height;
-      text-align: center;
-
-      border-color: transparent;
-      border-style: solid;
-      border-width: thin;
-      border-radius: $igv-button-border-radius;
-
-    }
-
-    div:first-child {
-      margin-left: 32px;
-      margin-right: 0;
-      background-color: $igv-button-ok-color;
-    }
-
-    div:last-child {
-      margin-left: 0;
-      margin-right: 32px;
-      background-color: $igv-button-cancel-color;
-    }
-
-    div:first-child:hover {
-      cursor: pointer;
-      background-color: $igv-button-ok-hover-color;
-    }
-
-    div:last-child:hover {
-      cursor: pointer;
-      background-color: $igv-button-cancel-hover-color;
-    }
-
-  }
-
-  // ok - container
-  .igv-generic-dialog-ok {
-
-    width: 100%;
-    height: 36px;
-
-    margin-top: 32px;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    div {
-      width: 98px;
-      height: 36px;
-
-      line-height: 36px;
-      text-align: center;
-      color: white;
-      font-family: $igv-default-font-face;
-      font-size: medium;
-      font-weight: 200;
-
-      border-color: white;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 4px;
-      background-color: #2B81AF;
-    }
-
-    div:hover {
-      cursor: pointer;
-      background-color: #25597f;
-    }
-
-  }
-
-}
-
-// popover
-.igv-popover {
-
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  min-width: 128px;
-
-  z-index: 4096;
-
-  font-family: $igv-default-font-face;
-  font-size: small;
-  font-weight: 400;
-  color: #444;
-
-  background: white;
-
-  border-radius: 4px;
-  border-color: $igv-grey-color;
-  border-style: solid;
-  border-width: thin;
-
-  display: none;
-}
-
-.igv-popover-header {
-
-  position: relative;
-  top: 0;
-  left: 0;
-
-  width: 100%;
-  height: 20px;
-
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-color: $igv-grey-color;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-
-  background-color: #eee;
-
-  div {
-
-    position: absolute;
-    top: 3px;
-    right: 3px;
-
-    height: 100%;
-    width: 16px;
-
-    text-align: center;
-    line-height: 100%;
-
-    cursor: pointer;
-    color: #444;
-    font-size: small;
-
-  }
-
-  div:hover {
-    color: white;
-  }
-
-}
-
-.igv-popover-track-popup-content {
-  position: relative;
-  top: 0;
-  left: 0;
-  max-height: 384px;
-  overflow-x: hidden;
-  overflow-y: auto;
-}
-
-.igv-popover-name-value {
-  cursor: default;
-  text-wrap: none;
-  white-space:nowrap;
-  max-width: 384px;
-}
-
-.igv-popover-name {
-  font-weight: bold;
-  padding-right: 4px;
-  float: left;
-}
-
-.igv-popover-value {
-  padding-left: 4px;
-  overflow: hidden;
-  white-space:nowrap;
-  text-overflow:ellipsis;
-  max-width:256px;
-  display:inline-block;
 }
 
 .igv-spinner-container {
@@ -1502,8 +1052,14 @@ $igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
   z-index: 512;
 }
 
+.igv-fa-check-visible {
+  color: inherit;
+  padding-right: 2px;
+}
+
 .igv-fa-check-hidden {
-  color: rgba(255, 255, 255, 0);
+  color: transparent;
+  padding-right: 2px;
 }
 
 .validateTips {
