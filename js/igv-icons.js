@@ -32,47 +32,48 @@
 
 var igv = (function (igv) {
 
+    igv.createWrappedIcon = function (name, color) {
+
+        let $svg = igv.createIcon(name, color);
+
+        let $wrapper = $('<i>');
+        $wrapper.append($svg);
+        return $wrapper;
+    };
+
+    igv.createCheckbox = function (name, initialState) {
+
+        let $container = $('<div>', { class: 'igv-trackgear-popover-check-container' });
+
+        let $div = $('<div>');
+        $container.append($div);
+
+        let $svg = iconMarkup('check', (true === initialState ? '#444' : 'transparent'));
+        $div.append($svg);
+
+        let $label = $('<div>'/*, { class: 'igv-some-label-class' }*/);
+        $label.text(name);
+        $container.append($label);
+
+        return $container;
+    };
 
     igv.createIcon = function (name, color) {
         return $(iconMarkup(name, color));
     };
 
-    igv.createWrappedIcon = function (name, color) {
-        var svg = igv.createIcon(name, color);
-        var wrapper = $('<i>');
-        wrapper.append(svg);
-        return wrapper;
-    };
-
-    igv.createCheckbox = function (name, initialState) {
-
-        var html = [];
-        html.push("<div>");
-        html.push(true === initialState ? '<i>' : '<i class="igv-fa-check-hidden">');
-        html.push(iconMarkup("check"))
-        html.push('</i>');
-        html.push(name);
-        html.push('</div>');
-        var str = html.join('');
-        return $(html.join(''));
-    }
-
     function iconMarkup(name, color) {
 
-        var icon = icons[name];
-        var width = icon[0];
-        var height = icon[1];
-        var data = icon[4];
+        color = color || "currentColor";
 
-        color = color || "currentColor"
+        let icon = icons[name];
+        let svg = '<svg ' + 'viewBox="0 0 ' + icon[ 0 ] + ' ' + icon[ 1 ] + '">';
+        svg += '<path fill="' + color + '" ' + 'd="' + icon[ 4 ] + '">' + '</path>';
+        svg += '</svg>';
 
-        return '<svg ' +
-            'class="svg-inline--fa5" ' +
-            'viewBox="0 0 ' + width + ' ' + height + '">' +
-            '<path fill="' + color + '" ' +
-            'd="' + data + '">' +
-            '</path></svg>';
-    };
+        return svg;
+
+    }
 
     var icons = {
         "address-book": [448, 512, [], "f2b9", "M436 160c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20V48c0-26.51-21.49-48-48-48H48C21.49 0 0 21.49 0 48v416c0 26.51 21.49 48 48 48h320c26.51 0 48-21.49 48-48v-48h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20zm-74 304H54a6 6 0 0 1-6-6V54a6 6 0 0 1 6-6h308a6 6 0 0 1 6 6v404a6 6 0 0 1-6 6zM128 208c0-44.183 35.817-80 80-80s80 35.817 80 80-35.817 80-80 80-80-35.817-80-80zm208 133.477V360c0 13.255-10.745 24-24 24H104c-13.255 0-24-10.745-24-24v-18.523c0-22.026 14.99-41.225 36.358-46.567l35.657-8.914c29.101 20.932 74.509 26.945 111.97 0l35.657 8.914C321.01 300.252 336 319.452 336 341.477z"],
@@ -696,6 +697,3 @@ var igv = (function (igv) {
     return igv
 
 })(igv || {});
-
-// <svg class="svg-inline--fa fa-plus-circle fa-w-16" aria-hidden="true" data-prefix="fa" data-icon="plus-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M256 8C119 8 8 119 8 256s111 248 248 248 248-111 248-248S393 8 256 8zm144 276c0 6.6-5.4 12-12 12h-92v92c0 6.6-5.4 12-12 12h-56c-6.6 0-12-5.4-12-12v-92h-92c-6.6 0-12-5.4-12-12v-56c0-6.6 5.4-12 12-12h92v-92c0-6.6 5.4-12 12-12h56c6.6 0 12 5.4 12 12v92h92c6.6 0 12 5.4 12 12v56z"></path></svg>
-// <svg class="svg-inline--fa fa-spinner fa-w-16 fa-fw fa-spin" style="" aria-hidden="true" data-prefix="fa" data-icon="spinner" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><path fill="currentColor" d="M304 48c0 26.51-21.49 48-48 48s-48-21.49-48-48 21.49-48 48-48 48 21.49 48 48zm-48 368c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zm208-208c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.49-48-48-48zM96 256c0-26.51-21.49-48-48-48S0 229.49 0 256s21.49 48 48 48 48-21.49 48-48zm12.922 99.078c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.491-48-48-48zm294.156 0c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48c0-26.509-21.49-48-48-48zM108.922 60.922c-26.51 0-48 21.49-48 48s21.49 48 48 48 48-21.49 48-48-21.491-48-48-48z"></path></svg>

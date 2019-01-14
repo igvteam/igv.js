@@ -1,3 +1,61 @@
+* {
+  -webkit-box-sizing: content-box !important;
+  -moz-box-sizing: content-box !important;
+  box-sizing: content-box !important; }
+
+svg {
+  max-width: 100% !important;
+  height: auto !important; }
+
+.igv-user-feedback {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 512px;
+  height: 360px;
+  z-index: 2048;
+  background-color: white;
+  border-color: #a2a2a2;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  color: #444;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-user-feedback div:first-child {
+    position: relative;
+    height: 24px;
+    width: 100%;
+    background-color: white;
+    border-bottom-color: #a2a2a2;
+    border-bottom-style: solid;
+    border-bottom-width: thin; }
+    .igv-user-feedback div:first-child div {
+      position: absolute;
+      top: 2px;
+      width: 16px;
+      height: 16px;
+      background-color: transparent; }
+    .igv-user-feedback div:first-child div:first-child {
+      left: 8px; }
+    .igv-user-feedback div:first-child div:last-child {
+      cursor: pointer;
+      right: 8px; }
+  .igv-user-feedback div:last-child {
+    width: 100%;
+    height: calc(100% - 24px);
+    border-width: 0; }
+    .igv-user-feedback div:last-child div {
+      width: auto;
+      height: auto;
+      margin: 8px; }
+
 .igv-color-swatch {
   display: flex;
   flex-flow: row;
@@ -46,7 +104,6 @@
   justify-content: flex-start;
   align-items: center; }
   .igv-generic-container div:first-child {
-    padding-right: 8px;
     cursor: move;
     display: flex;
     flex-flow: row;
@@ -56,16 +113,335 @@
     height: 24px;
     width: 100%;
     background-color: #dddddd; }
-    .igv-generic-container div:first-child i.fa {
-      cursor: pointer;
-      margin-right: 4px;
+    .igv-generic-container div:first-child i {
       display: block;
-      color: #5f5f5f; }
-    .igv-generic-container div:first-child i.fa:hover,
-    .igv-generic-container div:first-child i.fa:focus,
-    .igv-generic-container div:first-child i.fa:active {
+      color: #5f5f5f;
       cursor: pointer;
-      color: #0f0f0f; }
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      margin-bottom: 4px; }
+
+.igv-generic-dialog-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 200px;
+  border-color: #7F7F7F;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  z-index: 2048;
+  background-color: white;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-generic-dialog-container .igv-generic-dialog-header {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 24px;
+    cursor: move;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-color: #7F7F7F;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    background-color: #eee; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: 12px;
+      width: 12px;
+      color: #7F7F7F; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
+      cursor: pointer;
+      color: #444; }
+  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
+    color: #373737;
+    width: 95%;
+    height: 24px;
+    line-height: 24px;
+    text-align: left;
+    margin-top: 8px;
+    padding-left: 8px;
+    overflow-wrap: break-word;
+    background-color: white; }
+  .igv-generic-dialog-container .igv-generic-dialog-label-input {
+    margin-top: 8px;
+    width: 95%;
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    padding-left: 8px;
+    background-color: white;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
+      width: 30%;
+      height: 100%;
+      font-size: 16px;
+      text-align: right;
+      padding-right: 8px;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      width: 50%;
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-input {
+    margin-top: 8px;
+    width: calc(100% - 16px);
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
+      margin-top: 32px;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      width: 75px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-color: transparent;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 2px; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
+      margin-left: 32px;
+      margin-right: 0;
+      background-color: #5ea4e0; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
+      margin-left: 0;
+      margin-right: 32px;
+      background-color: #c4c4c4; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
+      cursor: pointer;
+      background-color: #3b5c7f; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
+      cursor: pointer;
+      background-color: #7f7f7f; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok {
+    width: 100%;
+    height: 36px;
+    margin-top: 32px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div {
+      width: 98px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: medium;
+      font-weight: 400;
+      border-color: white;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+      background-color: #2B81AF; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {
+      cursor: pointer;
+      background-color: #25597f; }
+
+.igv-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 128px;
+  z-index: 4096;
+  font-family: "Open Sans", sans-serif;
+  font-size: small;
+  font-weight: 400;
+  color: #4b4b4b;
+  background: white;
+  border-radius: 4px;
+  border-color: #7F7F7F;
+  border-style: solid;
+  border-width: thin;
+  display: none; }
+
+.igv-popover-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  background-color: #eee; }
+  .igv-popover-header div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: #7F7F7F; }
+  .igv-popover-header div:hover {
+    cursor: pointer;
+    color: #444; }
+
+.igv-popover-track-popup-content {
+  position: relative;
+  top: 0;
+  left: 0;
+  max-height: 384px;
+  overflow-x: hidden;
+  overflow-y: auto; }
+
+.igv-popover-name-value {
+  cursor: default;
+  text-wrap: none;
+  white-space: nowrap;
+  max-width: 384px; }
+
+.igv-popover-name {
+  font-weight: bold;
+  padding-right: 4px;
+  float: left; }
+
+.igv-popover-value {
+  padding-left: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 256px;
+  display: inline-block; }
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: #7F7F7F; }
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444; }
+
+.igv-trackgear-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 128px;
+  z-index: 4096;
+  cursor: pointer;
+  font-family: "Open Sans", sans-serif;
+  font-size: small;
+  font-weight: 400;
+  color: #4b4b4b;
+  background: white;
+  border-radius: 4px;
+  border-color: #7F7F7F;
+  border-style: solid;
+  border-width: thin; }
+
+.igv-trackgear-popover-header {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  background-color: #eee; }
+  .igv-trackgear-popover-header div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: #7F7F7F; }
+  .igv-trackgear-popover-header div:hover {
+    cursor: pointer;
+    color: #444; }
+
+.igv-trackgear-popover-check-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  background-color: transparent; }
+  .igv-trackgear-popover-check-container div {
+    padding-top: 2px;
+    padding-left: 8px; }
+  .igv-trackgear-popover-check-container div:first-child {
+    width: 12px;
+    height: 12px; }
+    .igv-trackgear-popover-check-container div:first-child svg {
+      max-width: 100%;
+      height: auto; }
 
 .igvControlDiv {
   position: relative; }
@@ -207,7 +583,9 @@
       border-color: #bfbfbf;
       background-color: white; }
     .igv-locus-size-group .igv-search-container div {
-      height: 100%; }
+      cursor: pointer;
+      height: 16px;
+      width: 16px; }
   .igv-locus-size-group .igv-windowsizepanel-content-div {
     margin-left: 4px;
     user-select: none; }
@@ -254,11 +632,13 @@
       margin-left: unset;
       margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: unset;
       margin-right: 8px; }
     .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
-      height: auto;
+      height: 24px;
+      width: 24px;
       margin-left: 8px;
       margin-right: unset; }
     .igv-nav-bar-right-container .igv-zoom-widget div:nth-child(even) {
@@ -442,39 +822,36 @@
   border-right-style: solid;
   border-right-width: 1px; }
 
-.igv-viewport-fa-close {
+.igv-multi-locus-panel-close-container {
   position: absolute;
   top: 4px;
   right: 4px;
-  font-size: 16px;
+  width: 16px;
+  height: 16px;
   color: #666666;
   z-index: 1000; }
 
-.igv-viewport-fa-close:hover {
+.igv-multi-locus-panel-close-container:hover {
   cursor: pointer;
   color: #434343; }
 
-.igv-viewport-content-ruler-div {
+.igv-multi-locus-panel-label-div {
   position: absolute;
   left: 50%;
   top: 25%;
   transform: translate(-50%, -25%);
   font-family: "Open Sans", sans-serif;
-  font-size: 8px;
-  font-weight: 200;
+  font-size: 12px;
+  font-weight: 400;
   text-align: center;
   min-width: 16px;
   z-index: 64;
-  color: #0066ff;
+  color: #373737;
   background-color: white;
   padding: 1px; }
 
-.igv-viewport-content-ruler-div:hover,
-.igv-viewport-content-ruler-div:focus,
-.igv-viewport-content-ruler-div:active {
-  cursor: pointer;
-  color: white;
-  background-color: #0066ff; }
+.igv-multi-locus-panel-label-div:hover {
+  cursor: pointer; }
 
 .igv-viewport-ruler {
   cursor: pointer;
@@ -492,12 +869,14 @@
   text-align: center; }
 
 .igv-viewport-spinner {
-  pointer-events: none;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1024;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
   color: #737373; }
 
 .igv-ruler-sweeper-div {
@@ -518,18 +897,6 @@
   height: 100%;
   background: white;
   text-align: center; }
-  .igv-right-hand-gutter i {
-    position: absolute;
-    top: 0;
-    right: 0;
-    padding-right: 6px;
-    font-size: 20px;
-    cursor: pointer;
-    color: grey; }
-  .igv-right-hand-gutter i:hover,
-  .igv-right-hand-gutter i:focus,
-  .igv-right-hand-gutter i:active {
-    color: #333333; }
 
 .igv-left-hand-gutter {
   position: absolute;
@@ -538,27 +905,6 @@
   height: 100%; }
   .igv-left-hand-gutter canvas {
     position: absolute; }
-
-.igv-track-menu-container {
-  background-color: white;
-  border-bottom-left-radius: 4px;
-  border-bottom-right-radius: 4px; }
-  .igv-track-menu-container div {
-    padding-left: 4px;
-    padding-right: 4px;
-    padding-top: 2px;
-    padding-bottom: 2px;
-    background-color: white; }
-    .igv-track-menu-container div i {
-      padding-right: 2px; }
-  .igv-track-menu-container div:hover,
-  .igv-track-menu-container div:focus,
-  .igv-track-menu-container div:active {
-    cursor: pointer;
-    background-color: #efefef; }
-  .igv-track-menu-container a {
-    color: inherit;
-    text-decoration: none; }
 
 .igv-track-menu-border-top {
   border-top-color: #a2a2a2;
@@ -741,322 +1087,10 @@
   border-width: thin;
   background-color: #7f7f7f; }
 
-.igv-user-feedback {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  width: 36em;
-  height: 27em;
-  margin-top: -9em;
-  /*set to a negative number 1/2 of your height*/
-  margin-left: -15em;
-  /*set to a negative number 1/2 of your width*/
-  background-color: white;
-  border-color: #a2a2a2;
-  border-style: solid;
-  border-width: thin;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 400;
-  color: #444; }
-  .igv-user-feedback div:first-child {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    height: 32px;
-    border-bottom-color: #a2a2a2;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: white; }
-    .igv-user-feedback div:first-child i {
-      font-size: 20px; }
-    .igv-user-feedback div:first-child i:first-child {
-      position: absolute;
-      top: 0;
-      left: 0;
-      padding: 8px;
-      color: red; }
-    .igv-user-feedback div:first-child i:last-child {
-      position: absolute;
-      top: 0;
-      right: 0;
-      padding: 8px;
-      cursor: pointer;
-      color: grey; }
-    .igv-user-feedback div:first-child i:last-child:hover,
-    .igv-user-feedback div:first-child i:last-child:focus,
-    .igv-user-feedback div:first-child i:last-child:active {
-      color: #333333; }
-  .igv-user-feedback div:last-child {
-    padding-left: 48px;
-    padding-top: 8px;
-    padding-right: 48px;
-    padding-bottom: 8px;
-    position: absolute;
-    top: 33px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: white; }
-
 .igv-ellipsis {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; }
-
-.igv-generic-dialog-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 300px;
-  height: 200px;
-  font-family: "Open Sans", sans-serif;
-  font-size: medium;
-  font-weight: 200;
-  border-color: #7F7F7F;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  z-index: 2048;
-  background-color: white;
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center; }
-  .igv-generic-dialog-container .igv-generic-dialog-header {
-    width: 100%;
-    height: 24px;
-    cursor: move;
-    border-color: #c4c4c4;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-style: solid;
-    border-width: thin;
-    background-color: #c4c4c4;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-header div {
-      height: 24px;
-      width: 16px;
-      margin-right: 6px;
-      text-align: center;
-      line-height: 24px;
-      color: #444;
-      font-size: medium; }
-    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
-      cursor: pointer; }
-  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
-    color: #373737;
-    width: 95%;
-    height: 24px;
-    line-height: 24px;
-    text-align: left;
-    margin-top: 8px;
-    padding-left: 8px;
-    overflow-wrap: break-word;
-    background-color: white; }
-  .igv-generic-dialog-container .igv-generic-dialog-label-input {
-    margin-top: 8px;
-    width: 95%;
-    height: 24px;
-    color: #373737;
-    line-height: 24px;
-    padding-left: 8px;
-    background-color: white;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
-      width: 30%;
-      height: 100%;
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
-      display: block;
-      height: 100%;
-      width: 100%;
-      padding-left: 4px;
-      font-family: "Open Sans", sans-serif;
-      font-weight: 400;
-      color: #373737;
-      text-align: left;
-      outline: none;
-      border-style: solid;
-      border-width: thin;
-      border-color: #7F7F7F;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
-      width: 50%;
-      font-size: 16px; }
-  .igv-generic-dialog-container .igv-generic-dialog-input {
-    margin-top: 8px;
-    width: calc(100% - 16px);
-    height: 24px;
-    color: #373737;
-    line-height: 24px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-input input {
-      display: block;
-      height: 100%;
-      width: 100%;
-      padding-left: 4px;
-      font-family: "Open Sans", sans-serif;
-      font-weight: 400;
-      color: #373737;
-      text-align: left;
-      outline: none;
-      border-style: solid;
-      border-width: thin;
-      border-color: #7F7F7F;
-      background-color: white; }
-    .igv-generic-dialog-container .igv-generic-dialog-input input {
-      font-size: 16px; }
-  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
-    width: 100%;
-    height: 28px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
-      margin-top: 32px;
-      color: white;
-      font-family: "Open Sans", sans-serif;
-      font-size: 14px;
-      font-weight: 200;
-      width: 75px;
-      height: 28px;
-      line-height: 28px;
-      text-align: center;
-      border-color: transparent;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 2px; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
-      margin-left: 32px;
-      margin-right: 0;
-      background-color: #5ea4e0; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
-      margin-left: 0;
-      margin-right: 32px;
-      background-color: #c4c4c4; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
-      cursor: pointer;
-      background-color: #3b5c7f; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
-      cursor: pointer;
-      background-color: #7f7f7f; }
-  .igv-generic-dialog-container .igv-generic-dialog-ok {
-    width: 100%;
-    height: 36px;
-    margin-top: 32px;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok div {
-      width: 98px;
-      height: 36px;
-      line-height: 36px;
-      text-align: center;
-      color: white;
-      font-family: "Open Sans", sans-serif;
-      font-size: medium;
-      font-weight: 200;
-      border-color: white;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 4px;
-      background-color: #2B81AF; }
-    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {
-      cursor: pointer;
-      background-color: #25597f; }
-
-.igv-popover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  min-width: 128px;
-  z-index: 4096;
-  font-family: "Open Sans", sans-serif;
-  font-size: small;
-  font-weight: 400;
-  color: #444;
-  background: white;
-  border-radius: 4px;
-  border-color: #7F7F7F;
-  border-style: solid;
-  border-width: thin;
-  display: none; }
-
-.igv-popover-header {
-  position: relative;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 20px;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-color: #7F7F7F;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-  background-color: #eee; }
-  .igv-popover-header div {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    height: 100%;
-    width: 16px;
-    text-align: center;
-    line-height: 100%;
-    cursor: pointer;
-    color: #444;
-    font-size: small; }
-  .igv-popover-header div:hover {
-    color: white; }
-
-.igv-popover-track-popup-content {
-  position: relative;
-  top: 0;
-  left: 0;
-  max-height: 384px;
-  overflow-x: hidden;
-  overflow-y: auto; }
-
-.igv-popover-name-value {
-  cursor: default;
-  text-wrap: none;
-  white-space: nowrap;
-  max-width: 384px; }
-
-.igv-popover-name {
-  font-weight: bold;
-  padding-right: 4px;
-  float: left; }
-
-.igv-popover-value {
-  padding-left: 4px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 256px;
-  display: inline-block; }
 
 .igv-spinner-container {
   color: #3f3f3f;
@@ -1067,8 +1101,13 @@
   font-size: 24px;
   z-index: 512; }
 
+.igv-fa-check-visible {
+  color: inherit;
+  padding-right: 2px; }
+
 .igv-fa-check-hidden {
-  color: rgba(255, 255, 255, 0); }
+  color: transparent;
+  padding-right: 2px; }
 
 .validateTips {
   border: 1px solid transparent;
