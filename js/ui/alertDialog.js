@@ -29,34 +29,36 @@
 var igv = (function (igv) {
 
     igv.AlertDialog = function ($parent, browser) {
-        var self = this,
-            $header,
-            $ok_container;
 
         this.$parent = $parent;
         this.browser = browser;
 
-        // dialog container
-        this.$container = $("<div>", { class:'igv-generic-dialog-container' });
+        // container
+        this.$container = $("<div>", { class:'igv-alert-dialog-container' });
         $parent.append(this.$container);
         this.$container.offset( { left:0, top:0 } );
 
-        // dialog header
-        $header = $("<div>", { class:'igv-generic-dialog-header' });
+        // header
+        let $header = $("<div>");
         this.$container.append($header);
-        igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.$label.html('');
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
 
-        // dialog label
-        this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
-        this.$container.append(this.$label);
-        self.$label.html('');
+        // body container
+        let $div = $("<div>", { id:'igv-alert-dialog-body' });
+        this.$container.append( $div );
+
+        // body copy
+        this.$body = $("<div>", { id:'igv-alert-dialog-body-copy' });
+        $div.append( this.$body );
+
+        let self = this;
+        // igv.attachDialogCloseHandlerWithParent($header, function () {
+        //     self.$body.html('');
+        //     self.$container.offset( { left:0, top:0 } );
+        //     self.$container.hide();
+        // });
 
         // ok container
-        $ok_container = $("<div>", { class:'igv-generic-dialog-ok' });
+        let $ok_container = $("<div>");
         this.$container.append($ok_container);
 
         // ok
@@ -66,24 +68,23 @@ var igv = (function (igv) {
         this.$ok.text('OK');
 
         this.$ok.on('click', function () {
-            self.$label.html('');
+            self.$body.html('');
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
 
-        //this.$container.draggable({ handle:$header.get(0) });
         igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();
     };
 
     igv.AlertDialog.prototype.configure = function (config) {
-        this.$label.html(config.label);
+        this.$body.html(config.label);
     };
 
     igv.AlertDialog.prototype.presentMessageWithCallback = function (message, callback) {
 
-        this.$label.text(message);
+        this.$body.text(message);
 
         let css =
             {
@@ -101,7 +102,7 @@ var igv = (function (igv) {
 
             callback('OK');
 
-            self.$label.html('');
+            self.$body.html('');
             self.$container.offset( { left:0, top:0 } );
             self.$container.hide();
         });
