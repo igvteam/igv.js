@@ -335,88 +335,61 @@ var igv = (function (igv) {
     }
 
 
-    igv.Browser.prototype.loadGenome = function (idOrConfig, initialLocus) {
+    igv.Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 
-        var self = this,
-            genomeChange,
-            genomeConfig;
+        var self = this;
 
         // idOrConfig might be json
         if (igv.isString(idOrConfig) && idOrConfig.startsWith("{")) {
             try {
                 idOrConfig = JSON.parse(idOrConfig);
             } catch (e) {
-                console.error(e);
                 // Apparently its not json,  just continue
             }
         }
 
-        return expandReference(idOrConfig)
+        const genomeConfig = await expandReference(idOrConfig)
+        const genome = await igv.GenomeUtils.loadGenome(genomeConfig)
+        const genomeChange = self.genome && (self.genome.id !== genome.id);
+        self.genome = genome;
+        self.$current_genome.text(genome.id || '');
+        self.$current_genome.attr('title', genome.id || '');
+        self.chromosomeSelectWidget.update(genome);
+        if (genomeChange) {
+            self.removeAllTracks();
+        }
+        self.genome = genome;
 
-            .then(function (config) {
+        let genomicStateList
+        try {
+            genomicStateList = await self.search(getInitialLocus(initialLocus, genome), true)
+        }
+        catch (error) {
+            // Couldn't find initial locus
+            console.error(error);
+            genomicStateList = await self.search(self.genome.getHomeChromosomeName());
+        }
+        self.genomicStateList = genomicStateList;
+        if (self.genomicStateList.length > 0) {
+            if (!self.rulerTrack && false !== self.config.showRuler) {
+                self.rulerTrack = new igv.RulerTrack(self);
+                self.addTrack(self.rulerTrack);
+            }
+        } else {
+            const errorString = 'Unrecognized locus ' + self.config.locus;
+            self.presentAlert(errorString, undefined);
+        }
 
-                genomeConfig = config;
-
-                return igv.GenomeUtils.loadGenome(config);
-            })
-
-            .then(function (genome) {
-
-                genomeChange = self.genome && (self.genome.id !== genome.id);
-                self.genome = genome;
-                self.$current_genome.text(genome.id || '');
-                self.$current_genome.attr('title', genome.id || '');
-                self.chromosomeSelectWidget.update(genome);
-
-                if (genomeChange) {
-                    self.removeAllTracks();
-                }
-                return genome;
-            })
-
-            .then(function (genome) {
-                self.genome = genome;
-                return self.search(getInitialLocus(initialLocus, genome), true);
-            })
-
-            .catch(function (error) {
-                // Couldn't find initial locus
-                console.error(error);
-                return self.search(self.genome.getHomeChromosomeName());
-            })
-
-            .then(function (genomicStateList) {
-
-                self.genomicStateList = genomicStateList;
-
-                if (self.genomicStateList.length > 0) {
-
-                    if (!self.rulerTrack && false !== self.config.showRuler) {
-                        self.rulerTrack = new igv.RulerTrack(self);
-                        self.addTrack(self.rulerTrack);
-                    }
-
-                } else {
-                    let errorString = 'Unrecognized locus ' + self.config.locus;
-                    self.presentAlert(errorString, undefined);
-                }
-
-                if (genomeConfig.tracks) {
-                    return self.loadTrackList(genomeConfig.tracks);
-                } else {
-                    return [];
-                }
-            })
-            .then(function (ignore) {
-
-                self.resize();    // Force recomputation and repaint
-
-                return self.genome;
-            })
+        if (genomeConfig.tracks) {
+            await self.loadTrackList(genomeConfig.tracks);
+        }
+        
+        self.resize();    // Force recomputation and repaint
+        return self.genome;
 
 
         // Expand a genome id to a reference object, if needed
-        function expandReference(conf) {
+        async function expandReference(conf) {
 
             var genomeID;
 
@@ -432,19 +405,16 @@ var igv = (function (igv) {
             }
 
             if (genomeID) {
-                return igv.GenomeUtils.getKnownGenomes()
+                const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
 
-                    .then(function (knownGenomes) {
-
-                        var reference = knownGenomes[genomeID];
-                        if (!reference) {
-                            self.presentAlert("Uknown genome id: " + genomeID, undefined);
-                        }
-                        return reference;
-                    })
+                var reference = knownGenomes[genomeID];
+                if (!reference) {
+                    self.presentAlert("Uknown genome id: " + genomeID, undefined);
+                }
+                return reference;
             }
             else {
-                return Promise.resolve(conf);
+                return conf;
             }
         }
 
