@@ -115,7 +115,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BamSource.prototype.getAlignments = function (chr, bpStart, bpEnd) {
+    igv.BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
 
         const self = this;
         const genome = this.genome;
@@ -123,51 +123,49 @@ var igv = (function (igv) {
 
         if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
 
-            return Promise.resolve(self.alignmentContainer);
+            return self.alignmentContainer;
 
         } else {
 
-            return self.bamReader.readAlignments(chr, bpStart, bpEnd)
+            const alignmentContainer = await self.bamReader.readAlignments(chr, bpStart, bpEnd)
 
-                .then(function (alignmentContainer) {
+            const maxRows = self.config.maxRows || 500;
+            let alignments = alignmentContainer.alignments;
 
-                    const maxRows = self.config.maxRows || 500;
-                    let alignments = alignmentContainer.alignments;
+            if (!self.viewAsPairs) {
+                alignments = unpairAlignments([{alignments: alignments}]);
+            }
 
-                    if (!self.viewAsPairs) {
-                        alignments = unpairAlignments([{alignments: alignments}]);
-                    }
+            const hasAlignments = alignments.length > 0;
 
-                    const hasAlignments = alignments.length > 0;
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows, showSoftClips);
 
-                    alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows, showSoftClips);
+            alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
-                    alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
+            self.alignmentContainer = alignmentContainer;
 
-                    self.alignmentContainer = alignmentContainer;
+            if (!hasAlignments) {
 
-                    if (!hasAlignments) {
+                return alignmentContainer;
 
-                        return alignmentContainer;
+            }
+            else {
 
-                    }
-                    else {
+                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
 
-                        return genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+                if (sequence) {
 
-                            .then(function (sequence) {
+                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                    alignmentContainer.sequence = sequence;           // TODO -- fix this
 
-                                if (sequence) {
+                    return alignmentContainer;
+                }
+                else {
+                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+                }
 
-                                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                                    alignmentContainer.sequence = sequence;           // TODO -- fix this
+            }
 
-
-                                    return alignmentContainer;
-                                }
-                            })
-                    }
-                })
         }
 
     }
