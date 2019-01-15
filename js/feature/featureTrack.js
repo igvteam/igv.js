@@ -137,9 +137,7 @@ var igv = (function (igv) {
         }
 
         FeatureTrack.prototype.supportsWholeGenome = function () {
-            return
-            this.config.indexed === false &&
-                this.config.supportsWholeGenome !== false
+            return this.config.indexed === false && this.config.supportsWholeGenome !== false
         }
 
         FeatureTrack.prototype.getFileHeader = function () {
