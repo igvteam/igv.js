@@ -1,10 +1,11 @@
 
 $igv-alert-dialog-width: 300px;
-$igv-alert-dialog-height: 220px;
+$igv-alert-dialog-height: 256px;
 
 $igv-alert-dialog-header-height: 24px;
-$igv-alert-dialog-ok-container-height: 48px;
+$igv-alert-dialog-ok-container-height: 64px;
 $igv-alert-dialog-ok-button-height: 36px;
+$igv-alert-dialog-body-copy-margin: 16px;
 
 .igv-alert-dialog-container {
 
@@ -20,7 +21,7 @@ $igv-alert-dialog-ok-button-height: 36px;
   border-width: thin;
 
   font-family: $igv-default-font-face;
-  font-size: medium;
+  font-size: 15px;
   font-weight: 400;
 
   z-index: 2048;
@@ -36,10 +37,15 @@ $igv-alert-dialog-ok-button-height: 36px;
   // header
   div:first-child {
 
-    cursor: move;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
 
     width: 100%;
     height: $igv-alert-dialog-header-height;
+    cursor: move;
 
     border-top-left-radius: $igv-trackgear-popover-border-radius;
     border-top-right-radius: $igv-trackgear-popover-border-radius;
@@ -48,12 +54,6 @@ $igv-alert-dialog-ok-button-height: 36px;
     border-bottom-width: thin;
 
     background-color: #eee;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
 
     div {
       margin-right: 4px;
@@ -71,13 +71,32 @@ $igv-alert-dialog-ok-button-height: 36px;
   }
 
   // body container
-  div {
+  #igv-alert-dialog-body {
     color: $igv-dark-grey-color;
 
     width: 100%;
     height: calc(100% - #{$igv-alert-dialog-header-height} - #{$igv-alert-dialog-ok-container-height});
 
-    background-color: rgba(173, 255, 47, 0.51);
+    overflow-y: scroll;
+
+    #igv-alert-dialog-body-copy {
+      cursor: pointer;
+      //user-select: none;
+
+      margin: $igv-alert-dialog-body-copy-margin;
+
+      width: auto;
+      height: auto;
+
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      overflow-wrap: break-word;
+      word-break: break-word;
+
+      background-color: white;
+      border: unset;
+    }
   }
 
   // ok - container
