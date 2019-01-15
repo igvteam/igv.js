@@ -41,12 +41,12 @@ var igv = (function (igv) {
      * @param config
      * @constructor
      */
-    igv.CramReader = function (config, genome) {
+    igv.CramReader = function (config, genome, browser) {
 
         const self = this;
 
         this.config = config;
-
+        this.browser = browser;
         this.genome = genome;
 
         this.cramFile = new gmodCRAM.CramFile({
@@ -143,6 +143,7 @@ var igv = (function (igv) {
     igv.CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         var self = this;
+        const browser = this.browser
 
         return this.getHeader()
 
@@ -190,7 +191,15 @@ var igv = (function (igv) {
 
                             alignmentContainer.finish();
                             return alignmentContainer;
-                        });
+                        })
+                        .catch(function (error) {
+                            let message = error.message;
+                            if(message && message.indexOf("MD5") >= 0) {
+                                message += ". Is this the correct genome for the loaded CRAM?</br>"
+                            }
+                            browser.presentAlert(message)
+                            throw error
+                        })
                 }
 
                 function decodeCramRecord(record, chrNames) {
