@@ -36,13 +36,13 @@ var igv = (function (igv) {
         this.$parent = $parent;
         this.browser = browser;
 
-        // dialog container
-        this.$container = $("<div>", { class:'igv-generic-dialog-container' });
+        // container
+        this.$container = $("<div>", { class:'igv-alert-dialog-container' });
         $parent.append(this.$container);
         this.$container.offset( { left:0, top:0 } );
 
-        // dialog header
-        $header = $("<div>", { class:'igv-generic-dialog-header' });
+        // header
+        $header = $("<div>");
         this.$container.append($header);
         igv.attachDialogCloseHandlerWithParent($header, function () {
             self.$label.html('');
@@ -50,13 +50,13 @@ var igv = (function (igv) {
             self.$container.hide();
         });
 
-        // dialog label
-        this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
+        // body container
+        this.$label = $("<div>");
         this.$container.append(this.$label);
         self.$label.html('');
 
         // ok container
-        $ok_container = $("<div>", { class:'igv-generic-dialog-ok' });
+        $ok_container = $("<div>");
         this.$container.append($ok_container);
 
         // ok
@@ -71,7 +71,6 @@ var igv = (function (igv) {
             self.$container.hide();
         });
 
-        //this.$container.draggable({ handle:$header.get(0) });
         igv.makeDraggable(this.$container.get(0), $header.get(0));
 
         this.$container.hide();

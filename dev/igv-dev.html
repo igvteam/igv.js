@@ -194,9 +194,11 @@
                         queryParametersSupported: true,
                     };
 
-                igv.createBrowser(document.getElementById('igvDiv'), options)
+                igv
+                    .createBrowser(document.getElementById('igvDiv'), options)
                     .then(function (browser) {
                         igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
+                        browser.presentAlert("i do realize this is an extremely long string for an alert message but simply must get to the bottom of this tiresome bug. Thank your for bearing with me.");
                         return browser;
                     })
 
