@@ -29,7 +29,14 @@ module.exports = function (grunt) {
         babel: {
             options: {
                 sourceMap: true,
-                presets: ['@babel/preset-env'],
+                presets: [
+                    [
+                        "@babel/preset-env",
+                        {
+                            "useBuiltIns": "entry"
+                        }
+                    ]
+                ],
                 plugins: [["transform-remove-console", {"exclude": ["error", "warn"]}]]
 
             },
