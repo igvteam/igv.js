@@ -622,15 +622,13 @@ var igv = (function (igv) {
     }
 
     function maxContentHeight(viewports) {
-        return Math.max(viewports.map(function (viewport) {
-            return viewport.getContentHeight();
-        }))
+        const heights = viewports.map((viewport)  => viewport.getContentHeight());
+        return Math.max(...heights);
     }
 
     function minContentHeight(viewports) {
-        return Math.min(viewports.map(function (viewport) {
-            return viewport.getContentHeight();
-        }))
+        const heights = viewports.map((viewport)  => viewport.getContentHeight());
+        return Math.min(...heights);
     }
 
     /**
