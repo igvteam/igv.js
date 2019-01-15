@@ -145,8 +145,6 @@ svg {
       margin: 16px;
       width: auto;
       height: auto;
-      overflow-x: hidden;
-      overflow-y: scroll;
       overflow-wrap: break-word;
       word-break: break-word;
       background-color: white;
