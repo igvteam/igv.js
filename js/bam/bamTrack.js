@@ -129,36 +129,38 @@ var igv = (function (igv) {
                 }
             });
 
-        BAMTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
+        BAMTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
             const self = this;
 
-            const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
+            return this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
-            if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
-                if (undefined === self.minFragmentLength) {
-                    self.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
-                }
-                if (undefined === self.maxFragmentLength) {
-                    self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
-                }
-            }
+                .then(function (alignmentContainer) {
 
-            const sort = self.sortObjects[viewport.genomicState.id];
+                    if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
+                        if (undefined === self.minFragmentLength) {
+                            self.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
+                        }
+                        if (undefined === self.maxFragmentLength) {
+                            self.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
+                        }
+                    }
 
-            if (sort) {
-                if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
+                    const sort = self.sortObjects[viewport.genomicState.id];
 
-                    self.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
+                    if (sort) {
+                        if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
 
-                } else {
-                    delete self.sortObjects[viewport.genomicState.id];
-                }
-            }
+                            self.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
 
-            return alignmentContainer;
+                        } else {
+                            delete self.sortObjects[viewport.genomicState.id];
+                        }
+                    }
 
+                    return alignmentContainer;
 
+                });
         };
 
         BAMTrack.filters = {
@@ -835,12 +837,12 @@ var igv = (function (igv) {
                     const isSoftClip = 'S' === block.type;
 
                     const strokeOutline =
-                        alignment.mq <= 0 ||
+                        alignment.mq <= 0  ||
                         self.highlightedAlignmentReadNamed === alignment.readName ||
                         isSoftClip;
 
                     let blockOutlineColor = outlineColor;
-                    if (self.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
+                    if(self.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
                     else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
@@ -898,7 +900,7 @@ var igv = (function (igv) {
                         }
                         igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
-                        if (strokeOutline) {
+                        if(strokeOutline) {
                             igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
                         }
                     }
@@ -1310,6 +1312,7 @@ var igv = (function (igv) {
         "chr47": "rgb(0, 214, 143)",
         "chr48": "rgb(20, 255, 177)",
     }
+
 
 
     return igv;
