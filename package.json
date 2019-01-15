@@ -35,7 +35,10 @@
     "type": "git",
     "url": "git+https://github.com/igvteam/igv.js.git"
   },
-  "dependencies": {},
+  "browserslist": "> 5%, not dead",
+  "dependencies": {
+    "regenerator": "^0.13.3"
+  },
   "devDependencies": {
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.3",
