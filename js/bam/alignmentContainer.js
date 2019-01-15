@@ -305,7 +305,7 @@ var igv = (function (igv) {
         this.total = 0;
     }
 
-    const threshold = 0.2;
+    const t = 0.2;
     const qualityWeight = true;
 
 
@@ -313,7 +313,7 @@ var igv = (function (igv) {
 
         var myself = this,
             mismatchQualitySum,
-            threshold = threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
+             threshold = t * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
