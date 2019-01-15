@@ -27,7 +27,9 @@
 var igv = (function (igv) {
 
 
-    igv.BamSource = function (config, genome) {
+    igv.BamSource = function (config, browser) {
+
+        const genome = browser.genome;
 
         this.config = config;
         this.genome = genome;
@@ -50,7 +52,7 @@ var igv = (function (igv) {
         } else if ("shardedBam" === config.sourceType) {
             this.bamReader = new igv.ShardedBamReader(config, genome);
         } else if ("cram" === config.format) {
-            this.bamReader = new igv.CramReader(config, genome);
+            this.bamReader = new igv.CramReader(config, genome, browser);
         }
         else {
             if (this.config.indexed === false) {

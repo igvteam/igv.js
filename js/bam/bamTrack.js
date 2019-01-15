@@ -68,7 +68,7 @@ var igv = (function (igv) {
                     config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
                 }
 
-                this.featureSource = new igv.BamSource(config, browser.genome);
+                this.featureSource = new igv.BamSource(config, browser);
 
                 this.maxRows = config.maxRows || 1000;
 
