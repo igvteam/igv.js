@@ -1,0 +1,143 @@
+
+$igv-alert-dialog-width: 300px;
+$igv-alert-dialog-height: 256px;
+
+$igv-alert-dialog-header-height: 24px;
+$igv-alert-dialog-ok-container-height: 64px;
+$igv-alert-dialog-ok-button-height: 36px;
+$igv-alert-dialog-body-copy-margin: 16px;
+
+.igv-alert-dialog-container {
+
+  position: absolute;
+  top: 0;
+  left:0;
+  width:$igv-alert-dialog-width;
+  height:$igv-alert-dialog-height;
+
+  border-color: $igv-trackgear-grey-color;
+  border-radius: $igv-trackgear-popover-border-radius;
+  border-style: solid;
+  border-width: thin;
+
+  font-family: $igv-default-font-face;
+  font-size: 15px;
+  font-weight: 400;
+
+  z-index: 2048;
+
+  background-color: white;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  // header
+  div:first-child {
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+
+    width: 100%;
+    height: $igv-alert-dialog-header-height;
+    cursor: move;
+
+    border-top-left-radius: $igv-trackgear-popover-border-radius;
+    border-top-right-radius: $igv-trackgear-popover-border-radius;
+    border-bottom-color: $igv-trackgear-grey-color;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+
+    background-color: #eee;
+
+    div {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: 12px;
+      width: 12px;
+      color: $igv-trackgear-grey-color;
+    }
+
+    div:hover {
+      cursor: pointer;
+      color: #444;
+    }
+
+  }
+
+  // body container
+  #igv-alert-dialog-body {
+    color: $igv-dark-grey-color;
+
+    width: 100%;
+    height: calc(100% - #{$igv-alert-dialog-header-height} - #{$igv-alert-dialog-ok-container-height});
+
+    overflow-y: scroll;
+
+    #igv-alert-dialog-body-copy {
+      cursor: pointer;
+      //user-select: none;
+
+      margin: $igv-alert-dialog-body-copy-margin;
+
+      width: auto;
+      height: auto;
+
+      overflow-x: hidden;
+      overflow-y: scroll;
+
+      overflow-wrap: break-word;
+      word-break: break-word;
+
+      background-color: white;
+      border: unset;
+    }
+  }
+
+  // ok - container
+  div:last-child {
+
+    width: 100%;
+    height: $igv-alert-dialog-ok-container-height;
+    background-color: white;
+
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
+
+    // ok - button
+    div {
+      width: 98px;
+      height: $igv-alert-dialog-ok-button-height;
+
+      line-height: $igv-alert-dialog-ok-button-height;
+      text-align: center;
+
+      color: white;
+      font-family: $igv-default-font-face;
+      font-size: medium;
+      font-weight: 400;
+
+      border-color: #2B81AF;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+      background-color: #2B81AF;
+    }
+
+    div:hover {
+      cursor: pointer;
+      border-color: #25597f;
+      background-color: #25597f;
+    }
+
+  }
+
+}
