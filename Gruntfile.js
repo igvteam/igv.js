@@ -1,3 +1,5 @@
+const webpackConfig = require('./webpack.config.js');
+
 module.exports = function (grunt) {
 
     // 1. All configuration goes here
@@ -26,42 +28,26 @@ module.exports = function (grunt) {
                 }
             }
         },
-        babel: {
-            options: {
-                sourceMap: true,
-                presets: [
-                    [
-                        "@babel/preset-env",
-                        {
-                            "targets": {
-                                "browsers": [
-                                    "> 1%",
-                                    "last 2 versions"
-                                ]
-                            },
-                            useBuiltIns: "usage",
-                        }
-                    ]
-                ],
-                plugins: [["transform-remove-console", {"exclude": ["error", "warn"]}]]
 
+        webpack: {
+            options: {
+                stats: !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
             },
-            dist: {
-                files: [
-                    {
-                        expand: true,
-                        cwd: 'js/',
-                        src: ['**/*.js'],
-                        dest: 'es5/'
-                    }
-                ]
-            }
+            prod: webpackConfig,
+            dev: Object.assign({ watch: true }, webpackConfig)
+        },
+
+        copy: {
+            igvjs: {
+                src: 'dist/igv.min.js',
+                dest: 'dist/igv.js',
+            },
         },
 
         concat: {
             igv: {
                 src: [
-                    'wrapper/header.js',
+                    'wrapper/header-cjs.js',
                     'tmp/embedCss.js',
                     'vendor/jquery-3.3.1.slim.js',
                     'vendor/underscore.js',
@@ -71,10 +57,10 @@ module.exports = function (grunt) {
                     'vendor/rbtree.js',
                     'vendor/tdigest.js',
                     'vendor/cram-bundle.js',
-                    'es5/**/*.js',
-                    'wrapper/footer.js'
+                    'js/**/*.js',
+                    'wrapper/footer-cjs.js'
                 ],
-                dest: 'dist/igv.js'
+                dest: 'tmp/igv-cjs.js'
             },
             igv_esm: {
                 src: [
@@ -92,23 +78,6 @@ module.exports = function (grunt) {
                     'wrapper/footer-esm.js'
                 ],
                 dest: 'dist/igv.esm.js'
-            },
-            igv_quick: {
-                src: [
-                    'wrapper/header.js',
-                    'tmp/embedCss.js',
-                    'vendor/jquery-3.3.1.slim.js',
-                    'vendor/underscore.js',
-                    'vendor/zlib_and_gzip.js',
-                    'vendor/inflate.js',
-                    'vendor/jquery.mousewheel.js',
-                    'vendor/rbtree.js',
-                    'vendor/tdigest.js',
-                    'vendor/cram-bundle.js',
-                    'js/**/*.js',
-                    'wrapper/footer.js'
-                ],
-                dest: 'dist/igv.js'
             },
             zlib: {
                 src: [
@@ -157,7 +126,10 @@ module.exports = function (grunt) {
             }
         },
 
-        clean: ['es5', 'tmp']
+        clean: {
+            dist: ['dist'],
+            tmp: ['es5', 'tmp']
+        }
 
     });
 
@@ -166,15 +138,12 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
     grunt.loadNpmTasks('grunt-contrib-connect');
-    grunt.loadNpmTasks('babel-core');
-    grunt.loadNpmTasks('grunt-babel');
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-copy');
+    grunt.loadNpmTasks('grunt-webpack');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['babel', 'concat:css', 'embed-css', 'concat:igv', 'uglify:igv', 'concat:igv_esm', 'uglify:igv_esm', 'clean']);
-
-    grunt.registerTask('quick-build', ['concat:css', 'embed-css', 'concat:igv_quick', 'clean']);
+    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'copy:igvjs']);
 
     grunt.registerTask('doc', ['md2html']);
 
