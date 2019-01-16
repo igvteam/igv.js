@@ -145,6 +145,9 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   top: 0;
   left: 0;
 
+  padding-left: 8px;
+  padding-right: 8px;
+
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -187,7 +190,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     width: 34px;
     height: $igv-navbar-height;
     margin-top:6px;
-    margin-left: 8px;
+    //margin-left: 8px;
     margin-right: 8px;
   }
 
@@ -357,7 +360,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     line-height: $igv-navbar-height;
 
     margin-left: 8px;
-    margin-right: 8px;
+    //margin-right: 8px;
 
     user-select: none;
 
@@ -412,7 +415,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     user-select: none;
 
     margin-left: 16px;
-    margin-right: 8px;
+    //margin-right: 8px;
 
     width: unset;
 
