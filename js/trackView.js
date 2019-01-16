@@ -772,9 +772,9 @@ var igv = (function (igv) {
 
             lastY = page.y;
 
-            $outerScroll.on('mousemove' + namespace, mouseMove);
-            $outerScroll.on('mouseup' + namespace, mouseUp);
-            $outerScroll.on('mouseleave' + namespace, mouseUp);
+            $(document).on('mousemove' + namespace, mouseMove);
+            $(document).on('mouseup' + namespace, mouseUp);
+            $(document).on('mouseleave' + namespace, mouseUp);
 
             // prevents start of horizontal track panning)
             event.stopPropagation();
@@ -792,7 +792,7 @@ var igv = (function (igv) {
         }
 
         function mouseUp(event) {
-            $outerScroll.off(self.namespace);
+            $(document).off(self.namespace);
         }
 
     };
