@@ -128,7 +128,7 @@ module.exports = function (grunt) {
 
         clean: {
             dist: ['dist'],
-            tmp: ['es5', 'tmp']
+            tmp: ['tmp']
         }
 
     });
@@ -143,7 +143,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-webpack');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'copy:igvjs']);
+    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'copy:igvjs', 'clean:tmp']);
 
     grunt.registerTask('doc', ['md2html']);
 
