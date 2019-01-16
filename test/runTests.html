@@ -11,6 +11,7 @@
 
     <script type="text/javascript" src="vendor/qunit.js"></script>
 
+    <script type="text/javascript" src="js/test.js"></script>
     <script type="text/javascript" src="testBigwig.js"></script>
     <script type="text/javascript" src="testBAM.js"></script>
     <script type="text/javascript" src="testBamIndex.js"></script>
@@ -29,7 +30,7 @@
     <script type="text/javascript" src="testTDF.js"></script>
     <script type="text/javascript" src="testSampleInformation.js"></script>
     <script type="text/javascript" src="testHtsgetReader.js"></script>
-    <script type="text/javascript" src="testIgvSession.js"></script>
+    <script type="text/javascript" src="testSessions.js"></script>
     <script type="text/javascript" src="testVariant.js"></script>
     <script type="text/javascript" src="testBrowser.js"></script>
     <script type="text/javascript" src="testUtils.js"></script>
@@ -41,32 +42,7 @@
 <div id="qunit"></div>
 <div id="qunit-fixture"></div>
 <script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
-
-        runBigwigTests();
-        runBAMTests();
-        runBAMIndexTests();
-        runAedTests();
-        runBedTests();
-        runBEDGraphTests();
-        runBufferedReaderTests();
-        runCoverageColoredRenderingTests();
-        runWigTests();
-        runGFFTests();
-        runFastaTests();
-        runSegTests();
-        runTabixTests();
-        runGenomeTests();
-        runTDFTests();
-        runSampleInformationTests();
-        runHtsgetTests();
-        runIgvSessionTests();
-        runVariantTests();
-        runBrowserTests();
-        runUtilTests();
-        runIgvXhrTests();
-        runCRAMTests();
-    });
+    document.addEventListener('DOMContentLoaded', igvtest.runTests);
 </script>
 </body>
 </html>
