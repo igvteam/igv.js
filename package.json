@@ -35,7 +35,7 @@
     "type": "git",
     "url": "git+https://github.com/igvteam/igv.js.git"
   },
-  "browserslist": "> 5%, not dead",
+  "browserslist": "> 1%, not dead",
   "dependencies": {
     "regenerator": "^0.13.3"
   },

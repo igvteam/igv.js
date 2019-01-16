@@ -33,7 +33,13 @@ module.exports = function (grunt) {
                     [
                         "@babel/preset-env",
                         {
-                            "useBuiltIns": "entry"
+                            "targets": {
+                                "browsers": [
+                                    "> 1%",
+                                    "last 2 versions"
+                                ]
+                            },
+                            useBuiltIns: "usage",
                         }
                     ]
                 ],
