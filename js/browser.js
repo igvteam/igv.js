@@ -263,7 +263,7 @@ var igv = (function (igv) {
 
                 const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
 
-                const string = igv.xhr.loadString(urlOrFile)
+                const string = await igv.xhr.loadString(urlOrFile)
 
                 return new igv.XMLSession(string, knownGenomes);
 
