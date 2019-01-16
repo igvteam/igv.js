@@ -21,7 +21,7 @@ module.exports = {
                             ["@babel/preset-env", {
                                 "targets": {
                                     // The % refers to the global coverage of users from browserslist
-                                    "browsers": [ ">1%"]
+                                    "browsers":  ">0.1%"
                                 }
                             }]
                         ]
