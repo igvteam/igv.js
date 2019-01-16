@@ -139,6 +139,14 @@
     "type": "annotation",
     "format": "bed",
     "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
+    "indexed": false,
+    "supportsWholeGenome": true,
+    "name": "Bed - No Index"
+  },
+  {
+    "type": "annotation",
+    "format": "bed",
+    "url": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed",
     "indexURL": "https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx",
     "name": "Bed - Tribble Index"
   },
