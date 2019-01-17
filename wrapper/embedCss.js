@@ -1,7 +1,7 @@
 (function () {
 
     var css =  '_CSS_';
-    
+
     var style = document.createElement('style');
     style.setAttribute('type', 'text/css');
     style.innerHTML = css;
@@ -16,7 +16,9 @@
             beforeChild = child;
         }
     }
+    // document.head.insertBefore(style, beforeChild);
 
+    beforeChild = headChildren[ headChildren.length - 1 ];
     document.head.insertBefore(style, beforeChild);
 
 })();
