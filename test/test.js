@@ -1,8 +1,6 @@
 var igvtest = {
 
     runTests: function () {
-
-
         runBigwigTests();
         runBAMTests();
         runBAMIndexTests();
@@ -26,6 +24,7 @@ var igvtest = {
         runUtilTests();
         runIgvXhrTests();
         runCRAMTests();
+        runCoreTests();
     },
 
     createTrackList:  function (div, file, browser) {
