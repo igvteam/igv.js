@@ -80,14 +80,12 @@ var igv = (function (igv) {
             menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
 
             this.$popoverContent.empty();
-            this.$popoverContent.removeClass("igv-popover-track-popup-content");
+            this.$popoverContent.removeClass();
+            this.$popoverContent.addClass("igv-popover-track-popup-content");
 
-            $container = $('<div class="igv-track-menu-container">');
-            this.$popoverContent.append($container);
-
-            menuItems.forEach(function (item) {
-                $container.append(item.object);
-            });
+            for (let item of menuItems) {
+                this.$popoverContent.append(item.object);
+            }
 
             const page = igv.pageCoordinates(e);
             $popover.css(clampPopoverLocation(page.x, page.y, this));
@@ -96,14 +94,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.Popover.prototype.presentTrackPopup = function (e, content) {
-        const page = igv.pageCoordinates(e);
-        this.presentContent(page.x, page.y, content);
-
-    };
-
-    igv.Popover.prototype.presentContent = function (pageX, pageY, content) {
-        var $container;
+    igv.Popover.prototype.presentTrackContent = function (pageX, pageY, content) {
 
         // Only 1 popover open at a time
         $('.igv-popover').hide();
@@ -113,10 +104,9 @@ var igv = (function (igv) {
         }
 
         this.$popoverContent.empty();
+        this.$popoverContent.removeClass();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
 
-        $container = $('<div class="igv-track-menu-container">');
-        this.$popoverContent.append($container);
         this.$popoverContent.html(content);
 
         this.$popover.css(clampPopoverLocation(pageX, pageY, this));
@@ -130,7 +120,7 @@ var igv = (function (igv) {
         Object.keys(this).forEach(function (key) {
             this[key] = undefined;
         })
-    }
+    };
 
     function clampPopoverLocation(pageX, pageY, popover) {
 
