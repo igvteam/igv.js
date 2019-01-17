@@ -207,6 +207,7 @@ var igv = (function (igv) {
                         config.type = "seg";
                         break;
                     case "bam":
+                    case "cram":
                         config.type = "alignment";
                         break;
                     case "bedpe":
