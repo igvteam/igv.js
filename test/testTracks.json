@@ -1,10 +1,30 @@
 [
   {
     "type": "alignment",
-    "name": "Heart SLC25A3",
+    "name": "Heart SLC25A3 - Dropbox",
+    "url": "https://www.dropbox.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0",
+    "indexURL": "https://www.dropbox.com/s/k3r83ckbo0chtm7/heart_slc25a3.crai?dl=0"
+  },
+  {
+    "type": "alignment",
+    "name": "Heart SLC25A3 - Amazon",
     "format": "cram",
     "url": "https://s3.amazonaws.com/igv.org.test/data/cram/heart_slc25a3.cram",
     "indexURL": "https://s3.amazonaws.com/igv.org.test/data/cram/heart_slc25a3.cram.crai"
+  },
+  {
+    "type": "alignment",
+    "name": "Heart SLC25S3 - Google Drive",
+    "format": "cram",
+    "url": "https://drive.google.com/open?id=1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo",
+    "indexURL":"https://drive.google.com/open?id=1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2"
+  },
+  {
+    "type": "alignment",
+    "name": "Heart SLC25A3 - Local",
+    "format": "cram",
+    "url": "../test/data/cram/heart_slc25a3.cram",
+    "indexURL": "../test/data/cram/heart_slc25a3.crai"
   },
   {
     "type": "annotation",
