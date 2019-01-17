@@ -399,7 +399,7 @@ svg {
   font-size: small;
   font-weight: 400;
   color: #4b4b4b;
-  background: white;
+  background-color: white;
   border-radius: 4px;
   border-color: #7F7F7F;
   border-style: solid;
@@ -436,7 +436,14 @@ svg {
   left: 0;
   max-height: 384px;
   overflow-x: hidden;
-  overflow-y: auto; }
+  overflow-y: auto;
+  background-color: white; }
+  .igv-popover-track-popup-content div {
+    margin-left: 4px;
+    background-color: white; }
+  .igv-popover-track-popup-content div:hover {
+    cursor: pointer;
+    background-color: #efefef; }
 
 .igv-popover-name-value {
   cursor: default;
@@ -605,8 +612,12 @@ svg {
     margin-right: 8px; }
   .igv-nav-bar-left-container .igv-current-genome {
     height: 32px;
-    margin-right: 8px;
+    width: 40px;
+    margin-left: 4px;
+    margin-right: 4px;
     user-select: none;
+    line-height: 32px;
+    vertical-align: middle;
     text-align: center; }
 
 .igv-nav-bar-genomic-location {
@@ -619,7 +630,7 @@ svg {
 
 .igv-chromosome-select-widget-container {
   height: 100%;
-  width: 100px;
+  width: 125px;
   margin-right: 4px;
   display: flex;
   flex-flow: column;
@@ -629,7 +640,7 @@ svg {
   .igv-chromosome-select-widget-container select {
     display: block;
     cursor: pointer;
-    width: 100%;
+    width: 100px;
     height: 75%;
     outline: none;
     font-size: 12px;
@@ -839,8 +850,8 @@ svg {
 .igv-track-div {
   position: relative;
   width: 100%;
-  margin-top: 2px;
-  margin-bottom: 2px; }
+  margin-top: 5px;
+  margin-bottom: 5px; }
 
 .igv-viewport-container {
   position: absolute;

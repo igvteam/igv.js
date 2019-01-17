@@ -107,7 +107,7 @@ var igv = (function (igv) {
 
                 const page = igv.pageCoordinates(e);
 
-                self.popover.presentContent(page.x, page.y, str);
+                self.popover.presentTrackContent(page.x, page.y, str);
 
             });
             this.$trackLabel.mousedown(function (e) {
@@ -888,7 +888,8 @@ var igv = (function (igv) {
 
                             var content = getPopupContent(e, self);
                             if (content) {
-                                self.popover.presentTrackPopup(e, content);
+                                const page = igv.pageCoordinates(e);
+                                self.popover.presentTrackContent(page.x, page.y, content);
                             }
                             clearTimeout(popupTimerID);
                             popupTimerID = undefined;
