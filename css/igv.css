@@ -568,6 +568,8 @@ svg {
   position: relative;
   top: 0;
   left: 0;
+  padding-left: 8px;
+  padding-right: 8px;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -599,7 +601,7 @@ svg {
   .igv-nav-bar-left-container .igv-logo {
     width: 34px;
     height: 32px;
-    margin-left: 8px;
+    margin-top: 6px;
     margin-right: 8px; }
   .igv-nav-bar-left-container .igv-current-genome {
     height: 32px;
@@ -706,7 +708,6 @@ svg {
     height: 32px;
     line-height: 32px;
     margin-left: 8px;
-    margin-right: 8px;
     user-select: none;
     display: flex;
     flex-flow: row;
@@ -739,7 +740,6 @@ svg {
     font-size: 24px;
     user-select: none;
     margin-left: 16px;
-    margin-right: 8px;
     width: unset;
     display: flex;
     flex-flow: row;
