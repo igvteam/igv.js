@@ -14,7 +14,7 @@
     font-weight: 400;
     color: $igv-trackgear-font-color;
 
-    background: white;
+    background-color: white;
 
     border-radius: $igv-trackgear-popover-border-radius;
     border-color: $igv-trackgear-grey-color;
@@ -68,6 +68,18 @@
     max-height: 384px;
     overflow-x: hidden;
     overflow-y: auto;
+
+    background-color: white;
+
+    div {
+        margin-left: 4px;
+        background-color: white;
+    }
+    div:hover {
+        cursor: pointer;
+        background-color: #efefef;
+    }
+
 }
 
 .igv-popover-name-value {
