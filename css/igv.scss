@@ -769,7 +769,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   height: 100%;
 
   background: white;
-  text-align: center;
+  //text-align: center;
 
 }
 
@@ -790,6 +790,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   border-top-color: #a2a2a2;
   border-top-style: solid;
   border-top-width: thin;
+  //width: 100%;
 }
 
 .igv-track-menu-category {
