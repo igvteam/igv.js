@@ -50,24 +50,35 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackGearPopover.prototype.presentMenuList = function (dx, dy, menuItemList) {
+    igv.TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
 
         var self = this,
             $container;
 
-        if (menuItemList.length > 0) {
-
-            menuItemList = igv.trackMenuItemListHelper(menuItemList, self.$popover);
+        if (list.length > 0) {
 
             this.$popoverContent.empty();
 
-            for (let item of menuItemList) {
+            list = igv.trackMenuItemListHelper(list, self.$popover);
+
+            for (let item of list) {
 
                 if (item.init) {
                     item.init();
                 }
 
-                this.$popoverContent.append(item.object);
+                let $e = item.object;
+                if (0 === list.indexOf(item)) {
+                    $e.removeClass('igv-track-menu-border-top');
+                }
+
+                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-trackgear-popover-check-container')) {
+                    // do nothing
+                } else if ($e.is('div')) {
+                    $e.addClass('igv-trackgear-popover-shim');
+                }
+
+                this.$popoverContent.append($e);
 
             }
 
