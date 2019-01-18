@@ -50,12 +50,12 @@ var igv = (function (igv) {
         this.genome = genome;
 
         this.cramFile = new gmodCRAM.CramFile({
-            filehandle: new RemoteFile(config.url),
+            filehandle: new FileHandler(config.url),
             seqFetch: config.seqFetch || seqFetch.bind(this),
             checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         })
 
-        const indexFileHandle = new RemoteFile(config.indexURL)
+        const indexFileHandle = new FileHandler(config.indexURL)
         this.indexedCramFile = new gmodCRAM.IndexedCramFile({
             cram: this.cramFile,
             index: new gmodCRAM.CraiIndex({
@@ -75,13 +75,9 @@ var igv = (function (igv) {
         const genome = this.genome;
 
         return this.getHeader()
-
             .then(function (header) {
-
                 const chrName = genome.getChromosomeName(header.chrNames[seqID])
-
                 return sequence.getSequence(chrName, start - 1, end);
-
             });
     }
 
@@ -150,8 +146,6 @@ var igv = (function (igv) {
 
             .then(function (header) {
 
-                const readNames = {};   // Hash for recording generated read names for intra slice pairs (lossy crams)
-
                 const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
                 const chrIdx = header.chrToIndex[queryChr];
                 const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
@@ -195,8 +189,8 @@ var igv = (function (igv) {
                         })
                         .catch(function (error) {
                             let message = error.message;
-                            if(message && message.indexOf("MD5") >= 0) {
-                                message += ". Is this the correct genome for the loaded CRAM?</br>"
+                            if (message && message.indexOf("MD5") >= 0) {
+                                "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                             }
                             browser.presentAlert(message)
                             throw error
@@ -367,36 +361,8 @@ var igv = (function (igv) {
             });
     }
 
+    class FileHandler {
 
-    function uniqueID() {
-        return Math.random().toString(36).substr(2, 9) + '-' + Math.random().toString(36).substr(2, 9);
-    }
-
-    /*
-    flags
-    cramFlags
-    sequenceId
-    readLength
-    alignmentStart
-    readGroupId
-    readName
-    templateSize =
-    tags[tagName]
-    lengthOnRef = lengthOnRef
-    mappingQuality
-    qualityScores
-    readBases
-    mate
-
-    mate
-      flags
-      sequenceId
-      alignmentStart
-      uniqueId
-      readName
-
-   */
-    class RemoteFile {
         constructor(source) {
             this.position = 0
             this.url = source
@@ -409,44 +375,14 @@ var igv = (function (igv) {
 
             const loadRange = {start: position, size: length};
             this._stat = {size: undefined}
-            return  igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}, {range: loadRange}))
+            return igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}, {range: loadRange}))
                 .then(function (arrayBuffer) {
                     const nodeBuffer = Buffer.from(arrayBuffer)
                     return nodeBuffer
                 })
-
-            // const headers = {}
-            // if (length < Infinity) {
-            //     headers.range = `bytes=${position}-${position + length}`
-            // } else if (length === Infinity && position !== 0) {
-            //     headers.range = `bytes=${position}-`
-            // }
-            // const response = await fetch(this.url, {
-            //     method: 'GET',
-            //     headers,
-            //     redirect: 'follow',
-            //     mode: 'cors',
-            // })
-            // if (
-            //     (response.status === 200 && position === 0) ||
-            //     response.status === 206
-            // ) {
-            //     const nodeBuffer = Buffer.from(await response.arrayBuffer())
-            //
-            //     // try to parse out the size of the remote file
-            //     const sizeMatch = /\/(\d+)$/.exec(response.headers.get('content-range'))
-            //     if (sizeMatch && sizeMatch[1]) {
-            //         this._stat = { size: parseInt(sizeMatch[1], 10)}
-            //     } else {
-            //         this._stat = { size: undefined}
-            //     }
-            //
-            //     return nodeBuffer
-            // }
-            // throw new Error(`HTTP ${response.status} fetching ${this.url}`)
         }
 
-        read(buffer, offset = 0, length = Infinity, position = 0) {
+        async read(buffer, offset = 0, length = Infinity, position = 0) {
             let readPosition = position
             if (readPosition === null) {
                 readPosition = this.position
@@ -472,12 +408,14 @@ var igv = (function (igv) {
     }
 
     class BufferCache {
-        constructor({ fetch, size = 10000000, chunkSize = 32768 }) {
-            if (!fetch) throw new Error('fetch function required')
+
+        constructor({fetch, size = 10000000, chunkSize = 32768}) {
+
             this.fetch = fetch
             this.chunkSize = chunkSize
-            this.lruCache = new QuickLRU({ maxSize: Math.floor(size / chunkSize) })
+            this.lruCache = new QuickLRU({maxSize: Math.floor(size / chunkSize)})
         }
+
         async get(outputBuffer, offset, length, position) {
             if (outputBuffer.length < offset + length)
                 throw new Error('output buffer not big enough for request')
@@ -498,7 +436,7 @@ var igv = (function (igv) {
             // stitch together the response buffer using them
             const chunks = await Promise.all(fetches)
             const chunksOffset = position - chunks[0].chunkNumber * this.chunkSize
-            chunks.forEach(({ data, chunkNumber }) => {
+            chunks.forEach(({data, chunkNumber}) => {
                 const chunkPositionStart = chunkNumber * this.chunkSize
                 let copyStart = 0
                 let copyEnd = this.chunkSize
