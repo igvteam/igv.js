@@ -17,7 +17,7 @@
   top: 0;
   left: 0;
 
-  min-width: 128px;
+  min-width: 132px;
 
   z-index: 4096;
 
@@ -34,8 +34,42 @@
   border-color: $igv-trackgear-grey-color;
   border-style: solid;
   border-width: thin;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  text-align: left;
+
+  > div:not(:first-child) {
+    width: 100%;
+
+    > div {
+      background: white;
+    }
+
+    > div:last-child {
+      border-bottom-left-radius: $igv-trackgear-popover-border-radius;
+      border-bottom-right-radius: $igv-trackgear-popover-border-radius;
+      border-bottom-color: transparent;
+      border-bottom-style: solid;
+      border-bottom-width: thin;
+    }
+
+    > div:hover {
+      background: #efefef;
+    }
+
+  }
+
 }
 
+.igv-trackgear-popover-shim {
+  padding-left: 8px;
+  padding-right: 8px;
+}
 .igv-trackgear-popover-header {
 
   position: relative;
@@ -43,8 +77,10 @@
   height: 24px;
   cursor: move;
 
+  border-top-color: transparent;
   border-top-left-radius: $igv-trackgear-popover-border-radius;
   border-top-right-radius: $igv-trackgear-popover-border-radius;
+
   border-bottom-color: $igv-trackgear-grey-color;
   border-bottom-style: solid;
   border-bottom-width: thin;
