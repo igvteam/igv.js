@@ -360,19 +360,17 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
     font-size: 18px;
 
-    width: 190px;
     height: $igv-navbar-height;
     line-height: $igv-navbar-height;
 
     margin-left: 8px;
-    //margin-right: 8px;
 
     user-select: none;
 
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
 
     div {
@@ -396,8 +394,8 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
     }
 
     div:nth-child(even) {
+      display: block;
       height: fit-content;
-      //padding-bottom: 20px;
     }
 
     input {
@@ -415,34 +413,54 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
     color: $igv-navbar-toggle-dark-dark;
 
-    font-size: 24px;
+    font-size: 18px;
+
+    height: $igv-navbar-height;
+    line-height: $igv-navbar-height;
+
+    margin-left: 8px;
 
     user-select: none;
-
-    margin-left: 16px;
-    //margin-right: 8px;
-
-    width: unset;
 
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
+
 
     div {
       cursor: pointer;
+      margin-left: unset;
+      margin-right: unset;
     }
 
+    // "-" zoom button
     div:first-child {
-      margin-right: 4px;
+      height: 24px;
+      width: 24px;
+      margin-left: unset;
+      margin-right: 8px;
     }
 
+    // "+" zoom button
     div:last-child {
-      margin-left: 4px;
+      height: 24px;
+      width: 24px;
+      margin-left: 8px;
+      margin-right: unset;
+    }
+
+    // slider
+    div:nth-child(even) {
+      width: 0;
+      height: 0;
+      display: none;
     }
 
     input {
+      width: 0;
+      height: 0;
       display: none;
     }
 
