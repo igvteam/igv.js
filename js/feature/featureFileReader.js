@@ -105,7 +105,9 @@ var igv = (function (igv) {
 
                         // Load the file header (not HTTP header) for an indexed file.
                         // TODO -- note this will fail if the file header is > 65kb in size
-                        options = igv.buildOptions(self.config, {bgz: index.tabix, range: {start: 0, size: 65000}});
+                        let maxSize = "vcf" === self.config.format ? 65000 : 1000;
+                        if(self.config.filename && self.config.filename.endsWith(".gz")) maxSize /= 2;
+                        options = igv.buildOptions(self.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
 
                         return igv.xhr.loadString(self.config.url, options)
                             .then(function (data) {
