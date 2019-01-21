@@ -1,4 +1,22 @@
 [
+
+  {
+    "type": "annotation",
+    "name": "genes - dropbox",
+    "format": "gtf",
+    "url": "https://www.dropbox.com/s/4fk2wk0eulam1j0/genes.gtf.gz?dl=0",
+    "indexURL": "https://www.dropbox.com/s/wtaqm2k7ag87xrj/genes.gtf.gz.tbi?dl=0"
+
+  },
+  {
+    "type": "annotation",
+    "name": "genes - google drive",
+    "format": "gtf",
+    "filename": "genes.gtf.gz",
+    "url": "https://drive.google.com/open?id=1ANNz7TTL_rBue-mXqwnvcQZEP6JiVBbH&key=AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0",
+    "indexURL": "https://drive.google.com/open?id=1TqiSv8uRnaqHpn9E7DJcol8Qy9HPPbAs&key=AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0"
+
+  },
   {
     "type": "alignment",
     "name": "Heart SLC25A3 - Dropbox",

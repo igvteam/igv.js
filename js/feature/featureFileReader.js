@@ -49,8 +49,7 @@ var igv = (function (igv) {
             this.dataURI = config.url;
         } else {
             uriParts = igv.parseUri(this.config.url);
-            this.filename = uriParts.file;
-            this.path = uriParts.path;
+            this.filename = config.filename || uriParts.file;
         }
 
         this.format = this.config.format;
