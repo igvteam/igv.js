@@ -37,12 +37,6 @@ module.exports = function (grunt) {
             dev: Object.assign({ watch: true }, webpackConfig)
         },
 
-        copy: {
-            igvjs: {
-                src: 'dist/igv.min.js',
-                dest: 'dist/igv.js',
-            },
-        },
 
         concat: {
             igv: {
@@ -116,10 +110,6 @@ module.exports = function (grunt) {
                 mangle: false,
                 sourceMap: true
             },
-            igv: {
-                src: 'dist/igv.js',
-                dest: 'dist/igv.min.js'
-            },
             igv_esm: {
                 src: 'dist/igv.esm.js',
                 dest: 'dist/igv.esm.min.js'
@@ -143,7 +133,7 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-webpack');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'copy:igvjs', 'clean:tmp']);
+    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'clean:tmp']);
 
     grunt.registerTask('doc', ['md2html']);
 
