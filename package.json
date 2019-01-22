@@ -4,7 +4,8 @@
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
   "files": [
-    "dist/**"
+    "dist/**",
+    "examples/**"
   ],
   "scripts": {
     "test": "grunt test",
