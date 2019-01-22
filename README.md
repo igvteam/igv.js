@@ -10,15 +10,15 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.2.0/examples/bam.html)***
+***[Alignments](https://igv.org/web/release/2.2.1/examples/bam.html)***
 
-***[GA4GH](https://igv.org/web/release/2.2.0/examples/ga4gh.html)***
+***[GA4GH](https://igv.org/web/release/2.2.1/examples/ga4gh.html)***
 
-***[Copy number](https://igv.org/web/release/2.2.0/examples/copyNumber.html)***
+***[Copy number](https://igv.org/web/release/2.2.1/examples/copyNumber.html)***
 
-***[Multiple regions](http://igv.org/release/2.2.0/test/examples/multi-locus.html)***
+***[Multiple regions](http://igv.org/release/2.2.1/test/examples/multi-locus.html)***
 
-***[More](http://igv.org/web/release/2.2.0/examples)***
+***[More](http://igv.org/web/release/2.2.1/examples)***
 
  
 # Quickstart
@@ -27,11 +27,11 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 igv.js consists of a single javascript file with no external dependencies.  To link directly to the current release copy this snippet
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/igv@2.2.0/dist/igv.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/igv@2.2.1/dist/igv.min.js"></script>
 ``` 
 
-Pre-built expanded and minified js files for ES5 (igv.js, igv.min.js) and ES6 (igv.esm.js, igv.esm.min.js)
-can be downloaded from [https://igv.org/web/release/2.2.0/dist/](https://igv.org/web/release/2.2.0/dist/).   
+Pre-built files for ES5 (igv.min.js) and ES6 (igv.esm.min.js)
+can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.2.1/dist/](https://cdn.jsdelivr.net/npm/igv@2.2.1/dist/).   
  
 Alternatively you can install with npm  
  
@@ -45,11 +45,11 @@ To use igv.js include it with a script tag
 
 ***or*** import it as a requirejs module 
 
-```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](http://igv.org/web/release/2.2.0/examples/igv-require.html))*
+```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](http://igv.org/web/release/2.2.1/examples/igv-require.html))*
 
 ***or*** import it as an es6 module 
 
-```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](http://igv.org/web/release/2.2.0/examples/igv-esm.html))*
+```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](http://igv.org/web/release/2.2.1/examples/igv-esm.html))*
 
 
 
@@ -59,22 +59,21 @@ To create an igv.js ***browser*** supply a container div
 and an initial configuration defining the reference genome, initial tracks, and other state to the 
 function ```igv.createBrowser(div, config)```.  
 
-This function returns a promise for an igv.Browser object which can used to control the browser.  An 
-[example](http://igv.org/web/release/2.0.0-rc5/examples/bam.html) of
+This function returns a promise for an igv.Browser object which can used to control the browser.  For example, to open
 a browser on a single alignment track opened at a specific locus:
 
 ```
       var igvDiv = document.getElementById("igv-div");
       var options =
         {
-            genome: "hg19",
-            locus: "chr8:128,747,267-128,754,546",
+            genome: "hg38",
+            locus: "chr8:127,736,588-127,739,371",
             tracks: [
                 {
-                    type: 'alignment',
-                    format: 'bam',
-                    url: 'https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
-                    name: 'HG02450'
+                    "name": "HG00103",
+                    "url": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram",
+                    "indexURL": "https://s3.amazonaws.com/1000genomes/data/HG00103/alignment/HG00103.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai",
+                    "format": "cram"
                 }
             ]
         };
@@ -110,8 +109,8 @@ npm run grunt
 
 This creates a dist folder with the following files
 
-* igv.js, igv.min.js - ES5 compatible files for script or requirejs imports
-* igv.esm.js,  igv.esm.min.js --  ES6 module 
+* igv.min.js - ES5 compatible UMDS file for script include, AMD, or CJS modules.  A script include will define an "igv" global.
+* igv.esm.min.js --  ES6 module 
 
 
 ### Tests
