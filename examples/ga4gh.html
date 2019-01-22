@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <title>igv.js</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div style="margin-left:16px;margin-top:16px;margin-right:16px;">
+    <h1>Embedded GA4GH browser</h1>
+    <div id="igv-div" style="padding: 2px; border:1px solid lightgray"></div>
+</div>
+
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var options =
+        {
+            genome: "hg19",
+            locus: "muc1",
+            // Insert your applications api key here,  or use OAuth
+            apiKey: 'AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0',
+            tracks: [
+                {
+                    sourceType: 'ga4gh',
+                    type: 'variant',
+                    url: 'https://genomics.googleapis.com/v1',
+                    variantSetId: '10473108253681171589',
+                    callSetIds: ["10473108253681171589-0", "10473108253681171589-1", "10473108253681171589-2",
+                        "10473108253681171589-3", "10473108253681171589-4", "10473108253681171589-5",
+                        "10473108253681171589-6", "10473108253681171589-7", "10473108253681171589-8",
+                        "10473108253681171589-9", "10473108253681171589-10", "10473108253681171589-11",
+                        "10473108253681171589-12", "10473108253681171589-13", "10473108253681171589-14",
+                        "10473108253681171589-15", "10473108253681171589-16", "10473108253681171589-17",
+                        "10473108253681171589-18", "10473108253681171589-19"],
+                    name: 'Ga4gh variants',
+                    visibilityWindow: 100000
+                },
+                {
+                    sourceType: 'ga4gh',
+                    type: 'alignment',
+                    url: 'https://genomics.googleapis.com/v1',
+                    readGroupSetIds: 'CMvnhpKTFhCjz9_25e_lCw',
+                    name: 'Ga4gh alignments'
+                }
+
+            ]
+        };
+
+        var igvDiv = document.getElementById("igv-div");
+
+        igv.createBrowser(igvDiv, options)
+
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
+
+    });
+
+</script>
+
+</body>
+
+</html>
