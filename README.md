@@ -13,15 +13,15 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.2.1/examples/bam.html)***
+***[Alignments](https://igv.org/web/release/2.2.1/examples/cram.html)***
 
 ***[GA4GH](https://igv.org/web/release/2.2.1/examples/ga4gh.html)***
 
 ***[Copy number](https://igv.org/web/release/2.2.1/examples/copyNumber.html)***
 
-***[Multiple regions](http://igv.org/release/2.2.1/test/examples/multi-locus.html)***
+***[Multiple regions](https://igv.org/web/release/2.2.1/examples/multi-locus.html)***
 
-***[More](http://igv.org/web/release/2.2.1/examples)***
+***[More](https://igv.org/web/release/2.2.1/examples/)***
 
  
 # Quickstart
