@@ -331,12 +331,13 @@ var igv = (function (igv) {
                         case 'EQ' :
                         case '=' :
                         case 'X' :
-                            blocks.push({
-                                start: pos,
-                                len: c.len,
-                                seqOffset: seqOffset,
-                                gapType: gapType
-                            });
+                            blocks.push(
+                                new igv.AlignmentBlock({
+                                    start: pos,
+                                    len: c.len,
+                                    seqOffset: seqOffset,
+                                    gapType: gapType
+                                }));
                             seqOffset += c.len;
                             pos += c.len;
 
