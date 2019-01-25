@@ -524,19 +524,20 @@ var igv = (function (igv) {
 
         if (tokens.length > 3) {
             // Note: these are very special rules for the gencode gene files.
-            tmp = tokens[3].replace(/"/g, '');
-            idName = tmp.split(';');
-            for (var i = 0; i < idName.length; i++) {
-                var kv = idName[i].split('=');
-                if (kv[0] == "gene_id") {
-                    id = kv[1];
-                }
-                if (kv[0] == "gene_name") {
-                    name = kv[1];
-                }
-            }
-            feature.id = id ? id : tmp;
-            feature.name = name ? name : tmp;
+            // tmp = tokens[3].replace(/"/g, '');
+            // idName = tmp.split(';');
+            // for (var i = 0; i < idName.length; i++) {
+            //     var kv = idName[i].split('=');
+            //     if (kv[0] == "gene_id") {
+            //         id = kv[1];
+            //     }
+            //     if (kv[0] == "gene_name") {
+            //         name = kv[1];
+            //     }
+            // }
+            // feature.id = id ? id : tmp;
+            // feature.name = name ? name : tmp;
+            feature.name = name;
         }
 
         if (tokens.length > 4) {
