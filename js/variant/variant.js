@@ -232,7 +232,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.Variant.prototype.popupData = function (genomicLocation) {
+    igv.Variant.prototype.popupData = function (genomicLocation, genomeId) {
 
         var self = this,
             fields, gt;
@@ -266,7 +266,7 @@ var igv = (function (igv) {
             });
         }
 
-        if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
+        if(this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
             let ref = this.referenceBases;
             if (ref.length === 1) {
                 let altArray = this.alternateBases.split(",");
@@ -274,9 +274,10 @@ var igv = (function (igv) {
                 for (let i = 0; i < altArray.length; i++) {
                     let alt = this.alternateBases[i];
                     if (alt.length === 1) {
-                        let l = "<a target='_blank' " +
-                            "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
-                        fields.push(l);
+                        let l = igv.TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
+                        if(l) {
+                            fields.push(l);
+                        }
                     }
                 }
             }
