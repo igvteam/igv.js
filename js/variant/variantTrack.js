@@ -59,40 +59,40 @@ var igv = (function (igv) {
         VariantTrack = igv.extend(igv.TrackBase,
 
             function (config, browser) {
-            
-            this.type = type;
-            
-            this.visibilityWindow = config.visibilityWindow === undefined ? 'compute' : config.visibilityWindow;
 
-            igv.TrackBase.call(this, config, browser);
+                this.type = type;
 
-            this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
-            this.labelDisplayMode = config.labelDisplayMode;
+                this.visibilityWindow = config.visibilityWindow === undefined ? 'compute' : config.visibilityWindow;
 
-            this.variantHeight = config.variantHeight || 10;
-            this.squishedCallHeight = config.squishedCallHeight || 1;
-            this.expandedCallHeight = config.expandedCallHeight || 10;
-            this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap : 2;
-            this.squishedVGap = config.squishedVGap !== undefined ? config.squishedVGap : 1;
+                igv.TrackBase.call(this, config, browser);
 
-            this.expandedGroupGap = config.expandedGroupGap || 10;
-            this.squishedGroupGap = config.squishedGroupGap || 5;
+                this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
+                this.labelDisplayMode = config.labelDisplayMode;
 
-            this.featureHeight = config.featureHeight || 14;
+                this.variantHeight = config.variantHeight || 10;
+                this.squishedCallHeight = config.squishedCallHeight || 1;
+                this.expandedCallHeight = config.expandedCallHeight || 10;
+                this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap : 2;
+                this.squishedVGap = config.squishedVGap !== undefined ? config.squishedVGap : 1;
 
-            this.featureSource = new igv.FeatureSource(config, browser.genome);
+                this.expandedGroupGap = config.expandedGroupGap || 10;
+                this.squishedGroupGap = config.squishedGroupGap || 5;
 
-            this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
-            this.homvarColor = config.homvarColor || "rgb(17,248,254)";
-            this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
+                this.featureHeight = config.featureHeight || 14;
 
-            this.sortDirection = "ASC";
+                this.featureSource = new igv.FeatureSource(config, browser.genome);
 
-            this.nRows = 1;  // Computed dynamically
-            this.groupBy = "None";
-            this.filterBy = undefined;
-            this.filters = [];
-        });
+                this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
+                this.homvarColor = config.homvarColor || "rgb(17,248,254)";
+                this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
+
+                this.sortDirection = "ASC";
+
+                this.nRows = 1;  // Computed dynamically
+                this.groupBy = "None";
+                this.filterBy = undefined;
+                this.filters = [];
+            });
 
         VariantTrack.prototype.getFileHeader = function () {
 
@@ -411,23 +411,18 @@ var igv = (function (igv) {
          */
         VariantTrack.prototype.popupData = function (config) {
 
-            let featureList = config.viewport.getCachedFeatures();
+            const featureList = config.viewport.getCachedFeatures();
             if (!featureList || featureList.length === 0) return [];
 
-            let self = this,
-                genomicLocation = config.genomicLocation,
-                xOffset = config.x,
-                yOffset = config.y,
-                referenceFrame = config.viewport.genomicState.referenceFrame,
-                tolerance = Math.floor(2 * referenceFrame.bpPerPixel),  // We need some tolerance around genomicLocation, start with +/- 2 pixels
-                vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap,
-                groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap,
-                popupData = [],
-                group;
+            const genomicLocation = config.genomicLocation
+            const referenceFrame = config.viewport.genomicState.referenceFrame
+            const tolerance = Math.floor(2 * referenceFrame.bpPerPixel)  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            const genomeID = this.browser.genome.id
+            const popupData = []
 
-            featureList.forEach(function (variant) {
+            for(let variant of featureList)  {
 
-                var row, callHeight, callSets, callSetGroups, cs, call;
+                //var row, callHeight, callSets, callSetGroups, cs, call;
 
                 if ((variant.start <= genomicLocation + tolerance) &&
                     (variant.end > genomicLocation - tolerance)) {
@@ -437,59 +432,64 @@ var igv = (function (igv) {
                     }
 
                     if ("COLLAPSED" == self.displayMode) {
-                        Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, self.type));
+                        Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
                     }
+
                     else {
-                        if (yOffset <= self.variantBandHeight) {
-                            // Variant
-                            row = (Math.floor)((yOffset - 10) / (self.variantHeight + vGap));
+                        const yOffset = config.y
+                        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
+                        const groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap
+
+                        if (yOffset <= this.variantBandHeight) {  // Variant
+                            const row = (Math.floor)((yOffset - 10) / (this.variantHeight + vGap));
                             if (variant.row === row) {
-                                Array.prototype.push.apply(popupData, variant.popupData(genomicLocation), self.type);
+                                Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
                             }
                         }
-                        else {
-                            // Call
-                            callSets = (self.filterBy) ? self.filteredCallSets : self.callSets;
-                            callSetGroups = (self.filterBy) ? self.filteredCallSetGroups : self.callSetGroups;
+                        else { // Genotype
+                            const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
+                            const callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
+
                             if (callSets && variant.calls) {
-                                callHeight = ("SQUISHED" === self.displayMode ? self.squishedCallHeight : self.expandedCallHeight);
-                                // console.log("call height: ", callHeight);
-                                // console.log("nRows: ", self.nRows);
+
+                                const callHeight = ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
                                 var totalCalls = 0;
-                                for (group = 0; group < callSetGroups.length; group++) {
+
+                                let row
+                                for (let group = 0; group < callSetGroups.length; group++) {
                                     var groupName = callSetGroups[group];
                                     var groupCalls = callSets[groupName].length;
-                                    if (yOffset <= self.variantBandHeight + vGap + (totalCalls + groupCalls) *
+                                    if (yOffset <= this.variantBandHeight + vGap + (totalCalls + groupCalls) *
                                         (callHeight + vGap) + (group * groupGap)) {
-                                        row = Math.floor((yOffset - (self.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
+                                        row = Math.floor((yOffset - (this.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
                                             + (group * groupGap))) / (callHeight + vGap));
                                         break;
                                     }
                                     totalCalls += groupCalls;
                                 }
-                                // row = Math.floor((yOffset - self.variantBandHeight - vGap - i*groupGap) / (callHeight + vGap));
+
                                 if (row >= 0) {
-                                    cs = callSets[groupName][row];
-                                    call = variant.calls[cs.id];
-                                    Array.prototype.push.apply(popupData, extractPopupData(call, variant));
+                                    const cs = callSets[groupName][row];
+                                    const call = variant.calls[cs.id];
+                                    Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
                                 }
                             }
                         }
                     }
                 }
-            });
+            }
 
             return popupData;
 
         };
 
         /**
-         * Default popup text function
+         * Genotype popup text.
          * @param call
          * @param variant
          * @returns {Array}
          */
-        function extractPopupData(call, variant) {
+        function extractGenotypePopupData(call, variant, genomeId) {
 
             var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
             let cravatLinks = [];
@@ -523,12 +523,6 @@ var igv = (function (igv) {
                     else {
                         let alt = variant.alternateBases[i - 1];
                         gt += alt;
-
-                        if (ref.length === 1 && alt.length === 1 && alt !== ref) {
-                            let l = "<a target='_blank' " +
-                                "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>CRAVAT " + ref + "->" + alt + "</a>";
-                            cravatLinks.push(l);
-                        }
                     }
                 });
             }
@@ -845,6 +839,7 @@ var igv = (function (igv) {
 
         };
     }
+
     return igv;
 
 })
