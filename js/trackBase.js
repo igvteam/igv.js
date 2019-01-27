@@ -50,7 +50,7 @@ var igv = (function (igv) {
      */
     igv.TrackBase = function (config, browser) {
 
-        if(config.displayMode) {
+        if (config.displayMode) {
             config.displayMode = config.displayMode.toUpperCase();
         }
 
@@ -162,49 +162,63 @@ var igv = (function (igv) {
             }
         }
 
+        const genomeId = this.getGenomeId()
         if (alleles && alleleFreqs) {
-            addCravatLinks(alleles, alleleFreqs, data);
-        }
 
-        return data;
+            if (alleles.endsWith(",")) {
+                alleles = alleles.substr(0, alleles.length - 1);
+            }
+            if (alleleFreqs.endsWith(",")) {
+                alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+            }
 
-
-        function addCravatLinks(alleles, alleleFreqs, data) {
-
-            if (alleles && alleleFreqs) {
-
-                if (alleles.endsWith(",")) {
-                    alleles = alleles.substr(0, alleles.length - 1);
+            let a = alleles.split(",");
+            let af = alleleFreqs.split(",");
+            if (af.length > 1) {
+                let b = [];
+                for (let i = 0; i < af.length; i++) {
+                    b.push({a: a[i], af: Number.parseFloat(af[i])});
                 }
-                if (alleleFreqs.endsWith(",")) {
-                    alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
-                }
+                b.sort(function (x, y) {
+                    return x.af - y.af
+                });
 
-                let a = alleles.split(",");
-                let af = alleleFreqs.split(",");
-                if (af.length > 1) {
-                    let b = [];
-                    for (let i = 0; i < af.length; i++) {
-                        b.push({a: a[i], af: Number.parseFloat(af[i])});
-                    }
-                    b.sort(function (x, y) {
-                        return x.af - y.af
-                    });
-
-                    let ref = b[b.length - 1].a;
-                    if (ref.length === 1) {
-                        for (let i = b.length - 2; i >= 0; i--) {
-                            let alt = b[i].a;
-                            if (alt.length === 1) {
-                                let l = "<a target='_blank' " +
-                                    "href='http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>";
+                let ref = b[b.length - 1].a;
+                if (ref.length === 1) {
+                    for (let i = b.length - 2; i >= 0; i--) {
+                        let alt = b[i].a;
+                        if (alt.length === 1) {
+                            const cravatLink = igv.TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
+                            if(cravatLink) {
                                 data.push("<hr/>");
-                                data.push(l);
+                                data.push(cravatLink);
                             }
                         }
                     }
                 }
             }
+        }
+
+
+        return data;
+
+
+    }
+
+    igv.TrackBase.prototype.getGenomeId = function () {
+        return this.browser.genome ? this.browser.genome.id : undefined
+    }
+
+    igv.TrackBase.getCravatLink = function (chr, position, ref, alt, genomeID) {
+
+        if ("hg38" === genomeID || "GRCh38" === genomeID) {
+
+            return "<a target='_blank' " +
+                "href='http://www.cravat.us/CRAVAT/variant.html?variant=" +
+                chr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+        }
+        else {
+            return undefined
         }
     }
 
