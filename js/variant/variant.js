@@ -63,71 +63,12 @@ var igv = (function (igv) {
 
     }
 
-
-    igv.createGAVariant = function (json) {
-
-        var variant = new igv.Variant();
-
-        variant.chr = json.referenceName;
-        variant.start = parseInt(json.start);  // Might get overriden below
-        variant.end = parseInt(json.end);      // Might get overriden below
-        variant.pos = variant.start + 1;       // GA4GH is 0 based.
-        variant.names = arrayToString(json.names, "; ");
-        variant.referenceBases = json.referenceBases;
-        variant.alternateBases = arrayToString(json.alternateBases);
-        variant.quality = json.quality;
-        variant.filter = arrayToString(json.filter);
-
-
-        // Flatten GA4GH attributes array
-        variant.info = {};
-        if(json.info) {
-            Object.keys(json.info).forEach(function (key) {
-                var value,
-                    valueArray = json.info[key];
-
-                if (Array.isArray(valueArray)) {
-                    value = valueArray.join(",");
-                } else {
-                    value = valueArray;
-                }
-                variant.info[key] = value;
-            });
-        }
-
-
-        // Need to build a hash of calls for fast lookup
-        // Note from the GA4GH spec on call ID:
-        //
-        // The ID of the call set this variant call belongs to. If this field is not present,
-        // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
-        // is guaranteed to match the ordering of the calls on this GAVariant.
-        // The number of results will also be the same.
-        variant.calls = {};
-        var order = 0, id;
-        if (json.calls) {
-            json.calls.forEach(function (call) {
-                id = call.callSetId;
-                variant.calls[id] = call;
-                order++;
-
-            })
-        }
-
-        init(variant);
-
-        return variant;
-
-    }
-
-
     function init(variant) {
 
-        //Alleles
-        var altTokens = variant.alternateBases.split(","),
-            minAltLength = variant.referenceBases.length,
-            maxAltLength = variant.referenceBases.length,
-            start, end;
+        const refBases = variant.referenceBases;
+        const altBases = variant.alternateBases
+        let minAltLength = refBases.length;
+        let maxAltLength = refBases.length;
 
         if (variant.info && variant.info["VT"]) {
             variant.type = variant.info["VT"].toLowerCase();
@@ -135,63 +76,93 @@ var igv = (function (igv) {
             variant.type = 'str';
         }
 
+        // Default start and end of variant block.  This can be modified below
+        let start = variant.pos - 1;      // convert to 0-based coordinate convention
+        let end = start + refBases.length
 
-        variant.alleles = [];
-
-        if (isRef(variant.alternateBases)) {
+        // Check for reference block
+;
+        if (isRef(altBases)) {
             variant.type = "refblock";
-        }
-
-        if (variant.type === "refblock") {     // "." => no alternate alleles
             variant.heterozygosity = 0;
 
         } else {
 
-            if ("." === variant.alternateBases) {
+
+            if ("." === altBases) {
                 // No alternate alleles.  Not sure how to interpret this
-                start = variant.pos - 1;
-                end = start + variant.referenceBases.length;
             }
 
             else {
-                altTokens.forEach(function (alt, index) {
-                    var a, s, e, diff;
+
+
+                const altTokens = altBases.split(",");
+                variant.alleles = [];
+
+                for(let alt of altTokens) {
 
                     variant.alleles.push(alt);
 
                     // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
 
+
                     if ("str" !== variant.type && alt.length > 0) {
 
-                        diff = variant.referenceBases.length - alt.length;
+
+                        let diff = refBases.length - alt.length;
 
                         if (diff > 0) {
-                            // deletion, assume left padded
-                            s = variant.pos - 1 + alt.length;
-                            e = s + diff;
+                            // deletion, see https://github.com/igvteam/igv.js/issues/849
+
+                            // First base should be padding base
+                            if(refBases.charCodeAt(0) === altBases.charCodeAt(0)) {
+                                start = variant.pos;
+
+                                // Check remaining bases right to left for padding (ref == alt)
+                                const refLength = refBases.length - 1;
+                                const altLength = altBases.length - 1;
+                                let i;
+                                for(i = 0; i < altLength; i++) {
+                                    if(refBases.charCodeAt(refLength - i) === altBases.charCodeAt(altLength - i)) {
+                                        end--
+                                    } else {
+                                        break;
+                                    }
+                                }
+
+                                if(i < altLength) {
+                                    // Leftover alt bases, see if we can continue to pad from front.  1st base already padded
+                                    let j;
+                                    for(j = 1; j < altLength - i; j++) {
+                                        if(refBases.charCodeAt(j) === altBases.charCodeAt(j)) {
+                                            start++
+                                        } else {
+                                            break;
+                                        }
+                                    }
+                                    if(j + i !== altBases.length) {
+                                        console.log("Non-conforming VCF indel: " + JSON.stringify(variant));
+                                    }
+                                }
+
+                            } else {
+                                // variant is non-compliant, or describes multiple events
+                            }
                         } else if (diff < 0) {
                             // Insertion, assume left padded, insertion begins to "right" of last ref base
-                            s = variant.pos - 1 + variant.referenceBases.length;
-                            e = s + 1;     // Insertion between s & e
+                            start = variant.pos - 1 + refBases.length;
+                            end = start + 1;     // Insertion between s & e
                         } else {
-                            s = variant.pos - 1;
-                            e = s + 1;
+                            start = variant.pos - 1;
+                            end= start + 1;
                         }
-
-                        start = start === undefined ? s : Math.min(start, s);
-                        end = end === undefined ? e : Math.max(end, e);
                     }
 
                     minAltLength = Math.min(minAltLength, alt.length);
                     maxAltLength = Math.max(maxAltLength, alt.length);
 
 
-                });
-            }
-
-            if ("str" === variant.type) {
-                start = variant.pos - 1;
-                end = start + variant.referenceBases.length;
+                }
             }
 
             variant.start = start;
@@ -266,7 +237,7 @@ var igv = (function (igv) {
             });
         }
 
-        if(this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
+        if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
             let ref = this.referenceBases;
             if (ref.length === 1) {
                 let altArray = this.alternateBases.split(",");
@@ -275,7 +246,7 @@ var igv = (function (igv) {
                     let alt = this.alternateBases[i];
                     if (alt.length === 1) {
                         let l = igv.TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
-                        if(l) {
+                        if (l) {
                             fields.push(l);
                         }
                     }
@@ -310,6 +281,69 @@ var igv = (function (igv) {
         }
         return value.join(delim);
     }
+
+
+    /**
+     * @deprecated - the GA4GH API has been deprecated.  This code no longer maintained.
+     * @param json
+     * @returns {Variant}
+     */
+    igv.createGAVariant = function (json) {
+
+        var variant = new igv.Variant();
+
+        variant.chr = json.referenceName;
+        variant.start = parseInt(json.start);  // Might get overriden below
+        variant.end = parseInt(json.end);      // Might get overriden below
+        variant.pos = variant.start + 1;       // GA4GH is 0 based.
+        variant.names = arrayToString(json.names, "; ");
+        variant.referenceBases = json.referenceBases;
+        variant.alternateBases = arrayToString(json.alternateBases);
+        variant.quality = json.quality;
+        variant.filter = arrayToString(json.filter);
+
+
+        // Flatten GA4GH attributes array
+        variant.info = {};
+        if (json.info) {
+            Object.keys(json.info).forEach(function (key) {
+                var value,
+                    valueArray = json.info[key];
+
+                if (Array.isArray(valueArray)) {
+                    value = valueArray.join(",");
+                } else {
+                    value = valueArray;
+                }
+                variant.info[key] = value;
+            });
+        }
+
+
+        // Need to build a hash of calls for fast lookup
+        // Note from the GA4GH spec on call ID:
+        //
+        // The ID of the call set this variant call belongs to. If this field is not present,
+        // the ordering of the call sets from a SearchCallSetsRequest over this GAVariantSet
+        // is guaranteed to match the ordering of the calls on this GAVariant.
+        // The number of results will also be the same.
+        variant.calls = {};
+        var order = 0, id;
+        if (json.calls) {
+            json.calls.forEach(function (call) {
+                id = call.callSetId;
+                variant.calls[id] = call;
+                order++;
+
+            })
+        }
+
+        init(variant);
+
+        return variant;
+
+    }
+
 
     return igv;
 })(igv || {});
