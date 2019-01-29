@@ -30,7 +30,6 @@
 
 var igv = (function (igv) {
 
-
     igv.createVCFVariant = function (tokens) {
 
         var variant = new igv.Variant();
@@ -65,113 +64,125 @@ var igv = (function (igv) {
 
     function init(variant) {
 
-        const refBases = variant.referenceBases;
-        const altBases = variant.alternateBases
-        let minAltLength = refBases.length;
-        let maxAltLength = refBases.length;
-
         if (variant.info && variant.info["VT"]) {
             variant.type = variant.info["VT"].toLowerCase();
         } else if (variant.info && variant.info["PERIOD"]) {
-            variant.type = 'str';
+            variant.type = "str";
+        }
+        if ("str" === variant.type) {
+            return initSTR(variant)
         }
 
-        // Default start and end of variant block.  This can be modified below
-        let start = variant.pos - 1;      // convert to 0-based coordinate convention
-        let end = start + refBases.length
+
+        const ref = variant.referenceBases;
+        const altBases = variant.alternateBases
+
 
         // Check for reference block
-;
-        if (isRef(altBases)) {
+        if (isRef(altBases) || "." === altBases) {
             variant.type = "refblock";
             variant.heterozygosity = 0;
+            variant.start = variant.pos - 1;      // convert to 0-based coordinate convention
+            variant.end = variant.start + ref.length
 
         } else {
 
+            const altTokens = altBases.split(",").filter(token => token.length > 0);
+            variant.alleles = [];
+            variant.start = variant.pos;
+            variant.end = variant.pos;
 
-            if ("." === altBases) {
-                // No alternate alleles.  Not sure how to interpret this
-            }
+            for (let alt of altTokens) {
 
-            else {
+                variant.alleles.push(alt);
+                let alleleStart
+                let alleleEnd
 
+                // We don't yet handle  SV and other special alt representations
+                if ("sv" === variant.type || !isKnownAlt(alt)) {
+                    // Unknown alt representation (SA or other special tag)
+                    alleleStart = variant.pos - 1
+                    alleleEnd = alleleStart + ref.length
 
-                const altTokens = altBases.split(",");
-                variant.alleles = [];
+                } else {
 
-                for(let alt of altTokens) {
+                    let altLength = alt.length;
+                    let lengthOnRef = ref.length;
 
-                    variant.alleles.push(alt);
+                    // Trim off matching bases.  Try first match, then right -> left,  then any remaining left -> right
+                    let s = 0;
+                    if (ref.charCodeAt(0) === alt.charCodeAt(0)) {
+                        s++;
+                        altLength--;
+                        lengthOnRef--;
+                    }
 
-                    // Adjust for padding, used for insertions and deletions, unless variant is a short tandem repeat.
-
-
-                    if ("str" !== variant.type && alt.length > 0) {
-
-
-                        let diff = refBases.length - alt.length;
-
-                        if (diff > 0) {
-                            // deletion, see https://github.com/igvteam/igv.js/issues/849
-
-                            // First base should be padding base
-                            if(refBases.charCodeAt(0) === altBases.charCodeAt(0)) {
-                                start = variant.pos;
-
-                                // Check remaining bases right to left for padding (ref == alt)
-                                const refLength = refBases.length - 1;
-                                const altLength = altBases.length - 1;
-                                let i;
-                                for(i = 0; i < altLength; i++) {
-                                    if(refBases.charCodeAt(refLength - i) === altBases.charCodeAt(altLength - i)) {
-                                        end--
-                                    } else {
-                                        break;
-                                    }
-                                }
-
-                                if(i < altLength) {
-                                    // Leftover alt bases, see if we can continue to pad from front.  1st base already padded
-                                    let j;
-                                    for(j = 1; j < altLength - i; j++) {
-                                        if(refBases.charCodeAt(j) === altBases.charCodeAt(j)) {
-                                            start++
-                                        } else {
-                                            break;
-                                        }
-                                    }
-                                    if(j + i !== altBases.length) {
-                                        console.log("Non-conforming VCF indel: " + JSON.stringify(variant));
-                                    }
-                                }
-
-                            } else {
-                                // variant is non-compliant, or describes multiple events
-                            }
-                        } else if (diff < 0) {
-                            // Insertion, assume left padded, insertion begins to "right" of last ref base
-                            start = variant.pos - 1 + refBases.length;
-                            end = start + 1;     // Insertion between s & e
+                    // right -> left from end
+                    while (altLength > 0 && lengthOnRef > 0) {
+                        if (alt.charCodeAt(s + altLength - 1) === ref.charCodeAt(s + lengthOnRef - 1)) {
+                            altLength--;
+                            lengthOnRef--;
                         } else {
-                            start = variant.pos - 1;
-                            end= start + 1;
+                            break;
                         }
                     }
 
-                    minAltLength = Math.min(minAltLength, alt.length);
-                    maxAltLength = Math.max(maxAltLength, alt.length);
+                    // if any remaining, left -> right
+                    while (altLength > 0 && lengthOnRef > 0) {
+                        if (alt.charCodeAt(s + altLength - 1) === ref.charCodeAt(s + lengthOnRef - 1)) {
+                            s++;
+                            altLength--;
+                            lengthOnRef--;
+                        } else {
+                            break;
+                        }
+                    }
 
-
+                    alleleStart = variant.pos + s - 1;      // -1 for zero based coordinates
+                    alleleEnd = alleleStart + Math.max(1, lengthOnRef)     // insertions have zero length on ref, but we give them 1
                 }
+
+                variant.start = Math.min(variant.start, alleleStart);
+                variant.end = Math.max(variant.end, alleleEnd);
+
             }
 
-            variant.start = start;
-            variant.end = end;
+        }
+    }
 
-            if (variant.info && variant.info.AC && variant.info.AN) {
-                variant.heterozygosity = calcHeterozygosity(variant.info.AC, variant.info.AN).toFixed(3);
+    const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
+
+    function isKnownAlt(alt) {
+        for (let i = 0; i < alt.length; i++) {
+            if (!knownAltBases.has(alt.charCodeAt(i))) {
+                return false;
             }
         }
+        return true;
+
+    }
+
+    function initSTR(variant) {
+
+        var altTokens = variant.alternateBases.split(","),
+            minAltLength = variant.referenceBases.length,
+            maxAltLength = variant.referenceBases.length;
+
+        variant.alleles = [];
+
+        altTokens.forEach(function (alt, index) {
+            variant.alleles.push(alt);
+            minAltLength = Math.min(minAltLength, alt.length);
+            maxAltLength = Math.max(maxAltLength, alt.length);
+        });
+
+        variant.start = variant.pos - 1;
+        variant.end = variant.start + variant.referenceBases.length;
+
+        if (variant.info && variant.info.AC && variant.info.AN) {
+            variant.heterozygosity = calcHeterozygosity(variant.info.AC, variant.info.AN).toFixed(3);
+        }
+
 
         // Alternate allele lengths used for STR color scale.
         variant.minAltLength = minAltLength;
@@ -196,8 +207,8 @@ var igv = (function (igv) {
             sum += refFrac * refFrac;
             return 1 - sum;
         };
-
     }
+
 
     igv.Variant = function () {
 
@@ -254,7 +265,6 @@ var igv = (function (igv) {
                 fields.push({name: key, value: arrayToString(self.info[key])});
             });
         }
-
 
 
         return fields;
