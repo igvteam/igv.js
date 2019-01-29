@@ -24,7 +24,8 @@ module.exports = {
                                     "browsers":  ">0.1%"
                                 }
                             }]
-                        ]
+                        ],
+                        plugins: [["transform-remove-console", {"exclude": ["error", "warn"]}]]
                     },
 
                 },
