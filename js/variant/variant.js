@@ -218,6 +218,24 @@ var igv = (function (igv) {
             {name: "Filter", value: this.filter}
         ];
 
+        if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
+            let ref = this.referenceBases;
+            if (ref.length === 1) {
+                let altArray = this.alternateBases.split(",");
+                fields.push("<hr/>");
+                for (let i = 0; i < altArray.length; i++) {
+                    let alt = this.alternateBases[i];
+                    if (alt.length === 1) {
+                        let l = igv.TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
+                        if (l) {
+                            fields.push(l);
+                            fields.push('<hr>');
+                        }
+                    }
+                }
+            }
+        }
+
         if (this.hasOwnProperty("heterozygosity")) {
             fields.push({name: "Heterozygosity", value: this.heterozygosity});
         }
@@ -237,22 +255,7 @@ var igv = (function (igv) {
             });
         }
 
-        if (this.referenceBases.length === 1 && !isRef(this.alternateBases)) {
-            let ref = this.referenceBases;
-            if (ref.length === 1) {
-                let altArray = this.alternateBases.split(",");
-                fields.push("<hr/>");
-                for (let i = 0; i < altArray.length; i++) {
-                    let alt = this.alternateBases[i];
-                    if (alt.length === 1) {
-                        let l = igv.TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
-                        if (l) {
-                            fields.push(l);
-                        }
-                    }
-                }
-            }
-        }
+
 
         return fields;
 
