@@ -76,8 +76,7 @@ var igv = (function (igv) {
             this.$viewport.append(this.$spinner);
             this.stopSpinner();
 
-            if("sequence" !==  trackView.track.type)
-            {
+            if ("sequence" !== trackView.track.type) {
                 this.popover = new igv.Popover(self.browser.$content);
                 self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
             }
@@ -449,33 +448,27 @@ var igv = (function (igv) {
 
     };
 
-    function draw(drawConfiguration, features) {
-
+    async function draw(drawConfiguration, features) {
 
         if (features) {
             drawConfiguration.features = features;
             this.trackView.track.draw(drawConfiguration);
         }
 
-        const self = this;
         const browser = this.browser;
-        if (browser.roi) {
 
-            for (let r of browser.roi) {
-                r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd)
-                    .then(function (f) {
-                        if (f && f.length > 0) {
-                            drawConfiguration.features = f;
-                            r.draw(drawConfiguration);
-                        }
-                    })
+        const roi = mergeArrays(browser.roi, this.trackView.track.roi)
+
+        if (roi) {
+            for (let r of roi) {
+                const f = await
+                    r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd)
+                if (f && f.length > 0) {
+                    drawConfiguration.features = f;
+                    r.draw(drawConfiguration);
+                }
+
             }
-            //
-            // .catch(function (error) {
-            //     console.error(error);
-            //     self.loading = false;
-            //     browser.presentAlert("ERROR DRAWING REGIONS OF INTEREST", self.$viewport);
-            // })
         }
     }
 
@@ -1030,6 +1023,18 @@ var igv = (function (igv) {
                 }
             }
         }
+    }
+
+    /**
+     * Merge 2 arrays.  a and/or b can be undefined.  If both are undefined, return undefined
+     * @param a An array or undefined
+     * @param b An array or undefined
+     */
+    function mergeArrays(a, b) {
+        if(a && b) return a.concat(b)
+        else if(a) return a
+        else return b
+
     }
 
     return igv;
