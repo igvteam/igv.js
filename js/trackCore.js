@@ -113,24 +113,34 @@ var igv = (function (igv) {
 
         trackConfig.browser = browser;
 
+        let track
         switch (type) {
 
             case "annotation":
             case "genes":
             case "fusionjuncspan":
             case "snp":
-
-                return igv.trackFactory["feature"](trackConfig, browser);
+                track = igv.trackFactory["feature"](trackConfig, browser);
+                break;
 
             default:
 
                 if (igv.trackFactory.hasOwnProperty(type)) {
-                    return igv.trackFactory[type](trackConfig, browser);
+                    track = igv.trackFactory[type](trackConfig, browser);
                 }
                 else {
-                    return undefined;
+                    track = undefined;
                 }
         }
+
+        if(config.roi && track) {
+            track.roi = [];
+            config.roi.forEach(function (r) {
+                track.roi.push(new igv.ROI(r, browser.genome));
+            });
+        }
+
+        return track
 
     };
 
