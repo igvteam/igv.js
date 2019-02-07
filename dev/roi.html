@@ -167,30 +167,28 @@
         const options = {
 
             locus: '1:67,655,272-67,684,468',
-
-
             genome: "hg19",
-            // Define 2 "region of interest" sets
+
+            // Define 2 "region of interest" sets, the first is global, the second specific to the track
             roi: [
                 {
                     name: 'ROI set 1',
-                    url: '../test/data/bed/roi_bed_1.bed',
+                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_1.bed',
                     indexed: false,
                     color: "rgba(68, 134, 247, 0.25)"
-                },
-                {
-                    name: 'ROI set 2',
-                    url: '../test/data/bed/roi_bed_2.bed',
-                    indexed: false,
-                    color: "rgba(0, 150, 50, 0.25)"
                 }
-
             ],
             tracks: [
                 {
-                    name: '3 Column BED File',
-                    url: 'https://s3.amazonaws.com/igvjs-dugla/data/roi.bed',
-                    indexed: false
+                    name: 'Some features',
+                    url: 'https://s3.amazonaws.com/igv.org.test/data/roi/some_features.bed',
+                    indexed: false,
+                    roi: [{
+                        name: 'ROI set 2',
+                        url: 'https://s3.amazonaws.com/igv.org.test/data/roi/roi_bed_2.bed',
+                        indexed: false,
+                        color: "rgba(0, 150, 50, 0.25)"
+                    }]
                 }
             ]
         };
