@@ -232,7 +232,6 @@ var igv = (function (igv) {
         var self = this;
 
         if (alignment.blocks === undefined) {
-
             incBlockCount(alignment);
         }
         else {
@@ -243,10 +242,8 @@ var igv = (function (igv) {
 
         function incBlockCount(block) {
 
-            var key,
-                base,
-                q;
-
+            if('S' === block.type) return;
+            
             const seq = alignment.seq;
             const qual = alignment.qual;
             const seqOffset = block.seqOffset;
@@ -257,11 +254,9 @@ var igv = (function (igv) {
                     self.coverage[i] = new Coverage();
                 }
 
-                base = seq.charAt(seqOffset + j);
-                key = (alignment.strand) ? "pos" + base : "neg" + base;
-
-
-                q = qual && seqOffset + j < qual.length ? qual[seqOffset + j] : 30;
+                const base = seq.charAt(seqOffset + j);
+                const key = (alignment.strand) ? "pos" + base : "neg" + base;
+                const q = qual && seqOffset + j < qual.length ? qual[seqOffset + j] : 30;
 
                 self.coverage[i][key] += 1;
                 self.coverage[i]["qual" + base] += q;
