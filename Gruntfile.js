@@ -41,7 +41,7 @@ module.exports = function (grunt) {
         concat: {
             igv: {
                 src: [
-                    'wrapper/header-cjs.js',
+                    'wrapper/header.js',
                     'tmp/embedCss.js',
                     'vendor/jquery-3.3.1.slim.js',
                     'vendor/underscore.js',
@@ -52,9 +52,9 @@ module.exports = function (grunt) {
                     'vendor/tdigest.js',
                     'vendor/cram-bundle.js',
                     'js/**/*.js',
-                    'wrapper/footer-cjs.js'
+                    'wrapper/footer.js'
                 ],
-                dest: 'tmp/igv-cjs.js'
+                dest: 'dist/igv.js'
             },
             igv_esm: {
                 src: [
