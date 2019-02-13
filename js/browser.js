@@ -319,7 +319,7 @@ var igv = (function (igv) {
 
         var panelWidth;
 
-        if (false !== session.showIdeogram) {
+        if (false !== session.showIdeogram && !self.ideoPanel) {
             panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
             self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth, self);
             self.ideoPanel.repaint();
