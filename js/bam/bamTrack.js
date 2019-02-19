@@ -83,6 +83,7 @@ var igv = (function (igv) {
                 this.pairsSupported = (undefined === config.pairsSupported);
 
                 this.showSoftClips = config.showSoftClips;
+                this.showAllBases = config.showAllBases;
 
                 this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
                 this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
@@ -268,6 +269,28 @@ var igv = (function (igv) {
             colorByMenuItems.forEach(function (item) {
                 const selected = (self.alignmentTrack.colorBy === item.key);
                 menuItems.push(colorByCB(item, selected));
+            });
+
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+            menuItems.push({
+                object: igv.createCheckbox("Show all bases", self.showAllBases),
+                click: function () {
+
+                    const $fa = $(this).find('i');
+
+                    self.showAllBases = !self.showAllBases;
+
+                    if (true === self.showAllBases) {
+                        $fa.removeClass('igv-fa-check-hidden');
+                        $fa.addClass('igv-fa-check-visible');
+                    } else {
+                        $fa.removeClass('igv-fa-check-visible');
+                        $fa.addClass('igv-fa-check-hidden');
+                    }
+
+                    self.config.showAllBases = self.showAllBases;
+                    self.trackView.updateViews(true);
+                }
             });
 
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
@@ -670,6 +693,7 @@ var igv = (function (igv) {
                 packedAlignmentRows = alignmentContainer.packedAlignmentRows;
 
             const showSoftClips = this.parent.showSoftClips;
+            const showAllBases = this.parent.showAllBases;
 
             let referenceSequence = alignmentContainer.sequence;
             if (referenceSequence) {
@@ -918,7 +942,7 @@ var igv = (function (igv) {
 
                     // Mismatch coloring
 
-                    if (isSoftClip || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
+                    if (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
 
                         const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                         const qual = alignment.qual;
@@ -935,7 +959,7 @@ var igv = (function (igv) {
                             if (readChar === "=") {
                                 readChar = refChar;
                             }
-                            if (readChar === "X" || refChar !== readChar || isSoftClip) {
+                            if (readChar === "X" || refChar !== readChar || isSoftClip || showAllBases) {
 
                                 let baseColor;
                                 if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
