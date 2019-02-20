@@ -1,4 +1,11 @@
 [
+  {
+    "type": "alignment",
+    "name": "HG02450 - Broad",
+    "format": "bam",
+    "url": "https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
+    "indexURL": "https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai"
+  },
 
   {
     "type": "annotation",
