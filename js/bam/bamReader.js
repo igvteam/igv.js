@@ -50,74 +50,50 @@ var igv = (function (igv) {
 
     };
 
-    igv.BamReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
+    igv.BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
 
-        var self = this;
+        const chrToIndex = await getChrIndex.call(this)
+        const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr;
+        const chrId = chrToIndex[queryChr];
 
+        const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
 
-        return getChrIndex.call(self)
+        if (chrId === undefined) {
+            return alignmentContainer;
 
-            .then(function (chrToIndex) {
+        } else {
 
-                var chrId, queryChr, alignmentContainer;
+            const bamIndex = await getIndex.call(this)
+            const chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd)
 
-                queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
+            if (!chunks || chunks.length === 0) {
+                return alignmentContainer;
+            }
 
-                chrId = chrToIndex[queryChr];
+            const promises = [];
+            for (let c of chunks) {
+                var fetchMin = c.minv.block,
+                    fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
+                    range = {start: fetchMin, size: fetchMax - fetchMin + 1};
+                promises.push(igv.xhr.loadArrayBuffer(this.bamPath, igv.buildOptions(this.config, {range: range})))
+            }
 
-                alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+            const compressedChunks = await Promise.all(promises)
 
-                if (chrId === undefined) {
-                    return Promise.resolve(alignmentContainer);
+            for (let i = 0; i < chunks.length; i++) {
+                const compressed = compressedChunks[i]
+                const c = chunks[i]
+                var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
-                } else {
+            }
 
-                    return getIndex.call(self)
+            alignmentContainer.finish();
+            return alignmentContainer;
 
-                        .then(function (bamIndex) {
+        }
+    }
 
-                            var chunks = bamIndex.blocksForRange(chrId, bpStart, bpEnd),
-                                promises = [];
-
-
-                            if (!chunks) {
-                                return Promise.resolve(null);
-                            }
-                            if (chunks.length === 0) {
-                                return Promise.resolve(alignmentContainer);
-                            }
-
-                            chunks.forEach(function (c) {
-
-                                promises.push(new Promise(function (fulfill, reject) {
-
-                                    var fetchMin = c.minv.block,
-                                        fetchMax = c.maxv.block + 65000,   // Make sure we get the whole block.
-                                        range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-
-                                    igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config, {range: range}))
-                                        .then(function (compressed) {
-
-                                            var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                                            igv.BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, self.indexToChr, chrId, bpStart, bpEnd, self.filter);
-
-                                            fulfill(alignmentContainer);
-
-                                        })
-                                        .catch(reject);
-
-                                }));
-                            });
-
-                            return Promise.all(promises);
-                        })
-                        .then(function (ignored) {
-                            alignmentContainer.finish();
-                            return alignmentContainer;
-                        });
-                }
-            });
-    };
 
     function readHeader() {
 
@@ -139,7 +115,7 @@ var igv = (function (igv) {
             });
     };
 
-    function getIndex() {
+    async function getIndex() {
 
         const self = this;
         const genome = this.genome;
@@ -156,7 +132,7 @@ var igv = (function (igv) {
         }
     }
 
-    function getChrIndex() {
+    async function getChrIndex() {
 
         var self = this;
 
