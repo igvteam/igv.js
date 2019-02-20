@@ -80,7 +80,7 @@ var igv = (function (igv) {
         if (true === this.track.ignoreTrackMenu) {
             // do nothing
         } else {
-            appendRightHandGutter.call(this, $(this.trackDiv));
+            igv.appendRightHandGutter.call(this, $(this.trackDiv));
         }
 
         if (this.track instanceof igv.RulerTrack) {
@@ -190,16 +190,15 @@ var igv = (function (igv) {
         resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
     }
 
-    function appendRightHandGutter($parent) {
+    igv.appendRightHandGutter = function($parent) {
 
         let $div = $('<div class="igv-right-hand-gutter">');
         $parent.append($div);
 
-        createTrackGearPopover.call(this, $div);
-    }
+        igv.createTrackGearPopover.call(this, $div);
+    };
 
-
-    function createTrackGearPopover($parent) {
+    igv.createTrackGearPopover = function($parent) {
 
         let $cogContainer = $("<div>", { class:'igv-trackgear-container' });
         $parent.append($cogContainer);
@@ -216,7 +215,7 @@ var igv = (function (igv) {
             self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
         });
 
-    }
+    };
 
     function resizeControlCanvas(width, height) {
 
