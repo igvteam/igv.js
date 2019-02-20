@@ -212,10 +212,10 @@ var igv = (function (igv) {
                     offset = blockEnd;
                     continue;   // unmapped read
                 }
-                else if (chrIdx && (refID > chrIdx || pos > max)) {
+                else if (chrIdx !== undefined && (refID > chrIdx || pos > max)) {
                     return;    // off right edge, we're done
                 }
-                else if (chrIdx && (refID < chrIdx)) {
+                else if (chrIdx !== undefined && (refID < chrIdx)) {
                     offset = blockEnd;
                     continue;   // ref ID to left of start, not sure this is possible
                 }
@@ -298,7 +298,6 @@ var igv = (function (igv) {
                 }
                 p += lseq;
 
-
                 if (mateChrIdx >= 0) {
                     alignment.mate = {
                         chr: chrNames[mateChrIdx],
@@ -316,7 +315,6 @@ var igv = (function (igv) {
                 if ((undefined === filter || filter.pass(alignment))) {
                     makeBlocks(alignment, cigarArray);
                     alignmentContainer.push(alignment);
-
                 }
                 offset = blockEnd;
             }
