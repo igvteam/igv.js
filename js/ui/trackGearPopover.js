@@ -48,6 +48,12 @@ var igv = (function (igv) {
 
         igv.makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
 
+        $popoverHeader.on('click.track_gear_popover', function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            // absorb click to prevent it leaking through to parent DOM element
+        });
+
     };
 
     igv.TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
