@@ -119,20 +119,32 @@ var igv = (function (igv) {
 
         $container.append(igv.createIcon("times"));
 
-        $container.on('click', closeHandler);
-        $container.on('touchend', closeHandler);
-
-        $container.on('mousedown', function (e) {
+        $container.on('click', function (e) {
+            e.preventDefault();
             e.stopPropagation();
+            closeHandler()
         });
 
-        $container.on('mouseup', function (e) {
-            e.stopPropagation();
-        });
-
-        $container.on('touchstart', function (e) {
-            e.stopPropagation();
-        });
+        // $container.on('touchend', function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        //     closeHandler()
+        // });
+        //
+        // $container.on('mousedown', function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        // });
+        //
+        // $container.on('mouseup', function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        // });
+        //
+        // $container.on('touchstart', function (e) {
+        //     e.preventDefault();
+        //     e.stopPropagation();
+        // });
 
     };
 
