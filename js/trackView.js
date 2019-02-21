@@ -210,8 +210,8 @@ var igv = (function (igv) {
 
         let self = this;
         $cogContainer.click(function (e) {
-            const page = igv.pageCoordinates(e);
-            // page.x, page.y
+            e.preventDefault();
+            e.stopPropagation();
             self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
         });
 
