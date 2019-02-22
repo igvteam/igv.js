@@ -537,7 +537,7 @@ var igv = (function (igv) {
             // }
             // feature.id = id ? id : tmp;
             // feature.name = name ? name : tmp;
-            feature.name = name;
+            feature.name = tokens[3];
         }
 
         if (tokens.length > 4) {
