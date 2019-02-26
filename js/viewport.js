@@ -79,7 +79,11 @@ var igv = (function (igv) {
             if ("sequence" !== trackView.track.type) {
 
                 this.popover = new igv.Popover(self.browser.$content);
-                this.popover.$popover.attr('id', trackView.track.name);
+
+                let str = trackView.track.name.toLowerCase().split(' ').join('_');
+                str = str + '_' + this.browser.genomicStateList.indexOf(this.genomicState);
+
+                this.popover.$popover.attr('id', str);
 
                 self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
             }
