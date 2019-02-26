@@ -77,7 +77,10 @@ var igv = (function (igv) {
             this.stopSpinner();
 
             if ("sequence" !== trackView.track.type) {
+
                 this.popover = new igv.Popover(self.browser.$content);
+                this.popover.$popover.attr('id', trackView.track.name);
+
                 self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
             }
         }
@@ -654,16 +657,21 @@ var igv = (function (igv) {
     igv.Viewport.prototype.dispose = function () {
         const self = this;
 
-        this.$viewport.off();
-        this.$viewport.empty();
-        $(this.contentDiv).off();
-        $(this.contentDiv).empty();
+        if (this.popover) {
+            this.popover.$popover.off();
+            this.popover.$popover.empty();
+            this.popover.$popover.remove();
+        }
+
         $(this.canvas).off();
         $(this.canvas).empty();
-        if (this.popover) {
-            $(this.popover).off();
-            $(this.popover).empty();
-        }
+
+        $(this.contentDiv).off();
+        $(this.contentDiv).empty();
+
+        this.$viewport.off();
+        this.$viewport.empty();
+
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.
         Object.keys(this).forEach(function (key, i, list) {
