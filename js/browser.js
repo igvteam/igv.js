@@ -383,7 +383,7 @@ var igv = (function (igv) {
         if (genomeConfig.tracks) {
             await self.loadTrackList(genomeConfig.tracks);
         }
-        
+
         self.resize();    // Force recomputation and repaint
         return self.genome;
 
@@ -1359,15 +1359,34 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.emptyViewportContainers = function () {
 
-        $(this.trackContainerDiv).find('.igv-scrollbar-outer-div').remove();
-        $(this.trackContainerDiv).find('.igv-viewport-div').remove();
-        $(this.trackContainerDiv).find('.igv-ruler-sweeper-div').remove();
-        this.$contentHeader.empty();
+        for (let trackView of this.trackViews) {
 
-        this.trackViews.forEach(function (trackView) {
+            if (trackView.$outerScroll) {
+                trackView.$outerScroll.remove();
+            }
+
+            for (let viewport of trackView.viewports) {
+
+                if (viewport.rulerSweeper) {
+                    viewport.rulerSweeper.$rulerSweeper.remove();
+                }
+
+                if (viewport.popover) {
+                    viewport.popover.$popover.off();
+                    viewport.popover.$popover.empty();
+                    viewport.popover.$popover.remove();
+                }
+
+                viewport.$viewport.remove();
+            }
+
+            delete trackView.viewports;
             trackView.viewports = [];
-            trackView.scrollbar = undefined;
-        });
+
+            delete trackView.scrollbar;
+        }
+
+        this.$contentHeader.empty();
 
     };
 
