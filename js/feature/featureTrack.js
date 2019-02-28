@@ -360,7 +360,6 @@ var igv = (function (igv) {
                     {
                         object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                         click: function () {
-                            self.browser.popover.hide();
                             self.displayMode = displayMode;
                             self.config.displayMode = displayMode;
                             self.trackView.checkContentHeight();

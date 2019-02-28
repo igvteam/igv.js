@@ -544,11 +544,13 @@
     padding-top: 2px;
     padding-left: 8px; }
   .igv-trackgear-popover-check-container div:first-child {
+    position: relative;
     width: 12px;
     height: 12px; }
     .igv-trackgear-popover-check-container div:first-child svg {
-      max-width: 100%;
-      height: auto; }
+      position: absolute;
+      width: 12px;
+      height: 12px; }
 
 .igvControlDiv {
   position: relative; }
