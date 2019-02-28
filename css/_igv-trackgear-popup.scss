@@ -126,13 +126,14 @@
   }
 
   div:first-child {
-
+    position: relative;
     width: 12px;
     height: 12px;
 
     svg {
-      max-width: 100%;
-      height: auto;
+      position: absolute;
+      width: 12px;
+      height: 12px;
     }
 
   }
