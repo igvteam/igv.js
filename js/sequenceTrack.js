@@ -160,6 +160,7 @@ var igv = (function (igv) {
                             })
                             self.trackView.setTrackHeight(25);
                         }
+                        self.trackView.repaintViews()
 
                     }
                 }
@@ -215,6 +216,7 @@ var igv = (function (igv) {
         SequenceTrack.prototype.draw = function (options) {
 
             const self = this;
+            const ctx = options.context;
 
             if (options.features) {
 
@@ -240,7 +242,7 @@ var igv = (function (igv) {
 
                         let color = fillColor.call(this, letter);
 
-                        let ctx = options.context;
+
                         if (options.bpPerPixel > 1/10) {
                             igv.graphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                         } else {
