@@ -56,7 +56,7 @@ var igv = (function (igv) {
             const genomeList = igv.GenomeUtils.genomeList;
 
             if (KNOWN_GENOMES) {
-                return PKNOWN_GENOMES;
+                return KNOWN_GENOMES;
             } else if (!genomeList) {
                 return {};
             }
