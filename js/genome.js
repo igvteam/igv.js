@@ -29,64 +29,44 @@ var igv = (function (igv) {
 
     igv.GenomeUtils = {
 
-        loadGenome: function (config) {
-
-            let cytobands, chrNames, chromosomes;
+        loadGenome: async function (config) {
 
             const cytobandUrl = config.cytobandURL;
             const aliasURL = config.aliasURL;
             const sequence = new igv.FastaSequence(config);
 
-            return sequence.init()
+            await sequence.init()
 
-                .then(function () {
-                    chrNames = sequence.chromosomeNames;
-                    chromosomes = sequence.chromosomes;
-                })
+            let cytobands
+            if (cytobandUrl) {
+                cytobands = await loadCytobands(cytobandUrl, sequence.config);
+            }
 
-                .then(function (ignore) {
-                    if (cytobandUrl) {
-                        return loadCytobands(cytobandUrl, sequence.config);
-                    } else {
-                        return undefined
-                    }
-                })
+            let aliases
+            if (aliasURL) {
+                aliases = await loadAliases(aliasURL, sequence.config);
+            }
 
-                .then(function (c) {
-                    cytobands = c;
-                    if (aliasURL) {
-                        return loadAliases(aliasURL, sequence.config);
-                    }
-                    else {
-                        return undefined;
-                    }
-                })
+            return new Genome(config, sequence, cytobands, aliases);
 
-                .then(function (aliases) {
-                    return new Genome(config, sequence, cytobands, aliases);
-                })
         },
 
-        getKnownGenomes: function () {
+        getKnownGenomes: async function () {
 
             const genomeList = igv.GenomeUtils.genomeList;
 
             if (KNOWN_GENOMES) {
-                return Promise.resolve(KNOWN_GENOMES);
+                return PKNOWN_GENOMES;
             } else if (!genomeList) {
-                return Promise.resolve({});
+                return {};
             }
             else if (typeof genomeList === 'string') {
-
-                return igv.xhr.loadJson(genomeList, {})
-
-                    .then(function (jsonArray) {
-                        return processJson(jsonArray);
-                    })
+                const jsonArray = await igv.xhr.loadJson(genomeList, {})
+                return processJson(jsonArray);
 
             }
             else {
-                return Promise.resolve(processJson(genomeList));
+                return processJson(genomeList);
             }
 
             function processJson(jsonArray) {
