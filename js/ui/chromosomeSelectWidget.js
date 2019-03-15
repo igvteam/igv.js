@@ -27,6 +27,8 @@ var igv = (function (igv) {
 
     igv.ChromosomeSelectWidget = function (browser, $parent) {
 
+        this.showAllChromosomes = browser.config.showAllChromosomes
+
         this.$container = $('<div>', { class:'igv-chromosome-select-widget-container' });
         $parent.append(this.$container);
 
@@ -46,7 +48,7 @@ var igv = (function (igv) {
 
         this.$select.empty();
 
-        list = genome.wgChromosomeNames.slice();  // slice used to copy list
+        list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
         list.unshift('all');
         list.forEach(function (name) {
             var $o;
