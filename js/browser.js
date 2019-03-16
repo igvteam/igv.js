@@ -1416,59 +1416,46 @@ var igv = (function (igv) {
         return this.search(chrName + ":" + start + "-" + end);
     };
 
-    igv.Browser.prototype.search = function (string, init) {
+    igv.Browser.prototype.search = async function (string, init) {
 
-        var self = this,
-            loci;
+        const self = this
 
-        const genome = this.genome;
+        const genome = this.genome
 
         if (string && string.trim().toLowerCase() === "all") string = "all";
 
-        loci = string.split(' ');
+        const loci = string.split(' ')
 
-        return createGenomicStateList(loci)
+        const genomicStateList = await createGenomicStateList(loci)
 
-            .then(function (genomicStateList) {
+        if (genomicStateList.length > 0) {
 
-                if (genomicStateList.length > 0) {
+            this.emptyViewportContainers();
+            this.genomicStateList = genomicStateList;
+            this.buildViewportsWithGenomicStateList(genomicStateList);
 
-                    self.emptyViewportContainers();
+            // assign ids to the state objects
+            for (let gs of genomicStateList) {
+                gs.id = igv.guid();
+            }
 
-                    self.genomicStateList = genomicStateList;
+        } else {
+            throw new Error('Unrecognized locus ' + string);
+        }
 
-                    self.buildViewportsWithGenomicStateList(genomicStateList);
+        if (this.ideoPanel) {
+            this.ideoPanel.discardPanels();
+            const panelWidth = self.viewportContainerWidth() / genomicStateList.length;
+            this.ideoPanel.buildPanels(this.$contentHeader, panelWidth);
+        }
 
-                    // assign ids to the state objects
-                    for (let gs of genomicStateList) {
-                        gs.id = igv.guid();
-                    }
+        this.updateUIWithGenomicStateListChange(genomicStateList);
 
-                    return genomicStateList
+        if (!init) {
+            this.updateViews();
+        }
 
-                } else {
-                    throw new Error('Unrecognized locus ' + string);
-                }
-
-            })
-            .then(function (genomicStateList) {
-
-                var panelWidth;
-
-                if (self.ideoPanel) {
-                    self.ideoPanel.discardPanels();
-                    panelWidth = self.viewportContainerWidth() / genomicStateList.length;
-                    self.ideoPanel.buildPanels(self.$contentHeader, panelWidth);
-                }
-
-                self.updateUIWithGenomicStateListChange(genomicStateList);
-
-                if (!init) {
-                    self.updateViews();
-                }
-
-                return genomicStateList;
-            })
+        return genomicStateList;
 
 
         /**
@@ -1478,55 +1465,24 @@ var igv = (function (igv) {
          *
          * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
          */
-        function createGenomicStateList(loci) {
+        async function createGenomicStateList(loci) {
 
 
             let searchConfig = self.searchConfig;
-            let ordered = {};
-            let unique = [];
-
-            // prune duplicates as the order list is built
-            loci.forEach(function (locus, index) {
-                if (undefined === ordered[locus]) {
-                    unique.push(locus);
-                    ordered[locus] = unique.indexOf(locus);
-                }
-            });
-
             let result = [];
-            let geneNameLoci = [];
-            let dictionary = {};
 
             // Try locus string first  (e.g.  chr1:100-200)
-            unique.forEach(function (locus) {
-
+            for (let locus of loci) {
                 let genomicState = isLocusChrNameStartEnd(locus, self.genome);
-
                 if (genomicState) {
                     genomicState.locusSearchString = locus;
                     result.push(genomicState);
-                    dictionary[locus] = genomicState;
                 }
                 else {
-                    geneNameLoci.push(locus);
-                }
-            });
-
-            if (geneNameLoci.length === 0) {
-
-                return Promise.resolve(appendReferenceFrames(result));
-
-            } else {
-
-                // Search based on feature symbol
-                // Try local feature cache first.  This is created from feature tracks tagged "searchable"
-                let promises = [];
-                geneNameLoci.forEach(function (locus) {
-                    var feature, genomicState, chromosome;
-
-                    feature = self.featureDB[locus.toLowerCase()];
+                    // Try local feature cache.    This is created from feature tracks tagged "searchable"
+                    const feature = self.featureDB[locus.toLowerCase()];
                     if (feature) {
-                        chromosome = self.genome.getChromosome(feature.chr);
+                        const chromosome = self.genome.getChromosome(feature.chr);
                         if (chromosome) {
                             genomicState = {
                                 chromosome: chromosome,
@@ -1536,104 +1492,44 @@ var igv = (function (igv) {
                             }
                             igv.Browser.validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
                             result.push(genomicState);
-                            dictionary[locus] = genomicState;
                         }
-                    } else {
-                        promises.push(searchPromise(locus));  // Not found, create promise to search via webservice
                     }
-                });
-
-                // Finally try search webservice
-                if (promises.length > 0) {
-
-                    return Promise.all(promises)
-
-                        .then(function (searchResponses) {
-
-                            searchResponses.forEach(function (response) {
-
-                                const genomicState = processSearchResult(response.result, response.locusSearchString);
-
-                                if (genomicState) {
-                                    result.push(genomicState);
-                                    dictionary[genomicState.locusSearchString] = genomicState;
-                                }
-                            });
-
-                            let cooked = Array(Object.keys(dictionary).length);
-
-                            result.forEach(function (r) {
-                                let key = r.locusSearchString;
-                                let index = ordered[key];
-                                cooked[index] = r;
-                            });
-
-                            return appendReferenceFrames(preserveOrder(result, dictionary, ordered));
-                        });
-                } else {
-
-                    return Promise.resolve(appendReferenceFrames(preserveOrder(result, dictionary, ordered)));
+                    else {
+                        // Try webservice
+                        const response = await searchWebService(locus)
+                        const genomicState = processSearchResult(response.result, response.locusSearchString);
+                        if (genomicState) {
+                            result.push(genomicState);
+                        }
+                    }
                 }
+                return appendReferenceFrames(result);
             }
 
 
             function appendReferenceFrames(genomicStateList) {
-
                 const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
-
                 genomicStateList.forEach(function (gs) {
                     gs.referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
                 });
-
                 return genomicStateList;
             }
 
-            /* End of function  */
-            function preserveOrder(list, dictionary, indexDictionary) {
-                var orderedList;
-
-                orderedList = Array(Object.keys(dictionary).length);
-
-                list.forEach(function (g) {
-                    var key,
-                        index;
-                    key = g.locusSearchString;
-                    index = indexDictionary[key];
-                    orderedList[index] = g;
-                });
-
-                return orderedList;
-                // return list;
-
-            }
-
-            function searchPromise(locus) {
-
-                var path = searchConfig.url.replace("$FEATURE$", locus);
-
+            async function searchWebService(locus) {
+                let path = searchConfig.url.replace("$FEATURE$", locus);
                 if (path.indexOf("$GENOME$") > -1) {
                     path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
                 }
-
-                return igv.xhr.loadString(path)
-                    .then(function (result) {
-                        return {
-                            result: result,
-                            locusSearchString: locus
-                        }
-                    });
-
+                const result = await igv.xhr.loadString(path)
+                return {
+                    result: result,
+                    locusSearchString: locus
+                }
             }
 
             function processSearchResult(searchServiceResponse, locusSearchString) {
 
-                var results,
-                    result,
-                    chr,
-                    start,
-                    end,
-                    geneNameLocusObject;
-
+                let results
                 if ('plain' === searchConfig.type) {
                     results = parseSearchResults(searchServiceResponse);
                 } else {
@@ -1650,17 +1546,16 @@ var igv = (function (igv) {
 
                     // Ingoring all but first result for now
                     // TODO -- present all and let user select if results.length > 1
-                    result = results[0];
+                    const result = results[0];
 
-                    //
                     if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
-                        console.log("Search service results must includ chromosome and start fields: " + result);
+                        console.log("Search service results must include chromosome and start fields: " + result);
                         return undefined;
                     }
 
-                    chr = result[searchConfig.chromosomeField];
-                    start = result[searchConfig.startField] - searchConfig.coords;
-                    end = result[searchConfig.endField];
+                    const chr = result[searchConfig.chromosomeField];
+                    let start = result[searchConfig.startField] - searchConfig.coords;
+                    let end = result[searchConfig.endField];
 
                     if (undefined === end) {
                         end = start + 1;
@@ -1671,21 +1566,12 @@ var igv = (function (igv) {
                         end += self.flanking;
                     }
 
-                    geneNameLocusObject = Object.assign({}, result);
-
+                    const geneNameLocusObject = Object.assign({}, result);
                     geneNameLocusObject.chromosome = self.genome.getChromosome(chr);
                     geneNameLocusObject.start = start;
                     geneNameLocusObject.end = end;
                     geneNameLocusObject.locusSearchString = locusSearchString;
-
                     geneNameLocusObject.selection = new igv.GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
-
-
-                    // geneName = result.geneSymbol || result.gene;
-                    // geneNameLocusObject.locusSearchString = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? result.snpId : geneName;
-                    //
-                    // obj = ('gtex' === geneNameLocusObject.type || 'snp' === geneNameLocusObject.type) ? {snp: result.snpId} : {gene: geneName};
-                    // geneNameLocusObject.selection = new igv.GtexSelection(obj);
 
                     return geneNameLocusObject;
 
@@ -2055,7 +1941,7 @@ var igv = (function (igv) {
             string = httpMessages[string];
         }
 
-        this.alertDialog.configure({ label: string });
+        this.alertDialog.configure({label: string});
         this.alertDialog.present($parent);
     };
 
