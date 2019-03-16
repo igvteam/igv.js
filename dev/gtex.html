@@ -168,57 +168,63 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-            .then(function (google) {
-
-                const options =
+        let options = {
+            type: "GTEX",
+            reference: {
+                id: 'hg19',
+                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                indexURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta.fai",
+                cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+                tracks: [
                     {
-                        // locus: 'muc1',
-                        // genome: "hg38",
-                        reference: {
-                            fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-                            indexURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta.fai",
-                            cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt"
-                        },
-                        tracks: [
-                            {
-                                name: "GWAS Snps",
-                                type: "annotation",
-                                format: "gtexgwas",
-                                url: "http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed"
-                            },
-                            {
-                                type: "eqtl",
-                                sourceType: "gtex-ws",
-                                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
-                                tissueName: "Muscle_Skeletal",
-                                name: "Muscle Skeletal",
-                                visibilityWindow: 1000000
-                            },
-                            {
-                                name: "Genes",
-                                type: "annotation",
-                                format: "bed",
-                                url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed",
-                                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed.idx"
-                            }
-                        ]
-                    };
+                        name: 'Genes',
+                        type: 'annotation',
+                        url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed',
+                        displayMode: 'EXPANDED',
+                        height: 100,
+                        autoHeight: true,
+                        removable: false,
+                        order: Number.MAX_VALUE // pinning track to bottom
+                    }
+                ]
+            },
+            //locus: params.location, // something like: chr1:1-500,000
+            flanking: 75000,
+            search: {
+                url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
+                resultsField: 'features',
+                geneField: 'geneSymbol',
+                snpField: 'snpId'
+            },
+            tracks: [
+                {
+                    name: 'GWAS Catalog',
+                    // type: 'gwasSNPS', -- errors with this track type
+                    url: 'http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    indexed: false,
+                    color: 'rgb(100,200,200)',
+                    displayMode: 'EXPANDED',
+                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
+                },
+                {
+                    type: "eqtl",
+                    sourceType: "gtex-ws",
+                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                    tissueName: "Muscle_Skeletal",
+                    name: "Muscle Skeletal",
+                    visibilityWindow: 1000000
+                }
+            ]
+        }
 
 
-                igv.createBrowser(document.getElementById('igvDiv'), options)
-                    .then(function (browser) {
-
-                    })
+        igv.createBrowser(document.getElementById('igvDiv'), options)
+            .then(function (browser) {
 
             })
-    });
+    })
 
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", igv.browser.sessionURL());
-    }
 
 </script>
 

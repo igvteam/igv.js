@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>GTEx</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h1>GTEx example</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+        let options = {
+            type: "GTEX",
+            reference: {
+                id: 'hg19',
+                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
+                indexURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta.fai",
+                cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+                tracks: [
+                    {
+                        name: 'Genes',
+                        type: 'annotation',
+                        url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed',
+                        displayMode: 'EXPANDED',
+                        height: 100,
+                        autoHeight: true,
+                        removable: false,
+                        order: Number.MAX_VALUE // pinning track to bottom
+                    }
+                ]
+            },
+            //locus: params.location, // something like: chr1:1-500,000
+            flanking: 75000,
+            search: {
+                url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
+                resultsField: 'features',
+                geneField: 'geneSymbol',
+                snpField: 'snpId'
+            },
+            tracks: [
+                {
+                    name: 'GWAS Catalog',
+                    // type: 'gwasSNPS', -- errors with this track type
+                    url: 'http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    indexed: false,
+                    color: 'rgb(100,200,200)',
+                    displayMode: 'EXPANDED',
+                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
+                },
+                {
+                    type: "eqtl",
+                    sourceType: "gtex-ws",
+                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                    tissueName: "Muscle_Skeletal",
+                    name: "Muscle Skeletal",
+                    visibilityWindow: 1000000
+                }
+            ]
+        }
+
+        var igvDiv = document.getElementById("igv-div");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+
+    });
+
+</script>
+
+</body>
+
+</html>
