@@ -914,29 +914,29 @@ var igv = (function (igv) {
 
     }
 
+
     function decodeGtexGWAS(tokens, ignore) {
+        //chrom	chromStart	chromEnd	Strongest SNP-risk allele	Disease/Phenotype	P-value	Odds ratio or beta	PUBMEDID
+        //1	1247493	1247494	rs12103-A	Inflammatory bowel disease	8.00E-13	1.1	23128233
 
-
-        var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
-
-        tokenCount = tokens.length;
-        if (tokenCount < 8) {
+        const tokenCount = tokens.length;
+        if (tokenCount < 7) {
             return null;
         }
-
-        chr = tokens[0];
-        start = parseInt(tokens[1]) - 1;
-        end = parseInt(tokens[3].split(':')[1]);
-        //name = tokens[3];
-        //score = parseFloat(tokens[4]);
-        //strand = tokens[5].trim();
-        //signal = parseFloat(tokens[6]);
-        pValue = parseFloat(tokens[5]);
-        //qValue = parseFloat(tokens[8]);
-
-        //return {chr: chr, start: start, end: end, name: name, score: score, strand: strand, signal: signal,
-        //    pValue: pValue, qValue: qValue};
-        return {chr: chr, start: start, end: end, pvalue: pValue};
+        const feature =  {
+            chr: tokens[0],
+            start: parseInt(tokens[1]) - 1,
+            end: parseInt(tokens[2]),
+            'Strongest SNP-risk allele': tokens[3],
+            'Disease/Phenotype': tokens[4],
+            'P-value': tokens[5],
+            'Odds ratio or beta': tokens[6],
+        }
+        if(tokens.length > 6) {
+            'https://www.ncbi.nlm.nih.gov/pubmed/'
+            feature['PUBMEDID'] = `<a target = "blank" href = "https://www.ncbi.nlm.nih.gov/pubmed/${tokens[7]}">${tokens[7]}</a>`
+        }
+        return feature
     }
 
     /**
