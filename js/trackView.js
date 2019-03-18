@@ -719,11 +719,13 @@ var igv = (function (igv) {
                         $swatch.get(0).style.borderColor = 'white';
                     });
 
-                $swatch.click(function () {
+                $swatch.on('click.trackview', (event) => {
+                    event.stopPropagation();
                     colorHandler(color);
                 });
 
-                $swatch.on('touchend', function () {
+                $swatch.on('touchend.trackview',  (event) => {
+                    event.stopPropagation();
                     colorHandler(color);
                 });
 
