@@ -509,17 +509,31 @@ var igv = (function (igv) {
 
             const exonCount = feature.exons ? feature.exons.length : 0;
             const coord = calculateFeatureCoordinates(feature, bpStart, xScale);
+            const step = this.arrowSpacing;
+            const direction = feature.strand === '+' ? 1 : feature.strand === '-' ? -1 : 0;
+
             if (exonCount === 0) {
                 // single-exon transcript
                 ctx.fillRect(coord.px, py, coord.pw, h);
-
+                
+                // Arrows
+                // Do not draw if strand is not +/-
+                if (direction !== 0) {
+                    ctx.fillStyle = "white";
+                    ctx.strokeStyle = "white";
+                    for (let x = coord.px + step / 2; x < coord.px1; x += step) {
+                        // draw arrowheads along central line indicating transcribed orientation
+                        igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                        igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+                    }
+                    ctx.fillStyle = color;
+                    ctx.strokeStyle = color;
+                }
             }
             else {
                 // multi-exon transcript
                 igv.graphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
-                const direction = feature.strand === '+' ? 1 : -1;
-                const step = this.arrowSpacing;
                 const pixelWidth = options.pixelWidth;
 
                 const xLeft = Math.max(0, coord.px) + step / 2;
@@ -565,7 +579,7 @@ var igv = (function (igv) {
                         ctx.fillRect(ePx, py, ePw, h);
 
                         // Arrows
-                        if (ePw > step + 5) {
+                        if (ePw > step + 5 && direction !== 0) {
                             ctx.fillStyle = "white";
                             ctx.strokeStyle = "white";
                             for (let x = ePx + step / 2; x < ePx1; x += step) {
