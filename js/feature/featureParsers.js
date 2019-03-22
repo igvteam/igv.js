@@ -974,6 +974,7 @@ var igv = (function (igv) {
             if (t.length == 2) {
                 const key = t[0].trim();
                 let value = t[1].trim();
+
                 //Strip off quotes, if any
                 if (value.startsWith('"') && value.endsWith('"')) {
                     value = value.substr(1, value.length - 2);
@@ -982,6 +983,9 @@ var igv = (function (igv) {
                 const keyLower = key.toLowerCase()
                 if ("color" === keyLower || "colour" === keyLower) color = igv.Color.createColorString(t[1]);
                 else {
+                    if('gff3' === format) {
+                        value = decodeURIComponent(value)
+                    }
                     attributes[key] = value;
                 }
             }
