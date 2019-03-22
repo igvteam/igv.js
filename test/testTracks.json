@@ -71,14 +71,6 @@
     "visibilityWindow": 1000000
   },
   {
-    "type": "eqtl",
-    "sourceType": "gtex-ws",
-    "url": "https://gtexportal.org/api/b0.9/association/singleTissueEqtlByLocation",
-    "tissueName": "Liver",
-    "name": "Liver - api/b0.9 API",
-    "visibilityWindow": 1000000
-  },
-  {
     "HEADING": "Platinum Genomes (gs protocol BAM)"
   },
   {
