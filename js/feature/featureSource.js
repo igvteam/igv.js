@@ -42,9 +42,9 @@ var igv = (function (igv) {
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
-        // Default GFF filter
+        // Default GFF filter -- these feature types will be filtered out
         if (undefined === config.filterTypes) {
-            config.filterTypes = ['chromosome']
+            config.filterTypes = ['chromosome', 'gene']
         }
 
         if (config.features && Array.isArray(config.features)) {
