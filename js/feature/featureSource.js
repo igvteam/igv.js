@@ -42,6 +42,11 @@ var igv = (function (igv) {
 
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
+        // Default GFF filter
+        if(undefined === config.filterTypes) {
+            config.filterTypes = ['chromosome']
+        }
+
         if (config.features && Array.isArray(config.features)) {
             let features = config.features;
             if (config.mappings) {
@@ -86,6 +91,8 @@ var igv = (function (igv) {
             }
         }
 
+
+
         this.visibilityWindow = config.visibilityWindow;
 
     };
@@ -121,7 +128,7 @@ var igv = (function (igv) {
                             if (features) {
 
                                 if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                    features = (new igv.GFFHelper(self.config.format)).combineFeatures(features);
+                                    features = (new igv.GFFHelper(self.config)).combineFeatures(features);
                                 }
 
                                 // Assign overlapping features to rows
@@ -245,7 +252,7 @@ var igv = (function (igv) {
                         if (featureList) {
 
                             if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                featureList = (new igv.GFFHelper(self.config.format)).combineFeatures(featureList);
+                                featureList = (new igv.GFFHelper(self.config)).combineFeatures(featureList);
                             }
 
                             // Assign overlapping features to rows

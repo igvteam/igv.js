@@ -1,0 +1,76 @@
+8	Ensembl	chromosome	1	145138636	.	.	.	ID=chromosome:8;Alias=CM000670.2,chr8,NC_000008.11
+8	ensembl_havana	gene	127735434	127741434	.	+	.	ID=gene:ENSG00000136997;Name=MYC;biotype=protein_coding;description=MYC proto-oncogene%2C bHLH transcription factor [Source:HGNC Symbol%3BAcc:HGNC:7553];gene_id=ENSG00000136997;logic_name=ensembl_havana_gene;version=17
+8	havana	mRNA	127735434	127740477	.	+	.	ID=transcript:ENST00000259523;Parent=gene:ENSG00000136997;Name=MYC-201;biotype=protein_coding;tag=basic;transcript_id=ENST00000259523;transcript_support_level=1;version=10
+8	havana	exon	127735434	127736623	.	+	.	Parent=transcript:ENST00000259523;Name=ENSE00001848036;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00001848036;rank=1;version=1
+8	havana	five_prime_UTR	127735434	127736623	.	+	.	Parent=transcript:ENST00000259523
+8	havana	mRNA	127735473	127735817	.	+	.	ID=transcript:ENST00000641252;Parent=gene:ENSG00000136997;Name=MYC-209;biotype=protein_coding;tag=basic;transcript_id=ENST00000641252;version=1
+8	havana	exon	127735473	127735817	.	+	.	Parent=transcript:ENST00000641252;Name=ENSE00003811676;constitutive=0;ensembl_end_phase=0;ensembl_phase=0;exon_id=ENSE00003811676;rank=1;version=1
+8	havana	CDS	127735473	127735817	.	+	0	ID=CDS:ENSP00000493139;Parent=transcript:ENST00000641252;protein_id=ENSP00000493139
+8	havana	mRNA	127735519	127738772	.	+	.	ID=transcript:ENST00000517291;Parent=gene:ENSG00000136997;Name=MYC-203;biotype=protein_coding;transcript_id=ENST00000517291;transcript_support_level=1;version=1
+8	havana	exon	127735519	127735836	.	+	.	Parent=transcript:ENST00000517291;Name=ENSE00002130483;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002130483;rank=1;version=1
+8	havana	five_prime_UTR	127735519	127735836	.	+	.	Parent=transcript:ENST00000517291
+8	.	biological_region	127735560	127739033	1.21e+03	.	.	external_name=oe %3D 0.75;logic_name=cpg
+8	.	biological_region	127735607	127735611	0.999	+	.	logic_name=eponine
+8	.	biological_region	127735712	127735713	0.999	-	.	logic_name=eponine
+8	.	biological_region	127736028	127736034	0.999	+	.	logic_name=eponine
+8	havana	mRNA	127736046	127736612	.	+	.	ID=transcript:ENST00000641036;Parent=gene:ENSG00000136997;Name=MYC-208;biotype=protein_coding;tag=basic;transcript_id=ENST00000641036;version=1
+8	havana	exon	127736046	127736612	.	+	.	Parent=transcript:ENST00000641036;Name=ENSE00003814064;constitutive=0;ensembl_end_phase=0;ensembl_phase=0;exon_id=ENSE00003814064;rank=1;version=1
+8	havana	CDS	127736046	127736612	.	+	0	ID=CDS:ENSP00000493145;Parent=transcript:ENST00000641036;protein_id=ENSP00000493145
+8	ensembl_havana	mRNA	127736069	127741434	.	+	.	ID=transcript:ENST00000621592;Parent=gene:ENSG00000136997;Name=MYC-207;biotype=protein_coding;ccdsid=CCDS6359.2;tag=basic;transcript_id=ENST00000621592;transcript_support_level=1;version=5
+8	ensembl_havana	five_prime_UTR	127736069	127736593	.	+	.	Parent=transcript:ENST00000621592
+8	ensembl_havana	exon	127736069	127736623	.	+	.	Parent=transcript:ENST00000621592;Name=ENSE00003746860;constitutive=0;ensembl_end_phase=0;ensembl_phase=-1;exon_id=ENSE00003746860;rank=1;version=1
+8	ensembl_havana	mRNA	127736084	127741434	.	+	.	ID=transcript:ENST00000377970;Parent=gene:ENSG00000136997;Name=MYC-202;biotype=protein_coding;tag=basic;transcript_id=ENST00000377970;transcript_support_level=1;version=6
+8	ensembl_havana	exon	127736084	127736623	.	+	.	Parent=transcript:ENST00000377970;Name=ENSE00001852283;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00001852283;rank=1;version=1
+8	ensembl_havana	five_prime_UTR	127736084	127736623	.	+	.	Parent=transcript:ENST00000377970
+8	havana	mRNA	127736220	127741372	.	+	.	ID=transcript:ENST00000524013;Parent=gene:ENSG00000136997;Name=MYC-205;biotype=protein_coding;tag=basic;transcript_id=ENST00000524013;transcript_support_level=1;version=1
+8	havana	five_prime_UTR	127736220	127736593	.	+	.	Parent=transcript:ENST00000524013
+8	havana	exon	127736220	127736623	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002098079;constitutive=0;ensembl_end_phase=0;ensembl_phase=-1;exon_id=ENSE00002098079;rank=1;version=1
+8	.	biological_region	127736229	127736235	0.999	+	.	logic_name=eponine
+8	havana	mRNA	127736231	127738475	.	+	.	ID=transcript:ENST00000520751;Parent=gene:ENSG00000136997;Name=MYC-204;biotype=protein_coding;transcript_id=ENST00000520751;transcript_support_level=3;version=1
+8	havana	exon	127736231	127736623	.	+	.	Parent=transcript:ENST00000520751;Name=ENSE00002107303;constitutive=0;ensembl_end_phase=-1;ensembl_phase=-1;exon_id=ENSE00002107303;rank=1;version=1
+8	havana	five_prime_UTR	127736231	127736623	.	+	.	Parent=transcript:ENST00000520751
+8	.	biological_region	127736304	127736797	1	+	.	external_name=rank %3D 4;logic_name=firstef
+8	havana	five_prime_UTR	127736441	127736593	.	+	.	Parent=transcript:ENST00000517291
+8	havana	exon	127736441	127736623	.	+	.	Parent=transcript:ENST00000517291;Name=ENSE00002122074;constitutive=0;ensembl_end_phase=0;ensembl_phase=-1;exon_id=ENSE00002122074;rank=2;version=1
+8	.	biological_region	127736536	127736754	1	+	.	external_name=rank %3D 3;logic_name=firstef
+8	.	biological_region	127736552	127736623	1	+	.	external_name=rank %3D 1;logic_name=firstef
+8	havana	CDS	127736594	127736623	.	+	0	ID=CDS:ENSP00000429441;Parent=transcript:ENST00000517291;protein_id=ENSP00000429441
+8	ensembl_havana	CDS	127736594	127736623	.	+	0	ID=CDS:ENSP00000478887;Parent=transcript:ENST00000621592;protein_id=ENSP00000478887
+8	havana	CDS	127736594	127736623	.	+	0	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	ensembl	mRNA	127736594	127740958	.	+	.	ID=transcript:ENST00000613283;Parent=gene:ENSG00000136997;Name=MYC-206;biotype=protein_coding;ccdsid=CCDS6359.2;tag=basic;transcript_id=ENST00000613283;transcript_support_level=1;version=2
+8	ensembl	exon	127736594	127736623	.	+	.	Parent=transcript:ENST00000613283;Name=ENSE00003808530;constitutive=0;ensembl_end_phase=0;ensembl_phase=0;exon_id=ENSE00003808530;rank=1;version=1
+8	ensembl	CDS	127736594	127736623	.	+	0	ID=CDS:ENSP00000479618;Parent=transcript:ENST00000613283;protein_id=ENSP00000479618
+8	.	biological_region	127737122	127737124	0.999	+	.	logic_name=eponine
+8	.	biological_region	127738146	127739019	1	+	.	external_name=rank %3D 2;logic_name=firstef
+8	havana	five_prime_UTR	127738248	127738262	.	+	.	Parent=transcript:ENST00000259523
+8	havana	exon	127738248	127739019	.	+	.	Parent=transcript:ENST00000259523;Name=ENSE00003540079;constitutive=0;ensembl_end_phase=1;ensembl_phase=-1;exon_id=ENSE00003540079;rank=2;version=1
+8	ensembl_havana	exon	127738248	127739019	.	+	.	Parent=transcript:ENST00000621592;Name=ENSE00003475084;constitutive=0;ensembl_end_phase=1;ensembl_phase=0;exon_id=ENSE00003475084;rank=2;version=1
+8	ensembl_havana	CDS	127738248	127739019	.	+	0	ID=CDS:ENSP00000478887;Parent=transcript:ENST00000621592;protein_id=ENSP00000478887
+8	ensembl_havana	five_prime_UTR	127738248	127738262	.	+	.	Parent=transcript:ENST00000377970
+8	ensembl_havana	exon	127738248	127739019	.	+	.	Parent=transcript:ENST00000377970;Name=ENSE00003540079;constitutive=0;ensembl_end_phase=1;ensembl_phase=-1;exon_id=ENSE00003540079;rank=2;version=1
+8	ensembl	exon	127738248	127739019	.	+	.	Parent=transcript:ENST00000613283;Name=ENSE00003475084;constitutive=0;ensembl_end_phase=1;ensembl_phase=0;exon_id=ENSE00003475084;rank=2;version=1
+8	ensembl	CDS	127738248	127739019	.	+	0	ID=CDS:ENSP00000479618;Parent=transcript:ENST00000613283;protein_id=ENSP00000479618
+8	havana	exon	127738251	127738772	.	+	.	Parent=transcript:ENST00000517291;Name=ENSE00002100709;constitutive=0;ensembl_end_phase=0;ensembl_phase=0;exon_id=ENSE00002100709;rank=3;version=1
+8	havana	CDS	127738251	127738772	.	+	0	ID=CDS:ENSP00000429441;Parent=transcript:ENST00000517291;protein_id=ENSP00000429441
+8	havana	exon	127738251	127739019	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002116242;constitutive=0;ensembl_end_phase=1;ensembl_phase=0;exon_id=ENSE00002116242;rank=2;version=1
+8	havana	CDS	127738251	127739019	.	+	0	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	havana	CDS	127738263	127739019	.	+	0	ID=CDS:ENSP00000259523;Parent=transcript:ENST00000259523;protein_id=ENSP00000259523
+8	ensembl_havana	CDS	127738263	127739019	.	+	0	ID=CDS:ENSP00000367207;Parent=transcript:ENST00000377970;protein_id=ENSP00000367207
+8	havana	five_prime_UTR	127738292	127738296	.	+	.	Parent=transcript:ENST00000520751
+8	havana	exon	127738292	127738475	.	+	.	Parent=transcript:ENST00000520751;Name=ENSE00002123623;constitutive=0;ensembl_end_phase=2;ensembl_phase=-1;exon_id=ENSE00002123623;rank=2;version=1
+8	havana	CDS	127738297	127738475	.	+	0	ID=CDS:ENSP00000430226;Parent=transcript:ENST00000520751;protein_id=ENSP00000430226
+8	.	biological_region	127738359	127738767	1	-	.	external_name=rank %3D 1;logic_name=firstef
+8	ensembl_havana	CDS	127740396	127740958	.	+	2	ID=CDS:ENSP00000478887;Parent=transcript:ENST00000621592;protein_id=ENSP00000478887
+8	ensembl_havana	exon	127740396	127741434	.	+	.	Parent=transcript:ENST00000621592;Name=ENSE00000926396;constitutive=0;ensembl_end_phase=-1;ensembl_phase=1;exon_id=ENSE00000926396;rank=3;version=4
+8	ensembl_havana	CDS	127740396	127740958	.	+	2	ID=CDS:ENSP00000367207;Parent=transcript:ENST00000377970;protein_id=ENSP00000367207
+8	ensembl_havana	exon	127740396	127741434	.	+	.	Parent=transcript:ENST00000377970;Name=ENSE00000926396;constitutive=0;ensembl_end_phase=-1;ensembl_phase=1;exon_id=ENSE00000926396;rank=3;version=4
+8	havana	CDS	127740396	127740958	.	+	2	ID=CDS:ENSP00000430235;Parent=transcript:ENST00000524013;protein_id=ENSP00000430235
+8	havana	exon	127740396	127741372	.	+	.	Parent=transcript:ENST00000524013;Name=ENSE00002104585;constitutive=0;ensembl_end_phase=-1;ensembl_phase=1;exon_id=ENSE00002104585;rank=3;version=1
+8	ensembl	exon	127740396	127740958	.	+	.	Parent=transcript:ENST00000613283;Name=ENSE00003715607;constitutive=0;ensembl_end_phase=0;ensembl_phase=1;exon_id=ENSE00003715607;rank=3;version=2
+8	ensembl	CDS	127740396	127740958	.	+	2	ID=CDS:ENSP00000479618;Parent=transcript:ENST00000613283;protein_id=ENSP00000479618
+8	havana	CDS	127740398	127740414	.	+	2	ID=CDS:ENSP00000259523;Parent=transcript:ENST00000259523;protein_id=ENSP00000259523
+8	havana	exon	127740398	127740477	.	+	.	Parent=transcript:ENST00000259523;Name=ENSE00001766895;constitutive=0;ensembl_end_phase=-1;ensembl_phase=1;exon_id=ENSE00001766895;rank=3;version=2
+8	havana	three_prime_UTR	127740415	127740477	.	+	.	Parent=transcript:ENST00000259523
+8	ensembl_havana	three_prime_UTR	127740959	127741434	.	+	.	Parent=transcript:ENST00000621592
+8	ensembl_havana	three_prime_UTR	127740959	127741434	.	+	.	Parent=transcript:ENST00000377970
+8	havana	three_prime_UTR	127740959	127741372	.	+	.	Parent=transcript:ENST00000524013
