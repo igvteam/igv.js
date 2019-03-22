@@ -95,7 +95,7 @@ var igv = (function (igv) {
         getTissueInfo: function(datasetId, baseURL) {
 
             datasetId = datasetId || 'gtex_v7';
-            baseURL = baseURL || 'https://gtexportal.org/api/b0.9';
+            baseURL = baseURL || 'https://gtexportal.org/rest/v1';
 
             let url = baseURL + '/dataset/tissueSummary?datasetId=' + datasetId;
 
@@ -105,7 +105,7 @@ var igv = (function (igv) {
         //https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation?chromosome=7&start=98358766&end=101523798&tissueName=Liver&datasetId=gtex_v7
         trackConfiguration: function (tissueSummary, baseURL) {
 
-            baseURL = baseURL || 'https://gtexportal.org/api/b0.9';
+            baseURL = baseURL || 'https://gtexportal.org/rest/v1';
 
             return {
                 type: "eqtl",
