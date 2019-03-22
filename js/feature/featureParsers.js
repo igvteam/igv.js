@@ -562,17 +562,13 @@ var igv = (function (igv) {
             exonStarts = tokens[11].split(',');
             exons = [];
 
-            for (var i = 0; i < exonCount; i++) {
+            for (let i = 0; i < exonCount; i++) {
                 eStart = start + parseInt(exonStarts[i]);
                 eEnd = eStart + parseInt(exonSizes[i]);
-                var exon = {start: eStart, end: eEnd};
-
-                if (feature.cdStart > eEnd || feature.cdEnd < eStart) exon.utr = true;   // Entire exon is UTR
-                if (feature.cdStart >= eStart && feature.cdStart <= eEnd) exon.cdStart = feature.cdStart;
-                if (feature.cdEnd >= eStart && feature.cdEnd <= eEnd) exon.cdEnd = feature.cdEnd;
-
-                exons.push(exon);
+                exons.push({start: eStart, end: eEnd});
             }
+
+            findUTRs(exons, feature.cdStart, feature.cdEnd)
 
             feature.exons = exons;
         }
@@ -655,14 +651,16 @@ var igv = (function (igv) {
 
         if (tokens.length < 9 + shift) return undefined;
 
+        const cdStart = parseInt(tokens[5 + shift])
+        const cdEnd = parseInt(tokens[6 + shift])
         var feature = {
                 name: tokens[0 + shift],
                 chr: tokens[1 + shift],
                 strand: tokens[2 + shift],
                 start: parseInt(tokens[3 + shift]),
                 end: parseInt(tokens[4 + shift]),
-                cdStart: parseInt(tokens[5 + shift]),
-                cdEnd: parseInt(tokens[6 + shift]),
+                cdStart: cdStart,
+                cdEnd: cdEnd,
                 id: tokens[0 + shift]
             },
             exonCount = parseInt(tokens[7 + shift]),
@@ -670,9 +668,12 @@ var igv = (function (igv) {
             exonEnds = tokens[9 + shift].split(','),
             exons = [];
 
-        for (var i = 0; i < exonCount; i++) {
-            exons.push({start: parseInt(exonStarts[i]), end: parseInt(exonEnds[i])});
+        for (let i = 0; i < exonCount; i++) {
+            const start = parseInt(exonStarts[i])
+            const end = parseInt(exonEnds[i])
+            exons.push({start: start, end: end});
         }
+        findUTRs(exons, cdStart, cdEnd)
 
         feature.exons = exons;
 
@@ -693,14 +694,16 @@ var igv = (function (igv) {
 
         if (tokens.length < 11 + shift) return undefined;
 
-        var feature = {
+        const cdStart = parseInt(tokens[5 + shift])
+        const cdEnd = parseInt(tokens[6 + shift])
+        const feature = {
                 name: tokens[11 + shift],
                 chr: tokens[1 + shift],
                 strand: tokens[2 + shift],
                 start: parseInt(tokens[3 + shift]),
                 end: parseInt(tokens[4 + shift]),
-                cdStart: parseInt(tokens[5 + shift]),
-                cdEnd: parseInt(tokens[6 + shift]),
+                cdStart: cdStart,
+                cdEnd: cdEnd,
                 id: tokens[0 + shift]
             },
             exonCount = parseInt(tokens[7 + shift]),
@@ -708,14 +711,16 @@ var igv = (function (igv) {
             exonEnds = tokens[9 + shift].split(','),
             exons = [];
 
-        for (var i = 0; i < exonCount; i++) {
-            exons.push({start: parseInt(exonStarts[i]), end: parseInt(exonEnds[i])});
+        for (let i = 0; i < exonCount; i++) {
+            const start = parseInt(exonStarts[i])
+            const end = parseInt(exonEnds[i])
+            exons.push({start: start, end: end});
         }
+        findUTRs(exons, cdStart, cdEnd)
 
         feature.exons = exons;
 
         return feature;
-
     }
 
     /**
@@ -730,6 +735,8 @@ var igv = (function (igv) {
 
         if (tokens.length < 10 + shift) return undefined;
 
+        const cdStart = parseInt(tokens[6 + shift])
+        const cdEnd = parseInt(tokens[7 + shift])
         var feature = {
                 name: tokens[0 + shift],
                 id: tokens[1 + shift],
@@ -737,21 +744,42 @@ var igv = (function (igv) {
                 strand: tokens[3 + shift],
                 start: parseInt(tokens[4 + shift]),
                 end: parseInt(tokens[5 + shift]),
-                cdStart: parseInt(tokens[6 + shift]),
-                cdEnd: parseInt(tokens[7 + shift])
+                cdStart: cdStart,
+                cdEnd: cdEnd
             },
             exonCount = parseInt(tokens[8 + shift]),
             exonStarts = tokens[9 + shift].split(','),
             exonEnds = tokens[10 + shift].split(','),
             exons = [];
 
-        for (var i = 0; i < exonCount; i++) {
-            exons.push({start: parseInt(exonStarts[i]), end: parseInt(exonEnds[i])});
+        for (let i = 0; i < exonCount; i++) {
+            const start = parseInt(exonStarts[i])
+            const end = parseInt(exonEnds[i])
+            exons.push({start: start, end: end});
         }
+        findUTRs(exons, cdStart, cdEnd)
 
         feature.exons = exons;
 
         return feature;
+    }
+
+    function findUTRs(exons, cdStart, cdEnd) {
+
+        for(let exon of exons) {
+            const end = exon.end
+            const start = exon.start
+            if (end < cdStart || start > cdEnd) {
+                exon.utr = true;
+            } else {
+                if (cdStart >= start && cdStart <= end) {
+                    exon.cdStart = cdStart
+                }
+                if(cdEnd >= start && cdEnd <= end) {
+                    exon.cdEnd = cdEnd
+                }
+            }
+        }
 
     }
 
@@ -923,7 +951,7 @@ var igv = (function (igv) {
         if (tokenCount < 7) {
             return null;
         }
-        const feature =  {
+        const feature = {
             chr: tokens[0],
             start: parseInt(tokens[1]) - 1,
             end: parseInt(tokens[2]),
@@ -932,7 +960,7 @@ var igv = (function (igv) {
             'P-value': tokens[5],
             'Odds ratio or beta': tokens[6],
         }
-        if(tokens.length > 6) {
+        if (tokens.length > 6) {
             'https://www.ncbi.nlm.nih.gov/pubmed/'
             feature['PUBMEDID'] = `<a target = "blank" href = "https://www.ncbi.nlm.nih.gov/pubmed/${tokens[7]}">${tokens[7]}</a>`
         }
@@ -969,7 +997,7 @@ var igv = (function (igv) {
         // Find ID and Parent, or transcript_id
         var delim = ('gff3' === format) ? '=' : /\s+/;
         var attributes = {};
-        for(let kv of  attributeString.split(';')) {
+        for (let kv of  attributeString.split(';')) {
             const t = kv.trim().split(delim, 2)
             if (t.length == 2) {
                 const key = t[0].trim();
@@ -983,7 +1011,7 @@ var igv = (function (igv) {
                 const keyLower = key.toLowerCase()
                 if ("color" === keyLower || "colour" === keyLower) color = igv.Color.createColorString(t[1]);
                 else {
-                    if('gff3' === format) {
+                    if ('gff3' === format) {
                         value = decodeURIComponent(value)
                     }
                     attributes[key] = value;
@@ -1035,7 +1063,7 @@ var igv = (function (igv) {
         pd.push({name: 'type', value: this.type})
         pd.push({name: 'start', value: this.start + 1})
         pd.push({name: 'end', value: this.end})
-        for(let kv of kvs) {
+        for (let kv of kvs) {
             const t = kv.trim().split(this.delim, 2);
             if (t.length === 2 && t[1] !== undefined) {
                 const key = t[0].trim();
