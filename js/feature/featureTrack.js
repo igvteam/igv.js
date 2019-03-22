@@ -260,8 +260,10 @@ var igv = (function (igv) {
 
                             // Ensure a visible gap between features
                             const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                            if(last && pxStart - last <= 0) {
-                                igv.graphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255, 0.5)"})
+                            if (last && pxStart - last <= 0) {
+                                ctx.globalAlpha = 0.5
+                                igv.graphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                                ctx.globalAlpha = 1.0
                             }
                             lastPxEnd[row] = pxEnd;
                         }
@@ -477,7 +479,7 @@ var igv = (function (igv) {
 
             let color = this.color;  // default
 
-            if(feature.alpha && feature.alpha !== 1) {
+            if (feature.alpha && feature.alpha !== 1) {
                 color = igv.Color.addAlpha(this.color, feature.alpha);
             }
 
@@ -520,7 +522,7 @@ var igv = (function (igv) {
             if (exonCount === 0) {
                 // single-exon transcript
                 ctx.fillRect(coord.px, py, coord.pw, h);
-                
+
                 // Arrows
                 // Do not draw if strand is not +/-
                 if (direction !== 0) {
