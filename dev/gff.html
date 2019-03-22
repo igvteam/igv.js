@@ -22,14 +22,15 @@
     <!-- Vendor JS -->
     <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
-
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/cram-bundle.js"></script>
 
     <!-- IGV JS -->
     <script src="../js/igv-icons.js"></script>
     <script src="../js/session/igvXmlSession.js"></script>
     <script src="../js/feature/mergedTrack.js"></script>
+
 
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
@@ -46,12 +47,14 @@
     <script src="../js/bam/htsgetReader.js"></script>
     <script src="../js/bam/alignmentBlock.js"></script>
     <script src="../js/bam/shardedBamReader.js"></script>
+    <script src="../js/cram/cramReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
     <script src="../js/bigwig/bufferedReader.js"></script>
     <script src="../js/bigwig/bwReader.js"></script>
     <script src="../js/bigwig/bwSource.js"></script>
+
 
     <script src="../js/feature/featureCache.js"></script>
     <script src="../js/feature/gffHelper.js"></script>
@@ -60,6 +63,7 @@
     <script src="../js/feature/tribble.js"></script>
     <script src="../js/feature/featureFileReader.js"></script>
     <script src="../js/feature/customServiceReader.js"></script>
+
 
     <script src="../js/feature/featureTrack.js"></script>
     <script src="../js/feature/wigTrack.js"></script>
@@ -119,7 +123,7 @@
     <script src="../js/viewport.js"></script>
     <script src="../js/ui/genericContainer.js"></script>
     <script src="../js/ui/trackGearPopover.js"></script>
-    
+
     <script src="../js/rulerTrack.js"></script>
     <script src="../js/rulerSweeper.js"></script>
 
@@ -129,7 +133,6 @@
     <script src="../js/parseUtils.js"></script>
     <script src="../js/fasta.js"></script>
     <script src="../js/sequenceTrack.js"></script>
-
 
     <script src="../js/igvxhr.js"></script>
     <script src="../js/binary.js"></script>
@@ -141,6 +144,10 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../js/civic/civicReader.js"></script>
+
+    <script src="../js/feature/fileFormats.js"></script>
+
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
     <script src="../js/canvas2svg.js"></script>
@@ -148,36 +155,72 @@
     <script src="../js/navbarManager.js"></script>
 
 </head>
+
 <body>
 
-<h1>Examples use of data URIs</h1>
+<div>
+    <button onclick="bookmark();">Bookmark</button>
+</div>
 
-<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        const igvDiv = document.getElementById("igvDiv");
         const options =
-        {
-            genome: "hg19",
-            locus: "chr1:36809782-36809822",
-            tracks: [
-                {
-                    url: "data:application/gzip;base64,H4sIBAAAAAAA/wYAQkMCAB4CzVXBctowEHUunTFfoR/AAsaeTnzCQKG02CSYZnrzCGuN1dqSI8mJc85P9nMqTEMzLaG9lFQzskZ6q9236332KAgvvr2xrOH7iX0T+X3HteOlnwohKeNEQ2cYX9tx5I/n42538umzay8if+C6Xr8zvJrZ84kfr4OVfRXt15v9mgwczxkQe7zwcS5KwDVnDd7khChca1YwzUDhnSVCqNuVNV/nEgiNkNsebIGbWxMmEVZwi1dREL+7xuvlchHjaa2Y4GOi0xwkztpdemyX3PWcy0vn7QZrUBrrssImi2SXBM5Yci/kV8rMHcZVBakW0smIozSRDqPNMxpxnWWsWQDf6jwkDer3zNjzNpSnrAA15/+KqOPglDVdWjdu0neyWxP3DJEG+0htkgUrmR4FoRJSr4IQDXqH0eKi1nEQ6ocKkLEyR7ExBDp6GB+a6MnV3jRjhQaJPgJUQVEElAJdQQYSeArqyZQUbMvnXEvBDzXv/URC41XNSHUMiz9MRuIOZE74NmTc4M8xpZkpRchUuStJVBoH3g7vm4f3Y7b26gvdzNZTwxbO24VbnbUE9L2oiFKhoKayRLG0Mxwv7VqZ2qWiLAmnqGAcfPQnif0isP9CXr/1zZGueR2BnUteR17wie5+SREv9/zpz9dpXf+dVF9ZI6clbQTtIa9zYVlWx8zD/8t6TCzrO6VT0KX2BgAAH4sIBAAAAAAA/wYAQkMCAIwC1da/axRBFAfwOROvv3GLlM7zSaaxMDY5EMm8e8Iq/sI0lkGtBCWt2phlihQWQv6ENCklXQhCBG1iDCIoiPgf+D+cb2bn1jUueldkj2y3b7d4H97Md+ZQlc+Vq0rNDq/rjtpUD1Pt0T2lXp1Rqn97oJa6SnmT+54r0Gc5kXHZnPGGLRkLBh1lAJYz69hCUYBfA5JCC8+tfNDJrw06bnnw/snNgTpM3d9oEG2JaC+KXBRNQDGWDZCfpuhuJXpQibZF9C6KKIom5dBUZ/S0YUb7UpuPoktRZKRb78hnVFgLNtcIANqTRktePgULyE9omAm8ltd2RW9FNDOeaPEEiT6m7p9J990kup9qH6R2vhRduKjOiuk/a0zedAHyE2XMYF0b0VADvQmg/dT88xpoJdUOpHYugRbks1KTzqhFzU7QfE6dv0wL7lRtwe1KKGxETV+9OC0BIbVx56KtATaOOT9uUYNKfa1tmaCaUcuVKmytbz+HwxAMnzoyr/mOWp2VSTW0DkaLDYmIeW4dYQ0hvBYWWDO3LIvbaTzZ4gmUfamFQjfJRkERwuN7KZOg2Eu2FbFV2QaFRspEKuuzFzYWIyK79YKsJtl1IVHQYQu0o4Ex2mIHNdgoMEKI/EiwBfU6we4IbNKZtajaqZ9U4XZXnlS/F2K4Ba5GVXnj+8dKQ4lFA9aE8bAnC6SBqXfcmiOiP24TWw2icAtciqLyxtfQco+QMwfsJMyJHJKVgkQ8Ys7G0DRF25VooxKFW+DlKCpvfJNhZNNNVbTbMKNwhD2Oon4UsWx4A8imlwmENbKW8wlRs8QDh1OLRKwz8AxoTdZGNvx9VP0CJ+V18DoNAAAfiwgEAAAAAAD/BgBCQwIAGwADAAAAAAAAAAAA",
-                    label: "SupportingReadsBam",
-                    height: 100,
-                    indexed: false,
-                    type: "alignment"
-                }
-            ]
-        };
+            {
+                // locus: 'muc1',
+                genome: "hg38",
+                flanking: 1000,
+                queryParametersSupported: true,
+                tracks: [
+                    {
+                        name: "CP006569",
+                        type: "annotation",
+                        format: "gff3",
+                        url: "../test/data/gff/CP006569.1.gff"
+                    },
+                    {
+                        name: "issue-870",
+                        type: "annotation",
+                        format: "gff3",
+                        url: "../test/data/gff/issue-870.gff3"
+                    },
+                    {
+                        name: "Tabix gff3",
+                        type: "annotation",
+                        format: "gff3",
+                        height: 500,
+                        url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi"
+                    },
+                    {
+                        "name": "Gencode v28 Basic",
+                        "type": "annotation",
+                        "format": "gtf",
+                        "displayMode": "EXPANDED",
+                        "height": 300,
+                        "url": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
+                        "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi",
+                        "visibilityWindow": 1000000
+                    }
+                ]
+            };
 
+        igv.createBrowser(document.getElementById('igvDiv'), options)
+            .then(function (browser) {
 
-        igv.createBrowser(igvDiv, options);
+            })
+
 
     });
+
+
+    function bookmark() {
+        window.history.pushState({}, "IGV", igv.browser.sessionURL());
+    }
 
 </script>
 

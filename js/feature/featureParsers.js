@@ -948,7 +948,7 @@ var igv = (function (igv) {
      */
     function decodeGFF(tokens, ignore) {
 
-        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, id, parent, color, name,
+        var tokenCount, chr, start, end, strand, type, score, phase, attributeString, color, name,
             transcript_id, i,
             format = this.format;
 
@@ -969,22 +969,23 @@ var igv = (function (igv) {
         // Find ID and Parent, or transcript_id
         var delim = ('gff3' === format) ? '=' : /\s+/;
         var attributes = {};
-        attributeString.split(';').forEach(function (kv) {
-            var t = kv.trim().split(delim, 2), key, value;
+        for(let kv of  attributeString.split(';')) {
+            const t = kv.trim().split(delim, 2)
             if (t.length == 2) {
-                key = t[0].trim();
-                value = t[1].trim();
+                const key = t[0].trim();
+                let value = t[1].trim();
                 //Strip off quotes, if any
                 if (value.startsWith('"') && value.endsWith('"')) {
                     value = value.substr(1, value.length - 2);
                 }
-                if ("ID" === t[0]) id = t[1];
-                else if ("Parent" === t[0]) parent = t[1];
-                else if ("color" === t[0].toLowerCase()) color = igv.Color.createColorString(t[1]);
-                else if ("transcript_id" === t[0]) id = t[1];     // gtf format
-                attributes[key] = value;
+
+                const keyLower = key.toLowerCase()
+                if ("color" === keyLower || "colour" === keyLower) color = igv.Color.createColorString(t[1]);
+                else {
+                    attributes[key] = value;
+                }
             }
-        });
+        }
 
         // Find name (label) property
         if (this.nameField) {
@@ -995,15 +996,15 @@ var igv = (function (igv) {
                 if (attributes.hasOwnProperty(gffNameFields[i])) {
                     this.nameField = gffNameFields[i];
                     name = attributes[this.nameField];
-
-
                     break;
                 }
             }
         }
 
+        const id = attributes["ID"] || attributes["transcript_id"]
+        const parent = attributes["Parent"]
 
-        return {
+        return new GFFFeature({
             id: id,
             parent: parent,
             name: name,
@@ -1015,26 +1016,34 @@ var igv = (function (igv) {
             strand: strand,
             color: color,
             attributeString: attributeString,
-            popupData: function () {
-                var kvs = this.attributeString.split(';'),
-                    pd = [],
-                    key, value;
-                kvs.forEach(function (kv) {
-                    var t = kv.trim().split(delim, 2);
-                    if (t.length === 2 && t[1] !== undefined) {
-                        key = t[0].trim();
-                        value = t[1].trim();
-                        //Strip off quotes, if any
-                        if (value.startsWith('"') && value.endsWith('"')) {
-                            value = value.substr(1, value.length - 2);
-                        }
-                        pd.push({name: key, value: value});
-                    }
-                });
-                return pd;
-            }
+            delim: delim
+        })
 
-        };
+    }
+
+    function GFFFeature(props) {
+        Object.assign(this, props)
+    }
+
+    GFFFeature.prototype.popupData = function (genomicLocation) {
+        const kvs = this.attributeString.split(';')
+        const pd = [];
+        pd.push({name: 'type', value: this.type})
+        pd.push({name: 'start', value: this.start + 1})
+        pd.push({name: 'end', value: this.end})
+        for(let kv of kvs) {
+            const t = kv.trim().split(this.delim, 2);
+            if (t.length === 2 && t[1] !== undefined) {
+                const key = t[0].trim();
+                let value = t[1].trim();
+                //Strip off quotes, if any
+                if (value.startsWith('"') && value.endsWith('"')) {
+                    value = value.substr(1, value.length - 2);
+                }
+                pd.push({name: key, value: value});
+            }
+        }
+        return pd;
     }
 
     /**
