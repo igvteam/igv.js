@@ -1169,7 +1169,7 @@ var igv = (function (igv) {
         let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
         viewports.forEach((viewport) => {
 
-            const referenceFrame = viewport.genomicState.referenceFrame;
+            const referenceFrame = viewport.genomicState.referenceFrame
             const chromosome = referenceFrame.getChromosome();
             const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
 
@@ -1178,19 +1178,20 @@ var igv = (function (igv) {
                 chromosomeLengthBP / viewport.$viewport.width();
 
             const centerBP = undefined === centerBPOrUndefined ?
-                (viewport.genomicState.referenceFrame.start + viewport.genomicState.referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
+                (referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
                 centerBPOrUndefined;
 
             let bpp;
             if (scaleFactor < 1.0) {
-                bpp = Math.max(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+                bpp = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             } else {
-                bpp = Math.min(viewport.genomicState.referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+                bpp = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
             }
 
             const viewportWidthBP = bpp * viewport.$viewport.width();
-            viewport.genomicState.referenceFrame.start = centerBP - (viewportWidthBP / 2)
-            viewport.genomicState.referenceFrame.bpPerPixel = bpp;
+            referenceFrame.start = centerBP - (viewportWidthBP / 2)
+            referenceFrame.bpPerPixel = bpp;
+            referenceFrame.clamp(viewport.$viewport.width())
             self.updateViews(viewport.genomicState);
 
         });
