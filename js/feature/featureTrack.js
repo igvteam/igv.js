@@ -259,14 +259,12 @@ var igv = (function (igv) {
                             self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
                             // Ensure a visible gap between features
-                            const pxStart = Math.floor((feature.start - bpStart) / bpStart)
-                            if(pxStart - last <= 0) {
-                                
+                            const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                            if(last && pxStart - last <= 0) {
+                                igv.graphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255, 0.5)"})
                             }
-
                             lastPxEnd[row] = pxEnd;
                         }
-
                     }
                 }
 
