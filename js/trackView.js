@@ -606,7 +606,7 @@ var igv = (function (igv) {
 
         if (this.scrollbar) {
             const currentTop = this.viewports[0].getContentTop();
-            const newTop =  Math.min(0, minContentHeight(this.viewports) - this.$viewportContainer.height());
+            const newTop =  Math.min(0, this.$viewportContainer.height() - minContentHeight(this.viewports));
             if(currentTop < newTop) {
                 this.viewports.forEach(function (viewport) {
                     $(viewport.contentDiv).css("top", newTop + "px");
@@ -684,6 +684,7 @@ var igv = (function (igv) {
 
 
     igv.TrackView.prototype.scrollBy = function (delta) {
+        console.log("scrollby " + delta)
         this.scrollbar.moveScrollerBy(delta);
     };
 
