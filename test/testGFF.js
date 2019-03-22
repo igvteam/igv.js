@@ -16,7 +16,8 @@ function runGFFTests() {
             bpEnd = 10000,
             featureSource = new igv.FeatureSource({
                     url: 'data/gff/eden.gff',
-                    format: 'gff3'
+                    format: 'gff3',
+                    filterTypes: []
                 },
                 genome);
 
