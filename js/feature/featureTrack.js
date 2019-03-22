@@ -243,23 +243,30 @@ var igv = (function (igv) {
                 let selectedFeature;
                 let lastPxEnd = [];
 
-                for (let gene of featureList) {
+                for (let feature of featureList) {
 
-                    if (gene.end < bpStart) continue;
-                    if (gene.start > bpEnd) break;
+                    if (feature.end < bpStart) continue;
+                    if (feature.start > bpEnd) break;
 
-                    if (!selectedFeature && selectedFeatureName && selectedFeatureName === gene.name.toUpperCase()) {
-                        selectedFeature = gene;
+                    if (!selectedFeature && selectedFeatureName && selectedFeatureName === feature.name.toUpperCase()) {
+                        selectedFeature = feature;
                     }
                     else {
-                        const row = this.displayMode === 'COLLAPSED' ? 0 : gene.row;
-                        const pxEnd = Math.ceil((gene.end - bpStart) / bpPerPixel);
+                        const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
+                        const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
                         const last = lastPxEnd[row];
                         if (!last || pxEnd > last) {
-                            self.render.call(this, gene, bpStart, bpPerPixel, pixelHeight, ctx, options);
+                            self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+
+                            // Ensure a visible gap between features
+                            const pxStart = Math.floor((feature.start - bpStart) / bpStart)
+                            if(pxStart - last <= 0) {
+                                
+                            }
 
                             lastPxEnd[row] = pxEnd;
                         }
+
                     }
                 }
 

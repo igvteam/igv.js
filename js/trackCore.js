@@ -133,7 +133,7 @@ var igv = (function (igv) {
                 }
         }
 
-        if(config.roi && track) {
+        if (config.roi && track) {
             track.roi = [];
             config.roi.forEach(function (r) {
                 track.roi.push(new igv.ROI(r, browser.genome));
@@ -155,9 +155,12 @@ var igv = (function (igv) {
             if ("bed" === config.type) {
                 config.type = "annotation";
                 config.format = config.format || "bed";
-
+            } else if ("annotations" === config.type) {
+                config.type = "annotation"
             }
-
+            else if ("alignments" === config.type) {
+                config.type = "alignment"
+            }
             else if ("bam" === config.type) {
                 config.type = "alignment";
                 config.format = "bam"
