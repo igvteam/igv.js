@@ -322,21 +322,22 @@ var igv = (function (igv) {
             })
             rows.push(-1000);
 
-            featureList.forEach(function (feature) {
+            let r;
+            for (let feature of featureList) {
 
-                const len = Math.min(rows.length, maxRows)
-                for (r = 0; r < len; r++) {
-                    if (feature.start > rows[r]) {
+                const length = Math.min(rows.length, maxRows);
+                for (r = 0; r < length; r++) {
+                    if (feature.start > rows[ r ]) {
                         feature.row = r;
-                        rows[r] = feature.end;
+                        rows[ r ] = feature.end;
                         return;
                     }
                 }
+
                 feature.row = r;
-                rows[r] = feature.end;
+                rows[ r ] = feature.end;
 
-
-            });
+            }
         }
     }
 
