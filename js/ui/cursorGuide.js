@@ -48,27 +48,30 @@ var igv = (function (igv) {
             // TODO: (dat) This assumes a single panel. Ensure support for multi-locus.
             if (igv.browser.trackViews && igv.browser.trackViews.length > 0) {
 
-
                 const viewportContainer = igv.browser.trackViews[0].$viewportContainer.get(0);
 
                 const viewportContainerRect = viewportContainer.getBoundingClientRect();
 
                 const cursorGuideParentRect = $cursorGuideParent.get(0).getBoundingClientRect();
 
-                const x = igv.Math.clamp( igv.getMouseXY(viewportContainer, e).x, 0, viewportContainerRect.width);
+                const mouseXY = igv.getMouseXY(viewportContainer, e);
 
+                if (mouseXY.x < 0 || mouseXY.x > viewportContainerRect.width) {
+                    return;
+                }
+
+                // pixel
                 const dx = viewportContainerRect.x - cursorGuideParentRect.x;
-                const x_css = x + dx;
+                const x_css = mouseXY.x + dx;
                 const str = Math.round(x_css) + 'px';
                 this.$guide.css({ left: str });
 
-                const xNormalized = igv.Math.clamp( igv.getMouseXY(viewportContainer, e).xNormalized, 0.0, 1.0);
+                // base-pair
                 const aBP = igv.browser.genomicStateList[ 0 ].referenceFrame.start;
                 const bBP = igv.browser.genomicStateList[ 0 ].referenceFrame.initialEnd;
+                const bp = igv.Math.lerp(aBP, bBP, mouseXY.xNormalized);
 
-                const bp = igv.Math.lerp(aBP, bBP, xNormalized);
-
-                console.log('x normalized ' + xNormalized.toFixed(3) + ' bp ' + igv.numberFormatter(Math.round(bp)));
+                console.log('x normalized ' + mouseXY.xNormalized.toFixed(3) + ' bp ' + igv.numberFormatter(Math.round(bp)));
 
             }
 
