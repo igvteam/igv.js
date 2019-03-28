@@ -28,29 +28,23 @@
  * Created by dat on 3/26/18.
  */
 var igv = (function (igv) {
-    
+
     "use strict";
 
-    igv.CursorGuide = function ($guideParent, $controlParent, config, browser) {
-        
+    igv.CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
+
         const self = this;
 
         this.browser = browser;
-        
+
         this.$guide = $('<div class="igv-cursor-tracking-guide">');
-        $guideParent.append(this.$guide);
+        $cursorGuideParent.append(this.$guide);
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $guideParent.on('mousemove.cursorGuide', function (e) {
-            var exe;
-
+        $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
             e.preventDefault();
-
-            exe = Math.max(50, igv.translateMouseCoordinates(e, $guideParent.get(0)).x);
-            exe = Math.min($guideParent.innerWidth() - 65, exe);
-            // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
-
-            self.$guide.css({ left: exe + 'px' });
+            const x = mouseMoveHandler(e, this, $cursorGuideParent);
+            console.log(Date.now() + ' cursor guide ' + x);
         });
 
         if (true === config.showCursorTrackingGuideButton) {
@@ -69,6 +63,18 @@ var igv = (function (igv) {
 
         }
 
+    };
+
+    let mouseMoveHandler = (event, cursorGuide, $cursorGuideParent) => {
+        var exe;
+
+        // TODO: This is sooooo fragile !!!
+        exe = Math.max(50, igv.translateMouseCoordinates(event, $cursorGuideParent.get(0)).x);
+        exe = Math.min($cursorGuideParent.innerWidth() - 65, exe);
+
+        cursorGuide.$guide.css({ left: exe + 'px' });
+
+        return exe;
     };
 
     igv.CursorGuide.prototype.doHide = function () {
