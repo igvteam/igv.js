@@ -45,7 +45,28 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
+            const element = document.elementFromPoint(e.clientX, e.clientY);
+
+            if (false === $(element).is('canvas')) {
+                return;
+            }
+
+            const $parent = $(element).parent();
+
+            const mouseXY = igv.getMouseXY($parent.get(0), e);
+            const bbox = $parent.get(0).getBoundingClientRect();
+
+            // base-pair
+            const index = $parent.data('genomicStateIndex');
+            const genomicState = igv.browser.genomicStateList[ index ];
+            const aBP = genomicState.referenceFrame.start;
+            const bBP = genomicState.referenceFrame.initialEnd;
+            const bp = Math.round(igv.Math.lerp(aBP, bBP, mouseXY.xNormalized));
+
+            console.log(Date.now() + ' x ' + igv.numberFormatter(mouseXY.x) + ' width ' + igv.numberFormatter(bbox.width) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(aBP) + ' end ' + igv.numberFormatter(bBP));
+
             // TODO: (dat) This assumes a single panel. Ensure support for multi-locus.
+            /*
             if (igv.browser.trackViews && igv.browser.trackViews.length > 0) {
 
                 const viewportContainer = igv.browser.trackViews[0].$viewportContainer.get(0);
@@ -71,9 +92,10 @@ var igv = (function (igv) {
                 const bBP = igv.browser.genomicStateList[ 0 ].referenceFrame.initialEnd;
                 const bp = igv.Math.lerp(aBP, bBP, mouseXY.xNormalized);
 
-                console.log('x normalized ' + mouseXY.xNormalized.toFixed(3) + ' bp ' + igv.numberFormatter(Math.round(bp)));
+                console.log(Date.now() + ' x normalized ' + mouseXY.xNormalized.toFixed(3) + ' bp ' + igv.numberFormatter(Math.round(bp)));
 
             }
+            */
 
         });
 
