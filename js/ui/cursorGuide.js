@@ -42,9 +42,21 @@ var igv = (function (igv) {
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
         $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
+
             e.preventDefault();
-            const x = mouseMoveHandler(e, this, $cursorGuideParent);
-            console.log(Date.now() + ' cursor guide ' + x);
+
+            if (igv.browser.trackViews && igv.browser.trackViews.length > 0) {
+
+                const bpp = igv.browser.genomicStateList[ 0 ].referenceFrame.bpPerPixel;
+                const aBP = igv.browser.genomicStateList[ 0 ].referenceFrame.start;
+                const bBP = igv.browser.genomicStateList[ 0 ].referenceFrame.initialEnd;
+                const domElement = igv.browser.trackViews[0].$viewportContainer.get(0);
+
+                const xy = igv.getMouseXY(domElement, e);
+                console.log('x ' + xy.xNormalized);
+
+            }
+
         });
 
         if (true === config.showCursorTrackingGuideButton) {
