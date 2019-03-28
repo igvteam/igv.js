@@ -25,6 +25,22 @@
 
 var igv = (function (igv) {
 
+    igv.getMouseXY = function(domElement, event) {
+
+        // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height
+        const dr = domElement.getBoundingClientRect();
+
+        const xy =
+            {
+                x: event.clientX - dr.left,
+                y: event.clientY - dr.top,
+                xNormalized: (event.clientX - dr.left)/dr.width,
+                yNormalized: (event.clientY - dr.top)/dr.height
+            };
+
+        return xy;
+    };
+
     igv.getExtension = function (config) {
         var path,
             filename,
