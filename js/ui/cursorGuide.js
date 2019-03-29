@@ -50,47 +50,12 @@ var igv = (function (igv) {
                 return;
             }
 
+            // TODO: support provision of custom mouse handler to consume genomic state
             const genomicState = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
 
-            return;
-
-
-
-
-
-
-
-
-            const $viewport_content = $canvas.parent();
-            const viewport_content_mouse_xy = igv.getMouseXY($viewport_content.get(0), e);
-
-            // base-pair
-            const index = $viewport_content.data('genomicStateIndex');
-
-            const referenceFrame = igv.browser.genomicStateList[ index ].referenceFrame;
-            const aBP = referenceFrame.start;
-            const bBP = 1 + referenceFrame.start + (viewport_content_mouse_xy.width * referenceFrame.bpPerPixel);
-
-            let str = Date.now();
-
-            // pixel
-            str = str + ' x ' + igv.numberFormatter(viewport_content_mouse_xy.x) + ' width ' + igv.numberFormatter(viewport_content_mouse_xy.width);
-
-            // bp = bp + (pixel * (bp / pixel))
-            const bp = Math.round(aBP + viewport_content_mouse_xy.x * referenceFrame.bpPerPixel);
-            str = str + ' bp ' + igv.numberFormatter(bp);
-
-            // bp
-            str = str + ' start ' + igv.numberFormatter(aBP) + ' end ' + igv.numberFormatter(bBP);
-            // console.log(str);
-
-
-
-
-            // pixel
-            const cursor_guide_parent_mouse_xy = igv.getMouseXY($cursorGuideParent.get(0), e);
-            const left = cursor_guide_parent_mouse_xy.x + 'px';
-            this.$guide.css({ left: left });
+            if (this.customMouseHandler) {
+                this.customMouseHandler(genomicState);
+            }
 
         });
 
@@ -114,39 +79,32 @@ var igv = (function (igv) {
 
     let mouseHandler = (event, $canvas, $guideLine, $guideParent, browser) => {
 
-        // position guide line
-        const cursor_guide_parent_mouse_xy = igv.getMouseXY($guideParent.get(0), event);
-        const left = cursor_guide_parent_mouse_xy.x + 'px';
+        // pixel location of guide line
+        const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
+        const left = guideParentMouseXY.x + 'px';
         $guideLine.css({ left: left });
 
 
-        // return base-pair location of guide line
-        const $viewport_content = $canvas.parent();
-        const viewport_content_mouse_xy = igv.getMouseXY($viewport_content.get(0), event);
+        // base-pair location of guide line
+        const $viewportContent = $canvas.parent();
+        const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
+        console.log('xNormalized ' + viewportContentMouseXY.xNormalized.toFixed(3));
 
-        const index = $viewport_content.data('genomicStateIndex');
+        const index = $viewportContent.data('genomicStateIndex');
 
         const referenceFrame = browser.genomicStateList[ index ].referenceFrame;
 
         const _startBP = referenceFrame.start;
-        const _endBP = 1 + referenceFrame.start + (viewport_content_mouse_xy.width * referenceFrame.bpPerPixel);
+        const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
 
         // bp = bp + (pixel * (bp / pixel))
-        const bp = Math.round(_startBP + viewport_content_mouse_xy.x * referenceFrame.bpPerPixel);
+        const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
 
-        return { bp: bp, start: _startBP, end: _endBP };
+        return { bp: bp, start: _startBP, end: _endBP, interpolant: viewportContentMouseXY.xNormalized };
     };
 
-    let DEPRICATED_mouseMoveHandler = (event, cursorGuide, $cursorGuideParent) => {
-        var exe;
-
-        // TODO: This is sooooo fragile !!!
-        exe = Math.max(50, igv.translateMouseCoordinates(event, $cursorGuideParent.get(0)).x);
-        exe = Math.min($cursorGuideParent.innerWidth() - 65, exe);
-
-        cursorGuide.$guide.css({ left: exe + 'px' });
-
-        return exe;
+    igv.CursorGuide.prototype.setCustomMouseHandler = function (customMouseHandler) {
+        this.customMouseHandler = customMouseHandler;
     };
 
     igv.CursorGuide.prototype.doHide = function () {
