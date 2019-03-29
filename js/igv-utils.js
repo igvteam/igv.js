@@ -35,7 +35,9 @@ var igv = (function (igv) {
                 x: event.clientX - dr.left,
                 y: event.clientY - dr.top,
                 xNormalized: (event.clientX - dr.left)/dr.width,
-                yNormalized: (event.clientY - dr.top)/dr.height
+                yNormalized: (event.clientY - dr.top)/dr.height,
+                width: dr.width,
+                height: dr.height
             };
 
         return xy;
