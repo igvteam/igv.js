@@ -1504,9 +1504,10 @@ var igv = (function (igv) {
                         }
                     }
                 }
-                return appendReferenceFrames(result);
+                appendReferenceFrames(result);
             }
 
+            return result;
 
             function appendReferenceFrames(genomicStateList) {
                 const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
