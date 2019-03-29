@@ -51,7 +51,9 @@ var igv = (function (igv) {
             }
 
             // TODO: support provision of custom mouse handler to consume genomic state
-            const genomicState = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
+            const { bp, start, end, interpolant }  = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
+
+            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
 
             if (this.customMouseHandler) {
                 this.customMouseHandler(genomicState);
@@ -88,7 +90,6 @@ var igv = (function (igv) {
         // base-pair location of guide line
         const $viewportContent = $canvas.parent();
         const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
-        console.log('xNormalized ' + viewportContentMouseXY.xNormalized.toFixed(3));
 
         const index = $viewportContent.data('genomicStateIndex');
 
