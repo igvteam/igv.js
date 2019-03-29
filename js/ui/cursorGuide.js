@@ -50,6 +50,17 @@ var igv = (function (igv) {
                 return;
             }
 
+            const genomicState = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
+
+            return;
+
+
+
+
+
+
+
+
             const $viewport_content = $canvas.parent();
             const viewport_content_mouse_xy = igv.getMouseXY($viewport_content.get(0), e);
 
@@ -77,53 +88,9 @@ var igv = (function (igv) {
 
 
             // pixel
-            const $viewport = $viewport_content.parent();
-            const $viewport_container = $viewport.parent();
-            const viewport_container_mouse_xy = igv.getMouseXY($viewport_container.get(0), e);
-            const cursorGuideParentRect = $cursorGuideParent.get(0).getBoundingClientRect();
-
-
-            str = Date.now();
-            str = str + ' x ' + igv.numberFormatter(viewport_container_mouse_xy.x) + ' width ' + igv.numberFormatter(viewport_container_mouse_xy.width);
-            console.log(str);
-
-            const dx = viewport_container_mouse_xy.x - cursorGuideParentRect.x;
-            const x_css = viewport_container_mouse_xy.x + dx;
-
-            const left = Math.round(x_css) + 'px';
+            const cursor_guide_parent_mouse_xy = igv.getMouseXY($cursorGuideParent.get(0), e);
+            const left = cursor_guide_parent_mouse_xy.x + 'px';
             this.$guide.css({ left: left });
-
-            // TODO: (dat) This assumes a single panel. Ensure support for multi-locus.
-            /*
-            if (igv.browser.trackViews && igv.browser.trackViews.length > 0) {
-
-                const viewportContainer = igv.browser.trackViews[0].$viewportContainer.get(0);
-
-                const viewportContainerRect = viewportContainer.getBoundingClientRect();
-
-                const cursorGuideParentRect = $cursorGuideParent.get(0).getBoundingClientRect();
-
-                const mouseXY = igv.getMouseXY(viewportContainer, e);
-
-                if (mouseXY.x < 0 || mouseXY.x > viewportContainerRect.width) {
-                    return;
-                }
-
-                // pixel
-                const dx = viewportContainerRect.x - cursorGuideParentRect.x;
-                const x_css = mouseXY.x + dx;
-                const str = Math.round(x_css) + 'px';
-                this.$guide.css({ left: str });
-
-                // base-pair
-                const aBP = igv.browser.genomicStateList[ 0 ].referenceFrame.start;
-                const bBP = igv.browser.genomicStateList[ 0 ].referenceFrame.initialEnd;
-                const bp = igv.Math.lerp(aBP, bBP, mouseXY.xNormalized);
-
-                console.log(Date.now() + ' x normalized ' + mouseXY.xNormalized.toFixed(3) + ' bp ' + igv.numberFormatter(Math.round(bp)));
-
-            }
-            */
 
         });
 
@@ -145,7 +112,32 @@ var igv = (function (igv) {
 
     };
 
-    let mouseMoveHandler = (event, cursorGuide, $cursorGuideParent) => {
+    let mouseHandler = (event, $canvas, $guideLine, $guideParent, browser) => {
+
+        // position guide line
+        const cursor_guide_parent_mouse_xy = igv.getMouseXY($guideParent.get(0), event);
+        const left = cursor_guide_parent_mouse_xy.x + 'px';
+        $guideLine.css({ left: left });
+
+
+        // return base-pair location of guide line
+        const $viewport_content = $canvas.parent();
+        const viewport_content_mouse_xy = igv.getMouseXY($viewport_content.get(0), event);
+
+        const index = $viewport_content.data('genomicStateIndex');
+
+        const referenceFrame = browser.genomicStateList[ index ].referenceFrame;
+
+        const _startBP = referenceFrame.start;
+        const _endBP = 1 + referenceFrame.start + (viewport_content_mouse_xy.width * referenceFrame.bpPerPixel);
+
+        // bp = bp + (pixel * (bp / pixel))
+        const bp = Math.round(_startBP + viewport_content_mouse_xy.x * referenceFrame.bpPerPixel);
+
+        return { bp: bp, start: _startBP, end: _endBP };
+    };
+
+    let DEPRICATED_mouseMoveHandler = (event, cursorGuide, $cursorGuideParent) => {
         var exe;
 
         // TODO: This is sooooo fragile !!!
