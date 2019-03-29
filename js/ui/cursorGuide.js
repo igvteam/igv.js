@@ -45,25 +45,53 @@ var igv = (function (igv) {
 
             e.preventDefault();
 
-            const element = document.elementFromPoint(e.clientX, e.clientY);
-
-            if (false === $(element).is('canvas')) {
+            const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
+            if (false === $canvas.is('canvas')) {
                 return;
             }
 
-            const $parent = $(element).parent();
-
-            const mouseXY = igv.getMouseXY($parent.get(0), e);
-            const bbox = $parent.get(0).getBoundingClientRect();
+            const $viewport_content = $canvas.parent();
+            const viewport_content_mouse_xy = igv.getMouseXY($viewport_content.get(0), e);
 
             // base-pair
-            const index = $parent.data('genomicStateIndex');
-            const genomicState = igv.browser.genomicStateList[ index ];
-            const aBP = genomicState.referenceFrame.start;
-            const bBP = genomicState.referenceFrame.initialEnd;
-            const bp = Math.round(igv.Math.lerp(aBP, bBP, mouseXY.xNormalized));
+            const index = $viewport_content.data('genomicStateIndex');
 
-            console.log(Date.now() + ' x ' + igv.numberFormatter(mouseXY.x) + ' width ' + igv.numberFormatter(bbox.width) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(aBP) + ' end ' + igv.numberFormatter(bBP));
+            const referenceFrame = igv.browser.genomicStateList[ index ].referenceFrame;
+            const aBP = referenceFrame.start;
+            const bBP = 1 + referenceFrame.start + (viewport_content_mouse_xy.width * referenceFrame.bpPerPixel);
+
+            let str = Date.now();
+
+            // pixel
+            str = str + ' x ' + igv.numberFormatter(viewport_content_mouse_xy.x) + ' width ' + igv.numberFormatter(viewport_content_mouse_xy.width);
+
+            // bp = bp + (pixel * (bp / pixel))
+            const bp = Math.round(aBP + viewport_content_mouse_xy.x * referenceFrame.bpPerPixel);
+            str = str + ' bp ' + igv.numberFormatter(bp);
+
+            // bp
+            str = str + ' start ' + igv.numberFormatter(aBP) + ' end ' + igv.numberFormatter(bBP);
+            // console.log(str);
+
+
+
+
+            // pixel
+            const $viewport = $viewport_content.parent();
+            const $viewport_container = $viewport.parent();
+            const viewport_container_mouse_xy = igv.getMouseXY($viewport_container.get(0), e);
+            const cursorGuideParentRect = $cursorGuideParent.get(0).getBoundingClientRect();
+
+
+            str = Date.now();
+            str = str + ' x ' + igv.numberFormatter(viewport_container_mouse_xy.x) + ' width ' + igv.numberFormatter(viewport_container_mouse_xy.width);
+            console.log(str);
+
+            const dx = viewport_container_mouse_xy.x - cursorGuideParentRect.x;
+            const x_css = viewport_container_mouse_xy.x + dx;
+
+            const left = Math.round(x_css) + 'px';
+            this.$guide.css({ left: left });
 
             // TODO: (dat) This assumes a single panel. Ensure support for multi-locus.
             /*
