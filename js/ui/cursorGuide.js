@@ -53,10 +53,10 @@ var igv = (function (igv) {
             // TODO: support provision of custom mouse handler to consume genomic state
             const { bp, start, end, interpolant }  = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
 
-            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
+            console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
 
             if (this.customMouseHandler) {
-                this.customMouseHandler(genomicState);
+                this.customMouseHandler({ bp, start, end, interpolant });
             }
 
         });
