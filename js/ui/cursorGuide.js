@@ -46,17 +46,17 @@ var igv = (function (igv) {
             e.preventDefault();
 
             const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
-            if (false === $canvas.is('canvas')) {
-                return;
-            }
+            const $viewportContent = $canvas.parent();
 
-            // TODO: support provision of custom mouse handler to consume genomic state
-            const { bp, start, end, interpolant }  = mouseHandler(e, $canvas, this.$guide, $cursorGuideParent, this.browser);
+            if ($viewportContent.hasClass('igv-viewport-content-div')) {
 
-            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
+                const { bp, start, end, interpolant }  = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, this.browser);
 
-            if (this.customMouseHandler) {
-                this.customMouseHandler({ bp, start, end, interpolant });
+                // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
+
+                if (this.customMouseHandler) {
+                    this.customMouseHandler({ bp, start, end, interpolant });
+                }
             }
 
         });
@@ -79,7 +79,7 @@ var igv = (function (igv) {
 
     };
 
-    let mouseHandler = (event, $canvas, $guideLine, $guideParent, browser) => {
+    let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
 
         // pixel location of guide line
         const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
@@ -88,7 +88,6 @@ var igv = (function (igv) {
 
 
         // base-pair location of guide line
-        const $viewportContent = $canvas.parent();
         const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
 
         const index = $viewportContent.data('genomicStateIndex');
