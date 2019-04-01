@@ -100,7 +100,12 @@ var igv = (function (igv) {
         // bp = bp + (pixel * (bp / pixel))
         const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
 
-        return { bp: bp, start: _startBP, end: _endBP, interpolant: viewportContentMouseXY.xNormalized };
+        // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
+        const $trackContainer = $viewportContent.closest('.igv-track-container-div');
+        const trackContainerMouseXY = igv.getMouseXY($trackContainer.get(0), event);
+
+
+        return { $host: $trackContainer, host_css_left: left, bp: bp, start: _startBP, end: _endBP, interpolant: viewportContentMouseXY.xNormalized };
     };
 
     igv.CursorGuide.prototype.setCustomMouseHandler = function (customMouseHandler) {
