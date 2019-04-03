@@ -603,7 +603,8 @@ var igv = (function (igv) {
             }
 
             const windowX = Math.round(options.viewportContainerX);
-            const windowX1 = windowX + options.viewportContainerWidth / (browser.genomicStateList.length || 1);
+            const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
+            const windowX1 = windowX + options.viewportContainerWidth / nLoci;
 
             renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
         }
