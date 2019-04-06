@@ -249,29 +249,32 @@ var igv = (function (igv) {
 
             const urlOrFile = options.url || options.file
 
-            let filename = options.filename
-            if (!filename) {
-                filename = (options.url ? igv.getFilename(options.url) : options.file.name)
-            }
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
 
                 var json = igv.Browser.uncompressSession(options.url);
                 return JSON.parse(json);
 
-            } else if (filename.endsWith(".xml")) {
-
-                const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
-
-                const string = await igv.xhr.loadString(urlOrFile)
-
-                return new igv.XMLSession(string, knownGenomes);
-
-
-            } else if (filename.endsWith(".json")) {
-                return igv.xhr.loadJson(urlOrFile);
             } else {
-                undefined;
+                let filename = options.filename
+                if (!filename) {
+                    filename = (options.url ? igv.getFilename(options.url) : options.file.name)
+                }
+
+                if (filename.endsWith(".xml")) {
+
+                    const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
+
+                    const string = await igv.xhr.loadString(urlOrFile)
+
+                    return new igv.XMLSession(string, knownGenomes);
+
+
+                } else if (filename.endsWith(".json")) {
+                    return igv.xhr.loadJson(urlOrFile);
+                } else {
+                    return undefined;
+                }
             }
 
         }
@@ -1908,7 +1911,11 @@ var igv = (function (igv) {
             }
             bytes = new Zlib.RawInflate(compressedBytes).decompress();
         }
-        const json = String.fromCharCode.apply(null, bytes);
+        let json = ''
+        for(let b of bytes) {
+            json += String.fromCharCode(b)
+        }
+            
         return json;
 
 
