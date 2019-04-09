@@ -262,7 +262,9 @@ var igv = (function (igv) {
         fn = fn.toLowerCase();
 
         // Special case -- UCSC refgene files
-        if (fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
+        if (fn.endsWith("refgene.txt.gz") ||
+            fn.endsWith("refgene.txt") ||
+            fn.endsWith("refgene.sorted.txt.gz")) {
             return "refgene";
         }
 
