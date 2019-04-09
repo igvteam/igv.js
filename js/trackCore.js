@@ -264,7 +264,6 @@ var igv = (function (igv) {
         // Special case -- UCSC refgene files
         if (fn.endsWith("refgene.txt.gz") || fn.endsWith("refgene.txt")) {
             return "refgene";
-            return;
         }
 
 
