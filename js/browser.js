@@ -1985,13 +1985,16 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.cancelTrackPan = function () {
 
-        if (this.isDragging) {
-            this.updateViews();
-            this.fireEvent('trackdragend');
-        }
+        const dragEnd = this.isDragging
         this.isDragging = false;
         this.isScrolling = false;
         this.vpMouseDown = undefined;
+
+
+        if (dragEnd) {
+            this.updateViews();
+            this.fireEvent('trackdragend');
+        }
 
     }
 
