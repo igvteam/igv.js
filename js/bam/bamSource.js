@@ -38,7 +38,6 @@ var igv = (function (igv) {
 
         if (igv.isFilePath(config.url)) {
             // do nothing
-            console.log('ignore');
         } else if (igv.isString(config.url) && config.url.startsWith("data:")) {
             this.config.indexed = false;
         }
