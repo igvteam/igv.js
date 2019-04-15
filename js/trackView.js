@@ -661,7 +661,7 @@ var igv = (function (igv) {
 
         let appleColors = Object.values(igv.appleCrayonPalette);
 
-        if (defaultColor) {
+        if (defaultColor && !(typeof defaultColor === 'function')) {
 
             // Remove 'snow' color.
             appleColors.splice(11, 1);
