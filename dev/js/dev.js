@@ -40,7 +40,7 @@ var igvdev = {
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                json[ 'tissueSummary' ].forEach(function (obj) {
+                json[ 'tissueInfo' ].forEach(function (obj) {
 
                     let trackDiv = document.createElement('div');
                     trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
