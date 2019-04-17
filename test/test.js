@@ -64,7 +64,7 @@ var igvtest = {
 
             .then(function (json) {
 
-                let tissueSummary = json['tissueSummary'];
+                let tissueSummary = json['tissueInfo'];
 
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
