@@ -97,7 +97,7 @@ var igv = (function (igv) {
             datasetId = datasetId || 'gtex_v7';
             baseURL = baseURL || 'https://gtexportal.org/rest/v1';
 
-            let url = baseURL + '/dataset/tissueSummary?datasetId=' + datasetId;
+            let url = baseURL + '/dataset/tissueInfo?datasetId=' + datasetId;
 
             return igv.xhr.loadJson(url, {})
         },
