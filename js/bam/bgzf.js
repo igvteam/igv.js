@@ -21,7 +21,7 @@ var igv = (function (igv) {
 
         while (ptr < lim) {
 
-            var ba = new Uint8Array(data, ptr[0], 18);
+            var ba = new Uint8Array(data, ptr, 18);
 
             var xlen = (ba[11] << 8) | (ba[10]);
             var si1 = ba[12];
