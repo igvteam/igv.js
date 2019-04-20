@@ -45,7 +45,7 @@
                     }
                 ]
             },
-            //locus: params.location, // something like: chr1:1-500,000
+            locus: 'HOXD-AS1',
             flanking: 75000,
             search: {
                 url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
@@ -76,21 +76,13 @@
         }
 
 
-        igv.createBrowser(document.getElementById('igvDiv'), options)
+        igv.createBrowser(document.getElementById('igv-div'), options)
             .then(function (browser) {
 
             })
     })
 
 
-        var igvDiv = document.getElementById("igv-div");
-
-        igv.createBrowser(igvDiv, options)
-            .then(function (browser) {
-                console.log("Created IGV browser");
-            })
-
-    });
 
 </script>
 
