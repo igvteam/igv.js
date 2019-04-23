@@ -27,12 +27,18 @@ var igv = (function (igv) {
         // viewport-content
         const $div = $("<div>", {class: 'igv-viewport-content-div'});
         this.$viewport.append($div);
+
+        // know the genomic state index
+        const index = this.browser.genomicStateList.indexOf(genomicState);
+        $div.data('genomicStateIndex', index);
+
         $div.height(this.$viewport.height());
         this.contentDiv = $div.get(0);
 
         // viewport canvas
         const $canvas = $('<canvas>');
         $(this.contentDiv).append($canvas);
+
         this.canvas = $canvas.get(0);
         this.ctx = this.canvas.getContext("2d");
 
