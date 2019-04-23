@@ -28,29 +28,37 @@
  * Created by dat on 3/26/18.
  */
 var igv = (function (igv) {
-    
+
     "use strict";
 
-    igv.CursorGuide = function ($guideParent, $controlParent, config, browser) {
-        
+    igv.CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
+
         const self = this;
 
         this.browser = browser;
-        
+
         this.$guide = $('<div class="igv-cursor-tracking-guide">');
-        $guideParent.append(this.$guide);
+        $cursorGuideParent.append(this.$guide);
 
         // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $guideParent.on('mousemove.cursorGuide', function (e) {
-            var exe;
+        $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
 
             e.preventDefault();
 
-            exe = Math.max(50, igv.translateMouseCoordinates(e, $guideParent.get(0)).x);
-            exe = Math.min($guideParent.innerWidth() - 65, exe);
-            // exe = Math.min(browser.trackContainerDiv.clientWidth - 65, exe);
+            const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
+            const $viewportContent = $canvas.parent();
 
-            self.$guide.css({ left: exe + 'px' });
+            if ($viewportContent.hasClass('igv-viewport-content-div')) {
+
+                const { bp, start, end, interpolant }  = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, browser);
+
+                // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
+
+                if (this.customMouseHandler) {
+                    this.customMouseHandler({ bp, start, end, interpolant });
+                }
+            }
+
         });
 
         if (true === config.showCursorTrackingGuideButton) {
@@ -69,6 +77,35 @@ var igv = (function (igv) {
 
         }
 
+    };
+
+    let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
+
+        // pixel location of guide line
+        const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
+        const left = guideParentMouseXY.x + 'px';
+        $guideLine.css({ left: left });
+
+
+        // base-pair location of guide line
+        const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
+
+        const index = $viewportContent.data('genomicStateIndex');
+
+        const referenceFrame = browser.genomicStateList[ index ].referenceFrame;
+
+        const _startBP = referenceFrame.start;
+        const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
+
+        // bp = bp + (pixel * (bp / pixel))
+        const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
+
+        // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
+        const $trackContainer = $viewportContent.closest('.igv-track-container-div');
+        const trackContainerMouseXY = igv.getMouseXY($trackContainer.get(0), event);
+
+
+        return { $host: $trackContainer, host_css_left: left, bp, start: _startBP, end: _endBP, interpolant: viewportContentMouseXY.xNormalized };
     };
 
     igv.CursorGuide.prototype.doHide = function () {
