@@ -214,7 +214,8 @@ var igv = (function (igv) {
                         else {
                             fullfill(xhr.response);
                         }
-                    } else if ((typeof gapi !== "undefined") && ((xhr.status === 404 || xhr.status == 403) && isGoogleURL(url)) && !options.retries) {
+                    } else if ((typeof gapi !== "undefined") &&
+                        ((xhr.status === 404 || xhr.status === 403 || xhr.status === 401) && isGoogleURL(url)) && !options.retries) {
 
                         options.retries = 1;
 
