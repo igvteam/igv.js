@@ -22,14 +22,16 @@
     <!-- Vendor JS -->
     <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
-
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
+    <script src="../vendor/cram-bundle.js"></script>
 
     <!-- IGV JS -->
     <script src="../js/igv-icons.js"></script>
     <script src="../js/session/igvXmlSession.js"></script>
     <script src="../js/feature/mergedTrack.js"></script>
+
+
 
     <script src="../js/bam/bamReader.js"></script>
     <script src="../js/bam/bamReaderNonIndexed.js"></script>
@@ -46,6 +48,7 @@
     <script src="../js/bam/htsgetReader.js"></script>
     <script src="../js/bam/alignmentBlock.js"></script>
     <script src="../js/bam/shardedBamReader.js"></script>
+    <script src="../js/cram/cramReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -121,7 +124,7 @@
     <script src="../js/viewport.js"></script>
     <script src="../js/ui/genericContainer.js"></script>
     <script src="../js/ui/trackGearPopover.js"></script>
-    
+
     <script src="../js/rulerTrack.js"></script>
     <script src="../js/rulerSweeper.js"></script>
 
@@ -131,7 +134,6 @@
     <script src="../js/parseUtils.js"></script>
     <script src="../js/fasta.js"></script>
     <script src="../js/sequenceTrack.js"></script>
-
 
     <script src="../js/igvxhr.js"></script>
     <script src="../js/binary.js"></script>
@@ -143,93 +145,78 @@
 
     <script src="../js/roi.js"></script>
     <script src="../js/roiSource.js"></script>
+    <script src="../js/civic/civicReader.js"></script>
+
+    <script src="../js/feature/fileFormats.js"></script>
+
     <script src="../vendor/tdigest.js"></script>
     <script src="../vendor/rbtree.js"></script>
     <script src="../js/canvas2svg.js"></script>
-    <script src="https://apis.google.com/js/platform.js"></script>
+
     <script src="../js/navbarManager.js"></script>
 
-    <script src="js/oauthExample.js"></script>
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
 </head>
 
 <body>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
-
-
-    <div id="signInButton"></div>
-
-    <div>
-        <button id="googlePickerButton" disabled onclick="createPicker()">Google Drive</button>
-    </div>
-
-    <p></p>
-
-    <a href='#' onclick="igv.browser.loadTrack({
-                                sourceType: 'ga4gh',
-                                type: 'bam',
-                                url: 'https://genomics.googleapis.com/v1',
-                                readGroupSetIds: 'CMvnhpKTFhCqqcrDgqfqgyA',
-                                name: 'Ga4gh BAM'
-                                })">Click to load Ga4gh BAM
-
-    </a>
-
-    <p></p>
-
-    <a href='#' onclick="igv.browser.loadTrack({
-                                sourceType: 'ga4gh',
-                                type: 'vcf',
-                                url: 'https://genomics.googleapis.com/v1',
-                                variantSetId: '11847417162926684904',
-                                name: 'Ga4gh variants'
-                                })">Click to load Ga4gh Variants
-    </a>
-
-    <p></p>
-
-    <a href='#' onclick="igv.browser.loadTrack({
-                                type: 'bam',
-                                url: 'gs://igv-bam-test/NA12878_S1.bam',
-                                indexURL: 'gs://igv-bam-test/NA12878_S1.bam.bai',
-                                name: 'GCS bam'
-                                })">GCS bam
-    </a>
-
-    <p></p>
-
-    <a href="#" onclick="igv.browser.loadTrack(   {
-    url: 'gs://genomics-public-data/platinum-genomes/platinum-genomes/bam/NA12877_S1.bam',
-    indexURL: 'gs://genomics-public-data/platinum-genomes/platinum-genomes/bam/NA12877_S1.bam.bai',
-    name: 'NA12877',
-    format: 'bam'
-    })">Platninum bam</a>
-
-    <a href="#" onclick="igv.browser.loadTrack(   {
-    url: 'gs://gdc-ccle-open/98a0206b-29f5-42d3-957b-6480e2fde185/G20483.HCC-15.2.bam',
-    indexURL: 'gs://gdc-ccle-open/78c0b917-0e41-4faa-a96c-3550b8377d78/G20483.HCC-15.2.bam.bai',
-    name: 'NA12877',
-    format: 'bam'
-    })">CCLE bam</a>
-
-
+<div>
+    <button onclick="bookmark();">Bookmark</button>
 </div>
+
+<h3>1000 Genomes low coverage CRAMs - click to load</h3>
+
+<div id="trackList"></div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        gapi.load('client:auth2', initClient);
+        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-        gapi.load('picker', function () {
-            document.getElementById("googlePickerButton").disabled = false;
-        });
+            .then(function (google) {
 
+                gapi.load('client:auth2', function () {
+
+                    const options =
+                        {
+                            locus: 'muc1',
+                            // genome: "hg38",
+                            genome: "hg19",
+                            flanking: 1000,
+                            queryParametersSupported: true,
+                            tracks: [
+                                {
+                                    name: "Bam",
+                                    type: "alignment",
+                                    format: "bam",
+                                    url: "gs://gdc-ccle-open/98a0206b-29f5-42d3-957b-6480e2fde185/G20483.HCC-15.2.bam",
+                                    indexURL: "gs://gdc-ccle-open/78c0b917-0e41-4faa-a96c-3550b8377d78/G20483.HCC-15.2.bam.bai"
+                                }
+                            ]
+                        };
+
+                    igv.createBrowser(document.getElementById('igvDiv'), options)
+                        .then(function (browser) {
+
+                        })
+
+                })
+            })
     });
 
 
-</script>
+    function bookmark() {
+        window.history.pushState({}, "IGV", igv.browser.sessionURL());
+    }
 
+</script>
 
 </body>
 
