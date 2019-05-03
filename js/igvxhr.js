@@ -28,6 +28,7 @@ var igv = (function (igv) {
     var NONE = 0;
     var GZIP = 1;
     var BGZF = 2;
+    var UNKNOWN = 3;
 
 
     class RateLimiter {
@@ -438,19 +439,14 @@ var igv = (function (igv) {
         } else if (fn.endsWith(".gz")) {
             compression = GZIP;
         } else {
-            compression = NONE;
+            compression = UNKNOWN;
         }
 
-        if (compression === NONE) {
-            options.mimeType = 'text/plain; charset=x-user-defined';
-            return igv.xhr.load(url, options);
-        } else {
-            options.responseType = "arraybuffer";
-            return igv.xhr.load(url, options)
-                .then(function (data) {
-                    return arrayBufferToString(data, compression);
-                })
-        }
+        options.responseType = "arraybuffer";
+        return igv.xhr.load(url, options)
+            .then(function (data) {
+                return arrayBufferToString(data, compression);
+            })
 
 
         function getFilename(url, options) {
@@ -527,6 +523,14 @@ var igv = (function (igv) {
     function arrayBufferToString(arraybuffer, compression) {
 
         var plain, inflate;
+
+        if(compression === UNKNOWN && arraybuffer.byteLength > 2) {
+
+            const m = new Uint8Array(arraybuffer, 0, 2)
+            if(m[0] === 31 && m[1] === 139) {
+                compression = GZIP
+            }
+        }
 
         if (compression === GZIP) {
             inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
