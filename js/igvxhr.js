@@ -510,14 +510,13 @@ var igv = (function (igv) {
 
         if (url.includes("//www.dropbox.com")) {
             return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
-        }
-        else if (url.includes("//drive.google.com")) {
+        } else if (url.includes("//drive.google.com")) {
             return igv.google.driveDownloadURL(url);
-        }
-        else if (url.includes("//www.broadinstitute.org/igvdata")) {
+        } else if (url.includes("//www.broadinstitute.org/igvdata")) {
             return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
-        }
-        else {
+        } else if (url.includes("//igvdata.broadinstitute.org")) {
+            return url.replace("//igvdata.broadinstitute.org", "https://dn7ywbm9isq8j.cloudfront.net")
+        } else {
             return url;
         }
     }
