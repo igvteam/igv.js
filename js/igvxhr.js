@@ -80,7 +80,7 @@ var igv = (function (igv) {
                 } else {
 
                     if(isGoogleDrive(url)) {
-
+console.log("rate limit " + url)
                         return new Promise(function (fulfill, reject) {
                             rateLimiter.limiter(async function (url, options) {
                                 try {
