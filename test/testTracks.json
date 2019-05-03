@@ -170,8 +170,15 @@
     ]
   },
   {
-    "name": "4 Column Bed",
-    "url": "../test/data/bed/4_columns.bed"
+    "url": "../test/data/bed/oneFeature.bed",
+    "indexed": false,
+    "name": "1 feature bed"
+  },
+  {
+    "name": "GZipped bed",
+    "type": "annotation",
+    "format": "bed",
+    "url": "../test/data/bed/basic_feature_3_columns.bed.gzipped"
   },
   {
     "url": "../test/data/bed/oneFeature.bed",
