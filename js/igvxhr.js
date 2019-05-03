@@ -29,7 +29,7 @@ var igv = (function (igv) {
     var GZIP = 1;
     var BGZF = 2;
     var UNKNOWN = 3;
-
+    var loginTried = false;
 
     class RateLimiter {
 
@@ -218,7 +218,8 @@ var igv = (function (igv) {
                                     fullfill(xhr.response);
                                 }
                             } else if ((typeof gapi !== "undefined") &&
-                                ((xhr.status === 404 || xhr.status === 403 || xhr.status === 401) && isGoogleURL(url)) && !options.retries) {
+                                ((xhr.status === 404 || xhr.status === 401) && isGoogleURL(url)) &&
+                                !options.retries) {
 
                                 options.retries = 1;
 
@@ -246,7 +247,9 @@ var igv = (function (igv) {
                             } else {
 
                                 //
-                                if (xhr.status === 416) {
+                                if (xhr.status === 403) {
+                                    handleError("Access forbidden")
+                                } else if (xhr.status === 416) {
                                     //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
                                     handleError("Unsatisfiable range");
                                 }
@@ -524,10 +527,10 @@ var igv = (function (igv) {
 
         var plain, inflate;
 
-        if(compression === UNKNOWN && arraybuffer.byteLength > 2) {
+        if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
 
             const m = new Uint8Array(arraybuffer, 0, 2)
-            if(m[0] === 31 && m[1] === 139) {
+            if (m[0] === 31 && m[1] === 139) {
                 compression = GZIP
             }
         }
@@ -559,7 +562,10 @@ var igv = (function (igv) {
         return igv.google.isGoogleURL(url);
     }
 
-    var loginTried = false;
+    function isGoogleDrive(url) {
+        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
+    }
+
 
     function getGoogleAccessToken() {
 
@@ -679,11 +685,6 @@ var igv = (function (igv) {
             i += bytesNeeded + 1;
         }
         return string
-    }
-
-
-    function isGoogleDrive(url) {
-        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
     }
 
     return igv;
