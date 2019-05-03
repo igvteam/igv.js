@@ -28,10 +28,47 @@ var igv = (function (igv) {
     var NONE = 0;
     var GZIP = 1;
     var BGZF = 2;
+
+
+    class RateLimiter {
+
+        constructor(wait) {
+            this.wait = wait === undefined ? 100 : wait
+            this.isCalled = false
+            this.calls = [];
+        }
+
+
+        limiter(fn) {
+
+            const self = this
+
+            let caller = function () {
+                if (self.calls.length && !self.isCalled) {
+                    self.isCalled = true;
+                    self.calls.shift().call();
+                    setTimeout(function () {
+                        self.isCalled = false;
+                        caller();
+                    }, self.wait);
+                }
+            };
+
+            return function () {
+                self.calls.push(fn.bind(this, ...arguments));
+                caller();
+            };
+        }
+
+    }
+
+    const rateLimiter = new RateLimiter(100)
+
+
     igv.xhr = {
 
 
-        load: function (url, options) {
+        load:  function (url, options) {
 
             options = options || {};
 
@@ -41,7 +78,24 @@ var igv = (function (igv) {
                 if(url.startsWith("data:")) {
                     return igv.decodeDataURI(url)
                 } else {
-                    return loadURL.call(this, url, options);
+
+                    if(isGoogleDrive(url)) {
+
+                        return new Promise(function (fulfill, reject) {
+                            rateLimiter.limiter(async function (url, options) {
+                                try {
+                                    const result = loadURL.call(this, url, options)
+                                    fulfill(result)
+                                } catch (e) {
+                                    reject(e)
+                                }
+                            })(url, options)
+                        })
+                    }
+
+                    else {
+                        return loadURL.call(this, url, options);
+                    }
                 }
             }
 
@@ -300,6 +354,8 @@ var igv = (function (igv) {
         }
     };
 
+    const loadURL2 = rateLimiter.limiter(loadURL)
+
     function loadFileSlice(localfile, options) {
 
         return new Promise(function (fullfill, reject) {
@@ -432,6 +488,10 @@ var igv = (function (igv) {
 
     function isAmazonV4Signed(url) {
         return url.indexOf("X-Amz-Signature") > -1;
+    }
+
+    function isGoogleDrive(url) {
+        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
     }
 
     function getOauthToken(url) {
@@ -633,6 +693,10 @@ var igv = (function (igv) {
         return string
     }
 
+
+    function isGoogleDrive(url) {
+        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
+    }
 
     return igv;
 })
