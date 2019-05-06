@@ -283,7 +283,7 @@ function runBedTests() {
             bpEnd = 67684468,
             featureSource = new igv.FeatureSource({
                     format: 'bed',
-                    url: 'data/bed/basic_feature_3_columns.bed.gz'
+                    url: 'data/bed/basic_feature_3_columns.bed.gzipped'
                 },
                 genome);
 
