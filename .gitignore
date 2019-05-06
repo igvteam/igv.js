@@ -1,6 +1,5 @@
 .DS_Store
 /.vscode/
-/dist/
 /es5/
 /.idea/
 /igv.js.iml
