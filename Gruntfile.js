@@ -54,7 +54,7 @@ module.exports = function (grunt) {
                     'js/**/*.js',
                     'wrapper/footer.js'
                 ],
-                dest: 'dist/igv.js'
+                dest: 'tmp/igv.js'
             },
             igv_esm: {
                 src: [
