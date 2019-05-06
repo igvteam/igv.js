@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.2.9",
+  "version": "2.2.10",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
   "files": [
