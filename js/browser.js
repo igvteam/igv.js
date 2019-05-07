@@ -1435,7 +1435,7 @@ var igv = (function (igv) {
 
         const loci = string.split(' ')
 
-        const genomicStateList = await createGenomicStateList(loci)
+        let genomicStateList = await createGenomicStateList(loci)
 
         if (genomicStateList.length > 0) {
 
@@ -1448,7 +1448,12 @@ var igv = (function (igv) {
                 gs.id = igv.guid();
             }
 
-        } else {
+        } else if (loci.length > 1) {
+            // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
+            genomicStateList = await createGenomicStateList([string])
+        }
+
+        if(genomicStateList.length === 0) {
             throw new Error('Unrecognized locus ' + string);
         }
 
@@ -1770,6 +1775,11 @@ var igv = (function (igv) {
         this.eventHandlers[eventName].push(fn);
     };
 
+    /**
+     * @deprecated use off()
+     * @param eventName
+     * @param fn
+     */
     igv.Browser.prototype.un = function (eventName, fn) {
         if (!this.eventHandlers[eventName]) {
             return;
@@ -1778,6 +1788,23 @@ var igv = (function (igv) {
         var callbackIndex = this.eventHandlers[eventName].indexOf(fn);
         if (callbackIndex !== -1) {
             this.eventHandlers[eventName].splice(callbackIndex, 1);
+        }
+    };
+
+    igv.Browser.prototype.off = function (eventName, fn) {
+
+        if(!eventName) {
+            this.eventHandlers = {}   // Remove all event handlers
+        }
+        else if(!fn) {
+            this.eventHandlers[eventName] = []  // Remove all eventhandlers matching name
+        }
+        else {
+            // Remove specific event handler
+            const callbackIndex = this.eventHandlers[eventName].indexOf(fn);
+            if (callbackIndex !== -1) {
+                this.eventHandlers[eventName].splice(callbackIndex, 1);
+            }
         }
     };
 
