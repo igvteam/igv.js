@@ -956,8 +956,8 @@ var igv = (function (igv) {
             const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
 
             let content;
-            if (undefined === popupClickHandlerResult) {
-
+            if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
+                // Indicates handler did not handle the result, or the handler wishes default behavior to occur
                 if (dataList && dataList.length > 0) {
                     content = formatPopoverText(dataList);
                 }
