@@ -1436,6 +1436,10 @@ var igv = (function (igv) {
         const loci = string.split(' ')
 
         let genomicStateList = await createGenomicStateList(loci)
+        if (!genomicStateList || genomicStateList.length === 0) {
+            // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
+            genomicStateList = await createGenomicStateList([string])
+        }
 
         if (genomicStateList.length > 0) {
 
@@ -1448,12 +1452,7 @@ var igv = (function (igv) {
                 gs.id = igv.guid();
             }
 
-        } else if (loci.length > 1) {
-            // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-            genomicStateList = await createGenomicStateList([string])
-        }
-
-        if(genomicStateList.length === 0) {
+        } else {
             throw new Error('Unrecognized locus ' + string);
         }
 
@@ -1480,7 +1479,6 @@ var igv = (function (igv) {
          * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
          */
         async function createGenomicStateList(loci) {
-
 
             let searchConfig = self.searchConfig;
             let result = [];
@@ -1793,10 +1791,10 @@ var igv = (function (igv) {
 
     igv.Browser.prototype.off = function (eventName, fn) {
 
-        if(!eventName) {
+        if (!eventName) {
             this.eventHandlers = {}   // Remove all event handlers
         }
-        else if(!fn) {
+        else if (!fn) {
             this.eventHandlers[eventName] = []  // Remove all eventhandlers matching name
         }
         else {
@@ -1944,7 +1942,7 @@ var igv = (function (igv) {
             bytes = new Zlib.RawInflate(compressedBytes).decompress();
         }
         let json = ''
-        for(let b of bytes) {
+        for (let b of bytes) {
             json += String.fromCharCode(b)
         }
 
