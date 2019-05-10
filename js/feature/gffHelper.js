@@ -267,7 +267,7 @@ var igv = (function (igv) {
             exon.children.push(cds)
         } else {
             cds.cdStart = cds.start
-            cds.ccdEnd = cds.end
+            cds.cdEnd = cds.end
             exons.push(cds)
         }
 
