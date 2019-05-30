@@ -21,9 +21,25 @@ function runTabixTests() {
             console.log(error);
             done();
         });
-
     });
-    
+
+    QUnit.test("bgzip", async function (assert) {
+
+        var done = assert.async();
+
+        const url = "data/bed/missing_linefeed.bed.gz"
+        const data = await igv.xhr.load(url,
+            {
+                responseType: "arraybuffer",
+            })
+
+        const result = igv.unbgzf(data)
+        assert.ok(result)
+
+        done()
+
+    })
+
 }
 
 
