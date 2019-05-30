@@ -147,12 +147,11 @@ var igv = (function (igv) {
 
 
         function loadSession(config) {
-            if(config.sessionURL) {
+            if (config.sessionURL) {
                 return browser.loadSession({
                     url: config.sessionURL
                 })
-            }
-            else {
+            } else {
                 return browser.loadSessionObject(config)
             }
         }
@@ -430,6 +429,8 @@ var igv = (function (igv) {
         i1 = uri.indexOf("?");
         i2 = uri.lastIndexOf("#");
 
+        let files
+        let indexURLs
         if (i1 >= 0) {
             if (i2 < 0) i2 = uri.length;
             for (i = i1 + 1; i < i2;) {
@@ -445,20 +446,30 @@ var igv = (function (igv) {
 
                     if ('file' === key) {
                         // IGV desktop style file parameter
-                        if (!config.tracks) config.tracks = [];
-                        value.split(',').forEach(function (t) {
-                            config.tracks.push({
-                                url: t
-                            })
-                        });
-                    }
-                    else {
+                        files = value.split(',')
+                    } else if ('index' === key) {
+                        // IGV desktop style index parameter
+                        indexURLs = value.split(',')
+                    } else {
                         config[key] = value;
                     }
                     i = j + 1;
                 }
             }
         }
+
+        if (files) {
+
+            if (!config.tracks) config.tracks = []
+            for (let i = 0; i < files.length; i++) {
+                const trackConfig = {url: files[i]}
+                if (indexURLs && indexURLs.length < i) {
+                    trackConfig.indexURL = indexURLs[i]
+                }
+                config.tracks.push(trackConfig)
+            }
+        }
+
         return query;
     }
 
