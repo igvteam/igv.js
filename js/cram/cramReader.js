@@ -111,12 +111,17 @@ var igv = (function (igv) {
                     for (let line of samHeader) {
 
                         if ('SQ' === line.tag) {
-                            const seq = line.data[0].value;
-                            chrToIndex[seq] = chrNames.length;
-                            chrNames.push(seq);
-                            if (genome) {
-                                const alias = genome.getChromosomeName(seq);
-                                chrAliasTable[alias] = seq;
+                            for(let d of line.data) {
+                                if(d.tag === "SN") {
+                                    const seq = d.value;
+                                    chrToIndex[seq] = chrNames.length;
+                                    chrNames.push(seq);
+                                    if (genome) {
+                                        const alias = genome.getChromosomeName(seq);
+                                        chrAliasTable[alias] = seq;
+                                    }
+                                    break;
+                                }
                             }
                         }
                         else if ('RG' === line.tag) {
