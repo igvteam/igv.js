@@ -144,18 +144,22 @@ var igv = (function (igv) {
 
                         var header_keys, key, value, i;
 
-                        // Support for GCS paths.
-                        url = url.startsWith("gs://") ? igv.google.translateGoogleCloudURL(url) : url;
-
-                        const headers = options.headers || {};
-
-
-                        if (options.token) {
-                            addOauthHeaders(headers, options.token);
+                        // Various Google tansformations
+                        if (isGoogleURL(url)) {
+                            if(url.startsWith("gs://")){
+                                url = igv.google.translateGoogleCloudURL(url)
+                            } else if(url.startsWith("https://www.googleapis.com/storage")) {
+                                if(!url.includes("altMedia=")) {
+                                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true")
+                                }
+                            }
+                            url = igv.google.addApiKey(url);
                         }
 
-                        if (isGoogleURL(url)) {
-                            url = igv.google.addApiKey(url);
+
+                        const headers = options.headers || {};
+                        if (options.token) {
+                            addOauthHeaders(headers, options.token);
                         }
 
                         const range = options.range;
