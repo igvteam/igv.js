@@ -30,14 +30,29 @@ var igv = (function (igv) {
     igv.setApiKey = function (key) {
         igv.google.setApiKey(key);
     }
-
-    igv.google = {
+   igv.google = {
 
         fileInfoCache: {},
 
         // Crude test, this is conservative, nothing bad happens for a false positive
         isGoogleURL: function (url) {
-            return (url.includes("googleapis") && !url.includes("urlshortener")) || (url.startsWith("gs://"));
+            return (url.includes("googleapis") && !url.includes("urlshortener")) ||
+                this.isGoogleCloudURL(url) ||
+                this.isGoogleStorageURL(url) ||
+                this.isGoogleDrive(url)
+        },
+
+        isGoogleStorageURL: function (url) {
+            return url.startsWith("https://www.googleapis.com/storage") ||
+                url.startsWith("https://storage.cloud.google.com")
+        },
+
+        isGoogleCloudURL: function(url) {
+            url.startsWith("gs://")
+        },
+
+        isGoogleDrive: function (url) {
+            return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
         },
 
         setApiKey: function (key) {
