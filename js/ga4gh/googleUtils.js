@@ -48,7 +48,7 @@ var igv = (function (igv) {
         },
 
         isGoogleCloudURL: function(url) {
-            url.startsWith("gs://")
+           return url.startsWith("gs://")
         },
 
         isGoogleDrive: function (url) {
