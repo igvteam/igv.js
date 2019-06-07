@@ -145,10 +145,10 @@ var igv = (function (igv) {
                         var header_keys, key, value, i;
 
                         // Various Google tansformations
-                        if (isGoogleURL(url)) {
+                        if (igv.google.isGoogleURL(url)) {
                             if(url.startsWith("gs://")){
                                 url = igv.google.translateGoogleCloudURL(url)
-                            } else if(url.startsWith("https://www.googleapis.com/storage")) {
+                            } else if(igv.google.isGoogleStorageURL(url)) {
                                 if(!url.includes("altMedia=")) {
                                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true")
                                 }
@@ -222,7 +222,7 @@ var igv = (function (igv) {
                                     fullfill(xhr.response);
                                 }
                             } else if ((typeof gapi !== "undefined") &&
-                                ((xhr.status === 404 || xhr.status === 401) && isGoogleURL(url)) &&
+                                ((xhr.status === 404 || xhr.status === 401) && igv.google.isGoogleURL(url)) &&
                                 !options.retries) {
 
                                 options.retries = 1;
@@ -465,20 +465,8 @@ var igv = (function (igv) {
 
     }
 
-    function isCrossDomain(url) {
-
-        var origin = window.location.origin;
-
-        return !url.startsWith(origin);
-
-    }
-
     function isAmazonV4Signed(url) {
         return url.indexOf("X-Amz-Signature") > -1;
-    }
-
-    function isGoogleDrive(url) {
-        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
     }
 
     function getOauthToken(url) {
@@ -557,13 +545,6 @@ var igv = (function (igv) {
         }
 
     };
-
-    /**
-     * Crude test for google urls.
-     */
-    function isGoogleURL(url) {
-        return igv.google.isGoogleURL(url);
-    }
 
     function isGoogleDrive(url) {
         return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
