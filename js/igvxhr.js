@@ -69,7 +69,7 @@ var igv = (function (igv) {
     igv.xhr = {
 
 
-        load: function (url, options) {
+        load: async function (url, options) {
 
             options = options || {};
 
@@ -92,40 +92,31 @@ var igv = (function (igv) {
                                 }
                             })(url, options)
                         })
-                    }
-
-                    else {
+                    } else {
                         return loadURL(url, options);
                     }
                 }
             }
 
-            function loadURL(url, options) {
+            async function loadURL(url, options) {
 
                 url = mapUrl(url);
 
                 options = options || {};
 
                 let oauthToken = options.oauthToken;
-
                 if (!oauthToken) {
                     oauthToken = getOauthToken(url);
                 }
-
-                if (!oauthToken) {
-
-                    return getLoadPromise(url, options);
-
-                } else {
-
+                if (oauthToken) {
                     let token = (typeof oauthToken === 'function') ? oauthToken() : oauthToken;
-
                     if (token.then && (typeof token.then === 'function')) {
                         return token.then(applyOauthToken);
-                    }
-                    else {
+                    } else {
                         return applyOauthToken(token);
                     }
+                } else {
+                    return getLoadPromise(url, options);
                 }
 
 
@@ -133,23 +124,19 @@ var igv = (function (igv) {
                     if (token) {
                         options.token = token;
                     }
-
                     return getLoadPromise(url, options);
                 }
 
-                function getLoadPromise(url, options) {
+                async function getLoadPromise(url, options) {
 
-                    return new Promise(function (fullfill, reject) {
-
-
-                        var header_keys, key, value, i;
+                    return new Promise(async function (fullfill, reject) {
 
                         // Various Google tansformations
                         if (igv.google.isGoogleURL(url)) {
-                            if(url.startsWith("gs://")){
+                            if (url.startsWith("gs://")) {
                                 url = igv.google.translateGoogleCloudURL(url)
-                            } else if(igv.google.isGoogleStorageURL(url)) {
-                                if(!url.includes("altMedia=")) {
+                            } else if (igv.google.isGoogleStorageURL(url)) {
+                                if (!url.includes("altMedia=")) {
                                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true")
                                 }
                             }
@@ -161,7 +148,6 @@ var igv = (function (igv) {
                         if (options.token) {
                             addOauthHeaders(headers, options.token);
                         }
-
                         const range = options.range;
                         const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
                         const isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent);
@@ -180,7 +166,6 @@ var igv = (function (igv) {
                         const mimeType = options.mimeType;
 
                         xhr.open(method, url);
-
 
                         if (range) {
                             var rangeEnd = range.size ? range.start + range.size - 1 : "";
@@ -217,12 +202,12 @@ var igv = (function (igv) {
                                 if (range && xhr.status != 206 && range.start !== 0) {
                                     // For small files a range starting at 0 can return the whole file => 200
                                     handleError("ERROR: range-byte header was ignored for url: " + url);
-                                }
-                                else {
+                                } else {
                                     fullfill(xhr.response);
                                 }
                             } else if ((typeof gapi !== "undefined") &&
-                                ((xhr.status === 404 || xhr.status === 401) && igv.google.isGoogleURL(url)) &&
+                                ((xhr.status === 404 || xhr.status === 401) &&
+                                    igv.google.isGoogleURL(url)) &&
                                 !options.retries) {
 
                                 options.retries = 1;
@@ -240,8 +225,7 @@ var igv = (function (igv) {
                                             .catch(function (error) {
                                                 if (reject) {
                                                     reject(error);
-                                                }
-                                                else {
+                                                } else {
                                                     throw(error);
                                                 }
                                             })
@@ -256,8 +240,7 @@ var igv = (function (igv) {
                                 } else if (xhr.status === 416) {
                                     //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
                                     handleError("Unsatisfiable range");
-                                }
-                                else {// TODO -- better error handling
+                                } else {// TODO -- better error handling
                                     handleError(xhr.status);
                                 }
                             }
@@ -287,8 +270,7 @@ var igv = (function (igv) {
                         function handleError(message) {
                             if (reject) {
                                 reject(new Error(message));
-                            }
-                            else {
+                            } else {
                                 throw new Error(message);
                             }
                         }
@@ -325,8 +307,7 @@ var igv = (function (igv) {
 
                     if (result) {
                         return JSON.parse(result);
-                    }
-                    else {
+                    } else {
                         return result;
                     }
                 })
@@ -380,8 +361,7 @@ var igv = (function (igv) {
             } else {
                 if ("arraybuffer" === options.responseType) {
                     fileReader.readAsArrayBuffer(localfile);
-                }
-                else {
+                } else {
                     fileReader.readAsBinaryString(localfile);
                 }
             }
@@ -409,8 +389,7 @@ var igv = (function (igv) {
 
                 if (compression === NONE) {
                     return fullfill(fileReader.result);
-                }
-                else {
+                } else {
                     return fullfill(arrayBufferToString(fileReader.result, compression));
                 }
             };
@@ -422,8 +401,7 @@ var igv = (function (igv) {
 
             if (compression === NONE) {
                 fileReader.readAsText(localfile);
-            }
-            else {
+            } else {
                 fileReader.readAsArrayBuffer(localfile);
             }
 
@@ -478,8 +456,7 @@ var igv = (function (igv) {
                 token = igv.oauth.google.access_token;
             }
             return token;
-        }
-        else {
+        } else {
             return undefined;
         }
     }
@@ -529,18 +506,15 @@ var igv = (function (igv) {
         if (compression === GZIP) {
             inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
             plain = inflate.decompress();
-        }
-        else if (compression === BGZF) {
+        } else if (compression === BGZF) {
             plain = new Uint8Array(igv.unbgzf(arraybuffer));
-        }
-        else {
+        } else {
             plain = new Uint8Array(arraybuffer);
         }
 
         if ('TextDecoder' in igv.getGlobalObject()) {
             return new TextDecoder().decode(plain);
-        }
-        else {
+        } else {
             return decodeUTF8(plain);
         }
 
@@ -551,7 +525,7 @@ var igv = (function (igv) {
     }
 
 
-    function getGoogleAccessToken() {
+    async function getGoogleAccessToken() {
 
         if (igv.oauth.google.access_token || loginTried) {
 
@@ -564,8 +538,7 @@ var igv = (function (igv) {
             if (!authInstance) {
                 igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
                 return undefined;
-            }
-            else {
+            } else {
                 scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
 
                 options = new gapi.auth2.SigninOptionsBuilder();
