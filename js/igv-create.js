@@ -58,6 +58,11 @@ var igv = (function (igv) {
 
         const browser = new igv.Browser(config, $('<div class="igv-track-container-div">')[0]);
 
+        // Backward compatibility -- globally visible.   This will be removed in a future release
+        if (!igv.browser) {
+            igv.browser = browser;
+        }
+
         browser.parent = parentDiv;
 
         $(parentDiv).append(browser.$root);
@@ -136,11 +141,6 @@ var igv = (function (igv) {
             .then(function (browser) {
 
                 allBrowsers.push(browser);
-
-                // Backward compatibility -- globally visible.   This will be removed in a future release
-                if (!igv.browser) {
-                    igv.browser = browser;
-                }
 
                 return browser;
             })
