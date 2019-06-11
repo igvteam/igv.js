@@ -463,7 +463,7 @@ var igv = (function (igv) {
             if (!config.tracks) config.tracks = []
             for (let i = 0; i < files.length; i++) {
                 const trackConfig = {url: files[i]}
-                if (indexURLs && indexURLs.length < i) {
+                if (indexURLs && indexURLs.length > i) {
                     trackConfig.indexURL = indexURLs[i]
                 }
                 config.tracks.push(trackConfig)
