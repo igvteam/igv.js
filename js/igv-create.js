@@ -460,8 +460,15 @@ var igv = (function (igv) {
 
         if (files) {
 
-            if (!config.tracks) config.tracks = []
+            if (!config.tracks)
+                config.tracks = []
             for (let i = 0; i < files.length; i++) {
+
+                if(files[i].endsWith(".xml") || files[i].endsWith(".json")) {
+                    config.sessionURL = files[i]
+                    break;
+                }
+
                 const trackConfig = {url: files[i]}
                 if (indexURLs && indexURLs.length > i) {
                     trackConfig.indexURL = indexURLs[i]
