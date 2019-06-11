@@ -525,45 +525,46 @@ var igv = (function (igv) {
     }
 
 
+    /**
+     * There can be only 1 oAuth promise executing at a time.
+     */
+    let oauthPromise;
+
     async function getGoogleAccessToken() {
-
-        if (igv.oauth.google.access_token || loginTried) {
-
+        if (igv.oauth.google.access_token) {
             return Promise.resolve(igv.oauth.google.access_token);
-
-        } else {
-            var scope, options, authInstance;
-
-            authInstance = gapi.auth2.getAuthInstance();
+        } else if (oauthPromise) {
+            return oauthPromise
+        }
+        else {
+            const authInstance = gapi.auth2.getAuthInstance();
             if (!authInstance) {
                 igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
                 return undefined;
             } else {
-                scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
-
-                options = new gapi.auth2.SigninOptionsBuilder();
+                const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+                const options = new gapi.auth2.SigninOptionsBuilder();
                 options.setPrompt('select_account');
                 options.setScope(scope);
-
-                loginTried = true;
-
-                return new Promise(function (resolve, reject) {
+                oauthPromise = new Promise(function (resolve, reject) {
 
                     igv.browser.presentMessageWithCallback("Google Login required", function () {
 
                         gapi.auth2.getAuthInstance().signIn(options)
-
                             .then(function (user) {
-
-                                var authResponse = user.getAuthResponse();
-
+                                const authResponse = user.getAuthResponse();
                                 igv.setGoogleOauthToken(authResponse["access_token"]);
-
                                 resolve(authResponse["access_token"]);
+                                oauthPromise = undefined
                             })
-                            .catch(reject);
+                            .catch(function(err) {
+                                oauthPromise = undefined
+                                reject(err)
+                            })
                     })
                 })
+
+                return oauthPromise
             }
         }
 
