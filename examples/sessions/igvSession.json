@@ -7,7 +7,7 @@
     "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
   },
   "locus": [
-    "chr8:128,747,314-128,754,680"
+    "chr8:128,746,315-128,755,680"
   ],
   "tracks": [
     {
@@ -15,26 +15,57 @@
       "order": -1.7976931348623157e+308
     },
     {
-      "url": "http://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
-      "label": "HG02450",
-      "order": 1,
+      "url": "https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig",
+      "color": "#018448",
+      "name": "GM12878 H3K4me3  signal ENCSR000AKA",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF000ATR.bigWig",
       "sourceType": "file",
-      "format": "bam",
-      "type": "alignment",
-      "height": 300,
-      "name": "HG02450",
-      "coverageTrackHeight": 50
+      "height": 50,
+      "autoscale": true,
+      "order": 4
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig",
+      "color": "#891100",
+      "name": "GM12878 H3K27me3  signal ENCSR000AKD",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF000AST.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "autoscale": true,
+      "order": 4
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig",
+      "color": "rgb(150,150,150)",
+      "name": "GM12878 H3K36me3  signal ENCSR000AKE",
+      "format": "bigwig",
+      "type": "wig",
+      "filename": "ENCFF000ATA.bigWig",
+      "sourceType": "file",
+      "height": 50,
+      "autoscale": true,
+      "order": 5
     },
     {
       "name": "Refseq Genes",
-      "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.txt.gz",
-      "order": 1000000,
-      "indexed": false,
-      "sourceType": "file",
       "format": "refgene",
+      "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz",
+      "indexURL": "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi",
+      "visibilityWindow": -1,
+      "removable": false,
+      "order": 1000000,
+      "filename": "refGene.sorted.txt.gz",
+      "sourceType": "file",
       "type": "annotation",
-      "height": 50,
-      "maxRows": 500
+      "maxRows": 500,
+      "filterTypes": [
+        "chromosome",
+        "gene"
+      ]
     }
   ]
 }

@@ -1,0 +1,39 @@
+{
+  "reference": {
+    "id": "hg19",
+    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
+    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
+  },
+  "locus": [
+    "8:128,672,679-128,828,674"
+  ],
+  "tracks": [
+    {
+      "type": "sequence",
+      "order": -1.7976931348623157e+308
+    },
+    {
+      "url": "https://www.encodeproject.org/files/ENCFF576BXP/@@download/ENCFF576BXP.bigWig",
+      "color": "rgb(150,150,150)",
+      "name": "22Rv1 CTCF",
+      "sourceType": "file",
+      "format": "bigwig",
+      "type": "wig",
+      "height": 50
+    },
+    {
+      "name": "Genes",
+      "searchable": false,
+      "type": "annotation",
+      "format": "gtf",
+      "sourceType": "file",
+      "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz",
+      "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v18.annotation.sorted.gtf.gz.tbi",
+      "visibilityWindow": 10000000,
+      "order": 1.7976931348623157e+308,
+      "displayMode": "EXPANDED",
+      "height": 50,
+      "maxRows": 500
+    }
+  ]
+}
