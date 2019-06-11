@@ -1,17 +1,14 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <Session genome="hg19" hasGeneTrack="true" hasSequenceTrack="true" locus="chr8:128746315-128755680" nextAutoscaleGroup="2" path="/Users/jrobinso/Dropbox/projects/igv.js/test/data/sessions/group_autoscale_session.xml" version="8">
     <Resources>
-        <Resource name="GM12878 H3K4me3 ChipSeq Signal" path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig"/>
-        <Resource name="GM12878 H3K27me3 ChipSeq Signal" path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig"/>
-        <Resource name="GM12878 H3K36me3 ChipSeq Signal" path="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig"/>
+        <Resource name="GM12878 H3K4me3 ChipSeq Signal" path="https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig"/>
+        <Resource name="GM12878 H3K27me3 ChipSeq Signal" path="https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig"/>
+        <Resource name="GM12878 H3K36me3 ChipSeq Signal" path="https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig"/>
     </Resources>
     <Panel height="660" name="DataPanel" width="1457">
-        <Track autoscaleGroup="1" color="200,0,0" name="GM12878 H3K4me3 ChipSeq Signal" id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig">
-        </Track>
-        <Track autoscaleGroup="1" color="0,0,150" name="GM12878 H3K27me3 ChipSeq Signal" id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig">
-         </Track>
-        <Track autoscaleGroup="1" color="0,150,0" name="GM12878 H3K36me3 ChipSeq Signal" id="http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig">
-        </Track>
+        <Track autoscaleGroup="1" color="200,0,0" id="https://www.encodeproject.org/files/ENCFF000AST/@@download/ENCFF000AST.bigWig" name="GM12878 H3K27me3 ChipSeq Signal"></Track>
+        <Track autoscaleGroup="1" color="0,0,150" id="https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig" name="GM12878 H3K36me3 ChipSeq Signal"></Track>
+        <Track autoscaleGroup="1" color="0,150,0" id="https://www.encodeproject.org/files/ENCFF000ATR/@@download/ENCFF000ATR.bigWig" name="GM12878 H3K4me3 ChipSeq Signal"></Track>
     </Panel>
     <Panel height="189" name="FeaturePanel" width="1457">
         <Track  id="hg19_genes" name="RefSeq Genes">

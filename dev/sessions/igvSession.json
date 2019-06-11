@@ -1,6 +1,14 @@
 {
-  "genome":  "hg19",
-  "locus": ["myc", "egfr"],
+  "reference": {
+    "id": "hg19",
+    "name": "Human (CRCh37/hg19)",
+    "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+    "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+  },
+  "locus": [
+    "chr8:128,747,314-128,754,680"
+  ],
   "tracks": [
     {
       "type": "sequence",
