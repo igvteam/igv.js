@@ -213,15 +213,17 @@ var igv = (function (igv) {
 
         if ("hg38" === genomeID || "GRCh38" === genomeID) {
 
+            const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
+
             return "<a target='_blank' " +
                 "href='http://www.cravat.us/CRAVAT/variant.html?variant=" +
-                chr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+                cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
         }
         else {
             return undefined
         }
     }
-
+//chr22 40418496 - A G
 
     return igv;
 
