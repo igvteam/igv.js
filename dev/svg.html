@@ -7,12 +7,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Dev</title>
+    <title>Dev - SVG</title>
 
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    <link rel="stylesheet" type="text/css" href="css/save_to_svg.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
@@ -24,11 +23,9 @@
     <script src="../vendor/underscore.js"></script>
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
-    <script src="../vendor/tdigest.js"></script>
-    <script src="../vendor/rbtree.js"></script>
+    <script src="../vendor/cram-bundle.js"></script>
 
     <!-- IGV JS -->
-    <script src="../js/canvas2svg.js"></script>
     <script src="../js/igv-icons.js"></script>
     <script src="../js/session/igvXmlSession.js"></script>
     <script src="../js/feature/mergedTrack.js"></script>
@@ -50,6 +47,7 @@
     <script src="../js/bam/htsgetReader.js"></script>
     <script src="../js/bam/alignmentBlock.js"></script>
     <script src="../js/bam/shardedBamReader.js"></script>
+    <script src="../js/cram/cramReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -125,7 +123,7 @@
     <script src="../js/viewport.js"></script>
     <script src="../js/ui/genericContainer.js"></script>
     <script src="../js/ui/trackGearPopover.js"></script>
-    
+
     <script src="../js/rulerTrack.js"></script>
     <script src="../js/rulerSweeper.js"></script>
 
@@ -150,7 +148,13 @@
     <script src="../js/civic/civicReader.js"></script>
 
     <script src="../js/feature/fileFormats.js"></script>
+
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
+    <script src="../js/canvas2svg.js"></script>
+
     <script src="../js/navbarManager.js"></script>
+
 </head>
 
 <body>
@@ -180,35 +184,26 @@
 
 <script type="text/javascript">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async () => {
 
-        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+        await igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
 
-            .then(function (google) {
+        const options =
+            {
+                genome: "hg19",
+                locus: 'myc',
+                flanking: 1000,
+                queryParametersSupported: true,
 
-                const options =
-                    {
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true,
+            };
 
-                    };
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options);
 
-                igv.createBrowser(document.getElementById('igv-app-container'), options)
-                    .then(function (browser) {
+        igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
 
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
+        $('#igv-draw-svg-button').on('click', (e) => { browser.renderSVG({ $container: $('#igv-svg-container') }); });
 
-                        $('#igv-draw-svg-button').on('click', (e) => {
-                            browser.renderSVG({ $container: $('#igv-svg-container') });
-                        });
-
-                        return browser;
-                    })
-
-            })
     });
-
 
     function bookmark() {
         window.history.pushState({}, "IGV", igv.browser.sessionURL());
