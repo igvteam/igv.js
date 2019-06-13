@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Dev</title>
+    <title>Dev - SVG</title>
 
 
 
@@ -156,6 +156,7 @@
     <script src="../js/canvas2svg.js"></script>
 
     <script src="../js/navbarManager.js"></script>
+
 </head>
 
 <body>
@@ -185,35 +186,26 @@
 
 <script type="text/javascript">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async () => {
 
-        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+        await igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
 
-            .then(function (google) {
+        const options =
+            {
+                genome: "hg19",
+                locus: 'myc',
+                flanking: 1000,
+                queryParametersSupported: true,
 
-                const options =
-                    {
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true,
+            };
 
-                    };
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options);
 
-                igv.createBrowser(document.getElementById('igv-app-container'), options)
-                    .then(function (browser) {
+        igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
 
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
+        $('#igv-draw-svg-button').on('click', (e) => { browser.renderSVG({ $container: $('#igv-svg-container') }); });
 
-                        $('#igv-draw-svg-button').on('click', (e) => {
-                            browser.renderSVG({ $container: $('#igv-svg-container') });
-                        });
-
-                        return browser;
-                    })
-
-            })
     });
-
 
     function bookmark() {
         window.history.pushState({}, "IGV", igv.browser.sessionURL());
