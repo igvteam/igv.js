@@ -9,10 +9,11 @@
     <link rel="shortcut icon" href=../img/favicon.ico>
     <title>IGV - Dev</title>
 
+
+
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    <link rel="stylesheet" type="text/css" href="css/save_to_svg.css"/>
 
     <!-- Vendor CSS -->
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
@@ -24,11 +25,9 @@
     <script src="../vendor/underscore.js"></script>
     <script src="../vendor/zlib_and_gzip.js"></script>
     <script src="../vendor/inflate.js"></script>
-    <script src="../vendor/tdigest.js"></script>
-    <script src="../vendor/rbtree.js"></script>
+    <script src="../vendor/cram-bundle.js"></script>
 
     <!-- IGV JS -->
-    <script src="../js/canvas2svg.js"></script>
     <script src="../js/igv-icons.js"></script>
     <script src="../js/session/igvXmlSession.js"></script>
     <script src="../js/feature/mergedTrack.js"></script>
@@ -50,6 +49,7 @@
     <script src="../js/bam/htsgetReader.js"></script>
     <script src="../js/bam/alignmentBlock.js"></script>
     <script src="../js/bam/shardedBamReader.js"></script>
+    <script src="../js/cram/cramReader.js"></script>
 
     <script src="../js/bigQuery/ccp.js"></script>
 
@@ -77,10 +77,10 @@
     <script src="../js/rna/rnaStruct.js"></script>
     <script src="../js/feature/ucscServiceReader.js"></script>
 
-    <script src="../js/ga4gh/ga4ghAlignmentReader.js"></script>
-    <script src="../js/ga4gh/ga4ghVariantReader.js"></script>
-    <script src="../js/ga4gh/ga4ghHelper.js"></script>
-    <script src="../js/ga4gh/googleUtils.js"></script>
+    <script src="../js/google/ga4ghAlignmentReader.js"></script>
+    <script src="../js/google/ga4ghVariantReader.js"></script>
+    <script src="../js/google/ga4ghHelper.js"></script>
+    <script src="../js/google/googleUtils.js"></script>
     <script src="../js/oauth.js"></script>
 
     <script src="../js/gtex/eqtlTrack.js"></script>
@@ -125,7 +125,7 @@
     <script src="../js/viewport.js"></script>
     <script src="../js/ui/genericContainer.js"></script>
     <script src="../js/ui/trackGearPopover.js"></script>
-    
+
     <script src="../js/rulerTrack.js"></script>
     <script src="../js/rulerSweeper.js"></script>
 
@@ -150,6 +150,11 @@
     <script src="../js/civic/civicReader.js"></script>
 
     <script src="../js/feature/fileFormats.js"></script>
+
+    <script src="../vendor/tdigest.js"></script>
+    <script src="../vendor/rbtree.js"></script>
+    <script src="../js/canvas2svg.js"></script>
+
     <script src="../js/navbarManager.js"></script>
 </head>
 
