@@ -35,6 +35,7 @@ var igv = (function (igv) {
     var DEFAULT_TRACK_HEIGHT = 300;
     var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
     var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
+    var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
     let BAMTrack;
 
@@ -647,6 +648,7 @@ var igv = (function (igv) {
             this.insertionColor = config.insertionColor || "rgb(138, 94, 161)";
             this.deletionColor = config.deletionColor || "black";
             this.skippedColor = config.skippedColor || "rgb(150, 170, 170)";
+            this.pairConnectorColor = config.pairConnectorColor;
 
             this.smallFragmentLengthColor = config.smallFragmentLengthColor || "rgb(0, 0, 150)";
             this.largeFragmentLengthColor = config.largeFragmentLengthColor || "rgb(200, 0, 0)";
@@ -734,25 +736,16 @@ var igv = (function (igv) {
                 for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                     const alignmentRow = packedAlignmentRows[rowIndex];
+                    const yRect = alignmentRowYInset + (self.alignmentRowHeight * rowIndex);
+                    const alignmentHeight = self.alignmentRowHeight - 2;
+                    for (let i = 0; i < alignmentRow.alignments.length; i++) {
 
-                    var yRect,
-                        alignmentHeight,
-                        i,
-                        b,
-                        alignment;
-
-                    yRect = alignmentRowYInset + (self.alignmentRowHeight * rowIndex);
-                    alignmentHeight = self.alignmentRowHeight - 2;
-                    for (i = 0; i < alignmentRow.alignments.length; i++) {
-
-                        alignment = alignmentRow.alignments[i];
+                        const alignment = alignmentRow.alignments[i];
 
                         self.hasPairs = self.hasPairs || alignment.isPaired();
 
                         if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
                         if (alignment.start > bpEnd) break;
-
-
                         if (true === alignment.hidden) {
                             continue;
                         }
@@ -780,7 +773,7 @@ var igv = (function (igv) {
             // alignment is a PairedAlignment
             function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-                var alignmentColor = getAlignmentColor.call(self, alignment.firstAlignment),
+                var connectorColor = self.getConnectorColor(alignment.firstAlignment),
                     xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                     xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
                     yStrokedLine = yRect + alignmentHeight / 2;
@@ -788,13 +781,10 @@ var igv = (function (igv) {
                 if ((alignment.connectingEnd) < bpStart || alignment.connectingStart > bpEnd) {
                     return;
                 }
-
                 if (alignment.mq <= 0) {
-                    alignmentColor = igv.Color.addAlpha(alignmentColor, 0.15);
+                    connectorColor = igv.Color.addAlpha(connectorColor, 0.15);
                 }
-
-                igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: alignmentColor});
-
+                igv.graphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor});
                 igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
             }
@@ -808,7 +798,7 @@ var igv = (function (igv) {
                     b,
                     diagnosticColor;
 
-                alignmentColor = getAlignmentColor.call(self, alignment);
+                alignmentColor = self.getAlignmentColor(alignment);
                 const outlineColor = alignmentColor;
 
                 blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
@@ -1120,10 +1110,34 @@ var igv = (function (igv) {
 
         };
 
-        function getAlignmentColor(alignment) {
+        /**
+         * Return the color for connectors in paired alignment view.   If explicitly set return that, otherwise return
+         * the alignment color, unless the color option can result in split colors (separte color for each mate).
+         *
+         * @param alignment
+         * @returns {string}
+         */
+        AlignmentTrack.prototype.getConnectorColor = function (alignment) {
+
+            if(this.pairConnectorColor) {
+                return this.pairConnectorColor
+            }
+
+            switch(this.colorBy) {
+                case "strand":
+                case "firstOfPairStrand":
+                case "pairOrientation":
+                case "tag":
+                    return this.parent.color || DEFAULT_CONNECTOR_COLOR
+                default:
+                    return this.getAlignmentColor(alignment)
+
+            }
+        }
+
+        AlignmentTrack.prototype.getAlignmentColor = function (alignment) {
 
             const self = this;
-
 
             let color = self.parent.color;
 
