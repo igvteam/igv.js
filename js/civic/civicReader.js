@@ -101,20 +101,8 @@ var igv = (function (igv) {
                 this.refBases && this.refBases.length === 1 &&
                 this.altBases && this.altBases.length === 1;
 
-            if (isSnp) {
-                const ref = this.refBases;
-                const alt = this.altBases;
-                cravatLink = createLink("CRAVAT", "http://www.cravat.us/CRAVAT/variant.html?variant=chr7_140808049_+_" + ref + "_" + alt);
-
-            }
 
             const pd = [link];
-
-            if (cravatLink) {
-                pd.push(cravatLink);
-
-            }
-
             pd.push({name: "Entrez", value: createLink(this.entrezName, "https://ghr.nlm.nih.gov/gene/" + this.entrezName)});
             pd.push({name: "Name", value: this.name});
 
