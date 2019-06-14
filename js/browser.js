@@ -218,7 +218,7 @@ var igv = (function (igv) {
             config.$container.append(svg);
         }
 
-        const path = config.filename ? config.filename : 'igv-app.svg';
+        const path = config.filename || 'igv-app.svg';
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         igv.download(path, data);
 

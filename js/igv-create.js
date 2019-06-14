@@ -331,6 +331,11 @@ var igv = (function (igv) {
             browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, browser);
         }
 
+        // SVG save button
+        if (true === config.showSVGSaveButton) {
+            browser.svgSaveControl = new igv.SVGSaveControl($toggle_button_container, browser);
+        }
+
         // zoom widget
         browser.zoomWidget = new igv.ZoomWidget(browser, $igv_nav_bar_right_container);
 
@@ -366,6 +371,10 @@ var igv = (function (igv) {
 
         if (undefined === config.showCenterGuideButton) {
             config.showCenterGuideButton = true;
+        }
+
+        if (undefined === config.showSVGSaveButton) {
+            config.showSVGSaveButton = true;
         }
 
         if (undefined === config.showTrackLabelButton) {

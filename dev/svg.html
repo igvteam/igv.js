@@ -108,6 +108,7 @@
     <script src="../js/ui/popover.js"></script>
     <script src="../js/ui/chromosomeSelectWidget.js"></script>
     <script src="../js/ui/zoomWidget.js"></script>
+    <script src="../js/ui/svgSaveControl.js"></script>
 
     <script src="../js/variant/vcfParser.js"></script>
     <script src="../js/variant/variant.js"></script>
@@ -161,10 +162,6 @@
 
 <body>
 
-<div>
-    <button onclick="bookmark();">Bookmark</button>
-</div>
-
 <h3>Example tracks - click to load</h3>
 
 <div id="trackList"></div>
@@ -173,12 +170,11 @@
     <div id='igv-app-container'></div>
 </div>
 
-
-<div id='igv-draw-svg-button-container'>
-    <button id='igv-draw-svg-button' type="button">
-        <label>Draw SVG</label>
-    </button>
-</div>
+<!--<div id='igv-draw-svg-button-container'>-->
+<!--    <button id='igv-draw-svg-button' type="button">-->
+<!--        <label>Draw SVG</label>-->
+<!--    </button>-->
+<!--</div>-->
 
 <div id="igv-svg-container">
 
@@ -194,22 +190,14 @@
             {
                 genome: "hg19",
                 locus: 'myc',
-                flanking: 1000,
-                queryParametersSupported: true,
-
+                showSVGSaveButton: true
             };
 
         const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options);
 
         igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
 
-        $('#igv-draw-svg-button').on('click', (e) => { browser.renderSVG({ $container: $('#igv-svg-container') }); });
-
     });
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", igv.browser.sessionURL());
-    }
 
 </script>
 
