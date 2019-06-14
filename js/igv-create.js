@@ -374,7 +374,7 @@ var igv = (function (igv) {
         }
 
         if (undefined === config.showSVGSaveButton) {
-            config.showSVGSaveButton = true;
+            config.showSVGSaveButton = false;
         }
 
         if (undefined === config.showTrackLabelButton) {
