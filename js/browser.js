@@ -148,7 +148,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.Browser.prototype.toSVG = function (config) {
+    igv.Browser.prototype.toSVG = function () {
 
         const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
         const anyViewportContainerBBox = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
@@ -201,23 +201,24 @@ var igv = (function (igv) {
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
         svgContext.setHeight(h_output);
 
-        let svg = svgContext.getSerializedSvg(true);
-
-        return svg;
+        return svgContext.getSerializedSvg(true);
 
     };
 
     igv.Browser.prototype.renderSVG = function (config) {
 
-        let svg = this.toSVG(config)
+        let svg = this.toSVG();
 
         if (config.$container) {
+
+            const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+
             config.$container.empty();
             config.$container.width(trackContainerBBox.width);
             config.$container.append(svg);
         }
 
-        const path = config.filename ? config.filename : 'igv-app.svg';
+        const path = config.filename || 'igv-app.svg';
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         igv.download(path, data);
 
