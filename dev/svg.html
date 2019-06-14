@@ -7,7 +7,7 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <link rel="shortcut icon" href=../img/favicon.ico>
-    <title>IGV - Dev</title>
+    <title>Dev - SVG</title>
 
 
 
@@ -108,6 +108,7 @@
     <script src="../js/ui/popover.js"></script>
     <script src="../js/ui/chromosomeSelectWidget.js"></script>
     <script src="../js/ui/zoomWidget.js"></script>
+    <script src="../js/ui/svgSaveControl.js"></script>
 
     <script src="../js/variant/vcfParser.js"></script>
     <script src="../js/variant/variant.js"></script>
@@ -156,13 +157,10 @@
     <script src="../js/canvas2svg.js"></script>
 
     <script src="../js/navbarManager.js"></script>
+
 </head>
 
 <body>
-
-<div>
-    <button onclick="bookmark();">Bookmark</button>
-</div>
 
 <h3>Example tracks - click to load</h3>
 
@@ -172,12 +170,11 @@
     <div id='igv-app-container'></div>
 </div>
 
-
-<div id='igv-draw-svg-button-container'>
-    <button id='igv-draw-svg-button' type="button">
-        <label>Draw SVG</label>
-    </button>
-</div>
+<!--<div id='igv-draw-svg-button-container'>-->
+<!--    <button id='igv-draw-svg-button' type="button">-->
+<!--        <label>Draw SVG</label>-->
+<!--    </button>-->
+<!--</div>-->
 
 <div id="igv-svg-container">
 
@@ -185,39 +182,22 @@
 
 <script type="text/javascript">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", async () => {
 
-        igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+        await igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
 
-            .then(function (google) {
+        const options =
+            {
+                genome: "hg19",
+                locus: 'myc',
+                showSVGSaveButton: true
+            };
 
-                const options =
-                    {
-                        genome: "hg19",
-                        flanking: 1000,
-                        queryParametersSupported: true,
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options);
 
-                    };
+        igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
 
-                igv.createBrowser(document.getElementById('igv-app-container'), options)
-                    .then(function (browser) {
-
-                        igvdev.createTrackList(document.getElementById('trackList'), browser);
-
-                        $('#igv-draw-svg-button').on('click', (e) => {
-                            browser.renderSVG({ $container: $('#igv-svg-container') });
-                        });
-
-                        return browser;
-                    })
-
-            })
     });
-
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", igv.browser.sessionURL());
-    }
 
 </script>
 
