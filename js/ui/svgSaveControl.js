@@ -34,7 +34,7 @@ var igv = (function (igv) {
         let $button = $('<div class="igv-nav-bar-button">');
         $parent.append($button);
 
-        $button.text('Save to SVG');
+        $button.text('Save SVG');
 
         $button.on('click.svg-save-control', () => {
             // browser.renderSVG({ $container: $('#igv-svg-container') })
