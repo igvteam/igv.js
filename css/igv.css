@@ -589,8 +589,6 @@
 
 .igv-navbar {
   position: relative;
-  top: 0;
-  left: 0;
   padding-left: 8px;
   padding-right: 8px;
   display: flex;
@@ -606,7 +604,6 @@
   margin-top: 2px;
   margin-bottom: 4px;
   height: 32px;
-  width: 100%;
   border-style: solid;
   border-radius: 3px;
   border-width: thin;
