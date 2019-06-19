@@ -18,8 +18,8 @@ $igv-navbar-toggle-light-color: #f3f3f3;
 $igv-navbar-toggle-dark-dark: #737373;
 $igv-navbar-button-height: 18px;
 $igv-navbar-button-width: 96px;
-$igv-navbar-button-font-size: 11px;
-
+$igv-navbar-button-font-size: 10px;
+$igv-navbar-button-border-radius: 6px;
 $igv-button-width: 75px;
 $igv-button-height: 28px;
 
@@ -477,8 +477,12 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
 // drag & drop file upload button
 .igv-nav-bar-button {
+
+  padding-left: 6px;
+  padding-right: 6px;
+
   height: $igv-navbar-button-height;
-  min-width: $igv-navbar-button-width;
+  //min-width: $igv-navbar-button-width;
   text-transform: capitalize;
 
   user-select: none;
@@ -495,7 +499,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   border-color: $igv-navbar-toggle-dark-dark;
   border-style: solid;
   border-width: thin;
-  border-radius: 10px;
+  border-radius: $igv-navbar-button-border-radius;
 }
 
 .igv-nav-bar-button-clicked {
