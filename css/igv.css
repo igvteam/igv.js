@@ -799,21 +799,22 @@
     display: none; }
 
 .igv-nav-bar-button {
+  padding-left: 6px;
+  padding-right: 6px;
   height: 18px;
-  min-width: 96px;
   text-transform: capitalize;
   user-select: none;
   line-height: 18px;
   text-align: center;
   font-family: "Open Sans", sans-serif;
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 200;
   color: #737373;
   background-color: #f3f3f3;
   border-color: #737373;
   border-style: solid;
   border-width: thin;
-  border-radius: 10px; }
+  border-radius: 6px; }
 
 .igv-nav-bar-button-clicked {
   color: white;
