@@ -332,7 +332,7 @@ var igv = (function (igv) {
         }
 
         // SVG save button
-        if (true === config.showSVGSaveButton) {
+        if (config.showSVGSaveButton) {
             browser.svgSaveControl = new igv.SVGSaveControl($toggle_button_container, browser);
         }
 
@@ -374,7 +374,7 @@ var igv = (function (igv) {
         }
 
         if (undefined === config.showSVGSaveButton) {
-            config.showSVGSaveButton = false;
+            config.showSVGSaveButton = true;
         }
 
         if (undefined === config.showTrackLabelButton) {
@@ -424,7 +424,6 @@ var igv = (function (igv) {
         if (config.showSequence) {
             config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
         }
-
     }
 
 
