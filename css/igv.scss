@@ -142,8 +142,8 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 .igv-navbar {
 
   position: relative;
-  top: 0;
-  left: 0;
+  //top: 0;
+  //left: 0;
 
   padding-left: 8px;
   padding-right: 8px;
@@ -164,7 +164,7 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   margin-bottom: 4px;
 
   height: $igv-navbar-height;
-  width: 100%;
+  //width: 100%;
 
   border-style: solid;
   border-radius: 3px;
