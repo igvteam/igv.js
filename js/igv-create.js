@@ -332,7 +332,7 @@ var igv = (function (igv) {
         }
 
         // SVG save button
-        if (config.showSVGSaveButton) {
+        if (config.showSVGButton) {
             browser.svgSaveControl = new igv.SVGSaveControl($toggle_button_container, browser);
         }
 
@@ -373,8 +373,8 @@ var igv = (function (igv) {
             config.showCenterGuideButton = true;
         }
 
-        if (undefined === config.showSVGSaveButton) {
-            config.showSVGSaveButton = true;
+        if (undefined === config.showSVGButton) {
+            config.showSVGButton = true;
         }
 
         if (undefined === config.showTrackLabelButton) {
