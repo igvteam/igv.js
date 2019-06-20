@@ -799,6 +799,7 @@
     display: none; }
 
 .igv-nav-bar-button {
+  box-sizing: unset;
   padding-left: 6px;
   padding-right: 6px;
   height: 18px;
