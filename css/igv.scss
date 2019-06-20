@@ -490,7 +490,10 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   user-select: none;
 
   line-height: $igv-navbar-button-height;
+
   text-align: center;
+  vertical-align: middle;
+
   font-family: $igv-default-font-face;
   font-size: $igv-navbar-button-font-size;
   font-weight: 200;
