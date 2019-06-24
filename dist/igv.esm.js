@@ -41988,11 +41988,8 @@ var igv = (function (igv) {
                             xhr.responseType = responseType;
                         }
                         if (headers) {
-                            header_keys = Object.keys(headers);
-                            for (i = 0; i < header_keys.length; i++) {
-                                key = header_keys[i];
-                                value = headers[key];
-                                // console.log("Adding to header: " + key + "=" + value);
+                            for (let key of Object.keys(headers)) {
+                                const value = headers[key];
                                 xhr.setRequestHeader(key, value);
                             }
                         }
