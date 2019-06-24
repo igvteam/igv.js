@@ -64,7 +64,6 @@ var igv = (function (igv) {
                     bucket,
                     feature,
                     gap = 2,
-                    packedRows = [],
                     bucketStart;
 
                 start = features[0].start;
@@ -85,7 +84,8 @@ var igv = (function (igv) {
 
                 row = 0;
 
-                while (allocatedCount < features.length && packedRows.length < maxRows) {
+
+                while (allocatedCount < features.length && row <= maxRows) {
 
 
                     while (nextStart <= end) {
