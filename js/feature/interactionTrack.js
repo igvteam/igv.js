@@ -27,10 +27,10 @@
 /**
  * Created by jrobinso on 7/5/18.
  */
+"use strict";
+
 
 var igv = (function (igv) {
-
-    "use strict";
 
     if (!igv.trackFactory) {
         igv.trackFactory = {};
