@@ -36,13 +36,11 @@ var igv = (function (igv) {
         this.alignmentContainer = undefined;
         this.maxRows = config.maxRows || 1000;
 
-        if (igv.isFilePath(config.url)) {
-            // do nothing
-        } else if (igv.isString(config.url) && config.url.startsWith("data:")) {
-            this.config.indexed = false;
-        }
 
-        if ("ga4gh" === config.sourceType) {
+        if (igv.isString(config.url) && config.url.startsWith("data:")) {
+            this.config.indexed = false;
+            this.bamReader = new igv.BamReaderNonIndexed(config, genome);
+        } else if ("ga4gh" === config.sourceType) {
             this.bamReader = new igv.Ga4ghAlignmentReader(config, genome);
         } else if ("pysam" === config.sourceType) {
             this.bamReader = new igv.BamWebserviceReader(config, genome)
