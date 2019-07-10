@@ -22430,7 +22430,7 @@ var igv = (function (igv) {
                 var start = 12 + xlen + ptr;    // Start of CDATA
                 var bytesLeft = data.byteLength - start;
                 var cDataSize = bsize - xlen - 19;
-                if(bytesLeft < cDataSize + 8) break;
+                if(bytesLeft < cDataSize) break;
 
                 const a = new Uint8Array(data, start, bytesLeft);
                 var inflate = new Zlib.RawInflate(a);
