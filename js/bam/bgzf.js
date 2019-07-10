@@ -30,13 +30,12 @@ var igv = (function (igv) {
                 var slen = (ba[15] << 8) | (ba[14]);
                 var bsize = (ba[17] << 8) | (ba[16]) + 1;
 
-
                 var start = 12 + xlen + ptr;    // Start of CDATA
-                var length = data.byteLength - start;
-                
-                if (length < (bsize + 8)) break;
+                var bytesLeft = data.byteLength - start;
+                var cDataSize = bsize - xlen - 19;
+                if(bytesLeft < cDataSize + 8) break;
 
-                const a = new Uint8Array(data, start, length)
+                const a = new Uint8Array(data, start, bytesLeft);
                 var inflate = new Zlib.RawInflate(a);
                 var unc = inflate.decompress();
 
@@ -45,6 +44,7 @@ var igv = (function (igv) {
 
                 totalSize += unc.byteLength;
                 oBlockList.push(unc);
+
             } catch (e) {
                 console.error(e)
                 break;

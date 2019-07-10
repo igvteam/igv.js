@@ -22427,13 +22427,12 @@ var igv = (function (igv) {
                 var slen = (ba[15] << 8) | (ba[14]);
                 var bsize = (ba[17] << 8) | (ba[16]) + 1;
 
-
                 var start = 12 + xlen + ptr;    // Start of CDATA
-                var length = data.byteLength - start;
-                
-                if (length < (bsize + 8)) break;
+                var bytesLeft = data.byteLength - start;
+                var cDataSize = bsize - xlen - 19;
+                if(bytesLeft < cDataSize + 8) break;
 
-                const a = new Uint8Array(data, start, length)
+                const a = new Uint8Array(data, start, bytesLeft);
                 var inflate = new Zlib.RawInflate(a);
                 var unc = inflate.decompress();
 
@@ -22442,6 +22441,7 @@ var igv = (function (igv) {
 
                 totalSize += unc.byteLength;
                 oBlockList.push(unc);
+
             } catch (e) {
                 console.error(e)
                 break;
@@ -29570,7 +29570,7 @@ var igv = (function (igv) {
 
             return self.getIndex()
 
-                .then(function (index) {
+                .then(async function (index) {
 
                     var options,
                         success;
@@ -29585,9 +29585,17 @@ var igv = (function (igv) {
                     } else if (index) {
 
                         // Load the file header (not HTTP header) for an indexed file.
-                        // TODO -- we need a better solution here, this will fail if header exceeds max size.   This however is unlikely.
-                        let maxSize = "vcf" === self.config.format ? 65000 : 1000;
-                        if(self.config.filename && self.config.filename.endsWith(".gz")) maxSize /= 2;
+
+                        let maxSize = "vcf" === self.config.format ? 65000 : 1000
+                        if (index.tabix) {
+                            const bsizeOptions = igv.buildOptions(self.config,  {range: {start: index.firstAlignmentBlock, size: 26}});
+                            const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
+                            const bsize = igv.bgzBlockSize(abuffer)
+                            maxSize = index.firstAlignmentBlock + bsize;
+                        } else {
+
+                        }
+
                         options = igv.buildOptions(self.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
 
                         return igv.xhr.loadString(self.config.url, options)
@@ -29696,12 +29704,19 @@ var igv = (function (igv) {
                         options,
                         success;
 
-                    const bsizeOptions = igv.buildOptions(self.config, {range: {start: block.maxv.block, size: 26}});
-                    const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
-                    const lastBlockSize = igv.bgzBlockSize(abuffer)
-
-
-                    endPos = block.maxv.block + lastBlockSize;
+                    if (self.index.tabix) {
+                        const bsizeOptions = igv.buildOptions(self.config, {
+                            range: {
+                                start: block.maxv.block,
+                                size: 26
+                            }
+                        });
+                        const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
+                        const lastBlockSize = igv.bgzBlockSize(abuffer)
+                        endPos = block.maxv.block + lastBlockSize;
+                    } else {
+                        endPos = block.maxv.block;
+                    }
 
                     options = igv.buildOptions(self.config, {
                         range: {
