@@ -171,16 +171,18 @@
 
         let options = {
             type: "GTEX",
+            showSVGButton: false,
+            datasetId: 'gtex_v8'
             reference: {
-                id: 'hg19',
-                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-                indexURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta.fai",
-                cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
+                id: 'hg38',
+                fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+                indexURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+                cytobandURL: "http://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt",
                 tracks: [
                     {
                         name: 'Genes',
                         type: 'annotation',
-                        url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed',
+                        url: 'https://storage.googleapis.com/gtex-igv-files/gencode.v26.GRCh38.genes.name.bed',
                         displayMode: 'EXPANDED',
                         height: 100,
                         autoHeight: true,
@@ -202,7 +204,7 @@
                     name: 'GWAS Catalog',
                     type: 'annotation',
                     format: 'gtexgwas',
-                    url: 'http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
+                    url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
                     indexed: false,
                     color: 'rgb(100,200,200)',
                     displayMode: 'EXPANDED',

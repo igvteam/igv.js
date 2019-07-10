@@ -38,7 +38,7 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.tissueName = config.tissueName;
+        this.tissueId = config.tissueSiteDetailId;
         this.indexed = true;
         this.datasetId = config.datasetId || "gtex_v8"
     };
@@ -81,7 +81,7 @@ var igv = (function (igv) {
                 queryEnd = Math.ceil(bpEnd),
                 datasetId = this.datasetId,
                 queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                    "&tissueSiteDetailId=" + this.tissueName + "&datasetId=" + datasetId;
+                    "&tissueSiteDetailId=" + this.tissueId + "&datasetId=" + datasetId;
 
             return new Promise(function (fulfill, reject) {
 
