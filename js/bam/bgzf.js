@@ -21,26 +21,34 @@ var igv = (function (igv) {
 
         while (ptr < lim) {
 
-            var ba = new Uint8Array(data, ptr, 18);
+            try {
+                var ba = new Uint8Array(data, ptr, 18);
 
-            var xlen = (ba[11] << 8) | (ba[10]);
-            var si1 = ba[12];
-            var si2 = ba[13];
-            var slen = (ba[15] << 8) | (ba[14]);
-            var bsize = (ba[17] << 8) | (ba[16]) + 1;
+                var xlen = (ba[11] << 8) | (ba[10]);
+                var si1 = ba[12];
+                var si2 = ba[13];
+                var slen = (ba[15] << 8) | (ba[14]);
+                var bsize = (ba[17] << 8) | (ba[16]) + 1;
 
-            var start = 12 + xlen + ptr;    // Start of CDATA
-            var length = data.byteLength - start;
 
-            if (length < (bsize + 8)) break;
+                var start = 12 + xlen + ptr;    // Start of CDATA
+                var length = data.byteLength - start;
+                
+                if (length < (bsize + 8)) break;
 
-            const a = new Uint8Array(data, start, length)
-            var inflate = new Zlib.RawInflate(a);
-            var unc = inflate.decompress();
-            ptr += inflate.ip + 26
+                const a = new Uint8Array(data, start, length)
+                var inflate = new Zlib.RawInflate(a);
+                var unc = inflate.decompress();
 
-            totalSize += unc.byteLength;
-            oBlockList.push(unc);
+
+                ptr += inflate.ip + 26
+
+                totalSize += unc.byteLength;
+                oBlockList.push(unc);
+            } catch (e) {
+                console.error(e)
+                break;
+            }
         }
 
         // Concatenate decompressed blocks
@@ -58,51 +66,15 @@ var igv = (function (igv) {
         }
     }
 
-    // Uncompress data,  assumed to be series of bgzipped blocks
-    // igv.unbgzf = function (data, lim) {
-    //
-    //     var oBlockList = [],
-    //         ptr = [0],
-    //         totalSize = 0;
-    //
-    //     lim = lim || data.byteLength - 18;
-    //
-    //     while (ptr[0] < lim) {
-    //
-    //         var ba = new Uint8Array(data, ptr[0], 18);
-    //
-    //         var xlen = (ba[11] << 8) | (ba[10]);
-    //         var si1 = ba[12];
-    //         var si2 = ba[13];
-    //         var slen = (ba[15] << 8) | (ba[14]);
-    //         var bsize = (ba[17] << 8) | (ba[16]) + 1;
-    //
-    //         var start = 12 + xlen + ptr[0];    // Start of CDATA
-    //         var length = data.byteLength - start;
-    //
-    //         if (length < (bsize + 8)) break;
-    //
-    //         var unc = jszlib_inflate_buffer(data, start, length, ptr);
-    //         ptr[0] += 8;    // Skipping CRC-32 and size of uncompressed data
-    //
-    //         totalSize += unc.byteLength;
-    //         oBlockList.push(unc);
-    //     }
-    //
-    //     // Concatenate decompressed blocks
-    //     if (oBlockList.length == 1) {
-    //         return oBlockList[0];
-    //     } else {
-    //         var out = new Uint8Array(totalSize);
-    //         var cursor = 0;
-    //         for (var i = 0; i < oBlockList.length; ++i) {
-    //             var b = new Uint8Array(oBlockList[i]);
-    //             arrayCopy(b, 0, out, cursor, b.length);
-    //             cursor += b.length;
-    //         }
-    //         return out.buffer;
-    //     }
-    // }
+    igv.bgzBlockSize = function (data) {
+
+        const ba = new Uint8Array(data);
+        const bsize = (ba[17] << 8) | (ba[16]) + 1;
+        return bsize;
+
+
+    }
+
 
     return igv;
 
