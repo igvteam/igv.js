@@ -207,7 +207,7 @@ var igv = (function (igv) {
 
             blocks.forEach(function (block) {
 
-                promises.push(new Promise(function (fullfill, reject) {
+                promises.push(new Promise(async function (fullfill, reject) {
 
                     var startPos = block.minv.block,
                         startOffset = block.minv.offset,
@@ -215,7 +215,12 @@ var igv = (function (igv) {
                         options,
                         success;
 
-                    endPos = block.maxv.block + MAX_GZIP_BLOCK_SIZE;
+                    const bsizeOptions = igv.buildOptions(self.config, {range: {start: block.maxv.block, size: 26}});
+                    const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
+                    const lastBlockSize = igv.bgzBlockSize(abuffer)
+
+
+                    endPos = block.maxv.block + lastBlockSize;
 
                     options = igv.buildOptions(self.config, {
                         range: {

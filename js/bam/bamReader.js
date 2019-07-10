@@ -72,9 +72,14 @@ var igv = (function (igv) {
 
             const promises = [];
             for (let c of chunks) {
-                var fetchMin = c.minv.block,
-                    fetchMax = c.maxv.block + MAX_GZIP_BLOCK_SIZE,   // Make sure we get the whole block.
-                    range = {start: fetchMin, size: fetchMax - fetchMin + 1};
+
+                const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
+                const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+                const lastBlockSize = igv.bgzBlockSize(abuffer)
+
+                const fetchMin = c.minv.block
+                const fetchMax = c.maxv.block + lastBlockSize
+                const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
                 promises.push(igv.xhr.loadArrayBuffer(this.bamPath, igv.buildOptions(this.config, {range: range})))
             }
 
@@ -99,24 +104,21 @@ var igv = (function (igv) {
     }
 
 
-    function readHeader() {
+    async function readHeader() {
 
-        const self = this;
         const genome = this.genome;
 
-        return getIndex.call(self)
+        const index = await getIndex.call(this)
 
-            .then(function (index) {
+        const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
+        const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+        const bsize = igv.bgzBlockSize(abuffer)
 
-                const len = index.firstAlignmentBlock + MAX_GZIP_BLOCK_SIZE;   // Insure we get the complete compressed block containing the header
+        const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
+        const options = igv.buildOptions(this.config, {range: {start: 0, size: len}});
+        const header = igv.BamUtils.readHeader(this.bamPath, options, genome);
 
-                const options = igv.buildOptions(self.config, {range: {start: 0, size: len}});
-
-                return igv.BamUtils.readHeader(self.bamPath, options, genome);
-            })
-            .then(function (header) {
-                return header;
-            });
+        return header
     };
 
     async function getIndex() {
