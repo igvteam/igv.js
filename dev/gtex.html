@@ -20,6 +20,7 @@
 
     <script src="js/dev.js"></script>
 
+
     <!-- Vendor JS -->
     <script src="../vendor/jquery-3.3.1.slim.js"></script>
     <script src="../vendor/underscore.js"></script>
@@ -31,6 +32,7 @@
     <script src="../js/igv-icons.js"></script>
     <script src="../js/session/igvXmlSession.js"></script>
     <script src="../js/feature/mergedTrack.js"></script>
+
 
 
     <script src="../js/bam/bamReader.js"></script>
@@ -107,6 +109,7 @@
     <script src="../js/ui/popover.js"></script>
     <script src="../js/ui/chromosomeSelectWidget.js"></script>
     <script src="../js/ui/zoomWidget.js"></script>
+    <script src="../js/ui/svgSaveControl.js"></script>
 
     <script src="../js/variant/vcfParser.js"></script>
     <script src="../js/variant/variant.js"></script>
@@ -135,6 +138,7 @@
     <script src="../js/fasta.js"></script>
     <script src="../js/sequenceTrack.js"></script>
 
+
     <script src="../js/igvxhr.js"></script>
     <script src="../js/binary.js"></script>
 
@@ -154,6 +158,7 @@
     <script src="../js/canvas2svg.js"></script>
 
     <script src="../js/navbarManager.js"></script>
+
 
 </head>
 
@@ -189,7 +194,7 @@
                     }
                 ]
             },
-            //locus: params.location, // something like: chr1:1-500,000
+            locus: 'HOXD-AS1',
             flanking: 75000,
             search: {
                 url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
