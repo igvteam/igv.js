@@ -38,9 +38,9 @@ var igv = (function (igv) {
 
         this.config = config;
         this.url = config.url;
-        this.tissueId = config.tissueSiteDetailId;
+        this.tissueName = config.tissueName;
         this.indexed = true;
-        this.datasetId = config.datasetId || "gtex_v8"
+        this.datasetId = config.datasetId || "gtex_v7"
     };
 
     //{
@@ -76,12 +76,12 @@ var igv = (function (igv) {
         igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
             let self=this,
-                queryChr = chr.startsWith("chr") ? chr : "chr" + chr,
+                queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
                 queryStart = Math.floor(bpStart),
                 queryEnd = Math.ceil(bpEnd),
                 datasetId = this.datasetId,
                 queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                    "&tissueSiteDetailId=" + this.tissueId + "&datasetId=" + datasetId;
+                    "&tissueName=" + this.tissueName + "&datasetId=" + datasetId;
 
             return new Promise(function (fulfill, reject) {
 
@@ -99,7 +99,7 @@ var igv = (function (igv) {
                         //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
                         json.singleTissueEqtl.forEach(function (eqtl) {
-                            eqtl.chr = eqtl.chromosome;
+                            eqtl.chr = "chr" + eqtl.chromosome;
                             eqtl.position = eqtl.pos;
                             eqtl.start = eqtl.pos - 1;
                             eqtl.end = eqtl.start + 1;

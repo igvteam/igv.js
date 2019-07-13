@@ -102,7 +102,7 @@ var igv = (function (igv) {
             return igv.xhr.loadJson(url, {})
         },
 
-        //https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation?chromosome=7&start=98358766&end=101523798&tissueSiteDetailId=Liver&datasetId=gtex_v8
+        //https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation?chromosome=7&start=98358766&end=101523798&tissueName=Liver&datasetId=gtex_v7
         trackConfiguration: function (tissueSummary, baseURL) {
 
             baseURL = baseURL || 'https://gtexportal.org/rest/v1';
@@ -111,7 +111,7 @@ var igv = (function (igv) {
                 type: "eqtl",
                 sourceType: "gtex-ws",
                 url: baseURL + '/association/singleTissueEqtlByLocation',
-                tissueSiteDetailId: tissueSummary.tissueSiteDetailId,
+                tissueName: tissueSummary.tissueSiteDetailId,
                 name: (tissueSummary.tissueSiteDetailId.split('_').join(' ')),
                 visibilityWindow: 250000
             }
