@@ -255,12 +255,12 @@ var igv = (function (igv) {
 
         };
 
-        WigTrack.prototype.popupData = function (clickState) {
+        WigTrack.prototype.popupData = function (clickState, features) {
 
             // We use the featureCache property rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-            let features = this.clickedFeatures(clickState);
+            if(!features) features = this.clickedFeatures(clickState);
 
             if (features && features.length > 0) {
 

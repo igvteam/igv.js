@@ -283,16 +283,36 @@ var igv = (function (igv) {
 
         };
 
+        FeatureTrack.prototype.clickedFeatures = function (clickState) {
+
+            const y = clickState.y - this.margin;
+            const allFeatures = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
+
+            let row;
+            switch (this.displayMode) {
+                case 'SQUISHED':
+                    row = Math.floor(y / this.squishedRowHeight);
+                    break;
+                case 'EXPANDED':
+                    row = Math.floor(y / this.expandedRowHeight);
+                    break;
+                default:
+                    row = undefined;
+            }
+
+            return allFeatures.filter(function (feature) {
+                return (row === undefined || feature.row === undefined || row === feature.row);
+            })
+        }
 
         /**
          * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
          */
-        FeatureTrack.prototype.popupData = function (clickState) {
+        FeatureTrack.prototype.popupData = function (clickState, features) {
 
             let self = this;
 
-            const yOffset = clickState.y - this.margin;
-            const features = filterByRow(this.clickedFeatures(clickState), yOffset);
+            if(!features) features = this.clickedFeatures(clickState);
             const genomicLocation = clickState.genomicLocation;
 
             const data = [];
@@ -307,28 +327,8 @@ var igv = (function (igv) {
                     Array.prototype.push.apply(data, featureData);
                 }
             }
-            ;
 
             return data;
-
-            function filterByRow(features, y) {
-
-                let row;
-                switch (self.displayMode) {
-                    case 'SQUISHED':
-                        row = Math.floor(y / self.squishedRowHeight);
-                        break;
-                    case 'EXPANDED':
-                        row = Math.floor(y / self.expandedRowHeight);
-                        break;
-                    default:
-                        row = undefined;
-                }
-
-                return features.filter(function (feature) {
-                    return (row === undefined || feature.row === undefined || row === feature.row);
-                })
-            }
 
         };
 

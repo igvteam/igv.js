@@ -1830,7 +1830,7 @@ var igv = (function (igv) {
 
         $(window).off(this.namespace);
         $(document).off(this.namespace);
-
+        this.eventHandlers = undefined;
         this.trackViews.forEach(function (tv) {
             tv.dispose();
         })

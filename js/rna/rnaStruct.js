@@ -177,19 +177,15 @@ var igv = (function (igv) {
             }
         }
 
-        RnaStructTrack.prototype.popupData = function (clickState) {
+        RnaStructTrack.prototype.clickedFeatures = function (clickState) {
 
-            // We use the featureCache property rather than method to avoid async load.  If the
-            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+            let features = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
 
-            let features = this.clickedFeatures(clickState);
-
-            if (features && features.length > 0) {
+            const clicked = [];
 
                 // Sort by score in descending order   (opposite order than drawn)
                 sortByScore(features, -1);
 
-                let clicked;
                 for (let f of features) {
                     const ds = f.drawState;
 
@@ -216,13 +212,23 @@ var igv = (function (igv) {
 
                     // Between outer and inner arcs, with some tolerance
                     if (d1 < outerLim && d2 > innerLim) {
-                        clicked = f;
+                        clicked.push(f);
                         break;
                     }
-
                 }
+                return clicked;
+        }
 
-                return this.extractPopupData(clicked);
+        RnaStructTrack.prototype.popupData = function (clickState, features) {
+
+            // We use the featureCache property rather than method to avoid async load.  If the
+            // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+
+            if(!features) features = this.clickedFeatures(clickState);
+
+            if (features && features.length > 0) {
+
+                return this.extractPopupData(features[0]);
 
             }
         }
