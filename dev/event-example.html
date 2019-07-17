@@ -8,30 +8,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="">
     <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-    <title>IGV - Custom Track Click</title>
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>IGV Examples - Locus Change</title>
 
-    <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 
-    <!-- Examples CSS -->
-    <link rel="stylesheet" href="css/custom-track-click.css">
-
-    <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-            integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
-
-    <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-            integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
-
-    <!-- IGV JS-->
     <!-- IGV CSS -->
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
@@ -40,6 +20,8 @@
     <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
 
     <script src="js/dev.js"></script>
+
+    <!-- IGV JS-->
 
     <!-- Vendor JS -->
     <script src="../vendor/jquery-3.3.1.slim.js"></script>
@@ -184,30 +166,26 @@
 
 <body>
 
-<main role="main" class="container">
+<main>
 
-    <div class="igv-custom-track-click-container">
-        <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
-        <p class="lead">In this example we show how to use the <code>trackclick</code> event to disable the default
-            pop-over. Instead
-            we're going to use it as a hook to implement custom click behavior.</p>
+    <div class="container-fluid">
 
-        <h3>Try it out:</h3>
+        <div class="row">
+            <div class="col-sm-12">
+                <h2>IGV.js <code>locuschange</code> Event Example</h2>
+                <p> In this example we want to update the page URL whenever the IGV viewer locus changes.
+                    To do this, we subscribe to the <code>locuschange</code>.
+                </p>
+                <h3>Try it out:</h3>
+                <ol>
+                    <li>Zoom or pan the canvas in the IGV viewer.</li>
+                    <li>Notice that the page URL updated to match the new locus.</li>
+                </ol>
+            </div>
+        </div>
 
-        <ol>
-            <li>Click on any features on the gene track.</li>
-            <li>Notice the genes you've clicked get added to the list on the right.</li>
-        </ol>
-
-    </div>
-
-    <div class="row">
-        <div id="igv-custom-track-click" class="col-sm-9"></div>
-        <div id="igv-custom-track-click-selected-genes" class="col-sm-3">
-            <h4>Selected Genes</h4>
-            <ul id="geneList">
-
-            </ul>
+        <div class="row">
+            <div class="col-sm-12" id="igvDiv"></div>
         </div>
     </div>
 
@@ -217,39 +195,27 @@
 
     $(document).ready(function () {
 
-       var options =
-        {
-            showNavigation: true,
-            locus: "chr1:155,160,475-155,184,282",
-            genome: "hg19",
 
+        var HASH_PREFIX = "#/locus/";
+        var currentHash = window.location.hash;
+        var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
+
+        var options = {
+            locus: locus,
+            genome: "hg19"
         };
 
-        var igv_custom_track_click = $('#igv-custom-track-click');
-
-        igv.createBrowser(igv_custom_track_click.get(0), options)
+        var $igv = $("#igvDiv");
+        var browser = igv.createBrowser($igv.get(0), options)
 
                 .then(function (browser) {
+                    console.log("Created IGV browser");
 
-                    var genesInList = {};
-
-                    browser.on('trackclick', function (track, popoverData) {
-                        var symbol = null;
-                        popoverData.forEach(function (nameValue) {
-                            if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
-                                symbol = nameValue.value;
-                            }
-                        });
-
-                        if (symbol && !genesInList[symbol]) {
-                            genesInList[symbol] = true;
-                            $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>');
-                        }
-
-                        return false // Prevent default pop-over behavior
-                        //return true;  // Do default pop-over behavior
+                    browser.on('locuschange', function (referenceFrame) {
+                        window.location.replace(HASH_PREFIX + referenceFrame.label);
                     });
                 });
+
     });
 
 </script>
