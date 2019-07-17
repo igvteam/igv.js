@@ -46,11 +46,11 @@ To use igv.js include it with a script tag
 
 ***or*** import it as a requirejs module 
 
-```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](https://cdn.jsdelivr.net/npm/igv@2.2.14/examples/igv-require.html))*
+```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](https://igv.org/web/release/2.2.14/examples/igv-require.html))*
 
 ***or*** import it as an es6 module 
 
-```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](https://cdn.jsdelivr.net/npm/igv@2.2.14/examples/igv-esm.html))*
+```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](https://igv.org/web/release/2.2.14/examples/igv-esm.html))*
 
 
 
