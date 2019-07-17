@@ -344,11 +344,26 @@ var igv = (function (igv) {
                 })
         };
 
-        SegTrack.prototype.popupData = function (clickState) {
+        SegTrack.prototype.clickedFeatures = function(clickState) {
+
+            const allFeatures = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
+            return filterByRow(allFeatures, clickState.y);
+
+            function filterByRow(features, y) {
+
+                return features.filter(function (feature) {
+                    const rect = feature.pixelRect;
+                    return rect && y >= rect.y && y <= (rect.y + rect.h);
+                });
+
+            }
+        }
+
+        SegTrack.prototype.popupData = function (clickState, featureList) {
 
             const self = this;
 
-            const featureList = filterByRow(this.clickedFeatures(clickState), clickState.y);
+            if(!featureList) featureList = this.clickedFeatures(clickState);
 
             const items = [];
 
@@ -371,15 +386,6 @@ var igv = (function (igv) {
                         data.push({name: property, value: feature[property]});
                     }
                 });
-            }
-
-            function filterByRow(features, y) {
-
-                    return features.filter(function (feature) {
-                        const rect = feature.pixelRect;
-                        return rect && y >= rect.y && y <= (rect.y + rect.h);
-                    });
-
             }
         }
 

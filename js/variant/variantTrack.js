@@ -409,23 +409,17 @@ var igv = (function (igv) {
         /**
          * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
          */
-        VariantTrack.prototype.popupData = function (config) {
+        VariantTrack.prototype.popupData = function (clickState, featureList) {
 
-            const featureList = config.viewport.getCachedFeatures();
-            if (!featureList || featureList.length === 0) return [];
+            if(!featureList) featureList = this.clickedFeatures(clickState);
 
-            const genomicLocation = config.genomicLocation
-            const referenceFrame = config.viewport.genomicState.referenceFrame
-            const tolerance = Math.floor(2 * referenceFrame.bpPerPixel)  // We need some tolerance around genomicLocation, start with +/- 2 pixels
+            const genomicLocation = clickState.genomicLocation
             const genomeID = this.browser.genome.id
             const popupData = []
 
             for(let variant of featureList)  {
 
                 //var row, callHeight, callSets, callSetGroups, cs, call;
-
-                if ((variant.start <= genomicLocation + tolerance) &&
-                    (variant.end > genomicLocation - tolerance)) {
 
                     if (popupData.length > 0) {
                         popupData.push('<HR>')
@@ -436,7 +430,7 @@ var igv = (function (igv) {
                     }
 
                     else {
-                        const yOffset = config.y
+                        const yOffset = clickState.y
                         const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
                         const groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap
 
@@ -476,7 +470,7 @@ var igv = (function (igv) {
                             }
                         }
                     }
-                }
+
             }
 
             return popupData;
