@@ -344,30 +344,31 @@ var igv = (function (igv) {
         }
 
         // Set limits on canvas size.  See https://github.com/igvteam/igv.js/issues/792
-        const origPixelHeight = pixelHeight;
-        pixelHeight = Math.min(Math.floor(MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)), pixelHeight);
-        pixelHeight = Math.min(Math.floor(MAX_PIXEL_HEIGHT) / (devicePixelRatio * devicePixelRatio), pixelHeight);
-        if (pixelHeight < origPixelHeight) {
-            console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
+        let mph = maxPixelHeight(pixelWidth, devicePixelRatio)
+        if (pixelHeight > mph) {
+            // Try lowering resolution
+            if(devicePixelRatio > 1) {
+                console.log("Adjusting devicePixelRatio")
+                devicePixelRatio = 1
+                mph = maxPixelHeight(pixelWidth, devicePixelRatio);
+            }
+            if(pixelHeight > mph) {
+                console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
+            }
         }
 
 
         const drawConfiguration =
             {
                 features: features,
-
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
-
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
-
                 referenceFrame: referenceFrame,
                 genomicState: genomicState,
-
                 selection: self.selection,
-
                 viewport: self,
                 viewportWidth: self.$viewport.width(),
                 viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
@@ -1053,6 +1054,13 @@ var igv = (function (igv) {
         else if(a) return a
         else return b
 
+    }
+
+    function maxPixelHeight(pixelWidth, devicePixelRatio) {
+        const maxPixelHeight1 = (MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)) / devicePixelRatio
+        const maxPixelHeight2 = (MAX_PIXEL_HEIGHT / devicePixelRatio)
+        const maxPixelHeight = Math.min(maxPixelHeight1, maxPixelHeight2)
+        return maxPixelHeight
     }
 
     return igv;
