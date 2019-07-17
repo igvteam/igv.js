@@ -34,7 +34,6 @@ var igv = (function (igv) {
         this.config = config;
         this.genome = genome;
         this.alignmentContainer = undefined;
-        this.maxRows = config.maxRows || 1000;
 
         if (igv.isString(config.url) && config.url.startsWith("data:")) {
             if("cram" === config.format) {
@@ -83,7 +82,7 @@ var igv = (function (igv) {
                 else {
                     alignments = unpairAlignments(alignmentContainer.packedAlignmentRows);
                 }
-                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, self.maxRows);
+                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end);
 
             }
         }
@@ -99,7 +98,7 @@ var igv = (function (igv) {
             if (this.alignmentContainer) {
                 const alignments = allAlignments(this.alignmentContainer.packedAlignmentRows);
                 const alignmentContainer = this.alignmentContainer;
-                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, this.maxRows, bool);
+                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, bool);
 
             }
         }
@@ -129,7 +128,6 @@ var igv = (function (igv) {
 
             const alignmentContainer = await self.bamReader.readAlignments(chr, bpStart, bpEnd)
 
-            const maxRows = self.config.maxRows || 500;
             let alignments = alignmentContainer.alignments;
 
             if (!self.viewAsPairs) {
@@ -138,7 +136,7 @@ var igv = (function (igv) {
 
             const hasAlignments = alignments.length > 0;
 
-            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, maxRows, showSoftClips);
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
 
             alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
@@ -227,7 +225,7 @@ var igv = (function (igv) {
             (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
     }
 
-    function packAlignmentRows(alignments, start, end, maxRows, showSoftClips) {
+    function packAlignmentRows(alignments, start, end, showSoftClips) {
 
         if (!alignments) return;
 
@@ -270,7 +268,7 @@ var igv = (function (igv) {
             });
 
 
-            while (allocatedCount < alignments.length && packedAlignmentRows.length < maxRows) {
+            while (allocatedCount < alignments.length) {
 
                 alignmentRow = new igv.BamAlignmentRow();
 

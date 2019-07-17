@@ -71,8 +71,6 @@ var igv = (function (igv) {
 
                 this.featureSource = new igv.BamSource(config, browser);
 
-                this.maxRows = config.maxRows || 1000;
-
                 this.coverageTrack = new CoverageTrack(config, this);
 
                 this.alignmentTrack = new AlignmentTrack(config, this);
@@ -664,8 +662,6 @@ var igv = (function (igv) {
             this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
             this.hasPairs = false;   // Until proven otherwise
-
-            this.maxRows = config.maxRows || 1000;   // Neccessary to avoid freezing browser for deep coverage
         };
 
         AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -730,14 +726,13 @@ var igv = (function (igv) {
 
             if (packedAlignmentRows) {
 
-                const nRows = Math.min(packedAlignmentRows.length, self.maxRows);
-
+                const nRows = packedAlignmentRows.length;
 
                 for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                     const alignmentRow = packedAlignmentRows[rowIndex];
                     const yRect = alignmentRowYInset + (self.alignmentRowHeight * rowIndex);
-                    const alignmentHeight = self.alignmentRowHeight - 2;
+                    const alignmentHeight = self.alignmentRowHeight <= 4 ? self.alignmentRowHeight : self.alignmentRowHeight - 2;
                     for (let i = 0; i < alignmentRow.alignments.length; i++) {
 
                         const alignment = alignmentRow.alignments[i];
@@ -979,10 +974,11 @@ var igv = (function (igv) {
                         center;
 
                     threshold = 1.0 / 10.0;
-                    if (bpp <= threshold) {
+                    if (bpp <= threshold && bbox.height >= 6) {
 
                         // render letter
-                        context.font = '10px sans-serif';
+                        const fontHeight = Math.min(10, bbox.height)
+                        context.font = '' + fontHeight + 'px sans-serif';
                         center = bbox.x + (bbox.width / 2.0);
                         igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), 9 + bbox.y, {strokeStyle: color});
                     } else {
