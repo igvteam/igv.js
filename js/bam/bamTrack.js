@@ -70,23 +70,16 @@ var igv = (function (igv) {
                 }
 
                 this.featureSource = new igv.BamSource(config, browser);
-
                 this.coverageTrack = new CoverageTrack(config, this);
-
                 this.alignmentTrack = new AlignmentTrack(config, this);
 
                 this.visibilityWindow = config.visibilityWindow || 30000;
-
                 this.viewAsPairs = config.viewAsPairs;
-
                 this.pairsSupported = (undefined === config.pairsSupported);
-
                 this.showSoftClips = config.showSoftClips;
                 this.showAllBases = config.showAllBases;
-
                 this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
                 this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
-
                 this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
                 this.maxFragmentLength = config.maxFragmentLength;
 
@@ -98,8 +91,7 @@ var igv = (function (igv) {
                         for (let sort of config.sort) {
                             assignSort(this.sortObjects, sort);
                         }
-                    }
-                    else {
+                    } else {
                         assignSort(this.sortObjects, config.sort);
                     }
                     config.sort = undefined;
@@ -222,8 +214,7 @@ var igv = (function (igv) {
 
             if (this.browser.isMultiLocusMode()) {
                 ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-            }
-            else {
+            } else {
                 this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
             }
         };
@@ -250,20 +241,50 @@ var igv = (function (igv) {
 
             const menuItems = [];
 
-            const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
+            // const $separator = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+            // menuItems.push({name: undefined, object: $separator, click: undefined, init: undefined});
+            //
+            // const clickFunction = function () {
+            //
+            //     self.alignmentTrack.colorBy = 'tag';
+            //     self.config.colorBy = 'tag';
+            //
+            //     const tag = self.trackView.browser.inputDialog.$input.val().trim();
+            //     if (tag !== self.alignmentTrack.colorByTag) {
+            //         self.alignmentTrack.colorByTag = tag;
+            //         self.config.colorByTag = tag;
+            //
+            //         self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+            //         $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+            //     }
+            //
+            //     self.trackView.repaintViews();
+            // };
+            //
+            // const config =
+            //     {
+            //         label: 'Row Height',
+            //         input: self.alignmentRowHeight.toString(),
+            //         click: clickFunction
+            //     };
+            //
+            // self.trackView.browser.inputDialog.configure(config);
+            // self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
+            //
 
+
+            const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+            $e.text('Color by');
+            menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+
+            const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
             if (self.alignmentTrack.hasPairs) {
                 colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
                 colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
                 colorByMenuItems.push({key: 'fragmentLength', label: 'fragment length'});
             }
-
             const tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
             colorByMenuItems.push({key: 'tag', label: tagLabel});
-
-            const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-            $e.text('Color by');
-            menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
 
             colorByMenuItems.forEach(function (item) {
                 const selected = (self.alignmentTrack.colorBy === item.key);
@@ -389,7 +410,6 @@ var igv = (function (igv) {
 
                         self.alignmentTrack.colorBy = menuItem.key;
                         self.config.colorBy = menuItem.key;
-
                         self.trackView.repaintViews();
                     }
 
@@ -418,8 +438,7 @@ var igv = (function (igv) {
             let baseColor;
             if (alpha >= 1) {
                 baseColor = igv.nucleotideColors[nucleotide];
-            }
-            else {
+            } else {
                 const foregroundColor = igv.nucleotideColorComponents[nucleotide];
                 if (!foregroundColor) {
                     return undefined;
@@ -485,12 +504,12 @@ var igv = (function (igv) {
 
         CoverageTrack.prototype.draw = function (options) {
 
-            const self = this;
-
             const ctx = options.context;
             if (this.top) {
                 ctx.translate(0, top);
             }
+            const yTop = options.top || 0
+            const yBottom = yTop + options.pixelHeight
 
             const alignmentContainer = options.features;
             const coverageMap = alignmentContainer.coverageMap;
@@ -559,28 +578,22 @@ var igv = (function (igv) {
                         igv.graphics.fillRect(ctx, x, y, w, h);
 
                         let accumulatedHeight = 0.0;
-                        ["A", "C", "T", "G"].forEach(function (nucleotide) {
+                        for (let nucleotide of ["A", "C", "T", "G"]) {
 
-                            var count,
-                                hh;
-
-                            count = item["pos" + nucleotide] + item["neg" + nucleotide];
-
+                            const count = item["pos" + nucleotide] + item["neg" + nucleotide];
 
                             // non-logoritmic
-                            hh = (count / self.dataRange.max) * self.height;
-
-                            y = (self.height - hh) - accumulatedHeight;
+                            const hh = (count / this.dataRange.max) * this.height;
+                            y = (this.height - hh) - accumulatedHeight;
                             accumulatedHeight += hh;
 
                             igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
                             igv.graphics.fillRect(ctx, x, y, w, hh);
-                        });
+                        }
                     }
                 }
             }
-
-        };
+        }
 
         CoverageTrack.prototype.popupData = function (config) {
 
@@ -672,8 +685,7 @@ var igv = (function (igv) {
                     h += downsampleRowHeight + alignmentStartGap;
                 }
                 return h + (this.alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
-            }
-            else {
+            } else {
                 return this.height;
             }
 
@@ -681,17 +693,17 @@ var igv = (function (igv) {
 
         AlignmentTrack.prototype.draw = function (options) {
 
-            const self = this,
-                alignmentContainer = options.features,
-                ctx = options.context,
-                bpPerPixel = options.bpPerPixel,
-                bpStart = options.bpStart,
-                pixelWidth = options.pixelWidth,
-                bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-                packedAlignmentRows = alignmentContainer.packedAlignmentRows;
-
+            const alignmentContainer = options.features
+            const ctx = options.context
+            const bpPerPixel = options.bpPerPixel
+            const bpStart = options.bpStart
+            const pixelWidth = options.pixelWidth
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+            const packedAlignmentRows = alignmentContainer.packedAlignmentRows
             const showSoftClips = this.parent.showSoftClips;
             const showAllBases = this.parent.showAllBases;
+            const yTop = options.top || 0
+            const yBottom = yTop + options.pixelHeight
 
             let referenceSequence = alignmentContainer.sequence;
             if (referenceSequence) {
@@ -716,8 +728,7 @@ var igv = (function (igv) {
                     igv.graphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
                 })
 
-            }
-            else {
+            } else {
                 alignmentRowYInset = 0;
             }
 
@@ -731,13 +742,12 @@ var igv = (function (igv) {
                 for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                     const alignmentRow = packedAlignmentRows[rowIndex];
-                    const yRect = alignmentRowYInset + (self.alignmentRowHeight * rowIndex);
-                    const alignmentHeight = self.alignmentRowHeight <= 4 ? self.alignmentRowHeight : self.alignmentRowHeight - 2;
-                    for (let i = 0; i < alignmentRow.alignments.length; i++) {
+                    const alignmentY = alignmentRowYInset + (this.alignmentRowHeight * rowIndex);
+                    const alignmentHeight = this.alignmentRowHeight <= 4 ? this.alignmentRowHeight : this.alignmentRowHeight - 2;
 
-                        const alignment = alignmentRow.alignments[i];
+                    for (let alignment of alignmentRow.alignments) {
 
-                        self.hasPairs = self.hasPairs || alignment.isPaired();
+                        this.hasPairs = this.hasPairs || alignment.isPaired();
 
                         if ((alignment.start + alignment.lengthOnRef) < bpStart) continue;
                         if (alignment.start > bpEnd) break;
@@ -747,17 +757,16 @@ var igv = (function (igv) {
 
                         if (alignment instanceof igv.PairedAlignment) {
 
-                            drawPairConnector(alignment, yRect, alignmentHeight);
+                            drawPairConnector.call(this, alignment, alignmentY, alignmentHeight);
 
-                            drawSingleAlignment(alignment.firstAlignment, yRect, alignmentHeight);
+                            drawSingleAlignment.call(this, alignment.firstAlignment, alignmentY, alignmentHeight);
 
                             if (alignment.secondAlignment) {
-                                drawSingleAlignment(alignment.secondAlignment, yRect, alignmentHeight);
+                                drawSingleAlignment.call(this, alignment.secondAlignment, alignmentY, alignmentHeight);
                             }
 
-                        }
-                        else {
-                            drawSingleAlignment(alignment, yRect, alignmentHeight);
+                        } else {
+                            drawSingleAlignment.call(this, alignment, alignmentY, alignmentHeight);
                         }
 
                     }
@@ -768,7 +777,7 @@ var igv = (function (igv) {
             // alignment is a PairedAlignment
             function drawPairConnector(alignment, yRect, alignmentHeight) {
 
-                var connectorColor = self.getConnectorColor(alignment.firstAlignment),
+                var connectorColor = this.getConnectorColor(alignment.firstAlignment),
                     xBlockStart = (alignment.connectingStart - bpStart) / bpPerPixel,
                     xBlockEnd = (alignment.connectingEnd - bpStart) / bpPerPixel,
                     yStrokedLine = yRect + alignmentHeight / 2;
@@ -793,7 +802,7 @@ var igv = (function (igv) {
                     b,
                     diagnosticColor;
 
-                alignmentColor = self.getAlignmentColor(alignment);
+                alignmentColor = this.getAlignmentColor(alignment);
                 const outlineColor = alignmentColor;
 
                 blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
@@ -817,19 +826,18 @@ var igv = (function (igv) {
                     // then skip.
                     if ((b != blocks.length - 1) && blocks[b + 1].start < bpStart) continue;
 
-                    drawBlock(block);
+                    drawBlock.call(this, block);
 
                     if ((block.start + block.len) > bpEnd) break;  // Do this after drawBlock to insure gaps are drawn
 
                     if (alignment.insertions) {
-                        alignment.insertions.forEach(function (block) {
-                            var refOffset = block.start - bpStart,
-                                xBlockStart = refOffset / bpPerPixel - 1,
-                                widthBlock = 3;
-                            igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: self.insertionColor});
-                        });
+                        for (let block of alignment.insertions) {
+                            const refOffset = block.start - bpStart
+                            const xBlockStart = refOffset / bpPerPixel - 1
+                            const widthBlock = 3
+                            igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                        }
                     }
-
                 }
 
                 function drawBlock(block) {
@@ -839,25 +847,24 @@ var igv = (function (igv) {
                     const blockStartPixel = (block.start - bpStart) / bpPerPixel;
                     const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
                     const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
-                    const arrowHeadWidthPixel = self.alignmentRowHeight / 2.0;
+                    const arrowHeadWidthPixel = this.alignmentRowHeight / 2.0;
                     const yStrokedLine = yRect + alignmentHeight / 2;
                     const isSoftClip = 'S' === block.type;
 
                     const strokeOutline =
                         alignment.mq <= 0 ||
-                        self.highlightedAlignmentReadNamed === alignment.readName ||
+                        this.highlightedAlignmentReadNamed === alignment.readName ||
                         isSoftClip;
 
                     let blockOutlineColor = outlineColor;
-                    if (self.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
+                    if (this.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
                     else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                         if ("D" === block.gapType) {
-                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.deletionColor});
-                        }
-                        else if ("N" === block.gapType) {
-                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: self.skippedColor});
+                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
+                        } else if ("N" === block.gapType) {
+                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
                         }
                     }
                     lastBlockEnd = blockEndPixel;
@@ -950,8 +957,7 @@ var igv = (function (igv) {
                                 if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                                     const readQual = qual[seqOffset + i];
                                     baseColor = shadedBaseColor(readQual, readChar, i + block.start);
-                                }
-                                else {
+                                } else {
                                     baseColor = igv.nucleotideColors[readChar];
                                 }
                                 if (baseColor) {
@@ -974,13 +980,13 @@ var igv = (function (igv) {
                         center;
 
                     threshold = 1.0 / 10.0;
-                    if (bpp <= threshold && bbox.height >= 6) {
+                    if (bpp <= threshold && bbox.height >= 8) {
 
                         // render letter
                         const fontHeight = Math.min(10, bbox.height)
                         context.font = '' + fontHeight + 'px sans-serif';
                         center = bbox.x + (bbox.width / 2.0);
-                        igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), 9 + bbox.y, {strokeStyle: color});
+                        igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color});
                     } else {
 
                         // render colored block
@@ -1115,11 +1121,11 @@ var igv = (function (igv) {
          */
         AlignmentTrack.prototype.getConnectorColor = function (alignment) {
 
-            if(this.pairConnectorColor) {
+            if (this.pairConnectorColor) {
                 return this.pairConnectorColor
             }
 
-            switch(this.colorBy) {
+            switch (this.colorBy) {
                 case "strand":
                 case "firstOfPairStrand":
                 case "pairOrientation":
@@ -1148,16 +1154,13 @@ var igv = (function (igv) {
 
                     if (alignment instanceof igv.PairedAlignment) {
                         color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
-                    }
-                    else if (alignment.isPaired()) {
+                    } else if (alignment.isPaired()) {
 
                         if (alignment.isFirstOfPair()) {
                             color = alignment.strand ? self.posStrandColor : self.negStrandColor;
-                        }
-                        else if (alignment.isSecondOfPair()) {
+                        } else if (alignment.isSecondOfPair()) {
                             color = alignment.strand ? self.negStrandColor : self.posStrandColor;
-                        }
-                        else {
+                        } else {
                             console.error("ERROR. Paired alignments are either first or second.")
                         }
                     }
@@ -1167,9 +1170,7 @@ var igv = (function (igv) {
 
                     if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                         color = getChrColor(alignment.mate.chr);
-                    }
-
-                    else if (self.pairOrientation && alignment.pairOrientation) {
+                    } else if (self.pairOrientation && alignment.pairOrientation) {
                         var oTypes = orientationTypes[self.pairOrientation];
                         if (oTypes) {
                             var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
@@ -1183,9 +1184,7 @@ var igv = (function (igv) {
 
                     if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                         color = getChrColor(alignment.mate.chr);
-                    }
-
-                    else if (self.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < self.parent.minFragmentLength) {
+                    } else if (self.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < self.parent.minFragmentLength) {
                         color = self.smallFragmentLengthColor;
                     } else if (self.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > self.parent.maxFragmentLength) {
                         color = self.largeFragmentLengthColor;
@@ -1200,8 +1199,7 @@ var igv = (function (igv) {
                         if (self.bamColorTag === self.colorByTag) {
                             // UCSC style color option
                             color = "rgb(" + tagValue + ")";
-                        }
-                        else {
+                        } else {
 
                             if (!self.tagColors) {
                                 self.tagColors = new igv.PaletteColorTable("Set1");
@@ -1272,13 +1270,11 @@ var igv = (function (igv) {
     function getChrColor(chr) {
         if (chrColorMap[chr]) {
             return chrColorMap[chr];
-        }
-        else if (chrColorMap["chr" + chr]) {
+        } else if (chrColorMap["chr" + chr]) {
             const color = chrColorMap["chr" + chr];
             chrColorMap[chr] = color;
             return color;
-        }
-        else {
+        } else {
             const color = igv.Color.randomRGB();
             chrColorMap[chr] = color;
             return color;
