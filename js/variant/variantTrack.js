@@ -247,7 +247,7 @@ var igv = (function (igv) {
             callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
             nCalls = getCallsetsLength.call(this);
 
-            igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (callSets && nCalls > 0 && "COLLAPSED" !== this.displayMode) {
                 igv.graphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});

@@ -58,7 +58,7 @@ var igv = (function (igv) {
         this.browser = browser;
         this.url = config.url;
         this.type = config.type;
-        this.supportHiDPI = config.supportHiDPI;
+        this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
 
         config.name = config.name || config.label;   // synonym for name, label is deprecated
         if (config.name) {
