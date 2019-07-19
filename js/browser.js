@@ -31,25 +31,18 @@ var igv = (function (igv) {
         let str;
 
         this.guid = igv.guid();
-
         this.namespace = '.browser_' + this.guid;
-
         this.config = options;
-
         this.$root = $('<div class="igv-root-div">');
 
         initialize.call(this, options);
 
         this.trackContainerDiv = trackContainerDiv;
-
         this.trackViews = [];
-
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
-
         this.featureDB = {};   // Hash of name -> feature, used for search function.
-
         this.constants = {
             dragThreshold: 3,
             scrollThreshold: 5,
