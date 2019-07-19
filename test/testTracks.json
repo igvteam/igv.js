@@ -307,7 +307,6 @@
   {
     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
-    "visibilityWindow": 20000,
     "name": "1KG Sites"
   },
   {
@@ -317,8 +316,7 @@
     "name": "1KG variants (chr22)",
     "squishedCallHeight": 1,
     "expandedCallHeight": 4,
-    "displayMode": "squished",
-    "visibilityWindow": 1000
+    "displayMode": "squished"
   },
   {
     "HEADING": "GA4GH"
