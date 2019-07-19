@@ -2,15 +2,11 @@
  * Created by dat on 9/16/16.
  */
 
-
+"use strict";
 
 var igv = (function (igv) {
 
-    "use strict";
-
     const NOT_LOADED_MESSAGE = 'Error loading track data';
-    const MAX_PIXEL_HEIGHT = 32000;
-    const MAX_PIXEL_COUNT = 200000000;
 
     igv.Viewport = function (trackView, $container, genomicState, width) {
 
@@ -340,6 +336,7 @@ var igv = (function (igv) {
         const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
         const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
 
+        // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const viewportHeight = this.$viewport.height()
         let pixelHeight = Math.min(self.getContentHeight(), 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
@@ -348,6 +345,7 @@ var igv = (function (igv) {
             }
             return;
         }
+        const canvasTop = Math.max(0, -($(this.contentDiv).position().top) - viewportHeight)
 
         // Always use high DPI if in compressed display mode, otherwise use preference setting;
         let devicePixelRatio;
@@ -357,27 +355,12 @@ var igv = (function (igv) {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         }
 
-        // Set limits on canvas size.  See https://github.com/igvteam/igv.js/issues/792
-        let mph = maxPixelHeight(pixelWidth, devicePixelRatio)
-        if (pixelHeight > mph) {
-            // Try lowering resolution
-            if (devicePixelRatio > 1) {
-                console.log("Adjusting devicePixelRatio")
-                devicePixelRatio = 1
-                mph = maxPixelHeight(pixelWidth, devicePixelRatio);
-            }
-            if (pixelHeight > mph) {
-                console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
-            }
-        }
-
-
         const drawConfiguration =
             {
                 features: features,
-                top: -$(this.contentDiv).position().top,
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
+                pixelTop: canvasTop,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
@@ -396,32 +379,30 @@ var igv = (function (igv) {
         newCanvas.width = devicePixelRatio * pixelWidth;
         newCanvas.height = devicePixelRatio * pixelHeight;
         const ctx = newCanvas.getContext("2d");
+       // ctx.save();
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        const canvasTop = Math.max(0, -($(this.contentDiv).position().top) - viewportHeight)
+
         const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
         newCanvas.style.position = 'absolute';
         newCanvas.style.left = pixelXOffset + "px";
         newCanvas.style.top = canvasTop + "px";
         drawConfiguration.context = ctx;
-
         ctx.translate(0, -canvasTop)
+        draw.call(this, drawConfiguration, features);
+       // ctx.translate(0, canvasTop);
+       // ctx.restore();
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
-
-        ctx.save();
-
-        draw.call(this, drawConfiguration, features);
-
-        ctx.restore();
 
         if (self.canvas) {
             $(self.canvas).remove();
         }
+        $(self.contentDiv).append(newCanvas);
 
         self.canvas = newCanvas;
         self.ctx = ctx;
-        $(self.contentDiv).append(newCanvas);
+
 
 
     };
@@ -463,6 +444,7 @@ var igv = (function (igv) {
                 viewport: this,
                 context: ctx,
                 top: -$(this.contentDiv).position().top,
+                pixelTop: 0,   // for compatibility with canvas draw
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
                 bpStart: bpStart,
@@ -581,11 +563,12 @@ var igv = (function (igv) {
 
         if (!this.ctx) return;
 
+        const canvasTop = this.canvasVerticalRange ? this.canvasVerticalRange.top : 0;
         const devicePixelRatio = window.devicePixelRatio;
         const w = this.$viewport.width() * devicePixelRatio;
         const h = this.$viewport.height() * devicePixelRatio;
         const x = -$(this.canvas).position().left * devicePixelRatio;
-        const y = -$(this.contentDiv).position().top * devicePixelRatio;
+        const y = (-$(this.contentDiv).position().top - canvasTop) * devicePixelRatio;
 
         const imageData = this.ctx.getImageData(x, y, w, h);
         const exportCanvas = document.createElement('canvas');
@@ -1074,13 +1057,6 @@ var igv = (function (igv) {
         else if (a) return a
         else return b
 
-    }
-
-    function maxPixelHeight(pixelWidth, devicePixelRatio) {
-        const maxPixelHeight1 = (MAX_PIXEL_COUNT / (pixelWidth * devicePixelRatio)) / devicePixelRatio
-        const maxPixelHeight2 = (MAX_PIXEL_HEIGHT / devicePixelRatio)
-        const maxPixelHeight = Math.min(maxPixelHeight1, maxPixelHeight2)
-        return maxPixelHeight
     }
 
     return igv;
