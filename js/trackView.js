@@ -789,7 +789,7 @@ var igv = (function (igv) {
         this.$innerScroll.css("top", newTop + "px");
 
         this.viewports.forEach(function (viewport) {
-            $(viewport.contentDiv).css("top", contentTop + "px");
+            viewport.setTop(contentTop)
         });
 
     }

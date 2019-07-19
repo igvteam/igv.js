@@ -251,6 +251,20 @@ var igv = (function (igv) {
         }
     }
 
+    igv.Viewport.prototype.setTop = function (contentTop) {
+
+        const viewportHeight = this.$viewport.height()
+        const viewTop = -contentTop
+        const viewBottom = viewTop + viewportHeight
+        $(this.contentDiv).css("top", contentTop + "px");
+
+        if (!this.canvasVerticalRange ||
+            this.canvasVerticalRange.bottom < viewBottom ||
+            this.canvasVerticalRange.top > viewTop) {
+            this.repaint()
+        }
+    }
+
     igv.Viewport.prototype.loadFeatures = function () {
 
         var self = this;
@@ -321,13 +335,13 @@ var igv = (function (igv) {
 
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-
         const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
         const bpStart = isWGV ? 0 : tile.startBP;
         const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
         const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
 
-        let pixelHeight = self.getContentHeight();
+        const viewportHeight = this.$viewport.height()
+        let pixelHeight = Math.min(self.getContentHeight(), 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (self.canvas) {
                 $(self.canvas).remove();
@@ -347,12 +361,12 @@ var igv = (function (igv) {
         let mph = maxPixelHeight(pixelWidth, devicePixelRatio)
         if (pixelHeight > mph) {
             // Try lowering resolution
-            if(devicePixelRatio > 1) {
+            if (devicePixelRatio > 1) {
                 console.log("Adjusting devicePixelRatio")
                 devicePixelRatio = 1
                 mph = maxPixelHeight(pixelWidth, devicePixelRatio);
             }
-            if(pixelHeight > mph) {
+            if (pixelHeight > mph) {
                 console.error("Maximum pixel height exceeded for track " + this.trackView.track.name);
             }
         }
@@ -361,6 +375,7 @@ var igv = (function (igv) {
         const drawConfiguration =
             {
                 features: features,
+                top: -$(this.contentDiv).position().top,
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
                 bpStart: bpStart,
@@ -375,7 +390,6 @@ var igv = (function (igv) {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
-
         const newCanvas = $('<canvas>').get(0);
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
@@ -384,11 +398,16 @@ var igv = (function (igv) {
         const ctx = newCanvas.getContext("2d");
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-        const pixelOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+        const canvasTop = Math.max(0, -($(this.contentDiv).position().top) - viewportHeight)
+        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
         newCanvas.style.position = 'absolute';
-        newCanvas.style.left = pixelOffset + "px";
-        newCanvas.style.top = self.canvas.style.top + "px";
+        newCanvas.style.left = pixelXOffset + "px";
+        newCanvas.style.top = canvasTop + "px";
         drawConfiguration.context = ctx;
+
+        ctx.translate(0, -canvasTop)
+
+        this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
         ctx.save();
 
@@ -443,6 +462,7 @@ var igv = (function (igv) {
             {
                 viewport: this,
                 context: ctx,
+                top: -$(this.contentDiv).position().top,
                 pixelWidth: pixelWidth,
                 pixelHeight: pixelHeight,
                 bpStart: bpStart,
@@ -763,7 +783,7 @@ var igv = (function (igv) {
                     }
                 });
 
-            self.popover.presentTrackContextMenu(e, menuItems);
+            if (self.popover) self.popover.presentTrackContextMenu(e, menuItems);
 
         });
 
@@ -1050,8 +1070,8 @@ var igv = (function (igv) {
      * @param b An array or undefined
      */
     function mergeArrays(a, b) {
-        if(a && b) return a.concat(b)
-        else if(a) return a
+        if (a && b) return a.concat(b)
+        else if (a) return a
         else return b
 
     }
