@@ -50,7 +50,7 @@ var igv = (function (igv) {
         this.downsampledIntervals = [];
 
         this.samplingWindowSize = samplingWindowSize === undefined ? 100 : samplingWindowSize;
-        this.samplingDepth = samplingDepth === undefined ? 100 : samplingDepth;
+        this.samplingDepth = samplingDepth === undefined ? 1000 : samplingDepth;
 
         this.pairsSupported = pairsSupported === undefined ? true : pairsSupported;
         this.paired = false;  // false until proven otherwise

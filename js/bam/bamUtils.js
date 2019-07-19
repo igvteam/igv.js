@@ -43,7 +43,7 @@ var igv = (function (igv) {
     var BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
 
     const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
-    const DEFAULT_SAMPLING_DEPTH = 100;
+    const DEFAULT_SAMPLING_DEPTH = 1000;
     const MAXIMUM_SAMPLING_DEPTH = 2500;
 
     igv.BamUtils = {
