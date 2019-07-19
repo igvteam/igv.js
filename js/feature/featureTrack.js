@@ -234,7 +234,7 @@ var igv = (function (igv) {
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
 
-            igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (featureList) {
 
