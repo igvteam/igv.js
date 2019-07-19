@@ -49,7 +49,7 @@ var igv = (function (igv) {
         this.authKey = config.authKey;   // Might be undefined or nill
 
         this.samplingWindowSize = config.samplingWindowSize === undefined ? 100 : config.samplingWindowSize;
-        this.samplingDepth = config.samplingDepth === undefined ? 100 : config.samplingDepth;
+        this.samplingDepth = config.samplingDepth === undefined ? 1000 : config.samplingDepth;
         if (config.viewAsPairs) {
             this.pairsSupported = true;
         }
