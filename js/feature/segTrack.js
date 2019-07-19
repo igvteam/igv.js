@@ -52,9 +52,6 @@ var igv = (function (igv) {
                 igv.TrackBase.call(this, config, browser);
 
                 this.isLog = config.isLog;
-
-                this.supportHiDPI = (config.supportHiDPI !== undefined) ? config.supportHiDPI : false;
-
                 this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
                 this.maxHeight = config.maxHeight || 500;
                 this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
@@ -152,7 +149,7 @@ var igv = (function (igv) {
             const ctx = options.context;
             const pixelWidth = options.pixelWidth;
             const pixelHeight = options.pixelHeight;
-            igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             const featureList = options.features;
 
