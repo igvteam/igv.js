@@ -73,9 +73,14 @@ var igv = (function (igv) {
             const promises = [];
             for (let c of chunks) {
 
-                const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
-                const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-                const lastBlockSize = igv.bgzBlockSize(abuffer)
+                let lastBlockSize
+                try {
+                    const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
+                    const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+                    lastBlockSize = igv.bgzBlockSize(abuffer)
+                } catch (e) {
+                    lastBlockSize = 0
+                }
 
                 const fetchMin = c.minv.block
                 const fetchMax = c.maxv.block + lastBlockSize
@@ -104,54 +109,42 @@ var igv = (function (igv) {
     }
 
 
-    async function readHeader() {
+    async function getHeader() {
+        if(!this.header) {
+            const genome = this.genome;
+            const index = await getIndex.call(this)
+            const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
+            const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+            const bsize = igv.bgzBlockSize(abuffer)
 
-        const genome = this.genome;
-
-        const index = await getIndex.call(this)
-
-        const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
-        const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-        const bsize = igv.bgzBlockSize(abuffer)
-
-        const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
-        const options = igv.buildOptions(this.config, {range: {start: 0, size: len}});
-        const header = igv.BamUtils.readHeader(this.bamPath, options, genome);
-
-        return header
-    };
+            const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
+            const options = igv.buildOptions(this.config, {range: {start: 0, size: len}});
+            this.header = await igv.BamUtils.readHeader(this.bamPath, options, genome);
+        }
+        return this.header
+    }
 
     async function getIndex() {
-
-        const self = this;
         const genome = this.genome;
-
-        if (self.index) {
-            return Promise.resolve(self.index);
+        if (!this.index) {
+            this.index = await igv.loadBamIndex(this.baiPath, this.config, false, genome)
+            return this.index
         }
-        else {
-            return igv.loadBamIndex(self.baiPath, self.config, false, genome)
-                .then(function (index) {
-                    self.index = index;
-                    return self.index;
-                });
-        }
+        return this.index;
     }
 
     async function getChrIndex() {
 
-        var self = this;
-
         if (this.chrToIndex) {
-            return Promise.resolve(this.chrToIndex);
+            return this.chrToIndex;
         }
         else {
-            return readHeader.call(self).then(function (header) {
-                self.chrToIndex = header.chrToIndex;
-                self.indexToChr = header.chrNames;
-                self.chrAliasTable = header.chrAliasTable;
-                return self.chrToIndex;
-            });
+            const header = await getHeader.call(this)
+            this.chrToIndex = header.chrToIndex;
+            this.indexToChr = header.chrNames;
+            this.chrAliasTable = header.chrAliasTable;
+            return this.chrToIndex;
+
         }
     }
 
