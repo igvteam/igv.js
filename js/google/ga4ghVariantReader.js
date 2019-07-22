@@ -68,18 +68,19 @@ var igv = (function (igv) {
                     decode: function (json) {
                         // If specific callSetIds are specified filter to those
                         if (self.callSetIds) {
-                            var filteredCallSets = [],
+                            var callSets = [],
                                 csIdSet = new Set();
 
                             self.callSetIds.forEach(function (csid) {
                                 csIdSet.add(csid);
                             })
+
                             json.callSets.forEach(function (cs) {
                                 if (csIdSet.has(cs.id)) {
-                                    filteredCallSets.push(cs);
+                                    callSets.push(cs);
                                 }
                             });
-                            return filteredCallSets;
+                            return callSets;
                         }
                         else {
                             return json.callSets;
