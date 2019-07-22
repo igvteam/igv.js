@@ -3,8 +3,8 @@
     "type": "alignment",
     "name": "HG02450 - Broad",
     "format": "bam",
-    "url": "https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
-    "indexURL": "https://data.broadinstitute.org/igvdata/1KG/b37/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai"
+    "url": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
+    "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai"
   },
 
   {
@@ -43,6 +43,13 @@
     "format": "cram",
     "url": "https://drive.google.com/open?id=1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo",
     "indexURL":"https://drive.google.com/open?id=1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2"
+  },
+  {
+    "type": "alignment",
+    "name": "Heart SLC25S3 - Google Drive - Form 2",
+    "format": "cram",
+    "url": "https://drive.google.com/a/cloud.ucsd.edu/file/d/1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo/view?usp=sharing",
+    "indexURL":"https://drive.google.com/a/cloud.ucsd.edu/file/d/1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2/view?usp=sharing"
   },
   {
     "type": "alignment",
