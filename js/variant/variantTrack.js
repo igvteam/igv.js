@@ -68,17 +68,15 @@ var igv = (function (igv) {
 
                 this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
                 this.labelDisplayMode = config.labelDisplayMode;
-
                 this.variantHeight = config.variantHeight || 10;
                 this.squishedCallHeight = config.squishedCallHeight || 1;
                 this.expandedCallHeight = config.expandedCallHeight || 10;
                 this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap : 2;
                 this.squishedVGap = config.squishedVGap !== undefined ? config.squishedVGap : 1;
-
                 this.expandedGroupGap = config.expandedGroupGap || 10;
                 this.squishedGroupGap = config.squishedGroupGap || 5;
-
                 this.featureHeight = config.featureHeight || 14;
+                this.visibilityWindow = config.visibilityWindow;
 
                 this.featureSource = new igv.FeatureSource(config, browser.genome);
 
@@ -90,90 +88,67 @@ var igv = (function (igv) {
 
                 this.nRows = 1;  // Computed dynamically
                 this.groupBy = "None";
-                this.filterBy = undefined;
-                this.filters = [];
             });
 
-        VariantTrack.prototype.getFileHeader = function () {
+        VariantTrack.prototype.postInit = async function () {
 
-            const self = this;
-
-            if (typeof self.featureSource.getFileHeader === "function") {
-
-                if (self.header) {
-                    return Promise.resolve(self.header);
-                }
-                else {
-                    return self.featureSource.getFileHeader()
-
-                        .then(function (header) {
-
-                            if (header) {
-
-                                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                                if (header.name && !self.config.name) {
-                                    self.name = header.name;
-                                }
-                                if (header.color && !self.config.color) {
-                                    self.color = "rgb(" + header.color + ")";
-                                }
-
-                                self.callSets = {};
-                                self.callSetGroups = ['None'];
-                                self.callSets.None = header.callSets;
-
-                                // header.features => file is not index, all features loaded
-                                if (!header.features && self.visibilityWindow === undefined) {
-                                    computeVisibilityWindow.call(self);
-                                }
-                            }
-                            self.header = header;
-                            return header;
-
-                        })
-                }
-            }
-            else {
-                return Promise.resolve(null);
-            }
-
-        }
-
-        function getCallsetsLength() {
-            let length = 0;
-            const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
-            Object.keys(callSets).forEach(function (key) {
-                if (callSets[key]) length += callSets[key].length;
-            });
-            return length;
-        }
-
-
-        function computeVisibilityWindow() {
-
+            const header = await this.getFileHeader();   // cricital, don't remove
             if (this.callSets) {
-                const length = getCallsetsLength.call(this);
-                if (length < 10) {
-                    this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
-                }
-                else {
-                    this.visibilityWindow = 1000 + ((2500 / length) * 40);
-                }
+                const length = this.callSets.length;
+                this.visibilityWindow = Math.max(100, DEFAULT_VISIBILITY_WINDOW - length * (DEFAULT_VISIBILITY_WINDOW / 100));
+
             }
             else {
                 this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
             }
+            return this;
 
         }
 
-        VariantTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+        VariantTrack.prototype.getFileHeader = async function () {
 
-            var self = this;
+            if (this.header) {
+                return this.header;
+            }
+            else if (typeof this.featureSource.getFileHeader === "function") {
 
-            return this.getFileHeader()
-                .then(function (header) {
-                    return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-                });
+                const header = await this.featureSource.getFileHeader()
+                if (header) {
+
+                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                    if (header.name && !this.config.name) {
+                        this.name = header.name;
+                    }
+                    if (header.color && !this.config.color) {
+                        this.color = "rgb(" + header.color + ")";
+                    }
+
+                    this.callSets = header.callSets;
+                    this.callSetGroups = ['None'];
+                    this.callSets.None = header.callSets;
+
+                }
+                this.header = header;
+                return header;
+            }
+
+            else {
+                return undefined;
+            }
+
+        }
+
+        VariantTrack.prototype.getCallsetsLength = function () {
+            return this.callSets.length;
+        }
+
+        VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
+
+            if (this.header === undefined) {
+                this.header = await this.getFileHeader();
+            }
+            return this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+
         }
 
 
@@ -186,8 +161,8 @@ var igv = (function (igv) {
          */
         VariantTrack.prototype.computePixelHeight = function (features) {
 
-            const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
-            const nCalls = callSets ? getCallsetsLength.call(this) : 0;
+            const callSets = this.callSets;
+            const nCalls = callSets ? this.getCallsetsLength() : 0;
 
             // Adjust call height if required for max canvas size.
             if (nCalls > 0) {
@@ -243,9 +218,9 @@ var igv = (function (igv) {
 
             this.variantBandHeight = 10 + this.nRows * (this.variantHeight + vGap);
 
-            callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
-            callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
-            nCalls = getCallsetsLength.call(this);
+            callSets = this.callSets;
+            callSetGroups = this.callSetGroups;
+            nCalls = this.getCallsetsLength();
 
             igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -411,65 +386,65 @@ var igv = (function (igv) {
          */
         VariantTrack.prototype.popupData = function (clickState, featureList) {
 
-            if(!featureList) featureList = this.clickedFeatures(clickState);
+            if (!featureList) featureList = this.clickedFeatures(clickState);
 
             const genomicLocation = clickState.genomicLocation
             const genomeID = this.browser.genome.id
             const popupData = []
 
-            for(let variant of featureList)  {
+            for (let variant of featureList) {
 
                 //var row, callHeight, callSets, callSetGroups, cs, call;
 
-                    if (popupData.length > 0) {
-                        popupData.push('<HR>')
-                    }
+                if (popupData.length > 0) {
+                    popupData.push('<HR>')
+                }
 
-                    if ("COLLAPSED" == self.displayMode) {
-                        Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
-                    }
+                if ("COLLAPSED" == self.displayMode) {
+                    Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
+                }
 
-                    else {
-                        const yOffset = clickState.y
-                        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
-                        const groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap
+                else {
+                    const yOffset = clickState.y
+                    const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
+                    const groupGap = (this.displayMode === 'EXPANDED') ? this.expandedGroupGap : this.squishedGroupGap
 
-                        if (yOffset <= this.variantBandHeight) {  // Variant
-                            const row = (Math.floor)((yOffset - 10) / (this.variantHeight + vGap));
-                            if (variant.row === row) {
-                                Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
-                            }
-                        }
-                        else { // Genotype
-                            const callSets = (this.filterBy) ? this.filteredCallSets : this.callSets;
-                            const callSetGroups = (this.filterBy) ? this.filteredCallSetGroups : this.callSetGroups;
-
-                            if (callSets && variant.calls) {
-
-                                const callHeight = ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
-                                var totalCalls = 0;
-
-                                let row
-                                for (let group = 0; group < callSetGroups.length; group++) {
-                                    var groupName = callSetGroups[group];
-                                    var groupCalls = callSets[groupName].length;
-                                    if (yOffset <= this.variantBandHeight + vGap + (totalCalls + groupCalls) *
-                                        (callHeight + vGap) + (group * groupGap)) {
-                                        row = Math.floor((yOffset - (this.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
-                                            + (group * groupGap))) / (callHeight + vGap));
-                                        break;
-                                    }
-                                    totalCalls += groupCalls;
-                                }
-
-                                if (row >= 0) {
-                                    const cs = callSets[groupName][row];
-                                    const call = variant.calls[cs.id];
-                                    Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
-                                }
-                            }
+                    if (yOffset <= this.variantBandHeight) {  // Variant
+                        const row = (Math.floor)((yOffset - 10) / (this.variantHeight + vGap));
+                        if (variant.row === row) {
+                            Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
                         }
                     }
+                    else { // Genotype
+                        const callSets =  this.callSets;
+                        const callSetGroups = this.callSetGroups;
+
+                        if (callSets && variant.calls) {
+
+                            const callHeight = ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
+                            var totalCalls = 0;
+
+                            let row
+                            for (let group = 0; group < callSetGroups.length; group++) {
+                                var groupName = callSetGroups[group];
+                                var groupCalls = callSets[groupName].length;
+                                if (yOffset <= this.variantBandHeight + vGap + (totalCalls + groupCalls) *
+                                    (callHeight + vGap) + (group * groupGap)) {
+                                    row = Math.floor((yOffset - (this.variantBandHeight + vGap + totalCalls * (callHeight + vGap)
+                                        + (group * groupGap))) / (callHeight + vGap));
+                                    break;
+                                }
+                                totalCalls += groupCalls;
+                            }
+
+                            if (row >= 0) {
+                                const cs = callSets[groupName][row];
+                                const call = variant.calls[cs.id];
+                                Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
+                            }
+                        }
+                    }
+                }
 
             }
 
@@ -597,9 +572,6 @@ var igv = (function (igv) {
                             label: 'Sort by allele length',
                             click: function () {
                                 sortCallSetsByAlleleLength(self.callSets, variant, self.sortDirection);
-                                if (this.filterBy) {
-                                    sortCallSetsByAlleleLength(self.filteredCallSets, variant, self.sortDirection)
-                                }
                                 self.sortDirection = (self.sortDirection === "ASC") ? "DESC" : "ASC";
                                 self.trackView.repaintViews();
                             }
@@ -645,13 +617,6 @@ var igv = (function (igv) {
 
         VariantTrack.prototype.groupCallSets = function (attribute) {
 
-            var self = this;
-
-            if (this.filterBy) {
-                var filteredCallSetResults = createGroups(attribute, this.filteredCallSets);
-                this.filteredCallSets = filteredCallSetResults[0];
-                this.filteredCallSetGroups = filteredCallSetResults[1];
-            }
             var callSetResults = createGroups(attribute, this.callSets);
             this.callSets = callSetResults[0];
             this.callSetGroups = callSetResults[1];
@@ -734,37 +699,6 @@ var igv = (function (igv) {
         };
 
 
-        VariantTrack.prototype.filterByFamily = function (value) {
-            var self = this;
-            if ("" === value) {
-                self.filters = [];
-                self.filterBy = undefined;
-            } else {
-                try {
-                    self.filters = value.split(",");
-                    self.filterBy = "familyId";
-                    self.filteredCallSets = {};
-                    self.filteredCallSetGroups = [];
-                    Object.keys(this.callSets).forEach(function (groupName) {
-                        var group = self.callSets[groupName];
-                        group.forEach(function (callSet) {
-                            var attrs = igv.sampleInformation.getAttributes(callSet.name);
-                            var attribute = attrs[self.filterBy];
-                            if (self.filters.indexOf(attribute) !== -1) {
-                                if (!self.filteredCallSets.hasOwnProperty(groupName)) {
-                                    self.filteredCallSets[groupName] = [];
-                                    self.filteredCallSetGroups.push(groupName);
-                                }
-                                self.filteredCallSets[groupName].push(callSet);
-                            }
-                        });
-                    });
-                } catch (err) {
-                    console.log(err);
-                }
-            }
-        };
-
 
         VariantTrack.prototype.menuItemList = function () {
 
@@ -814,20 +748,20 @@ var igv = (function (igv) {
                 });
             }
 
-            if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
-                menuItems.push(igv.trackMenuItem(this.trackView, "Filter by Family ID", "Family IDs", this.filters.join(","),
-                    function () {
-                        var value;
-
-                        value = self.trackView.browser.inputDialog.$input.val().trim();
-
-                        if (undefined !== value) {
-                            self.filterByFamily(value);
-                            self.trackView.repaintViews();
-                        }
-
-                    }, true));
-            }
+            // if (igv.sampleInformation.getAttributeNames().indexOf("familyId") !== -1) {
+            //     menuItems.push(igv.trackMenuItem(this.trackView, "Filter by Family ID", "Family IDs", this.filters.join(","),
+            //         function () {
+            //             var value;
+            //
+            //             value = self.trackView.browser.inputDialog.$input.val().trim();
+            //
+            //             if (undefined !== value) {
+            //                 self.filterByFamily(value);
+            //                 self.trackView.repaintViews();
+            //             }
+            //
+            //         }, true));
+            // }
 
             return menuItems;
 

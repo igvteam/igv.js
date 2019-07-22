@@ -571,9 +571,7 @@ var igv = (function (igv) {
      * @param config
      * @returns {*}
      */
-    igv.Browser.prototype.loadTrack = function (config) {
-
-        var self = this;
+    igv.Browser.prototype.loadTrack = async function (config) {
 
         // config might be json
         if (igv.isString(config)) {
@@ -581,74 +579,64 @@ var igv = (function (igv) {
         }
 
         if (!knowHowToLoad(config)) {
-            self.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
+            this.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
             return Promise.resolve();
         }
 
-        return resolveTrackProperties(config)
+        await resolveTrackProperties(config)
 
-            .then(function (config) {
+        igv.inferTrackTypes(config);
 
-                var settings,
-                    property,
-                    newTrack;
-
-                igv.inferTrackTypes(config);
-
-                // Set defaults if specified
-                if (self.trackDefaults && config.type) {
-                    settings = self.trackDefaults[config.type];
-                    if (settings) {
-                        for (property in settings) {
-                            if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                                config[property] = settings[property];
-                            }
-                        }
+        // Set defaults if specified
+        if (this.trackDefaults && config.type) {
+            const settings = this.trackDefaults[config.type];
+            if (settings) {
+                for (let property in settings) {
+                    if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                        config[property] = settings[property];
                     }
                 }
+            }
+        }
 
-                newTrack = igv.createTrack(config, self);
+        const newTrack = igv.createTrack(config, this);
 
-                if (undefined === newTrack) {
-                    self.presentAlert("Unknown file type: " + config.url, undefined);
-                    return newTrack;
-                }
+        if (undefined === newTrack) {
+            this.presentAlert("Unknown file type: " + config.url, undefined);
+            return newTrack;
+        }
 
-                // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
-                if (undefined === newTrack.order) {
-                    newTrack.order = self.trackViews.length;
-                }
+        // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+        if (undefined === newTrack.order) {
+            newTrack.order = this.trackViews.length;
+        }
 
-                self.addTrack(newTrack);
+        if (typeof newTrack.postInit === 'function') {
+            await newTrack.postInit();
+        }
 
-                return newTrack;
-            })
-            .then(function (newTrack) {
-                return postInit(newTrack)
-            })
+        this.addTrack(newTrack);
 
-        function resolveTrackProperties(config) {
+        return newTrack;
+
+        async function resolveTrackProperties(config) {
 
             if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
-                return igv.google.getDriveFileInfo(config.url)
+                const json = await igv.google.getDriveFileInfo(config.url)
 
-                    .then(function (json) {
+                config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
+                if (!config.filename) {
+                    config.filename = json.originalFileName;
+                }
+                if (!config.format) {
+                    config.format = igv.inferFileFormat(config.filename);
+                }
+                if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
+                    config.indexURL = igv.google.driveDownloadURL(config.indexURL);
+                }
 
-                        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
-
-                        if (!config.filename) {
-                            config.filename = json.originalFileName;
-                        }
-                        if (!config.format) {
-                            config.format = igv.inferFileFormat(config.filename);
-                        }
-                        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                            config.indexURL = igv.google.driveDownloadURL(config.indexURL);
-                        }
-
-                        return config;
-                    })
+                return config;
 
 
             }
@@ -656,60 +644,10 @@ var igv = (function (igv) {
                 if (config.url && !config.filename) {
                     config.filename = igv.getFilename(config.url);
                 }
-
-                return Promise.resolve(config);
+                return config;
             }
-
-
         }
 
-        function postInit(track) {
-
-            if (track && typeof track.postInit === 'function') {
-                return track.postInit();
-            }
-            else {
-                return Promise.resolve(track);
-            }
-
-        }
-
-
-        function resolveTrackProperties(config) {
-
-            if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
-
-                return igv.google.getDriveFileInfo(config.url)
-
-                    .then(function (json) {
-
-                        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
-
-                        if (!config.filename) {
-                            config.filename = json.originalFileName;
-                        }
-                        if (!config.format) {
-                            config.format = igv.inferFileFormat(config.filename);
-                        }
-                        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                            config.indexURL = igv.google.driveDownloadURL(config.indexURL);
-                        }
-
-                        return config;
-                    })
-
-
-            }
-            else {
-                if (config.url && !config.filename) {
-                    config.filename = igv.getFilename(config.url);
-                }
-
-                return Promise.resolve(config);
-            }
-
-
-        }
     }
 
 
