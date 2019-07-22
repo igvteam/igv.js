@@ -341,7 +341,7 @@ var igv = (function (igv) {
                 })
         };
 
-        SegTrack.prototype.clickedFeatures = function(clickState) {
+        SegTrack.prototype.clickedFeatures = function (clickState) {
 
             const allFeatures = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
             return filterByRow(allFeatures, clickState.y);
@@ -360,7 +360,7 @@ var igv = (function (igv) {
 
             const self = this;
 
-            if(!featureList) featureList = this.clickedFeatures(clickState);
+            if (!featureList) featureList = this.clickedFeatures(clickState);
 
             const items = [];
 
@@ -377,12 +377,27 @@ var igv = (function (igv) {
 
                 const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
 
-                Object.keys(feature).forEach(function (property) {
-                    if (!filteredProperties.has(property) &&
-                        igv.isSimpleType(feature[property])) {
-                        data.push({name: property, value: feature[property]});
+                // hack for whole genome properties
+                let f
+                if(feature.hasOwnProperty('realChr')) {
+                    f = Object.assign({}, feature);
+                    f.chr = feature.realChr;
+                    f.start = feature.realStart;
+                    f.end = feature.realEnd;
+                    delete f.realChr;
+                    delete f.realStart;
+                    delete f.realEnd;
+                } else {
+                    f = feature;
+                }
+
+
+                for (let property of Object.keys(f)) {
+
+                    if (!filteredProperties.has(property) && igv.isSimpleType(f[property])) {
+                        data.push({name: property, value: f[property]});
                     }
-                });
+                }
             }
         }
 
