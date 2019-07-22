@@ -228,7 +228,7 @@ var igv = (function (igv) {
 
             if (features && features.length > 0) {
 
-                return this.extractPopupData(features[0]);
+                return igv.TrackBase.extractPopupData(features[0], this.getGenomeId());
 
             }
         }

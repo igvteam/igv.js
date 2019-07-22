@@ -318,7 +318,7 @@ var igv = (function (igv) {
             const data = [];
             for (let feature of features) {
 
-                const featureData = feature.popupData ? feature.popupData(genomicLocation) : this.extractPopupData(feature);
+                const featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) : igv.TrackBase.extractPopupData(feature, this.getGenomeId());
 
                 if (featureData) {
                     if (data.length > 0) {

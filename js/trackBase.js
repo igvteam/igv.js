@@ -142,7 +142,7 @@ var igv = (function (igv) {
      * @param feature
      * @returns {Array}
      */
-    igv.TrackBase.prototype.extractPopupData = function (feature) {
+    igv.TrackBase.extractPopupData = function (feature, genomeId) {
 
         const filteredProperties = new Set(['row', 'color']);
         const data = [];
@@ -163,7 +163,7 @@ var igv = (function (igv) {
             }
         }
 
-        const genomeId = this.getGenomeId()
+        //const genomeId = this.getGenomeId()
         if (alleles && alleleFreqs) {
 
             if (alleles.endsWith(",")) {
