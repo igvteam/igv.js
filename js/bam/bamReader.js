@@ -74,12 +74,12 @@ var igv = (function (igv) {
             for (let c of chunks) {
 
                 let lastBlockSize
-                try {
+                if(c.maxv.offset === 0) {
+                    lastBlockSize = 0;    // Don't need to read the last block. 
+                } else {
                     const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
                     const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                     lastBlockSize = igv.bgzBlockSize(abuffer)
-                } catch (e) {
-                    lastBlockSize = 0
                 }
 
                 const fetchMin = c.minv.block
@@ -110,7 +110,7 @@ var igv = (function (igv) {
 
 
     async function getHeader() {
-        if(!this.header) {
+        if (!this.header) {
             const genome = this.genome;
             const index = await getIndex.call(this)
             const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
