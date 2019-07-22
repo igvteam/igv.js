@@ -358,12 +358,27 @@ var igv = (function (igv) {
                 const wg = Object.create(Object.getPrototypeOf(f));
                 Object.assign(wg, f);
 
+                wg.realChr = f.chr;
+                wg.realStart = f.start;
+                wg.realEnd = f.end;
+
                 wg.chr = "all";
                 wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                 wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
                 // Don't draw exons in whole genome view
                 if (wg["exons"]) delete wg["exons"]
+
+                wg.popupData = function(genomeLocation) {
+                    const clonedObject = Object.assign({}, this)
+                    clonedObject.chr = this.realChr
+                    clonedObject.start = this.realStart
+                    clonedObject.end = this.realEnd
+                    delete clonedObject.realChr
+                    delete clonedObject.realStart
+                    delete clonedObject.realEnd
+                    return igv.TrackBase.extractPopupData(clonedObject, genome.id)
+                }
 
                 wgFeatures.push(wg);
             }
@@ -374,6 +389,10 @@ var igv = (function (igv) {
         });
 
         return wgFeatures;
+
+
+
+
 
     }
 
