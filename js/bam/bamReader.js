@@ -75,7 +75,7 @@ var igv = (function (igv) {
 
                 let lastBlockSize
                 if(c.maxv.offset === 0) {
-                    lastBlockSize = 0;    // Don't need to read the last block. 
+                    lastBlockSize = 0;    // Don't need to read the last block.
                 } else {
                     const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
                     const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
