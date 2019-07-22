@@ -93,9 +93,6 @@ var igv = (function (igv) {
             }
         }
 
-
-        this.visibilityWindow = config.visibilityWindow;
-
     };
 
     igv.FeatureSource.prototype.supportsWholeGenome = function () {
