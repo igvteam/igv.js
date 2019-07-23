@@ -36,27 +36,28 @@ var igv = (function (igv) {
         this.$container.append(this.$select);
 
         this.$select.on('change', function () {
-            browser.search($(this).val());
-            $(this).blur();
+            const value = $(this).val();
+            if(value !== '') {
+                browser.search($(this).val());
+                $(this).blur();
+            }
         });
 
     };
 
     igv.ChromosomeSelectWidget.prototype.update = function (genome) {
-        var self = this,
-            list;
+
 
         this.$select.empty();
-
-        list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
+        const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
         list.unshift('all');
-        list.forEach(function (name) {
+        list.unshift('');
+        for(let name of list) {
             var $o;
-
             $o = $('<option>', { 'value':name });
-            self.$select.append($o);
+            this.$select.append($o);
             $o.text(name);
-        });
+        }
 
     };
 

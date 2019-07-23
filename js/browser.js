@@ -986,6 +986,7 @@ var igv = (function (igv) {
 
         } else {
             this.$searchInput.val('');
+            this.chromosomeSelectWidget.$select.val('');
         }
 
     };
