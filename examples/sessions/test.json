@@ -15,7 +15,7 @@
 	  "order": -1.7976931348623157e+308
 	},
 	{
-	  "url": "http://1000genomes.s3.amazonaws.com/phase3/data/NA12778/exome_alignment/NA12778.mapped.ILLUMINA.bwa.CEU.exome.20121211.bam",
+	  "url": "https://1000genomes.s3.amazonaws.com/phase3/data/NA12778/exome_alignment/NA12778.mapped.ILLUMINA.bwa.CEU.exome.20121211.bam",
 	  "indexURL": null,
 	  "order": 0,
 	  "name": "NA12778 exome",
