@@ -35,7 +35,7 @@ function runBAMIndexTests() {
     QUnit.test("loadIndex", function (assert) {
         var done = assert.async();
 
-        var url = "http://1000genomes.s3.amazonaws.com/phase3/data/HG01879/alignment/HG01879.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai";
+        var url = "https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/alignment/HG01879.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai";
 
 
         igv.loadBamIndex(url, {}, false).then(function (bamIndex){

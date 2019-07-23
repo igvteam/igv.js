@@ -39,7 +39,7 @@
     "id": "hg18",
     "name": "Human (hg18)",
     "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta",
-    "indexURL": "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta.fai",
+    "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg18/hg18.fasta.fai",
     "cytobandURL": "https://s3.amazonaws.com/igv.org.genomes/hg18/cytoBandIdeo.txt.gz",
     "tracks": [
       {
