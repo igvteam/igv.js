@@ -217,7 +217,7 @@ var igv = (function (igv) {
             const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
 
             return "<a target='_blank' " +
-                "href='http://www.cravat.us/CRAVAT/variant.html?variant=" +
+                "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
                 cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
         }
         else {
