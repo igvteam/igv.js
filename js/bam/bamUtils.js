@@ -34,17 +34,17 @@
 
 var igv = (function (igv) {
 
-    var SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
-    var CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
-    var READ_STRAND_FLAG = 0x10;
-    var MATE_STRAND_FLAG = 0x20;
+    const SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
+    const CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
+    const READ_STRAND_FLAG = 0x10;
+    const MATE_STRAND_FLAG = 0x20;
 
-    var BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]); // BAM\1
-    var BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
+    const BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]); // BAM\1
+    const BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
 
     const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
-    const DEFAULT_SAMPLING_DEPTH = 1000;
-    const MAXIMUM_SAMPLING_DEPTH = 2500;
+    const DEFAULT_SAMPLING_DEPTH = 500;
+    const MAXIMUM_SAMPLING_DEPTH = 10000;
 
     igv.BamUtils = {
 
@@ -408,7 +408,7 @@ var igv = (function (igv) {
             reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
 
             if (reader.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
-                igv.log("Warning: attempt to set sampling depth > maximum value of 2500");
+                igv.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH);
                 reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
             }
 
