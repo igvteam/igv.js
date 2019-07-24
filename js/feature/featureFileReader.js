@@ -107,7 +107,12 @@ var igv = (function (igv) {
 
                         let maxSize = "vcf" === self.config.format ? 65000 : 1000
                         if (index.tabix) {
-                            const bsizeOptions = igv.buildOptions(self.config,  {range: {start: index.firstAlignmentBlock, size: 26}});
+                            const bsizeOptions = igv.buildOptions(self.config, {
+                                range: {
+                                    start: index.firstAlignmentBlock,
+                                    size: 26
+                                }
+                            });
                             const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
                             const bsize = igv.bgzBlockSize(abuffer)
                             maxSize = index.firstAlignmentBlock + bsize;
@@ -161,7 +166,7 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.loadIndex = function () {
 
-        var idxFile = this.config.indexURL;
+        const idxFile = this.config.indexURL;
 
         if (this.filename.endsWith('.gz')) {
 
@@ -169,7 +174,7 @@ var igv = (function (igv) {
                 idxFile = this.config.url + '.tbi';
             }
             return igv.loadBamIndex(idxFile, this.config, true, this.genome);
-            
+
         } else {
 
             if (!idxFile) {
@@ -179,35 +184,30 @@ var igv = (function (igv) {
         }
     };
 
-    igv.FeatureFileReader.prototype.loadFeaturesNoIndex = function () {
+    igv.FeatureFileReader.prototype.loadFeaturesNoIndex = async function () {
 
-        var self = this;
+        const options = igv.buildOptions(this.config);    // Add oauth token, if any
+        const data = await igv.xhr.loadString(this.config.url, options)
 
-        var options = igv.buildOptions(self.config);    // Add oauth token, if any
+        this.header = this.parser.parseHeader(data);
+        if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
+            this.format = 'gff3';
+        }
+        return this.parser.parseFeatures(data);   // <= PARSING DONE HERE
 
-        return igv.xhr.loadString(self.config.url, options)
-            .then(function (data) {
-                self.header = self.parser.parseHeader(data);
-                if (self.header instanceof String && self.header.startsWith("##gff-version 3")) {
-                    self.format = 'gff3';
-                }
-                return self.parser.parseFeatures(data);   // <= PARSING DONE HERE
-            })
 
     };
 
-    igv.FeatureFileReader.prototype.loadFeaturesWithIndex = function (chr, start, end) {
+    igv.FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, end) {
 
         //console.log("Using index");
-        var self = this;
+        const config = this.config
+        const parser = this.parser
+        const tabix = this.index.tabix
+        const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
+        const promises = []
 
-
-        var blocks,
-            tabix = self.index && self.index.tabix,
-            refId = tabix ? self.index.sequenceIndexMap[chr] : chr,
-            promises = [];
-
-        blocks = self.index.blocksForRange(refId, start, end);
+        const blocks = this.index.blocksForRange(refId, start, end);
 
         if (!blocks || blocks.length === 0) {
             return Promise.resolve([]);
@@ -217,108 +217,83 @@ var igv = (function (igv) {
 
                 promises.push(new Promise(async function (fullfill, reject) {
 
-                    var startPos = block.minv.block,
-                        startOffset = block.minv.offset,
-                        endPos,
-                        options,
-                        success;
+                    const startPos = block.minv.block
+                    const startOffset = block.minv.offset
+                    const endOffset = block.maxv.offset
+                    let endPos
 
-                    if (self.index.tabix) {
-                        const bsizeOptions = igv.buildOptions(self.config, {
-                            range: {
-                                start: block.maxv.block,
-                                size: 26
-                            }
-                        });
-                        const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
-                        const lastBlockSize = igv.bgzBlockSize(abuffer)
+                    if (tabix) {
+                        let lastBlockSize = 0
+                        if (endOffset > 0) {
+                            const bsizeOptions = igv.buildOptions(config, {
+                                range: {
+                                    start: block.maxv.block,
+                                    size: 26
+                                }
+                            });
+                            const abuffer = await igv.xhr.loadArrayBuffer(config.url, bsizeOptions)
+                            lastBlockSize = igv.bgzBlockSize(abuffer)
+                        }
                         endPos = block.maxv.block + lastBlockSize;
                     } else {
                         endPos = block.maxv.block;
                     }
 
-                    options = igv.buildOptions(self.config, {
+                    options = igv.buildOptions(config, {
                         range: {
                             start: startPos,
                             size: endPos - startPos + 1
                         }
                     });
 
-                    success = function (data) {
-
-                        var inflated,
-                            slicedData,
-                            slicedFeatures,
-                            filteredFeatures,
-                            f,
-                            i;
-
-                        if (self.index.tabix) {
-                            inflated = new Uint8Array(igv.unbgzf(data));
-                        } else {
-                            inflated = data;
-                        }
-
-                        slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                        slicedFeatures = self.parser.parseFeatures(slicedData);
+                    const success = function (inflated) {
+                        const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                        const slicedFeatures = parser.parseFeatures(slicedData);
 
                         // Filter features not in requested range.
-                        filteredFeatures = [];
-                        for (i = 0; i < slicedFeatures.length; i++) {
-                            f = slicedFeatures[i];
+                        const filteredFeatures = [];
+                        for (let f of slicedFeatures) {
                             if (f.start > end) break;
                             if (f.end >= start && f.start <= end) {
                                 filteredFeatures.push(f);
                             }
                         }
-
-
                         fullfill(filteredFeatures);
                     };
 
-
-                    // Async load
-                    if (self.index.tabix) {
+                    if (tabix) {
                         igv.xhr
-                            .loadArrayBuffer(self.config.url, options)
-                            .then(success)
+                            .loadArrayBuffer(config.url, options)
+                            .then(function (data) {
+                                const inflated = new Uint8Array(igv.unbgzf(data))
+                                success(inflated)
+                            })
                             .catch(reject);
                     } else {
                         igv.xhr
-                            .loadString(self.config.url, options)
+                            .loadString(config.url, options)
                             .then(success)
                             .catch(reject);
                     }
-
                 }))
             });
 
-            return Promise.all(promises)
+            const featureArrays = await Promise.all(promises)
 
-                .then(function (featureArrays) {
+            let allFeatures = featureArrays[0];
+            if(allFeatures.length > 1) {
+                allFeatures = featureArrays[0];
+                for (let i = 1; i < featureArrays.length; i++) {
+                    allFeatures = allFeatures.concat(featureArrays[i]);
+                }
+                allFeatures.sort(function (a, b) {
+                    return a.start - b.start;
+                });
+            }
 
-                    var i,
-                        allFeatures;
-
-                    if (featureArrays.length === 1) {
-                        allFeatures = featureArrays[0];
-                    } else {
-                        allFeatures = featureArrays[0];
-
-                        for (i = 1; i < featureArrays.length; i++) {
-                            allFeatures = allFeatures.concat(featureArrays[i]);
-                        }
-
-                        allFeatures.sort(function (a, b) {
-                            return a.start - b.start;
-                        });
-                    }
-
-                    return allFeatures;
-                })
+            return allFeatures;
         }
-
-    };
+    }
 
     igv.FeatureFileReader.prototype.getIndex = function () {
 
