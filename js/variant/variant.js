@@ -39,7 +39,7 @@ var igv = (function (igv) {
         variant.names = tokens[2];    // id in VCF
         variant.referenceBases = tokens[3];
         variant.alternateBases = tokens[4];
-        variant.quality = parseInt(tokens[5]);
+        variant.quality = tokens[5];
         variant.filter = tokens[6];
         variant.info = getInfoObject(tokens[7]);
         init(variant);
@@ -54,6 +54,7 @@ var igv = (function (igv) {
                 var element = elem.split('=');
                 info[element[0]] = element[1];
             });
+
             return info;
         };
 
@@ -61,10 +62,15 @@ var igv = (function (igv) {
 
     function init(variant) {
 
-        if (variant.info && variant.info["VT"]) {
-            variant.type = variant.info["VT"].toLowerCase();
-        } else if (variant.info && variant.info["PERIOD"]) {
-            variant.type = "str";
+        if (variant.info) {
+            if (variant.info["VT"]) {
+                variant.type = variant.info["VT"];
+            } else if (variant.info["SVTYPE"]) {
+                variant.type = "SV";
+            }
+            else if (variant.info["PERIOD"]) {
+                variant.type = "STR";
+            }
         }
 
         const ref = variant.referenceBases;
@@ -72,10 +78,14 @@ var igv = (function (igv) {
 
         // Check for reference block
         if (isRef(altBases) || "." === altBases) {
-            variant.type = "refblock";
+            variant.type = "REFBLOCK";
             variant.heterozygosity = 0;
             variant.start = variant.pos - 1;      // convert to 0-based coordinate convention
             variant.end = variant.start + ref.length
+
+        } else if ("SV" === variant.type && variant.info["END"]) {
+            variant.start = variant.pos - 1;
+            variant.end = Number.parseInt(variant.info["END"]);
 
         } else {
             const altTokens = altBases.split(",").filter(token => token.length > 0);
@@ -90,12 +100,7 @@ var igv = (function (igv) {
                 let alleleEnd
 
                 // We don't yet handle  SV and other special alt representations
-                if ("sv" === variant.type || !isKnownAlt(alt)) {
-                    // Unknown alt representation (SA or other special tag)
-                    alleleStart = variant.pos - 1
-                    alleleEnd = alleleStart + ref.length
-
-                } else {
+                if ("SV" !== variant.type && isKnownAlt(alt)) {
 
                     let altLength = alt.length;
                     let lengthOnRef = ref.length;
@@ -137,7 +142,6 @@ var igv = (function (igv) {
                 variant.end = Math.max(variant.end, alleleEnd);
 
             }
-
         }
     }
 
@@ -167,7 +171,7 @@ var igv = (function (igv) {
             {name: "Pos", value: this.pos},
             {name: "Names", value: this.names ? this.names : ""},
             {name: "Ref", value: this.referenceBases},
-            {name: "Alt", value: this.alternateBases},
+            {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},
             {name: "Qual", value: this.quality},
             {name: "Filter", value: this.filter}
         ];
@@ -215,7 +219,7 @@ var igv = (function (igv) {
     };
 
     igv.Variant.prototype.isRefBlock = function () {
-        return "refblock" === this.type;
+        return "REFBLOCK" === this.type;
     }
 
     function isRef(altAlleles) {
