@@ -237,7 +237,7 @@ var igv = (function (igv) {
 
                                 const py = this.variantBandHeight + vGap + (callsDrawn + variant.row) * (h + vGap)
 
-                                let allVar= true;  // until proven otherwise
+                                let allVar = true;  // until proven otherwise
                                 let allRef = true;
                                 call.genotype.forEach(function (g) {
                                     if (g != 0) allRef = false;
@@ -303,7 +303,7 @@ var igv = (function (igv) {
                         if (callSets && variant.calls) {
                             const callHeight = ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
                             const row = Math.floor((yOffset - this.variantBandHeight) / (callHeight + vGap))
-                            if (row >= 0) {
+                            if (row >= 0 && row < callSets.length) {
                                 const cs = callSets[row];
                                 const call = variant.calls[cs.id];
                                 Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
@@ -330,17 +330,16 @@ var igv = (function (igv) {
             let cravatLinks = [];
             popupData = [];
 
-                let ref = variant.referenceBases;
-                call.genotype.forEach(function (i) {
-                    if (i === 0) {
-                        gt += variant.referenceBases;
-                    }
-                    else {
-                        let alt = variant.alternateBases[i - 1];
-                        gt += alt;
-                    }
-                });
-
+            const altArray = variant.alternateBases.split(",")
+            call.genotype.forEach(function (i) {
+                if (i === 0) {
+                    gt += variant.referenceBases;
+                }
+                else {
+                    let alt = altArray[i - 1].replace("<", "&lt;");
+                    gt += alt;
+                }
+            });
 
 
             if (call.callSetName !== undefined) {
@@ -468,6 +467,7 @@ var igv = (function (igv) {
                         object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
                         click: function () {
                             self.displayMode = displayMode;
+                            self.trackView.checkContentHeight();
                             self.trackView.repaintViews();
                         }
                     });
