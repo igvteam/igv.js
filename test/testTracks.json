@@ -182,6 +182,11 @@
     "name": "1 feature bed"
   },
   {
+    "url": "../test/data/bed/4_columns.bed",
+    "format": "bed",
+    "name": "4 column bed with track line"
+  },
+  {
     "name": "GZipped bed",
     "type": "annotation",
     "format": "bed",
@@ -321,8 +326,6 @@
     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz",
     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.chr22.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz.tbi",
     "name": "1KG variants (chr22)",
-    "squishedCallHeight": 1,
-    "expandedCallHeight": 4,
     "displayMode": "squished"
   },
   {
