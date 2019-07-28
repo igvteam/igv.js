@@ -63,87 +63,78 @@ var igv = (function (igv) {
      * @param start
      * @param end
      */
-    igv.FeatureFileReader.prototype.readFeatures = function (chr, start, end) {
+    igv.FeatureFileReader.prototype.readFeatures = async function (chr, start, end) {
 
-        var self = this;
+        const index = await this.getIndex()
+        if (index) {
+            return this.loadFeaturesWithIndex(chr, start, end);
+        } else if (this.dataURI) {
+            return this.loadFeaturesFromDataURI();
+        } else {
+            return this.loadFeaturesNoIndex()
+        }
 
-        return self.getIndex()
-            .then(function (index) {
-                if (index) {
-                    return self.loadFeaturesWithIndex(chr, start, end);
-                } else if (self.dataURI) {
-                    return self.loadFeaturesFromDataURI();
-                } else {
-                    return self.loadFeaturesNoIndex()
-                }
-            });
     };
 
-    igv.FeatureFileReader.prototype.readHeader = function () {
+    igv.FeatureFileReader.prototype.readHeader = async function () {
 
-        var self = this;
+        if (!this.header) {
 
-        if (self.header) {
-            return Promise.resolve(self.header);
-        } else {
 
-            return self.getIndex()
 
-                .then(async function (index) {
+            let header
 
-                    var options,
-                        success;
-                    if (self.dataURI) {
+            if (this.dataURI) {
 
-                        return self.loadFeaturesFromDataURI(self.dataURI)
-                            .then(function (features) {
-                                var header = self.header || {};
-                                header.features = features;
-                                return header;
-                            })
-                    } else if (index) {
+                const features = await this.loadFeaturesFromDataURI(this.dataURI)
+                header = this.header || {};
+                header.features = features;
 
-                        // Load the file header (not HTTP header) for an indexed file.
+            } else {
 
-                        let maxSize = "vcf" === self.config.format ? 65000 : 1000
-                        if (index.tabix) {
-                            const bsizeOptions = igv.buildOptions(self.config, {
-                                range: {
-                                    start: index.firstAlignmentBlock,
-                                    size: 26
-                                }
-                            });
-                            const abuffer = await igv.xhr.loadArrayBuffer(self.config.url, bsizeOptions)
-                            const bsize = igv.bgzBlockSize(abuffer)
-                            maxSize = index.firstAlignmentBlock + bsize;
-                        } else {
+                const index = await this.getIndex()
+                if (index) {
 
-                        }
+                    // Load the file header (not HTTP header) for an indexed file.
 
-                        options = igv.buildOptions(self.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-
-                        return igv.xhr.loadString(self.config.url, options)
-                            .then(function (data) {
-                                self.header = self.parser.parseHeader(data);
-                                return self.header
-                            });
+                    let maxSize = "vcf" === this.config.format ? 65000 : 1000
+                    if (index.tabix) {
+                        const bsizeOptions = igv.buildOptions(this.config, {
+                            range: {
+                                start: index.firstAlignmentBlock,
+                                size: 26
+                            }
+                        });
+                        const abuffer = await igv.xhr.loadArrayBuffer(this.config.url, bsizeOptions)
+                        const bsize = igv.bgzBlockSize(abuffer)
+                        maxSize = index.firstAlignmentBlock + bsize;
                     } else {
-                        // If this is a non-indexed file we will load all features in advance
-                        return self.loadFeaturesNoIndex()
-                            .then(function (features) {
-                                var header = self.header || {};
-                                header.features = features;
-                                return header;
-                            })
+
                     }
-                })
-                .then(function (header) {
-                    if (header && self.parser) {
-                        self.parser.header = header;
-                    }
-                    return header;
-                })
+
+                    const options = igv.buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+
+                    const data = await igv.xhr.loadString(this.config.url, options)
+                    header = this.parser.parseHeader(data);
+
+
+                } else {
+                    // If this is a non-indexed file we will load all features in advance
+                    const features = await this.loadFeaturesNoIndex()
+                    header = this.header || {};
+                    header.features = features;
+                }
+
+
+                if (header && this.parser) {
+                    this.parser.header = header;
+                }
+
+                this.header = header;
+                return header;
+            }
         }
+        return this.header;
 
     };
 
@@ -166,7 +157,7 @@ var igv = (function (igv) {
      */
     igv.FeatureFileReader.prototype.loadIndex = function () {
 
-        const idxFile = this.config.indexURL;
+        let idxFile = this.config.indexURL;
 
         if (this.filename.endsWith('.gz')) {
 
@@ -281,7 +272,7 @@ var igv = (function (igv) {
             const featureArrays = await Promise.all(promises)
 
             let allFeatures = featureArrays[0];
-            if(allFeatures.length > 1) {
+            if (allFeatures.length > 1) {
                 allFeatures = featureArrays[0];
                 for (let i = 1; i < featureArrays.length; i++) {
                     allFeatures = allFeatures.concat(featureArrays[i]);
@@ -327,7 +318,7 @@ var igv = (function (igv) {
         }
     };
 
-    igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = function () {
+    igv.FeatureFileReader.prototype.loadFeaturesFromDataURI = async function () {
 
         const plain = igv.decodeDataURI(this.dataURI)
         this.header = this.parser.parseHeader(plain);
@@ -335,7 +326,7 @@ var igv = (function (igv) {
             this.format = 'gff3';
         }
         const features = this.parser.parseFeatures(plain);
-        return Promise.resolve(features);
+        return features;
     };
 
     return igv;
