@@ -329,6 +329,12 @@
     "displayMode": "squished"
   },
   {
+    "type": "variant",
+    "url": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+    "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+    "name": "1KG SV variants"
+  },
+  {
     "HEADING": "GA4GH"
   },
   {
