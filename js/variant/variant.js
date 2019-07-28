@@ -42,12 +42,9 @@ var igv = (function (igv) {
         variant.quality = parseInt(tokens[5]);
         variant.filter = tokens[6];
         variant.info = getInfoObject(tokens[7]);
-
         init(variant);
-
         return variant;
 
-        //
         function getInfoObject(infoStr) {
 
             if (!infoStr) return undefined;
@@ -69,14 +66,9 @@ var igv = (function (igv) {
         } else if (variant.info && variant.info["PERIOD"]) {
             variant.type = "str";
         }
-        if ("str" === variant.type) {
-            return initSTR(variant)
-        }
-
 
         const ref = variant.referenceBases;
         const altBases = variant.alternateBases
-
 
         // Check for reference block
         if (isRef(altBases) || "." === altBases) {
@@ -86,7 +78,6 @@ var igv = (function (igv) {
             variant.end = variant.start + ref.length
 
         } else {
-
             const altTokens = altBases.split(",").filter(token => token.length > 0);
             variant.alleles = [];
             variant.start = variant.pos;
@@ -162,54 +153,6 @@ var igv = (function (igv) {
 
     }
 
-    function initSTR(variant) {
-
-        var altTokens = variant.alternateBases.split(","),
-            minAltLength = variant.referenceBases.length,
-            maxAltLength = variant.referenceBases.length;
-
-        variant.alleles = [];
-
-        altTokens.forEach(function (alt, index) {
-            variant.alleles.push(alt);
-            minAltLength = Math.min(minAltLength, alt.length);
-            maxAltLength = Math.max(maxAltLength, alt.length);
-        });
-
-        variant.start = variant.pos - 1;
-        variant.end = variant.start + variant.referenceBases.length;
-
-        if (variant.info && variant.info.AC && variant.info.AN) {
-            variant.heterozygosity = calcHeterozygosity(variant.info.AC, variant.info.AN).toFixed(3);
-        }
-
-
-        // Alternate allele lengths used for STR color scale.
-        variant.minAltLength = minAltLength;
-        variant.maxAltLength = maxAltLength;
-
-
-        function calcHeterozygosity(ac, an) {
-            var sum = 0,
-                altFreqs = Array.isArray(ac) ? ac : ac.split(','),
-                altCount = 0,
-                refFrac;
-
-            an = Array.isArray(an) ? parseInt(an[0]) : parseInt(an);
-            altFreqs.forEach(function (altFreq) {
-                var a = parseInt(altFreq),
-                    altFrac = a / an;
-                sum += altFrac * altFrac;
-                altCount += a;
-            });
-
-            refFrac = (an - altCount) / an;
-            sum += refFrac * refFrac;
-            return 1 - sum;
-        };
-    }
-
-
     igv.Variant = function () {
 
     }
@@ -233,14 +176,13 @@ var igv = (function (igv) {
             let ref = this.referenceBases;
             if (ref.length === 1) {
                 let altArray = this.alternateBases.split(",");
-                fields.push("<hr/>");
                 for (let i = 0; i < altArray.length; i++) {
                     let alt = this.alternateBases[i];
                     if (alt.length === 1) {
                         let l = igv.TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
                         if (l) {
+                            fields.push("<hr/>");
                             fields.push(l);
-                            fields.push('<hr>');
                         }
                     }
                 }
@@ -251,19 +193,19 @@ var igv = (function (igv) {
             fields.push({name: "Heterozygosity", value: this.heterozygosity});
         }
 
-        // Special case of VCF with a single sample
-        if (this.calls && this.calls.length === 1) {
-            fields.push('<hr>');
-            gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
-            fields.push({name: "Genotype", value: gt});
-        }
-
-
         if (this.info) {
             fields.push('<hr>');
             Object.keys(this.info).forEach(function (key) {
                 fields.push({name: key, value: arrayToString(self.info[key])});
             });
+        }
+
+
+        // Special case of VCF with a single sample
+        if (this.calls && this.calls.length === 1) {
+            fields.push('<hr>');
+            gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
+            fields.push({name: "Genotype", value: gt});
         }
 
 

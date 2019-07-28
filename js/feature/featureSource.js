@@ -54,11 +54,9 @@ var igv = (function (igv) {
             if (config.mappings) {
                 mapProperties(features, config.mappings)
             }
-            this.queryable = false;
             this.featureCache = new igv.FeatureCache(features, genome);
             this.static = true;
-        }
-        else if (config.sourceType === "ga4gh") {
+        } else if (config.sourceType === "ga4gh") {
             this.reader = new igv.Ga4ghVariantReader(config, genome);
             this.queryable = true;
         } else if (config.sourceType === "immvar") {
@@ -76,17 +74,15 @@ var igv = (function (igv) {
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new igv.CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
-        }
-        else if ("civic-ws" === config.sourceType) {
+        } else if ("civic-ws" === config.sourceType) {
             this.reader = new igv.CivicReader(config);
             this.queryable = false;
-        }
-        else {
+        } else {
             this.reader = new igv.FeatureFileReader(config, genome);
             if (config.queryable != undefined) {
                 this.queryable = config.queryable
             } else if (queryableFormats.has(config.format)) {
-                this.queryable = true;
+                this.queryable = queryableFormats.has(config.format) || reader.indexed;
             }
             else {
                 // Leav undefined -- will defer until we know if reader has an index
@@ -99,59 +95,29 @@ var igv = (function (igv) {
         return !this.queryable;
     }
 
-    igv.FeatureSource.prototype.getFileHeader = function () {
+    igv.FeatureSource.prototype.getFileHeader = async function () {
 
-        const self = this;
-        const genome = this.genome;
-        const maxRows = this.config.maxRows || 500;
+        if (!this.header) {
+            if (this.reader && typeof this.reader.readHeader === "function") {
 
-
-        if (self.header) {
-            return Promise.resolve(self.header);
-        } else {
-            if (self.reader && typeof self.reader.readHeader === "function") {
-
-                return self.reader.readHeader()
-
-                    .then(function (header) {
-
-                        // Non-indexed readers will return features as a side effect.  This is an important,
-                        // if unfortunate, performance hack
-                        if (header) {
-
-                            self.header = header;
-
-                            var features = header.features;
-
-                            if (features) {
-
-                                if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                    features = (new igv.GFFHelper(self.config)).combineFeatures(features);
-                                }
-
-                                // Assign overlapping features to rows
-                                packFeatures(features, maxRows);
-                                self.featureCache = new igv.FeatureCache(features, genome);
-
-                                // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                                if (self.config.searchable) {
-                                    addFeaturesToDB.call(self, features);
-                                }
-                            }
-                        }
-
-                        if (header && header.format) {
-                            self.config.format = header.format;
-                        }
-
-                        return header;
-                    })
+                const header = await this.reader.readHeader()
+                if (header) {
+                    this.header = header;
+                    // Non-indexed readers will return features as a side effect (entire file is read).
+                    const features = header.features;
+                    if (features) {
+                        this.ingestFeatures(features);
+                    }
+                    if (header.format)
+                        this.config.format = header.format;
+                }
+                this.header = header;
             }
             else {
-                self.header = {};
-                return Promise.resolve(self.header);
+                this.header = {};
             }
         }
+        return this.header
 
     };
 
@@ -169,7 +135,7 @@ var igv = (function (igv) {
 
 
     /**
-     * Required function fo all data source objects.  Fetches features for the
+     * Required function for all data source objects.  Fetches features for the
      * range requested and passes them on to the success function.  Usually this is
      * a function that renders the features on the canvas
      *
@@ -179,49 +145,38 @@ var igv = (function (igv) {
      * @param bpPerPixel
      */
 
-    igv.FeatureSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
+    igv.FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-        const self = this;
         const reader = this.reader;
         const genome = this.genome;
-        const supportWholeGenome = this.config.supportWholeGenome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const maxRows = self.config.maxRows || 500;
+        const maxRows = this.config.maxRows || 500;
+        const featureCache = await getFeatureCache.call(this)
+        const isQueryable = this.queryable;
 
-        return getFeatureCache()
-
-            .then(function (featureCache) {
-
-                const isQueryable = self.queryable;
-
-                if ("all" === chr.toLowerCase()) {
-                    if (isQueryable) {    // Strange test -- what it really means is are we querying for specific regions
-                        return [];
-                    }
-                    else {
-                        return self.getWGFeatures(featureCache.getAllFeatures());
-                    }
-                }
-                else {
-                    return self.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
-                }
-
-            })
+        if ("all" === chr.toLowerCase()) {
+            if (isQueryable) {   // queryable sources don't support whole genome view
+                return [];
+            }
+            else {
+                return this.getWGFeatures(featureCache.getAllFeatures());
+            }
+        }
+        else {
+            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+        }
 
 
-        function getFeatureCache() {
-
-            var genomicInterval;
+        async function getFeatureCache() {
 
             let intervalStart = bpStart;
             let intervalEnd = bpEnd;
+            let genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
-            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+            if (this.featureCache &&
+                (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
 
-            if (self.featureCache &&
-                (self.static || self.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-
-                return Promise.resolve(self.featureCache);
+                return this.featureCache;
             }
             else {
 
@@ -240,44 +195,45 @@ var igv = (function (igv) {
                 }
                 genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
 
+                let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 
-                return reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+                if (this.queryable === undefined) {
+                    this.queryable = reader.indexed;
+                }
 
-                    .then(function (featureList) {
+                if (featureList) {
+                    this.ingestFeatures(featureList, genomicInterval);
+                }
+                else {
+                    this.featureCache = new igv.FeatureCache();     // Empty cache
+                }
 
-                        if (self.queryable === undefined) self.queryable = reader.indexed;
+                return this.featureCache;
 
-                        if (featureList) {
-
-                            if ("gtf" === self.config.format || "gff3" === self.config.format || "gff" === self.config.format) {
-                                featureList = (new igv.GFFHelper(self.config)).combineFeatures(featureList);
-                            }
-
-                            // Assign overlapping features to rows
-                            packFeatures(featureList, maxRows);
-
-                            // Note - replacing previous cache with new one
-                            self.featureCache = self.queryable ?
-                                new igv.FeatureCache(featureList, genome, genomicInterval) :
-                                new igv.FeatureCache(featureList, genome);
-
-
-                            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-                            if (self.config.searchable) {
-                                addFeaturesToDB.call(self, featureList);
-                            }
-                        }
-                        else {
-                            self.featureCache = new igv.FeatureCache();     // Empty cache
-                        }
-
-                        return self.featureCache;
-
-                    })
             }
         }
     };
 
+    igv.FeatureSource.prototype.ingestFeatures = function (featureList, genomicInterval) {
+
+        if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
+            featureList = (new igv.GFFHelper(this.config)).combineFeatures(featureList);
+        }
+
+        // Assign overlapping features to rows
+        packFeatures(featureList, this.maxRows);
+
+        // Note - replacing previous cache with new one
+        this.featureCache = this.queryable ?
+            new igv.FeatureCache(featureList, this.genome, genomicInterval) :
+            new igv.FeatureCache(featureList, this.genome);
+
+
+        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+        if (this.config.searchable) {
+            addFeaturesToDB.call(this, featureList);
+        }
+    }
 
     function packFeatures(features, maxRows) {
 
@@ -369,7 +325,7 @@ var igv = (function (igv) {
                 // Don't draw exons in whole genome view
                 if (wg["exons"]) delete wg["exons"]
 
-                wg.popupData = function(genomeLocation) {
+                wg.popupData = function (genomeLocation) {
                     const clonedObject = Object.assign({}, this)
                     clonedObject.chr = this.realChr
                     clonedObject.start = this.realStart
@@ -389,9 +345,6 @@ var igv = (function (igv) {
         });
 
         return wgFeatures;
-
-
-
 
 
     }
