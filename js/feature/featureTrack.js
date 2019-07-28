@@ -60,14 +60,12 @@ var igv = (function (igv) {
                     config.maxRows = 500;
                 }
                 this.maxRows = config.maxRows;
-
                 this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
                 this.labelDisplayMode = config.labelDisplayMode;
 
                 const format = config.format ? config.format.toLowerCase() : undefined;
                 if ('bigwig' === format || 'bigbed' === format) {
                     this.featureSource = new igv.BWSource(config, browser.genome);
-
                 }
                 else {
                     this.featureSource = new igv.FeatureSource(config, browser.genome);
@@ -117,22 +115,18 @@ var igv = (function (igv) {
 
             });
 
-        FeatureTrack.prototype.postInit = function () {
+        FeatureTrack.prototype.postInit = async function () {
 
-            const self = this;
+            await this.readFileHeader()
+
             const format = this.config.format;
-
-            if (format && format.toLowerCase() === 'bigbed' && this.visibilityWindow === undefined) {
-
-                return this.featureSource.defaultVisibilityWindow()
-                    .then(function (visibilityWindow) {
-                        self.visibilityWindow = visibilityWindow;
-                        return self;
-                    })
+            if (format && format.toLowerCase() === 'bigbed' &&
+                this.visibilityWindow === undefined &&
+                typeof this.featureSource.defaultVisibilityWindow === 'function') {
+                this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
             }
-            else {
-                return Promise.resolve(self);
-            }
+
+            return this;
 
         }
 
@@ -140,53 +134,27 @@ var igv = (function (igv) {
             return this.config.indexed === false && this.config.supportsWholeGenome !== false
         }
 
-        FeatureTrack.prototype.getFileHeader = function () {
-
-            const self = this;
-
-            if (typeof self.featureSource.getFileHeader === "function") {
-
-                if (self.header) {
-                    return Promise.resolve(self.header);
+        FeatureTrack.prototype.readFileHeader = async function () {
+            if (typeof this.featureSource.getFileHeader === "function") {
+                const header = await this.featureSource.getFileHeader()
+                if (header) {
+                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
+                    if (header.name && !this.config.name) {
+                        this.name = header.name;
+                    }
+                    if (header.color && !this.config.color) {
+                        this.color = "rgb(" + header.color + ")";
+                    }
+                    this.header = header;
                 }
                 else {
-                    return self.featureSource.getFileHeader()
-
-                        .then(function (header) {
-
-                            if (header) {
-                                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                                if (header.name && !self.config.name) {
-                                    self.name = header.name;
-                                }
-                                if (header.color && !self.config.color) {
-                                    self.color = "rgb(" + header.color + ")";
-                                }
-                                self.header = header;
-                            }
-                            else {
-                                self.header = {};
-                            }
-
-                            return header;
-
-                        })
+                    this.header = {};
                 }
             }
-            else {
-                return Promise.resolve(null);
-            }
-        };
+        }
 
-        FeatureTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-
-            const self = this;
-
-            return this.getFileHeader()
-
-                .then(function (header) {
-                    return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.visibilityWindow);
-                });
+        FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+            return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.visibilityWindow);
         };
 
 
@@ -312,7 +280,7 @@ var igv = (function (igv) {
 
             let self = this;
 
-            if(!features) features = this.clickedFeatures(clickState);
+            if (!features) features = this.clickedFeatures(clickState);
             const genomicLocation = clickState.genomicLocation;
 
             const data = [];
