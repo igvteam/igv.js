@@ -328,19 +328,11 @@ var igv = (function (igv) {
 
 
     function loadFileSlice(localfile, options) {
-
         return new Promise(function (fullfill, reject) {
-
-            var fileReader,
-                blob,
-                rangeEnd;
-
-            fileReader = new FileReader();
+            var fileReader = new FileReader();
 
             fileReader.onload = function (e) {
-
                 fullfill(fileReader.result);
-
             };
 
             fileReader.onerror = function (e) {
@@ -349,8 +341,7 @@ var igv = (function (igv) {
             };
 
             if (options.range) {
-                rangeEnd = options.range.start + options.range.size - 1;
-                blob = localfile.slice(options.range.start, rangeEnd + 1);
+                var blob = localfile.slice(options.range.start, options.range.start + options.range.size);
                 if ("arraybuffer" === options.responseType) {
                     fileReader.readAsArrayBuffer(blob);
                 } else {
@@ -363,9 +354,7 @@ var igv = (function (igv) {
                     fileReader.readAsBinaryString(localfile);
                 }
             }
-
         });
-
     }
 
     function loadStringFromFile(localfile, options) {
