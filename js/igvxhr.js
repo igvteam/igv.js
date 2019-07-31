@@ -40,9 +40,7 @@ var igv = (function (igv) {
             this.calls = [];
         }
 
-
         limiter(fn) {
-
             const self = this;
 
             let caller = function () {
@@ -61,15 +59,12 @@ var igv = (function (igv) {
                 caller();
             };
         }
-
     }
 
     const rateLimiter = new RateLimiter(100);
 
-
     igv.xhr = {
-
-
+        
         load: async function (url, options) {
 
             options = options || {};
@@ -226,9 +221,8 @@ var igv = (function (igv) {
                                                 } else {
                                                     throw(error);
                                                 }
-                                            })
+                                            });
                                     });
-
 
                             } else {
 
@@ -278,21 +272,17 @@ var igv = (function (igv) {
         },
 
         loadArrayBuffer: function (url, options) {
-
             options = options || {};
             options.responseType = "arraybuffer";
 
             if (url instanceof File) {
                 return loadFileSlice(url, options);
             } else {
-
                 return igv.xhr.load(url, options);
             }
-
         },
 
         loadJson: function (url, options) {
-
             options = options || {};
 
             var method = options.method || (options.sendData ? "POST" : "GET");
@@ -302,18 +292,15 @@ var igv = (function (igv) {
             return igv.xhr.load(url, options)
 
                 .then(function (result) {
-
                     if (result) {
                         return JSON.parse(result);
                     } else {
                         return result;
                     }
-                })
-
+                });
         },
 
         loadString: function (path, options) {
-
             options = options || {};
 
             if (path instanceof File) {
@@ -358,7 +345,6 @@ var igv = (function (igv) {
     }
 
     function loadStringFromFile(localfile, options) {
-
         return new Promise(function (fullfill, reject) {
 
             var fileReader = new FileReader();
