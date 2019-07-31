@@ -43,7 +43,7 @@ var igv = (function (igv) {
 
         limiter(fn) {
 
-            const self = this
+            const self = this;
 
             let caller = function () {
                 if (self.calls.length && !self.isCalled) {
@@ -64,7 +64,7 @@ var igv = (function (igv) {
 
     }
 
-    const rateLimiter = new RateLimiter(100)
+    const rateLimiter = new RateLimiter(100);
 
 
     igv.xhr = {
@@ -91,8 +91,8 @@ var igv = (function (igv) {
                                 } catch (e) {
                                     reject(e)
                                 }
-                            })(url, options)
-                        })
+                            })(url, options);
+                        });
                     } else {
                         return loadURL(url, options);
                     }
@@ -135,10 +135,10 @@ var igv = (function (igv) {
                         // Various Google tansformations
                         if (igv.google.isGoogleURL(url)) {
                             if (url.startsWith("gs://")) {
-                                url = igv.google.translateGoogleCloudURL(url)
+                                url = igv.google.translateGoogleCloudURL(url);
                             } else if (igv.google.isGoogleStorageURL(url)) {
                                 if (!url.includes("altMedia=")) {
-                                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true")
+                                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                                 }
                             }
                             url = igv.google.addApiKey(url);
@@ -227,7 +227,7 @@ var igv = (function (igv) {
                                                     throw(error);
                                                 }
                                             })
-                                    })
+                                    });
 
 
                             } else {
