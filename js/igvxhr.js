@@ -328,11 +328,11 @@ var igv = (function (igv) {
 
 
     function loadFileSlice(localfile, options) {
-        return new Promise(function (fullfill, reject) {
+        return new Promise(function (resolve, reject) {
             var fileReader = new FileReader();
 
             fileReader.onload = function (e) {
-                fullfill(fileReader.result);
+                resolve(fileReader.result);
             };
 
             fileReader.onerror = function (e) {
