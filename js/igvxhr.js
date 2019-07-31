@@ -35,8 +35,8 @@ var igv = (function (igv) {
     class RateLimiter {
 
         constructor(wait) {
-            this.wait = wait === undefined ? 100 : wait
-            this.isCalled = false
+            this.wait = wait === undefined ? 100 : wait;
+            this.isCalled = false;
             this.calls = [];
         }
 
@@ -409,27 +409,24 @@ var igv = (function (igv) {
     }
 
     function getOauthToken(url) {
-
-        if (igv) {
-            const host = igv.parseUri(url).host;
-            let token = igv.oauth.getToken(host);
-            if (!token && igv.google.isGoogleURL(url)) {
-                token = igv.oauth.google.access_token;
-            }
-            return token;
-        } else {
+        if (!igv) {
             return undefined;
         }
+
+        const host = igv.parseUri(url).host;
+        let token = igv.oauth.getToken(host);
+        if (!token && igv.google.isGoogleURL(url)) {
+            token = igv.oauth.google.access_token;
+        }
+        return token;
     }
 
     function addOauthHeaders(headers, acToken) {
-        {
-            if (acToken) {
-                headers["Cache-Control"] = "no-cache";
-                headers["Authorization"] = "Bearer " + acToken;
-            }
-            return headers;
+        if (acToken) {
+            headers["Cache-Control"] = "no-cache";
+            headers["Authorization"] = "Bearer " + acToken;
         }
+        return headers;        
     }
 
     /**
@@ -453,19 +450,16 @@ var igv = (function (igv) {
 
 
     function arrayBufferToString(arraybuffer, compression) {
-
-        var plain, inflate;
-
         if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
-
-            const m = new Uint8Array(arraybuffer, 0, 2)
+            const m = new Uint8Array(arraybuffer, 0, 2);
             if (m[0] === 31 && m[1] === 139) {
-                compression = GZIP
+                compression = GZIP;
             }
         }
 
+        var plain;
         if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
             plain = inflate.decompress();
         } else if (compression === BGZF) {
             plain = new Uint8Array(igv.unbgzf(arraybuffer));
@@ -478,13 +472,11 @@ var igv = (function (igv) {
         } else {
             return decodeUTF8(plain);
         }
-
     };
 
     function isGoogleDrive(url) {
-        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
+        return url.includes("drive.google.com") || url.includes("www.googleapis.com/drive");
     }
-
 
     /**
      * There can be only 1 oAuth promise executing at a time.
@@ -494,41 +486,40 @@ var igv = (function (igv) {
     async function getGoogleAccessToken() {
         if (igv.oauth.google.access_token) {
             return Promise.resolve(igv.oauth.google.access_token);
-        } else if (oauthPromise) {
-            return oauthPromise
         }
-        else {
-            const authInstance = gapi.auth2.getAuthInstance();
-            if (!authInstance) {
-                igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
-                return undefined;
-            } else {
-                const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
-                const options = new gapi.auth2.SigninOptionsBuilder();
-                options.setPrompt('select_account');
-                options.setScope(scope);
-                oauthPromise = new Promise(function (resolve, reject) {
+        if (oauthPromise) {
+            return oauthPromise;
+        } 
 
-                    igv.browser.presentMessageWithCallback("Google Login required", function () {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (!authInstance) {
+            igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+            return undefined;
+        }
 
-                        gapi.auth2.getAuthInstance().signIn(options)
-                            .then(function (user) {
-                                const authResponse = user.getAuthResponse();
-                                igv.setGoogleOauthToken(authResponse["access_token"]);
-                                resolve(authResponse["access_token"]);
-                                oauthPromise = undefined
-                            })
-                            .catch(function(err) {
-                                oauthPromise = undefined
-                                reject(err)
-                            })
+        const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+        const options = new gapi.auth2.SigninOptionsBuilder();
+        options.setPrompt('select_account');
+        options.setScope(scope);
+        oauthPromise = new Promise(function (resolve, reject) {
+
+            igv.browser.presentMessageWithCallback("Google Login required", function () {
+
+                gapi.auth2.getAuthInstance().signIn(options)
+                    .then(function (user) {
+                        const authResponse = user.getAuthResponse();
+                        igv.setGoogleOauthToken(authResponse["access_token"]);
+                        resolve(authResponse["access_token"]);
+                        oauthPromise = undefined;
                     })
-                })
+                    .catch(function(err) {
+                        oauthPromise = undefined;
+                        reject(err);
+                    });
+            });
+        });
 
-                return oauthPromise
-            }
-        }
-
+        return oauthPromise;
     }
 
 
@@ -555,7 +546,6 @@ var igv = (function (igv) {
     }
 
     function validateIP(address) {
-
         const regex = new RegExp(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
         return regex.test(address);
     }
