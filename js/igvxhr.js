@@ -348,18 +348,15 @@ var igv = (function (igv) {
         return new Promise(function (fullfill, reject) {
 
             var fileReader = new FileReader();
-            var compression;
 
+            var compression = NONE;
             if (options.bgz) {
                 compression = BGZF;
             } else if (localfile.name.endsWith(".gz")) {
                 compression = GZIP;
-            } else {
-                compression = NONE;
             }
 
             fileReader.onload = function (e) {
-
                 if (compression === NONE) {
                     return fullfill(fileReader.result);
                 } else {
@@ -377,43 +374,34 @@ var igv = (function (igv) {
             } else {
                 fileReader.readAsArrayBuffer(localfile);
             }
-
         });
 
     }
 
     function loadStringFromUrl(url, options) {
+        options = options || {};
 
-        var compression,
-            fn,
-            idx;
+        var fn = options.filename || igv.getFilename(url);
 
-        if (options === undefined) options = {};
-
-        fn = options.filename || igv.getFilename(url);
-
+        var compression = UNKNOWN;
         if (options.bgz) {
             compression = BGZF;
         } else if (fn.endsWith(".gz")) {
             compression = GZIP;
-        } else {
-            compression = UNKNOWN;
         }
 
         options.responseType = "arraybuffer";
         return igv.xhr.load(url, options)
             .then(function (data) {
                 return arrayBufferToString(data, compression);
-            })
+            });
 
 
         function getFilename(url, options) {
-
             if (options.filename) {
                 return Promise.resolve(options.filename);
             }
         }
-
     }
 
     function isAmazonV4Signed(url) {
