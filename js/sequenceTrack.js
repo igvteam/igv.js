@@ -184,7 +184,7 @@ var igv = (function (igv) {
                     }
 
                     obj.codons = st;
-                    obj.aminoA = self.translationDict[st];
+                    obj.aminoA = self.translationDict[st.toUpperCase()];
                     threeFrame[fNum].push(obj);
                     obj = null;
                     idx += 3;
