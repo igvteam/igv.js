@@ -40,12 +40,15 @@
   "devDependencies": {
     "@babel/core": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
+    "@gmod/bam": "^1.0.20",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-remove-console": "^6.9.4",
     "babel-polyfill": "^6.26.0",
     "grunt": "^1.0.4",
     "grunt-babel": "^8.0.0",
+    "grunt-contrib-clean": "^2.0.0",
     "grunt-contrib-concat": "^1.0.1",
+    "grunt-contrib-connect": "^2.0.0",
     "grunt-contrib-copy": "^1.0.0",
     "grunt-contrib-uglify-es": "^3.3.0",
     "grunt-qunit-puppeteer": "^1.0.13",
@@ -54,9 +57,5 @@
     "shelljs": "^0.8.3",
     "webpack": "^4.34.0"
   },
-  "dependencies": {
-    "@gmod/bam": "^1.0.20",
-    "grunt-contrib-clean": "^2.0.0",
-    "grunt-contrib-connect": "^2.0.0"
-  }
+  "dependencies": {}
 }
