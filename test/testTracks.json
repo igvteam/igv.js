@@ -26,6 +26,13 @@
   },
   {
     "type": "alignment",
+    "name": "Heart SLC25A3 - Dropbox BAM",
+    "format": "bam",
+    "url": "https://www.dropbox.com/s/tb6vueic5t1bvcv/heart_slc25a3.bam?dl=0",
+    "indexURL": "https://www.dropbox.com/s/x22tg6s3umkp5yy/heart_slc25a3.bam.bai?dl=0"
+  },
+  {
+    "type": "alignment",
     "name": "Heart SLC25A3 - Dropbox",
     "url": "https://www.dropbox.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0",
     "indexURL": "https://www.dropbox.com/s/k3r83ckbo0chtm7/heart_slc25a3.crai?dl=0"
