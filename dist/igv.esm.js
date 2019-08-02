@@ -29617,7 +29617,7 @@ var igv = (function (igv) {
                         endPos = block.maxv.block;
                     }
 
-                    options = igv.buildOptions(config, {
+                    const options = igv.buildOptions(config, {
                         range: {
                             start: startPos,
                             size: endPos - startPos + 1
@@ -50155,6 +50155,7 @@ var igv = (function (igv) {
                         }
                     }
                 }
+
             }
 
             return popupData;
