@@ -36,28 +36,25 @@ var igv = (function (igv) {
      */
 
     igv.FeatureCache = function (featureList, genome, range) {
-        
+
         this.treeMap = buildTreeMap(featureList, genome);
         this.range = range;
-        
+        this.allFeatures = featureList;
+
     }
 
     igv.FeatureCache.prototype.containsRange = function (genomicRange) {
-
         // No range means cache contains all features
         return (this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
-
     }
 
     igv.FeatureCache.prototype.queryFeatures = function (chr, start, end) {
 
-        var featureList, intervalFeatures, feature, len, i, tree, intervals;
-
-        tree = this.treeMap[chr];
+        const tree = this.treeMap[chr];
 
         if (!tree) return [];
 
-        intervals = tree.findOverlapping(start, end);
+        const intervals = tree.findOverlapping(start, end);
 
         if (intervals.length == 0) {
             return [];
@@ -67,19 +64,18 @@ var igv = (function (igv) {
             // overlapping the requested range.
             // Assumption: features are sorted by start position
 
-            featureList = [];
+            const featureList = [];
 
-            intervals.forEach(function (interval) {
-                intervalFeatures = interval.value;
-                len = intervalFeatures.length;
-                for (i = 0; i < len; i++) {
-                    feature = intervalFeatures[i];
+            for (let interval of intervals) {
+                const indexRange = interval.value;
+                for (let i = indexRange.start; i <= indexRange.end; i++) {
+                    let feature = this.allFeatures[i];
                     if (feature.start > end) break;
                     else if (feature.end >= start) {
                         featureList.push(feature);
                     }
                 }
-            });
+            }
 
             featureList.sort(function (a, b) {
                 return a.start - b.start;
@@ -87,7 +83,6 @@ var igv = (function (igv) {
 
             return featureList;
         }
-
     };
 
     /**
@@ -97,31 +92,16 @@ var igv = (function (igv) {
      */
     igv.FeatureCache.prototype.getAllFeatures = function () {
 
-
-        var allFeatures = [];
-        var treeMap = this.treeMap;
-        if (treeMap) {
-            for (var key in treeMap) {
-                if (treeMap.hasOwnProperty(key)) {
-
-                    var tree = treeMap[key];
-                    tree.mapIntervals(function (interval) {
-                        allFeatures = allFeatures.concat(interval.value);
-                    });
-                }
-            }
-        }
-
-        return allFeatures;
+        return this.allFeatures;
 
     }
 
     function buildTreeMap(featureList, genome) {
-        
+
         const treeMap = {};
         const chromosomes = [];
         const featureCache = {};
-        
+
         if (featureList) {
 
             featureList.forEach(function (feature) {
@@ -129,7 +109,7 @@ var igv = (function (igv) {
                 let chr = feature.chr;
 
                 // Translate to "official" name
-                if(genome) {
+                if (genome) {
                     chr = genome.getChromosomeName(chr);
                 }
 
@@ -167,7 +147,7 @@ var igv = (function (igv) {
         tree = new igv.IntervalTree();
         len = featureList.length;
 
-        chunkSize = Math.max(10, Math.round(len / 100));
+        chunkSize = Math.max(10, Math.round(len / 10));
 
         featureList.sort(function (f1, f2) {
             return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
@@ -175,17 +155,25 @@ var igv = (function (igv) {
 
         for (i = 0; i < len; i += chunkSize) {
             e = Math.min(len, i + chunkSize);
-            subArray = featureList.slice(i, e);
-            iStart = subArray[0].start;
+            subArray = new IndexRange(i, e); //featureList.slice(i, e);
+            iStart = featureList[i].start;
             //
             iEnd = iStart;
-            subArray.forEach(function (feature) {
-                iEnd = Math.max(iEnd, feature.end);
-            });
+            for (let j = i; j < e; j++) {
+                iEnd = Math.max(iEnd, featureList[j].end);
+            }
             tree.insert(iStart, iEnd, subArray);
         }
 
         return tree;
+    }
+
+
+    class IndexRange {
+        constructor(start, end) {
+            this.start = start;
+            this.end = end;
+        }
     }
 
 
