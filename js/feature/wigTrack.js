@@ -170,17 +170,20 @@ var igv = (function (igv) {
 
         WigTrack.prototype.draw = function (options) {
 
-            var self = this, features, ctx, bpPerPixel, bpStart, pixelWidth, pixelHeight, bpEnd,
-                featureValueMinimum, featureValueMaximum, featureValueRange, baselineColor;
+            var self = this;
 
-            features = options.features;
-            ctx = options.context;
-            bpPerPixel = options.bpPerPixel;
-            bpStart = options.bpStart;
-            pixelWidth = options.pixelWidth;
-            pixelHeight = options.pixelHeight;
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const features = options.features;
+            const ctx = options.context;
+            const bpPerPixel = options.bpPerPixel;
+            const bpStart = options.bpStart;
+            const pixelWidth = options.pixelWidth;
+            const pixelHeight = options.pixelHeight;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            let lastXPixel = -1;
+            let lastValue = -1;
+            let lastNegValue = 1;
 
+            let baselineColor;
             if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
                 baselineColor = igv.Color.addAlpha(self.color, 0.1);
             }
@@ -189,19 +192,19 @@ var igv = (function (igv) {
 
                 if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
-                featureValueMinimum = self.dataRange.min;
-                featureValueMaximum = self.dataRange.max;
+                const featureValueMinimum = self.dataRange.min;
+                const featureValueMaximum = self.dataRange.max;
 
                 // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
                 // nothing to paint.
                 if (featureValueMaximum > featureValueMinimum) {
 
-                    featureValueRange = featureValueMaximum - featureValueMinimum;
-
                     if (renderFeature.end < bpStart) return;
                     if (renderFeature.start > bpEnd) return;
 
-                    features.forEach(renderFeature);
+                    for (let f of features) {
+                        renderFeature(f, this.dataRange)
+                    }
 
                     // If the track includes negative values draw a baseline
                     if (featureValueMinimum < 0) {
@@ -212,7 +215,11 @@ var igv = (function (igv) {
             }
 
 
-            function renderFeature(feature) {
+            function renderFeature(feature, dataRange) {
+
+                const featureValueMinimum = self.dataRange.min;
+                const featureValueMaximum = self.dataRange.max;
+                const featureValueRange = featureValueMaximum - featureValueMinimum;
 
                 const x = Math.floor((feature.start - bpStart) / bpPerPixel);
                 const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
@@ -248,7 +255,19 @@ var igv = (function (igv) {
                     }
 
                 } else {
-                    igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+                    // Draw optimization important for many points -- don't draw if the peak will be occluded by previously drawn features
+                    if (x > lastXPixel || ((feature.value > 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue))) {
+                        igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+                        lastXPixel = x;
+                        if (feature.value > 0) {
+                            lastValue = feature.value;
+                        } else if (feature.value < 0) {
+                            lastNegValue = feature.value;
+                        }
+
+                    }
+
+
                 }
 
             }
@@ -260,7 +279,7 @@ var igv = (function (igv) {
             // We use the featureCache property rather than method to avoid async load.  If the
             // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-            if(!features) features = this.clickedFeatures(clickState);
+            if (!features) features = this.clickedFeatures(clickState);
 
             if (features && features.length > 0) {
 
