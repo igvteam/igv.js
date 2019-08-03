@@ -150,7 +150,6 @@ var igv = (function (igv) {
         const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const maxRows = this.config.maxRows || 500;
         const featureCache = await getFeatureCache.call(this)
         const isQueryable = this.queryable;
 
@@ -159,11 +158,16 @@ var igv = (function (igv) {
                 return [];
             }
             else {
-                return this.getWGFeatures(featureCache.getAllFeatures());
+                const allFeatures = featureCache.getAllFeatures();
+                if(allFeatures.length > 100000) {
+                    return [];
+                } else {
+                    return this.getWGFeatures(featureCache.getAllFeatures());
+                }
             }
         }
         else {
-            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+            return featureCache.queryFeatures(queryChr, bpStart, bpEnd);
         }
 
 
@@ -175,7 +179,6 @@ var igv = (function (igv) {
 
             if (this.featureCache &&
                 (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-
                 return this.featureCache;
             }
             else {
@@ -221,7 +224,9 @@ var igv = (function (igv) {
         }
 
         // Assign overlapping features to rows
-        packFeatures(featureList, this.maxRows);
+        if(this.config.format !== "wig") {
+            packFeatures(featureList, this.maxRows);
+        }
 
         // Note - replacing previous cache with new one
         this.featureCache = this.queryable ?
@@ -299,10 +304,12 @@ var igv = (function (igv) {
     // TODO -- filter by pixel size
     igv.FeatureSource.prototype.getWGFeatures = function (features) {
 
+        if(this.wgFeatures) {
+            return this.wgFeatures;
+
+        }
         const genome = this.genome;
-
         const wgChromosomeNames = new Set(genome.wgChromosomeNames);
-
         const wgFeatures = [];
 
         for (let f of features) {
@@ -344,8 +351,9 @@ var igv = (function (igv) {
             return a.start - b.start;
         });
 
-        return wgFeatures;
+        this.wgFeatures = wgFeatures;
 
+        return wgFeatures;
 
     }
 
