@@ -35,15 +35,13 @@ var igv = (function (igv) {
     class RateLimiter {
 
         constructor(wait) {
-            this.wait = wait === undefined ? 100 : wait
-            this.isCalled = false
+            this.wait = wait === undefined ? 100 : wait;
+            this.isCalled = false;
             this.calls = [];
         }
 
-
         limiter(fn) {
-
-            const self = this
+            const self = this;
 
             let caller = function () {
                 if (self.calls.length && !self.isCalled) {
@@ -61,15 +59,12 @@ var igv = (function (igv) {
                 caller();
             };
         }
-
     }
 
-    const rateLimiter = new RateLimiter(100)
-
+    const rateLimiter = new RateLimiter(100);
 
     igv.xhr = {
-
-
+        
         load: async function (url, options) {
 
             options = options || {};
@@ -91,8 +86,8 @@ var igv = (function (igv) {
                                 } catch (e) {
                                     reject(e)
                                 }
-                            })(url, options)
-                        })
+                            })(url, options);
+                        });
                     } else {
                         return loadURL(url, options);
                     }
@@ -135,10 +130,10 @@ var igv = (function (igv) {
                         // Various Google tansformations
                         if (igv.google.isGoogleURL(url)) {
                             if (url.startsWith("gs://")) {
-                                url = igv.google.translateGoogleCloudURL(url)
+                                url = igv.google.translateGoogleCloudURL(url);
                             } else if (igv.google.isGoogleStorageURL(url)) {
                                 if (!url.includes("altMedia=")) {
-                                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true")
+                                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                                 }
                             }
                             url = igv.google.addApiKey(url);
@@ -226,9 +221,8 @@ var igv = (function (igv) {
                                                 } else {
                                                     throw(error);
                                                 }
-                                            })
-                                    })
-
+                                            });
+                                    });
 
                             } else {
 
@@ -278,21 +272,17 @@ var igv = (function (igv) {
         },
 
         loadArrayBuffer: function (url, options) {
-
             options = options || {};
             options.responseType = "arraybuffer";
 
             if (url instanceof File) {
                 return loadFileSlice(url, options);
             } else {
-
                 return igv.xhr.load(url, options);
             }
-
         },
 
         loadJson: function (url, options) {
-
             options = options || {};
 
             var method = options.method || (options.sendData ? "POST" : "GET");
@@ -302,18 +292,15 @@ var igv = (function (igv) {
             return igv.xhr.load(url, options)
 
                 .then(function (result) {
-
                     if (result) {
                         return JSON.parse(result);
                     } else {
                         return result;
                     }
-                })
-
+                });
         },
 
         loadString: function (path, options) {
-
             options = options || {};
 
             if (path instanceof File) {
@@ -328,19 +315,11 @@ var igv = (function (igv) {
 
 
     function loadFileSlice(localfile, options) {
-
-        return new Promise(function (fullfill, reject) {
-
-            var fileReader,
-                blob,
-                rangeEnd;
-
-            fileReader = new FileReader();
+        return new Promise(function (resolve, reject) {
+            var fileReader = new FileReader();
 
             fileReader.onload = function (e) {
-
-                fullfill(fileReader.result);
-
+                resolve(fileReader.result);
             };
 
             fileReader.onerror = function (e) {
@@ -349,8 +328,7 @@ var igv = (function (igv) {
             };
 
             if (options.range) {
-                rangeEnd = options.range.start + options.range.size - 1;
-                blob = localfile.slice(options.range.start, rangeEnd + 1);
+                var blob = localfile.slice(options.range.start, options.range.start + options.range.size);
                 if ("arraybuffer" === options.responseType) {
                     fileReader.readAsArrayBuffer(blob);
                 } else {
@@ -363,28 +341,22 @@ var igv = (function (igv) {
                     fileReader.readAsBinaryString(localfile);
                 }
             }
-
         });
-
     }
 
     function loadStringFromFile(localfile, options) {
-
         return new Promise(function (fullfill, reject) {
 
             var fileReader = new FileReader();
-            var compression;
 
+            var compression = NONE;
             if (options.bgz) {
                 compression = BGZF;
             } else if (localfile.name.endsWith(".gz")) {
                 compression = GZIP;
-            } else {
-                compression = NONE;
             }
 
             fileReader.onload = function (e) {
-
                 if (compression === NONE) {
                     return fullfill(fileReader.result);
                 } else {
@@ -402,43 +374,34 @@ var igv = (function (igv) {
             } else {
                 fileReader.readAsArrayBuffer(localfile);
             }
-
         });
 
     }
 
     function loadStringFromUrl(url, options) {
+        options = options || {};
 
-        var compression,
-            fn,
-            idx;
+        var fn = options.filename || igv.getFilename(url);
 
-        if (options === undefined) options = {};
-
-        fn = options.filename || igv.getFilename(url);
-
+        var compression = UNKNOWN;
         if (options.bgz) {
             compression = BGZF;
         } else if (fn.endsWith(".gz")) {
             compression = GZIP;
-        } else {
-            compression = UNKNOWN;
         }
 
         options.responseType = "arraybuffer";
         return igv.xhr.load(url, options)
             .then(function (data) {
                 return arrayBufferToString(data, compression);
-            })
+            });
 
 
         function getFilename(url, options) {
-
             if (options.filename) {
                 return Promise.resolve(options.filename);
             }
         }
-
     }
 
     function isAmazonV4Signed(url) {
@@ -446,27 +409,24 @@ var igv = (function (igv) {
     }
 
     function getOauthToken(url) {
-
-        if (igv) {
-            const host = igv.parseUri(url).host;
-            let token = igv.oauth.getToken(host);
-            if (!token && igv.google.isGoogleURL(url)) {
-                token = igv.oauth.google.access_token;
-            }
-            return token;
-        } else {
+        if (!igv) {
             return undefined;
         }
+
+        const host = igv.parseUri(url).host;
+        let token = igv.oauth.getToken(host);
+        if (!token && igv.google.isGoogleURL(url)) {
+            token = igv.oauth.google.access_token;
+        }
+        return token;
     }
 
     function addOauthHeaders(headers, acToken) {
-        {
-            if (acToken) {
-                headers["Cache-Control"] = "no-cache";
-                headers["Authorization"] = "Bearer " + acToken;
-            }
-            return headers;
+        if (acToken) {
+            headers["Cache-Control"] = "no-cache";
+            headers["Authorization"] = "Bearer " + acToken;
         }
+        return headers;        
     }
 
     /**
@@ -490,19 +450,16 @@ var igv = (function (igv) {
 
 
     function arrayBufferToString(arraybuffer, compression) {
-
-        var plain, inflate;
-
         if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
-
-            const m = new Uint8Array(arraybuffer, 0, 2)
+            const m = new Uint8Array(arraybuffer, 0, 2);
             if (m[0] === 31 && m[1] === 139) {
-                compression = GZIP
+                compression = GZIP;
             }
         }
 
+        var plain;
         if (compression === GZIP) {
-            inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+            var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
             plain = inflate.decompress();
         } else if (compression === BGZF) {
             plain = new Uint8Array(igv.unbgzf(arraybuffer));
@@ -515,13 +472,11 @@ var igv = (function (igv) {
         } else {
             return decodeUTF8(plain);
         }
-
     };
 
     function isGoogleDrive(url) {
-        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
+        return url.includes("drive.google.com") || url.includes("www.googleapis.com/drive");
     }
-
 
     /**
      * There can be only 1 oAuth promise executing at a time.
@@ -531,41 +486,40 @@ var igv = (function (igv) {
     async function getGoogleAccessToken() {
         if (igv.oauth.google.access_token) {
             return Promise.resolve(igv.oauth.google.access_token);
-        } else if (oauthPromise) {
-            return oauthPromise
         }
-        else {
-            const authInstance = gapi.auth2.getAuthInstance();
-            if (!authInstance) {
-                igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
-                return undefined;
-            } else {
-                const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
-                const options = new gapi.auth2.SigninOptionsBuilder();
-                options.setPrompt('select_account');
-                options.setScope(scope);
-                oauthPromise = new Promise(function (resolve, reject) {
+        if (oauthPromise) {
+            return oauthPromise;
+        } 
 
-                    igv.browser.presentMessageWithCallback("Google Login required", function () {
+        const authInstance = gapi.auth2.getAuthInstance();
+        if (!authInstance) {
+            igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+            return undefined;
+        }
 
-                        gapi.auth2.getAuthInstance().signIn(options)
-                            .then(function (user) {
-                                const authResponse = user.getAuthResponse();
-                                igv.setGoogleOauthToken(authResponse["access_token"]);
-                                resolve(authResponse["access_token"]);
-                                oauthPromise = undefined
-                            })
-                            .catch(function(err) {
-                                oauthPromise = undefined
-                                reject(err)
-                            })
+        const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+        const options = new gapi.auth2.SigninOptionsBuilder();
+        options.setPrompt('select_account');
+        options.setScope(scope);
+        oauthPromise = new Promise(function (resolve, reject) {
+
+            igv.browser.presentMessageWithCallback("Google Login required", function () {
+
+                gapi.auth2.getAuthInstance().signIn(options)
+                    .then(function (user) {
+                        const authResponse = user.getAuthResponse();
+                        igv.setGoogleOauthToken(authResponse["access_token"]);
+                        resolve(authResponse["access_token"]);
+                        oauthPromise = undefined;
                     })
-                })
+                    .catch(function(err) {
+                        oauthPromise = undefined;
+                        reject(err);
+                    });
+            });
+        });
 
-                return oauthPromise
-            }
-        }
-
+        return oauthPromise;
     }
 
 
@@ -592,7 +546,6 @@ var igv = (function (igv) {
     }
 
     function validateIP(address) {
-
         const regex = new RegExp(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
         return regex.test(address);
     }
