@@ -39,6 +39,7 @@ var igv = (function (igv) {
 
         this.treeMap = this.buildTreeMap(featureList, genome);
         this.range = range;
+        this.count = featureList.length;
     }
 
     igv.FeatureCache.prototype.containsRange = function (genomicRange) {

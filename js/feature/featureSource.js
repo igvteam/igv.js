@@ -159,8 +159,7 @@ var igv = (function (igv) {
                 return [];
             }
             else {
-                const allFeatures = featureCache.getAllFeatures();
-                if(allFeatures.length > 100000) {
+                if(featureCache.count > 100000) {
                     this.supportsWG = false;
                     return [];
                 } else {

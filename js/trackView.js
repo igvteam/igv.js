@@ -451,8 +451,8 @@ var igv = (function (igv) {
         const rpV = viewportsToReload.call(this, force);
         for (let vp of rpV) {
             await vp.loadFeatures()
-            if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chr) {
-                this.checkZoomIn();
+            if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chrName) {
+                vp.checkZoomIn();
             }
         }
 
