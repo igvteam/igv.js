@@ -8,6 +8,7 @@
     "examples/**"
   ],
   "scripts": {
+    "build": "grunt",
     "test": "grunt test",
     "grunt": "node node_modules/grunt/bin/grunt",
     "prepack": "node_modules/grunt/bin/grunt",

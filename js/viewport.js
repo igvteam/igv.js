@@ -218,9 +218,7 @@ var igv = (function (igv) {
 
 
         function showZoomInNotice() {
-
             const referenceFrame = this.genomicState.referenceFrame;
-
             if (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             }
