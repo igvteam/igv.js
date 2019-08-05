@@ -82,24 +82,16 @@ var igv = (function (igv) {
                 }
 
                 this.windowFunction = config.windowFunction || "mean";
-
                 this.paintAxis = igv.paintAxis;
-
                 this.graphType = config.graphType || "bar";
 
             });
 
-        WigTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+        WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
-            var self = this;
+            const header = await this.getFileHeader();
+            return  this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
 
-            return this.getFileHeader()
-
-                .then(function (header) {
-
-                    return self.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.windowFunction);
-
-                });
         };
 
         WigTrack.prototype.menuItemList = function () {
