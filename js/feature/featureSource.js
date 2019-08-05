@@ -89,10 +89,12 @@ var igv = (function (igv) {
             }
         }
 
+        this.supportsWG = !this.queryable;   // Can be dynamically changed
+
     };
 
     igv.FeatureSource.prototype.supportsWholeGenome = function () {
-        return !this.queryable;
+        return this.supportsWG;
     }
 
     igv.FeatureSource.prototype.getFileHeader = async function () {
@@ -136,8 +138,7 @@ var igv = (function (igv) {
 
     /**
      * Required function for all data source objects.  Fetches features for the
-     * range requested and passes them on to the success function.  Usually this is
-     * a function that renders the features on the canvas
+     * range requested.
      *
      * @param chr
      * @param bpStart
@@ -145,7 +146,7 @@ var igv = (function (igv) {
      * @param bpPerPixel
      */
 
-    igv.FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
+    igv.FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
         const reader = this.reader;
         const genome = this.genome;
@@ -160,6 +161,7 @@ var igv = (function (igv) {
             else {
                 const allFeatures = featureCache.getAllFeatures();
                 if(allFeatures.length > 100000) {
+                    this.supportsWG = false;
                     return [];
                 } else {
                     return this.getWGFeatures(featureCache.getAllFeatures());
