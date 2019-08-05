@@ -451,19 +451,22 @@ var igv = (function (igv) {
         const rpV = viewportsToReload.call(this, force);
         for (let vp of rpV) {
             await vp.loadFeatures()
+            if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chr) {
+                this.checkZoomIn();
+            }
         }
 
         const isDragging = this.browser.isDragging;
 
         if (!isDragging && this.track.autoscale) {
             let allFeatures = [];
-            for(let vp of visibleViewports) {
+            for (let vp of visibleViewports) {
                 const referenceFrame = vp.genomicState.referenceFrame;
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
                 if (vp.tile && vp.tile.features) {
-                        allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                    allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
 
                 }
             }
@@ -478,12 +481,12 @@ var igv = (function (igv) {
 
         // Must repaint all viewports if autoscaling
         if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
-            for(let vp of visibleViewports) {
+            for (let vp of visibleViewports) {
                 vp.repaint();
             }
         }
         else {
-            for(let vp of rpV) {
+            for (let vp of rpV) {
                 vp.repaint();
             }
         }
@@ -495,46 +498,39 @@ var igv = (function (igv) {
     /**
      * Return a promise to get all in-view features.  Used for group autoscaling.
      */
-    igv.TrackView.prototype.getInViewFeatures = function (force) {
+    igv.TrackView.prototype.getInViewFeatures = async function (force) {
 
         if (!(this.browser && this.browser.genomicStateList)) {
-            return Promise.resolve([]);
+            return [];
         }
 
-        var self = this, promises, rpV;
-
         // List of viewports that need reloading
-        rpV = viewportsToReload.call(this, force);
-
-        promises = rpV.map(function (vp) {
+        const rpV = viewportsToReload.call(this, force);
+        const promises = rpV.map(function (vp) {
             return vp.loadFeatures();
         });
 
-        return Promise.all(promises)
+        await Promise.all(promises)
 
-            .then(function (tiles) {
-                var allFeatures = [];
-                self.viewports.forEach(function (vp) {
-                    if (vp.tile && vp.tile.features) {
-                        var referenceFrame, chr, start, end, cache;
-                        referenceFrame = vp.genomicState.referenceFrame;
-                        start = referenceFrame.start;
-                        end = start + referenceFrame.toBP($(vp.contentDiv).width());
-                        allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
-                    }
-                });
-                return allFeatures;
-            })
-
+        let allFeatures = [];
+        for(let vp of this.viewports) {
+            if (vp.tile && vp.tile.features) {
+                const referenceFrame = vp.genomicState.referenceFrame;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(vp.contentDiv).width());
+                allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+            }
+        }
+        return allFeatures;
     };
 
 
     function viewportsToReload(force) {
 
-        var rpV;
+
 
         // List of viewports that need reloading
-        rpV = this.viewports.filter(function (viewport) {
+        const rpV = this.viewports.filter(function (viewport) {
             if (!viewport.isVisible()) {
                 return false
             }
@@ -542,12 +538,12 @@ var igv = (function (igv) {
                 return false
             }
             else {
-                var bpPerPixel, referenceFrame, chr, start, end;
-                referenceFrame = viewport.genomicState.referenceFrame;
-                chr = referenceFrame.chrName;
-                start = referenceFrame.start;
-                end = start + referenceFrame.toBP($(viewport.contentDiv).width());
-                bpPerPixel = referenceFrame.bpPerPixel;
+
+                const referenceFrame = viewport.genomicState.referenceFrame;
+                const chr = referenceFrame.chrName;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+                const bpPerPixel = referenceFrame.bpPerPixel;
                 return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
             }
         });
