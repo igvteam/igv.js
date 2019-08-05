@@ -163,7 +163,7 @@ var igv = (function (igv) {
                     this.supportsWG = false;
                     return [];
                 } else {
-                    return this.getWGFeatures(allFeatures);
+                    return this.getWGFeatures( featureCache.getAllFeatures() );
                 }
             }
         }
