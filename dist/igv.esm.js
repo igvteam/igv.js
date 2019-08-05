@@ -29229,10 +29229,8 @@ var igv = (function (igv) {
 
     igv.FeatureCache = function (featureList, genome, range) {
 
-        this.treeMap = buildTreeMap(featureList, genome);
+        this.treeMap = this.buildTreeMap(featureList, genome);
         this.range = range;
-        this.allFeatures = featureList;
-
     }
 
     igv.FeatureCache.prototype.containsRange = function (genomicRange) {
@@ -29257,22 +29255,22 @@ var igv = (function (igv) {
             // Assumption: features are sorted by start position
 
             const featureList = [];
-
-            for (let interval of intervals) {
-                const indexRange = interval.value;
-                for (let i = indexRange.start; i <= indexRange.end; i++) {
-                    let feature = this.allFeatures[i];
-                    if (feature.start > end) break;
-                    else if (feature.end >= start) {
-                        featureList.push(feature);
+            const all = this.allFeatures[chr];
+            if(all) {
+                for (let interval of intervals) {
+                    const indexRange = interval.value;
+                    for (let i = indexRange.start; i < indexRange.end; i++) {
+                        let feature = all[i];
+                        if (feature.start > end) break;
+                        else if (feature.end >= start) {
+                            featureList.push(feature);
+                        }
                     }
                 }
+                featureList.sort(function (a, b) {
+                    return a.start - b.start;
+                });
             }
-
-            featureList.sort(function (a, b) {
-                return a.start - b.start;
-            });
-
             return featureList;
         }
     };
@@ -29288,38 +29286,38 @@ var igv = (function (igv) {
 
     }
 
-    function buildTreeMap(featureList, genome) {
+    igv.FeatureCache.prototype.buildTreeMap = function (featureList, genome) {
 
         const treeMap = {};
         const chromosomes = [];
-        const featureCache = {};
+        this.allFeatures = {};
 
         if (featureList) {
-
-            featureList.forEach(function (feature) {
+            for (let feature of featureList) {
 
                 let chr = feature.chr;
-
                 // Translate to "official" name
                 if (genome) {
                     chr = genome.getChromosomeName(chr);
                 }
 
-                let geneList = featureCache[chr];
-
+                let geneList = this.allFeatures[chr];
                 if (!geneList) {
                     chromosomes.push(chr);
                     geneList = [];
-                    featureCache[chr] = geneList;
+                    this.allFeatures[chr] = geneList;
                 }
                 geneList.push(feature);
-            });
+            }
 
 
             // Now build interval tree for each chromosome
-            for (let i = 0; i < chromosomes.length; i++) {
-                const chr = chromosomes[i];
-                treeMap[chr] = buildIntervalTree(featureCache[chr]);
+            for (let chr of chromosomes) {
+                const chrFeatures = this.allFeatures[chr];
+                chrFeatures.sort(function (f1, f2) {
+                    return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
+                });
+                treeMap[chr] = buildIntervalTree(chrFeatures);
             }
         }
 
@@ -29334,23 +29332,16 @@ var igv = (function (igv) {
      */
     function buildIntervalTree(featureList) {
 
-        var i, e, iStart, iEnd, tree, chunkSize, len, subArray;
+        const tree = new igv.IntervalTree();
+        const len = featureList.length;
+        const chunkSize = Math.max(10, Math.round(len / 10));
 
-        tree = new igv.IntervalTree();
-        len = featureList.length;
-
-        chunkSize = Math.max(10, Math.round(len / 10));
-
-        featureList.sort(function (f1, f2) {
-            return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
-        });
-
-        for (i = 0; i < len; i += chunkSize) {
-            e = Math.min(len, i + chunkSize);
-            subArray = new IndexRange(i, e); //featureList.slice(i, e);
-            iStart = featureList[i].start;
+        for (let i = 0; i < len; i += chunkSize) {
+            const e = Math.min(len, i + chunkSize);
+            const subArray = new IndexRange(i, e); //featureList.slice(i, e);
+            const iStart = featureList[i].start;
             //
-            iEnd = iStart;
+            let iEnd = iStart;
             for (let j = i; j < e; j++) {
                 iEnd = Math.max(iEnd, featureList[j].end);
             }
@@ -31338,7 +31329,7 @@ var igv = (function (igv) {
                     this.supportsWG = false;
                     return [];
                 } else {
-                    return this.getWGFeatures(featureCache.getAllFeatures());
+                    return this.getWGFeatures(allFeatures);
                 }
             }
         }
@@ -31362,12 +31353,12 @@ var igv = (function (igv) {
                 // If a visibility window is defined, potentially expand query interval.
                 // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
                 // indicating whole chromosome should be read at once.
-                if (visibilityWindow <= 0) {
+                if (this.visibilityWindow === undefined || this.visibilityWindow <= 0) {
                     // Whole chromosome
                     intervalStart = 0;
                     intervalEnd = Number.MAX_VALUE;
                 }
-                else if (visibilityWindow > (bpEnd - bpStart)) {
+                else if (this.visibilityWindow !== undefined && this.visibilityWindow > (bpEnd - bpStart)) {
                     const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
                     intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
                     intervalEnd = bpStart + expansionWindow;
@@ -31478,7 +31469,7 @@ var igv = (function (igv) {
     }
 
     // TODO -- filter by pixel size
-    igv.FeatureSource.prototype.getWGFeatures = function (features) {
+    igv.FeatureSource.prototype.getWGFeatures = function (allFeatures) {
 
         if(this.wgFeatures) {
             return this.wgFeatures;
@@ -31488,38 +31479,43 @@ var igv = (function (igv) {
         const wgChromosomeNames = new Set(genome.wgChromosomeNames);
         const wgFeatures = [];
 
-        for (let f of features) {
+        for(let c of genome.wgChromosomeNames) {
 
-            let queryChr = genome.getChromosomeName(f.chr);
+            const features = allFeatures[c];
 
-            if (wgChromosomeNames.has(queryChr)) {
+            if(features) {
+                for (let f of features) {
+                    let queryChr = genome.getChromosomeName(f.chr);
+                    if (wgChromosomeNames.has(queryChr)) {
 
-                const wg = Object.create(Object.getPrototypeOf(f));
-                Object.assign(wg, f);
+                        const wg = Object.create(Object.getPrototypeOf(f));
+                        Object.assign(wg, f);
 
-                wg.realChr = f.chr;
-                wg.realStart = f.start;
-                wg.realEnd = f.end;
+                        wg.realChr = f.chr;
+                        wg.realStart = f.start;
+                        wg.realEnd = f.end;
 
-                wg.chr = "all";
-                wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                        wg.chr = "all";
+                        wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                        wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
-                // Don't draw exons in whole genome view
-                if (wg["exons"]) delete wg["exons"]
+                        // Don't draw exons in whole genome view
+                        if (wg["exons"]) delete wg["exons"]
 
-                wg.popupData = function (genomeLocation) {
-                    const clonedObject = Object.assign({}, this)
-                    clonedObject.chr = this.realChr
-                    clonedObject.start = this.realStart
-                    clonedObject.end = this.realEnd
-                    delete clonedObject.realChr
-                    delete clonedObject.realStart
-                    delete clonedObject.realEnd
-                    return igv.TrackBase.extractPopupData(clonedObject, genome.id)
+                        wg.popupData = function (genomeLocation) {
+                            const clonedObject = Object.assign({}, this)
+                            clonedObject.chr = this.realChr
+                            clonedObject.start = this.realStart
+                            clonedObject.end = this.realEnd
+                            delete clonedObject.realChr
+                            delete clonedObject.realStart
+                            delete clonedObject.realEnd
+                            return igv.TrackBase.extractPopupData(clonedObject, genome.id)
+                        }
+
+                        wgFeatures.push(wg);
+                    }
                 }
-
-                wgFeatures.push(wg);
             }
         }
 

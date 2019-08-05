@@ -164,7 +164,7 @@ var igv = (function (igv) {
                     this.supportsWG = false;
                     return [];
                 } else {
-                    return this.getWGFeatures(featureCache.getAllFeatures());
+                    return this.getWGFeatures(allFeatures);
                 }
             }
         }
@@ -188,12 +188,12 @@ var igv = (function (igv) {
                 // If a visibility window is defined, potentially expand query interval.
                 // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
                 // indicating whole chromosome should be read at once.
-                if (visibilityWindow <= 0) {
+                if (this.visibilityWindow === undefined || this.visibilityWindow <= 0) {
                     // Whole chromosome
                     intervalStart = 0;
                     intervalEnd = Number.MAX_VALUE;
                 }
-                else if (visibilityWindow > (bpEnd - bpStart)) {
+                else if (this.visibilityWindow !== undefined && this.visibilityWindow > (bpEnd - bpStart)) {
                     const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
                     intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
                     intervalEnd = bpStart + expansionWindow;
@@ -304,7 +304,7 @@ var igv = (function (igv) {
     }
 
     // TODO -- filter by pixel size
-    igv.FeatureSource.prototype.getWGFeatures = function (features) {
+    igv.FeatureSource.prototype.getWGFeatures = function (allFeatures) {
 
         if(this.wgFeatures) {
             return this.wgFeatures;
@@ -314,38 +314,43 @@ var igv = (function (igv) {
         const wgChromosomeNames = new Set(genome.wgChromosomeNames);
         const wgFeatures = [];
 
-        for (let f of features) {
+        for(let c of genome.wgChromosomeNames) {
 
-            let queryChr = genome.getChromosomeName(f.chr);
+            const features = allFeatures[c];
 
-            if (wgChromosomeNames.has(queryChr)) {
+            if(features) {
+                for (let f of features) {
+                    let queryChr = genome.getChromosomeName(f.chr);
+                    if (wgChromosomeNames.has(queryChr)) {
 
-                const wg = Object.create(Object.getPrototypeOf(f));
-                Object.assign(wg, f);
+                        const wg = Object.create(Object.getPrototypeOf(f));
+                        Object.assign(wg, f);
 
-                wg.realChr = f.chr;
-                wg.realStart = f.start;
-                wg.realEnd = f.end;
+                        wg.realChr = f.chr;
+                        wg.realStart = f.start;
+                        wg.realEnd = f.end;
 
-                wg.chr = "all";
-                wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                        wg.chr = "all";
+                        wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                        wg.end = genome.getGenomeCoordinate(f.chr, f.end);
 
-                // Don't draw exons in whole genome view
-                if (wg["exons"]) delete wg["exons"]
+                        // Don't draw exons in whole genome view
+                        if (wg["exons"]) delete wg["exons"]
 
-                wg.popupData = function (genomeLocation) {
-                    const clonedObject = Object.assign({}, this)
-                    clonedObject.chr = this.realChr
-                    clonedObject.start = this.realStart
-                    clonedObject.end = this.realEnd
-                    delete clonedObject.realChr
-                    delete clonedObject.realStart
-                    delete clonedObject.realEnd
-                    return igv.TrackBase.extractPopupData(clonedObject, genome.id)
+                        wg.popupData = function (genomeLocation) {
+                            const clonedObject = Object.assign({}, this)
+                            clonedObject.chr = this.realChr
+                            clonedObject.start = this.realStart
+                            clonedObject.end = this.realEnd
+                            delete clonedObject.realChr
+                            delete clonedObject.realStart
+                            delete clonedObject.realEnd
+                            return igv.TrackBase.extractPopupData(clonedObject, genome.id)
+                        }
+
+                        wgFeatures.push(wg);
+                    }
                 }
-
-                wgFeatures.push(wg);
             }
         }
 
