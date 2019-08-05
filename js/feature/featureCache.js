@@ -37,10 +37,8 @@ var igv = (function (igv) {
 
     igv.FeatureCache = function (featureList, genome, range) {
 
-        this.treeMap = buildTreeMap(featureList, genome);
+        this.treeMap = this.buildTreeMap(featureList, genome);
         this.range = range;
-        this.allFeatures = featureList;
-
     }
 
     igv.FeatureCache.prototype.containsRange = function (genomicRange) {
@@ -65,22 +63,22 @@ var igv = (function (igv) {
             // Assumption: features are sorted by start position
 
             const featureList = [];
-
-            for (let interval of intervals) {
-                const indexRange = interval.value;
-                for (let i = indexRange.start; i <= indexRange.end; i++) {
-                    let feature = this.allFeatures[i];
-                    if (feature.start > end) break;
-                    else if (feature.end >= start) {
-                        featureList.push(feature);
+            const all = this.allFeatures[chr];
+            if(all) {
+                for (let interval of intervals) {
+                    const indexRange = interval.value;
+                    for (let i = indexRange.start; i < indexRange.end; i++) {
+                        let feature = all[i];
+                        if (feature.start > end) break;
+                        else if (feature.end >= start) {
+                            featureList.push(feature);
+                        }
                     }
                 }
+                featureList.sort(function (a, b) {
+                    return a.start - b.start;
+                });
             }
-
-            featureList.sort(function (a, b) {
-                return a.start - b.start;
-            });
-
             return featureList;
         }
     };
@@ -96,38 +94,38 @@ var igv = (function (igv) {
 
     }
 
-    function buildTreeMap(featureList, genome) {
+    igv.FeatureCache.prototype.buildTreeMap = function (featureList, genome) {
 
         const treeMap = {};
         const chromosomes = [];
-        const featureCache = {};
+        this.allFeatures = {};
 
         if (featureList) {
-
-            featureList.forEach(function (feature) {
+            for (let feature of featureList) {
 
                 let chr = feature.chr;
-
                 // Translate to "official" name
                 if (genome) {
                     chr = genome.getChromosomeName(chr);
                 }
 
-                let geneList = featureCache[chr];
-
+                let geneList = this.allFeatures[chr];
                 if (!geneList) {
                     chromosomes.push(chr);
                     geneList = [];
-                    featureCache[chr] = geneList;
+                    this.allFeatures[chr] = geneList;
                 }
                 geneList.push(feature);
-            });
+            }
 
 
             // Now build interval tree for each chromosome
-            for (let i = 0; i < chromosomes.length; i++) {
-                const chr = chromosomes[i];
-                treeMap[chr] = buildIntervalTree(featureCache[chr]);
+            for (let chr of chromosomes) {
+                const chrFeatures = this.allFeatures[chr];
+                chrFeatures.sort(function (f1, f2) {
+                    return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
+                });
+                treeMap[chr] = buildIntervalTree(chrFeatures);
             }
         }
 
@@ -142,23 +140,16 @@ var igv = (function (igv) {
      */
     function buildIntervalTree(featureList) {
 
-        var i, e, iStart, iEnd, tree, chunkSize, len, subArray;
+        const tree = new igv.IntervalTree();
+        const len = featureList.length;
+        const chunkSize = Math.max(10, Math.round(len / 10));
 
-        tree = new igv.IntervalTree();
-        len = featureList.length;
-
-        chunkSize = Math.max(10, Math.round(len / 10));
-
-        featureList.sort(function (f1, f2) {
-            return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
-        });
-
-        for (i = 0; i < len; i += chunkSize) {
-            e = Math.min(len, i + chunkSize);
-            subArray = new IndexRange(i, e); //featureList.slice(i, e);
-            iStart = featureList[i].start;
+        for (let i = 0; i < len; i += chunkSize) {
+            const e = Math.min(len, i + chunkSize);
+            const subArray = new IndexRange(i, e); //featureList.slice(i, e);
+            const iStart = featureList[i].start;
             //
-            iEnd = iStart;
+            let iEnd = iStart;
             for (let j = i; j < e; j++) {
                 iEnd = Math.max(iEnd, featureList[j].end);
             }
