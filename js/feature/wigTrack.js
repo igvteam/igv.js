@@ -55,9 +55,11 @@ var igv = (function (igv) {
 
                 this.featureType = 'numeric';
 
+                // Default color, might be overridden by track line
                 if (config.color === undefined) {
                     config.color = "rgb(150,150,150)";
                 }
+
                 if (config.height === undefined) {
                     config.height = 50;
                 }
@@ -87,12 +89,15 @@ var igv = (function (igv) {
 
             });
 
-        WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-
+        WigTrack.prototype.postInit = async function () {
             const header = await this.getFileHeader();
-            return  this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+            if (header) this.setTrackProperties(header)
+        }
 
-        };
+        WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+            return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+
+        }
 
         WigTrack.prototype.menuItemList = function () {
 
@@ -125,40 +130,13 @@ var igv = (function (igv) {
 
         };
 
-        WigTrack.prototype.getFileHeader = function () {
+        WigTrack.prototype.getFileHeader = async function () {
 
-            var self = this;
-
-            if (typeof self.featureSource.getFileHeader === "function") {
-
-                if (self.header) {
-                    return Promise.resolve(self.header);
-                }
-                else {
-                    return self.featureSource.getFileHeader()
-                        .then(function (header) {
-
-                            if (header) {
-                                // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                                if (header.name && !self.config.name) {
-                                    self.name = header.name;
-                                }
-                                if (header.color && !self.config.color) {
-                                    self.color = "rgb(" + header.color + ")";
-                                }
-                            }
-                            self.header = header;
-
-                            return header;
-
-                        })
-                }
+            if (typeof this.featureSource.getFileHeader === "function") {
+                this.header = await this.featureSource.getFileHeader();
             }
-            else {
-                return Promise.resolve(null);
-            }
-
-        };
+            return this.header;
+        }
 
         WigTrack.prototype.draw = function (options) {
 
@@ -212,7 +190,6 @@ var igv = (function (igv) {
                 const featureValueMinimum = self.dataRange.min;
                 const featureValueMaximum = self.dataRange.max;
                 const featureValueRange = featureValueMaximum - featureValueMinimum;
-
                 const x = Math.floor((feature.start - bpStart) / bpPerPixel);
                 const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
                 const width = Math.max(1, rectEnd - x);
@@ -226,14 +203,13 @@ var igv = (function (igv) {
                 } else {
                     yb = featureValueMaximum / featureValueRange;
                 }
-
                 const yUnitless = Math.min(y, yb);
                 const y2 = Math.max(y, yb);
                 const heightUnitLess = y2 - yUnitless;
-
                 if (yUnitless >= 1 || y2 <= 0) return;      //  Value < minimum
 
-                const color = (typeof self.color === "function") ? self.color(feature.value) : self.color;
+                let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
+                const color = (typeof c === "function") ? c(feature.value) : c;
 
                 if (self.graphType === "points") {
                     const pointSize = self.config.pointSize || 3;

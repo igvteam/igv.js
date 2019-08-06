@@ -1,46 +1,38 @@
-/**
- * Created by turner on 2/13/14.
- */
-function runBEDGraphTests() {
+function runTrackLineTests() {
 
 
-    //mock object
-    const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
+    const browser = {
+        genome: {
+            getChromosomeName: function (chr) {
+                return chr.startsWith("chr") ? chr : "chr" + chr;
+            }
         }
     }
 
-    QUnit.test("BEDGraphFeatureSource getFeatures", function (assert) {
+    QUnit.test("WigTrack trackLine", function (assert) {
 
         var done = assert.async();
 
-        var chr = "chr19",
-            bpStart = 49302001,
-            bpEnd = 49304701,
-            featureSource = new igv.FeatureSource({
-                    format: 'bedgraph',
-                    url: 'data/wig/bedgraph-example-uscs.bedgraph'
-                },
-                genome);
+        const wigTrack = igv.trackFactory["wig"]({
+                format: 'bedgraph',
+                url: 'data/wig/bedgraph-example-uscs.bedgraph'
+            },
+            browser);
 
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
+        //track type=bedGraph name="BedGraph Format" description="BedGraph format" visibility=full color=200,100,0 altColor=0,100,200 priority=20
+        wigTrack.postInit()
+            .then(function (ignore) {
+                assert.ok(wigTrack);
+                assert.equal("EXPANDED", wigTrack.displayMode);
+                assert.equal("rgb(200,100,0)", wigTrack.color);
+                assert.equal("rgb(0,100,200)", wigTrack.altColor);
+                assertEqual("BedGraph Format", wigTrack.name);
+                done();
+            })
 
-            assert.ok(features);
-            assert.equal(features.length, 9);
-
-            //chr19	49302600	49302900	-0.50
-            var f = features[2];
-            assert.equal(f.chr, "chr19", "chromosome");
-            assert.equal(f.start, 49302600, "start");
-            assert.equal(f.end, 49302900, "end");
-            assert.equal(f.value, -0.50, "value");
-
-            done();
-        }).catch(function (error) {
-            console.log(error);
-            assert.ok(false);
-        });
+            .catch(function (error) {
+                console.log(error);
+            });
 
     });
 
