@@ -53,6 +53,10 @@ var igv = (function (igv) {
         // Map of event name -> [ handlerFn, ... ]
         this.eventHandlers = {};
 
+        this.$spinner = $('<div class="igv-track-container-spinner">');
+        this.$spinner.append(igv.createIcon("spinner"));
+        $(this.trackContainerDiv).append(this.$spinner);
+
         addMouseHandlers.call(this);
 
     };
@@ -105,6 +109,22 @@ var igv = (function (igv) {
             }
         }
     }
+
+    igv.Browser.prototype.startSpinner = function () {
+        const $spinner = this.$spinner;
+        if ($spinner) {
+            $spinner.addClass("fa5-spin");
+            $spinner.show();
+        }
+    };
+
+    igv.Browser.prototype.stopSpinner = function () {
+        const $spinner = this.$spinner;
+        if ($spinner) {
+            $spinner.hide();
+            $spinner.removeClass("fa5-spin");
+        }
+    };
 
     igv.Browser.prototype.isMultiLocusMode = function () {
         return this.genomicStateList && this.genomicStateList.length > 1;
@@ -515,7 +535,7 @@ var igv = (function (igv) {
         this.isCenterGuideVisible = true;
     };
 
-    igv.Browser.prototype.loadTrackList = function (configList) {
+    igv.Browser.prototype.loadTrackList = async function (configList) {
 
         const self = this;
 
@@ -533,25 +553,26 @@ var igv = (function (igv) {
         }
 
 
-        const promises = [];
-        configList.filter(knowHowToLoad).forEach(function (config) {
-            promises.push(self.loadTrack(config));
-        });
+        try {
+            this.startSpinner();
+            const promises = [];
+            configList.filter(knowHowToLoad).forEach(function (config) {
+                config.noSpinner = true;
+                promises.push(self.loadTrack(config));
+            });
 
-        return Promise.all(promises)
-
-            .then(function (loadedTracks) {
-
-                const groupAutoscaleViews = self.trackViews.filter(function (trackView) {
-                    return trackView.track.autoscaleGroup
-                })
-
-                if (groupAutoscaleViews.length > 0) {
-                    self.updateViews(self.genomicStateList[0], groupAutoscaleViews);
-                }
-
-                return loadedTracks;
+            const loadedTracks = await Promise.all(promises)
+            const groupAutoscaleViews = self.trackViews.filter(function (trackView) {
+                return trackView.track.autoscaleGroup
             })
+            if (groupAutoscaleViews.length > 0) {
+                self.updateViews(self.genomicStateList[0], groupAutoscaleViews);
+            }
+            return loadedTracks;
+        } finally {
+            this.stopSpinner();
+        }
+
     };
 
     function knowHowToLoad(config) {
@@ -600,25 +621,31 @@ var igv = (function (igv) {
             }
         }
 
-        const newTrack = igv.createTrack(config, this);
+        try {
+            if(!config.noSpinner) this.startSpinner();
 
-        if (undefined === newTrack) {
-            this.presentAlert("Unknown file type: " + config.url, undefined);
+            const newTrack = igv.createTrack(config, this);
+
+            if (undefined === newTrack) {
+                this.presentAlert("Unknown file type: " + config.url, undefined);
+                return newTrack;
+            }
+
+            // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
+            if (undefined === newTrack.order) {
+                newTrack.order = this.trackViews.length;
+            }
+
+            if (typeof newTrack.postInit === 'function') {
+                await newTrack.postInit();
+            }
+
+            this.addTrack(newTrack);
+
             return newTrack;
+        } finally {
+            if(!config.noSpinner) this.stopSpinner();
         }
-
-        // Set order field of track here.  Otherwise track order might get shuffled during asynchronous load
-        if (undefined === newTrack.order) {
-            newTrack.order = this.trackViews.length;
-        }
-
-        if (typeof newTrack.postInit === 'function') {
-            await newTrack.postInit();
-        }
-
-        this.addTrack(newTrack);
-
-        return newTrack;
 
         async function resolveTrackProperties(config) {
 
