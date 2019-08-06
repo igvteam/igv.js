@@ -259,49 +259,42 @@ var igv = (function (igv) {
         }
     }
 
-    igv.Viewport.prototype.loadFeatures = function () {
+    igv.Viewport.prototype.loadFeatures = async function () {
 
-        var self = this;
 
-        const genomicState = self.genomicState;
+        const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-
         const chr = referenceFrame.chrName;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
-
-        const pixelWidth = $(self.contentDiv).width() * 3;
+        const pixelWidth = $(this.contentDiv).width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
         const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
 
-
-        if (self.loading && self.loading.start === bpStart && self.loading.end === bpEnd) {
-            return Promise.resolve(undefined);
+        if (this.loading && this.loading.start === bpStart && this.loading.end === bpEnd) {
+            return undefined;
         }
-
-        self.loading = {start: bpStart, end: bpEnd};
-
-        self.startSpinner();
+        this.loading = {start: bpStart, end: bpEnd};
+        this.startSpinner();
 
         // console.log('get features');
-        return getFeatures.call(self, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, self)
+        try {
+            const features = await getFeatures.call(this, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
+            this.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features);
+            this.loading = false;
+            this.hideMessage();
+            this.stopSpinner();
+            return this.tile;
+        } catch (error) {
+            this.showMessage(NOT_LOADED_MESSAGE);
+            //throw error;
+        } finally {
+            this.loading = false;
+            this.stopSpinner();
+        }
 
-            .then(function (features) {
-                self.hideMessage();
-                self.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features);
-                self.loading = false;
-                self.stopSpinner();
-                return self.tile;
-            })
-
-            .catch(function (error) {
-                self.showMessage(NOT_LOADED_MESSAGE);
-                self.loading = false;
-                self.stopSpinner();
-                throw error;
-            })
     }
 
 
@@ -377,7 +370,7 @@ var igv = (function (igv) {
         newCanvas.width = devicePixelRatio * pixelWidth;
         newCanvas.height = devicePixelRatio * pixelHeight;
         const ctx = newCanvas.getContext("2d");
-       // ctx.save();
+        // ctx.save();
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
 
@@ -388,8 +381,8 @@ var igv = (function (igv) {
         drawConfiguration.context = ctx;
         ctx.translate(0, -canvasTop)
         draw.call(this, drawConfiguration, features);
-       // ctx.translate(0, canvasTop);
-       // ctx.restore();
+        // ctx.translate(0, canvasTop);
+        // ctx.restore();
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
@@ -400,7 +393,6 @@ var igv = (function (igv) {
 
         self.canvas = newCanvas;
         self.ctx = ctx;
-
 
 
     };
