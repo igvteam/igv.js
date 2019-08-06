@@ -772,6 +772,21 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   color: $igv-navbar-toggle-dark-dark;
 }
 
+.igv-track-container-spinner {
+
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events:none;
+  color: $igv-navbar-toggle-dark-dark;
+}
+
 .igv-ruler-sweeper-div {
 
   display: none;
