@@ -136,6 +136,45 @@ var igv = (function (igv) {
         return (igv.FeatureUtils.findOverlapping(features, ss, ee));
     };
 
+    /**
+     * Set certain track properties, usually from a "track" line.  Not all UCSC properties are supported.
+     * @param properties
+     */
+    igv.TrackBase.prototype.setTrackProperties = function (properties) {
+        for (let key of Object.keys(properties)) {
+            switch (key) {
+                case "name":
+                case "useScore":
+                    this[key] = properties[key]
+                    break;
+                case "visibility":
+                    //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
+                    const viz = properties[key];
+                    switch (viz) {
+                        case "2":
+                        case "3":
+                        case "pack":
+                        case "full":
+                            this.displayMode = "EXPANDED"
+                            break;
+                        case "4":
+                        case "squish":
+                            this.displayMode = "SQUISHED"
+                            break;
+                        case "1":
+                        case "dense":
+                            this.displayMode = "COLLAPSED"
+                    }
+                    break;
+                case "color":
+                case "altColor":
+                    this[key] = "rgb(" + properties[key] + ")";
+                    break;
+                case "featureVisiblityWindow":
+                    this.visibilityWindow = Number.parseInt(properties[key]);
+            }
+        }
+    }
 
     /**
      * Default popup text function -- just extracts string and number properties in random order.
@@ -190,7 +229,7 @@ var igv = (function (igv) {
                         let alt = b[i].a;
                         if (alt.length === 1) {
                             const cravatLink = igv.TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
-                            if(cravatLink) {
+                            if (cravatLink) {
                                 data.push("<hr/>");
                                 data.push(cravatLink);
                             }
@@ -224,7 +263,8 @@ var igv = (function (igv) {
             return undefined
         }
     }
-//chr22 40418496 - A G
+
+
 
     return igv;
 
