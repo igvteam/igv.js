@@ -117,7 +117,10 @@ var igv = (function (igv) {
 
         FeatureTrack.prototype.postInit = async function () {
 
-            await this.readFileHeader()
+            const header = await this.readFileHeader();
+
+            // Set properties from track line
+            if(header) this.setTrackProperties(header)
 
             const format = this.config.format;
             if (format && format.toLowerCase() === 'bigbed' &&
@@ -135,22 +138,12 @@ var igv = (function (igv) {
         }
 
         FeatureTrack.prototype.readFileHeader = async function () {
+
             if (typeof this.featureSource.getFileHeader === "function") {
-                const header = await this.featureSource.getFileHeader()
-                if (header) {
-                    // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-                    if (header.name && !this.config.name) {
-                        this.name = header.name;
-                    }
-                    if (header.color && !this.config.color) {
-                        this.color = "rgb(" + header.color + ")";
-                    }
-                    this.header = header;
-                }
-                else {
-                    this.header = {};
-                }
+                this.header = await this.featureSource.getFileHeader();
             }
+
+            return this.header;
         }
 
         FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {

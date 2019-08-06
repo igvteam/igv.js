@@ -173,7 +173,7 @@ var igv = (function (igv) {
 
         while (line = dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-                if (line.startsWith("track")) {
+                if (line.startsWith("track") || line.startsWith("#track")) {
                     let h = parseTrackLine(line);
                     if (header) {
                         Object.assign(header, h);
@@ -442,17 +442,16 @@ var igv = (function (igv) {
     }
 
     function parseTrackLine(line) {
-        var properties = {},
-            tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g),
-            tmp = [],
-            i, tk, curr;
+
+        const properties = {};
+        const tokens = line.split(/(?:")([^"]+)(?:")|([^\s"]+)(?=\s+|$)/g);
+
 
         // Clean up tokens array
-        for (i = 1; i < tokens.length; i++) {
-            if (!tokens[i] || tokens[i].trim().length === 0) continue;
-
-            tk = tokens[i].trim();
-
+        let curr;
+        const tmp = [];
+        for (let tk of tokens) {
+            if (!tk || tk.trim().length === 0) continue;
             if (tk.endsWith("=") > 0) {
                 curr = tk;
             }
@@ -463,18 +462,17 @@ var igv = (function (igv) {
             else {
                 tmp.push(tk);
             }
-
         }
-
-
-        tmp.forEach(function (str) {
+        for(let str of tmp) {
             if (!str) return;
             var kv = str.split('=', 2);
             if (kv.length == 2) {
-                properties[kv[0]] = kv[1];
+                const key = kv[0].trim();
+                const value = kv[1].trim();
+                properties[key] = value;
             }
 
-        });
+        }
 
         return properties;
     }
@@ -766,7 +764,7 @@ var igv = (function (igv) {
 
     function findUTRs(exons, cdStart, cdEnd) {
 
-        for(let exon of exons) {
+        for (let exon of exons) {
             const end = exon.end
             const start = exon.start
             if (end < cdStart || start > cdEnd) {
@@ -775,7 +773,7 @@ var igv = (function (igv) {
                 if (cdStart >= start && cdStart <= end) {
                     exon.cdStart = cdStart
                 }
-                if(cdEnd >= start && cdEnd <= end) {
+                if (cdEnd >= start && cdEnd <= end) {
                     exon.cdEnd = cdEnd
                 }
             }

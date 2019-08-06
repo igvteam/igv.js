@@ -580,7 +580,7 @@ var igv = (function (igv) {
         }
 
         if (!knowHowToLoad(config)) {
-            this.presentAlert("The following track could not be loaded.  Is this a local files? " + config.name);
+            this.presentAlert("The following track could not be loaded.  Is this a local file? " + config.name);
             return Promise.resolve();
         }
 
