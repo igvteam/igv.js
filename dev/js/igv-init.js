@@ -1,25 +1,59 @@
 import ig from "../../js/igv-create.js";
 
-const options =
-    {
-        reference: {
-            fastaURL: "../local/caeJap1/chrUn.fa",
-            indexURL: "../local/caeJap1/chrUn.fa.fai"
-        },
+// const options =
+//     {
+//         reference: {
+//             fastaURL: "../local/caeJap1/chrUn.fa",
+//             indexURL: "../local/caeJap1/chrUn.fa.fai"
+//         },
+//
+//         tracks: [
+//             {
+//                 name: "Genes",
+//                 type: "annotation",
+//                 format: "refgene",
+//                 url: "../local/caeJap1/xenoRefGene.txt.gz",
+//                 indexed: false
+//             }
+//         ]
+//     };
+//
+//
+// ig.createBrowser(document.getElementById('igvDiv'), options)
+//     .then(function (browser) {
+//         return browser;
+//     })
 
-        tracks: [
+let browser;
+
+igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+
+    .then(function (google) {
+
+        const options =
             {
-                name: "Genes",
-                type: "annotation",
-                format: "refgene",
-                url: "../local/caeJap1/xenoRefGene.txt.gz",
-                indexed: false
-            }
-        ]
-    };
+                genome: "hg19",
+                //  locus: [ 'egfr', 'myc' ],
+                locus: "myc",
+                flanking: 1000,
+                queryParametersSupported: true,
+                showAllChromosomes: true,
 
+            };
 
-ig.createBrowser(document.getElementById('igvDiv'), options)
-    .then(function (browser) {
-        return browser;
+        ig.createBrowser(document.getElementById('igvDiv'), options)
+            .then(function (b) {
+                browser = b;
+
+                igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
+                // let str = "i do realize this is an extremely long string for an alert message but simply must get to the bottom of this tiresome bug. Thank your for bearing with me.";
+                // let url = 'https://longurlmaker.com/go?id=EXLVPCEEVMCJMZAHPCWLLUKQSDBNNSRSQDOGFTLAFNJRMJZCMVNYQXOIAQWOJOHZRVFXOQYTEHLRRKTEFGDVDSEEIBTRPARGVWDJNBDSJOJBYDGEJKANCFSKGLCVMTCHQFREHUWRIFTHIAMSKNGMSYXZKZUWTWEKCVOKPKCYPVGYWTRGHXTZWRYGRTCKPHUSCICSSFRIAYHXRYEYVXYROXYGQBQGILYKUBDMGUVHSCEKAJIWGHOVENBUOSBXDAHXBLKIFGQYIVIJERFLYUGCHIXVBZSFZACBMNJRTZPBUYLYPQKNLQQSZOOANHFMIINUWXLPWBRRACQPTADFRUXRIMSVTYIBHWWDTISQKKIKNZAHZDMRYJJGWBCPZKRHHNKAVDRFOZPBYQIYTUQREZYABAQBLHISVSTRWLWKKMLJCUIWOYOTYMUZNKAZSISOBMFXXCHIOTRRNANCYCVWPQWCBWCUFUIGHODEQLMFEEWSEKUDMQABGWEITHCYBLEIZINQTZVYERQJCLNPBNRIKVQDCTCEEGNEPAUIAPHFHXOJIBZKPQSAMJDOCGTHMGLCHGKIVRNDPCNYDMITCBTOKXDNDWVQDGSLMDTIVHLKJYJNLRGNSZBDWFRACMQFTIRFLKOHSARBZAOKSUXLUZOQEFQGRHMKPEQBOFIHFAIEBWOURMFLLUBQASXRZKCPOTRDZAKEBSJDPXXGKCRVXTMXMKPLUSBJLSNLSXPUQZXFXUMHXDDUXPRJAGVVYWEKORVHPLBFKYLHTXPQBSLZICIIJDDIZISOZOWOAYULXFSQDIHFASEIVMQEQUMQCFFCTBRTZLEXRXNVGVAGOFOJSFOIABYCGEFAFWUFHZCZXQUDMVJAAYJSEYBFZAIFENGJJAPRASQXILBVHKVIJFAODBTCCBIGOOPYPFPPXGNGSOBZZXHJCIXFKRHMTPSIEIGTOWJLDWSVKUVJRDSTMQYWHFJBVCJZKPTZMCKPYDKIXGSOJLIVBGSJMCKHEUHPKAOWDZLBCWKZCDOMOWIQDAAPDLXHFFWPGKMJJXLMTVMWZAIOXQEARFQURNCWSZMYJYITWTGPPSMOTUCQLHRDMHYDUAANZNMJLUDHNJXCCKQVETLQADTNKSQFTRSTEECPYGXMQVPSFFNKZZAZCUMNNDSGULZYPCOOILAZHPRMVFXUFYUITGVGJOMDZMCOOQDXCEWJUOWPUTKZRFIKLDRVSDZRQBGERJCTOZDIOZYISJHKOPVATMVMQVDGWKLOUOIINLQBLPJEYROMHKNBWINNDRTABFPVTXEHJUIVKSZIKOVSYITVRHIVYCVAILVBJAITVROFJOOUCKMBTGXKNGGMICMRNISWIBPDTEJDSXXVHJXAPVLDBSPKUCBHKUETVUXOZGRRDPNLYLMOGYSHQHRKKTSUNXOJRLXQRPIVEWGDHTSNRKVHRNSBGKWTILDZXBQOQZKVVRYCKRPCBLJTYCVENSYVDBVACLPTKZPFROIBFYEGJNZHQUMDMKYQMTQPFFIQFYWWMEYRDCYMQXUGSGJFQIVDCLSHRBXWZUTMYRDBTCOKZIQSPAXGISJLDCSVDQRDKKPJCTLWVZGVIWNXXKDGCNRGPJBSATWLELUGEGCAGIVOFJMCTQIWDZDSJFLKYHVCSQIXWLYCTTRYCEBWUKTXKWQUBBEAIACBQLYNWWQPQIOTMQQGAJELFUFHWKHEKKFBVEORBFHRNWLZNBGOKLZQGFYCPGGAQMCMQQESWLKJIVIVXPJHAIYGOXIDDPEUCGGTXKLTWVCERLZOAJWBRVIFSRJWGNQJUWCRHOKDKNIBYIPZRMBJHJPZAYVHMMQGJTYQHIURVCSULITCUVLBEBBEAXLMJBTSURJCAETWHMQSVKVPFGRJISOIQZUZBOSWGCYHGSDOEUGZECPKJGURZIZPIUPJIIGPLEWSXAGCUNCZPRJYYDPYMOOUIDDRMKHXOEPMEVOZJQYYHHWGLMEXBSSKWWBIGJFVNUHSQVRZLQYTYVZJHDHIWZSSWUACEGXSBEKRZCRKSPEQKDASG';
+                // browser.presentAlert(url);
+                return browser;
+            })
+
     })
+
+function bookmark() {
+    window.history.pushState({}, "IGV", browser.sessionURL());
+}

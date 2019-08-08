@@ -124,7 +124,7 @@ var igv = (function (igv) {
 
                 if (width > threshold) {
 
-                    igv.Browser.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+                    igv.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
 
                     self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
                     self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);

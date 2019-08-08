@@ -96,54 +96,6 @@ var igv = (function (igv) {
         }
     };
 
-    igv.createTrack = function (config, browser) {
-
-        // Lowercase format
-        if (config.format) {
-            config.format = config.format.toLowerCase();
-        }
-
-
-        let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
-
-        if ("data" === type) type = "wig";   // deprecated
-
-        // add browser to track config
-        let trackConfig = Object.assign({}, config);
-
-        trackConfig.browser = browser;
-
-        let track
-        switch (type) {
-
-            case "annotation":
-            case "genes":
-            case "fusionjuncspan":
-            case "snp":
-                track = igv.trackFactory["feature"](trackConfig, browser);
-                break;
-
-            default:
-
-                if (igv.trackFactory.hasOwnProperty(type)) {
-                    track = igv.trackFactory[type](trackConfig, browser);
-                }
-                else {
-                    track = undefined;
-                }
-        }
-
-        if (config.roi && track) {
-            track.roi = [];
-            config.roi.forEach(function (r) {
-                track.roi.push(new igv.ROI(r, browser.genome));
-            });
-        }
-
-        return track
-
-    };
-
     igv.inferTrackTypes = function (config) {
 
         function translateDeprecatedTypes(config) {

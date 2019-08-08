@@ -623,6 +623,46 @@ var igv = (function (igv) {
 
     }
 
+    igv.validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
+
+        let ss = extent.start;
+        let ee = extent.end;
+
+        if (undefined === ee) {
+
+            ss -= minimumBP / 2;
+            ee = ss + minimumBP;
+
+            if (ee > chromosomeLengthBP) {
+                ee = chromosomeLengthBP;
+                ss = ee - minimumBP;
+            } else if (ss < 0) {
+                ss = 0;
+                ee = minimumBP;
+            }
+
+        } else if (ee - ss < minimumBP) {
+
+            const center = (ee + ss) / 2;
+
+            if (center - minimumBP / 2 < 0) {
+                ss = 0;
+                ee = ss + minimumBP;
+            } else if (center + minimumBP / 2 > chromosomeLengthBP) {
+                ee = chromosomeLengthBP;
+                ss = ee - minimumBP;
+            } else {
+                ss = center - minimumBP / 2;
+                ee = ss + minimumBP;
+            }
+        }
+
+        extent.start = Math.ceil(ss);
+        extent.end = Math.floor(ee);
+    };
+
+
+
 
     return igv;
 

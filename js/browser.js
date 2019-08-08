@@ -26,6 +26,7 @@
 import TrackView from "./trackView.js";
 import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
+import TrackFactory from "./trackFactory";
 
 "use strict";
 
@@ -618,7 +619,7 @@ Browser.prototype.loadTrack = async function (config) {
     try {
         if (!config.noSpinner) this.startSpinner();
 
-        const newTrack = igv.createTrack(config, this);
+        const newTrack = this.createTrack(config);
 
         if (undefined === newTrack) {
             this.presentAlert("Unknown file type: " + config.url, undefined);
@@ -671,6 +672,50 @@ Browser.prototype.loadTrack = async function (config) {
 
 }
 
+Browser.prototype.createTrack = function (config) {
+
+    // Lowercase format
+    if (config.format) {
+        config.format = config.format.toLowerCase();
+    }
+
+
+    let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
+
+    if ("data" === type) type = "wig";   // deprecated
+
+    // add browser to track config
+    let trackConfig = Object.assign({}, config);
+
+    trackConfig.browser = this;
+
+    let track
+    switch (type) {
+
+        case "annotation":
+        case "genes":
+        case "fusionjuncspan":
+        case "snp":
+            track = TrackFactory["feature"](trackConfig, this);
+            break;
+        default:
+            if (TrackFactory.hasOwnProperty(type)) {
+                track = TrackFactory[type](trackConfig, this);
+            } else {
+                track = undefined;
+            }
+    }
+
+    if (config.roi && track) {
+        track.roi = [];
+        config.roi.forEach(function (r) {
+            track.roi.push(new igv.ROI(r, this.genome));
+        });
+    }
+
+    return track
+
+}
 
 /**
  * Add a new track.  Each track is associated with the following DOM elements
@@ -1453,7 +1498,7 @@ Browser.prototype.search = async function (string, init) {
                             end: feature.end,
                             locusSearchString: locus
                         }
-                        Browser.validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
+                        igv.validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
                         result.push(genomicState);
                     }
                 } else {
@@ -1649,7 +1694,7 @@ Browser.prototype.search = async function (string, init) {
 
                 }
 
-                Browser.validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
+                igv.validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
 
                 return locusObject;
 
@@ -1658,45 +1703,6 @@ Browser.prototype.search = async function (string, init) {
         }
     }
 };
-
-Browser.validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
-
-    let ss = extent.start;
-    let ee = extent.end;
-
-    if (undefined === ee) {
-
-        ss -= minimumBP / 2;
-        ee = ss + minimumBP;
-
-        if (ee > chromosomeLengthBP) {
-            ee = chromosomeLengthBP;
-            ss = ee - minimumBP;
-        } else if (ss < 0) {
-            ss = 0;
-            ee = minimumBP;
-        }
-
-    } else if (ee - ss < minimumBP) {
-
-        const center = (ee + ss) / 2;
-
-        if (center - minimumBP / 2 < 0) {
-            ss = 0;
-            ee = ss + minimumBP;
-        } else if (center + minimumBP / 2 > chromosomeLengthBP) {
-            ee = chromosomeLengthBP;
-            ss = ee - minimumBP;
-        } else {
-            ss = center - minimumBP / 2;
-            ee = ss + minimumBP;
-        }
-    }
-
-    extent.start = Math.ceil(ss);
-    extent.end = Math.floor(ee);
-};
-
 
 Browser.prototype.loadSampleInformation = function (url) {
     var name = url;
