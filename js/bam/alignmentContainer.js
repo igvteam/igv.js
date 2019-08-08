@@ -240,6 +240,30 @@ var igv = (function (igv) {
             });
         }
 
+        if(alignment.deletions) {
+            for(let del of alignment.deletions) {
+                const offset = del.start - self.bpStart;
+                for(let i = offset; i < offset + del.len; i++) {
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage();
+                    }
+                    this.coverage[i].del++;
+                }
+            }
+        }
+
+        if(alignment.insertions) {
+            for(let del of alignment.insertions) {
+                const i = del.start - this.bpStart;
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage();
+                    }
+                    this.coverage[i].ins++;
+            }
+        }
+
         function incBlockCount(block) {
 
             if('S' === block.type) return;
@@ -298,6 +322,8 @@ var igv = (function (igv) {
         this.qual = 0;
 
         this.total = 0;
+        this.del = 0;
+        this.ins = 0;
     }
 
     const t = 0.2;

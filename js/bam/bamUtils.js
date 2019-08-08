@@ -484,6 +484,7 @@ var igv = (function (igv) {
         const blocks = [];
 
         let insertions;
+        let deletions;
         let seqOffset = 0;
         let pos = alignment.start;
         let gapType;
@@ -520,6 +521,13 @@ var igv = (function (igv) {
                     gapType = 'N';
                     break;  // reference skip
                 case 'D' :
+                    if(deletions === undefined) {
+                        deletions = [];
+                    }
+                    deletions.push({
+                        start: pos,
+                        len: c.len
+                    });
                     pos += c.len;
                     gapType = 'D';
                     break;
@@ -561,6 +569,7 @@ var igv = (function (igv) {
 
         alignment.blocks =  blocks;
         alignment.insertions = insertions;
+        alignment.deletions = deletions;
 
     }
 

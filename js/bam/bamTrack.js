@@ -200,8 +200,7 @@ var igv = (function (igv) {
         };
 
         BAMTrack.prototype.draw = function (options) {
-
-
+            
             igv.graphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (this.coverageTrack.height > 0) {
@@ -609,17 +608,13 @@ var igv = (function (igv) {
                 coverage = coverageMap.coverage[coverageMapIndex];
 
             if (coverage) {
-
-
                 nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
-
                 nameValues.push({name: 'Total Count', value: coverage.total});
 
                 // A
                 let tmp = coverage.posA + coverage.negA;
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
                 nameValues.push({name: 'A', value: tmp});
-
 
                 // C
                 tmp = coverage.posC + coverage.negC;
@@ -640,6 +635,10 @@ var igv = (function (igv) {
                 tmp = coverage.posN + coverage.negN;
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
                 nameValues.push({name: 'N', value: tmp});
+
+                nameValues.push('<HR/>');
+                nameValues.push({name: 'DEL', value: coverage.del.toString()});
+                nameValues.push({name: 'INS', value: coverage.ins.toString()});
 
             }
 
