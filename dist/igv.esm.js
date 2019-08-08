@@ -18683,6 +18683,30 @@ var igv = (function (igv) {
             });
         }
 
+        if(alignment.deletions) {
+            for(let del of alignment.deletions) {
+                const offset = del.start - self.bpStart;
+                for(let i = offset; i < offset + del.len; i++) {
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage();
+                    }
+                    this.coverage[i].del++;
+                }
+            }
+        }
+
+        if(alignment.insertions) {
+            for(let del of alignment.insertions) {
+                const i = del.start - this.bpStart;
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage();
+                    }
+                    this.coverage[i].ins++;
+            }
+        }
+
         function incBlockCount(block) {
 
             if('S' === block.type) return;
@@ -18741,6 +18765,8 @@ var igv = (function (igv) {
         this.qual = 0;
 
         this.total = 0;
+        this.del = 0;
+        this.ins = 0;
     }
 
     const t = 0.2;
@@ -20470,7 +20496,6 @@ var igv = (function (igv) {
 
         BAMTrack.prototype.draw = function (options) {
 
-
             igv.graphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (this.coverageTrack.height > 0) {
@@ -20878,17 +20903,13 @@ var igv = (function (igv) {
                 coverage = coverageMap.coverage[coverageMapIndex];
 
             if (coverage) {
-
-
                 nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
-
                 nameValues.push({name: 'Total Count', value: coverage.total});
 
                 // A
                 let tmp = coverage.posA + coverage.negA;
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
                 nameValues.push({name: 'A', value: tmp});
-
 
                 // C
                 tmp = coverage.posC + coverage.negC;
@@ -20909,6 +20930,10 @@ var igv = (function (igv) {
                 tmp = coverage.posN + coverage.negN;
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
                 nameValues.push({name: 'N', value: tmp});
+
+                nameValues.push('<HR/>');
+                nameValues.push({name: 'DEL', value: coverage.del.toString()});
+                nameValues.push({name: 'INS', value: coverage.ins.toString()});
 
             }
 
@@ -20982,6 +21007,7 @@ var igv = (function (igv) {
 
             let alignmentRowYInset = 0;
 
+            ctx.save();
             if (this.top) ctx.translate(0, this.top);
 
             if (alignmentContainer.hasDownsampledIntervals()) {
@@ -21042,7 +21068,7 @@ var igv = (function (igv) {
                     }
                 }
             }
-
+            ctx.restore();
 
             // alignment is a PairedAlignment
             function drawPairConnector(alignment, yRect, alignmentHeight) {
@@ -22103,6 +22129,7 @@ var igv = (function (igv) {
         const blocks = [];
 
         let insertions;
+        let deletions;
         let seqOffset = 0;
         let pos = alignment.start;
         let gapType;
@@ -22139,6 +22166,13 @@ var igv = (function (igv) {
                     gapType = 'N';
                     break;  // reference skip
                 case 'D' :
+                    if(deletions === undefined) {
+                        deletions = [];
+                    }
+                    deletions.push({
+                        start: pos,
+                        len: c.len
+                    });
                     pos += c.len;
                     gapType = 'D';
                     break;
@@ -22180,6 +22214,7 @@ var igv = (function (igv) {
 
         alignment.blocks =  blocks;
         alignment.insertions = insertions;
+        alignment.deletions = deletions;
 
     }
 
