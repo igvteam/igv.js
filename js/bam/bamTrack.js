@@ -200,7 +200,7 @@ var igv = (function (igv) {
         };
 
         BAMTrack.prototype.draw = function (options) {
-            
+
             igv.graphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (this.coverageTrack.height > 0) {
@@ -712,6 +712,7 @@ var igv = (function (igv) {
 
             let alignmentRowYInset = 0;
 
+            ctx.save();
             if (this.top) ctx.translate(0, this.top);
 
             if (alignmentContainer.hasDownsampledIntervals()) {
@@ -772,7 +773,7 @@ var igv = (function (igv) {
                     }
                 }
             }
-
+            ctx.restore();
 
             // alignment is a PairedAlignment
             function drawPairConnector(alignment, yRect, alignmentHeight) {
