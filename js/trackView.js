@@ -56,9 +56,11 @@ var igv = (function (igv) {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        if (typeof track.paintAxis === 'function') {
-            appendLeftHandGutter.call(this, $(this.trackDiv));
-        }
+        appendLeftHandGutter.call(this, $(this.trackDiv));
+
+        // if (typeof track.paintAxis === 'function') {
+        //     appendLeftHandGutter.call(this, $(this.trackDiv));
+        // }
 
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $(this.trackDiv).append(this.$viewportContainer);
@@ -174,20 +176,25 @@ var igv = (function (igv) {
         this.leftHandGutter = $leftHandGutter[0];
         $parent.append($leftHandGutter);
 
-        if (this.track.dataRange) {
+        if (typeof this.track.paintAxis === 'function') {
 
-            $leftHandGutter.click(function (e) {
-                self.browser.dataRangeDialog.configure({trackView: self});
-                self.browser.dataRangeDialog.present($(self.trackDiv));
-            });
+            if (this.track.dataRange) {
 
-            $leftHandGutter.addClass('igv-clickable');
+                $leftHandGutter.click(function (e) {
+                    self.browser.dataRangeDialog.configure({trackView: self});
+                    self.browser.dataRangeDialog.present($(self.trackDiv));
+                });
+
+                $leftHandGutter.addClass('igv-clickable');
+            }
+
+            $canvas = $('<canvas class ="igv-track-control-canvas">');
+            $leftHandGutter.append($canvas);
+            this.controlCanvas = $canvas.get(0);
+            resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
+
         }
 
-        $canvas = $('<canvas class ="igv-track-control-canvas">');
-        $leftHandGutter.append($canvas);
-        this.controlCanvas = $canvas.get(0);
-        resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
     }
 
     igv.appendRightHandGutter = function ($parent) {
@@ -221,7 +228,7 @@ var igv = (function (igv) {
 
         var devicePixelRatio = window.devicePixelRatio;
 
-        if (this.leftHandGutter) {
+        if (typeof this.track.paintAxis === 'function') {
 
             if (this.controlCanvas) {
                 $(this.controlCanvas).remove();
