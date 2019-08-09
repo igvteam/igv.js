@@ -23,10 +23,10 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import FeatureSource from '../feature/featureSource';
+import TrackBase from "../trackBase";
 
-
-const EqtlTrack = igv.extend(igv.TrackBase,
+const EqtlTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
@@ -65,7 +65,7 @@ const EqtlTrack = igv.extend(igv.TrackBase,
         this.visibilityWindow = config.visibilityWindow === undefined ?
             2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000;
 
-        this.featureSource = new igv.FeatureSource(config, browser.genome);
+        this.featureSource = new FeatureSource(config, browser.genome);
 
         igv.GtexUtils.gtexLoaded = true;
 

@@ -22,305 +22,300 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-"use strict";
 
-var igv = (function (igv) {
+import BamReaderNonIndexed from "./bamReaderNonIndexed";
+import ShardedBamReader from "./shardedBamReader";
+import BamReader from "./bamReader";
+import BamWebserviceReader from "./bamWebserviceReader";
+import HtsgetReader from "./htsgetReader";
+import CramReader from "../cram/cramReader";
+import Ga4ghAlignmentReader from "../google/ga4ghAlignmentReader";
+import BamAlignmentRow from "./bamAlignmentRow";
+import PairedAlignment from "./pairedAlignment";
 
+const BamSource = function (config, browser) {
 
-    igv.BamSource = function (config, browser) {
+    const genome = browser.genome;
 
-        const genome = browser.genome;
+    this.config = config;
+    this.genome = genome;
+    this.alignmentContainer = undefined;
 
-        this.config = config;
-        this.genome = genome;
-        this.alignmentContainer = undefined;
-
-        if (igv.isString(config.url) && config.url.startsWith("data:")) {
-            if("cram" === config.format) {
-                throw "CRAM data uris are not supported"
-            }
-            this.config.indexed = false;
+    if (igv.isString(config.url) && config.url.startsWith("data:")) {
+        if ("cram" === config.format) {
+            throw "CRAM data uris are not supported"
         }
+        this.config.indexed = false;
+    }
 
-        if ("ga4gh" === config.sourceType) {
-            this.bamReader = new igv.Ga4ghAlignmentReader(config, genome);
-        } else if ("pysam" === config.sourceType) {
-            this.bamReader = new igv.BamWebserviceReader(config, genome)
-        } else if ("htsget" === config.sourceType) {
-            this.bamReader = new igv.HtsgetReader(config, genome);
-        } else if ("shardedBam" === config.sourceType) {
-            this.bamReader = new igv.ShardedBamReader(config, genome);
-        } else if ("cram" === config.format) {
-            this.bamReader = new igv.CramReader(config, genome, browser);
-        }
-        else {
-            if (this.config.indexed === false) {
-                this.bamReader = new igv.BamReaderNonIndexed(config, genome);
-            }
-            else {
-                this.bamReader = new igv.BamReader(config, genome);
-            }
-        }
-
-        this.viewAsPairs = config.viewAsPairs;
-        this.showSoftClips = config.showSoftClips;
-    };
-
-    igv.BamSource.prototype.setViewAsPairs = function (bool) {
-        var self = this;
-
-        if (this.viewAsPairs !== bool) {
-            this.viewAsPairs = bool;
-            // TODO -- repair alignments
-            if (this.alignmentContainer) {
-                var alignmentContainer = this.alignmentContainer,
-                    alignments;
-
-                if (bool) {
-                    alignments = pairAlignments(alignmentContainer.packedAlignmentRows);
-                }
-                else {
-                    alignments = unpairAlignments(alignmentContainer.packedAlignmentRows);
-                }
-                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end);
-
-            }
-        }
-
-    };
-
-    igv.BamSource.prototype.setShowSoftClips = function (bool) {
-
-        if (this.showSoftClips !== bool) {
-
-            this.showSoftClips = bool;
-
-            if (this.alignmentContainer) {
-                const alignments = allAlignments(this.alignmentContainer.packedAlignmentRows);
-                const alignmentContainer = this.alignmentContainer;
-                alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, bool);
-
-            }
-        }
-
-        function allAlignments(rows) {
-            let result = [];
-            for (let row of rows) {
-                for (let alignment of row.alignments) {
-                    result.push(alignment);
-                }
-            }
-            return result;
+    if ("ga4gh" === config.sourceType) {
+        this.bamReader = new Ga4ghAlignmentReader(config, genome);
+    } else if ("pysam" === config.sourceType) {
+        this.bamReader = new BamWebserviceReader(config, genome)
+    } else if ("htsget" === config.sourceType) {
+        this.bamReader = new HtsgetReader(config, genome);
+    } else if ("shardedBam" === config.sourceType) {
+        this.bamReader = new ShardedBamReader(config, genome);
+    } else if ("cram" === config.format) {
+        this.bamReader = new CramReader(config, genome, browser);
+    } else {
+        if (this.config.indexed === false) {
+            this.bamReader = new BamReaderNonIndexed(config, genome);
+        } else {
+            this.bamReader = new BamReader(config, genome);
         }
     }
 
-    igv.BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
+    this.viewAsPairs = config.viewAsPairs;
+    this.showSoftClips = config.showSoftClips;
+};
 
-        const self = this;
-        const genome = this.genome;
-        const showSoftClips = this.showSoftClips;
+BamSource.prototype.setViewAsPairs = function (bool) {
+    var self = this;
 
-        if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+    if (this.viewAsPairs !== bool) {
+        this.viewAsPairs = bool;
+        // TODO -- repair alignments
+        if (this.alignmentContainer) {
+            var alignmentContainer = this.alignmentContainer,
+                alignments;
 
-            return self.alignmentContainer;
+            if (bool) {
+                alignments = pairAlignments(alignmentContainer.packedAlignmentRows);
+            } else {
+                alignments = unpairAlignments(alignmentContainer.packedAlignmentRows);
+            }
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end);
+
+        }
+    }
+
+};
+
+BamSource.prototype.setShowSoftClips = function (bool) {
+
+    if (this.showSoftClips !== bool) {
+
+        this.showSoftClips = bool;
+
+        if (this.alignmentContainer) {
+            const alignments = allAlignments(this.alignmentContainer.packedAlignmentRows);
+            const alignmentContainer = this.alignmentContainer;
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, bool);
+
+        }
+    }
+
+    function allAlignments(rows) {
+        let result = [];
+        for (let row of rows) {
+            for (let alignment of row.alignments) {
+                result.push(alignment);
+            }
+        }
+        return result;
+    }
+}
+
+BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
+
+    const self = this;
+    const genome = this.genome;
+    const showSoftClips = this.showSoftClips;
+
+    if (self.alignmentContainer && self.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+
+        return self.alignmentContainer;
+
+    } else {
+
+        const alignmentContainer = await self.bamReader.readAlignments(chr, bpStart, bpEnd)
+
+        let alignments = alignmentContainer.alignments;
+
+        if (!self.viewAsPairs) {
+            alignments = unpairAlignments([{alignments: alignments}]);
+        }
+
+        const hasAlignments = alignments.length > 0;
+
+        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
+
+        alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
+
+        self.alignmentContainer = alignmentContainer;
+
+        if (!hasAlignments) {
+
+            return alignmentContainer;
 
         } else {
 
-            const alignmentContainer = await self.bamReader.readAlignments(chr, bpStart, bpEnd)
+            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
 
-            let alignments = alignmentContainer.alignments;
+            if (sequence) {
 
-            if (!self.viewAsPairs) {
-                alignments = unpairAlignments([{alignments: alignments}]);
-            }
-
-            const hasAlignments = alignments.length > 0;
-
-            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
-
-            alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
-
-            self.alignmentContainer = alignmentContainer;
-
-            if (!hasAlignments) {
+                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                alignmentContainer.sequence = sequence;           // TODO -- fix this
 
                 return alignmentContainer;
-
-            }
-            else {
-
-                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
-
-                if (sequence) {
-
-                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                    alignmentContainer.sequence = sequence;           // TODO -- fix this
-
-                    return alignmentContainer;
-                }
-                else {
-                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
-                }
-
+            } else {
+                console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
             }
 
         }
 
     }
 
-    function pairAlignments(rows) {
+}
 
-        var pairCache = {},
-            result = [];
+function pairAlignments(rows) {
 
-        rows.forEach(function (row) {
+    var pairCache = {},
+        result = [];
 
-            row.alignments.forEach(function (alignment) {
+    rows.forEach(function (row) {
 
-                var pairedAlignment;
+        row.alignments.forEach(function (alignment) {
 
-                if (canBePaired(alignment)) {
+            var pairedAlignment;
 
-                    pairedAlignment = pairCache[alignment.readName];
-                    if (pairedAlignment) {
-                        pairedAlignment.setSecondAlignment(alignment);
-                        pairCache[alignment.readName] = undefined;   // Don't need to track this anymore.
-                    }
-                    else {
-                        pairedAlignment = new igv.PairedAlignment(alignment);
-                        pairCache[alignment.readName] = pairedAlignment;
-                        result.push(pairedAlignment);
-                    }
+            if (canBePaired(alignment)) {
+
+                pairedAlignment = pairCache[alignment.readName];
+                if (pairedAlignment) {
+                    pairedAlignment.setSecondAlignment(alignment);
+                    pairCache[alignment.readName] = undefined;   // Don't need to track this anymore.
+                } else {
+                    pairedAlignment = new PairedAlignment(alignment);
+                    pairCache[alignment.readName] = pairedAlignment;
+                    result.push(pairedAlignment);
                 }
-
-                else {
-                    result.push(alignment);
-                }
-            });
+            } else {
+                result.push(alignment);
+            }
         });
-        return result;
-    }
+    });
+    return result;
+}
 
-    function unpairAlignments(rows) {
-        var result = [];
-        rows.forEach(function (row) {
-            row.alignments.forEach(function (alignment) {
-                if (alignment instanceof igv.PairedAlignment) {
-                    if (alignment.firstAlignment) result.push(alignment.firstAlignment);  // shouldn't need the null test
-                    if (alignment.secondAlignment) result.push(alignment.secondAlignment);
+function unpairAlignments(rows) {
+    var result = [];
+    rows.forEach(function (row) {
+        row.alignments.forEach(function (alignment) {
+            if (alignment instanceof PairedAlignment) {
+                if (alignment.firstAlignment) result.push(alignment.firstAlignment);  // shouldn't need the null test
+                if (alignment.secondAlignment) result.push(alignment.secondAlignment);
 
-                }
-                else {
-                    result.push(alignment);
-                }
-            });
+            } else {
+                result.push(alignment);
+            }
         });
-        return result;
-    }
+    });
+    return result;
+}
 
-    function canBePaired(alignment) {
-        return alignment.isPaired() &&
-            alignment.isMateMapped() &&
-            alignment.chr === alignment.mate.chr &&
-            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
-    }
+function canBePaired(alignment) {
+    return alignment.isPaired() &&
+        alignment.isMateMapped() &&
+        alignment.chr === alignment.mate.chr &&
+        (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
+}
 
-    function packAlignmentRows(alignments, start, end, showSoftClips) {
+function packAlignmentRows(alignments, start, end, showSoftClips) {
 
-        if (!alignments) return;
-
-
-        if (alignments.length === 0) {
-            return [];
-        } else {
-
-            var bucketList = [],
-                allocatedCount = 0,
-                lastAllocatedCount = 0,
-                nextStart,
-                alignmentRow,
-                index,
-                bucket,
-                alignment,
-                alignmentSpace = 8,
-                packedAlignmentRows = [],
-                bucketStart;
+    if (!alignments) return;
 
 
-            alignments.sort(function (a, b) {
-                return showSoftClips ? a.scStart - b.scStart : a.start - b.start;
-            });
+    if (alignments.length === 0) {
+        return [];
+    } else {
 
-            // bucketStart = Math.max(start, alignments[0].start);
-            const firstAlignment = alignments[0];
-            bucketStart = Math.max(start, showSoftClips ? firstAlignment.scStart : firstAlignment.start);
+        var bucketList = [],
+            allocatedCount = 0,
+            lastAllocatedCount = 0,
+            nextStart,
+            alignmentRow,
+            index,
+            bucket,
+            alignment,
+            alignmentSpace = 8,
+            packedAlignmentRows = [],
+            bucketStart;
+
+
+        alignments.sort(function (a, b) {
+            return showSoftClips ? a.scStart - b.scStart : a.start - b.start;
+        });
+
+        // bucketStart = Math.max(start, alignments[0].start);
+        const firstAlignment = alignments[0];
+        bucketStart = Math.max(start, showSoftClips ? firstAlignment.scStart : firstAlignment.start);
+        nextStart = bucketStart;
+
+        alignments.forEach(function (alignment) {
+
+            //var buckListIndex = Math.max(0, alignment.start - bucketStart);
+            const s = showSoftClips ? alignment.scStart : alignment.start;
+            var buckListIndex = Math.max(0, s - bucketStart);
+            if (bucketList[buckListIndex] === undefined) {
+                bucketList[buckListIndex] = [];
+            }
+            bucketList[buckListIndex].push(alignment);
+        });
+
+
+        while (allocatedCount < alignments.length) {
+
+            alignmentRow = new BamAlignmentRow();
+
+            while (nextStart <= end) {
+
+                bucket = undefined;
+
+                while (!bucket && nextStart <= end) {
+
+                    index = nextStart - bucketStart;
+                    if (bucketList[index] === undefined) {
+                        ++nextStart;                     // No alignments at this index
+                    } else {
+                        bucket = bucketList[index];
+                    }
+
+                } // while (bucket)
+
+                if (!bucket) {
+                    break;
+                }
+                alignment = bucket.pop();
+                if (0 === bucket.length) {
+                    bucketList[index] = undefined;
+                }
+
+                alignmentRow.alignments.push(alignment);
+
+                nextStart = showSoftClips ?
+                    alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
+                    alignment.start + alignment.lengthOnRef + alignmentSpace;
+                ++allocatedCount;
+
+            } // while (nextStart)
+
+            if (alignmentRow.alignments.length > 0) {
+                packedAlignmentRows.push(alignmentRow);
+            }
+
             nextStart = bucketStart;
 
-            alignments.forEach(function (alignment) {
+            if (allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
 
-                //var buckListIndex = Math.max(0, alignment.start - bucketStart);
-                const s = showSoftClips ? alignment.scStart : alignment.start;
-                var buckListIndex = Math.max(0, s - bucketStart);
-                if (bucketList[buckListIndex] === undefined) {
-                    bucketList[buckListIndex] = [];
-                }
-                bucketList[buckListIndex].push(alignment);
-            });
+            lastAllocatedCount = allocatedCount;
 
+        } // while (allocatedCount)
 
-            while (allocatedCount < alignments.length) {
-
-                alignmentRow = new igv.BamAlignmentRow();
-
-                while (nextStart <= end) {
-
-                    bucket = undefined;
-
-                    while (!bucket && nextStart <= end) {
-
-                        index = nextStart - bucketStart;
-                        if (bucketList[index] === undefined) {
-                            ++nextStart;                     // No alignments at this index
-                        } else {
-                            bucket = bucketList[index];
-                        }
-
-                    } // while (bucket)
-
-                    if (!bucket) {
-                        break;
-                    }
-                    alignment = bucket.pop();
-                    if (0 === bucket.length) {
-                        bucketList[index] = undefined;
-                    }
-
-                    alignmentRow.alignments.push(alignment);
-
-                    nextStart = showSoftClips ?
-                        alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
-                        alignment.start + alignment.lengthOnRef + alignmentSpace;
-                    ++allocatedCount;
-
-                } // while (nextStart)
-
-                if (alignmentRow.alignments.length > 0) {
-                    packedAlignmentRows.push(alignmentRow);
-                }
-
-                nextStart = bucketStart;
-
-                if (allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
-
-                lastAllocatedCount = allocatedCount;
-
-            } // while (allocatedCount)
-
-            return packedAlignmentRows;
-        }
+        return packedAlignmentRows;
     }
+}
 
 
-    return igv;
-
-})(igv || {});
+export default BamSource;

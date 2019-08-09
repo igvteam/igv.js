@@ -23,10 +23,11 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import FeatureSource from './featureSource';
+import TDFSource from "../tdf/tdfSource";
+import TrackBase from "../trackBase";
 
-
-const WigTrack = igv.extend(igv.TrackBase,
+const WigTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
@@ -43,15 +44,15 @@ const WigTrack = igv.extend(igv.TrackBase,
             config.height = 50;
         }
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
             this.featureSource = new igv.BWSource(config, browser.genome);
         } else if ("tdf" === format) {
-            this.featureSource = new igv.TDFSource(config, browser.genome);
+            this.featureSource = new TDFSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.FeatureSource(config, browser.genome);
+            this.featureSource = new FeatureSource(config, browser.genome);
         }
 
         this.autoscale = config.autoscale || config.max === undefined;

@@ -23,13 +23,14 @@
  * THE SOFTWARE.
  */
 
-// Simple variant track for mpg prototype
-"use strict";
+import FeatureSource from '../feature/featureSource';
+import T2DVariantSource from "./t2dVariantSource";
+import TrackBase from "../trackBase";
 
 const DEFAULT_POPOVER_WINDOW = 100000000;
 const type = "gwas";
 
-const GWASTrack = igv.extend(igv.TrackBase,
+const GWASTrack = igv.extend(TrackBase,
     function (config, browser) {
         this.config = config;
         this.url = config.url;
@@ -61,9 +62,9 @@ const GWASTrack = igv.extend(igv.TrackBase,
 
         // An obvious hack -- the source should be passed in as an arbument
         if (config.format && ("gtexgwas" === config.format.toLowerCase())) {
-            this.featureSource = new igv.FeatureSource(config, browser.genome);
+            this.featureSource = new FeatureSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.T2DVariantSource(config, browser.genome);
+            this.featureSource = new T2DVariantSource(config, browser.genome);
         }
 
     });

@@ -23,14 +23,15 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import FeatureCache from "../feature/featureCache";
+import getDataWrapper from "../feature/dataWrapper";
+import TrackBase from "../trackBase";
 
-
-const RnaStructTrack = igv.extend(igv.TrackBase,
+const RnaStructTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         // Set defaults
         if (!config.height) {
@@ -158,7 +159,7 @@ RnaStructTrack.prototype.draw = function (options) {
 
 RnaStructTrack.prototype.clickedFeatures = function (clickState) {
 
-    let features = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
+    let features = TrackBase.prototype.clickedFeatures.call(this, clickState);
 
     const clicked = [];
 
@@ -207,7 +208,7 @@ RnaStructTrack.prototype.popupData = function (clickState, features) {
 
     if (features && features.length > 0) {
 
-        return igv.TrackBase.extractPopupData(features[0], this.getGenomeId());
+        return TrackBase.extractPopupData(features[0], this.getGenomeId());
 
     }
 }
@@ -258,6 +259,7 @@ function sortByScore(featureList, direction) {
 
 
     });
+
 }
 
 
@@ -280,7 +282,7 @@ FeatureSource.prototype.getFeatures = function (chr, start, end) {
 
             .then(function (data) {
 
-                self.featureCache = new igv.FeatureCache(parseBP(data), genome);
+                self.featureCache = new FeatureCache(parseBP(data), genome);
 
                 return self.featureCache.queryFeatures(chr, start, end);
 
@@ -295,7 +297,7 @@ FeatureSource.prototype.getFeatures = function (chr, start, end) {
 
         if (!data) return null;
 
-        const dataWrapper = igv.getDataWrapper(data);
+        const dataWrapper = getDataWrapper(data);
 
         let header = true;
         let line;

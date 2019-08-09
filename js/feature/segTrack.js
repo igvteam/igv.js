@@ -23,14 +23,14 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import FeatureSource from './featureSource';
+import TrackBase from "../trackBase";
 
-
-const SegTrack = igv.extend(igv.TrackBase,
+const SegTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
@@ -70,7 +70,7 @@ const SegTrack = igv.extend(igv.TrackBase,
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = new igv.FeatureSource(this.config, browser.genome);
+        this.featureSource = new FeatureSource(this.config, browser.genome);
 
         if (config.sort) {
             const sort = config.sort;
@@ -321,7 +321,7 @@ SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
 
 SegTrack.prototype.clickedFeatures = function (clickState) {
 
-    const allFeatures = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
+    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
     return filterByRow(allFeatures, clickState.y);
 
     function filterByRow(features, y) {

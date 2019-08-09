@@ -23,10 +23,6 @@
  * THE SOFTWARE.
  */
 
-"use strict";
-
-var igv = (function (igv) {
-
     const READ_PAIRED_FLAG = 0x1;
     const PROPER_PAIR_FLAG = 0x2;
     const READ_UNMAPPED_FLAG = 0x4;
@@ -53,59 +49,59 @@ var igv = (function (igv) {
      * blocks
      */
 
-    igv.BamAlignment = function () {
+    const BamAlignment = function () {
         this.hidden = false;
     }
 
-    igv.BamAlignment.prototype.isMapped = function () {
+    BamAlignment.prototype.isMapped = function () {
         return (this.flags & READ_UNMAPPED_FLAG) === 0;
     }
 
-    igv.BamAlignment.prototype.isPaired = function () {
+    BamAlignment.prototype.isPaired = function () {
         return (this.flags & READ_PAIRED_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isProperPair = function () {
+    BamAlignment.prototype.isProperPair = function () {
         return (this.flags & PROPER_PAIR_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isFirstOfPair = function () {
+    BamAlignment.prototype.isFirstOfPair = function () {
         return (this.flags & FIRST_OF_PAIR_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isSecondOfPair = function () {
+    BamAlignment.prototype.isSecondOfPair = function () {
         return (this.flags & SECOND_OF_PAIR_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isSecondary = function () {
+    BamAlignment.prototype.isSecondary = function () {
         return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isSupplementary = function () {
+    BamAlignment.prototype.isSupplementary = function () {
         return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isFailsVendorQualityCheck = function () {
+    BamAlignment.prototype.isFailsVendorQualityCheck = function () {
         return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isDuplicate = function () {
+    BamAlignment.prototype.isDuplicate = function () {
         return (this.flags & DUPLICATE_READ_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isMateMapped = function () {
+    BamAlignment.prototype.isMateMapped = function () {
         return (this.flags & MATE_UNMAPPED_FLAG) === 0;
     }
 
-    igv.BamAlignment.prototype.isNegativeStrand = function () {
+    BamAlignment.prototype.isNegativeStrand = function () {
         return (this.flags & READ_STRAND_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.isMateNegativeStrand = function () {
+    BamAlignment.prototype.isMateNegativeStrand = function () {
         return (this.flags & MATE_STRAND_FLAG) !== 0;
     }
 
-    igv.BamAlignment.prototype.tags = function () {
+    BamAlignment.prototype.tags = function () {
 
         if (!this.tagDict) {
             if (this.tagBA) {
@@ -167,7 +163,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.BamAlignment.prototype.popupData = function (genomicLocation) {
+    BamAlignment.prototype.popupData = function (genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the
         // inserted bases in a popup (like in desktop IGV).
@@ -260,7 +256,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.BamAlignment.prototype.readBaseAt = function (genomicLocation) {
+    BamAlignment.prototype.readBaseAt = function (genomicLocation) {
 
         const block = blockAtGenomicLocation(this.blocks, genomicLocation);
 
@@ -280,7 +276,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
+    BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
 
         const block = blockAtGenomicLocation(this.blocks, genomicLocation);
 
@@ -360,6 +356,4 @@ var igv = (function (igv) {
 
     }
 
-    return igv;
-
-})(igv || {});
+export default BamAlignment;

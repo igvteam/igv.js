@@ -24,6 +24,7 @@
  */
 
 import ViewPort from "./viewport.js";
+import FeatureUtils from "./feature/featureUtils";
 
 var dragged,
     dragDestination;
@@ -465,7 +466,7 @@ TrackView.prototype.updateViews = async function (force) {
             const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
             if (vp.tile && vp.tile.features) {
-                allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
 
             }
         }
@@ -516,7 +517,7 @@ TrackView.prototype.getInViewFeatures = async function (force) {
             const referenceFrame = vp.genomicState.referenceFrame;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-            allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+            allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
         }
     }
     return allFeatures;

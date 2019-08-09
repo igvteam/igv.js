@@ -28,13 +28,9 @@
  * Created by jrobinso on 11/22/2016.
  */
 
-
-var igv = (function (igv) {
-
-
     var GZIP_FLAG = 0x1;
 
-    igv.TDFReader = function (config, genome) {
+    const TDFReader = function (config, genome) {
         this.config = config;
         this.genome = genome;
         this.path = config.url;
@@ -43,7 +39,7 @@ var igv = (function (igv) {
     };
 
 
-    igv.TDFReader.prototype.readHeader = function () {
+    TDFReader.prototype.readHeader = function () {
 
         var self = this;
 
@@ -122,7 +118,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
+    TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
 
         var self = this,
             dsName,
@@ -205,7 +201,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.TDFReader.prototype.readRootGroup = function () {
+    TDFReader.prototype.readRootGroup = function () {
 
         const self = this;
         const genome = this.genome;
@@ -238,7 +234,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.TDFReader.prototype.readGroup = function (name) {
+    TDFReader.prototype.readGroup = function (name) {
 
         var self = this, group;
 
@@ -406,7 +402,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
+    TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
 
         var self = this;
 
@@ -485,7 +481,7 @@ var igv = (function (igv) {
         // Read raw data for all tiles into a buffer
     }
 
-    igv.TDFReader.prototype.readTile = function (indexEntry, nTracks) {
+    TDFReader.prototype.readTile = function (indexEntry, nTracks) {
 
         var self = this;
 
@@ -525,7 +521,4 @@ var igv = (function (igv) {
 
     }
 
-    return igv;
-
-})
-(igv || {});
+export default TDFReader;

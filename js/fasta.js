@@ -374,7 +374,7 @@ var igv = (function (igv) {
         }
 
         bytes = new Uint8Array(dataString.length);
-        for (var i = 0; i < dataString.length; i++) {
+        for (let i = 0; i < dataString.length; i++) {
             bytes[i] = dataString.charCodeAt(i);
         }
 

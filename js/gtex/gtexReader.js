@@ -24,103 +24,92 @@
  */
 
 /**
- * Created by jrobinso on 10/8/15.
+ * @param url - url to the webservice
+ * @constructor
  */
+const GtexReader = function (config) {
 
-var igv = (function (igv) {
+    this.config = config;
+    this.url = config.url;
+    this.tissueName = config.tissueName;
+    this.indexed = true;
+    this.datasetId = config.datasetId || "gtex_v7"
+};
 
+//{
+//    "release": "v6",
+//    "singleTissueEqtl": [
+//    {
+//        "beta": -0.171944779728988,
+//        "chromosome": "3",
+//        "gencodeId": "ENSG00000168827.10",
+//        "geneSymbol": "GFM1",
+//        "pValue": 1.22963421134407e-09,
+//        "snpId": "rs3765025",
+//        "start": 158310846,
+//        "tissueName": "Thyroid"
+//    },
+// "singleTissueEqtl": [
+//     {
+//         "beta": 0.388922,
+//         "chromosome": "12",
+//         "gencodeId": "ENSG00000245017.2",
+//         "geneSymbol": "RP11-181C3.1",
+//         "geneSymbolUpper": "RP11-181C3.1",
+//         "pValue": 5.76253e-06,
+//         "release": "v7",
+//         "snpId": "rs10860345",
+//         "start": 98972466,
+//         "tissueName": "Adrenal_Gland",
+//         "variantId": "12_98972466_T_C_b37"
+//     }
+//
+// http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
 
-    /**
-     * @param url - url to the webservice
-     * @constructor
-     */
-    igv.GtexReader = function (config) {
+GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
-        this.config = config;
-        this.url = config.url;
-        this.tissueName = config.tissueName;
-        this.indexed = true;
-        this.datasetId = config.datasetId || "gtex_v7"
-    };
+    let self = this,
+        queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
+        queryStart = Math.floor(bpStart),
+        queryEnd = Math.ceil(bpEnd),
+        datasetId = this.datasetId,
+        queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
+            "&tissueName=" + this.tissueName + "&datasetId=" + datasetId;
 
-    //{
-    //    "release": "v6",
-    //    "singleTissueEqtl": [
-    //    {
-    //        "beta": -0.171944779728988,
-    //        "chromosome": "3",
-    //        "gencodeId": "ENSG00000168827.10",
-    //        "geneSymbol": "GFM1",
-    //        "pValue": 1.22963421134407e-09,
-    //        "snpId": "rs3765025",
-    //        "start": 158310846,
-    //        "tissueName": "Thyroid"
-    //    },
-    // "singleTissueEqtl": [
-    //     {
-    //         "beta": 0.388922,
-    //         "chromosome": "12",
-    //         "gencodeId": "ENSG00000245017.2",
-    //         "geneSymbol": "RP11-181C3.1",
-    //         "geneSymbolUpper": "RP11-181C3.1",
-    //         "pValue": 5.76253e-06,
-    //         "release": "v7",
-    //         "snpId": "rs10860345",
-    //         "start": 98972466,
-    //         "tissueName": "Adrenal_Gland",
-    //         "variantId": "12_98972466_T_C_b37"
-    //     }
-    //
-    // http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
+    return new Promise(function (fulfill, reject) {
 
-        igv.GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
+        igv.xhr.loadJson(queryURL, {
+            withCredentials: self.config.withCredentials
+        }).then(function (json) {
 
-            let self=this,
-                queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
-                queryStart = Math.floor(bpStart),
-                queryEnd = Math.ceil(bpEnd),
-                datasetId = this.datasetId,
-                queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                    "&tissueName=" + this.tissueName + "&datasetId=" + datasetId;
+            var variants;
 
-            return new Promise(function (fulfill, reject) {
+            if (json && json.singleTissueEqtl) {
+                //variants = json.variants;
+                //variants.sort(function (a, b) {
+                //    return a.POS - b.POS;
+                //});
+                //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                igv.xhr.loadJson(queryURL, {
-                    withCredentials: self.config.withCredentials
-                }).then(function (json) {
+                json.singleTissueEqtl.forEach(function (eqtl) {
+                    eqtl.chr = "chr" + eqtl.chromosome;
+                    eqtl.position = eqtl.pos;
+                    eqtl.start = eqtl.pos - 1;
+                    eqtl.end = eqtl.start + 1;
+                    eqtl.snp = eqtl.snpId;
+                    eqtl.geneName = eqtl.geneSymbol;
+                    eqtl.geneId = eqtl.gencodeId;
 
-                    var variants;
+                });
 
-                    if (json && json.singleTissueEqtl) {
-                        //variants = json.variants;
-                        //variants.sort(function (a, b) {
-                        //    return a.POS - b.POS;
-                        //});
-                        //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+                fulfill(json.singleTissueEqtl);
+            } else {
+                fulfill(null);
+            }
 
-                        json.singleTissueEqtl.forEach(function (eqtl) {
-                            eqtl.chr = "chr" + eqtl.chromosome;
-                            eqtl.position = eqtl.pos;
-                            eqtl.start = eqtl.pos - 1;
-                            eqtl.end = eqtl.start + 1;
-                            eqtl.snp = eqtl.snpId;
-                            eqtl.geneName = eqtl.geneSymbol;
-                            eqtl.geneId = eqtl.gencodeId;
+        }).catch(reject);
 
-                        });
+    });
+}
 
-                        fulfill(json.singleTissueEqtl);
-                    }
-                    else {
-                        fulfill(null);
-                    }
-
-                }).catch(reject);
-
-            });
-        }
-
-
-    return igv;
-})
-(igv || {});
+export default GtexReader;

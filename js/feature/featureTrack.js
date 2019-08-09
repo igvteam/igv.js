@@ -23,14 +23,16 @@
  * THE SOFTWARE.
  */
 "use strict";
+import FeatureSource from './featureSource';
+import TrackBase from "../trackBase";
 
-const FeatureTrack = igv.extend(igv.TrackBase,
+const FeatureTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
         this.type = "feature";
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
         if (config.maxRows === undefined) {
@@ -44,7 +46,7 @@ const FeatureTrack = igv.extend(igv.TrackBase,
         if ('bigwig' === format || 'bigbed' === format) {
             this.featureSource = new igv.BWSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.FeatureSource(config, browser.genome);
+            this.featureSource = new FeatureSource(config, browser.genome);
         }
 
         // Set default heights
@@ -216,7 +218,7 @@ FeatureTrack.prototype.draw = function (options) {
 FeatureTrack.prototype.clickedFeatures = function (clickState) {
 
     const y = clickState.y - this.margin;
-    const allFeatures = igv.TrackBase.prototype.clickedFeatures.call(this, clickState);
+    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
 
     let row;
     switch (this.displayMode) {
@@ -248,7 +250,7 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
     const data = [];
     for (let feature of features) {
 
-        const featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) : igv.TrackBase.extractPopupData(feature, this.getGenomeId());
+        const featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) : TrackBase.extractPopupData(feature, this.getGenomeId());
 
         if (featureData) {
             if (data.length > 0) {

@@ -26,59 +26,49 @@
 // Experimental class for fetching features from an mpg webservice.
 // http://immvar.broadinstitute.org:3000/load_data?chromosome=&start=&end=&categories=
 
-var igv = (function (igv) {
+const ImmVarReader = function (config) {
 
-    /**
-     * @param url - url to the webservice
-     * @constructor
-     */
-    igv.ImmVarReader = function (config) {
+    this.config = config;
+    this.url = config.url;
+    this.cellConditionId = config.cellConditionId;
+    this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
 
-        this.config = config;
-        this.url = config.url;
-        this.cellConditionId = config.cellConditionId;
-        this.valueThreshold = config.valueThreshold ? config.valueThreshold : 5E-2;
+};
 
-    };
+ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) {
 
-    igv.ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) {
+    var self = this,
+        queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
+            "&cell_condition_id=" + this.cellConditionId;
 
-        var self = this,
-            queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-                "&cell_condition_id=" + this.cellConditionId;
+    return new Promise(function (fulfill, reject) {
+        igv.xhr.loadJson(queryURL, {
+            withCredentials: self.config.withCredentials
+        }).then(function (json) {
 
-        return new Promise(function (fulfill, reject) {
-            igv.xhr.loadJson(queryURL, {
-                withCredentials: self.config.withCredentials
-            }).then(function (json) {
+            if (json) {
+                //variants = json.variants;
+                //variants.sort(function (a, b) {
+                //    return a.POS - b.POS;
+                //});
+                //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-                if (json) {
-                    //variants = json.variants;
-                    //variants.sort(function (a, b) {
-                    //    return a.POS - b.POS;
-                    //});
-                    //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
+                json.eqtls.forEach(function (eqtl) {
+                    eqtl.chr = eqtl.chromosome;
+                    eqtl.start = eqtl.position;
+                    eqtl.end = eqtl.position + 1;
+                });
 
-                    json.eqtls.forEach(function (eqtl) {
-                        eqtl.chr = eqtl.chromosome;
-                        eqtl.start = eqtl.position;
-                        eqtl.end = eqtl.position + 1;
-                    });
+                fulfill(json.eqtls);
+            } else {
+                fulfill(null);
+            }
 
-                    fulfill(json.eqtls);
-                }
-                else {
-                    fulfill(null);
-                }
-
-            }).catch(function (error) {
-                reject(error);
-            });
-
+        }).catch(function (error) {
+            reject(error);
         });
-    }
 
+    });
+}
 
-    return igv;
-})
-(igv || {});
+export default ImmVarReader;

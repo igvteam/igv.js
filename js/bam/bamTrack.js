@@ -23,7 +23,9 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import BamSource from "./bamSource";
+import PairedAlignment from "./pairedAlignment";
+import TrackBase from "../trackBase";
 
 const type = "alignment";
 
@@ -36,7 +38,7 @@ var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
 
-const BAMTrack = igv.extend(igv.TrackBase,
+const BAMTrack = igv.extend(TrackBase,
     function (config, browser) {
 
         this.type = type;
@@ -44,13 +46,13 @@ const BAMTrack = igv.extend(igv.TrackBase,
         // Override default track height for bams
         if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         if (config.coverageTrackHeight === undefined) {
             config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
         }
 
-        this.featureSource = new igv.BamSource(config, browser);
+        this.featureSource = new BamSource(config, browser);
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
 
@@ -737,7 +739,7 @@ AlignmentTrack.prototype.draw = function (options) {
                     continue;
                 }
 
-                if (alignment instanceof igv.PairedAlignment) {
+                if (alignment instanceof PairedAlignment) {
 
                     drawPairConnector.call(this, alignment, alignmentY, alignmentHeight);
 
@@ -1134,7 +1136,7 @@ AlignmentTrack.prototype.getAlignmentColor = function (alignment) {
 
         case "firstOfPairStrand":
 
-            if (alignment instanceof igv.PairedAlignment) {
+            if (alignment instanceof PairedAlignment) {
                 color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
             } else if (alignment.isPaired()) {
 

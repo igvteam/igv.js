@@ -24,17 +24,14 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinson on 4/15/16.
- */
-
-"use strict";
+import FeatureSource from '../feature/featureSource';
+import TrackBase from "../trackBase";
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
 const topMargin = 10
 
-const VariantTrack = igv.extend(igv.TrackBase,
+const VariantTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
@@ -42,7 +39,7 @@ const VariantTrack = igv.extend(igv.TrackBase,
 
         this.visibilityWindow = config.visibilityWindow;
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
@@ -56,7 +53,7 @@ const VariantTrack = igv.extend(igv.TrackBase,
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
 
-        this.featureSource = new igv.FeatureSource(config, browser.genome);
+        this.featureSource = new FeatureSource(config, browser.genome);
 
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)"
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";

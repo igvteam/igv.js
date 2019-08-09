@@ -23,7 +23,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-const MergedTrack = igv.extend(igv.TrackBase, function (config, browser) {
+
+import TrackBase from "../trackBase";
+
+const MergedTrack = igv.extend(TrackBase, function (config, browser) {
 
     var self = this;
 
@@ -36,7 +39,7 @@ const MergedTrack = igv.extend(igv.TrackBase, function (config, browser) {
         config.height = 50;
     }
 
-    igv.TrackBase.call(this, config, browser);
+    TrackBase.call(this, config, browser);
 
     this.tracks = [];
     config.tracks.forEach(function (tconf) {

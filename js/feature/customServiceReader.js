@@ -24,86 +24,72 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 10/10/16.
- */
+const CustomServiceReader = function (config) {
+
+    this.config = config;
+
+}
+
+CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
 
 
-var igv = (function (igv) {
+    var self = this,
+        url = self.config.url,
+        body = self.config.body;
 
+    if (chr.toLowerCase() !== "all") {
 
-    igv.CustomServiceReader = function (config) {
+        url = url
+            .replace("$CHR", chr)
+            .replace("$START", start)
+            .replace("$END", end);
 
-        this.config = config;
-
+        if (body !== undefined) {
+            self.config.body =
+                self.config.body
+                    .replace("$CHR", chr)
+                    .replace("$START", start)
+                    .replace("$END", end);
+        }
     }
 
-    igv.CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
+    return igv.xhr.load(url, self.config)
 
+        .then(function (data) {
 
-        var self = this,
-            url = self.config.url,
-            body = self.config.body;
-
-        if (chr.toLowerCase() !== "all") {
-
-            url = url
-                .replace("$CHR", chr)
-                .replace("$START", start)
-                .replace("$END", end);
-
-            if (body !== undefined) {
-                self.config.body =
-                    self.config.body
-                        .replace("$CHR", chr)
-                        .replace("$START", start)
-                        .replace("$END", end);
-            }
-        }
-
-        return igv.xhr.load(url, self.config)
-            
-            .then(function (data) {
-
-                if (data) {
-                    if (typeof self.config.parser === "function") {
-                        return self.config.parser(data);
-                    }
-                    else if (igv.isString(data)) {
-                        // TODO -- make this explict in config (returnType="json", "xml", etc)
-                        try {
-                            return JSON.parse(data);
-                        } catch (e) {
-                            // Apparently not json, just return data
-                            return data;
-                        }
-                    }
-                    else {
+            if (data) {
+                if (typeof self.config.parser === "function") {
+                    return self.config.parser(data);
+                } else if (igv.isString(data)) {
+                    // TODO -- make this explict in config (returnType="json", "xml", etc)
+                    try {
+                        return JSON.parse(data);
+                    } catch (e) {
+                        // Apparently not json, just return data
                         return data;
                     }
+                } else {
+                    return data;
                 }
-                else {
-                    return [];
-                }
-            })
-            .then(function (features) {
+            } else {
+                return [];
+            }
+        })
+        .then(function (features) {
 
-                if(self.config.mappings) {
+            if (self.config.mappings) {
 
-                    let mappingKeys = Object.keys(self.config.mappings);
-                    features.forEach(function (f) {
-                        mappingKeys.forEach(function (key) {
-                            f[key] = f[self.config.mappings[key]];
-                        });
+                let mappingKeys = Object.keys(self.config.mappings);
+                features.forEach(function (f) {
+                    mappingKeys.forEach(function (key) {
+                        f[key] = f[self.config.mappings[key]];
                     });
-                }
+                });
+            }
 
-                return features;
+            return features;
 
-            })
-    }
+        })
+}
 
-
-    return igv;
-
-})(igv || {});
+export default CustomServiceReader;

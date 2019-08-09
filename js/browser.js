@@ -27,6 +27,9 @@ import TrackView from "./trackView.js";
 import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory";
+import ROI from "./roi";
+import GtexSelection from "./gtex/gtex";
+import XMLSession from "./session/igvXmlSession";
 
 "use strict";
 
@@ -282,7 +285,7 @@ Browser.prototype.loadSession = async function (options) {
 
                 const string = await igv.xhr.loadString(urlOrFile)
 
-                return new igv.XMLSession(string, knownGenomes);
+                return new XMLSession(string, knownGenomes);
 
 
             } else if (filename.endsWith(".json")) {
@@ -316,7 +319,7 @@ Browser.prototype.loadSessionObject = async function (session) {
             if (gs) {
                 const gene = session.gtexSelections[s].gene;
                 const snp = session.gtexSelections[s].snp;
-                gs.selection = new igv.GtexSelection(gene, snp);
+                gs.selection = new GtexSelection(gene, snp);
             }
         }
     }
@@ -324,7 +327,7 @@ Browser.prototype.loadSessionObject = async function (session) {
     if (session.roi) {
         self.roi = [];
         session.roi.forEach(function (r) {
-            self.roi.push(new igv.ROI(r, self.genome));
+            self.roi.push(new ROI(r, self.genome));
         });
     }
 
@@ -709,7 +712,7 @@ Browser.prototype.createTrack = function (config) {
     if (config.roi && track) {
         track.roi = [];
         config.roi.forEach(function (r) {
-            track.roi.push(new igv.ROI(r, this.genome));
+            track.roi.push(new ROI(r, this.genome));
         });
     }
 
@@ -1579,7 +1582,7 @@ Browser.prototype.search = async function (string, init) {
                 geneNameLocusObject.start = start;
                 geneNameLocusObject.end = end;
                 geneNameLocusObject.locusSearchString = locusSearchString;
-                geneNameLocusObject.selection = new igv.GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
+                geneNameLocusObject.selection = new GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
 
                 return geneNameLocusObject;
 

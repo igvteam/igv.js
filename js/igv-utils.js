@@ -25,6 +25,15 @@
 
 var igv = (function (igv) {
 
+
+    igv.extend = function (parent, child) {
+
+        child.prototype = Object.create(parent.prototype);
+        child.prototype.constructor = child;
+        child.prototype._super = Object.getPrototypeOf(child.prototype);
+        return child;
+    }
+
     igv.getMouseXY = function(domElement, event) {
 
         // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height

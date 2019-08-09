@@ -24,16 +24,15 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 7/5/18.
- */
-"use strict";
+import FeatureParser from "./featureParsers";
+import FeatureCache from "./featureCache";
+import TrackBase from "../trackBase";
 
-const InteractionTrack = igv.extend(igv.TrackBase,
+const InteractionTrack = igv.extend(TrackBase,
 
     function (config, browser) {
 
-        igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
         this.theta = config.theta || Math.PI / 4;
         this.sinTheta = Math.sin(this.theta);
@@ -84,13 +83,13 @@ InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
             .then(function (data) {
 
-                const parser = new igv.FeatureParser("bedpe");
+                const parser = new FeatureParser("bedpe");
 
                 const header = parser.parseHeader(data);
 
                 const features = parser.parseFeatures(data);
 
-                self.featureCache = new igv.FeatureCache(features, genome);
+                self.featureCache = new FeatureCache(features, genome);
 
                 // TODO -- whole genome features here.
 

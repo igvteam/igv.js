@@ -24,17 +24,13 @@
  * THE SOFTWARE.
  */
 
-"use strict";
-
-var igv = (function (igv) {
-
-    igv.UCSCServiceReader = function (config, genome) {
+const UCSCServiceReader = function (config, genome) {
         this.config = config;
         this.genome = genome;
         this.expandQueryInterval = false;
     };
 
-    igv.UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
+    UCSCServiceReader.prototype.readFeatures = function (chr, start, end) {
 
         const s = Math.max(0, Math.floor(start));
         let e = Math.ceil(end);
@@ -90,6 +86,4 @@ var igv = (function (igv) {
         sample.exons = exons;
     }
 
-
-    return igv;
-})(igv || {});
+export default UCSCServiceReader;

@@ -32,300 +32,295 @@
  *   Search       findOverlapping
  */
 
+var BLACK = 1;
+var RED = 2;
+
+var NIL = {}
+NIL.color = BLACK;
+NIL.parent = NIL;
+NIL.left = NIL;
+NIL.right = NIL;
 
 
-var igv = (function (igv) {
-
-    var BLACK = 1;
-    var RED = 2;
-
-    var NIL = {}
-    NIL.color = BLACK;
-    NIL.parent = NIL;
-    NIL.left = NIL;
-    NIL.right = NIL;
+const IntervalTree = function () {
+    this.root = NIL;
+}
 
 
-    igv.IntervalTree = function () {
-        this.root = NIL;
-    }
+IntervalTree.prototype.insert = function (start, end, value) {
 
-
-    igv.IntervalTree.prototype.insert = function (start, end, value) {
-
-        var interval = new Interval(start, end, value);
-        var x = new Node(interval);
-        this.treeInsert(x);
-        x.color = RED;
-        while (x != this.root && x.parent.color == RED) {
-            if (x.parent == x.parent.parent.left) {
-                var y = x.parent.parent.right;
-                if (y.color == RED) {
-                    x.parent.color = BLACK;
-                    y.color = BLACK;
-                    x.parent.parent.color = RED;
-                    x = x.parent.parent;
-                } else {
-                    if (x == x.parent.right) {
-                        x = x.parent;
-                        leftRotate.call(this, x);
-                    }
-                    x.parent.color = BLACK;
-                    x.parent.parent.color = RED;
-                    rightRotate.call(this, x.parent.parent);
+    var interval = new Interval(start, end, value);
+    var x = new Node(interval);
+    this.treeInsert(x);
+    x.color = RED;
+    while (x != this.root && x.parent.color == RED) {
+        if (x.parent == x.parent.parent.left) {
+            var y = x.parent.parent.right;
+            if (y.color == RED) {
+                x.parent.color = BLACK;
+                y.color = BLACK;
+                x.parent.parent.color = RED;
+                x = x.parent.parent;
+            } else {
+                if (x == x.parent.right) {
+                    x = x.parent;
+                    leftRotate.call(this, x);
                 }
+                x.parent.color = BLACK;
+                x.parent.parent.color = RED;
+                rightRotate.call(this, x.parent.parent);
+            }
+        } else {
+            var y = x.parent.parent.left;
+            if (y.color == RED) {
+                x.parent.color = BLACK;
+                y.color = BLACK;
+                x.parent.parent.color = RED;
+                x = x.parent.parent;
             } else {
-                var y = x.parent.parent.left;
-                if (y.color == RED) {
-                    x.parent.color = BLACK;
-                    y.color = BLACK;
-                    x.parent.parent.color = RED;
-                    x = x.parent.parent;
-                } else {
-                    if (x == x.parent.left) {
-                        x = x.parent;
-                        rightRotate.call(this, x);
-                    }
-                    x.parent.color = BLACK;
-                    x.parent.parent.color = RED;
-                    leftRotate.call(this, x.parent.parent);
+                if (x == x.parent.left) {
+                    x = x.parent;
+                    rightRotate.call(this, x);
                 }
+                x.parent.color = BLACK;
+                x.parent.parent.color = RED;
+                leftRotate.call(this, x.parent.parent);
             }
         }
-        this.root.color = BLACK;
+    }
+    this.root.color = BLACK;
+}
+
+
+/**
+ *
+ * @param start - query interval
+ * @param end - query interval
+ * @returns Array of all intervals overlapping the query region
+ */
+IntervalTree.prototype.findOverlapping = function (start, end) {
+
+
+    var searchInterval = new Interval(start, end, 0);
+
+    if (this.root === NIL) return [];
+
+    var intervals = searchAll.call(this, searchInterval, this.root, []);
+
+    if (intervals.length > 1) {
+        intervals.sort(function (i1, i2) {
+            return i1.low - i2.low;
+        });
     }
 
+    return intervals;
+}
 
-    /**
-     *
-     * @param start - query interval
-     * @param end - query interval
-     * @returns Array of all intervals overlapping the query region
-     */
-    igv.IntervalTree.prototype.findOverlapping = function (start, end) {
+/**
+ * Dump info on intervals to console.  For debugging.
+ */
+IntervalTree.prototype.logIntervals = function () {
 
+    logNode(this.root, 0);
 
-        var searchInterval = new Interval(start, end, 0);
+    function logNode(node, indent) {
 
-        if (this.root === NIL) return [];
+        var space = "";
+        for (var i = 0; i < indent; i++) space += " ";
+        console.log(space + node.interval.low + " " + node.interval.high); // + " " + (node.interval.value ? node.interval.value : " null"));
 
-        var intervals = searchAll.call(this, searchInterval, this.root, []);
+        indent += 5;
 
-        if(intervals.length > 1) {
-            intervals.sort(function(i1, i2) {
-                 return i1.low - i2.low;
-            });
-        }
-
-        return intervals;
+        if (node.left != NIL) logNode(node.left, indent);
+        if (node.right != NIL) logNode(node.right, indent);
     }
 
-    /**
-     * Dump info on intervals to console.  For debugging.
-     */
-    igv.IntervalTree.prototype.logIntervals = function() {
+}
 
-        logNode(this.root, 0);
 
-        function logNode(node, indent) {
+IntervalTree.prototype.mapIntervals = function (func) {
 
-            var space = "";
-            for(var i=0; i<indent; i++) space += " ";
-            console.log(space + node.interval.low + " " + node.interval.high); // + " " + (node.interval.value ? node.interval.value : " null"));
+    applyInterval(this.root);
 
-            indent += 5;
+    function applyInterval(node) {
 
-            if(node.left != NIL) logNode(node.left, indent);
-            if(node.right != NIL) logNode(node.right, indent);
-        }
+        func(node.interval);
 
+        if (node.left != NIL) applyInterval(node.left);
+        if (node.right != NIL) applyInterval(node.right);
+    }
+}
+
+function searchAll(interval, node, results) {
+
+    if (node.interval.overlaps(interval)) {
+        results.push(node.interval);
     }
 
-
-    igv.IntervalTree.prototype.mapIntervals = function(func) {
-
-        applyInterval(this.root);
-
-        function applyInterval(node) {
-
-            func(node.interval);
-
-            if(node.left != NIL) applyInterval(node.left);
-            if(node.right != NIL) applyInterval(node.right);
-        }
+    if (node.left != NIL && node.left.max >= interval.low) {
+        searchAll.call(this, interval, node.left, results);
     }
 
-    function searchAll(interval, node, results) {
-
-        if (node.interval.overlaps(interval)) {
-            results.push(node.interval);
-        }
-
-        if (node.left != NIL && node.left.max >= interval.low) {
-            searchAll.call(this, interval, node.left, results);
-        }
-
-        if (node.right != NIL && node.right.min <= interval.high) {
-            searchAll.call(this, interval, node.right, results);
-        }
-
-        return results;
+    if (node.right != NIL && node.right.min <= interval.high) {
+        searchAll.call(this, interval, node.right, results);
     }
 
-    function leftRotate(x) {
-        var y = x.right;
-        x.right = y.left;
-        if (y.left != NIL) {
-            y.left.parent = x;
-        }
-        y.parent = x.parent;
-        if (x.parent == NIL) {
-            this.root = y;
+    return results;
+}
+
+function leftRotate(x) {
+    var y = x.right;
+    x.right = y.left;
+    if (y.left != NIL) {
+        y.left.parent = x;
+    }
+    y.parent = x.parent;
+    if (x.parent == NIL) {
+        this.root = y;
+    } else {
+        if (x.parent.left == x) {
+            x.parent.left = y;
         } else {
-            if (x.parent.left == x) {
-                x.parent.left = y;
-            } else {
-                x.parent.right = y;
-            }
+            x.parent.right = y;
         }
-        y.left = x;
-        x.parent = y;
-
-        applyUpdate.call(this, x);
-        // no need to apply update on y, since it'll y is an ancestor
-        // of x, and will be touched by applyUpdate().
     }
+    y.left = x;
+    x.parent = y;
+
+    applyUpdate.call(this, x);
+    // no need to apply update on y, since it'll y is an ancestor
+    // of x, and will be touched by applyUpdate().
+}
 
 
-    function rightRotate(x) {
-        var y = x.left;
-        x.left = y.right;
-        if (y.right != NIL) {
-            y.right.parent = x;
-        }
-        y.parent = x.parent;
-        if (x.parent == NIL) {
-            this.root = y;
+function rightRotate(x) {
+    var y = x.left;
+    x.left = y.right;
+    if (y.right != NIL) {
+        y.right.parent = x;
+    }
+    y.parent = x.parent;
+    if (x.parent == NIL) {
+        this.root = y;
+    } else {
+        if (x.parent.right == x) {
+            x.parent.right = y;
         } else {
-            if (x.parent.right == x) {
-                x.parent.right = y;
-            } else {
-                x.parent.left = y;
-            }
+            x.parent.left = y;
         }
-        y.right = x;
-        x.parent = y;
-
-
-        applyUpdate.call(this, x);
-        // no need to apply update on y, since it'll y is an ancestor
-        // of x, and will be touched by applyUpdate().
     }
+    y.right = x;
+    x.parent = y;
 
 
-    /**
-     * Note:  Does not maintain RB constraints,  this is done post insert
-     *
-     * @param x  a Node
-     */
-    igv.IntervalTree.prototype.treeInsert = function (x) {
-        var node = this.root;
-        var y = NIL;
-        while (node != NIL) {
-            y = node;
-            if (x.interval.low <= node.interval.low) {
-                node = node.left;
-            } else {
-                node = node.right;
-            }
-        }
-        x.parent = y;
+    applyUpdate.call(this, x);
+    // no need to apply update on y, since it'll y is an ancestor
+    // of x, and will be touched by applyUpdate().
+}
 
-        if (y == NIL) {
-            this.root = x;
-            x.left = x.right = NIL;
+
+/**
+ * Note:  Does not maintain RB constraints,  this is done post insert
+ *
+ * @param x  a Node
+ */
+IntervalTree.prototype.treeInsert = function (x) {
+    var node = this.root;
+    var y = NIL;
+    while (node != NIL) {
+        y = node;
+        if (x.interval.low <= node.interval.low) {
+            node = node.left;
         } else {
-            if (x.interval.low <= y.interval.low) {
-                y.left = x;
-            } else {
-                y.right = x;
-            }
+            node = node.right;
         }
-
-        applyUpdate.call(this, x);
     }
+    x.parent = y;
 
-
-    // Applies the statistic update on the node and its ancestors.
-    function applyUpdate (node) {
-        while (node != NIL) {
-            var nodeMax = node.left.max > node.right.max ? node.left.max : node.right.max;
-            var intervalHigh = node.interval.high;
-            node.max = nodeMax > intervalHigh ? nodeMax : intervalHigh;
-
-            var nodeMin = node.left.min < node.right.min ? node.left.min : node.right.min;
-            var intervalLow = node.interval.low;
-            node.min = nodeMin < intervalLow ? nodeMin : intervalLow;
-
-            node = node.parent;
+    if (y == NIL) {
+        this.root = x;
+        x.left = x.right = NIL;
+    } else {
+        if (x.interval.low <= y.interval.low) {
+            y.left = x;
+        } else {
+            y.right = x;
         }
     }
 
+    applyUpdate.call(this, x);
+}
 
-    function Interval (low, high, value) {
-        this.low = low;
-        this.high = high;
-        this.value = value;
+
+// Applies the statistic update on the node and its ancestors.
+function applyUpdate(node) {
+    while (node != NIL) {
+        var nodeMax = node.left.max > node.right.max ? node.left.max : node.right.max;
+        var intervalHigh = node.interval.high;
+        node.max = nodeMax > intervalHigh ? nodeMax : intervalHigh;
+
+        var nodeMin = node.left.min < node.right.min ? node.left.min : node.right.min;
+        var intervalLow = node.interval.low;
+        node.min = nodeMin < intervalLow ? nodeMin : intervalLow;
+
+        node = node.parent;
     }
+}
 
 
-    Interval.prototype.equals = function (other) {
-        if (!other) {
-            return false;
-        }
-        if (this == other) {
-            return true;
-        }
-        return (this.low == otherInterval.low &&
-            this.high == otherInterval.high);
+function Interval(low, high, value) {
+    this.low = low;
+    this.high = high;
+    this.value = value;
+}
 
+
+Interval.prototype.equals = function (other) {
+    if (!other) {
+        return false;
     }
-
-
-    Interval.prototype.compareTo = function (other) {
-        if (this.low < other.low)
-            return -1;
-        if (this.low > other.low)
-            return 1;
-
-        if (this.high < other.high)
-            return -1;
-        if (this.high > other.high)
-            return 1;
-
-        return 0;
+    if (this == other) {
+        return true;
     }
+    return (this.low == otherInterval.low &&
+        this.high == otherInterval.high);
 
-    /**
-     * Returns true if this interval overlaps the other.
-     */
-    Interval.prototype.overlaps = function (other) {
-        try {
-            return (this.low <= other.high && other.low <= this.high);
-        } catch (e) {
-            //alert(e);
-            igv.browser.presentAlert(e, undefined);
-        }
+}
+
+
+Interval.prototype.compareTo = function (other) {
+    if (this.low < other.low)
+        return -1;
+    if (this.low > other.low)
+        return 1;
+
+    if (this.high < other.high)
+        return -1;
+    if (this.high > other.high)
+        return 1;
+
+    return 0;
+}
+
+/**
+ * Returns true if this interval overlaps the other.
+ */
+Interval.prototype.overlaps = function (other) {
+    try {
+        return (this.low <= other.high && other.low <= this.high);
+    } catch (e) {
+        //alert(e);
+        igv.browser.presentAlert(e, undefined);
     }
+}
 
-    function Node(interval) {
-        this.parent = NIL;
-        this.left = NIL;
-        this.right = NIL;
-        this.interval = interval;
-        this.color = RED;
-    }
-
+function Node(interval) {
+    this.parent = NIL;
+    this.left = NIL;
+    this.right = NIL;
+    this.interval = interval;
+    this.color = RED;
+}
 
 
 //
@@ -375,7 +370,7 @@ var igv = (function (igv) {
 //
 //
 //
-//    igv.IntervalTree.prototype.allRedNodesFollowConstraints = function (node) {
+//    IntervalTree.prototype.allRedNodesFollowConstraints = function (node) {
 //        if (node == NIL)
 //            return true;
 //
@@ -393,7 +388,7 @@ var igv = (function (igv) {
 //
 //
 //    // Check that both ends are equally balanced in terms of black height.
-//    igv.IntervalTree.prototype.isBalancedBlackHeight = function (node) {
+//    IntervalTree.prototype.isBalancedBlackHeight = function (node) {
 //        if (node == NIL)
 //            return true;
 //        return (blackHeight(node.left) == blackHeight(node.right) &&
@@ -403,7 +398,7 @@ var igv = (function (igv) {
 //
 //
 //    // The black height of a node should be left/right equal.
-//    igv.IntervalTree.prototype.blackHeight = function (node) {
+//    IntervalTree.prototype.blackHeight = function (node) {
 //        if (node == NIL)
 //            return 0;
 //        var leftBlackHeight = blackHeight(node.left);
@@ -415,26 +410,26 @@ var igv = (function (igv) {
 //    }
 
 
-    /**
-     * Test code: make sure that the tree has all the properties
-     * defined by Red Black trees and interval trees
-     * <p/>
-     * o.  Root is black.
-     * <p/>
-     * o.  NIL is black.
-     * <p/>
-     * o.  Red nodes have black children.
-     * <p/>
-     * o.  Every path from root to leaves contains the same number of
-     * black nodes.
-     * <p/>
-     * o.  getMax(node) is the maximum of any interval rooted at that node..
-     * <p/>
-     * This code is expensive, and only meant to be used for
-     * assertions and testing.
-     */
+/**
+ * Test code: make sure that the tree has all the properties
+ * defined by Red Black trees and interval trees
+ * <p/>
+ * o.  Root is black.
+ * <p/>
+ * o.  NIL is black.
+ * <p/>
+ * o.  Red nodes have black children.
+ * <p/>
+ * o.  Every path from root to leaves contains the same number of
+ * black nodes.
+ * <p/>
+ * o.  getMax(node) is the maximum of any interval rooted at that node..
+ * <p/>
+ * This code is expensive, and only meant to be used for
+ * assertions and testing.
+ */
 //
-//    igv.IntervalTree.prototype.isValid = function () {
+//    IntervalTree.prototype.isValid = function () {
 //        if (this.root.color != BLACK) {
 //            logger.warn("root color is wrong");
 //            return false;
@@ -457,7 +452,7 @@ var igv = (function (igv) {
 //    }
 //
 //
-//    igv.IntervalTree.prototype.hasCorrectMaxFields = function (node) {
+//    IntervalTree.prototype.hasCorrectMaxFields = function (node) {
 //        if (node == NIL)
 //            return true;
 //        return (getRealMax(node) == (node.max) &&
@@ -466,7 +461,7 @@ var igv = (function (igv) {
 //    }
 //
 //
-//    igv.IntervalTree.prototype.hasCorrectMinFields = function (node) {
+//    IntervalTree.prototype.hasCorrectMinFields = function (node) {
 //        if (node == NIL)
 //            return true;
 //        return (getRealMin(node) == (node.min) &&
@@ -474,6 +469,4 @@ var igv = (function (igv) {
 //            this.hasCorrectMinFields(node.right));
 //    }
 
-    return igv;
-
-})(igv || {});
+export default IntervalTree;

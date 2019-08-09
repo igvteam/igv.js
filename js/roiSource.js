@@ -23,39 +23,37 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+import FeatureFileReader from "./feature/featureFileReader";
 
-    /**
-     * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
-     *
-     * @param config
-     * @constructor
-     */
-    igv.ROISource = function (config) {
-        this.config = config || {};
-        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
-        this.reader = new igv.FeatureFileReader(config);
-    };
+/**
+ *
+ * feature source for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
+ *
+ * @param config
+ * @constructor
+ */
+const ROISource = function (config) {
+    this.config = config || {};
+    this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
+    this.reader = new FeatureFileReader(config);
+};
 
-    igv.ROISource.prototype.getRegions = function (chr, bpStart, bpEnd) {
+ROISource.prototype.getRegions = function (chr, bpStart, bpEnd) {
 
-        var self = this;
-        return new Promise(function (fulfill, reject) {
+    var self = this;
+    return new Promise(function (fulfill, reject) {
 
-            var genomicInterval;
+        var genomicInterval;
 
-            genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+        genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
 
-            self.reader
-                .readFeatures(chr, genomicInterval.start, genomicInterval.end)
-                .then(function (features) {
-                    fulfill(features)
-                })
-                .catch(reject);
-        });
-    };
+        self.reader
+            .readFeatures(chr, genomicInterval.start, genomicInterval.end)
+            .then(function (features) {
+                fulfill(features)
+            })
+            .catch(reject);
+    });
+};
 
-
-    return igv;
-})
-(igv || {});
+export default ROISource;
