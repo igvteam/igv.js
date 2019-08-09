@@ -25,84 +25,79 @@
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
-var igv = (function (igv) {
+const ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
+    this.genome = genome;
+    this.chrName = chrName;
+    this.start = start;
+    this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+    this.bpPerPixel = bpPerPixel;
+};
 
+ReferenceFrame.prototype.calculateEnd = function (pixels) {
+    return this.start + this.bpPerPixel * pixels;
+};
 
-    igv.ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
-        this.genome = genome;
-        this.chrName = chrName;
-        this.start = start;
-        this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
-        this.bpPerPixel = bpPerPixel;
-    };
+ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
+    return (end - this.start) / pixels;
+};
 
-    igv.ReferenceFrame.prototype.calculateEnd = function (pixels) {
-        return this.start + this.bpPerPixel * pixels;
-    };
+ReferenceFrame.prototype.set = function (json) {
+    this.chrName = json.chrName;
+    this.start = json.start;
+    this.bpPerPixel = json.bpPerPixel;
+};
 
-    igv.ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
-        return (end - this.start) / pixels;
-    };
+ReferenceFrame.prototype.toPixels = function (bp) {
+    return bp / this.bpPerPixel;
+};
 
-    igv.ReferenceFrame.prototype.set = function (json) {
-        this.chrName = json.chrName;
-        this.start = json.start;
-        this.bpPerPixel = json.bpPerPixel;
-    };
+ReferenceFrame.prototype.toBP = function (pixels) {
+    return this.bpPerPixel * pixels;
+};
 
-    igv.ReferenceFrame.prototype.toPixels = function (bp) {
-        return bp / this.bpPerPixel;
-    };
+ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
 
-    igv.ReferenceFrame.prototype.toBP = function (pixels) {
-        return this.bpPerPixel * pixels;
-    };
+    this.start += pixels * this.bpPerPixel;
+    this.clamp(viewportWidth);
 
-    igv.ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
+};
 
-        this.start += pixels * this.bpPerPixel;
-        this.clamp(viewportWidth);
+ReferenceFrame.prototype.clamp = function (viewportWidth) {
+    // clamp left
+    const min = this.genome.getChromosome(this.chrName).bpStart || 0
+    this.start = Math.max(min, this.start);
 
-    };
+    // clamp right
+    if (viewportWidth) {
 
-    igv.ReferenceFrame.prototype.clamp = function (viewportWidth) {
-        // clamp left
-        const min = this.genome.getChromosome(this.chrName).bpStart || 0
-        this.start = Math.max(min, this.start);
+        var chromosome = this.genome.getChromosome(this.chrName);
+        var maxEnd = chromosome.bpLength;
+        var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
 
-        // clamp right
-        if (viewportWidth) {
-
-            var chromosome = this.genome.getChromosome(this.chrName);
-            var maxEnd = chromosome.bpLength;
-            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
-
-            if (this.start > maxStart) {
-                this.start = maxStart;
-            }
+        if (this.start > maxStart) {
+            this.start = maxStart;
         }
     }
+}
 
-    igv.ReferenceFrame.prototype.getChromosome = function () {
-        return this.genome.getChromosome(this.chrName)
+ReferenceFrame.prototype.getChromosome = function () {
+    return this.genome.getChromosome(this.chrName)
+}
+
+ReferenceFrame.prototype.showLocus = function (pixels) {
+
+    if ('all' === this.chrName.toLowerCase()) {
+        return this.chrName.toLowerCase();
+    } else {
+        const ss = igv.numberFormatter(Math.floor(this.start) + 1);
+        const ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+        return this.chrName + ':' + ss + '-' + ee;
     }
+};
 
-    igv.ReferenceFrame.prototype.showLocus = function (pixels) {
-
-        if ('all' === this.chrName.toLowerCase()) {
-            return this.chrName.toLowerCase();
-        } else {
-            const ss = igv.numberFormatter(Math.floor(this.start) + 1);
-            const ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
-            return this.chrName + ':' + ss + '-' + ee;
-        }
-    };
-
-    igv.ReferenceFrame.prototype.description = function () {
-        return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
-    };
+ReferenceFrame.prototype.description = function () {
+    return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
+};
 
 
-    return igv;
-
-})(igv || {});
+export default ReferenceFrame;

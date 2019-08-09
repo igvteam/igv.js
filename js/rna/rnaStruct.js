@@ -26,6 +26,8 @@
 import FeatureCache from "../feature/featureCache";
 import getDataWrapper from "../feature/dataWrapper";
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
+import igvxhr from "../igvxhr";
 
 const RnaStructTrack = igv.extend(TrackBase,
 
@@ -70,7 +72,7 @@ RnaStructTrack.prototype.draw = function (options) {
     const xScale = bpPerPixel;
     const orienation = self.arcOrientation;
 
-    igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const featureList = options.features;
 
@@ -278,7 +280,7 @@ FeatureSource.prototype.getFeatures = function (chr, start, end) {
 
         const options = igv.buildOptions(this.config);
 
-        return igv.xhr.loadString(self.config.url, options)
+        return igvxhr.loadString(self.config.url, options)
 
             .then(function (data) {
 

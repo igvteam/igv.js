@@ -24,6 +24,7 @@
  */
 
 import getDataWrapper from "./dataWrapper";
+import IGVColor from "../igv-color";
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -530,7 +531,7 @@ function decodeBed(tokens, ignore) {
     }
     if (tokens.length > 8) {
         if (tokens[8] !== "." && tokens[8] !== "0")
-            feature.color = igv.Color.createColorString(tokens[8]);
+            feature.color = IGVColor.createColorString(tokens[8]);
     }
     if (tokens.length > 11) {
         exonCount = parseInt(tokens[9]);
@@ -554,7 +555,7 @@ function decodeBed(tokens, ignore) {
         let thicknessColumn = this.header.thicknessColumn;
         let colorColumn = this.header.colorColumn;
         if (colorColumn && colorColumn < tokens.length) {
-            feature.color = igv.Color.createColorString(tokens[colorColumn])
+            feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
         if (thicknessColumn && thicknessColumn < tokens.length) {
             feature.thickness = tokens[thicknessColumn];
@@ -802,7 +803,7 @@ function decodeBedGraph(tokens, ignore) {
     if (this.header) {
         let colorColumn = this.header.colorColumn;
         if (colorColumn && colorColumn < tokens.length) {
-            feature.color = igv.Color.createColorString(tokens[colorColumn])
+            feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
     }
 
@@ -983,7 +984,7 @@ function decodeGFF(tokens, ignore) {
             }
 
             const keyLower = key.toLowerCase()
-            if ("color" === keyLower || "colour" === keyLower) color = igv.Color.createColorString(t[1]);
+            if ("color" === keyLower || "colour" === keyLower) color = IGVColor.createColorString(t[1]);
             else {
                 if ('gff3' === format) {
                     value = decodeURIComponent(value)
@@ -1109,7 +1110,7 @@ function AedFeature(aed, allColumns) {
             }
         } else if (aedColumn.namespace === 'style') {
             if (aedColumn.name === 'color') {
-                this.color = igv.Color.createColorString(token);
+                this.color = IGVColor.createColorString(token);
             }
         }
     }
@@ -1233,7 +1234,7 @@ function decodeBedpe(tokens, ignore) {
         let thicknessColumn = this.header.thicknessColumn;
         let colorColumn = this.header.colorColumn;
         if (colorColumn && colorColumn < tokens.length) {
-            feature.color = igv.Color.createColorString(tokens[colorColumn])
+            feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
         if (thicknessColumn && thicknessColumn < tokens.length) {
             feature.thickness = tokens[thicknessColumn];
@@ -1289,7 +1290,7 @@ function decodeInteract(tokens, ignore) {
         let thicknessColumn = this.header.thicknessColumn;
         let colorColumn = this.header.colorColumn;
         if (colorColumn && colorColumn < tokens.length) {
-            feature.color = igv.Color.createColorString(tokens[colorColumn])
+            feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
         if (thicknessColumn && thicknessColumn < tokens.length) {
             feature.thickness = tokens[thicknessColumn];
@@ -1311,7 +1312,7 @@ function decodeBedpeDomain(tokens, ignore) {
         chr: tokens[0],
         start: Number.parseInt(tokens[1]),
         end: Number.parseInt(tokens[2]),
-        color: igv.Color.createColorString(tokens[6]),
+        color: IGVColor.createColorString(tokens[6]),
         score: Number.parseFloat(tokens[7])
     };
 }

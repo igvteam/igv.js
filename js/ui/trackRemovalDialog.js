@@ -23,91 +23,90 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-var igv = (function (igv) {
 
-    igv.TrackRemovalDialog = function ($parent, browser) {
-        var self = this,
-            $header,
-            $buttons;
+import makeDraggable from "./draggable";
 
-        this.browser = browser;
+const TrackRemovalDialog = function ($parent, browser) {
+    var self = this,
+        $header,
+        $buttons;
 
-        // dialog container
-        this.$container = $("<div>", { class:'igv-generic-dialog-container' });
-        $parent.append(this.$container);
-        this.$container.offset( { left:0, top:0 } );
+    this.browser = browser;
 
-        // dialog header
-        $header = $("<div>", { class:'igv-generic-dialog-header' });
-        this.$container.append($header);
-        igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.$track_name.text(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+    // dialog container
+    this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
+    $parent.append(this.$container);
+    this.$container.offset({left: 0, top: 0});
 
-        // dialog label
-        this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
-        this.$container.append(this.$label);
-        this.$label.text('Remove track:');
+    // dialog header
+    $header = $("<div>", {class: 'igv-generic-dialog-header'});
+    this.$container.append($header);
+    igv.attachDialogCloseHandlerWithParent($header, function () {
+        self.$track_name.text(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-        // track name
-        this.$track_name = $("<div>", { class:'igv-generic-dialog-one-liner igv-ellipsis' });
-        this.$container.append(this.$track_name);
-        // this.$track_name.text('this is a really long track name so I better make it interesting');
+    // dialog label
+    this.$label = $("<div>", {class: 'igv-generic-dialog-one-liner'});
+    this.$container.append(this.$label);
+    this.$label.text('Remove track:');
 
-        // ok | cancel
-        $buttons = $("<div>", { class:'igv-generic-dialog-ok-cancel' });
-        this.$container.append($buttons);
+    // track name
+    this.$track_name = $("<div>", {class: 'igv-generic-dialog-one-liner igv-ellipsis'});
+    this.$container.append(this.$track_name);
+    // this.$track_name.text('this is a really long track name so I better make it interesting');
 
-        // ok
-        this.$ok = $("<div>");
-        $buttons.append(this.$ok);
-        this.$ok.text('OK');
+    // ok | cancel
+    $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
+    this.$container.append($buttons);
 
-        // cancel
-        this.$cancel = $("<div>");
-        $buttons.append(this.$cancel);
-        this.$cancel.text('Cancel');
+    // ok
+    this.$ok = $("<div>");
+    $buttons.append(this.$ok);
+    this.$ok.text('OK');
 
-        this.$cancel.on('click', function () {
-            self.$track_name.text(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+    // cancel
+    this.$cancel = $("<div>");
+    $buttons.append(this.$cancel);
+    this.$cancel.text('Cancel');
 
-        // this.$container.draggable({ handle:$header.get(0) });
-        igv.makeDraggable(this.$container.get(0), $header.get(0));
-        this.$container.hide();
-    };
+    this.$cancel.on('click', function () {
+        self.$track_name.text(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-    igv.TrackRemovalDialog.prototype.configure = function (config) {
+    // this.$container.draggable({ handle:$header.get(0) });
+    makeDraggable(this.$container.get(0), $header.get(0));
+    this.$container.hide();
+};
 
-        var self = this;
+TrackRemovalDialog.prototype.configure = function (config) {
 
-        this.$track_name.text(config.name || 'unnamed');
+    var self = this;
 
-        this.$ok.unbind();
-        this.$ok.on('click', function () {
-            config.click();
-            self.$track_name.text(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
-    };
+    this.$track_name.text(config.name || 'unnamed');
 
-    igv.TrackRemovalDialog.prototype.present = function ($parent) {
+    this.$ok.unbind();
+    this.$ok.on('click', function () {
+        config.click();
+        self.$track_name.text(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
+};
 
-        var offset_top,
-            scroll_top;
+TrackRemovalDialog.prototype.present = function ($parent) {
 
-        offset_top = $parent.offset().top;
-        scroll_top = $('body').scrollTop();
+    var offset_top,
+        scroll_top;
 
-        this.$container.offset( { left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top) } );
-        this.$container.show();
-    };
+    offset_top = $parent.offset().top;
+    scroll_top = $('body').scrollTop();
 
-    return igv;
+    this.$container.offset({left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top)});
+    this.$container.show();
+};
 
-})(igv || {});
+export default TrackRemovalDialog;

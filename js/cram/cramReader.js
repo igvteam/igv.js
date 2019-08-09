@@ -28,6 +28,7 @@ import AlignmentContainer from "../bam/alignmentContainer";
 import BamUtils from "../bam/bamUtils";
 import BamAlignment from "../bam/bamAlignment";
 import AlignmentBlock from "../bam/alignmentBlock";
+import igvxhr from "../igvxhr";
 
 const READ_STRAND_FLAG = 0x10;
 const MATE_STRAND_FLAG = 0x20;
@@ -374,7 +375,7 @@ class FileHandler {
 
         const loadRange = {start: position, size: length};
         this._stat = {size: undefined}
-        return igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}, {range: loadRange}))
+        return igvxhr.loadArrayBuffer(this.url, igv.buildOptions({}, {range: loadRange}))
             .then(function (arrayBuffer) {
                 const nodeBuffer = Buffer.from(arrayBuffer)
                 return nodeBuffer
@@ -391,7 +392,7 @@ class FileHandler {
     }
 
     async readFile() {
-        const arrayBuffer = await igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}))
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, igv.buildOptions({}))
         return Buffer.from(arrayBuffer)
     }
 

@@ -26,6 +26,8 @@
 
 import BamAlignment from "./bamAlignment";
 import AlignmentBlock from "./alignmentBlock";
+import igvxhr from "../igvxhr";
+import  {unbgzf, bgzBlockSize} from './bgzf';
 
 /**
  * This code is based on the Biodalliance BAM reader by Thomas Down,  2011
@@ -49,13 +51,13 @@ import AlignmentBlock from "./alignmentBlock";
 
         readHeader: function (url, options, genome) {
 
-            return igv.xhr.loadArrayBuffer(url, options)
+            return igvxhr.loadArrayBuffer(url, options)
 
                 .then(function (compressedBuffer) {
 
                     var header, unc, uncba;
 
-                    unc = igv.unbgzf(compressedBuffer);
+                    unc = unbgzf(compressedBuffer);
                     uncba = new Uint8Array(unc);
 
                     header = BamUtils.decodeBamHeader(uncba, genome);

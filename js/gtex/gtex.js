@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import igvxhr from "../igvxhr";
+
 const GtexSelection = function (gene, snp) {
 
     this.geneColors = {};
@@ -96,7 +98,7 @@ igv.GtexUtils = {
 
         let url = baseURL + '/dataset/tissueInfo?datasetId=' + datasetId;
 
-        return igv.xhr.loadJson(url, {})
+        return igvxhr.loadJson(url, {})
     },
 
     //https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation?chromosome=7&start=98358766&end=101523798&tissueName=Liver&datasetId=gtex_v7

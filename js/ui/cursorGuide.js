@@ -24,126 +24,124 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by dat on 3/26/18.
- */
-var igv = (function (igv) {
+const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
-    "use strict";
+    const self = this;
 
-    igv.CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
+    this.browser = browser;
 
-        const self = this;
+    this.$guide = $('<div class="igv-cursor-tracking-guide">');
+    $cursorGuideParent.append(this.$guide);
 
-        this.browser = browser;
+    // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
+    $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
 
-        this.$guide = $('<div class="igv-cursor-tracking-guide">');
-        $cursorGuideParent.append(this.$guide);
+        e.preventDefault();
 
-        // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-        $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
+        const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
+        const $viewportContent = $canvas.parent();
 
-            e.preventDefault();
+        if ($viewportContent.hasClass('igv-viewport-content-div')) {
 
-            const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
-            const $viewportContent = $canvas.parent();
+            const {bp, start, end, interpolant} = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, browser);
 
-            if ($viewportContent.hasClass('igv-viewport-content-div')) {
+            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
 
-                const { bp, start, end, interpolant }  = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, browser);
-
-                // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
-
-                if (this.customMouseHandler) {
-                    this.customMouseHandler({ bp, start, end, interpolant });
-                }
+            if (this.customMouseHandler) {
+                this.customMouseHandler({bp, start, end, interpolant});
             }
+        }
 
+    });
+
+    if (true === config.showCursorTrackingGuideButton) {
+
+        this.$button = $('<div class="igv-nav-bar-button">');
+        $controlParent.append(this.$button);
+        this.$button.text('cursor guide');
+
+        this.$button.on('click', function () {
+            if (true === browser.cursorGuideVisible) {
+                self.doHide();
+            } else {
+                self.doShow();
+            }
         });
 
-        if (true === config.showCursorTrackingGuideButton) {
+    }
 
-            this.$button = $('<div class="igv-nav-bar-button">');
-            $controlParent.append(this.$button);
-            this.$button.text('cursor guide');
+};
 
-            this.$button.on('click', function () {
-                if (true === browser.cursorGuideVisible) {
-                    self.doHide();
-                } else {
-                    self.doShow();
-                }
-            });
+let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
 
-        }
+    // pixel location of guide line
+    const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
+    const left = guideParentMouseXY.x + 'px';
+    $guideLine.css({left: left});
 
+
+    // base-pair location of guide line
+    const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
+
+    const index = $viewportContent.data('genomicStateIndex');
+
+    const referenceFrame = browser.genomicStateList[index].referenceFrame;
+
+    const _startBP = referenceFrame.start;
+    const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
+
+    // bp = bp + (pixel * (bp / pixel))
+    const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
+
+    // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
+    const $trackContainer = $viewportContent.closest('.igv-track-container-div');
+    const trackContainerMouseXY = igv.getMouseXY($trackContainer.get(0), event);
+
+
+    return {
+        $host: $trackContainer,
+        host_css_left: left,
+        bp,
+        start: _startBP,
+        end: _endBP,
+        interpolant: viewportContentMouseXY.xNormalized
     };
+};
 
-    let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
+CursorGuide.prototype.doHide = function () {
+    if (this.$button) {
+        this.$button.removeClass('igv-nav-bar-button-clicked');
+    }
+    this.browser.hideCursorGuide();
+};
 
-        // pixel location of guide line
-        const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
-        const left = guideParentMouseXY.x + 'px';
-        $guideLine.css({ left: left });
+CursorGuide.prototype.doShow = function () {
+    this.$button.addClass('igv-nav-bar-button-clicked');
+    this.browser.showCursorGuide();
+};
 
+CursorGuide.prototype.setState = function (cursorGuideVisible) {
 
-        // base-pair location of guide line
-        const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
+    if (this.$button) {
 
-        const index = $viewportContent.data('genomicStateIndex');
-
-        const referenceFrame = browser.genomicStateList[ index ].referenceFrame;
-
-        const _startBP = referenceFrame.start;
-        const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
-
-        // bp = bp + (pixel * (bp / pixel))
-        const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
-
-        // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
-        const $trackContainer = $viewportContent.closest('.igv-track-container-div');
-        const trackContainerMouseXY = igv.getMouseXY($trackContainer.get(0), event);
-
-
-        return { $host: $trackContainer, host_css_left: left, bp, start: _startBP, end: _endBP, interpolant: viewportContentMouseXY.xNormalized };
-    };
-
-    igv.CursorGuide.prototype.doHide = function () {
-        if (this.$button) {
+        if (true === cursorGuideVisible) {
+            this.$button.addClass('igv-nav-bar-button-clicked');
+        } else {
             this.$button.removeClass('igv-nav-bar-button-clicked');
         }
-        this.browser.hideCursorGuide();
-    };
 
-    igv.CursorGuide.prototype.doShow = function () {
-        this.$button.addClass('igv-nav-bar-button-clicked');
-        this.browser.showCursorGuide();
-    };
+    }
+};
 
-    igv.CursorGuide.prototype.setState = function (cursorGuideVisible) {
+CursorGuide.prototype.disable = function () {
+    this.doHide();
+    this.$guide.hide();
+};
 
-        if (this.$button) {
+CursorGuide.prototype.enable = function () {
+    if (this.$button) {
+        this.$button.show();
+    }
+};
 
-            if (true === cursorGuideVisible) {
-                this.$button.addClass('igv-nav-bar-button-clicked');
-            } else {
-                this.$button.removeClass('igv-nav-bar-button-clicked');
-            }
-
-        }
-    };
-
-    igv.CursorGuide.prototype.disable = function () {
-        this.doHide();
-        this.$guide.hide();
-    };
-
-    igv.CursorGuide.prototype.enable = function () {
-        if (this.$button) {
-            this.$button.show();
-        }
-    };
-
-    return igv;
-
-}) (igv || {});
+export default CursorGuide;

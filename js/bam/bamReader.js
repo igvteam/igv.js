@@ -27,6 +27,8 @@
 import loadBamIndex from "./bamIndex";
 import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
+import igvxhr from "../igvxhr";
+import  {unbgzf, bgzBlockSize} from './bgzf';
 
 const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
 
@@ -79,14 +81,14 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
                 lastBlockSize = 0;    // Don't need to read the last block.
             } else {
                 const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
-                const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-                lastBlockSize = igv.bgzBlockSize(abuffer)
+                const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+                lastBlockSize = bgzBlockSize(abuffer)
             }
 
             const fetchMin = c.minv.block
             const fetchMax = c.maxv.block + lastBlockSize
             const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-            promises.push(igv.xhr.loadArrayBuffer(this.bamPath, igv.buildOptions(this.config, {range: range})))
+            promises.push(igvxhr.loadArrayBuffer(this.bamPath, igv.buildOptions(this.config, {range: range})))
         }
 
         const compressedChunks = await Promise.all(promises)
@@ -95,7 +97,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             try {
                 const compressed = compressedChunks[i]
                 const c = chunks[i]
-                var ba = new Uint8Array(igv.unbgzf(compressed)); //new Uint8Array(igv.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                var ba = new Uint8Array(unbgzf(compressed)); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                 BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
             } catch (e) {
                 console.error("Error decompressing chunk " + i)
@@ -115,8 +117,8 @@ async function getHeader() {
         const genome = this.genome;
         const index = await getIndex.call(this)
         const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
-        const abuffer = await igv.xhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-        const bsize = igv.bgzBlockSize(abuffer)
+        const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+        const bsize = bgzBlockSize(abuffer)
 
         const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
         const options = igv.buildOptions(this.config, {range: {start: 0, size: len}});

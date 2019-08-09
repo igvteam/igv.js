@@ -23,58 +23,51 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 3/18/15.
- */
-var igv = (function (igv) {
+const UserFeedback = function ($parent) {
 
-    igv.UserFeedback = function ($parent) {
+    this.$container = $('<div class="igv-user-feedback">');
+    $parent.append(this.$container);
 
-        this.$container = $('<div class="igv-user-feedback">');
-        $parent.append(this.$container);
+    // header
+    let $header = $('<div>');
+    this.$container.append($header);
 
-        // header
-        let $header = $('<div>');
-        this.$container.append($header);
+    // alert
+    let $exclamation = $('<div>');
+    $header.append($exclamation);
 
-        // alert
-        let $exclamation = $('<div>');
-        $header.append($exclamation);
+    let $a = igv.createIcon("exclamation-triangle", 'red');
+    $exclamation.append($a);
 
-        let $a = igv.createIcon("exclamation-triangle", 'red');
-        $exclamation.append( $a );
+    // dismiss
+    let $dismiss = $('<div>');
+    $header.append($dismiss);
 
-        // dismiss
-        let $dismiss = $('<div>');
-        $header.append($dismiss);
+    let $b = igv.createIcon("times-circle", 'grey');
+    $dismiss.append($b);
 
-        let $b = igv.createIcon("times-circle", 'grey');
-        $dismiss.append( $b );
+    // body copy
+    let $bodyCopyContainer = $('<div>');
+    this.$container.append($bodyCopyContainer);
 
-        // body copy
-        let $bodyCopyContainer = $('<div>');
-        this.$container.append($bodyCopyContainer);
+    let $bodyCopy = $('<div>');
+    $bodyCopyContainer.append($bodyCopy);
+    $bodyCopy.text('i am user feedback');
 
-        let $bodyCopy = $('<div>');
-        $bodyCopyContainer.append($bodyCopy);
-        $bodyCopy.text('i am user feedback');
+    let self;
+    $dismiss.click(function () {
+        $bodyCopy.html('');
+        self.$container.hide();
+    });
 
-        let self;
-        $dismiss.click(function () {
-            $bodyCopy.html('');
-            self.$container.hide();
-        });
+};
 
-    };
+UserFeedback.prototype.show = function () {
+    this.$container.show();
+};
 
-    igv.UserFeedback.prototype.show = function () {
-        this.$container.show();
-    };
+UserFeedback.prototype.hide = function () {
+    this.$container.hide();
+};
 
-    igv.UserFeedback.prototype.hide = function () {
-        this.$container.hide();
-    };
-
-    return igv;
-
-})(igv || {});
+export default UserFeedback;

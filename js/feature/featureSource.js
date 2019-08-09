@@ -31,6 +31,9 @@ import GFFHelper from "./gffHelper";
 import GtexReader from "../gtex/gtexReader";
 import ImmVarReader from "../gtex/immvarReader";
 import TrackBase from "../trackBase";
+import Ga4ghVariantReader from "../google/ga4ghVariantReader";
+import CivicReader from "../civic/civicReader";
+import GenomicInterval from "../genome/genomicInterval";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -62,7 +65,7 @@ const FeatureSource = function (config, genome) {
         this.featureCache = new FeatureCache(features, genome);
         this.static = true;
     } else if (config.sourceType === "ga4gh") {
-        this.reader = new igv.Ga4ghVariantReader(config, genome);
+        this.reader = new Ga4ghVariantReader(config, genome);
         this.queryable = true;
     } else if (config.sourceType === "immvar") {
         this.reader = new ImmVarReader(config);
@@ -80,7 +83,7 @@ const FeatureSource = function (config, genome) {
         this.reader = new CustomServiceReader(config.source);
         this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
     } else if ("civic-ws" === config.sourceType) {
-        this.reader = new igv.CivicReader(config);
+        this.reader = new CivicReader(config);
         this.queryable = false;
     } else {
         this.reader = new FeatureFileReader(config, genome);
@@ -177,7 +180,7 @@ FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPer
 
         let intervalStart = bpStart;
         let intervalEnd = bpEnd;
-        let genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+        let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
         if (this.featureCache &&
             (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
@@ -196,7 +199,7 @@ FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPer
                 intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
                 intervalEnd = bpStart + expansionWindow;
             }
-            genomicInterval = new igv.GenomicInterval(queryChr, intervalStart, intervalEnd);
+            genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
             let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
 

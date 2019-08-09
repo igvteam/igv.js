@@ -24,57 +24,50 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by dat on 3/26/18.
- */
-var igv = (function (igv) {
+const TrackLabelControl = function ($parent, browser) {
 
-    igv.TrackLabelControl = function ($parent, browser) {
-        
-        var self = this;
+    var self = this;
 
-        this.browser = browser;
-        
-        this.$button = $('<div class="igv-nav-bar-button">');
-        $parent.append(this.$button);
-        this.$button.text('track labels');
+    this.browser = browser;
 
-        this.$button.on('click', function () {
-            if (true === browser.trackLabelsVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
-    };
+    this.$button = $('<div class="igv-nav-bar-button">');
+    $parent.append(this.$button);
+    this.$button.text('track labels');
 
-    igv.TrackLabelControl.prototype.doHide = function () {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
-        this.browser.hideTrackLabels();
-    };
-
-    igv.TrackLabelControl.prototype.doShow = function () {
-        this.$button.addClass('igv-nav-bar-button-clicked');
-        this.browser.showTrackLabels();
-    };
-
-    igv.TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
-        if (true === trackLabelsVisible) {
-            this.$button.addClass('igv-nav-bar-button-clicked');
+    this.$button.on('click', function () {
+        if (true === browser.trackLabelsVisible) {
+            self.doHide();
         } else {
-            this.$button.removeClass('igv-nav-bar-button-clicked');
+            self.doShow();
         }
-    };
+    });
+};
 
-    igv.TrackLabelControl.prototype.disable = function () {
-        this.doHide();
-        this.$button.hide();
-    };
+TrackLabelControl.prototype.doHide = function () {
+    this.$button.removeClass('igv-nav-bar-button-clicked');
+    this.browser.hideTrackLabels();
+};
 
-    igv.TrackLabelControl.prototype.enable = function () {
-        this.$button.show();
-    };
+TrackLabelControl.prototype.doShow = function () {
+    this.$button.addClass('igv-nav-bar-button-clicked');
+    this.browser.showTrackLabels();
+};
 
-    return igv;
+TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
+    if (true === trackLabelsVisible) {
+        this.$button.addClass('igv-nav-bar-button-clicked');
+    } else {
+        this.$button.removeClass('igv-nav-bar-button-clicked');
+    }
+};
 
-}) (igv || {});
+TrackLabelControl.prototype.disable = function () {
+    this.doHide();
+    this.$button.hide();
+};
+
+TrackLabelControl.prototype.enable = function () {
+    this.$button.show();
+};
+
+export default TrackLabelControl;

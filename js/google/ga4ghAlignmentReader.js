@@ -26,6 +26,10 @@
 import AlignmentContainer from "../bam/alignmentContainer";
 import BamAlignment from "../bam/bamAlignment";
 import AlignmentBlock from "../bam/alignmentBlock";
+import   {
+    ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
+    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
+} from './ga4ghHelper';
 
 var CigarOperationTable = {
     "ALIGNMENT_MATCH": "M",
@@ -70,7 +74,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
             var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                 readURL = self.url + "/reads/search";
 
-            return igv.ga4ghSearch({
+            return ga4ghSearch({
                 url: readURL,
                 body: {
                     "readGroupSetIds": [self.readGroupSetIds],
@@ -108,7 +112,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                             // Query for reference names to build an alias table (map of genome ref names -> dataset ref names)
                             var readURL = self.url + "/references/search";
 
-                            return igv.ga4ghSearch({
+                            return ga4ghSearch({
                                 url: readURL,
                                 body: {
                                     "referenceSetId": referenceSetId
@@ -351,7 +355,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
 Ga4ghAlignmentReader.prototype.readMetadata = function () {
 
-    return igv.ga4ghGet({
+    return ga4ghGet({
         url: this.url,
         entity: "readgroupsets",
         entityId: this.readGroupSetIds

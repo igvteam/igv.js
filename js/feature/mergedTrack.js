@@ -119,8 +119,8 @@ function autoscale(chr, featureArrays) {
     //         });
     //     });
     //
-    //     min = Math.min(0, igv.Math.percentile(allValues, .1));
-    //     max = igv.Math.percentile(allValues, 99.9);
+    //     min = Math.min(0, IGVMath.percentile(allValues, .1));
+    //     max = IGVMath.percentile(allValues, 99.9);
     //
     // }
     // else {

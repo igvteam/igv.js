@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import igvxhr from "../igvxhr";
+
 // Experimental class for fetching features from an mpg webservice.
 // http://immvar.broadinstitute.org:3000/load_data?chromosome=&start=&end=&categories=
 
@@ -42,7 +44,7 @@ ImmVarReader.prototype.readFeatures = function (queryChr, queryStart, queryEnd) 
             "&cell_condition_id=" + this.cellConditionId;
 
     return new Promise(function (fulfill, reject) {
-        igv.xhr.loadJson(queryURL, {
+        igvxhr.loadJson(queryURL, {
             withCredentials: self.config.withCredentials
         }).then(function (json) {
 

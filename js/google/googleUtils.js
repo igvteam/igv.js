@@ -23,14 +23,9 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+import igvxhr from "../igvxhr";
 
-
-    //@deprecated -- use igv.google.setApiKey
-    igv.setApiKey = function (key) {
-        igv.google.setApiKey(key);
-    }
-    igv.google = {
+const google = {
 
         fileInfoCache: {},
 
@@ -110,14 +105,14 @@ var igv = (function (igv) {
             var id = getGoogleDriveFileID(googleDriveURL),
                 endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
 
-            return igv.xhr.loadJson(endPoint, igv.buildOptions({}));
+            return igvxhr.loadJson(endPoint, igv.buildOptions({}));
         },
 
         loadGoogleProperties: function (propertiesURL) {
 
             const self = this;
 
-            return igv.xhr.loadArrayBuffer(propertiesURL)
+            return igvxhr.loadArrayBuffer(propertiesURL)
 
                 .then(function (arrayBuffer) {
                     var inflate, plain, str;
@@ -157,7 +152,6 @@ var igv = (function (igv) {
         }
     }
 
-    return igv;
+export default google;
 
-})(igv || {});
 

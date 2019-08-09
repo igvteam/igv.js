@@ -22,7 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import Browser from "./browser.js"
+import Browser from "./browser.js";
+import GenomeUtils from "./genome/genome";
+import WindowSizePanel from "./windowSizePanel";
+import InputDialog from "./ui/inputDialog";
+import DataRangeDialog from "./ui/dataRangeDialog";
+import TrackRemovalDialog from "./ui/trackRemovalDialog";
+import AlertDialog from "./ui/alertDialog";
+import UserFeedback from "./ui/userFeedback";
+import SVGSaveControl from "./ui/svgSaveControl";
+import ZoomWidget from "./ui/zoomWidget";
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget";
+import TrackLabelControl from "./ui/trackLabelControl";
+import CenterGuide from "./ui/centerGuide";
+import CursorGuide from "./ui/cursorGuide";
+import NavbarManager from "./navbarManager";
+import igvxhr from "./igvxhr";
+import oauth from "./oauth";
 
 const version = "@VERSION";
 
@@ -41,7 +57,7 @@ function createBrowser(parentDiv, config) {
     if (undefined === config) config = {};
 
     // Path to genomes.json file.   This is globally shared among all browser objects
-    igv.GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+    GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
 
     setDefaults(config);
 
@@ -73,25 +89,25 @@ function createBrowser(parentDiv, config) {
     browser.$content.append(browser.trackContainerDiv);
 
     // user feedback
-    browser.userFeedback = new igv.UserFeedback(browser.$content);
+    browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
 
-    // browser.popover = new igv.Popover(browser.$content, browser);
+    // browser.popover = new Popover(browser.$content, browser);
 
-    browser.alertDialog = new igv.AlertDialog(browser.$content, browser);
+    browser.alertDialog = new AlertDialog(browser.$content, browser);
 
-    browser.inputDialog = new igv.InputDialog(browser.$root, browser);
+    browser.inputDialog = new InputDialog(browser.$root, browser);
 
-    browser.trackRemovalDialog = new igv.TrackRemovalDialog(browser.$root, browser);
+    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root, browser);
 
-    browser.dataRangeDialog = new igv.DataRangeDialog(browser.$root, browser);
+    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
     if (config.apiKey) {
-        igv.google.setApiKey(config.apiKey);
+        google.setApiKey(config.apiKey);
     }
 
     if (config.oauthToken) {
-        igv.oauth.setToken(config.oauthToken);
+        oauth.setToken(config.oauthToken);
     }
 
     return loadSession(config)
@@ -128,7 +144,7 @@ function createBrowser(parentDiv, config) {
                 browser.centerGuide.forcedShow();
             }
 
-            igv.xhr.startup();
+            igvxhr.startup();
 
             browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
@@ -229,7 +245,7 @@ function createStandardControls(browser, config) {
     $navigation = $('<div>', {class: 'igv-navbar'});
     $controls.append($navigation);
     browser.$navigation = $navigation;
-    browser.navbarManager = new igv.NavbarManager(browser);
+    browser.navbarManager = new NavbarManager(browser);
 
     $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
     $navigation.append($igv_nav_bar_left_container);
@@ -252,7 +268,7 @@ function createStandardControls(browser, config) {
     $igv_nav_bar_left_container.append($genomic_location);
 
     // chromosome select widget
-    browser.chromosomeSelectWidget = new igv.ChromosomeSelectWidget(browser, $genomic_location);
+    browser.chromosomeSelectWidget = new ChromosomeSelectWidget(browser, $genomic_location);
     if (undefined === config.showChromosomeWidget) {
         config.showChromosomeWidget = true;   // Default to true
     }
@@ -305,7 +321,7 @@ function createStandardControls(browser, config) {
     // browser.$searchResults.hide();
 
     // window size display
-    browser.windowSizePanel = new igv.WindowSizePanel($locus_size_group, browser);
+    browser.windowSizePanel = new WindowSizePanel($locus_size_group, browser);
 
 
     // cursor guide | center guide | track labels
@@ -318,23 +334,23 @@ function createStandardControls(browser, config) {
     browser.$toggle_button_container = $toggle_button_container;
 
     // cursor guide
-    browser.cursorGuide = new igv.CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.cursorGuide = new CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
 
     // center guide
-    browser.centerGuide = new igv.CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.centerGuide = new CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
 
     // toggle track labels
     if (true === config.showTrackLabelButton) {
-        browser.trackLabelControl = new igv.TrackLabelControl($toggle_button_container, browser);
+        browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
     // SVG save button
     if (config.showSVGButton) {
-        browser.svgSaveControl = new igv.SVGSaveControl($toggle_button_container, browser);
+        browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
 
     // zoom widget
-    browser.zoomWidget = new igv.ZoomWidget(browser, $igv_nav_bar_right_container);
+    browser.zoomWidget = new ZoomWidget(browser, $igv_nav_bar_right_container);
 
     if (false === config.showNavigation) {
         browser.$navigation.hide();

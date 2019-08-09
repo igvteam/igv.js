@@ -27,6 +27,9 @@
 import FeatureParser from "./featureParsers";
 import FeatureCache from "./featureCache";
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
+import IGVColor from "../igv-color";
+import igvxhr from "../igvxhr";
 
 const InteractionTrack = igv.extend(TrackBase,
 
@@ -79,7 +82,7 @@ InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
         const options = igv.buildOptions(self.config);    // Add oauth token, if any
 
-        return igv.xhr.loadString(self.config.url, options)
+        return igvxhr.loadString(self.config.url, options)
 
             .then(function (data) {
 
@@ -111,7 +114,7 @@ InteractionTrack.prototype.draw = function (options) {
     const bpStart = options.bpStart;
     const xScale = bpPerPixel;
 
-    igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const featureList = options.features;
 
@@ -277,7 +280,7 @@ function getAlphaColor(color, alpha) {
 
     let c = this.colorAlphaCache[color];
     if (!c) {
-        c = igv.Color.addAlpha(color, alpha);
+        c = IGVColor.addAlpha(color, alpha);
         this.colorAlphaCache[color] = c;
     }
     return c;

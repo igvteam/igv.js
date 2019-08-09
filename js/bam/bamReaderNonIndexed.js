@@ -27,6 +27,8 @@
 import FeatureCache from "../feature/featureCache";
 import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
+import igvxhr from "../igvxhr";
+import  {unbgzf, bgzBlockSize} from './bgzf';
 
 /**
  * Class for reading a bam file
@@ -63,15 +65,15 @@ BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
         if (this.isDataUri) {
 
             var data = decodeDataURI(this.bamPath);
-            var unc = igv.unbgzf(data.buffer);
+            var unc = unbgzf(data.buffer);
             parseAlignments(new Uint8Array(unc));
             return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
         } else {
-            return igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config))
+            return igvxhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config))
 
                 .then(function (arrayBuffer) {
 
-                    var unc = igv.unbgzf(arrayBuffer);
+                    var unc = unbgzf(arrayBuffer);
 
                     parseAlignments(new Uint8Array(unc));
 

@@ -26,6 +26,8 @@
 
 import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
+import igvxhr from "../igvxhr";
+import  {unbgzf, bgzBlockSize} from './bgzf';
 
 const HtsgetReader = function (config, genome) {
 
@@ -52,7 +54,7 @@ HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
         '&start=' + start +
         '&end=' + end;
 
-    return igv.xhr.loadJson(url, self.config)
+    return igvxhr.loadJson(url, self.config)
 
         .then(function (data) {
 
@@ -63,7 +65,7 @@ HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
         .then(function (dataArr) {
 
             const compressedData = concatArrays(dataArr);  // In essence a complete bam file
-            const unc = igv.unbgzf(compressedData.buffer);
+            const unc = unbgzf(compressedData.buffer);
             const ba = new Uint8Array(unc);
 
             if (!self.header) {
@@ -117,7 +119,7 @@ function loadUrls(urls) {
             }
 
             promiseArray.push(new Promise(function (fulfill, reject) {
-                igv.xhr.loadArrayBuffer(urlData.url, options)
+                igvxhr.loadArrayBuffer(urlData.url, options)
                     .then(function (buffer) {
                         fulfill(new Uint8Array(buffer));
                     });

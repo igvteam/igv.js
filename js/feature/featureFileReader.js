@@ -27,6 +27,8 @@ import FeatureParser from "./featureParsers";
 import SegParser from "./segParser";
 import VcfParser from "../variant/vcfParser";
 import loadBamIndex from "../bam/bamIndex";
+import igvxhr from "../igvxhr";
+import  {unbgzf, bgzBlockSize} from '../bam/bgzf';
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -107,8 +109,8 @@ FeatureFileReader.prototype.readHeader = async function () {
                             size: 26
                         }
                     });
-                    const abuffer = await igv.xhr.loadArrayBuffer(this.config.url, bsizeOptions)
-                    const bsize = igv.bgzBlockSize(abuffer)
+                    const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
+                    const bsize = bgzBlockSize(abuffer)
                     maxSize = index.firstAlignmentBlock + bsize;
                 } else {
 
@@ -116,7 +118,7 @@ FeatureFileReader.prototype.readHeader = async function () {
 
                 const options = igv.buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
 
-                const data = await igv.xhr.loadString(this.config.url, options)
+                const data = await igvxhr.loadString(this.config.url, options)
                 header = this.parser.parseHeader(data);
 
 
@@ -180,7 +182,7 @@ FeatureFileReader.prototype.loadIndex = function () {
 FeatureFileReader.prototype.loadFeaturesNoIndex = async function () {
 
     const options = igv.buildOptions(this.config);    // Add oauth token, if any
-    const data = await igv.xhr.loadString(this.config.url, options)
+    const data = await igvxhr.loadString(this.config.url, options)
 
     this.header = this.parser.parseHeader(data);
     if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
@@ -224,8 +226,8 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                                 size: 26
                             }
                         });
-                        const abuffer = await igv.xhr.loadArrayBuffer(config.url, bsizeOptions)
-                        lastBlockSize = igv.bgzBlockSize(abuffer)
+                        const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
+                        lastBlockSize = bgzBlockSize(abuffer)
                     }
                     endPos = block.maxv.block + lastBlockSize;
                 } else {
@@ -255,15 +257,15 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                 };
 
                 if (tabix) {
-                    igv.xhr
+                    igvxhr
                         .loadArrayBuffer(config.url, options)
                         .then(function (data) {
-                            const inflated = new Uint8Array(igv.unbgzf(data))
+                            const inflated = new Uint8Array(unbgzf(data))
                             success(inflated)
                         })
                         .catch(reject);
                 } else {
-                    igv.xhr
+                    igvxhr
                         .loadString(config.url, options)
                         .then(success)
                         .catch(reject);

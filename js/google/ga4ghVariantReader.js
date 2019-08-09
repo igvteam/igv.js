@@ -23,10 +23,12 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+import   {
+    ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
+    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
+} from './ga4ghHelper';
 
-
-    igv.Ga4ghVariantReader = function (config, genome) {
+const Ga4ghVariantReader = function (config, genome) {
 
         this.config = config;
         this.genome = genome;
@@ -38,7 +40,7 @@ var igv = (function (igv) {
     }
 
     // Simulate a VCF file header
-    igv.Ga4ghVariantReader.prototype.readHeader = function () {
+    Ga4ghVariantReader.prototype.readHeader = function () {
 
         var self = this;
 
@@ -58,7 +60,7 @@ var igv = (function (igv) {
 
                 var readURL = self.url + "/callsets/search";
 
-                return igv.ga4ghSearch({
+                return ga4ghSearch({
                     url: readURL,
                     fields: "nextPageToken,callSets(id,name)",
                     body: {
@@ -96,7 +98,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
+    Ga4ghVariantReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
         const self = this;
         const genome = this.genome;
@@ -112,7 +114,7 @@ var igv = (function (igv) {
                 var queryChr = chrAliasTable.hasOwnProperty(chr) ? chrAliasTable[chr] : chr,
                     readURL = self.url + "/variants/search";
 
-                return igv.ga4ghSearch({
+                return ga4ghSearch({
                     url: readURL,
                     fields: (self.includeCalls ? undefined : "nextPageToken,variants(id,variantSetId,names,referenceName,start,end,referenceBases,alternateBases,quality,filter,info)"),
                     body: {
@@ -178,16 +180,13 @@ var igv = (function (igv) {
     }
 
 
-    igv.Ga4ghVariantReader.prototype.readMetadata = function () {
+    Ga4ghVariantReader.prototype.readMetadata = function () {
 
-        return igv.ga4ghGet({
+        return ga4ghGet({
             url: this.url,
             entity: "variantsets",
             entityId: this.variantSetId
         });
     }
 
-
-    return igv;
-
-})(igv || {});
+export default Ga4ghVariantReader;

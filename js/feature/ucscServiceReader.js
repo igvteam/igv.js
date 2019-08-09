@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+import igvxhr from "../igvxhr";
+
 const UCSCServiceReader = function (config, genome) {
         this.config = config;
         this.genome = genome;
@@ -45,7 +47,7 @@ const UCSCServiceReader = function (config, genome) {
 
         const url = this.config.url + '?db=' + this.config.db + '&table=' + this.config.tableName + '&chr=' + chr + '&start=' + s + '&end=' + e;
 
-        return igv.xhr.loadJson(url, this.config)
+        return igvxhr.loadJson(url, this.config)
             .then(function (data) {
                 if (data) {
                     data.forEach(function (sample) {

@@ -23,208 +23,204 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
 
-    // TODO -- big endian
+// TODO -- big endian
 
-    igv.BinaryParser = function (dataView, littleEndian) {
+const BinaryParser = function (dataView, littleEndian) {
 
-        this.littleEndian = littleEndian !== undefined ? littleEndian : true
-        this.position = 0;
-        this.view = dataView;
-        this.length = dataView.byteLength;
-    }
+    this.littleEndian = littleEndian !== undefined ? littleEndian : true
+    this.position = 0;
+    this.view = dataView;
+    this.length = dataView.byteLength;
+}
 
-    igv.BinaryParser.prototype.available = function() {
-        return this.length - this.position;
-    }
-    
-    igv.BinaryParser.prototype.remLength = function () {
-        return this.length - this.position;
-    }
+BinaryParser.prototype.available = function () {
+    return this.length - this.position;
+}
 
-    igv.BinaryParser.prototype.hasNext = function () {
-        return this.position < this.length - 1;
-    }
+BinaryParser.prototype.remLength = function () {
+    return this.length - this.position;
+}
 
-    igv.BinaryParser.prototype.getByte = function () {
-        var retValue = this.view.getUint8(this.position, this.littleEndian);
-        this.position++;
-        return retValue;
-    }
+BinaryParser.prototype.hasNext = function () {
+    return this.position < this.length - 1;
+}
 
-    igv.BinaryParser.prototype.getShort = function () {
+BinaryParser.prototype.getByte = function () {
+    var retValue = this.view.getUint8(this.position, this.littleEndian);
+    this.position++;
+    return retValue;
+}
 
-        var retValue = this.view.getInt16(this.position, this.littleEndian);
-        this.position += 2
-        return retValue;
-    }
+BinaryParser.prototype.getShort = function () {
 
-    igv.BinaryParser.prototype.getUShort = function () {
+    var retValue = this.view.getInt16(this.position, this.littleEndian);
+    this.position += 2
+    return retValue;
+}
 
-        // var byte1 = this.getByte(),
-        //     byte2 = this.getByte(),
-        //     retValue = ((byte2 << 24 >>> 16) + (byte1 << 24 >>> 24));
-        //     return retValue;
+BinaryParser.prototype.getUShort = function () {
 
-       //
-        var retValue = this.view.getUint16 (this.position, this.littleEndian);
-        this.position += 2
-        return retValue;
-    }
+    // var byte1 = this.getByte(),
+    //     byte2 = this.getByte(),
+    //     retValue = ((byte2 << 24 >>> 16) + (byte1 << 24 >>> 24));
+    //     return retValue;
 
-
-    igv.BinaryParser.prototype.getInt = function () {
-
-        var retValue = this.view.getInt32(this.position, this.littleEndian);
-        this.position += 4;
-        return retValue;
-    }
+    //
+    var retValue = this.view.getUint16(this.position, this.littleEndian);
+    this.position += 2
+    return retValue;
+}
 
 
-    igv.BinaryParser.prototype.getUInt = function () {
-        var retValue = this.view.getUint32(this.position, this.littleEndian);
-        this.position += 4;
-        return retValue;
-    }
+BinaryParser.prototype.getInt = function () {
 
-    igv.BinaryParser.prototype.getLong = function () {
+    var retValue = this.view.getInt32(this.position, this.littleEndian);
+    this.position += 4;
+    return retValue;
+}
 
-        // DataView doesn't support long. So we'll try manually
 
-        var b = [];
-        b[0] = this.view.getUint8(this.position);
-        b[1] = this.view.getUint8(this.position + 1);
-        b[2] = this.view.getUint8(this.position + 2);
-        b[3] = this.view.getUint8(this.position + 3);
-        b[4] = this.view.getUint8(this.position + 4);
-        b[5] = this.view.getUint8(this.position + 5);
-        b[6] = this.view.getUint8(this.position + 6);
-        b[7] = this.view.getUint8(this.position + 7);
+BinaryParser.prototype.getUInt = function () {
+    var retValue = this.view.getUint32(this.position, this.littleEndian);
+    this.position += 4;
+    return retValue;
+}
 
-        var value = 0;
-        if (this.littleEndian) {
-            for (var i = b.length - 1; i >= 0; i--) {
-                value = (value * 256) + b[i];
-            }
-        } else {
-            for (var i = 0; i < b.length; i++) {
-                value = (value * 256) + b[i];
-            }
+BinaryParser.prototype.getLong = function () {
+
+    // DataView doesn't support long. So we'll try manually
+
+    var b = [];
+    b[0] = this.view.getUint8(this.position);
+    b[1] = this.view.getUint8(this.position + 1);
+    b[2] = this.view.getUint8(this.position + 2);
+    b[3] = this.view.getUint8(this.position + 3);
+    b[4] = this.view.getUint8(this.position + 4);
+    b[5] = this.view.getUint8(this.position + 5);
+    b[6] = this.view.getUint8(this.position + 6);
+    b[7] = this.view.getUint8(this.position + 7);
+
+    var value = 0;
+    if (this.littleEndian) {
+        for (var i = b.length - 1; i >= 0; i--) {
+            value = (value * 256) + b[i];
         }
-
-
-        this.position += 8;
-        return value;
+    } else {
+        for (var i = 0; i < b.length; i++) {
+            value = (value * 256) + b[i];
+        }
     }
 
-    igv.BinaryParser.prototype.getString = function (len) {
 
-        var s = "";
-        var c;
-        while ((c = this.view.getUint8(this.position++)) != 0) {
+    this.position += 8;
+    return value;
+}
+
+BinaryParser.prototype.getString = function (len) {
+
+    var s = "";
+    var c;
+    while ((c = this.view.getUint8(this.position++)) != 0) {
+        s += String.fromCharCode(c);
+        if (len && s.length == len) break;
+    }
+    return s;
+}
+
+BinaryParser.prototype.getFixedLengthString = function (len) {
+
+    var s = "";
+    var i;
+    var c;
+    for (i = 0; i < len; i++) {
+        c = this.view.getUint8(this.position++);
+        if (c > 0) {
             s += String.fromCharCode(c);
-            if (len && s.length == len) break;
         }
-        return s;
     }
+    return s;
+}
 
-    igv.BinaryParser.prototype.getFixedLengthString = function (len) {
+BinaryParser.prototype.getFixedLengthTrimmedString = function (len) {
 
-        var s = "";
-        var i;
-        var c;
-        for (i = 0; i < len; i++) {
-            c = this.view.getUint8(this.position++);
-            if (c > 0) {
-                s += String.fromCharCode(c);
-            }
+    var s = "";
+    var i;
+    var c;
+    for (i = 0; i < len; i++) {
+        c = this.view.getUint8(this.position++);
+        if (c > 32) {
+            s += String.fromCharCode(c);
         }
-        return s;
     }
+    return s;
+}
 
-    igv.BinaryParser.prototype.getFixedLengthTrimmedString = function (len) {
+BinaryParser.prototype.getFloat = function () {
 
-        var s = "";
-        var i;
-        var c;
-        for (i = 0; i < len; i++) {
-            c = this.view.getUint8(this.position++);
-            if (c > 32) {
-                s += String.fromCharCode(c);
-            }
-        }
-        return s;
-    }
-
-    igv.BinaryParser.prototype.getFloat = function () {
-
-        var retValue = this.view.getFloat32(this.position, this.littleEndian);
-        this.position += 4;
-        return retValue;
+    var retValue = this.view.getFloat32(this.position, this.littleEndian);
+    this.position += 4;
+    return retValue;
 
 
-    }
+}
 
-    igv.BinaryParser.prototype.getDouble = function () {
+BinaryParser.prototype.getDouble = function () {
 
-        var retValue = this.view.getFloat64(this.position, this.littleEndian);
-        this.position += 8;
-        return retValue;
-    }
+    var retValue = this.view.getFloat64(this.position, this.littleEndian);
+    this.position += 8;
+    return retValue;
+}
 
-    igv.BinaryParser.prototype.skip = function (n) {
+BinaryParser.prototype.skip = function (n) {
 
-        this.position += n;
-        return this.position;
-    }
-
-
-    /**
-     * Return a bgzip (bam and tabix) virtual pointer
-     * TODO -- why isn't 8th byte used ?
-     * @returns {*}
-     */
-    igv.BinaryParser.prototype.getVPointer = function () {
-
-        var position = this.position,
-            offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
-            byte6 = ((this.view.getUint8(position + 6) & 0xff) * 0x100000000),
-            byte5 = ((this.view.getUint8(position + 5) & 0xff) * 0x1000000),
-            byte4 = ((this.view.getUint8(position + 4) & 0xff) * 0x10000),
-            byte3 = ((this.view.getUint8(position + 3) & 0xff) * 0x100),
-            byte2 = ((this.view.getUint8(position + 2) & 0xff)),
-            block = byte6 + byte5 + byte4 + byte3 + byte2;
-        this.position += 8;
-
-        //       if (block == 0 && offset == 0) {
-        //           return null;
-        //       } else {
-        return new VPointer(block, offset);
-        //       }
-    }
+    this.position += n;
+    return this.position;
+}
 
 
-    function VPointer(block, offset) {
-        this.block = block;
-        this.offset = offset;
-    }
+/**
+ * Return a bgzip (bam and tabix) virtual pointer
+ * TODO -- why isn't 8th byte used ?
+ * @returns {*}
+ */
+BinaryParser.prototype.getVPointer = function () {
 
-    VPointer.prototype.isLessThan = function (vp) {
-        return this.block < vp.block ||
-            (this.block === vp.block && this.offset < vp.offset);
-    }
+    var position = this.position,
+        offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
+        byte6 = ((this.view.getUint8(position + 6) & 0xff) * 0x100000000),
+        byte5 = ((this.view.getUint8(position + 5) & 0xff) * 0x1000000),
+        byte4 = ((this.view.getUint8(position + 4) & 0xff) * 0x10000),
+        byte3 = ((this.view.getUint8(position + 3) & 0xff) * 0x100),
+        byte2 = ((this.view.getUint8(position + 2) & 0xff)),
+        block = byte6 + byte5 + byte4 + byte3 + byte2;
+    this.position += 8;
 
-    VPointer.prototype.isGreaterThan = function (vp) {
-        return this.block > vp.block ||
-            (this.block === vp.block && this.offset > vp.offset);
-    }
-
-    VPointer.prototype.print = function () {
-        return "" + this.block + ":" + this.offset;
-    }
+    //       if (block == 0 && offset == 0) {
+    //           return null;
+    //       } else {
+    return new VPointer(block, offset);
+    //       }
+}
 
 
-    return igv;
+function VPointer(block, offset) {
+    this.block = block;
+    this.offset = offset;
+}
 
-})(igv || {});
+VPointer.prototype.isLessThan = function (vp) {
+    return this.block < vp.block ||
+        (this.block === vp.block && this.offset < vp.offset);
+}
+
+VPointer.prototype.isGreaterThan = function (vp) {
+    return this.block > vp.block ||
+        (this.block === vp.block && this.offset > vp.offset);
+}
+
+VPointer.prototype.print = function () {
+    return "" + this.block + ":" + this.offset;
+}
+
+export default BinaryParser;

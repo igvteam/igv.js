@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import igvxhr from "../igvxhr";
+
 const VARIANT = "VARIANT";
 const TRAIT = "TRAIT";
 /**
@@ -85,7 +87,7 @@ T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
                 queryURL = self.config.proxy ? self.config.proxy : self.url,
                 body = self.queryJson(queryChr, queryStart, queryEnd, self.config);
 
-            igv.xhr.loadJson(queryURL, {
+            igvxhr.loadJson(queryURL, {
                 sendData: body,
                 withCredentials: self.config.withCredentials
 

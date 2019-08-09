@@ -25,6 +25,8 @@
 
 import FeatureSource from './featureSource';
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
+import IGVMath from "../igv-math";
 
 const SegTrack = igv.extend(TrackBase,
 
@@ -125,12 +127,12 @@ SegTrack.prototype.draw = function (options) {
 
     const self = this;
 
-    const v2 = igv.Math.log2(2);
+    const v2 = IGVMath.log2(2);
 
     const ctx = options.context;
     const pixelWidth = options.pixelWidth;
     const pixelHeight = options.pixelHeight;
-    igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const featureList = options.features;
 
@@ -183,7 +185,7 @@ SegTrack.prototype.draw = function (options) {
 
             let value = segment.value;
             if (!self.isLog) {
-                value = igv.Math.log2(value / 2);
+                value = IGVMath.log2(value / 2);
             }
 
             let color;
@@ -220,7 +222,7 @@ SegTrack.prototype.draw = function (options) {
             segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
             ctx.fillRect(px, y, pw, sh - 2 * border);
 
-            //igv.graphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+            //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
         }
     } else {

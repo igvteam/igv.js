@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 
+import BinaryParser from "../binary";
+import igvxhr from "../igvxhr";
+
 /**
  *
  * @param indexFile
@@ -33,7 +36,7 @@ function loadTribbleIndex(indexFile, config, genome) {
 
     return new Promise(function (fullfill) {
 
-        igv.xhr
+        igvxhr
             .loadArrayBuffer(indexFile, igv.buildOptions(config))
             .then(function (arrayBuffer) {
 
@@ -41,7 +44,7 @@ function loadTribbleIndex(indexFile, config, genome) {
 
                     var index = {};
 
-                    var parser = new igv.BinaryParser(new DataView(arrayBuffer));
+                    var parser = new BinaryParser(new DataView(arrayBuffer));
 
                     readHeader(parser);
 

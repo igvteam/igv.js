@@ -25,6 +25,9 @@
 "use strict";
 import FeatureSource from './featureSource';
 import TrackBase from "../trackBase";
+import BWSource from "../bigwig/bwSource";
+import IGVGraphics from "../igv-canvas";
+import IGVColor from "../igv-color";
 
 const FeatureTrack = igv.extend(TrackBase,
 
@@ -44,7 +47,7 @@ const FeatureTrack = igv.extend(TrackBase,
 
         const format = config.format ? config.format.toLowerCase() : undefined;
         if ('bigwig' === format || 'bigbed' === format) {
-            this.featureSource = new igv.BWSource(config, browser.genome);
+            this.featureSource = new BWSource(config, browser.genome);
         } else {
             this.featureSource = new FeatureSource(config, browser.genome);
         }
@@ -168,7 +171,7 @@ FeatureTrack.prototype.draw = function (options) {
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
 
-    igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     if (featureList) {
 
@@ -195,7 +198,7 @@ FeatureTrack.prototype.draw = function (options) {
                     const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
                     if (last && pxStart - last <= 0) {
                         ctx.globalAlpha = 0.5
-                        igv.graphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
                         ctx.globalAlpha = 1.0
                     }
                     lastPxEnd[row] = pxEnd;
@@ -411,7 +414,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     let color = this.color;  // default
 
     if (feature.alpha && feature.alpha !== 1) {
-        color = igv.Color.addAlpha(this.color, feature.alpha);
+        color = IGVColor.addAlpha(this.color, feature.alpha);
     }
 
 
@@ -459,15 +462,15 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
             ctx.strokeStyle = "white";
             for (let x = coord.px + step / 2; x < coord.px1; x += step) {
                 // draw arrowheads along central line indicating transcribed orientation
-                igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+                IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
             }
             ctx.fillStyle = color;
             ctx.strokeStyle = color;
         }
     } else {
         // multi-exon transcript
-        igv.graphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
+        IGVGraphics.strokeLine(ctx, coord.px + 1, cy, coord.px1 - 1, cy); // center line for introns
 
         const pixelWidth = options.pixelWidth;
 
@@ -475,8 +478,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         const xRight = Math.min(pixelWidth, coord.px1);
         for (let x = xLeft; x < xRight; x += step) {
             // draw arrowheads along central line indicating transcribed orientation
-            igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-            igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+            IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+            IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
         }
         for (let e = 0; e < exonCount; e++) {
             // draw the exons
@@ -518,8 +521,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
                     ctx.strokeStyle = "white";
                     for (let x = ePx + step / 2; x < ePx1; x += step) {
                         // draw arrowheads along central line indicating transcribed orientation
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
-                        igv.graphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
+                        IGVGraphics.strokeLine(ctx, x - direction * 2, cy - 2, x, cy);
+                        IGVGraphics.strokeLine(ctx, x - direction * 2, cy + 2, x, cy);
                     }
                     ctx.fillStyle = color;
                     ctx.strokeStyle = color;
@@ -594,11 +597,11 @@ function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, window
         if (options.labelTransform) {
             ctx.save();
             options.labelTransform(ctx, labelX);
-            igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
+            IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
             ctx.restore();
 
         } else {
-            igv.graphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+            IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
         }
 
     }

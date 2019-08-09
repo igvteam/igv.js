@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import IGVGraphics from "./igv-canvas";
 
 const SequenceTrack = function (config, browser) {
 
@@ -224,10 +224,10 @@ SequenceTrack.prototype.draw = function (options) {
 
 
                 if (options.bpPerPixel > 1 / 10) {
-                    igv.graphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
+                    IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                 } else {
                     let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
-                    igv.graphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
+                    IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
                 }
             }
         }
@@ -277,10 +277,10 @@ SequenceTrack.prototype.draw = function (options) {
                         aaS = 'START'; //Color blind accessible
                     }
 
-                    igv.graphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
+                    IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
 
                     if (options.bpPerPixel <= 1 / 10) {
-                        igv.graphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
+                        IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
                     }
 
                 }

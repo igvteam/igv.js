@@ -22,133 +22,127 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import makeDraggable from "./draggable";
 
-/**
- * Created by turner on 9/19/14.
- */
-var igv = (function (igv) {
+const Popover = function ($parent, browser) {
+    this.browser = browser;
+    this.$parent = initializationHelper.call(this, $parent);
+};
 
-    igv.Popover = function ($parent, browser) {
-        this.browser = browser;
-        this.$parent = initializationHelper.call(this, $parent);
-    };
+function initializationHelper($parent) {
 
-    function initializationHelper($parent) {
+    var self = this,
+        $popoverHeader;
 
-        var self = this,
-            $popoverHeader;
+    // popover container
+    this.$popover = $('<div class="igv-popover">');
 
-        // popover container
-        this.$popover = $('<div class="igv-popover">');
+    $parent.append(this.$popover);
 
-        $parent.append(this.$popover);
+    // popover header
+    $popoverHeader = $('<div class="igv-popover-header">');
+    this.$popover.append($popoverHeader);
 
-        // popover header
-        $popoverHeader = $('<div class="igv-popover-header">');
-        this.$popover.append($popoverHeader);
+    igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
+        self.hide();
+    });
 
-        igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
-            self.hide();
-        });
+    // popover content
+    this.$popoverContent = $('<div>');
 
-        // popover content
-        this.$popoverContent = $('<div>');
+    this.$popover.append(this.$popoverContent);
 
-        this.$popover.append(this.$popoverContent);
+    // this.$popover.draggable({handle: $popoverHeader.get(0)});
+    makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
 
-       // this.$popover.draggable({handle: $popoverHeader.get(0)});
-       igv.makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
+    return $parent;
 
-        return $parent;
+}
 
-    }
+Popover.prototype.hide = function () {
+    this.$popover.hide();
+};
 
-    igv.Popover.prototype.hide = function () {
-        this.$popover.hide();
-    };
+Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
 
-    igv.Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
+    var $container,
+        $popover = this.$popover;
 
-        var $container,
-            $popover = this.$popover;
+    // Only 1 popover open at a time
+    $('.igv-popover').hide();
 
-        // Only 1 popover open at a time
-        $('.igv-popover').hide();
+    if (menuItems.length > 0) {
 
-        if (menuItems.length > 0) {
-
-            menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
-
-            this.$popoverContent.empty();
-            this.$popoverContent.removeClass();
-            this.$popoverContent.addClass("igv-popover-track-popup-content");
-
-            for (let item of menuItems) {
-                this.$popoverContent.append(item.object);
-            }
-
-            const page = igv.pageCoordinates(e);
-            $popover.css(clampPopoverLocation(page.x, page.y, this));
-            $popover.show();
-        }
-
-    };
-
-    igv.Popover.prototype.presentTrackContent = function (pageX, pageY, content) {
-
-        // Only 1 popover open at a time
-        $('.igv-popover').hide();
-
-        if (undefined === content) {
-            return;
-        }
+        menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
 
         this.$popoverContent.empty();
         this.$popoverContent.removeClass();
         this.$popoverContent.addClass("igv-popover-track-popup-content");
 
-        this.$popoverContent.html(content);
-
-        this.$popover.css(clampPopoverLocation(pageX, pageY, this));
-        this.$popover.show();
-
-    };
-
-    igv.Popover.prototype.dispose = function () {
-        this.$popover.empty();
-        this.$popoverContent.empty();
-        Object.keys(this).forEach(function (key) {
-            this[key] = undefined;
-        })
-    };
-
-    function clampPopoverLocation(pageX, pageY, popover) {
-
-        var left,
-            containerCoordinates = {x: pageX, y: pageY},
-            containerRect = {x: 0, y: 0, width: $(window).width(), height: $(window).height()},
-            popupRect,
-            popupX = pageX,
-            popupY = pageY;
-
-        popupX -= popover.$parent.offset().left;
-        popupY -= popover.$parent.offset().top;
-        popupRect = {
-            x: popupX,
-            y: popupY,
-            width: popover.$popover.outerWidth(),
-            height: popover.$popover.outerHeight()
-        };
-
-        left = popupX;
-        if (containerCoordinates.x + popupRect.width > containerRect.width) {
-            left = popupX - popupRect.width;
+        for (let item of menuItems) {
+            this.$popoverContent.append(item.object);
         }
 
-        return {"left": left + "px", "top": popupY + "px"};
+        const page = igv.pageCoordinates(e);
+        $popover.css(clampPopoverLocation(page.x, page.y, this));
+        $popover.show();
     }
 
-    return igv;
+};
 
-})(igv || {});
+Popover.prototype.presentTrackContent = function (pageX, pageY, content) {
+
+    // Only 1 popover open at a time
+    $('.igv-popover').hide();
+
+    if (undefined === content) {
+        return;
+    }
+
+    this.$popoverContent.empty();
+    this.$popoverContent.removeClass();
+    this.$popoverContent.addClass("igv-popover-track-popup-content");
+
+    this.$popoverContent.html(content);
+
+    this.$popover.css(clampPopoverLocation(pageX, pageY, this));
+    this.$popover.show();
+
+};
+
+Popover.prototype.dispose = function () {
+    this.$popover.empty();
+    this.$popoverContent.empty();
+    Object.keys(this).forEach(function (key) {
+        this[key] = undefined;
+    })
+};
+
+function clampPopoverLocation(pageX, pageY, popover) {
+
+    var left,
+        containerCoordinates = {x: pageX, y: pageY},
+        containerRect = {x: 0, y: 0, width: $(window).width(), height: $(window).height()},
+        popupRect,
+        popupX = pageX,
+        popupY = pageY;
+
+    popupX -= popover.$parent.offset().left;
+    popupY -= popover.$parent.offset().top;
+    popupRect = {
+        x: popupX,
+        y: popupY,
+        width: popover.$popover.outerWidth(),
+        height: popover.$popover.outerHeight()
+    };
+
+    left = popupX;
+    if (containerCoordinates.x + popupRect.width > containerRect.width) {
+        left = popupX - popupRect.width;
+    }
+
+    return {"left": left + "px", "top": popupY + "px"};
+}
+
+export default Popover;
 

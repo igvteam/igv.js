@@ -26,6 +26,9 @@
 import BamSource from "./bamSource";
 import PairedAlignment from "./pairedAlignment";
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
+import paintAxis from "../util/paintAxis";
+import IGVColor from "../igv-color";
 
 const type = "alignment";
 
@@ -184,7 +187,7 @@ BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
 BAMTrack.prototype.draw = function (options) {
 
-    igv.graphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     if (this.coverageTrack.height > 0) {
         this.coverageTrack.draw(options);
@@ -478,7 +481,7 @@ var CoverageTrack = function (config, parent) {
 
     this.height = config.coverageTrackHeight;
     this.dataRange = {min: 0};   // Leav max undefined
-    this.paintAxis = igv.paintAxis;
+    this.paintAxis = paintAxis;
 };
 
 CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -512,10 +515,10 @@ CoverageTrack.prototype.draw = function (options) {
     // If alignment track color is != default, use it
     let color = this.parent.coverageColor;
     if (this.parent.color !== DEFAULT_ALIGNMENT_COLOR) {
-        color = igv.Color.darkenLighten(this.parent.color, -35);
+        color = IGVColor.darkenLighten(this.parent.color, -35);
     }
 
-    igv.graphics.setProperties(ctx, {
+    IGVGraphics.setProperties(ctx, {
         fillStyle: color,
         strokeStyle: color
     });
@@ -535,8 +538,8 @@ CoverageTrack.prototype.draw = function (options) {
         const x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-        // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
-        igv.graphics.fillRect(ctx, x, y, w, h);
+        // IGVGraphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
+        IGVGraphics.fillRect(ctx, x, y, w, h);
     }
 
     // coverage mismatch coloring -- don't try to do this in above loop, color bar will be overwritten when w<1
@@ -557,8 +560,8 @@ CoverageTrack.prototype.draw = function (options) {
             const refBase = sequence[i];
             if (item.isMismatch(refBase)) {
 
-                igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
-                igv.graphics.fillRect(ctx, x, y, w, h);
+                IGVGraphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
+                IGVGraphics.fillRect(ctx, x, y, w, h);
 
                 let accumulatedHeight = 0.0;
                 for (let nucleotide of ["A", "C", "T", "G"]) {
@@ -570,8 +573,8 @@ CoverageTrack.prototype.draw = function (options) {
                     y = (this.height - hh) - accumulatedHeight;
                     accumulatedHeight += hh;
 
-                    igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
-                    igv.graphics.fillRect(ctx, x, y, w, hh);
+                    IGVGraphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
+                    IGVGraphics.fillRect(ctx, x, y, w, hh);
                 }
             }
         }
@@ -709,7 +712,7 @@ AlignmentTrack.prototype.draw = function (options) {
                 xBlockStart += 1;
                 xBlockEnd -= 1;
             }
-            igv.graphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
+            IGVGraphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
         })
 
     } else {
@@ -770,10 +773,10 @@ AlignmentTrack.prototype.draw = function (options) {
             return;
         }
         if (alignment.mq <= 0) {
-            connectorColor = igv.Color.addAlpha(connectorColor, 0.15);
+            connectorColor = IGVColor.addAlpha(connectorColor, 0.15);
         }
-        igv.graphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor});
-        igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
+        IGVGraphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor});
+        IGVGraphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
     }
 
@@ -796,10 +799,10 @@ AlignmentTrack.prototype.draw = function (options) {
         }
 
         if (alignment.mq <= 0) {
-            alignmentColor = igv.Color.addAlpha(alignmentColor, 0.15);
+            alignmentColor = IGVColor.addAlpha(alignmentColor, 0.15);
         }
 
-        igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
+        IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
         for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
@@ -819,7 +822,7 @@ AlignmentTrack.prototype.draw = function (options) {
                     const refOffset = block.start - bpStart
                     const xBlockStart = refOffset / bpPerPixel - 1
                     const widthBlock = 3
-                    igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                    IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
                 }
             }
         }
@@ -846,9 +849,9 @@ AlignmentTrack.prototype.draw = function (options) {
 
             if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                 if ("D" === block.gapType) {
-                    igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
+                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
                 } else if ("N" === block.gapType) {
-                    igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
+                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
                 }
             }
             lastBlockEnd = blockEndPixel;
@@ -896,16 +899,16 @@ AlignmentTrack.prototype.draw = function (options) {
                         yRect];
 
                 }
-                igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
+                IGVGraphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
                 if (strokeOutline) {
-                    igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
+                    IGVGraphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
                 }
             }
 
             // Internal block
             else {
-                igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
+                IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
 
                 if (strokeOutline) {
                     ctx.save();
@@ -970,11 +973,11 @@ AlignmentTrack.prototype.draw = function (options) {
                 const fontHeight = Math.min(10, bbox.height)
                 context.font = '' + fontHeight + 'px sans-serif';
                 center = bbox.x + (bbox.width / 2.0);
-                igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color});
+                IGVGraphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color});
             } else {
 
                 // render colored block
-                igv.graphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color});
+                IGVGraphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color});
             }
         }
     }
@@ -1257,7 +1260,7 @@ function getChrColor(chr) {
         chrColorMap[chr] = color;
         return color;
     } else {
-        const color = igv.Color.randomRGB();
+        const color = IGVColor.randomRGB();
         chrColorMap[chr] = color;
         return color;
     }

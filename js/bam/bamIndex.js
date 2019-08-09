@@ -1,6 +1,9 @@
 // Represents a BAM index.
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
+import BinaryParser from "../binary";
+import igvxhr from "../igvxhr";
+
 const BAI_MAGIC = 21578050;
 const TABIX_MAGIC = 21578324;
 const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
@@ -15,7 +18,7 @@ const MAX_GZIP_BLOCK_SIZE = (1 << 16);
  */
 async function loadBamIndex(indexURL, config, tabix, genome) {
 
-    let arrayBuffer = await igv.xhr.loadArrayBuffer(indexURL, igv.buildOptions(config))
+    let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, igv.buildOptions(config))
 
     var indices = [],
         magic, nbin, nintv, nref, parser,
@@ -33,7 +36,7 @@ async function loadBamIndex(indexURL, config, tabix, genome) {
         arrayBuffer = inflate.decompress().buffer;
     }
 
-    parser = new igv.BinaryParser(new DataView(arrayBuffer));
+    parser = new BinaryParser(new DataView(arrayBuffer));
 
     magic = parser.getInt();
 

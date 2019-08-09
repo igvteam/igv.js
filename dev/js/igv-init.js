@@ -24,9 +24,11 @@ import ig from "../../js/igv-create.js";
 //         return browser;
 //     })
 
-let browser;
+import google from "../../js/google/googleUtils";
+import igvxhr from "../../js/igvxhr";
 
-igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+let browser;
+google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
     .then(function (google) {
 
@@ -45,7 +47,7 @@ igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client
             .then(function (b) {
                 browser = b;
 
-                igvdev.createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
+                createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
                 // let str = "i do realize this is an extremely long string for an alert message but simply must get to the bottom of this tiresome bug. Thank your for bearing with me.";
                 // let url = 'https://longurlmaker.com/go?id=EXLVPCEEVMCJMZAHPCWLLUKQSDBNNSRSQDOGFTLAFNJRMJZCMVNYQXOIAQWOJOHZRVFXOQYTEHLRRKTEFGDVDSEEIBTRPARGVWDJNBDSJOJBYDGEJKANCFSKGLCVMTCHQFREHUWRIFTHIAMSKNGMSYXZKZUWTWEKCVOKPKCYPVGYWTRGHXTZWRYGRTCKPHUSCICSSFRIAYHXRYEYVXYROXYGQBQGILYKUBDMGUVHSCEKAJIWGHOVENBUOSBXDAHXBLKIFGQYIVIJERFLYUGCHIXVBZSFZACBMNJRTZPBUYLYPQKNLQQSZOOANHFMIINUWXLPWBRRACQPTADFRUXRIMSVTYIBHWWDTISQKKIKNZAHZDMRYJJGWBCPZKRHHNKAVDRFOZPBYQIYTUQREZYABAQBLHISVSTRWLWKKMLJCUIWOYOTYMUZNKAZSISOBMFXXCHIOTRRNANCYCVWPQWCBWCUFUIGHODEQLMFEEWSEKUDMQABGWEITHCYBLEIZINQTZVYERQJCLNPBNRIKVQDCTCEEGNEPAUIAPHFHXOJIBZKPQSAMJDOCGTHMGLCHGKIVRNDPCNYDMITCBTOKXDNDWVQDGSLMDTIVHLKJYJNLRGNSZBDWFRACMQFTIRFLKOHSARBZAOKSUXLUZOQEFQGRHMKPEQBOFIHFAIEBWOURMFLLUBQASXRZKCPOTRDZAKEBSJDPXXGKCRVXTMXMKPLUSBJLSNLSXPUQZXFXUMHXDDUXPRJAGVVYWEKORVHPLBFKYLHTXPQBSLZICIIJDDIZISOZOWOAYULXFSQDIHFASEIVMQEQUMQCFFCTBRTZLEXRXNVGVAGOFOJSFOIABYCGEFAFWUFHZCZXQUDMVJAAYJSEYBFZAIFENGJJAPRASQXILBVHKVIJFAODBTCCBIGOOPYPFPPXGNGSOBZZXHJCIXFKRHMTPSIEIGTOWJLDWSVKUVJRDSTMQYWHFJBVCJZKPTZMCKPYDKIXGSOJLIVBGSJMCKHEUHPKAOWDZLBCWKZCDOMOWIQDAAPDLXHFFWPGKMJJXLMTVMWZAIOXQEARFQURNCWSZMYJYITWTGPPSMOTUCQLHRDMHYDUAANZNMJLUDHNJXCCKQVETLQADTNKSQFTRSTEECPYGXMQVPSFFNKZZAZCUMNNDSGULZYPCOOILAZHPRMVFXUFYUITGVGJOMDZMCOOQDXCEWJUOWPUTKZRFIKLDRVSDZRQBGERJCTOZDIOZYISJHKOPVATMVMQVDGWKLOUOIINLQBLPJEYROMHKNBWINNDRTABFPVTXEHJUIVKSZIKOVSYITVRHIVYCVAILVBJAITVROFJOOUCKMBTGXKNGGMICMRNISWIBPDTEJDSXXVHJXAPVLDBSPKUCBHKUETVUXOZGRRDPNLYLMOGYSHQHRKKTSUNXOJRLXQRPIVEWGDHTSNRKVHRNSBGKWTILDZXBQOQZKVVRYCKRPCBLJTYCVENSYVDBVACLPTKZPFROIBFYEGJNZHQUMDMKYQMTQPFFIQFYWWMEYRDCYMQXUGSGJFQIVDCLSHRBXWZUTMYRDBTCOKZIQSPAXGISJLDCSVDQRDKKPJCTLWVZGVIWNXXKDGCNRGPJBSATWLELUGEGCAGIVOFJMCTQIWDZDSJFLKYHVCSQIXWLYCTTRYCEBWUKTXKWQUBBEAIACBQLYNWWQPQIOTMQQGAJELFUFHWKHEKKFBVEORBFHRNWLZNBGOKLZQGFYCPGGAQMCMQQESWLKJIVIVXPJHAIYGOXIDDPEUCGGTXKLTWVCERLZOAJWBRVIFSRJWGNQJUWCRHOKDKNIBYIPZRMBJHJPZAYVHMMQGJTYQHIURVCSULITCUVLBEBBEAXLMJBTSURJCAETWHMQSVKVPFGRJISOIQZUZBOSWGCYHGSDOEUGZECPKJGURZIZPIUPJIIGPLEWSXAGCUNCZPRJYYDPYMOOUIDDRMKHXOEPMEVOZJQYYHHWGLMEXBSSKWWBIGJFVNUHSQVRZLQYTYVZJHDHIWZSSWUACEGXSBEKRZCRKSPEQKDASG';
                 // browser.presentAlert(url);
@@ -53,6 +55,63 @@ igv.google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client
             })
 
     })
+
+
+function createTrackList(div, file, browser) {
+
+
+    return igvxhr.loadJson(file)
+
+        .then(function (tracks) {
+
+            tracks.forEach(function (track) {
+
+                var trackDiv, name;
+
+                if (track.HEADING) {
+                    div.insertAdjacentHTML("beforeend",
+                        "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
+                        + track.HEADING + "</div>");
+                } else {
+                    trackDiv = document.createElement('div');
+                    trackDiv.innerHTML = track.name;
+                    trackDiv.addEventListener('click', function (event) {
+
+                        // Convert to json to insure we can load json representations (not strictly neccessary).
+                        var json = JSON.stringify(track);
+
+                        browser.loadTrack(json);
+                    });
+
+                    div.appendChild(trackDiv);
+                }
+
+            })
+
+            return igv.GtexUtils.getTissueInfo("gtex_v7")
+        })
+
+        .then(function (json) {
+
+            div.insertAdjacentHTML("beforeend",
+                "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
+
+            json['tissueInfo'].forEach(function (obj) {
+
+                let trackDiv = document.createElement('div');
+                trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
+                trackDiv.addEventListener('click', function (event) {
+
+                    browser.loadTrack(igv.GtexUtils.trackConfiguration(obj));
+
+                });
+
+                div.appendChild(trackDiv)
+
+            })
+        });
+
+}
 
 function bookmark() {
     window.history.pushState({}, "IGV", browser.sessionURL());

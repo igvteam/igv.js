@@ -26,6 +26,7 @@
 
 import FeatureSource from '../feature/featureSource';
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
@@ -164,12 +165,12 @@ VariantTrack.prototype.draw = function (options) {
     const bpPerPixel = options.bpPerPixel
     const bpStart = options.bpStart
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-    igv.graphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
 
     if (callSets && nCalls > 0 && "COLLAPSED" !== this.displayMode) {
-        igv.graphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
+        IGVGraphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
     }
 
     const featureList = options.features
@@ -247,6 +248,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
     const genomicLocation = clickState.genomicLocation
     const genomeID = this.browser.genome.id
     const popupData = []
+    const browser = this.browser.sampleInformation;
 
     for (let variant of featureList) {
 
@@ -274,7 +276,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
                     if (row >= 0 && row < callSets.length) {
                         const cs = callSets[row];
                         const call = variant.calls[cs.id];
-                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
+                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
                     }
                 }
             }
@@ -292,7 +294,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
  * @param variant
  * @returns {Array}
  */
-function extractGenotypePopupData(call, variant, genomeId) {
+function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
 
     var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
     let cravatLinks = [];
@@ -326,13 +328,15 @@ function extractGenotypePopupData(call, variant, genomeId) {
         popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
     }
 
-    var attr = igv.sampleInformation.getAttributes(call.callSetName);
-    if (attr) {
-        Object.keys(attr).forEach(function (attrName) {
-            var displayText = attrName.replace(/([A-Z])/g, " $1");
-            displayText = displayText.charAt(0).toUpperCase() + displayText.slice(1);
-            popupData.push({name: displayText, value: attr[attrName]});
-        });
+    if(sampleInformation) {
+        var attr = sampleInformation.getAttributes(call.callSetName);
+        if (attr) {
+            Object.keys(attr).forEach(function (attrName) {
+                var displayText = attrName.replace(/([A-Z])/g, " $1");
+                displayText = displayText.charAt(0).toUpperCase() + displayText.slice(1);
+                popupData.push({name: displayText, value: attr[attrName]});
+            });
+        }
     }
 
     var infoKeys = Object.keys(call.info);

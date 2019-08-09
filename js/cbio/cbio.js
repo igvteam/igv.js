@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import igvxhr from "../igvxhr";
 
 var igv = (function (igv) {
 
@@ -36,7 +36,7 @@ var igv = (function (igv) {
             baseURL = baseURL || "http://www.cbioportal.org/api";
 
             let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
-            return igv.xhr.loadJson(url);
+            return igvxhr.loadJson(url);
         },
 
         fetchSamplesByStudy: function (study, baseURL) {
@@ -45,7 +45,7 @@ var igv = (function (igv) {
 
             let url = baseURL + "/studies/" + study.studyId + "/samples";
 
-            return igv.xhr.loadJson(url)
+            return igvxhr.loadJson(url)
 
                 .then(function (samples) {
 
@@ -75,7 +75,7 @@ var igv = (function (igv) {
                     let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
                     let body = JSON.stringify(sampleStudyList);
 
-                    return igv.xhr.loadJson(url, {method: "POST", sendData: body})
+                    return igvxhr.loadJson(url, {method: "POST", sendData: body})
 
                 })
         },

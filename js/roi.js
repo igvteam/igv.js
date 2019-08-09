@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 import FeatureSource from './feature/featureSource'
+import IGVGraphics from "./igv-canvas";
 
 var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 
@@ -65,7 +66,7 @@ ROI.prototype.draw = function (drawConfiguration) {
         }
 
         coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-        igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+        IGVGraphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
     }
 
 

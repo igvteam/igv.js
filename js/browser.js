@@ -30,8 +30,13 @@ import TrackFactory from "./trackFactory";
 import ROI from "./roi";
 import GtexSelection from "./gtex/gtex";
 import XMLSession from "./session/igvXmlSession";
-
-"use strict";
+import RulerTrack from "./rulerTrack";
+import GenomeUtils from "./genome/genome";
+import loadPlinkFile from "./sampleInformation";
+import IdeoPanel from "./ideogram";
+import ReferenceFrame from "./referenceFrame";
+import WindowSizePanel from "./windowSizePanel";
+import igvxhr from "./igvxhr";
 
 const Browser = function (options, trackContainerDiv) {
     let str;
@@ -281,15 +286,15 @@ Browser.prototype.loadSession = async function (options) {
 
             if (filename.endsWith(".xml")) {
 
-                const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
+                const knownGenomes = await GenomeUtils.getKnownGenomes()
 
-                const string = await igv.xhr.loadString(urlOrFile)
+                const string = await igvxhr.loadString(urlOrFile)
 
                 return new XMLSession(string, knownGenomes);
 
 
             } else if (filename.endsWith(".json")) {
-                return igv.xhr.loadJson(urlOrFile);
+                return igvxhr.loadJson(urlOrFile);
             } else {
                 return undefined;
             }
@@ -342,7 +347,7 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     if (false !== session.showIdeogram && !self.ideoPanel) {
         panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
-        self.ideoPanel = new igv.IdeoPanel(self.$contentHeader, panelWidth, self);
+        self.ideoPanel = new IdeoPanel(self.$contentHeader, panelWidth, self);
         self.ideoPanel.repaint();
     }
 
@@ -370,7 +375,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
     }
 
     const genomeConfig = await expandReference(idOrConfig)
-    const genome = await igv.GenomeUtils.loadGenome(genomeConfig)
+    const genome = await GenomeUtils.loadGenome(genomeConfig)
     const genomeChange = self.genome && (self.genome.id !== genome.id);
     self.genome = genome;
     self.$current_genome.text(genome.id || '');
@@ -392,7 +397,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
     self.genomicStateList = genomicStateList;
     if (self.genomicStateList.length > 0) {
         if (!self.rulerTrack && false !== self.config.showRuler) {
-            self.rulerTrack = new igv.RulerTrack(self);
+            self.rulerTrack = new RulerTrack(self);
             self.addTrack(self.rulerTrack);
         }
     } else {
@@ -423,7 +428,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
         }
 
         if (genomeID) {
-            const knownGenomes = await igv.GenomeUtils.getKnownGenomes()
+            const knownGenomes = await GenomeUtils.getKnownGenomes()
 
             var reference = knownGenomes[genomeID];
             if (!reference) {
@@ -649,7 +654,7 @@ Browser.prototype.loadTrack = async function (config) {
 
         if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
-            const json = await igv.google.getDriveFileInfo(config.url)
+            const json = await google.getDriveFileInfo(config.url)
 
             config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
             if (!config.filename) {
@@ -659,7 +664,7 @@ Browser.prototype.loadTrack = async function (config) {
                 config.format = igv.inferFileFormat(config.filename);
             }
             if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                config.indexURL = igv.google.driveDownloadURL(config.indexURL);
+                config.indexURL = google.driveDownloadURL(config.indexURL);
             }
 
             return config;
@@ -1248,7 +1253,7 @@ Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genom
         ss = alignmentCC - (bpp * (pixels / 2));
         ee = ss + (bpp * pixels);
 
-        return new igv.ReferenceFrame(genome, chromosomeName, ss, ee, bpp);
+        return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp);
     }
 
 };
@@ -1298,7 +1303,7 @@ Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState
         const ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
         const bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
 
-        self.genomicStateList[i].referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
+        self.genomicStateList[i].referenceFrame = new ReferenceFrame(genome, gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
     });
 
     this.updateUIWithGenomicStateListChange(this.genomicStateList);
@@ -1521,7 +1526,7 @@ Browser.prototype.search = async function (string, init) {
         function appendReferenceFrames(genomicStateList) {
             const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
             genomicStateList.forEach(function (gs) {
-                gs.referenceFrame = new igv.ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
+                gs.referenceFrame = new ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
             });
             return genomicStateList;
         }
@@ -1531,7 +1536,7 @@ Browser.prototype.search = async function (string, init) {
             if (path.indexOf("$GENOME$") > -1) {
                 path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
             }
-            const result = await igv.xhr.loadString(path)
+            const result = await igvxhr.loadString(path)
             return {
                 result: result,
                 locusSearchString: locus
@@ -1707,14 +1712,14 @@ Browser.prototype.search = async function (string, init) {
     }
 };
 
-Browser.prototype.loadSampleInformation = function (url) {
+Browser.prototype.loadSampleInformation = async function (url) {
     var name = url;
     if (url instanceof File) {
         name = url.name;
     }
     var ext = name.substr(name.lastIndexOf('.') + 1);
     if (ext === 'fam') {
-        igv.sampleInformation.loadPlinkFile(url);
+        this.sampleInformation = await loadPlinkFile(url);
     }
 };
 

@@ -23,6 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import igvxhr from "../igvxhr";
 
 const CustomServiceReader = function (config) {
 
@@ -53,7 +54,7 @@ CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
         }
     }
 
-    return igv.xhr.load(url, self.config)
+    return igvxhr.load(url, self.config)
 
         .then(function (data) {
 

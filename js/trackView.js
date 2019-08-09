@@ -25,6 +25,10 @@
 
 import ViewPort from "./viewport.js";
 import FeatureUtils from "./feature/featureUtils";
+import RulerTrack from "./rulerTrack";
+import TrackGearPopover from "./ui/trackGearPopover";
+import GenericContainer from "./ui/genericContainer";
+import IGVColor from "./igv-color";
 
 var dragged,
     dragDestination;
@@ -48,7 +52,7 @@ const TrackView = function (browser, $container, track) {
     guid = igv.guid();
     this.namespace = '.trackview_' + guid;
 
-    if (this.track instanceof igv.RulerTrack) {
+    if (this.track instanceof RulerTrack) {
         this.trackDiv.dataset.rulerTrack = "rulerTrack";
     }
 
@@ -83,7 +87,7 @@ const TrackView = function (browser, $container, track) {
         igv.appendRightHandGutter.call(this, $(this.trackDiv));
     }
 
-    if (this.track instanceof igv.RulerTrack) {
+    if (this.track instanceof RulerTrack) {
         // do nuthin
     } else {
         attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
@@ -91,7 +95,7 @@ const TrackView = function (browser, $container, track) {
 
     if ("sequence" === this.track.type) {
         // do nothing
-    } else if (this.track instanceof igv.RulerTrack) {
+    } else if (this.track instanceof RulerTrack) {
         // do nothing
     } else {
         this.createColorPicker();
@@ -205,7 +209,7 @@ igv.createTrackGearPopover = function ($parent) {
 
     $cogContainer.append(igv.createIcon('cog'));
 
-    this.trackGearPopover = new igv.TrackGearPopover($parent);
+    this.trackGearPopover = new TrackGearPopover($parent);
     this.trackGearPopover.$popover.hide();
 
     let self = this;
@@ -330,7 +334,7 @@ TrackView.prototype.createColorPicker = function () {
             }
         };
 
-    this.colorPicker = new igv.genericContainer(config);
+    this.colorPicker = new GenericContainer(config);
 
     igv.createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
 
@@ -659,7 +663,7 @@ igv.createColorSwatchSelector = function ($genericContainer, colorHandler, defau
         appleColors.splice(11, 1);
 
         // Add default color.
-        appleColors.unshift(igv.Color.rgbToHex(defaultColor));
+        appleColors.unshift(IGVColor.rgbToHex(defaultColor));
     }
 
     for (let color of appleColors) {

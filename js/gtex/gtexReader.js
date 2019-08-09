@@ -23,10 +23,8 @@
  * THE SOFTWARE.
  */
 
-/**
- * @param url - url to the webservice
- * @constructor
- */
+import igvxhr from "../igvxhr";
+
 const GtexReader = function (config) {
 
     this.config = config;
@@ -78,7 +76,7 @@ GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
     return new Promise(function (fulfill, reject) {
 
-        igv.xhr.loadJson(queryURL, {
+        igvxhr.loadJson(queryURL, {
             withCredentials: self.config.withCredentials
         }).then(function (json) {
 

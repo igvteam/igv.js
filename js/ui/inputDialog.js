@@ -23,111 +23,108 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import makeDraggable from "./draggable";
 
-var igv = (function (igv) {
+const InputDialog = function ($parent, browser) {
+    var self = this,
+        $header,
+        $buttons;
 
-    igv.InputDialog = function ($parent, browser) {
-        var self = this,
-            $header,
-            $buttons;
+    this.browser = browser;
 
-        this.browser = browser;
+    // dialog container
+    this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
+    $parent.append(this.$container);
+    this.$container.offset({left: 0, top: 0});
 
-        // dialog container
-        this.$container = $("<div>", { class:'igv-generic-dialog-container' });
-        $parent.append(this.$container);
-        this.$container.offset( { left:0, top:0 } );
+    // dialog header
+    $header = $("<div>", {class: 'igv-generic-dialog-header'});
+    this.$container.append($header);
+    igv.attachDialogCloseHandlerWithParent($header, function () {
+        self.$input.val(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-        // dialog header
-        $header = $("<div>", { class:'igv-generic-dialog-header' });
-        this.$container.append($header);
-        igv.attachDialogCloseHandlerWithParent($header, function () {
-            self.$input.val(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+    // dialog label
+    this.$label = $("<div>", {class: 'igv-generic-dialog-one-liner'});
+    this.$container.append(this.$label);
+    this.$label.text('Unlabeled');
 
-        // dialog label
-        this.$label = $("<div>", { class:'igv-generic-dialog-one-liner'});
-        this.$container.append(this.$label);
-        this.$label.text('Unlabeled');
-
-        // input container
-        this.$input_container = $("<div>", { class:'igv-generic-dialog-input'});
-        this.$container.append(this.$input_container);
-        //
-        this.$input = $("<input>");
-        this.$input_container.append(this.$input);
+    // input container
+    this.$input_container = $("<div>", {class: 'igv-generic-dialog-input'});
+    this.$container.append(this.$input_container);
+    //
+    this.$input = $("<input>");
+    this.$input_container.append(this.$input);
 
 
-        // ok | cancel
-        $buttons = $("<div>", { class:'igv-generic-dialog-ok-cancel' });
-        this.$container.append($buttons);
+    // ok | cancel
+    $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
+    this.$container.append($buttons);
 
-        // ok
-        this.$ok = $("<div>");
-        $buttons.append(this.$ok);
-        this.$ok.text('OK');
+    // ok
+    this.$ok = $("<div>");
+    $buttons.append(this.$ok);
+    this.$ok.text('OK');
 
-        // cancel
-        this.$cancel = $("<div>");
-        $buttons.append(this.$cancel);
-        this.$cancel.text('Cancel');
+    // cancel
+    this.$cancel = $("<div>");
+    $buttons.append(this.$cancel);
+    this.$cancel.text('Cancel');
 
-        this.$cancel.on('click', function () {
-            self.$input.val(undefined);
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+    this.$cancel.on('click', function () {
+        self.$input.val(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-        //this.$container.draggable({ handle:$header.get(0) });
-        igv.makeDraggable(this.$container.get(0), $header.get(0));
+    //this.$container.draggable({ handle:$header.get(0) });
+    makeDraggable(this.$container.get(0), $header.get(0));
 
-        this.$container.hide();
-    };
+    this.$container.hide();
+};
 
-    igv.InputDialog.prototype.configure = function (config) {
+InputDialog.prototype.configure = function (config) {
 
-        var self = this;
+    var self = this;
 
-        this.$label.text(config.label);
-        
-        this.$input.val(config.input);
+    this.$label.text(config.label);
 
-        this.$input.unbind();
-        this.$input.on('keyup', function (e) {
-            if (13 === e.keyCode) {
-                config.click();
-                self.$input.val(undefined);
-                self.$container.offset( { left:0, top:0 } );
-                self.$container.hide();
-            }
-        });
+    this.$input.val(config.input);
 
-        this.$ok.unbind();
-        this.$ok.on('click', function () {
-
+    this.$input.unbind();
+    this.$input.on('keyup', function (e) {
+        if (13 === e.keyCode) {
             config.click();
-
             self.$input.val(undefined);
-            self.$container.offset( { left:0, top:0 } );
+            self.$container.offset({left: 0, top: 0});
             self.$container.hide();
-        });
+        }
+    });
 
-    };
+    this.$ok.unbind();
+    this.$ok.on('click', function () {
 
-    igv.InputDialog.prototype.present = function ($parent) {
+        config.click();
 
-        var offset_top,
-            scroll_top;
+        self.$input.val(undefined);
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-        offset_top = $parent.offset().top;
-        scroll_top = $('body').scrollTop();
+};
 
-        this.$container.offset( { left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top) } );
-        this.$container.show();
-    };
+InputDialog.prototype.present = function ($parent) {
 
-    return igv;
+    var offset_top,
+        scroll_top;
 
-})(igv || {});
+    offset_top = $parent.offset().top;
+    scroll_top = $('body').scrollTop();
+
+    this.$container.offset({left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top)});
+    this.$container.show();
+};
+
+export default InputDialog;

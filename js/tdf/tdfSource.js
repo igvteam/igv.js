@@ -29,6 +29,7 @@
  */
 
 import TDFReader from "./tdfReader";
+import GenomicInterval from "../genome/genomicInterval";
 
 const TDFSource = function (config, genome) {
 
@@ -40,7 +41,7 @@ const TDFSource = function (config, genome) {
 TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
     const self = this;
-    const genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+    const genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
     const genome = this.genome;
 
     if (chr.toLowerCase() === "all") {

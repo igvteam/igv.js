@@ -23,28 +23,24 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+const WindowSizePanel = function ($parent, browser) {
 
-    igv.WindowSizePanel = function ($parent, browser) {
+    this.$content = $('<div class="igv-windowsizepanel-content-div">');
+    $parent.append(this.$content);
+    this.browser = browser;
 
-        this.$content = $('<div class="igv-windowsizepanel-content-div">');
-        $parent.append(this.$content);
-        this.browser = browser;
+};
 
-    };
+WindowSizePanel.prototype.show = function () {
+    this.$content.show();
+};
 
-    igv.WindowSizePanel.prototype.show = function () {
-        this.$content.show();
-    };
+WindowSizePanel.prototype.hide = function () {
+    this.$content.hide();
+};
 
-    igv.WindowSizePanel.prototype.hide = function () {
-        this.$content.hide();
-    };
+WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
+    this.$content.text(igv.prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+};
 
-    igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-        this.$content.text( igv.prettyBasePairNumber(Math.round( this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
-    };
-
-    return igv;
-})
-(igv || {});
+export default WindowSizePanel;

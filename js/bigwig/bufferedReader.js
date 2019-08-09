@@ -23,15 +23,9 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 4/7/14.
- */
+import igvxhr from "../igvxhr";
 
-
-var igv = (function (igv) {
-
-
-    igv.BufferedReader = function (config, contentLength, bufferSize) {
+const BufferedReader = function (config, contentLength, bufferSize) {
         this.path = config.url;
         this.bufferSize = bufferSize ? bufferSize : 512000;
         this.range = {start: -1, size: -1};
@@ -44,7 +38,7 @@ var igv = (function (igv) {
      * @param fulfill - function to receive result
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
-    igv.BufferedReader.prototype.dataViewForRange = function (requestedRange, asUint8) {
+    BufferedReader.prototype.dataViewForRange = function (requestedRange, asUint8) {
 
         var self = this;
 
@@ -68,7 +62,7 @@ var igv = (function (igv) {
             loadRange = {start: requestedRange.start, size: bufferSize};
 
 
-            return igv.xhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
+            return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
                 .then(function (arrayBuffer) {
                     self.data = arrayBuffer;
                     self.range = loadRange;
@@ -90,7 +84,4 @@ var igv = (function (igv) {
 
     }
 
-
-    return igv;
-
-})(igv || {});
+export default BufferedReader;

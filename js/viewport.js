@@ -2,9 +2,8 @@
  * Created by dat on 9/16/16.
  */
 import C2S from "./canvas2svg.js";
-
-"use strict";
-
+import Popover from "./ui/popover";
+import RulerSweeper from "./rulerSweeper";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -47,7 +46,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
 
     if ('ruler' === trackView.track.type) {
 
-        this.rulerSweeper = new igv.RulerSweeper(this);
+        this.rulerSweeper = new RulerSweeper(this);
 
         trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
 
@@ -80,7 +79,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
 
         if ("sequence" !== trackView.track.type) {
 
-            this.popover = new igv.Popover(self.browser.$content);
+            this.popover = new Popover(self.browser.$content);
 
             let str = trackView.track.name.toLowerCase().split(' ').join('_');
             str = str + '_' + this.browser.genomicStateList.indexOf(this.genomicState);

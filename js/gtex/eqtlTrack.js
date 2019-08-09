@@ -25,6 +25,8 @@
 
 import FeatureSource from '../feature/featureSource';
 import TrackBase from "../trackBase";
+import IGVGraphics from "../igv-canvas";
+import IGVMath from "../igv-math";
 
 const EqtlTrack = igv.extend(TrackBase,
 
@@ -82,7 +84,7 @@ EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
         'strokeStyle': "black"
     };
 
-    igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     // Determine a tick spacing such that there is at least 10 pixels between ticks
 
@@ -105,16 +107,16 @@ EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
         y1 = y2 = pixelHeight - Math.round((p - track.dataRange.min) / yScale);
 
-        igv.graphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
+        IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
 
         if (y1 > 8) {
-            igv.graphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
+            IGVGraphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
         } // Offset numbers down by 2 pixels;
     }
 
     font['textAlign'] = 'center';
 
-    igv.graphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 4, pixelHeight / 2, font, {rotate: {angle: -90}});
+    IGVGraphics.fillText(ctx, "-log10(pvalue)", pixelWidth / 4, pixelHeight / 2, font, {rotate: {angle: -90}});
 
 };
 
@@ -145,8 +147,8 @@ EqtlTrack.prototype.draw = function (options) {
         selection = options.genomicState.selection;
 
     // Background
-    if (this.background) igv.graphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
-    igv.graphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
+    if (this.background) IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+    IGVGraphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
     if (ctx) {
 
@@ -215,14 +217,14 @@ EqtlTrack.prototype.draw = function (options) {
 
                     if (drawSelected && selection) {
                         color = selection.colorForGene(geneName);
-                        igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
+                        IGVGraphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
                     } else {
                         color = capped ? "rgb(150, 150, 150)" : "rgb(180, 180, 180)";
-                        igv.graphics.setProperties(ctx, {fillStyle: color, strokeStyle: color});
+                        IGVGraphics.setProperties(ctx, {fillStyle: color, strokeStyle: color});
                     }
 
-                    igv.graphics.fillCircle(ctx, px, py, radius);
-                    igv.graphics.strokeCircle(ctx, px, py, radius);
+                    IGVGraphics.fillCircle(ctx, px, py, radius);
+                    IGVGraphics.strokeCircle(ctx, px, py, radius);
                 }
             }
         }
@@ -311,7 +313,7 @@ EqtlTrack.prototype.doAutoscale = function (featureList) {
                 return -Math.log(eqtl.value) / Math.LN10
             });
 
-        this.dataRange.max = igv.Math.percentile(values, this.autoscalePercentile);
+        this.dataRange.max = IGVMath.percentile(values, this.autoscalePercentile);
     } else {
         // No features -- default
         const max = this.config.maxLogP || this.config.max;

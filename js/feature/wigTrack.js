@@ -26,6 +26,10 @@
 import FeatureSource from './featureSource';
 import TDFSource from "../tdf/tdfSource";
 import TrackBase from "../trackBase";
+import BWSource from "../bigwig/bwSource";
+import IGVGraphics from "../igv-canvas";
+import paintAxis from "../util/paintAxis";
+import IGVColor from "../igv-color";
 
 const WigTrack = igv.extend(TrackBase,
 
@@ -48,7 +52,7 @@ const WigTrack = igv.extend(TrackBase,
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
-            this.featureSource = new igv.BWSource(config, browser.genome);
+            this.featureSource = new BWSource(config, browser.genome);
         } else if ("tdf" === format) {
             this.featureSource = new TDFSource(config, browser.genome);
         } else {
@@ -64,7 +68,7 @@ const WigTrack = igv.extend(TrackBase,
         }
 
         this.windowFunction = config.windowFunction || "mean";
-        this.paintAxis = igv.paintAxis;
+        this.paintAxis = paintAxis;
         this.graphType = config.graphType || "bar";
 
     });
@@ -135,7 +139,7 @@ WigTrack.prototype.draw = function (options) {
 
     let baselineColor;
     if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
-        baselineColor = igv.Color.addAlpha(self.color, 0.1);
+        baselineColor = IGVColor.addAlpha(self.color, 0.1);
     }
 
     if (features && features.length > 0) {
@@ -159,7 +163,7 @@ WigTrack.prototype.draw = function (options) {
             // If the track includes negative values draw a baseline
             if (featureValueMinimum < 0) {
                 const basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
-                igv.graphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+                IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
             }
         }
     }
@@ -199,13 +203,13 @@ WigTrack.prototype.draw = function (options) {
             if (isNaN(x)) {
                 console.log('isNaN(x). feature start ' + igv.numberFormatter(feature.start) + ' bp start ' + igv.numberFormatter(bpStart));
             } else {
-                igv.graphics.fillCircle(ctx, px, py, pointSize / 2);
+                IGVGraphics.fillCircle(ctx, px, py, pointSize / 2);
             }
 
         } else {
             // Draw optimization important for many points -- don't draw if the peak will be occluded by previously drawn features
             if (x > lastXPixel || ((feature.value > 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue))) {
-                igv.graphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+                IGVGraphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
                 lastXPixel = x;
                 if (feature.value > 0) {
                     lastValue = feature.value;

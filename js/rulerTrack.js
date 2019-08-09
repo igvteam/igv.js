@@ -23,264 +23,262 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+import IGVGraphics from "./igv-canvas";
+import IGVColor from "./igv-color";
 
-    "use strict";
+const RulerTrack = function (browser) {
 
-    igv.RulerTrack = function (browser) {
+    this.browser = browser;
+    this.height = 40;
+    this.name = "";
+    this.id = "ruler";
+    this.disableButtons = true;
+    this.ignoreTrackMenu = true;
+    this.order = -Number.MAX_VALUE;
+    this.removable = false;
+    this.type = 'ruler';
 
-        this.browser = browser;
-        this.height = 40;
-        this.name = "";
-        this.id = "ruler";
-        this.disableButtons = true;
-        this.ignoreTrackMenu = true;
-        this.order = -Number.MAX_VALUE;
-        this.removable = false;
-        this.type = 'ruler';
+};
 
-    };
+RulerTrack.prototype.updateLocusLabel = function () {
+    var self = this;
 
-    igv.RulerTrack.prototype.updateLocusLabel = function () {
-        var self = this;
+    this.trackView.viewports.forEach(function (viewport) {
+        var str;
+        str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
 
-        this.trackView.viewports.forEach(function (viewport) {
-            var str;
-            str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
+        // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
+        viewport.$rulerLabel.text(str);
+    });
 
-            // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
-            viewport.$rulerLabel.text(str);
-        });
+};
 
-    };
+RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
 
-    igv.RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+    const browser = this.browser;
 
-        const browser = this.browser;
+    var $close,
+        $closeButton;
 
-        var $close,
-            $closeButton;
+    $viewport.addClass('igv-viewport-ruler');
 
-        $viewport.addClass('igv-viewport-ruler');
+    $close = $('<div class="igv-multi-locus-panel-close-container">');
+    $viewport.append($close);
 
-        $close = $('<div class="igv-multi-locus-panel-close-container">');
-        $viewport.append($close);
+    $close.append(igv.createIcon("times-circle"));
 
-        $close.append(igv.createIcon("times-circle"));
+    $close.click(function (e) {
+        browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
+    });
 
-        $close.click(function (e) {
-            browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
-        });
+};
 
-    };
+RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
-    igv.RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    return Promise.resolve([]);
 
-        return Promise.resolve([]);
+};
 
-    };
+RulerTrack.prototype.computePixelHeight = function (ignore) {
+    return this.height;
+};
 
-    igv.RulerTrack.prototype.computePixelHeight = function (ignore) {
-        return this.height;
-    };
+RulerTrack.prototype.draw = function (options) {
 
-    igv.RulerTrack.prototype.draw = function (options) {
+    if (igv.isWholeGenomeView(options.referenceFrame)) {
 
-        if (igv.isWholeGenomeView(options.referenceFrame)) {
+        options.viewport.rulerSweeper.disableMouseHandlers();
 
-            options.viewport.rulerSweeper.disableMouseHandlers();
+        drawWholeGenome.call(this, options);
 
-            drawWholeGenome.call(this, options);
+    } else {
 
+        options.viewport.rulerSweeper.addMouseHandlers();
+
+        const tickHeight = 6;
+        const shim = 2;
+        const pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
+        const tick = new Tick(pixelWidthBP, options);
+
+        tick.drawTicks(options, tickHeight, shim, this.height);
+        IGVGraphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
+
+    }
+
+};
+
+function drawWholeGenome(options) {
+
+    options.context.save();
+
+    IGVGraphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, {'fillStyle': 'white'});
+
+    let y = 0;
+    let h = options.pixelHeight;
+
+    for (let name of this.browser.genome.wgChromosomeNames) {
+
+        let xBP = this.browser.genome.getCumulativeOffset(name);
+        let wBP = this.browser.genome.getChromosome(name).bpLength;
+
+        let x = Math.round(xBP / options.bpPerPixel);
+        let w = Math.round(wBP / options.bpPerPixel);
+
+        renderChromosomeRect.call(this, options.context, x, y, w, h, name);
+    }
+
+    options.context.restore();
+
+}
+
+function renderChromosomeRect(ctx, x, y, w, h, name) {
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.font = '12px sans-serif';
+
+    // IGVGraphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
+
+    IGVGraphics.strokeLine(ctx, x + w, y, x + w, y + h, {strokeStyle: IGVColor.greyScale(191)});
+
+    const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
+
+    if (w > ctx.measureText(shortName).width) {
+        IGVGraphics.fillText(ctx, shortName, (x + (w / 2)), (y + (h / 2)), {fillStyle: IGVColor.greyScale(68)});
+    }
+
+}
+
+function toggleColor(value) {
+    return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
+}
+
+RulerTrack.prototype.supportsWholeGenome = function () {
+    return true;
+};
+
+RulerTrack.prototype.dispose = function () {
+    // do stuff
+};
+
+const Tick = function (pixelWidthBP, options) {
+
+    initialize.call(this, pixelWidthBP, options);
+
+    function initialize(pixelWidthBP, options) {
+
+        var numberOfZeroes,
+            majorUnit,
+            unitMultiplier,
+            numberOfMajorTicks,
+            str;
+
+        const isSVGContext = options.context.isSVG || false;
+
+        if (pixelWidthBP < 10) {
+            set.call(this, 1, "bp", 1, isSVGContext);
+        }
+
+        numberOfZeroes = Math.floor(Math.log10(pixelWidthBP));
+
+        if (numberOfZeroes > 9) {
+            majorUnit = "gb";
+            unitMultiplier = 1e9;
+        } else if (numberOfZeroes > 6) {
+            majorUnit = "mb";
+            unitMultiplier = 1e6;
+        } else if (numberOfZeroes > 3) {
+            majorUnit = "kb";
+            unitMultiplier = 1e3;
         } else {
-
-            options.viewport.rulerSweeper.addMouseHandlers();
-
-            const tickHeight = 6;
-            const shim = 2;
-            const pixelWidthBP = 1 + Math.floor(options.referenceFrame.toBP(options.pixelWidth));
-            const tick = new Tick(pixelWidthBP, options);
-
-            tick.drawTicks(options, tickHeight, shim, this.height);
-            igv.graphics.strokeLine(options.context, 0, this.height - shim, options.pixelWidth, this.height - shim);
-
+            majorUnit = "bp";
+            unitMultiplier = 1;
         }
 
-    };
+        str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
+        this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
 
-    function drawWholeGenome(options) {
+        numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
 
-        options.context.save();
-
-        igv.graphics.fillRect(options.context, 0, 0, options.pixelWidth, options.pixelHeight, { 'fillStyle' : 'white' });
-
-        let y = 0;
-        let h = options.pixelHeight;
-
-        for (let name of this.browser.genome.wgChromosomeNames) {
-
-            let xBP = this.browser.genome.getCumulativeOffset(name);
-            let wBP = this.browser.genome.getChromosome(name).bpLength;
-
-            let x = Math.round(xBP / options.bpPerPixel);
-            let w = Math.round(wBP / options.bpPerPixel);
-
-            renderChromosomeRect.call(this, options.context, x, y, w, h, name);
-        }
-
-        options.context.restore();
-
-    }
-
-    function renderChromosomeRect(ctx, x, y, w, h, name) {
-
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.font = '12px sans-serif';
-
-        // igv.graphics.fillRect(ctx, x, y, w, h, { 'fillStyle' : toggleColor(this.browser.genome.wgChromosomeNames.indexOf(name)) });
-
-        igv.graphics.strokeLine(ctx, x + w, y, x + w, y + h, { strokeStyle: igv.Color.greyScale(191) });
-
-        const shortName = (name.startsWith("chr")) ? name.substring(3) : name;
-
-        if (w > ctx.measureText(shortName).width) {
-            igv.graphics.fillText(ctx, shortName, (x + (w/2)), (y + (h/2)), { fillStyle: igv.Color.greyScale(68) });
+        if (numberOfMajorTicks < 25) {
+            set.call(this, Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier, isSVGContext);
+        } else {
+            set.call(this, Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier, isSVGContext);
         }
 
     }
 
-    function toggleColor (value) {
-        return 0 === value % 2 ? 'rgb(250,250,250)' : 'rgb(255,255,255)';
+    function set(majorTick, majorUnit, unitMultiplier, isSVGContext) {
+
+        // reduce label frequency by half for SVG rendering
+        this.majorTick = true === isSVGContext ? 2 * majorTick : majorTick;
+        this.majorUnit = majorUnit;
+
+        this.halfTick = majorTick / 2;
+
+        this.unitMultiplier = unitMultiplier;
     }
 
-    igv.RulerTrack.prototype.supportsWholeGenome = function () {
-        return true;
-    };
+};
 
-    igv.RulerTrack.prototype.dispose = function () {
-        // do stuff
-    };
+Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
 
-    const Tick = function (pixelWidthBP, options) {
-
-        initialize.call(this, pixelWidthBP, options);
-
-        function initialize(pixelWidthBP, options) {
-
-            var numberOfZeroes,
-                majorUnit,
-                unitMultiplier,
-                numberOfMajorTicks,
-                str;
-
-            const isSVGContext = options.context.isSVG || false;
-
-            if (pixelWidthBP < 10) {
-                set.call(this, 1, "bp", 1, isSVGContext);
-            }
-
-            numberOfZeroes = Math.floor(Math.log10(pixelWidthBP));
-
-            if (numberOfZeroes > 9) {
-                majorUnit = "gb";
-                unitMultiplier = 1e9;
-            } else if (numberOfZeroes > 6) {
-                majorUnit = "mb";
-                unitMultiplier = 1e6;
-            } else if (numberOfZeroes > 3) {
-                majorUnit = "kb";
-                unitMultiplier = 1e3;
-            } else {
-                majorUnit = "bp";
-                unitMultiplier = 1;
-            }
-
-            str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
-            this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
-
-            numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
-
-            if (numberOfMajorTicks < 25) {
-                set.call(this, Math.pow(10, numberOfZeroes - 1), majorUnit, unitMultiplier, isSVGContext);
-            } else {
-                set.call(this, Math.pow(10, numberOfZeroes) / 2, majorUnit, unitMultiplier, isSVGContext);
-            }
-
-        }
-
-        function set(majorTick, majorUnit, unitMultiplier, isSVGContext) {
-
-            // reduce label frequency by half for SVG rendering
-            this.majorTick = true === isSVGContext ? 2 * majorTick : majorTick;
-            this.majorUnit = majorUnit;
-
-            this.halfTick = majorTick / 2;
-
-            this.unitMultiplier = unitMultiplier;
-        }
-
-    };
-
-    Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
-
-        var numberOfTicks,
-            bp,
-            pixel,
-            label,
-            labelWidth,
-            labelX,
-            numer,
-            floored;
+    var numberOfTicks,
+        bp,
+        pixel,
+        label,
+        labelWidth,
+        labelX,
+        numer,
+        floored;
 
 
-        numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
-        labelWidth = 0;
-        labelX = 0;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
+    numberOfTicks = Math.floor(options.bpStart / this.majorTick) - 1;
+    labelWidth = 0;
+    labelX = 0;
+    pixel = 0;
+    while (pixel < options.pixelWidth) {
 
-            bp = Math.floor(numberOfTicks * this.majorTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+        bp = Math.floor(numberOfTicks * this.majorTick);
+        pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
 
-            label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
+        label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
+        labelWidth = options.context.measureText(label).width;
+
+        labelX = Math.round(pixel - labelWidth / 2);
+
+        IGVGraphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
+        IGVGraphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
+
+        ++numberOfTicks;
+    }
+
+    numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
+    pixel = 0;
+    while (pixel < options.pixelWidth) {
+
+        bp = Math.floor(numberOfTicks * this.halfTick);
+        pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
+        numer = bp / this.unitMultiplier;
+        floored = Math.floor(numer);
+
+        if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
+            label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
             labelWidth = options.context.measureText(label).width;
-
-            labelX = Math.round(pixel - labelWidth / 2);
-
-            igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-            igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
-
-            ++numberOfTicks;
+            labelX = pixel - labelWidth / 2;
+            IGVGraphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
         }
 
-        numberOfTicks = Math.floor(options.bpStart / this.halfTick) - 1;
-        pixel = 0;
-        while (pixel < options.pixelWidth) {
+        IGVGraphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
 
-            bp = Math.floor(numberOfTicks * this.halfTick);
-            pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
-            numer = bp / this.unitMultiplier;
-            floored = Math.floor(numer);
-
-            if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
-                label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
-                labelWidth = options.context.measureText(label).width;
-                labelX = pixel - labelWidth / 2;
-                igv.graphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
-            }
-
-            igv.graphics.strokeLine(options.context, pixel, height - tickHeight, pixel, height - shim);
-
-            ++numberOfTicks;
-        }
+        ++numberOfTicks;
+    }
 
 
-    };
+};
 
-    Tick.prototype.description = function (blurb) {
-        console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
-    };
+Tick.prototype.description = function (blurb) {
+    console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
+};
 
-    return igv;
-})(igv || {});
+export default RulerTrack;

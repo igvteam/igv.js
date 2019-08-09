@@ -24,6 +24,7 @@
  */
 
 import FeatureFileReader from "./feature/featureFileReader";
+import GenomicInterval from "./genome/genomicInterval";
 
 /**
  *
@@ -45,7 +46,7 @@ ROISource.prototype.getRegions = function (chr, bpStart, bpEnd) {
 
         var genomicInterval;
 
-        genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
+        genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
 
         self.reader
             .readFeatures(chr, genomicInterval.start, genomicInterval.end)

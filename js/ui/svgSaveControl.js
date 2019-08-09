@@ -24,24 +24,17 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by dat on 6/14/19.
- */
-var igv = (function (igv) {
+const SVGSaveControl = function ($parent, browser) {
 
-    igv.SVGSaveControl = function ($parent, browser) {
+    let $button = $('<div class="igv-nav-bar-button">');
+    $parent.append($button);
 
-        let $button = $('<div class="igv-nav-bar-button">');
-        $parent.append($button);
+    $button.text('Save SVG');
 
-        $button.text('Save SVG');
+    $button.on('click.svg-save-control', () => {
+        // browser.renderSVG({ $container: $('#igv-svg-container') })
+        browser.renderSVG({});
+    });
+};
 
-        $button.on('click.svg-save-control', () => {
-            // browser.renderSVG({ $container: $('#igv-svg-container') })
-            browser.renderSVG({});
-        });
-    };
-
-    return igv;
-
-}) (igv || {});
+export default SVGSaveControl;
