@@ -27,11 +27,13 @@ import FeatureSource from '../feature/featureSource';
 import T2DVariantSource from "./t2dVariantSource";
 import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
+import {BinnedColorScale} from "../util/colorScale";
+import {extend} from "../util/igvUtils";
 
 const DEFAULT_POPOVER_WINDOW = 100000000;
 const type = "gwas";
 
-const GWASTrack = igv.extend(TrackBase,
+const GWASTrack = extend(TrackBase,
     function (config, browser) {
         this.config = config;
         this.url = config.url;
@@ -59,7 +61,7 @@ const GWASTrack = igv.extend(TrackBase,
 
         this.pvalue = config.pvalue ? config.pvalue : "PVALUE";
 
-        this.colorScale = new igv.BinnedColorScale(cs);
+        this.colorScale = new BinnedColorScale(cs);
 
         // An obvious hack -- the source should be passed in as an arbument
         if (config.format && ("gtexgwas" === config.format.toLowerCase())) {

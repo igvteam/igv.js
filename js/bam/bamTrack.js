@@ -29,6 +29,10 @@ import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
 import paintAxis from "../util/paintAxis";
 import IGVColor from "../igv-color";
+import {createCheckbox} from "../igv-icons";
+import {numberFormatter} from "../util/stringUtils";
+import {nucleotideColors, nucleotideColorComponents, PaletteColorTable} from "../util/colorPalletes";
+import {extend} from "../util/igvUtils";
 
 const type = "alignment";
 
@@ -41,7 +45,7 @@ var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
 
-const BAMTrack = igv.extend(TrackBase,
+const BAMTrack = extend(TrackBase,
     function (config, browser) {
 
         this.type = type;
@@ -86,7 +90,7 @@ const BAMTrack = igv.extend(TrackBase,
         // Assign sort objects to a genomic state
         function assignSort(currentSorts, sort) {
 
-            const range = igv.parseLocusString(sort.locus);
+            const range = parseLocusString(sort.locus);
 
             // Loop through current genomic states, assign sort to first matching state
             for (let gs of browser.genomicStateList) {
@@ -279,7 +283,7 @@ BAMTrack.prototype.menuItemList = function () {
 
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
     menuItems.push({
-        object: igv.createCheckbox("Show all bases", self.showAllBases),
+        object: createCheckbox("Show all bases", self.showAllBases),
         click: function () {
 
             const $fa = $(this).find('i');
@@ -304,7 +308,7 @@ BAMTrack.prototype.menuItemList = function () {
     if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
         menuItems.push({
-            object: igv.createCheckbox("View as pairs", self.viewAsPairs),
+            object: createCheckbox("View as pairs", self.viewAsPairs),
             click: function () {
 
                 const $fa = $(this).find('i');
@@ -327,7 +331,7 @@ BAMTrack.prototype.menuItemList = function () {
     }
 
     menuItems.push({
-        object: igv.createCheckbox("Show soft clips", self.showSoftClips),
+        object: createCheckbox("Show soft clips", self.showSoftClips),
         click: function () {
 
             const $fa = $(this).find('i');
@@ -353,7 +357,7 @@ BAMTrack.prototype.menuItemList = function () {
     function colorByCB(menuItem, showCheck) {
 
 
-        const $e = igv.createCheckbox(menuItem.label, showCheck);
+        const $e = createCheckbox(menuItem.label, showCheck);
 
         const clickHandler = function () {
 
@@ -375,7 +379,7 @@ BAMTrack.prototype.menuItemList = function () {
                         self.alignmentTrack.colorByTag = tag;
                         self.config.colorByTag = tag;
 
-                        self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                        self.alignmentTrack.tagColors = new PaletteColorTable("Set1");
                         $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                     }
 
@@ -423,9 +427,9 @@ function shadedBaseColor(qual, nucleotide) {
 
     let baseColor;
     if (alpha >= 1) {
-        baseColor = igv.nucleotideColors[nucleotide];
+        baseColor = nucleotideColors[nucleotide];
     } else {
-        const foregroundColor = igv.nucleotideColorComponents[nucleotide];
+        const foregroundColor = nucleotideColorComponents[nucleotide];
         if (!foregroundColor) {
             return undefined;
         }
@@ -560,7 +564,7 @@ CoverageTrack.prototype.draw = function (options) {
             const refBase = sequence[i];
             if (item.isMismatch(refBase)) {
 
-                IGVGraphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
+                IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]});
                 IGVGraphics.fillRect(ctx, x, y, w, h);
 
                 let accumulatedHeight = 0.0;
@@ -573,7 +577,7 @@ CoverageTrack.prototype.draw = function (options) {
                     y = (this.height - hh) - accumulatedHeight;
                     accumulatedHeight += hh;
 
-                    IGVGraphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
+                    IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[nucleotide]});
                     IGVGraphics.fillRect(ctx, x, y, w, hh);
                 }
             }
@@ -594,7 +598,7 @@ CoverageTrack.prototype.popupData = function (config) {
         coverage = coverageMap.coverage[coverageMapIndex];
 
     if (coverage) {
-        nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
+        nameValues.push(referenceFrame.chrName + ":" + numberFormatter(1 + genomicLocation));
         nameValues.push({name: 'Total Count', value: coverage.total});
 
         // A
@@ -945,7 +949,7 @@ AlignmentTrack.prototype.draw = function (options) {
                             const readQual = qual[seqOffset + i];
                             baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                         } else {
-                            baseColor = igv.nucleotideColors[readChar];
+                            baseColor = nucleotideColors[readChar];
                         }
                         if (baseColor) {
                             const xPixel = ((block.start + i) - bpStart) / bpPerPixel;
@@ -1189,7 +1193,7 @@ AlignmentTrack.prototype.getAlignmentColor = function (alignment) {
                 } else {
 
                     if (!self.tagColors) {
-                        self.tagColors = new igv.PaletteColorTable("Set1");
+                        self.tagColors = new PaletteColorTable("Set1");
                     }
                     color = self.tagColors.getColor(tagValue);
                 }
@@ -1325,5 +1329,31 @@ const chrColorMap = {
     "chr47": "rgb(0, 214, 143)",
     "chr48": "rgb(20, 255, 177)",
 }
+
+
+/**
+ * Parse a locus string and return a range object.  Locus string is of the form chr:start-end.  End is optional
+ *
+ */
+function parseLocusString (string) {
+
+    const t1 = string.split(":");
+    const t2 = t1[1].split("-");
+
+    const range = {
+        chr: t1[0],
+        start: Number.parseInt(t2[0]) - 1
+    };
+
+    if (t2.length > 1) {
+        range.end = Number.parseInt(t2[1]);
+    } else {
+        range.end = range.start + 1;
+    }
+
+    return range;
+
+}
+
 
 export default BAMTrack;

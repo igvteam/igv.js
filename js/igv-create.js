@@ -39,6 +39,7 @@ import CursorGuide from "./ui/cursorGuide";
 import NavbarManager from "./navbarManager";
 import igvxhr from "./igvxhr";
 import oauth from "./oauth";
+import {createIcon} from "./igv-icons";
 
 const version = "@VERSION";
 
@@ -72,7 +73,7 @@ function createBrowser(parentDiv, config) {
     const browser = new Browser(config, $('<div class="igv-track-container-div">')[0]);
 
     // Backward compatibility -- globally visible.   This will be removed in a future release
-    if (!igv.browser) {
+    if (typeof igv !== 'undefined' && !igv.browser) {
         igv.browser = browser;
     }
 
@@ -94,11 +95,11 @@ function createBrowser(parentDiv, config) {
 
     // browser.popover = new Popover(browser.$content, browser);
 
-    browser.alertDialog = new AlertDialog(browser.$content, browser);
+    browser.alertDialog = new AlertDialog(browser.$content);
 
-    browser.inputDialog = new InputDialog(browser.$root, browser);
+    browser.inputDialog = new InputDialog(browser.$root);
 
-    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root, browser);
+    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
 
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
@@ -135,7 +136,7 @@ function createBrowser(parentDiv, config) {
                 browser.centerGuide.doShow();
             }
 
-            const isWGV = browser.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
+            const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
 
             // multi-locus mode or isWGV
             if (browser.isMultiLocusMode() || isWGV) {
@@ -172,17 +173,20 @@ function createBrowser(parentDiv, config) {
 };
 
 function removeBrowser(browser) {
-
     browser.dispose();
-
     browser.$root.remove();
-
-    if (browser === igv.browser) {
-        igv.browser = undefined;
-    }
-
     allBrowsers = allBrowsers.filter(item => item !== browser);
 
+    // backward compatibility -- this will be removed in a future release
+    if (typeof igv !== 'undefined' && browser === igv.browser) {
+        igv.browser = undefined;
+    }
+}
+
+// A hack to replace the global igv.browser for the purpose of alert dialogs
+// TODO fixme
+function getBrowser() {
+    return allBrowsers[0];
 }
 
 
@@ -304,7 +308,7 @@ function createStandardControls(browser, config) {
     $searchContainer.append($div);
 
     // search icon svg
-    $div.append(igv.createIcon("search"));
+    $div.append(createIcon("search"));
 
     $div.click(function () {
         browser.search(browser.$searchInput.val());
@@ -515,7 +519,7 @@ function logo() {
     );
 }
 
-export default {createBrowser, removeBrowser, visibilityChange}
+export {createBrowser, removeBrowser, visibilityChange, getBrowser}
 
 
 

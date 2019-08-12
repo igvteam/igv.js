@@ -26,10 +26,8 @@
 import AlignmentContainer from "../bam/alignmentContainer";
 import BamAlignment from "../bam/bamAlignment";
 import AlignmentBlock from "../bam/alignmentBlock";
-import   {
-    ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
-    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
-} from './ga4ghHelper';
+import {ga4ghGet, ga4ghSearch} from './ga4ghHelper';
+import BamFilter from "../bam/bamFilter";
 
 var CigarOperationTable = {
     "ALIGNMENT_MATCH": "M",
@@ -48,7 +46,7 @@ const Ga4ghAlignmentReader = function (config, genome) {
     this.config = config;
     this.genome = genome;
     this.url = config.url;
-    this.filter = new igv.BamFilter(config.filter);
+    this.filter = new BamFilter(config.filter);
     this.readGroupSetIds = config.readGroupSetIds;
     this.authKey = config.authKey;   // Might be undefined or nill
 
@@ -361,24 +359,6 @@ Ga4ghAlignmentReader.prototype.readMetadata = function () {
         entityId: this.readGroupSetIds
     });
 }
-
-igv.decodeGa4ghReadset = function (json) {
-
-    var sequenceNames = [],
-        fileData = json["fileData"];
-
-    fileData.forEach(function (fileObject) {
-
-        var refSequences = fileObject["refSequences"];
-
-        refSequences.forEach(function (refSequence) {
-            sequenceNames.push(refSequence["name"]);
-        });
-    });
-
-    return sequenceNames;
-}
-
 
 /**
  * Hardcoded hack to work around some non-compliant google datasets

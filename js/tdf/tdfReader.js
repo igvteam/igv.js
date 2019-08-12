@@ -26,6 +26,8 @@
 
 import BinaryParser from "../binary";
 import igvxhr from "../igvxhr";
+import Zlib from "../../vendor/zlib_and_gzip";
+import {buildOptions} from "../util/igvUtils";
 
 const GZIP_FLAG = 0x1;
 
@@ -46,7 +48,7 @@ TDFReader.prototype.readHeader = function () {
         return Promise.resolve(this);   // Already read
     }
 
-    return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: {start: 0, size: 64000}}))
+    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: {start: 0, size: 64000}}))
 
         .then(function (data) {
 
@@ -82,7 +84,7 @@ TDFReader.prototype.readHeader = function () {
             self.compressed = (self.flags & GZIP_FLAG) != 0;
 
             // Now read index
-            return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+            return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
                 range: {
                     start: self.indexPos,
                     size: self.indexSize
@@ -147,7 +149,7 @@ TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
                     return undefined;
                 } else {
 
-                    return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
                         range: {
                             start: indexEntry.position,
                             size: indexEntry.size
@@ -246,7 +248,7 @@ TDFReader.prototype.readGroup = function (name) {
                     return undefined;
                 } else {
 
-                    return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+                    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
                         range: {
                             start: indexEntry.position,
                             size: indexEntry.size
@@ -416,7 +418,7 @@ TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
     var size = (lastEntry.position + lastEntry.size) - position;
 
 
-    return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
         range: {
             start: position,
             size: size
@@ -477,7 +479,7 @@ TDFReader.prototype.readTile = function (indexEntry, nTracks) {
 
     var self = this;
 
-    return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
         range: {
             start: indexEntry.position,
             size: indexEntry.size

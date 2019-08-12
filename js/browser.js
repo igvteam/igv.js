@@ -35,13 +35,21 @@ import GenomeUtils from "./genome/genome";
 import loadPlinkFile from "./sampleInformation";
 import IdeoPanel from "./ideogram";
 import ReferenceFrame from "./referenceFrame";
-import WindowSizePanel from "./windowSizePanel";
 import igvxhr from "./igvxhr";
+import Zlib from "../vendor/zlib_and_gzip";
+import {getFilename, isFilePath} from './util/fileUtils'
+import {inferTrackTypes, inferFileFormat} from "./util/trackUtils";
+import {createIcon} from "./igv-icons";
+import {isString, splitLines, numberFormatter} from "./util/stringUtils"
+import {pageCoordinates, guid} from "./util/domUtils";
+import {decodeDataURI} from "./util/uriUtils";
+import {download, validateLocusExtent, doAutoscale} from "./util/igvUtils";
+
 
 const Browser = function (options, trackContainerDiv) {
     let str;
 
-    this.guid = igv.guid();
+    this.guid = guid();
     this.namespace = '.browser_' + this.guid;
     this.config = options;
     this.$root = $('<div class="igv-root-div">');
@@ -65,7 +73,7 @@ const Browser = function (options, trackContainerDiv) {
     this.eventHandlers = {};
 
     this.$spinner = $('<div class="igv-track-container-spinner">');
-    this.$spinner.append(igv.createIcon("spinner"));
+    this.$spinner.append(createIcon("spinner"));
     $(this.trackContainerDiv).append(this.$spinner);
 
     addMouseHandlers.call(this);
@@ -154,22 +162,6 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
     return false;
 };
 
-igv.isWholeGenomeView = function (referenceFrame) {
-    let chromosomeName = referenceFrame.chrName.toLowerCase();
-
-    return 'all' === chromosomeName;
-};
-
-igv.hasKnownFileExtension = function (config) {
-    var extension = igv.getExtension(config);
-
-    if (undefined === extension) {
-        return false;
-    }
-    return igv.knownFileExtensions.has(extension);
-};
-
-
 Browser.prototype.toSVG = function () {
 
     const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
@@ -242,7 +234,7 @@ Browser.prototype.renderSVG = function (config) {
 
     const path = config.filename || 'igv.svg';
     const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-    igv.download(path, data);
+    download(path, data);
 
 };
 
@@ -281,7 +273,7 @@ Browser.prototype.loadSession = async function (options) {
         } else {
             let filename = options.filename
             if (!filename) {
-                filename = (options.url ? igv.getFilename(options.url) : options.file.name)
+                filename = (options.url ? getFilename(options.url) : options.file.name)
             }
 
             if (filename.endsWith(".xml")) {
@@ -366,7 +358,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
     var self = this;
 
     // idOrConfig might be json
-    if (igv.isString(idOrConfig) && idOrConfig.startsWith("{")) {
+    if (isString(idOrConfig) && idOrConfig.startsWith("{")) {
         try {
             idOrConfig = JSON.parse(idOrConfig);
         } catch (e) {
@@ -418,7 +410,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 
         var genomeID;
 
-        if (igv.isString(conf)) {
+        if (isString(conf)) {
             genomeID = conf;
         } else if (conf.genome) {
             genomeID = conf.genome;
@@ -462,7 +454,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 //
 Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-    const isWGV = (this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(genomicStateList[0].referenceFrame));
+    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].referenceFrame));
 
     if (isWGV || this.isMultiLocusMode()) {
         this.centerGuide.forcedHide();
@@ -478,11 +470,9 @@ Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateLis
 
 // track labels
 Browser.prototype.setTrackLabelName = function (trackView, name) {
-
     trackView.viewports.forEach((viewport) => {
-        igv.setTrackLabel(viewport.$trackLabel, trackView.track, name);
+        viewport.setTrackLabel(name);
     });
-
 };
 
 Browser.prototype.hideTrackLabels = function () {
@@ -581,13 +571,13 @@ Browser.prototype.loadTrackList = async function (configList) {
 function knowHowToLoad(config) {
 
     // config might be json
-    if (igv.isString(config)) {
+    if (isString(config)) {
         config = JSON.parse(config);
     }
 
     const url = config.url;
     const features = config.features;
-    return undefined === url || igv.isString(url) || igv.isFilePath(url);
+    return undefined === url || isString(url) || url instanceof File;
 }
 
 /**
@@ -599,7 +589,7 @@ function knowHowToLoad(config) {
 Browser.prototype.loadTrack = async function (config) {
 
     // config might be json
-    if (igv.isString(config)) {
+    if (isString(config)) {
         config = JSON.parse(config);
     }
 
@@ -610,7 +600,7 @@ Browser.prototype.loadTrack = async function (config) {
 
     await resolveTrackProperties(config)
 
-    igv.inferTrackTypes(config);
+    inferTrackTypes(config);
 
     // Set defaults if specified
     if (this.trackDefaults && config.type) {
@@ -652,7 +642,7 @@ Browser.prototype.loadTrack = async function (config) {
 
     async function resolveTrackProperties(config) {
 
-        if (igv.isString(config.url) && config.url.startsWith("https://drive.google.com")) {
+        if (isString(config.url) && config.url.startsWith("https://drive.google.com")) {
 
             const json = await google.getDriveFileInfo(config.url)
 
@@ -661,7 +651,7 @@ Browser.prototype.loadTrack = async function (config) {
                 config.filename = json.originalFileName;
             }
             if (!config.format) {
-                config.format = igv.inferFileFormat(config.filename);
+                config.format = inferFileFormat(config.filename);
             }
             if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
                 config.indexURL = google.driveDownloadURL(config.indexURL);
@@ -672,7 +662,7 @@ Browser.prototype.loadTrack = async function (config) {
 
         } else {
             if (config.url && !config.filename) {
-                config.filename = igv.getFilename(config.url);
+                config.filename = getFilename(config.url);
             }
             return config;
         }
@@ -776,15 +766,13 @@ Browser.prototype.reorderTracks = function () {
 
 
 Browser.prototype.removeTrackByName = function (name) {
-
-    var remove;
-    remove = _.first(_.filter(this.trackViews, function (trackView) {
-        return name === trackView.track.name;
-    }));
-
-    this.removeTrack(remove.track);
-
-};
+    const copy = this.trackViews.slice();
+    for (let trackView of copy) {
+        if (name === trackView.track.name) {
+            this.removeTrack(trackView.track);
+        }
+    }
+}
 
 Browser.prototype.removeTrack = function (track) {
 
@@ -872,7 +860,7 @@ Browser.prototype.resize = function () {
 
     if (this.genomicStateList && viewportWidth > 0) {
 
-        const isWGV = this.isMultiLocusWholeGenomeView() || igv.isWholeGenomeView(this.genomicStateList[0].referenceFrame);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].referenceFrame);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -986,7 +974,7 @@ Browser.prototype.updateViews = function (genomicState, views) {
                     featureArray.forEach(function (features) {
                         allFeatures = allFeatures.concat(features);
                     })
-                    dataRange = igv.doAutoscale(allFeatures);
+                    dataRange = doAutoscale(allFeatures);
 
                     groupTrackViews.forEach(function (trackView) {
                         trackView.track.dataRange = dataRange;
@@ -1047,8 +1035,8 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
                     }
                 }
 
-                ss = igv.numberFormatter(Math.floor(referenceFrame.start + 1));
-                ee = igv.numberFormatter(Math.floor(end));
+                ss = numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = numberFormatter(Math.floor(end));
                 str = referenceFrame.chrName + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
@@ -1454,7 +1442,7 @@ Browser.prototype.search = async function (string, init) {
 
         // assign ids to the state objects
         for (let gs of genomicStateList) {
-            gs.id = igv.guid();
+            gs.id = guid();
         }
 
     } else {
@@ -1506,7 +1494,7 @@ Browser.prototype.search = async function (string, init) {
                             end: feature.end,
                             locusSearchString: locus
                         }
-                        igv.validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
+                        validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
                         result.push(genomicState);
                     }
                 } else {
@@ -1606,7 +1594,7 @@ Browser.prototype.search = async function (string, init) {
 
                 const linesTrimmed = []
                 const results = []
-                const lines = igv.splitLines(data);
+                const lines = splitLines(data);
 
                 lines.forEach(function (item) {
                     if ("" === item) {
@@ -1702,7 +1690,7 @@ Browser.prototype.search = async function (string, init) {
 
                 }
 
-                igv.validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
+                validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
 
                 return locusObject;
 
@@ -1883,7 +1871,7 @@ Browser.uncompressSession = function (url) {
     let bytes
     if (url.indexOf('/gzip;base64') > 0) {
         //Proper dataURI
-        bytes = igv.decodeDataURI(url);
+        bytes = decodeDataURI(url);
     } else {
 
         let enc = url.substring(5);
@@ -1955,7 +1943,7 @@ Browser.prototype.presentMessageWithCallback = function (message, callback) {
 Browser.prototype.mouseDownOnViewport = function (e, viewport) {
 
     var coords;
-    coords = igv.pageCoordinates(e);
+    coords = pageCoordinates(e);
     this.vpMouseDown = {
         viewport: viewport,
         lastMouseX: coords.x,
@@ -2079,7 +2067,7 @@ function addMouseHandlers() {
             return;
         }
 
-        coords = igv.pageCoordinates(e);
+        coords = pageCoordinates(e);
 
         if (self.vpMouseDown) {
 

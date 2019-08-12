@@ -30,8 +30,9 @@ import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
 import IGVColor from "../igv-color";
 import igvxhr from "../igvxhr";
+import {extend, buildOptions} from "../util/igvUtils";
 
-const InteractionTrack = igv.extend(TrackBase,
+const InteractionTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -80,7 +81,7 @@ InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
         return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
     } else {
 
-        const options = igv.buildOptions(self.config);    // Add oauth token, if any
+        const options = buildOptions(self.config);    // Add oauth token, if any
 
         return igvxhr.loadString(self.config.url, options)
 

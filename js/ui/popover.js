@@ -23,6 +23,9 @@
  * THE SOFTWARE.
  */
 import makeDraggable from "./draggable";
+import {trackMenuItemList, trackMenuItemListHelper} from "../util/menuUtils";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils";
+import {pageCoordinates} from "../util/domUtils";
 
 const Popover = function ($parent, browser) {
     this.browser = browser;
@@ -43,7 +46,7 @@ function initializationHelper($parent) {
     $popoverHeader = $('<div class="igv-popover-header">');
     this.$popover.append($popoverHeader);
 
-    igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
+    attachDialogCloseHandlerWithParent($popoverHeader, function () {
         self.hide();
     });
 
@@ -73,7 +76,7 @@ Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
 
     if (menuItems.length > 0) {
 
-        menuItems = igv.trackMenuItemListHelper(menuItems, $popover);
+        menuItems = trackMenuItemListHelper(menuItems, $popover);
 
         this.$popoverContent.empty();
         this.$popoverContent.removeClass();
@@ -83,7 +86,7 @@ Popover.prototype.presentTrackContextMenu = function (e, menuItems) {
             this.$popoverContent.append(item.object);
         }
 
-        const page = igv.pageCoordinates(e);
+        const page = pageCoordinates(e);
         $popover.css(clampPopoverLocation(page.x, page.y, this));
         $popover.show();
     }

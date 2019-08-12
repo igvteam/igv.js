@@ -27,12 +27,14 @@
 import FeatureSource from '../feature/featureSource';
 import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
+import {createCheckbox} from "../igv-icons";
+import {extend} from "../util/igvUtils";
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
 const topMargin = 10
 
-const VariantTrack = igv.extend(TrackBase,
+const VariantTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -435,7 +437,7 @@ VariantTrack.prototype.menuItemList = function () {
 
         menuItems.push(
             {
-                object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
                 click: function () {
                     self.displayMode = displayMode;
                     self.trackView.checkContentHeight();

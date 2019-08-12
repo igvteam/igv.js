@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 import makeDraggable from "./draggable";
+import {trackMenuItemList, trackMenuItemListHelper} from "../util/menuUtils";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils";
 
 const TrackGearPopover = function ($parent) {
 
@@ -35,7 +37,7 @@ const TrackGearPopover = function ($parent) {
     this.$popover.append($popoverHeader);
 
     let self = this;
-    igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
+    attachDialogCloseHandlerWithParent($popoverHeader, function () {
         self.$popover.hide();
     });
 
@@ -61,7 +63,7 @@ TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
 
         this.$popoverContent.empty();
 
-        list = igv.trackMenuItemListHelper(list, self.$popover);
+        list = trackMenuItemListHelper(list, self.$popover);
 
         for (let item of list) {
 

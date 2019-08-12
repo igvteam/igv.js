@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 import makeDraggable from "./draggable";
+import {createIcon} from "../igv-icons";
+import {guid} from "../util/domUtils";
 
 const GenericContainer = function ({$parent, width, height, closeHandler}) {
 
@@ -30,7 +32,7 @@ const GenericContainer = function ({$parent, width, height, closeHandler}) {
         $header,
         $fa;
 
-    this.namespace = '.generic_container_' + igv.guid();
+    this.namespace = '.generic_container_' + guid();
 
     let $container = $('<div>', {class: 'igv-generic-container'});
     $parent.append($container);
@@ -56,7 +58,7 @@ const GenericContainer = function ({$parent, width, height, closeHandler}) {
     let $div = $('<i>');
     $header.append($div);
 
-    $div.append(igv.createIcon("times"));
+    $div.append(createIcon("times"));
 
     $div.on('mousedown' + self.namespace, function (e) {
         e.stopPropagation();

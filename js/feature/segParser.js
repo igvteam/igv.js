@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {splitLines} from "../util/stringUtils";
+
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
  *
@@ -45,7 +47,7 @@ const SegParser = function () {
 
 SegParser.prototype.parseHeader = function (data) {
 
-    var lines = igv.splitLines(data),
+    var lines = splitLines(data),
         len = lines.length,
         line,
         i,
@@ -69,7 +71,7 @@ SegParser.prototype.parseHeader = function (data) {
 
 SegParser.prototype.parseFeatures = function (data) {
 
-    var lines = data ? igv.splitLines(data) : [],
+    var lines = data ? splitLines(data) : [],
         len = lines.length,
         tokens, allFeatures = [], line, i, dataColumn;
 

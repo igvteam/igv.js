@@ -25,6 +25,9 @@
 
 import IGVGraphics from "./igv-canvas";
 import IGVColor from "./igv-color";
+import GenomeUtils from "./genome/genome";
+import {createIcon} from "./igv-icons";
+import {numberFormatter} from "./util/stringUtils";
 
 const RulerTrack = function (browser) {
 
@@ -65,7 +68,7 @@ RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicS
     $close = $('<div class="igv-multi-locus-panel-close-container">');
     $viewport.append($close);
 
-    $close.append(igv.createIcon("times-circle"));
+    $close.append(createIcon("times-circle"));
 
     $close.click(function (e) {
         browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
@@ -85,7 +88,7 @@ RulerTrack.prototype.computePixelHeight = function (ignore) {
 
 RulerTrack.prototype.draw = function (options) {
 
-    if (igv.isWholeGenomeView(options.referenceFrame)) {
+    if (GenomeUtils.isWholeGenomeView(options.referenceFrame)) {
 
         options.viewport.rulerSweeper.disableMouseHandlers();
 
@@ -195,7 +198,7 @@ const Tick = function (pixelWidthBP, options) {
             unitMultiplier = 1;
         }
 
-        str = igv.numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
+        str = numberFormatter(Math.floor(pixelWidthBP / unitMultiplier)) + " " + majorUnit;
         this.labelWidthBP = Math.round(options.referenceFrame.toBP(options.context.measureText(str).width));
 
         numberOfMajorTicks = pixelWidthBP / Math.pow(10, numberOfZeroes - 1);
@@ -242,7 +245,7 @@ Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
         bp = Math.floor(numberOfTicks * this.majorTick);
         pixel = Math.round(options.referenceFrame.toPixels((bp - 1) - options.bpStart + 0.5));
 
-        label = igv.numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
+        label = numberFormatter(Math.floor(bp / this.unitMultiplier)) + " " + this.majorUnit;
         labelWidth = options.context.measureText(label).width;
 
         labelX = Math.round(pixel - labelWidth / 2);
@@ -263,7 +266,7 @@ Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
         floored = Math.floor(numer);
 
         if (numer === floored && (this.majorTick / this.labelWidthBP) > 8) {
-            label = igv.numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
+            label = numberFormatter(Math.floor(numer)) + " " + this.majorUnit;
             labelWidth = options.context.measureText(label).width;
             labelX = pixel - labelWidth / 2;
             IGVGraphics.fillText(options.context, label, labelX, height - (tickHeight / 0.75));
@@ -278,7 +281,7 @@ Tick.prototype.drawTicks = function (options, tickHeight, shim, height) {
 };
 
 Tick.prototype.description = function (blurb) {
-    console.log((blurb || '') + ' tick ' + igv.numberFormatter(this.majorTick) + ' label width ' + igv.numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
+    console.log((blurb || '') + ' tick ' + numberFormatter(this.majorTick) + ' label width ' + numberFormatter(this.labelWidthBP) + ' multiplier ' + this.unitMultiplier);
 };
 
 export default RulerTrack;

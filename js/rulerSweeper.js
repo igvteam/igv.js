@@ -23,19 +23,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+import {translateMouseCoordinates} from "./util/domUtils";
+import {validateLocusExtent} from "./util/igvUtils";
+import {guid} from "./util/domUtils";
+
 const RulerSweeper = function (viewport) {
-
-    var guid;
-
     this.viewport = viewport;
     this.browser = viewport.browser;
-
     this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
     $(viewport.contentDiv).append(this.$rulerSweeper);
-
-    guid = igv.guid();
-    this.namespace = '.sweeper_' + guid;
-
+    this.namespace = '.sweeper_' + guid();
     this.addMouseHandlers();
 };
 
@@ -68,7 +66,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
         isMouseIn = true;
 
-        mouseDown = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
+        mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
 
         if (true === isMouseDown) {
 
@@ -88,7 +86,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
         if (isMouseDown && isMouseIn) {
 
-            mouseCurrent = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
+            mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
             mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
             mouseCurrent = Math.max(mouseCurrent, 0);
 
@@ -122,7 +120,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
             if (width > threshold) {
 
-                igv.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+                validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
 
                 self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
                 self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);

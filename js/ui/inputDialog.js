@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 import makeDraggable from "./draggable";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils";
 
-const InputDialog = function ($parent, browser) {
+const InputDialog = function ($parent) {
     var self = this,
         $header,
         $buttons;
 
-    this.browser = browser;
 
     // dialog container
     this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
@@ -40,7 +40,7 @@ const InputDialog = function ($parent, browser) {
     // dialog header
     $header = $("<div>", {class: 'igv-generic-dialog-header'});
     this.$container.append($header);
-    igv.attachDialogCloseHandlerWithParent($header, function () {
+    attachDialogCloseHandlerWithParent($header, function () {
         self.$input.val(undefined);
         self.$container.offset({left: 0, top: 0});
         self.$container.hide();

@@ -73,9 +73,6 @@ const FeatureSource = function (config, genome) {
     } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
         this.reader = new GtexReader(config);
         this.queryable = true;
-    } else if (config.sourceType === "bigquery") {
-        this.reader = new igv.BigQueryFeatureReader(config);
-        this.queryable = true;
     } else if (config.sourceType === 'ucscservice') {
         this.reader = new UCSCServiceReader(config.source);
         this.queryable = true;

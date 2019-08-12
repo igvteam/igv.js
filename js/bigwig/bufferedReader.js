@@ -24,6 +24,7 @@
  */
 
 import igvxhr from "../igvxhr";
+import {buildOptions} from "../util/igvUtils";
 
 const BufferedReader = function (config, contentLength, bufferSize) {
         this.path = config.url;
@@ -62,7 +63,7 @@ const BufferedReader = function (config, contentLength, bufferSize) {
             loadRange = {start: requestedRange.start, size: bufferSize};
 
 
-            return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: loadRange}))
+            return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: loadRange}))
                 .then(function (arrayBuffer) {
                     self.data = arrayBuffer;
                     self.range = loadRange;

@@ -23,8 +23,9 @@
  * THE SOFTWARE.
  */
 
-import createVCFVariant from "./variant";
+import {createVCFVariant} from "./variant";
 import getDataWrapper from "../feature/dataWrapper";
+import {splitStringRespectingQuotes} from "../util/stringUtils";
 
 /**
  * Parser for VCF files.
@@ -82,7 +83,7 @@ VcfParser.prototype.parseHeader = function (data) {
                     // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
                     // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
 
-                    tokens = igv.splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+                    tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
 
                     tokens.forEach(function (token) {
                         var kv = token.split("=");

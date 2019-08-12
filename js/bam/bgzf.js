@@ -1,3 +1,5 @@
+import Zlib from "../../vendor/zlib_and_gzip";
+
 var BLOCK_HEADER_LENGTH = 18;
 var BLOCK_LENGTH_OFFSET = 16;  // Location in the gzip block of the total block size (actually total block size - 1)
 var BLOCK_FOOTER_LENGTH = 8; // Number of bytes that follow the deflated data
@@ -6,7 +8,6 @@ var GZIP_OVERHEAD = BLOCK_HEADER_LENGTH + BLOCK_FOOTER_LENGTH + 2; // Gzip overh
 var GZIP_ID1 = 31;   // Magic number
 var GZIP_ID2 = 139;  // Magic number
 var GZIP_FLG = 4; // FEXTRA flag means there are optional fields
-
 
 // Uncompress data,  assumed to be series of bgzipped blocks
 function unbgzf(data, lim) {

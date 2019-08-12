@@ -25,125 +25,122 @@
 
 import igvxhr from "../igvxhr";
 
-var igv = (function (igv) {
+const cBioUtils = {
 
 
-    igv.cBioUtils = {
+    fetchStudies: function (baseURL) {
 
+        baseURL = baseURL || "http://www.cbioportal.org/api";
 
-        fetchStudies: function (baseURL) {
+        let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
+        return igvxhr.loadJson(url);
+    },
 
-            baseURL = baseURL || "http://www.cbioportal.org/api";
+    fetchSamplesByStudy: function (study, baseURL) {
 
-            let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
-            return igvxhr.loadJson(url);
-        },
+        baseURL = baseURL || "http://www.cbioportal.org/api"
 
-        fetchSamplesByStudy: function (study, baseURL) {
+        let url = baseURL + "/studies/" + study.studyId + "/samples";
 
-            baseURL = baseURL || "http://www.cbioportal.org/api"
+        return igvxhr.loadJson(url)
 
-            let url = baseURL + "/studies/" + study.studyId + "/samples";
+            .then(function (samples) {
 
-            return igvxhr.loadJson(url)
+                let sampleStudyList = {
+                    studyId: study.studyId,
+                    study: study,
+                    sampleIDs: []
+                }
 
-                .then(function (samples) {
+                for (let sampleJson of samples) {
 
-                    let sampleStudyList = {
-                        studyId: study.studyId,
-                        study: study,
-                        sampleIDs: []
+                    sampleStudyList.sampleIDs.push(sampleJson["sampleId"]);
+                }
+
+                return sampleStudyList;
+            })
+    },
+
+    fetchCopyNumberByStudy: function (study, baseURL) {
+
+        baseURL = baseURL || "http://www.cbioportal.org/api";
+
+        this.fetchSamplesByStudy(study)
+
+            .then(function (sampleStudyList) {
+
+                let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
+                let body = JSON.stringify(sampleStudyList);
+
+                return igvxhr.loadJson(url, {method: "POST", sendData: body})
+
+            })
+    },
+
+    initMenu: function (baseURL) {
+
+        baseURL = baseURL || "http://www.cbioportal.org/api";
+
+        const self = this;
+
+        return this.fetchStudies(baseURL)
+
+            .then(function (studies) {
+
+                const samplePromises = [];
+
+                for (let study of studies) {
+
+                    let sampleCount = study["cnaSampleCount"];
+                    if (sampleCount > 0) {
+                        samplePromises.push(self.fetchSamplesByStudy(study.studyId, baseURL));
                     }
+                }
 
-                    for (let sampleJson of samples) {
+                return Promise.all(samplePromises);
+            })
 
-                        sampleStudyList.sampleIDs.push(sampleJson["sampleId"]);
-                    }
+            .then(function (sampleStudyListArray) {
 
-                    return sampleStudyList;
-                })
-        },
+                const trackJson = [];
 
-        fetchCopyNumberByStudy: function (study, baseURL) {
+                for (let sampleStudyList of sampleStudyListArray) {
 
-            baseURL = baseURL || "http://www.cbioportal.org/api";
+                    const study = sampleStudyList.study;
+                    const sampleCount = sampleStudyList.sampleIDs.length;
 
-            this.fetchSamplesByStudy(study)
+                    if (sampleCount > 0) {
 
-                .then(function (sampleStudyList) {
+                        const name = study["shortName"] + " (" + sampleCount + ")";
+                        const body = JSON.stringify(sampleStudyList);
 
-                    let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
-                    let body = JSON.stringify(sampleStudyList);
-
-                    return igvxhr.loadJson(url, {method: "POST", sendData: body})
-
-                })
-        },
-
-        initMenu: function (baseURL) {
-
-            baseURL = baseURL || "http://www.cbioportal.org/api";
-
-            const self = this;
-
-            return this.fetchStudies(baseURL)
-
-                .then(function (studies) {
-
-                    const samplePromises = [];
-
-                    for (let study of studies) {
-
-                        let sampleCount = study["cnaSampleCount"];
-                        if (sampleCount > 0) {
-                            samplePromises.push(self.fetchSamplesByStudy(study.studyId, baseURL));
-                        }
-                    }
-
-                    return Promise.all(samplePromises);
-                })
-
-                .then(function (sampleStudyListArray) {
-
-                    const trackJson = [];
-
-                    for (let sampleStudyList of sampleStudyListArray) {
-
-                        const study = sampleStudyList.study;
-                        const sampleCount = sampleStudyList.sampleIDs.length;
-
-                        if (sampleCount > 0) {
-
-                            const name = study["shortName"] + " (" + sampleCount + ")";
-                            const body = JSON.stringify(sampleStudyList);
-
-                            trackJson.push({
-                                "name": name,
-                                "type": "seg",
-                                "displayMode": "EXPANDED",
-                                "sourceType": "custom",
-                                "source": {
-                                    "url": baseURL + "/copy-number-segments/fetch?projection=SUMMARY",
-                                    "method": "POST",
-                                    "contentType": "application/json",
-                                    "body": body,
-                                    "queryable": false,
-                                    "isLog": true,
-                                    "mappings": {
-                                        "chr": "chromosome",
-                                        "value": "segmentMean",
-                                        "sampleKey": "uniqueSampleKey",
-                                        "sample": "sampleId"
-                                    }
+                        trackJson.push({
+                            "name": name,
+                            "type": "seg",
+                            "displayMode": "EXPANDED",
+                            "sourceType": "custom",
+                            "source": {
+                                "url": baseURL + "/copy-number-segments/fetch?projection=SUMMARY",
+                                "method": "POST",
+                                "contentType": "application/json",
+                                "body": body,
+                                "queryable": false,
+                                "isLog": true,
+                                "mappings": {
+                                    "chr": "chromosome",
+                                    "value": "segmentMean",
+                                    "sampleKey": "uniqueSampleKey",
+                                    "sample": "sampleId"
                                 }
-                            });
-                        }
+                            }
+                        });
                     }
+                }
 
-                    return trackJson;
-                })
-        }
+                return trackJson;
+            })
     }
+}
 
 
 // Example json
@@ -162,8 +159,5 @@ var igv = (function (igv) {
 //     "numberOfProbes": 958
 // }
 
+export default cBioUtils;
 
-    return igv;
-
-})
-(igv || {});

@@ -27,7 +27,9 @@
 import BamAlignment from "./bamAlignment";
 import AlignmentBlock from "./alignmentBlock";
 import igvxhr from "../igvxhr";
-import  {unbgzf, bgzBlockSize} from './bgzf';
+import  {unbgzf} from './bgzf';
+import {splitLines} from "../util/stringUtils";
+import BamFilter from "./bamFilter";
 
 /**
  * This code is based on the Biodalliance BAM reader by Thomas Down,  2011
@@ -194,7 +196,7 @@ import  {unbgzf, bgzBlockSize} from './bgzf';
          * @param max                maximum genomic position
          * @param chrIdx             chromosome index
          * @param chrNames            array of chromosome names
-         * @param filter             a igv.BamFilter object
+         * @param filter             a BamFilter object
          */
         decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
@@ -326,7 +328,7 @@ import  {unbgzf, bgzBlockSize} from './bgzf';
             var lines, i, j, len, tokens, blocks, pos, qualString, rnext, pnext, lengthOnRef,
                 alignment, cigarArray, started;
 
-            lines = igv.splitLines(sam);
+            lines = splitLines(sam);
             len = lines.length;
             started = false;
 
@@ -398,7 +400,7 @@ import  {unbgzf, bgzBlockSize} from './bgzf';
 
         setReaderDefaults: function (reader, config) {
 
-            reader.filter = new igv.BamFilter(config.filter);
+            reader.filter = new BamFilter(config.filter);
 
             if (config.readgroup) {
                 reader.filter.readgroups = new Set([config.readgroup]);
@@ -409,7 +411,7 @@ import  {unbgzf, bgzBlockSize} from './bgzf';
             reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
 
             if (reader.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
-                igv.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH);
+                console.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH);
                 reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
             }
 

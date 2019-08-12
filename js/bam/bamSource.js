@@ -32,6 +32,7 @@ import CramReader from "../cram/cramReader";
 import Ga4ghAlignmentReader from "../google/ga4ghAlignmentReader";
 import BamAlignmentRow from "./bamAlignmentRow";
 import PairedAlignment from "./pairedAlignment";
+import {isString} from "../util/stringUtils";
 
 const BamSource = function (config, browser) {
 
@@ -41,7 +42,7 @@ const BamSource = function (config, browser) {
     this.genome = genome;
     this.alignmentContainer = undefined;
 
-    if (igv.isString(config.url) && config.url.startsWith("data:")) {
+    if (isString(config.url) && config.url.startsWith("data:")) {
         if ("cram" === config.format) {
             throw "CRAM data uris are not supported"
         }

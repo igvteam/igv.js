@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 import igvxhr from "../igvxhr";
+import {isString} from "../util/stringUtils";
 
 const CustomServiceReader = function (config) {
 
@@ -61,7 +62,7 @@ CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
             if (data) {
                 if (typeof self.config.parser === "function") {
                     return self.config.parser(data);
-                } else if (igv.isString(data)) {
+                } else if (isString(data)) {
                     // TODO -- make this explict in config (returnType="json", "xml", etc)
                     try {
                         return JSON.parse(data);

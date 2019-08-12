@@ -5562,3 +5562,5 @@ Zlib.Deflate.prototype.compress = function() {
   return output;
 };
 
+export default Zlib;
+

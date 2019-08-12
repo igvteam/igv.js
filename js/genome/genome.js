@@ -25,8 +25,11 @@
 
 import Cytoband from "./cytoband";
 import FastaSequence from "./fasta";
-import GenomicInterval from "./genomicInterval";
 import igvxhr from "../igvxhr";
+import Zlib from "../../vendor/zlib_and_gzip";
+import {splitLines} from "../util/stringUtils";
+import {decodeDataURI} from "../util/uriUtils";
+import {buildOptions} from "../util/igvUtils";
 
 let KNOWN_GENOMES;
 
@@ -82,6 +85,11 @@ const GenomeUtils = {
 
             return table;
         }
+    },
+
+    isWholeGenomeView:  function (referenceFrame) {
+        let chromosomeName = referenceFrame.chrName.toLowerCase();
+        return 'all' === chromosomeName;
     }
 };
 
@@ -300,7 +308,7 @@ function loadCytobands(cytobandUrl, config) {
         var data = decodeDataUri(cytobandUrl);
         return Promise.resolve(getCytobands(data));
     } else {
-        return igvxhr.loadString(cytobandUrl, igv.buildOptions(config))
+        return igvxhr.loadString(cytobandUrl, buildOptions(config))
             .then(function (data) {
                 return getCytobands(data);
             });
@@ -311,7 +319,7 @@ function loadCytobands(cytobandUrl, config) {
             lastChr,
             n = 0,
             c = 1,
-            lines = igv.splitLines(data),
+            lines = splitLines(data),
             len = lines.length,
             cytobands = {};
 
@@ -348,7 +356,7 @@ function loadCytobands(cytobandUrl, config) {
         let plain
 
         if (dataUri.startsWith("data:application/gzip;base64")) {
-            plain = igv.decodeDataURI(dataUri)
+            plain = decodeDataURI(dataUri)
         } else {
 
             let bytes,
@@ -382,11 +390,11 @@ function loadCytobands(cytobandUrl, config) {
 
 function loadAliases(aliasURL, config) {
 
-    return igvxhr.loadString(aliasURL, igv.buildOptions(config))
+    return igvxhr.loadString(aliasURL, buildOptions(config))
 
         .then(function (data) {
 
-            var lines = igv.splitLines(data),
+            var lines = splitLines(data),
                 aliases = [];
 
             lines.forEach(function (line) {

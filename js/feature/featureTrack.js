@@ -28,8 +28,11 @@ import TrackBase from "../trackBase";
 import BWSource from "../bigwig/bwSource";
 import IGVGraphics from "../igv-canvas";
 import IGVColor from "../igv-color";
+import {createCheckbox} from "../igv-icons";
+import {extend} from "../util/igvUtils";
+import GtexUtils from "../gtex/gtexUtils";
 
-const FeatureTrack = igv.extend(TrackBase,
+const FeatureTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -174,44 +177,29 @@ FeatureTrack.prototype.draw = function (options) {
     IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     if (featureList) {
-
-        const selectedFeatureName = igv.selectedGene ? igv.selectedGene.toUpperCase() : undefined;
-
-        let selectedFeature;
         let lastPxEnd = [];
-
         for (let feature of featureList) {
-
             if (feature.end < bpStart) continue;
             if (feature.start > bpEnd) break;
 
-            if (!selectedFeature && selectedFeatureName && selectedFeatureName === feature.name.toUpperCase()) {
-                selectedFeature = feature;
-            } else {
-                const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
-                const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-                const last = lastPxEnd[row];
-                if (!last || pxEnd > last) {
-                    self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+            const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
+            const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
+            const last = lastPxEnd[row];
+            if (!last || pxEnd > last) {
+                self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
-                    // Ensure a visible gap between features
-                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                    if (last && pxStart - last <= 0) {
-                        ctx.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        ctx.globalAlpha = 1.0
-                    }
-                    lastPxEnd[row] = pxEnd;
+                // Ensure a visible gap between features
+                const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                if (last && pxStart - last <= 0) {
+                    ctx.globalAlpha = 0.5
+                    IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                    ctx.globalAlpha = 1.0
                 }
+                lastPxEnd[row] = pxEnd;
+
             }
         }
 
-        if (selectedFeature) {
-            const c = selectedFeature.color;
-            selectedFeature.color = "rgb(255,0,0)";
-            self.render.call(this, selectedFeature, bpStart, bpPerPixel, pixelHeight, ctx, options);
-            selectedFeature.color = c;
-        }
     } else {
         console.log("No feature list");
     }
@@ -276,7 +264,7 @@ FeatureTrack.prototype.menuItemList = function () {
     if (this.render === renderSnp) {
         (["function", "class"]).forEach(function (colorScheme) {
             menuItems.push({
-                object: igv.createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
+                object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
                 click: function () {
                     self.colorBy = colorScheme;
                     self.trackView.repaintViews();
@@ -300,7 +288,7 @@ FeatureTrack.prototype.menuItemList = function () {
 
         menuItems.push(
             {
-                object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
                 click: function () {
                     self.displayMode = displayMode;
                     self.config.displayMode = displayMode;
@@ -555,9 +543,7 @@ function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, window
     var geneColor, geneFontStyle, transform,
         boxX, boxX1,    // label should be centered between these two x-coordinates
         labelX, labelY,
-        textFitsInBox,
-        selectedFeatureName = igv.selectedGene ? igv.selectedGene.toUpperCase() : undefined;    // <= for juicebox
-
+        textFitsInBox;
     // feature outside of viewable window
     if (featureX1 < windowX || featureX > windowX1) {
         boxX = featureX;
@@ -568,7 +554,7 @@ function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, window
         boxX1 = Math.min(featureX1, windowX1);
     }
 
-    if (genomicState.selection && igv.GtexUtils.gtexLoaded && feature.name !== undefined) {
+    if (genomicState.selection && GtexUtils.gtexLoaded && feature.name !== undefined) {
         // TODO -- for gtex, figure out a better way to do this
         geneColor = genomicState.selection.colorForGene(feature.name);
     }
@@ -576,7 +562,7 @@ function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, window
 
     textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
 
-    if ((feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
+    if (//(feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
         ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
         geneFontStyle = {
             // font: '10px PT Sans',

@@ -27,8 +27,12 @@ import FeatureSource from './featureSource';
 import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
 import IGVMath from "../igv-math";
+import {createCheckbox} from "../igv-icons";
+import {GradientColorScale} from "../util/colorScale";
+import {extend} from "../util/igvUtils";
+import {isSimpleType} from "../util/igvUtils";
 
-const SegTrack = igv.extend(TrackBase,
+const SegTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -42,7 +46,7 @@ const SegTrack = igv.extend(TrackBase,
 
 
         this.posColorScale = config.posColorScale ||
-            new igv.GradientColorScale(
+            new GradientColorScale(
                 {
                     low: 0.1,
                     lowR: 255,
@@ -55,7 +59,7 @@ const SegTrack = igv.extend(TrackBase,
                 }
             );
         this.negColorScale = config.negColorScale ||
-            new igv.GradientColorScale(
+            new GradientColorScale(
                 {
                     low: -1.5,
                     lowR: 0,
@@ -99,7 +103,7 @@ SegTrack.prototype.menuItemList = function () {
     ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
         menuItems.push(
             {
-                object: igv.createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
                 click: function () {
                     self.displayMode = displayMode;
                     self.config.displayMode = displayMode;
@@ -208,7 +212,7 @@ SegTrack.prototype.draw = function (options) {
             const pw = Math.max(1, px1 - px);
 
             // const sign = px < 0 ? '-' : '+';
-            // console.log('start ' + sign + igv.numberFormatter(Math.abs(px)) + ' width ' + igv.numberFormatter(pw) + ' end ' + igv.numberFormatter(px + pw));
+            // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
 
             ctx.fillStyle = color;
 
@@ -374,7 +378,7 @@ SegTrack.prototype.popupData = function (clickState, featureList) {
 
         for (let property of Object.keys(f)) {
 
-            if (!filteredProperties.has(property) && igv.isSimpleType(f[property])) {
+            if (!filteredProperties.has(property) && isSimpleType(f[property])) {
                 data.push({name: property, value: f[property]});
             }
         }

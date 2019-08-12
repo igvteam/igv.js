@@ -29,6 +29,7 @@
 
 import IGVGraphics from "./igv-canvas";
 import IGVColor from "./igv-color";
+import {translateMouseCoordinates} from "./util/domUtils";
 
 const IdeoPanel = function ($parent, panelWidth, browser) {
     this.browser = browser;
@@ -415,7 +416,7 @@ function setupCanvasSize(panel) {
 
 function clickHandler(browser, panel, e) {
 
-    const xy = igv.translateMouseCoordinates(e, panel.$ideogram.get(0));
+    const xy = translateMouseCoordinates(e, panel.$ideogram.get(0));
 
     let referenceFrame = panel.genomicState.referenceFrame;
 

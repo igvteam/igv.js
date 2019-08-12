@@ -29,6 +29,9 @@ import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
 import igvxhr from "../igvxhr";
 import  {unbgzf, bgzBlockSize} from './bgzf';
+import {isString} from "../util/stringUtils";
+import {decodeDataURI} from "../util/uriUtils";
+import {buildOptions} from "../util/igvUtils";
 
 /**
  * Class for reading a bam file
@@ -44,7 +47,7 @@ const BamReaderNonIndexed = function (config, genome) {
 
     this.bamPath = config.url;
 
-    this.isDataUri = igv.isString(config.url) && config.url.startsWith("data:");
+    this.isDataUri = isString(config.url) && config.url.startsWith("data:");
 
     BamUtils.setReaderDefaults(this, config);
 
@@ -69,7 +72,7 @@ BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
             parseAlignments(new Uint8Array(unc));
             return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
         } else {
-            return igvxhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config))
+            return igvxhr.loadArrayBuffer(self.bamPath, buildOptions(self.config))
 
                 .then(function (arrayBuffer) {
 
@@ -119,26 +122,26 @@ BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
 
 };
-
-function decodeDataURI(dataURI) {
-    var bytes,
-        split = dataURI.split(','),
-        info = split[0].split(':')[1],
-        dataString = split[1];
-
-    if (info.indexOf('base64') >= 0) {
-        dataString = atob(dataString);
-    } else {
-        dataString = decodeURI(dataString);
-    }
-
-    bytes = new Uint8Array(dataString.length);
-    for (var i = 0; i < dataString.length; i++) {
-        bytes[i] = dataString.charCodeAt(i);
-    }
-
-    return bytes;
-}
+//
+// function decodeDataURI(dataURI) {
+//     var bytes,
+//         split = dataURI.split(','),
+//         info = split[0].split(':')[1],
+//         dataString = split[1];
+//
+//     if (info.indexOf('base64') >= 0) {
+//         dataString = atob(dataString);
+//     } else {
+//         dataString = decodeURI(dataString);
+//     }
+//
+//     bytes = new Uint8Array(dataString.length);
+//     for (var i = 0; i < dataString.length; i++) {
+//         bytes[i] = dataString.charCodeAt(i);
+//     }
+//
+//     return bytes;
+// }
 
 
 export default BamReaderNonIndexed;

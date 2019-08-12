@@ -23,10 +23,8 @@
  * THE SOFTWARE.
  */
 
-import   {
-    ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
-    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
-} from './ga4ghHelper';
+import   {ga4ghGet, ga4ghSearch} from './ga4ghHelper';
+import {createGAVariant} from "../variant/variant";
 
 const Ga4ghVariantReader = function (config, genome) {
 
@@ -133,7 +131,7 @@ const Ga4ghVariantReader = function (config, genome) {
 
                         json.variants.forEach(function (json) {
 
-                            v = igv.createGAVariant(json);
+                            v = createGAVariant(json);
 
                             if (!v.isRefBlock()) {
                                 variants.push(v);

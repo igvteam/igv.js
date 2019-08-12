@@ -27,8 +27,12 @@ import FeatureSource from '../feature/featureSource';
 import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
 import IGVMath from "../igv-math";
+import {dataRangeMenuItem} from "../util/menuUtils";
+import {createCheckbox} from "../igv-icons";
+import {extend} from "../util/igvUtils";
+import GtexUtils from "./gtexUtils";
 
-const EqtlTrack = igv.extend(TrackBase,
+const EqtlTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -69,7 +73,7 @@ const EqtlTrack = igv.extend(TrackBase,
 
         this.featureSource = new FeatureSource(config, browser.genome);
 
-        igv.GtexUtils.gtexLoaded = true;
+        GtexUtils.gtexLoaded = true;
 
     });
 
@@ -278,10 +282,10 @@ EqtlTrack.prototype.menuItemList = function () {
     var self = this,
         menuItems = [];
 
-    menuItems.push(igv.dataRangeMenuItem(this.trackView));
+    menuItems.push(dataRangeMenuItem(this.trackView));
 
     menuItems.push({
-        object: igv.createCheckbox("Autoscale", self.autoscale),
+        object: createCheckbox("Autoscale", self.autoscale),
         click: function () {
             var $fa = $(this).find('i');
 

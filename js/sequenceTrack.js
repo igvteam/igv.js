@@ -24,6 +24,7 @@
  */
 
 import IGVGraphics from "./igv-canvas";
+import {nucleotideColors} from "./util/colorPalletes";
 
 const SequenceTrack = function (config, browser) {
 
@@ -298,7 +299,7 @@ function fillColor(index) {
     if (this.color) {
         return this.color;
     } else if ("dna" === this.sequenceType) {
-        return igv.nucleotideColors[index] || 'gray';
+        return nucleotideColors[index] || 'gray';
     } else {
         return 'rgb(0, 0, 150)';
     }

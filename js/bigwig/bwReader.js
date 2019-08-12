@@ -27,6 +27,8 @@ import BufferedReader from "./bufferedReader";
 import BinaryParser from "../binary";
 import IGVColor from "../igv-color";
 import igvxhr from "../igvxhr";
+import Zlib from "../../vendor/zlib_and_gzip";
+import {buildOptions} from "../util/igvUtils";
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26; // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66; // BigWig Magic High to Low
@@ -124,7 +126,7 @@ BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPix
 
                 const size = end - start;
 
-                return igvxhr.loadArrayBuffer(self.config.url, igv.buildOptions(self.config, {
+                return igvxhr.loadArrayBuffer(self.config.url, buildOptions(self.config, {
                     range: {
                         start: start,
                         size: size
@@ -187,7 +189,7 @@ BWReader.prototype.loadHeader = function () {
     if (self.header) {
         return Promise.resolve(self.header);
     } else {
-        return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {
+        return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
             range: {
                 start: 0,
                 size: BBFILE_HEADER_SIZE
@@ -259,7 +261,7 @@ BWReader.prototype.loadHeader = function () {
 
         let range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
 
-        return igvxhr.loadArrayBuffer(self.path, igv.buildOptions(self.config, {range: range}))
+        return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: range}))
 
             .then(function (data) {
 

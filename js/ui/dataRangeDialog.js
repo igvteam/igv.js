@@ -25,6 +25,7 @@
  */
 
 import makeDraggable from "./draggable";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils";
 
 const DataRangeDialog = function ($parent, browser) {
     var self = this,
@@ -42,7 +43,7 @@ const DataRangeDialog = function ($parent, browser) {
     // dialog header
     $header = $("<div>", {class: 'igv-generic-dialog-header'});
     this.$container.append($header);
-    igv.attachDialogCloseHandlerWithParent($header, function () {
+    attachDialogCloseHandlerWithParent($header, function () {
         self.$minimum_input.val(undefined);
         self.$maximum_input.val(undefined);
         self.$container.offset({left: 0, top: 0});

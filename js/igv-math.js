@@ -105,47 +105,6 @@ const IGVMath = {
 
 };
 
-igv.Rect = {
-
-    make: function (x, y, width, height) {
-        var r;
-
-        r = this.makeRectZero();
-
-        r.origin.x = x;
-        r.origin.y = y;
-
-        r.size.width = width;
-        r.size.height = height;
-
-        return r;
-    },
-
-    makeRectZero: function () {
-        return {origin: {x: 0, y: 0}, size: {width: 0, height: 0}};
-    },
-
-    makeWithCenterAndSize: function (center, size) {
-        var halfSize,
-            r;
-
-        halfSize = this.makeSize(size.width / 2.0, size.height / 2.0);
-
-        r = this.make(center.x - halfSize.width, center.y - halfSize.height, size.width, size.height);
-
-        return r;
-    },
-
-    makePoint: function (x, y) {
-        return {x: x, y: y};
-    },
-
-    makeSize: function (width, height) {
-        return {width: width, height: height};
-    }
-
-};
-
 function selectElement(array, k) {
 
     // Credit Steve Hanov http://stevehanov.ca/blog/index.php?id=122

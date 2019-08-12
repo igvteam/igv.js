@@ -23,6 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import {createIcon} from "../igv-icons";
 
 const ZoomWidget = function (browser, $parent) {
 
@@ -35,7 +36,7 @@ const ZoomWidget = function (browser, $parent) {
     $div = $('<div>');
     this.$zoomContainer.append($div);
 
-    $div.append(igv.createIcon("minus-circle"));
+    $div.append(createIcon("minus-circle"));
 
     $div.on('click', function () {
         browser.zoomOut();
@@ -56,7 +57,7 @@ const ZoomWidget = function (browser, $parent) {
     $div = $('<div>');
     this.$zoomContainer.append($div);
 
-    $div.append(igv.createIcon("plus-circle"));
+    $div.append(createIcon("plus-circle"));
 
     $div.on('click', function () {
         browser.zoomIn();

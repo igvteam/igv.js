@@ -45,7 +45,7 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
             const {bp, start, end, interpolant} = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, browser);
 
-            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + igv.numberFormatter(bp) + ' start ' + igv.numberFormatter(start) + ' end ' + igv.numberFormatter(end));
+            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + numberFormatter(bp) + ' start ' + numberFormatter(start) + ' end ' + numberFormatter(end));
 
             if (this.customMouseHandler) {
                 this.customMouseHandler({bp, start, end, interpolant});
@@ -75,13 +75,13 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
 
     // pixel location of guide line
-    const guideParentMouseXY = igv.getMouseXY($guideParent.get(0), event);
+    const guideParentMouseXY = getMouseXY($guideParent.get(0), event);
     const left = guideParentMouseXY.x + 'px';
     $guideLine.css({left: left});
 
 
     // base-pair location of guide line
-    const viewportContentMouseXY = igv.getMouseXY($viewportContent.get(0), event);
+    const viewportContentMouseXY = getMouseXY($viewportContent.get(0), event);
 
     const index = $viewportContent.data('genomicStateIndex');
 
@@ -95,7 +95,7 @@ let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) 
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
     const $trackContainer = $viewportContent.closest('.igv-track-container-div');
-    const trackContainerMouseXY = igv.getMouseXY($trackContainer.get(0), event);
+    const trackContainerMouseXY = getMouseXY($trackContainer.get(0), event);
 
 
     return {
@@ -142,6 +142,24 @@ CursorGuide.prototype.enable = function () {
     if (this.$button) {
         this.$button.show();
     }
+};
+
+function getMouseXY(domElement, event) {
+
+    // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height
+    const dr = domElement.getBoundingClientRect();
+
+    const xy =
+        {
+            x: event.clientX - dr.left,
+            y: event.clientY - dr.top,
+            xNormalized: (event.clientX - dr.left)/dr.width,
+            yNormalized: (event.clientY - dr.top)/dr.height,
+            width: dr.width,
+            height: dr.height
+        };
+
+    return xy;
 };
 
 export default CursorGuide;

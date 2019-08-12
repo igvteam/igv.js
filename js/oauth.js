@@ -81,8 +81,10 @@ const oauth = {
  *
  * @param token
  */
-igv.setGoogleOauthToken = function (token) {
-    oauth.google.access_token = token;
+if(typeof igv !== 'undefined') {
+    igv.setGoogleOauthToken = function (token) {
+        oauth.google.access_token = token;
+    }
 }
 
 

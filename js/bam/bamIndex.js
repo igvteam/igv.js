@@ -3,6 +3,8 @@
 
 import BinaryParser from "../binary";
 import igvxhr from "../igvxhr";
+import Zlib from "../../vendor/zlib_and_gzip";
+import {buildOptions} from "../util/igvUtils";
 
 const BAI_MAGIC = 21578050;
 const TABIX_MAGIC = 21578324;
@@ -18,7 +20,7 @@ const MAX_GZIP_BLOCK_SIZE = (1 << 16);
  */
 async function loadBamIndex(indexURL, config, tabix, genome) {
 
-    let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, igv.buildOptions(config))
+    let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
 
     var indices = [],
         magic, nbin, nintv, nref, parser,

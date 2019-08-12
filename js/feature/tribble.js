@@ -25,6 +25,7 @@
 
 import BinaryParser from "../binary";
 import igvxhr from "../igvxhr";
+import {buildOptions} from "../util/igvUtils";
 
 /**
  *
@@ -37,7 +38,7 @@ function loadTribbleIndex(indexFile, config, genome) {
     return new Promise(function (fullfill) {
 
         igvxhr
-            .loadArrayBuffer(indexFile, igv.buildOptions(config))
+            .loadArrayBuffer(indexFile, buildOptions(config))
             .then(function (arrayBuffer) {
 
                 if (arrayBuffer) {

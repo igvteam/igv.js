@@ -24,10 +24,12 @@
  */
 
 // Indexed fasta files
-
+import Zlib from "../../vendor/zlib_and_gzip";
 import GenomicInterval from "./genomicInterval";
 import Chromosome from "./chromosome";
 import igvxhr from "../igvxhr";
+import {splitLines} from "../util/stringUtils";
+import {buildOptions} from "../util/igvUtils";
 
 const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
 
@@ -153,11 +155,11 @@ FastaSequence.prototype.getIndex = function () {
         return Promise.resolve(this.index);
     } else {
         const self = this;
-        return igvxhr.load(self.indexFile, igv.buildOptions(self.config))
+        return igvxhr.load(self.indexFile, buildOptions(self.config))
 
             .then(function (data) {
 
-                const lines = igv.splitLines(data);
+                const lines = splitLines(data);
                 const len = lines.length;
                 let lineNo = 0;
                 let order = 0;
@@ -202,13 +204,13 @@ FastaSequence.prototype.loadAll = function () {
     if (this.isDataURI) {
         return Promise.resolve(parseFasta(this.file));
     } else {
-        return igvxhr.load(self.file, igv.buildOptions(self.config))
+        return igvxhr.load(self.file, buildOptions(self.config))
             .then(parseFasta)
     }
 
     function parseFasta(data) {
 
-        var lines = igv.splitLines(data),
+        var lines = splitLines(data),
             len = lines.length,
             lineNo = 0,
             nextLine,
@@ -316,7 +318,7 @@ FastaSequence.prototype.readSequence = function (chr, qstart, qend) {
                     console.error("No sequence for " + chr + ":" + qstart + "-" + qend)
                     return "";
                 } else {
-                    return igvxhr.load(self.file, igv.buildOptions(self.config, {
+                    return igvxhr.load(self.file, buildOptions(self.config, {
                         range: {
                             start: startByte,
                             size: byteCount

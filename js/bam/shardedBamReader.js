@@ -26,6 +26,7 @@
 import BamReader from "./bamReader";
 import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
+import {getBrowser} from "../igv-create";
 
 const ShardedBamReader = function (config, genome) {
 
@@ -85,7 +86,7 @@ ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
 
             .catch(function (error) {
                 console.error(error);
-                igv.browser.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                getBrowser().presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                 self.bamReaders[queryChr] = "none";
                 return new AlignmentContainer(chr, start, end);   // Empty alignment container
             })

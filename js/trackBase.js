@@ -24,6 +24,8 @@
  */
 
 import FeatureUtils from "./feature/featureUtils";
+import {isFilePath} from './util/fileUtils'
+import {isSimpleType} from "./util/igvUtils";
 
 /**
  * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
@@ -49,7 +51,7 @@ const TrackBase = function (config, browser) {
     if (config.name) {
         this.name = config.name;
     } else {
-        if (igv.isFilePath(config.url)) this.name = config.url.name;
+        if (isFilePath(config.url)) this.name = config.url.name;
         else this.name = config.url;
     }
 
@@ -87,7 +89,7 @@ TrackBase.prototype.getState = function () {
 
     Object.keys(config).forEach(function (key) {
         const value = self[key];
-        if (value && (igv.isSimpleType(value) || typeof value === "boolean")) {
+        if (value && (isSimpleType(value) || typeof value === "boolean")) {
             config[key] = value;
         }
     })
@@ -173,7 +175,7 @@ TrackBase.extractPopupData = function (feature, genomeId) {
     for (var property in feature) {
 
         if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
-            igv.isSimpleType(feature[property])) {
+            isSimpleType(feature[property])) {
 
             data.push({name: property, value: feature[property]});
 

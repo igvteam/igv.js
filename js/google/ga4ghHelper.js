@@ -113,7 +113,7 @@ function ga4ghSearch(options) {
 
 function ga4ghSearchReadGroupSets(options) {
 
-    igv.ga4ghSearch({
+    ga4ghSearch({
         url: options.url + "/readgroupsets/search",
         body: {
             "datasetIds": [options.datasetId],
@@ -132,7 +132,7 @@ function ga4ghSearchReadGroupSets(options) {
 
 function ga4ghSearchVariantSets(options) {
 
-    igv.ga4ghSearch({
+    ga4ghSearch({
         url: options.url + "/variantsets/search",
         body: {
             "datasetIds": [options.datasetId],
@@ -153,7 +153,7 @@ function ga4ghSearchCallSets(options) {
     // When searching by dataset id, first must get variant sets.
     if (options.datasetId) {
 
-        igv.ga4ghSearchVariantSets({
+        ga4ghSearchVariantSets({
 
             url: options.url,
             datasetId: options.datasetId,
@@ -167,7 +167,7 @@ function ga4ghSearchCallSets(options) {
                 // Substitute variantSetIds for datasetId
                 options.datasetId = undefined;
                 options.variantSetIds = variantSetIds;
-                igv.ga4ghSearchCallSets(options);
+                ga4ghSearchCallSets(options);
 
 
             }
@@ -175,7 +175,7 @@ function ga4ghSearchCallSets(options) {
 
     } else {
 
-        igv.ga4ghSearch({
+        ga4ghSearch({
             url: options.url + "/callsets/search",
             body: {
                 "variantSetIds": options.variantSetIds,
@@ -199,11 +199,11 @@ function ga4ghSearchCallSets(options) {
 
 function ga4ghSearchReadAndCallSets(options) {
 
-    igv.ga4ghSearchReadGroupSets({
+    ga4ghSearchReadGroupSets({
         url: options.url,
         datasetId: options.datasetId,
         success: function (readGroupSets) {
-            igv.ga4ghSearchCallSets({
+            ga4ghSearchCallSets({
                 url: options.url,
                 datasetId: options.datasetId,
                 success: function (callSets) {

@@ -1,4 +1,5 @@
-import ig from "../../js/igv-create.js";
+import {createBrowser} from "../../js/igv-create";
+import GtexUtils from "../../js/gtex/gtexUtils";
 
 // const options =
 //     {
@@ -43,7 +44,7 @@ google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_goo
 
             };
 
-        ig.createBrowser(document.getElementById('igvDiv'), options)
+        createBrowser(document.getElementById('igvDiv'), options)
             .then(function (b) {
                 browser = b;
 
@@ -88,7 +89,7 @@ function createTrackList(div, file, browser) {
 
             })
 
-            return igv.GtexUtils.getTissueInfo("gtex_v7")
+            return GtexUtils.getTissueInfo("gtex_v7")
         })
 
         .then(function (json) {

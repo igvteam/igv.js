@@ -30,8 +30,12 @@ import BWSource from "../bigwig/bwSource";
 import IGVGraphics from "../igv-canvas";
 import paintAxis from "../util/paintAxis";
 import IGVColor from "../igv-color";
+import {dataRangeMenuItem} from "../util/menuUtils";
+import {createCheckbox} from "../igv-icons";
+import {numberFormatter} from "../util/stringUtils";
+import {extend} from "../util/igvUtils";
 
-const WigTrack = igv.extend(TrackBase,
+const WigTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -88,10 +92,10 @@ WigTrack.prototype.menuItemList = function () {
     var self = this,
         menuItems = [];
 
-    menuItems.push(igv.dataRangeMenuItem(this.trackView));
+    menuItems.push(dataRangeMenuItem(this.trackView));
 
     menuItems.push({
-        object: igv.createCheckbox("Autoscale", self.autoscale),
+        object: createCheckbox("Autoscale", self.autoscale),
         click: function () {
             var $fa = $(this).find('i');
 
@@ -201,7 +205,7 @@ WigTrack.prototype.draw = function (options) {
             const px = x + width / 2;
 
             if (isNaN(x)) {
-                console.log('isNaN(x). feature start ' + igv.numberFormatter(feature.start) + ' bp start ' + igv.numberFormatter(bpStart));
+                console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
             } else {
                 IGVGraphics.fillCircle(ctx, px, py, pointSize / 2);
             }
@@ -245,12 +249,12 @@ WigTrack.prototype.popupData = function (clickState, features) {
 
         if (selectedFeature) {
             let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                igv.numberFormatter(selectedFeature.start + 1)
-                : igv.numberFormatter(selectedFeature.start + 1) + "-" + igv.numberFormatter(selectedFeature.end);
+                numberFormatter(selectedFeature.start + 1)
+                : numberFormatter(selectedFeature.start + 1) + "-" + numberFormatter(selectedFeature.end);
             popupData.push({name: "Position:", value: posString});
             popupData.push({
                 name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                value: igv.numberFormatter(selectedFeature.value)
+                value: numberFormatter(selectedFeature.value)
             });
         }
 

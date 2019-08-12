@@ -22,6 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import {createIcon} from "../igv-icons";
 
 const UserFeedback = function ($parent) {
 
@@ -36,14 +37,14 @@ const UserFeedback = function ($parent) {
     let $exclamation = $('<div>');
     $header.append($exclamation);
 
-    let $a = igv.createIcon("exclamation-triangle", 'red');
+    let $a = createIcon("exclamation-triangle", 'red');
     $exclamation.append($a);
 
     // dismiss
     let $dismiss = $('<div>');
     $header.append($dismiss);
 
-    let $b = igv.createIcon("times-circle", 'grey');
+    let $b = createIcon("times-circle", 'grey');
     $dismiss.append($b);
 
     // body copy

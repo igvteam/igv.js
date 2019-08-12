@@ -25,6 +25,7 @@
 
 import getDataWrapper from "./dataWrapper";
 import IGVColor from "../igv-color";
+import {getFormat} from "../util/trackUtils";
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -144,7 +145,7 @@ const FeatureParser = function (format, decode, config) {
                 break;
             default:
 
-                customFormat = igv.getFormat(this.format);
+                customFormat = getFormat(this.format);
                 if (customFormat !== undefined) {
                     this.decode = decodeCustom;
                     this.format = customFormat;

@@ -25,10 +25,9 @@
 
 import makeDraggable from "./draggable";
 
-const AlertDialog = function ($parent, browser) {
+const AlertDialog = function ($parent) {
 
     this.$parent = $parent;
-    this.browser = browser;
 
     // container
     this.$container = $("<div>", {class: 'igv-alert-dialog-container'});
@@ -48,7 +47,7 @@ const AlertDialog = function ($parent, browser) {
     $div.append(this.$body);
 
     let self = this;
-    // igv.attachDialogCloseHandlerWithParent($header, function () {
+    // attachDialogCloseHandlerWithParent($header, function () {
     //     self.$body.html('');
     //     self.$container.offset( { left:0, top:0 } );
     //     self.$container.hide();

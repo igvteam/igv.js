@@ -29,6 +29,12 @@ import RulerTrack from "./rulerTrack";
 import TrackGearPopover from "./ui/trackGearPopover";
 import GenericContainer from "./ui/genericContainer";
 import IGVColor from "./igv-color";
+import {trackMenuItemList} from "./util/menuUtils";
+import {createIcon} from "./igv-icons";
+import {pageCoordinates, guid} from "./util/domUtils";
+import {appleCrayonPalette} from "./util/colorPalletes";
+import {doAutoscale} from "./util/igvUtils";
+
 
 var dragged,
     dragDestination;
@@ -37,9 +43,7 @@ const TrackView = function (browser, $container, track) {
 
     var self = this,
         width,
-        $track,
-        config,
-        guid;
+        $track;
 
     this.browser = browser;
     this.track = track;
@@ -49,8 +53,7 @@ const TrackView = function (browser, $container, track) {
     this.trackDiv = $track.get(0);
     $container.append($track);
 
-    guid = igv.guid();
-    this.namespace = '.trackview_' + guid;
+    this.namespace = '.trackview_' + guid();
 
     if (this.track instanceof RulerTrack) {
         this.trackDiv.dataset.rulerTrack = "rulerTrack";
@@ -84,7 +87,7 @@ const TrackView = function (browser, $container, track) {
     if (true === this.track.ignoreTrackMenu) {
         // do nothing
     } else {
-        igv.appendRightHandGutter.call(this, $(this.trackDiv));
+        appendRightHandGutter.call(this, $(this.trackDiv));
     }
 
     if (this.track instanceof RulerTrack) {
@@ -194,20 +197,18 @@ function appendLeftHandGutter($parent) {
     resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
 }
 
-igv.appendRightHandGutter = function ($parent) {
-
+function appendRightHandGutter($parent) {
     let $div = $('<div class="igv-right-hand-gutter">');
     $parent.append($div);
+    createTrackGearPopover.call(this, $div);
+}
 
-    igv.createTrackGearPopover.call(this, $div);
-};
-
-igv.createTrackGearPopover = function ($parent) {
+function createTrackGearPopover($parent) {
 
     let $cogContainer = $("<div>", {class: 'igv-trackgear-container'});
     $parent.append($cogContainer);
 
-    $cogContainer.append(igv.createIcon('cog'));
+    $cogContainer.append(createIcon('cog'));
 
     this.trackGearPopover = new TrackGearPopover($parent);
     this.trackGearPopover.$popover.hide();
@@ -216,10 +217,10 @@ igv.createTrackGearPopover = function ($parent) {
     $cogContainer.click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
+        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, trackMenuItemList(self));
     });
 
-};
+}
 
 function resizeControlCanvas(width, height) {
 
@@ -336,7 +337,7 @@ TrackView.prototype.createColorPicker = function () {
 
     this.colorPicker = new GenericContainer(config);
 
-    igv.createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
+    createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
 
     self.colorPicker.$container.hide();
 
@@ -478,7 +479,7 @@ TrackView.prototype.updateViews = async function (force) {
         if (typeof this.track.doAutoscale === 'function') {
             this.track.doAutoscale(allFeatures);
         } else {
-            this.track.dataRange = igv.doAutoscale(allFeatures);
+            this.track.dataRange = doAutoscale(allFeatures);
         }
     }
 
@@ -653,9 +654,9 @@ TrackView.prototype.scrollBy = function (delta) {
     this.scrollbar.moveScrollerBy(delta);
 };
 
-igv.createColorSwatchSelector = function ($genericContainer, colorHandler, defaultColor) {
+function createColorSwatchSelector($genericContainer, colorHandler, defaultColor) {
 
-    let appleColors = Object.values(igv.appleCrayonPalette);
+    let appleColors = Object.values(appleCrayonPalette);
 
     if (defaultColor && !(typeof defaultColor === 'function')) {
 
@@ -706,8 +707,7 @@ const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
     const self = this;
     let lastY;
 
-    const guid = igv.guid();
-    const namespace = '.trackscrollbar' + guid;
+    const namespace = '.trackscrollbar' + guid();
     this.namespace = namespace;
 
     const $outerScroll = $('<div class="igv-scrollbar-outer-div">');
@@ -735,7 +735,7 @@ const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
 
         event.preventDefault();
 
-        const page = igv.pageCoordinates(event);
+        const page = pageCoordinates(event);
 
         lastY = page.y;
 
@@ -752,7 +752,7 @@ const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
         event.preventDefault();
         event.stopPropagation();
 
-        const page = igv.pageCoordinates(event);
+        const page = pageCoordinates(event);
         self.moveScrollerBy(page.y - lastY);
         lastY = page.y;
 
@@ -813,5 +813,5 @@ TrackScrollbar.prototype.update = function () {
         this.$outerScroll.hide();
     }
 };
-    
+
 export default TrackView

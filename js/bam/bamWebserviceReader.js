@@ -27,6 +27,7 @@
 import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
 import igvxhr from "../igvxhr";
+import {buildOptions} from "../util/igvUtils";
 
 /**
  * Class for reading bam records from an igv.js-flask server
@@ -62,7 +63,7 @@ BamWebserviceReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                 "&region=" + queryChr + ":" + bpStart + "-" + bpEnd;
 
 
-            return igvxhr.loadString(url, igv.buildOptions(self.config))
+            return igvxhr.loadString(url, buildOptions(self.config))
 
                 .then(function (sam) {
 
@@ -95,7 +96,7 @@ function getHeader() {
     } else {
 
         const url = this.config.url + "?file=" + this.config.alignmentFile + "&options=-b,-H";
-        const options = igv.buildOptions(this.config);
+        const options = buildOptions(this.config);
 
         return BamUtils.readHeader(url, options, genome)
 

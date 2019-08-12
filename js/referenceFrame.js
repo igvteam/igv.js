@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {numberFormatter} from "./util/stringUtils";
+
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
 const ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
@@ -89,14 +91,14 @@ ReferenceFrame.prototype.showLocus = function (pixels) {
     if ('all' === this.chrName.toLowerCase()) {
         return this.chrName.toLowerCase();
     } else {
-        const ss = igv.numberFormatter(Math.floor(this.start) + 1);
-        const ee = igv.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+        const ss = numberFormatter(Math.floor(this.start) + 1);
+        const ee = numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
         return this.chrName + ':' + ss + '-' + ee;
     }
 };
 
 ReferenceFrame.prototype.description = function () {
-    return "ReferenceFrame " + this.chrName + " " + igv.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
+    return "ReferenceFrame " + this.chrName + " " + numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
 };
 
 

@@ -29,6 +29,10 @@ import VcfParser from "../variant/vcfParser";
 import loadBamIndex from "../bam/bamIndex";
 import igvxhr from "../igvxhr";
 import  {unbgzf, bgzBlockSize} from '../bam/bgzf';
+import {isFilePath} from '../util/fileUtils'
+import {isString} from "../util/stringUtils";
+import {parseUri, decodeDataURI} from "../util/uriUtils";
+import {buildOptions} from "../util/igvUtils";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -47,13 +51,13 @@ const FeatureFileReader = function (config, genome) {
     this.indexURL = config.indexURL;
     this.indexed = config.indexed;
 
-    if (igv.isFilePath(this.config.url)) {
+    if (isFilePath(this.config.url)) {
         this.filename = this.config.url.name;
-    } else if (igv.isString(this.config.url) && this.config.url.startsWith('data:')) {
+    } else if (isString(this.config.url) && this.config.url.startsWith('data:')) {
         this.indexed = false;  // by definition
         this.dataURI = config.url;
     } else {
-        uriParts = igv.parseUri(this.config.url);
+        uriParts = parseUri(this.config.url);
         this.filename = config.filename || uriParts.file;
     }
 
@@ -103,7 +107,7 @@ FeatureFileReader.prototype.readHeader = async function () {
 
                 let maxSize = "vcf" === this.config.format ? 65000 : 1000
                 if (index.tabix) {
-                    const bsizeOptions = igv.buildOptions(this.config, {
+                    const bsizeOptions = buildOptions(this.config, {
                         range: {
                             start: index.firstAlignmentBlock,
                             size: 26
@@ -116,7 +120,7 @@ FeatureFileReader.prototype.readHeader = async function () {
 
                 }
 
-                const options = igv.buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
 
                 const data = await igvxhr.loadString(this.config.url, options)
                 header = this.parser.parseHeader(data);
@@ -181,7 +185,7 @@ FeatureFileReader.prototype.loadIndex = function () {
 
 FeatureFileReader.prototype.loadFeaturesNoIndex = async function () {
 
-    const options = igv.buildOptions(this.config);    // Add oauth token, if any
+    const options = buildOptions(this.config);    // Add oauth token, if any
     const data = await igvxhr.loadString(this.config.url, options)
 
     this.header = this.parser.parseHeader(data);
@@ -220,7 +224,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                 if (tabix) {
                     let lastBlockSize = 0
                     if (endOffset > 0) {
-                        const bsizeOptions = igv.buildOptions(config, {
+                        const bsizeOptions = buildOptions(config, {
                             range: {
                                 start: block.maxv.block,
                                 size: 26
@@ -234,7 +238,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                     endPos = block.maxv.block;
                 }
 
-                const options = igv.buildOptions(config, {
+                const options = buildOptions(config, {
                     range: {
                         start: startPos,
                         size: endPos - startPos + 1
@@ -324,7 +328,7 @@ FeatureFileReader.prototype.getIndex = function () {
 
 FeatureFileReader.prototype.loadFeaturesFromDataURI = async function () {
 
-    const plain = igv.decodeDataURI(this.dataURI)
+    const plain = decodeDataURI(this.dataURI)
     this.header = this.parser.parseHeader(plain);
     if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
         this.format = 'gff3';

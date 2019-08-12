@@ -29,6 +29,8 @@ import AlignmentContainer from "./alignmentContainer";
 import BamUtils from "./bamUtils";
 import igvxhr from "../igvxhr";
 import  {unbgzf, bgzBlockSize} from './bgzf';
+import {inferIndexPath} from "../util/trackUtils";
+import {buildOptions} from "../util/igvUtils";
 
 const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
 
@@ -47,7 +49,7 @@ const BamReader = function (config, genome) {
     this.bamPath = config.url;
 
     // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-    this.baiPath = config.indexURL || igv.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
+    this.baiPath = config.indexURL || inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
 
     BamUtils.setReaderDefaults(this, config);
 
@@ -80,7 +82,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             if (c.maxv.offset === 0) {
                 lastBlockSize = 0;    // Don't need to read the last block.
             } else {
-                const bsizeOptions = igv.buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
+                const bsizeOptions = buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
                 const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                 lastBlockSize = bgzBlockSize(abuffer)
             }
@@ -88,7 +90,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             const fetchMin = c.minv.block
             const fetchMax = c.maxv.block + lastBlockSize
             const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-            promises.push(igvxhr.loadArrayBuffer(this.bamPath, igv.buildOptions(this.config, {range: range})))
+            promises.push(igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range})))
         }
 
         const compressedChunks = await Promise.all(promises)
@@ -116,12 +118,12 @@ async function getHeader() {
     if (!this.header) {
         const genome = this.genome;
         const index = await getIndex.call(this)
-        const bsizeOptions = igv.buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
+        const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
         const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
         const bsize = bgzBlockSize(abuffer)
 
         const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
-        const options = igv.buildOptions(this.config, {range: {start: 0, size: len}});
+        const options = buildOptions(this.config, {range: {start: 0, size: len}});
         this.header = await BamUtils.readHeader(this.bamPath, options, genome);
     }
     return this.header

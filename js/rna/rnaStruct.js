@@ -28,8 +28,9 @@ import getDataWrapper from "../feature/dataWrapper";
 import TrackBase from "../trackBase";
 import IGVGraphics from "../igv-canvas";
 import igvxhr from "../igvxhr";
+import {extend, buildOptions} from "../util/igvUtils";
 
-const RnaStructTrack = igv.extend(TrackBase,
+const RnaStructTrack = extend(TrackBase,
 
     function (config, browser) {
 
@@ -45,9 +46,9 @@ const RnaStructTrack = igv.extend(TrackBase,
         this.theta = Math.PI / 2;
 
         if ("bp" === config.format) {
-            this.featureSource = new FeatureSource(config, browser.genome);
+            this.featureSource = new RNAFeatureSource(config, browser.genome);
         } else {
-            this.featureSource = new igv.FeatureSource(config, browser.genome);
+            this.featureSource = new RNAFeatureSource(config, browser.genome);
         }
     });
 
@@ -265,20 +266,20 @@ function sortByScore(featureList, direction) {
 }
 
 
-function FeatureSource(config, genome) {
+function RNAFeatureSource(config, genome) {
 
     this.config = config;
     this.genome = genome;
 }
 
-FeatureSource.prototype.getFeatures = function (chr, start, end) {
+RNAFeatureSource.prototype.getFeatures = function (chr, start, end) {
 
     const self = this;
     const genome = this.genome;
 
     if (!this.featureCache) {
 
-        const options = igv.buildOptions(this.config);
+        const options = buildOptions(this.config);
 
         return igvxhr.loadString(self.config.url, options)
 

@@ -4,10 +4,14 @@
 import C2S from "./canvas2svg.js";
 import Popover from "./ui/popover";
 import RulerSweeper from "./rulerSweeper";
+import GenomeUtils from "./genome/genome";
+import {createIcon} from "./igv-icons";
+import {pageCoordinates, translateMouseCoordinates} from "./util/domUtils";
+import {download} from "./util/igvUtils";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
-const ViewPort = function (trackView, $container, genomicState, width) {
+function ViewPort  (trackView, $container, genomicState, width) {
 
     const self = this;
 
@@ -58,7 +62,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
 
         $(this.contentDiv).append(this.$rulerLabel);
 
-        if (true === igv.isWholeGenomeView(this.genomicState.referenceFrame)) {
+        if (true === GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame)) {
             enableRulerTrackMouseHandlers.call(this);
         } else {
             disableRulerTrackMouseHandlers.call(this);
@@ -72,7 +76,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
         // $spinnerContainer.css({'font-size': dimen + 'px'});
 
         this.$spinner = $('<div class="igv-viewport-spinner">');
-        this.$spinner.append(igv.createIcon("spinner"));
+        this.$spinner.append(createIcon("spinner"));
 
         this.$viewport.append(this.$spinner);
         this.stopSpinner();
@@ -95,7 +99,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
         this.$trackLabel = $('<div class="igv-track-label">');
         this.$viewport.append(this.$trackLabel);
 
-        igv.setTrackLabel(this.$trackLabel, trackView.track, trackView.track.name);
+        this.setTrackLabel(trackView.track.name);
 
         if (false === self.browser.trackLabelsVisible) {
             this.$trackLabel.hide();
@@ -112,7 +116,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
                 str = trackView.track.name;
             }
 
-            const page = igv.pageCoordinates(e);
+            const page = pageCoordinates(e);
 
             self.popover.presentTrackContent(page.x, page.y, str);
 
@@ -133,7 +137,7 @@ const ViewPort = function (trackView, $container, genomicState, width) {
 
     }
 
-};
+}
 
 function createZoomInNotice($parent) {
 
@@ -152,6 +156,24 @@ function createZoomInNotice($parent) {
 ViewPort.prototype.isVisible = function () {
     return this.$viewport.width()
 }
+
+
+// UI
+ViewPort.prototype.setTrackLabel = function (label) {
+
+    const $label = this.$trackLabel;
+    const track = this.trackView.track;
+
+    track.name = label;
+    track.config.name = label;
+
+    $label.empty();
+    $label.html(track.name);
+
+    const txt = $label.text();
+    $label.attr('title', txt);
+};
+
 
 ViewPort.prototype.setWidth = function (width) {
     this.$viewport.outerWidth(width);
@@ -292,7 +314,6 @@ ViewPort.prototype.loadFeatures = async function () {
         this.loading = false;
         this.stopSpinner();
     }
-
 }
 
 
@@ -314,7 +335,7 @@ ViewPort.prototype.repaint = function (tile) {
         return;
     }
 
-    const isWGV = igv.isWholeGenomeView(this.genomicState.referenceFrame);
+    const isWGV = GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame);
 
     const features = tile.features;
 
@@ -491,7 +512,7 @@ function enableRulerTrackMouseHandlers() {
     let self = this;
     this.$viewport.on('click' + namespace, (e) => {
 
-        const pixel = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+        const pixel = translateMouseCoordinates(e, self.$viewport.get(0)).x;
         const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
 
         let searchString;
@@ -568,7 +589,7 @@ ViewPort.prototype.saveImage = function () {
     // filename = this.trackView.track.name + ".png";
     const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
     const data = exportCanvas.toDataURL("image/png");
-    igv.download(filename, data);
+    download(filename, data);
 };
 
 ViewPort.prototype.renderSVGContext = function (context, offset) {
@@ -650,7 +671,7 @@ ViewPort.prototype.saveSVG = function () {
     const data = URL.createObjectURL(new Blob([svg], {
         type: "application/octet-stream"
     }));
-    igv.download(filename, data);
+    download(filename, data);
 };
 
 /**
@@ -765,13 +786,13 @@ function addMouseHandlers() {
     this.$viewport.on('mousedown', function (e) {
         self.enableClick = true;
         browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = igv.pageCoordinates(e);
+        mouseDownCoords = pageCoordinates(e);
     });
 
     this.$viewport.on('touchstart', function (e) {
         self.enableClick = true;
         browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = igv.pageCoordinates(e);
+        mouseDownCoords = pageCoordinates(e);
     });
 
     /**
@@ -824,7 +845,7 @@ function addMouseHandlers() {
         // if(!mouseDownCoords) {
         //     return;
         // }
-        // const coords = igv.pageCoordinates(e);
+        // const coords = pageCoordinates(e);
         // const dx = coords.x - mouseDownCoords.x;
         // const dy = coords.y - mouseDownCoords.y;
         // const dist2 = dx*dx + dy*dy;
@@ -838,8 +859,8 @@ function addMouseHandlers() {
         e.preventDefault();
         e.stopPropagation();
 
-        const mouseX = igv.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-        const mouseXCanvas = igv.translateMouseCoordinates(e, self.canvas).x;
+        const mouseX = translateMouseCoordinates(e, self.$viewport.get(0)).x;
+        const mouseXCanvas = translateMouseCoordinates(e, self.canvas).x;
         const referenceFrame = self.genomicState.referenceFrame;
         const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
 
@@ -891,7 +912,7 @@ function addMouseHandlers() {
 
                         var content = getPopupContent(e, self);
                         if (content) {
-                            const page = igv.pageCoordinates(e);
+                            const page = pageCoordinates(e);
                             self.popover.presentTrackContent(page.x, page.y, content);
                         }
                         clearTimeout(popupTimerID);
@@ -907,8 +928,8 @@ function addMouseHandlers() {
     function createClickState(e, viewport) {
 
         const referenceFrame = viewport.genomicState.referenceFrame;
-        const viewportCoords = igv.translateMouseCoordinates(e, viewport.contentDiv);
-        const canvasCoords = igv.translateMouseCoordinates(e, viewport.canvas);
+        const viewportCoords = translateMouseCoordinates(e, viewport.contentDiv);
+        const canvasCoords = translateMouseCoordinates(e, viewport.canvas);
         const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
         if (undefined === genomicLocation || null === viewport.tile) {

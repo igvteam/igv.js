@@ -24,6 +24,8 @@
  */
 
 import igvxhr from "./igvxhr";
+import {splitLines} from "./util/stringUtils";
+import {buildOptions} from "./util/igvUtils";
 
 const SampleInformation = function () {
     this.attributes = {};
@@ -34,9 +36,9 @@ SampleInformation.prototype.loadPlinkFile = async function (url, config) {
 
     if (!config) config = {};
 
-    var options = igv.buildOptions(config);    // Add oauth token, if any
+    var options = buildOptions(config);    // Add oauth token, if any
     const data = await igvxhr.loadString(url, options);
-    var lines = igv.splitLines(data);
+    var lines = splitLines(data);
 
     for(let line of lines) {
         var line_arr = line.split(' ');
