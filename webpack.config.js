@@ -2,13 +2,13 @@ const path = require('path')
 
 module.exports = {
     mode: 'production',
-    entry:  ['babel-polyfill', './tmp/igv.js'],
+    entry:  ['babel-polyfill', './js/igv-create.js'],
     target: 'web',
     output: {
-        path: path.resolve(__dirname, 'dist'),
-        filename: 'igv.min.js',
+        path: path.resolve(__dirname, 'tmp'),
+        filename: 'igv.var.js',
         library: 'igv',
-        libraryTarget: 'umd'
+        libraryTarget: 'var'
     },
     module: {
         rules: [
