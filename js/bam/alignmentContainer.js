@@ -252,11 +252,11 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         if(alignment.insertions) {
             for(let del of alignment.insertions) {
                 const i = del.start - this.bpStart;
-                if(i < 0) continue;
-                if (!this.coverage[i]) {
-                    this.coverage[i] = new Coverage();
-                }
-                this.coverage[i].ins++;
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage();
+                    }
+                    this.coverage[i].ins++;
             }
         }
 

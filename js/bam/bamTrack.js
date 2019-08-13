@@ -600,7 +600,9 @@ const BAMTrack = extend(TrackBase,
                 coverage = coverageMap.coverage[coverageMapIndex];
 
             if (coverage) {
-        nameValues.push(referenceFrame.chrName + ":" + numberFormatter(1 + genomicLocation));
+
+                nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
+
                 nameValues.push({name: 'Total Count', value: coverage.total});
 
                 // A
