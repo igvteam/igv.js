@@ -1,6 +1,5 @@
-/**
- * Created by turner on 2/13/14.
- */
+import FeatureSource from "../js/feature/featureSource.js";
+
 function runWigTests() {
 
 
@@ -16,7 +15,7 @@ function runWigTests() {
 				var done = assert.async();
 
         var path = "data/wig/fixedStep-example.wig",
-            featureSource = new igv.FeatureSource(
+            featureSource = new FeatureSource(
                 {format: 'wig', url: path},
                 genome),
             chr = "chr19",
@@ -52,8 +51,6 @@ function runWigTests() {
             console.log(error);
             assert.ok(false);
         });
-
-
     });
 
     QUnit.test("wig variable step", function(assert) {
@@ -61,7 +58,7 @@ function runWigTests() {
 
         var url = "data/wig/variableStep-example.wig";
 
-        var wigFeatureSource = new igv.FeatureSource(
+        var wigFeatureSource = new FeatureSource(
             {format: 'wig', url: url},
             genome);
 
@@ -70,7 +67,7 @@ function runWigTests() {
         //variableStep chrom=chr19 span=150
         var starts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
         var values = [10.0, 12.5, 15.0, 17.5, 20.0, 17.5, 15.0, 12.5, 10.0];
-        span = 150;
+        const span = 150;
 
         var chr = "chr19";
         var bpStart = 49304200;
@@ -95,8 +92,7 @@ function runWigTests() {
             console.log(error);
             assert.ok(false);
         });
-
-
     });
-
 }
+
+export default runWigTests;

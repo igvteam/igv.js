@@ -51,8 +51,7 @@ SampleInformation.prototype.loadPlinkFile = async function (url, config) {
         }
     }
     this.plinkLoaded = true;
-    return this.attributes;
-
+    return this;
 }
 
 /**
@@ -76,8 +75,7 @@ SampleInformation.prototype.hasAttributes = function () {
 
 function loadPlinkFile(url, config) {
     const si = new SampleInformation();
-    si.loadPlinkFile();
-    return si;
+    return si.loadPlinkFile(url, config);
 }
 
 export default loadPlinkFile;

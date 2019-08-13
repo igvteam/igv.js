@@ -34,6 +34,7 @@ import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {nucleotideColors, nucleotideColorComponents, PaletteColorTable} from "../util/colorPalletes.js";
 import {extend} from "../util/igvUtils.js";
+import {parseLocusString} from "../util/trackUtils.js";
 
 const type = "alignment";
 
@@ -1330,31 +1331,5 @@ const chrColorMap = {
     "chr47": "rgb(0, 214, 143)",
     "chr48": "rgb(20, 255, 177)",
 }
-
-
-/**
- * Parse a locus string and return a range object.  Locus string is of the form chr:start-end.  End is optional
- *
- */
-function parseLocusString (string) {
-
-    const t1 = string.split(":");
-    const t2 = t1[1].split("-");
-
-    const range = {
-        chr: t1[0],
-        start: Number.parseInt(t2[0]) - 1
-    };
-
-    if (t2.length > 1) {
-        range.end = Number.parseInt(t2[1]);
-    } else {
-        range.end = range.start + 1;
-    }
-
-    return range;
-
-}
-
 
 export default BAMTrack;

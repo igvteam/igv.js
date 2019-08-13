@@ -1,3 +1,5 @@
+import FeatureSource from "../js/feature/featureSource.js";
+
 function runGFFTests() {
 
     // mock object
@@ -14,7 +16,7 @@ function runGFFTests() {
         var chr = "chr1",
             bpStart = 1,
             bpEnd = 10000,
-            featureSource = new igv.FeatureSource({
+            featureSource = new FeatureSource({
                     url: 'data/gff/eden.gff',
                     format: 'gff3',
                     filterTypes: []
@@ -36,3 +38,5 @@ function runGFFTests() {
             });
     });
 }
+
+export default runGFFTests;

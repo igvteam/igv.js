@@ -190,7 +190,6 @@ function runCRAMTests() {
 
         var done = assert.async();
 
-
         const cramReader = new CramReader({
             url: 'data/cram/na12889_lossy.cram',
             indexURL: 'data/cram/na12889_lossy.cram.crai',
@@ -206,10 +205,8 @@ function runCRAMTests() {
 
         cramReader.readAlignments('chr1', 155150690, 155150700)
             .then(function (alignmentContainer) {
-
                 const firstOfPair = alignmentContainer.alignments[0];
                 assert.equal("ERR234328.62863390", firstOfPair.readName);
-
                 return cramReader.readAlignments('chr16', 12100200, 12100300);
             })
 
@@ -261,8 +258,9 @@ function runCRAMTests() {
             });
 
     });
- 
 }
+
+export default runCRAMTests;
 
 
 

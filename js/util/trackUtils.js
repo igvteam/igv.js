@@ -259,5 +259,29 @@ function translateDeprecatedTypes(config) {
     }
 }
 
+/**
+ * Parse a locus string and return a range object.  Locus string is of the form chr:start-end.  End is optional
+ *
+ */
+function parseLocusString (string) {
 
-export {getFormat, inferTrackTypes, inferFileFormat, inferIndexPath};
+    const t1 = string.split(":");
+    const t2 = t1[1].split("-");
+
+    const range = {
+        chr: t1[0],
+        start: Number.parseInt(t2[0]) - 1
+    };
+
+    if (t2.length > 1) {
+        range.end = Number.parseInt(t2[1]);
+    } else {
+        range.end = range.start + 1;
+    }
+
+    return range;
+}
+
+
+
+export {getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};
