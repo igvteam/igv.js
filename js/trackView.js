@@ -23,17 +23,18 @@
  * THE SOFTWARE.
  */
 
+import $ from "./vendor/jquery-3.3.1.slim.js";
 import ViewPort from "./viewport.js";
-import FeatureUtils from "./feature/featureUtils";
-import RulerTrack from "./rulerTrack";
-import TrackGearPopover from "./ui/trackGearPopover";
-import GenericContainer from "./ui/genericContainer";
-import IGVColor from "./igv-color";
-import {trackMenuItemList} from "./util/menuUtils";
-import {createIcon} from "./igv-icons";
-import {pageCoordinates, guid} from "./util/domUtils";
-import {appleCrayonPalette} from "./util/colorPalletes";
-import {doAutoscale} from "./util/igvUtils";
+import FeatureUtils from "./feature/featureUtils.js";
+import RulerTrack from "./rulerTrack.js";
+import TrackGearPopover from "./ui/trackGearPopover.js";
+import GenericContainer from "./ui/genericContainer.js";
+import IGVColor from "./igv-color.js";
+import {trackMenuItemList} from "./util/menuUtils.js";
+import {createIcon} from "./igv-icons.js";
+import {pageCoordinates, guid} from "./util/domUtils.js";
+import {appleCrayonPalette} from "./util/colorPalletes.js";
+import {doAutoscale} from "./util/igvUtils.js";
 
 
 var dragged,

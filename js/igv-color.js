@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import IGVMath from "./igv-math";
+import IGVMath from "./igv-math.js";
 
 const IGVColor = {
 

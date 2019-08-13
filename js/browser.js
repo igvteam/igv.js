@@ -23,27 +23,29 @@
  * THE SOFTWARE.
  */
 
+import $ from "./vendor/jquery-3.3.1.slim.js";
 import TrackView from "./trackView.js";
 import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
-import TrackFactory from "./trackFactory";
-import ROI from "./roi";
-import GtexSelection from "./gtex/gtex";
-import XMLSession from "./session/igvXmlSession";
-import RulerTrack from "./rulerTrack";
-import GenomeUtils from "./genome/genome";
-import loadPlinkFile from "./sampleInformation";
-import IdeoPanel from "./ideogram";
-import ReferenceFrame from "./referenceFrame";
-import igvxhr from "./igvxhr";
-import Zlib from "../vendor/zlib_and_gzip";
-import {getFilename, isFilePath} from './util/fileUtils'
-import {inferTrackTypes, inferFileFormat} from "./util/trackUtils";
-import {createIcon} from "./igv-icons";
-import {isString, splitLines, numberFormatter} from "./util/stringUtils"
-import {pageCoordinates, guid} from "./util/domUtils";
-import {decodeDataURI} from "./util/uriUtils";
-import {download, validateLocusExtent, doAutoscale} from "./util/igvUtils";
+import TrackFactory from "./trackFactory.js";
+import ROI from "./roi.js";
+import GtexSelection from "./gtex/gtex.js";
+import XMLSession from "./session/igvXmlSession.js";
+import RulerTrack from "./rulerTrack.js";
+import GenomeUtils from "./genome/genome.js";
+import loadPlinkFile from "./sampleInformation.js";
+import IdeoPanel from "./ideogram.js";
+import ReferenceFrame from "./referenceFrame.js";
+import igvxhr from "./igvxhr.js";
+import Zlib from "./vendor/zlib_and_gzip.js";
+import {getFilename, isFilePath} from './util/fileUtils.js'
+import {inferTrackTypes, inferFileFormat} from "./util/trackUtils.js";
+import {createIcon} from "./igv-icons.js";
+import {isString, splitLines, numberFormatter} from "./util/stringUtils.js"
+import {pageCoordinates, guid} from "./util/domUtils.js";
+import {decodeDataURI} from "./util/uriUtils.js";
+import {download, validateLocusExtent, doAutoscale} from "./util/igvUtils.js";
+import google from "./google/googleUtils.js";
 
 
 const Browser = function (options, trackContainerDiv) {
@@ -706,9 +708,9 @@ Browser.prototype.createTrack = function (config) {
 
     if (config.roi && track) {
         track.roi = [];
-        config.roi.forEach(function (r) {
+        for(let r of config.roi) {
             track.roi.push(new ROI(r, this.genome));
-        });
+        }
     }
 
     return track

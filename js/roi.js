@@ -23,8 +23,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import FeatureSource from './feature/featureSource'
-import IGVGraphics from "./igv-canvas";
+import FeatureSource from './feature/featureSource.js'
+import IGVGraphics from "./igv-canvas.js";
 
 var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 

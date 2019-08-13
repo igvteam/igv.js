@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
-import Zlib from "../../vendor/zlib_and_gzip";
-import {buildOptions} from "../util/igvUtils";
+import igvxhr from "../igvxhr.js";
+import Zlib from "../vendor/zlib_and_gzip.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const google = {
 

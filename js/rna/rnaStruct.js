@@ -23,12 +23,12 @@
  * THE SOFTWARE.
  */
 
-import FeatureCache from "../feature/featureCache";
-import getDataWrapper from "../feature/dataWrapper";
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import igvxhr from "../igvxhr";
-import {extend, buildOptions} from "../util/igvUtils";
+import FeatureCache from "../feature/featureCache.js";
+import getDataWrapper from "../feature/dataWrapper.js";
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import igvxhr from "../igvxhr.js";
+import {extend, buildOptions} from "../util/igvUtils.js";
 
 const RnaStructTrack = extend(TrackBase,
 

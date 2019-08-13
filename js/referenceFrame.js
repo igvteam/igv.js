@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {numberFormatter} from "./util/stringUtils";
+import {numberFormatter} from "./util/stringUtils.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 

@@ -22,15 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-"use strict";
-import FeatureSource from './featureSource';
-import TrackBase from "../trackBase";
-import BWSource from "../bigwig/bwSource";
-import IGVGraphics from "../igv-canvas";
-import IGVColor from "../igv-color";
-import {createCheckbox} from "../igv-icons";
-import {extend} from "../util/igvUtils";
-import GtexUtils from "../gtex/gtexUtils";
+
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import FeatureSource from './featureSource.js';
+import TrackBase from "../trackBase.js";
+import BWSource from "../bigwig/bwSource.js";
+import IGVGraphics from "../igv-canvas.js";
+import IGVColor from "../igv-color.js";
+import {createCheckbox} from "../igv-icons.js";
+import {extend} from "../util/igvUtils.js";
+import GtexUtils from "../gtex/gtexUtils.js";
 
 const FeatureTrack = extend(TrackBase,
 

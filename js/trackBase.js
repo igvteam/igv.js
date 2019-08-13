@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import FeatureUtils from "./feature/featureUtils";
-import {isFilePath} from './util/fileUtils'
-import {isSimpleType} from "./util/igvUtils";
+import FeatureUtils from "./feature/featureUtils.js";
+import {isFilePath} from './util/fileUtils.js'
+import {isSimpleType} from "./util/igvUtils.js";
 
 /**
  * A collection of properties and methods shared by all (or most) track types.   Used as a mixin

@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-import makeDraggable from "./draggable";
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
 
 const AlertDialog = function ($parent) {
 

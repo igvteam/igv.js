@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
-import {getBrowser} from "../igv-create";
+import igvxhr from "../igvxhr.js";
+import {getBrowser} from "../igv-create.js";
 
 const VARIANT = "VARIANT";
 const TRAIT = "TRAIT";

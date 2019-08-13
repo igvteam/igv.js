@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
+import igvxhr from "../igvxhr.js";
 
 const UCSCServiceReader = function (config, genome) {
         this.config = config;

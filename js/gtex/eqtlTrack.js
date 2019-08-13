@@ -23,14 +23,15 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from '../feature/featureSource';
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import IGVMath from "../igv-math";
-import {dataRangeMenuItem} from "../util/menuUtils";
-import {createCheckbox} from "../igv-icons";
-import {extend} from "../util/igvUtils";
-import GtexUtils from "./gtexUtils";
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import FeatureSource from '../feature/featureSource.js';
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import IGVMath from "../igv-math.js";
+import {dataRangeMenuItem} from "../util/menuUtils.js";
+import {createCheckbox} from "../igv-icons.js";
+import {extend} from "../util/igvUtils.js";
+import GtexUtils from "./gtexUtils.js";
 
 const EqtlTrack = extend(TrackBase,
 

@@ -23,12 +23,12 @@
  * THE SOFTWARE.
  */
 
-import BufferedReader from "./bufferedReader";
-import BinaryParser from "../binary";
-import IGVColor from "../igv-color";
-import igvxhr from "../igvxhr";
-import Zlib from "../../vendor/zlib_and_gzip";
-import {buildOptions} from "../util/igvUtils";
+import BufferedReader from "./bufferedReader.js";
+import BinaryParser from "../binary.js";
+import IGVColor from "../igv-color.js";
+import igvxhr from "../igvxhr.js";
+import Zlib from "../vendor/zlib_and_gzip.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26; // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66; // BigWig Magic High to Low

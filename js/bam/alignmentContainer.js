@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import PairedAlignment from "./pairedAlignment";
+import PairedAlignment from "./pairedAlignment.js";
 
 function canBePaired(alignment) {
     return alignment.isPaired() &&

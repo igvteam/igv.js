@@ -23,17 +23,17 @@
  * THE SOFTWARE.
  */
 
-import FeatureFileReader from "./featureFileReader";
-import FeatureCache from "./featureCache";
-import CustomServiceReader from "./customServiceReader";
-import UCSCServiceReader from "./ucscServiceReader";
-import GFFHelper from "./gffHelper";
-import GtexReader from "../gtex/gtexReader";
-import ImmVarReader from "../gtex/immvarReader";
-import TrackBase from "../trackBase";
-import Ga4ghVariantReader from "../google/ga4ghVariantReader";
-import CivicReader from "../civic/civicReader";
-import GenomicInterval from "../genome/genomicInterval";
+import FeatureFileReader from "./featureFileReader.js";
+import FeatureCache from "./featureCache.js";
+import CustomServiceReader from "./customServiceReader.js";
+import UCSCServiceReader from "./ucscServiceReader.js";
+import GFFHelper from "./gffHelper.js";
+import GtexReader from "../gtex/gtexReader.js";
+import ImmVarReader from "../gtex/immvarReader.js";
+import TrackBase from "../trackBase.js";
+import Ga4ghVariantReader from "../google/ga4ghVariantReader.js";
+import CivicReader from "../civic/civicReader.js";
+import GenomicInterval from "../genome/genomicInterval.js";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 

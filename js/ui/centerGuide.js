@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
+
 const CenterGuide = function ($guideParent, $controlParent, config, browser) {
 
     const self = this;

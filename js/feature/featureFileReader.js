@@ -23,16 +23,16 @@
  * THE SOFTWARE.
  */
 
-import FeatureParser from "./featureParsers";
-import SegParser from "./segParser";
-import VcfParser from "../variant/vcfParser";
-import loadBamIndex from "../bam/bamIndex";
-import igvxhr from "../igvxhr";
-import  {unbgzf, bgzBlockSize} from '../bam/bgzf';
-import {isFilePath} from '../util/fileUtils'
-import {isString} from "../util/stringUtils";
-import {parseUri, decodeDataURI} from "../util/uriUtils";
-import {buildOptions} from "../util/igvUtils";
+import FeatureParser from "./featureParsers.js";
+import SegParser from "./segParser.js";
+import VcfParser from "../variant/vcfParser.js";
+import loadBamIndex from "../bam/bamIndex.js";
+import igvxhr from "../igvxhr.js";
+import  {unbgzf, bgzBlockSize} from '../bam/bgzf.js';
+import {isFilePath} from '../util/fileUtils.js'
+import {isString} from "../util/stringUtils.js";
+import {parseUri, decodeDataURI} from "../util/uriUtils.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 

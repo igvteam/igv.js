@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import IntervalTree from "../intervalTree";
+import IntervalTree from "../intervalTree.js";
 
 /**
  * Object for caching lists of features.  Supports effecient queries for sub-range  (chr, start, end)

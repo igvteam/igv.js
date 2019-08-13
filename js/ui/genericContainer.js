@@ -22,9 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import makeDraggable from "./draggable";
-import {createIcon} from "../igv-icons";
-import {guid} from "../util/domUtils";
+
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
+import {createIcon} from "../igv-icons.js";
+import {guid} from "../util/domUtils.js";
 
 const GenericContainer = function ({$parent, width, height, closeHandler}) {
 

@@ -24,14 +24,14 @@
  * THE SOFTWARE.
  */
 
-import FeatureCache from "../feature/featureCache";
-import AlignmentContainer from "./alignmentContainer";
-import BamUtils from "./bamUtils";
-import igvxhr from "../igvxhr";
-import  {unbgzf, bgzBlockSize} from './bgzf';
-import {isString} from "../util/stringUtils";
-import {decodeDataURI} from "../util/uriUtils";
-import {buildOptions} from "../util/igvUtils";
+import FeatureCache from "../feature/featureCache.js";
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import igvxhr from "../igvxhr.js";
+import {unbgzf, bgzBlockSize} from './bgzf.js';
+import {isString} from "../util/stringUtils.js";
+//import {decodeDataURI} from "../util/uriUtils.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 /**
  * Class for reading a bam file
@@ -122,26 +122,25 @@ BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
 
 };
-//
-// function decodeDataURI(dataURI) {
-//     var bytes,
-//         split = dataURI.split(','),
-//         info = split[0].split(':')[1],
-//         dataString = split[1];
-//
-//     if (info.indexOf('base64') >= 0) {
-//         dataString = atob(dataString);
-//     } else {
-//         dataString = decodeURI(dataString);
-//     }
-//
-//     bytes = new Uint8Array(dataString.length);
-//     for (var i = 0; i < dataString.length; i++) {
-//         bytes[i] = dataString.charCodeAt(i);
-//     }
-//
-//     return bytes;
-// }
+
+function decodeDataURI(dataURI) {
+
+    const split = dataURI.split(',');
+    const info = split[0].split(':')[1];
+    let dataString = split[1];
+
+    if (info.indexOf('base64') >= 0) {
+        dataString = atob(dataString);
+    } else {
+        dataString = decodeURI(dataString);
+    }
+
+    const bytes = new Uint8Array(dataString.length);
+    for (var i = 0; i < dataString.length; i++) {
+        bytes[i] = dataString.charCodeAt(i);
+    }
+    return bytes;
+}
 
 
 export default BamReaderNonIndexed;

@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 
-import loadBamIndex from "./bamIndex";
-import AlignmentContainer from "./alignmentContainer";
-import BamUtils from "./bamUtils";
-import igvxhr from "../igvxhr";
-import  {unbgzf, bgzBlockSize} from './bgzf';
-import {inferIndexPath} from "../util/trackUtils";
-import {buildOptions} from "../util/igvUtils";
+import loadBamIndex from "./bamIndex.js";
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import igvxhr from "../igvxhr.js";
+import  {unbgzf, bgzBlockSize} from './bgzf.js';
+import {inferIndexPath} from "../util/trackUtils.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
 

@@ -23,11 +23,11 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "../bam/alignmentContainer";
-import BamAlignment from "../bam/bamAlignment";
-import AlignmentBlock from "../bam/alignmentBlock";
-import {ga4ghGet, ga4ghSearch} from './ga4ghHelper';
-import BamFilter from "../bam/bamFilter";
+import AlignmentContainer from "../bam/alignmentContainer.js";
+import BamAlignment from "../bam/bamAlignment.js";
+import AlignmentBlock from "../bam/alignmentBlock.js";
+import {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js';
+import BamFilter from "../bam/bamFilter.js";
 
 var CigarOperationTable = {
     "ALIGNMENT_MATCH": "M",

@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import   {ga4ghGet, ga4ghSearch} from './ga4ghHelper';
-import {createGAVariant} from "../variant/variant";
+import   {ga4ghGet, ga4ghSearch} from './ga4ghHelper.js';
+import {createGAVariant} from "../variant/variant.js";
 
 const Ga4ghVariantReader = function (config, genome) {
 

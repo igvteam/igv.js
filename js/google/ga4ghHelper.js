@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
+import igvxhr from "../igvxhr.js";
 
 function ga4ghGet(options) {
     var url = options.url + "/" + options.entity + "/" + options.entityId;

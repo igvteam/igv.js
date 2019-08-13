@@ -23,16 +23,16 @@
  * THE SOFTWARE.
  */
 
-import BamReaderNonIndexed from "./bamReaderNonIndexed";
-import ShardedBamReader from "./shardedBamReader";
-import BamReader from "./bamReader";
-import BamWebserviceReader from "./bamWebserviceReader";
-import HtsgetReader from "./htsgetReader";
-import CramReader from "../cram/cramReader";
-import Ga4ghAlignmentReader from "../google/ga4ghAlignmentReader";
-import BamAlignmentRow from "./bamAlignmentRow";
-import PairedAlignment from "./pairedAlignment";
-import {isString} from "../util/stringUtils";
+import BamReaderNonIndexed from "./bamReaderNonIndexed.js";
+import ShardedBamReader from "./shardedBamReader.js";
+import BamReader from "./bamReader.js";
+import BamWebserviceReader from "./bamWebserviceReader.js";
+import HtsgetReader from "./htsgetReader.js";
+import CramReader from "../cram/cramReader.js";
+import Ga4ghAlignmentReader from "../google/ga4ghAlignmentReader.js";
+import BamAlignmentRow from "./bamAlignmentRow.js";
+import PairedAlignment from "./pairedAlignment.js";
+import {isString} from "../util/stringUtils.js";
 
 const BamSource = function (config, browser) {
 

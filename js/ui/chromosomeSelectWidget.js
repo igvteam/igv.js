@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
+
 const ChromosomeSelectWidget = function (browser, $parent) {
 
     this.showAllChromosomes = browser.config.showAllChromosomes

@@ -22,7 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import {createIcon} from "../igv-icons";
+
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import {createIcon} from "../igv-icons.js";
 
 const UserFeedback = function ($parent) {
 

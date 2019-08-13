@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {numberFormatter} from "../util/stringUtils";
+import {numberFormatter} from "../util/stringUtils.js";
 
 const READ_PAIRED_FLAG = 0x1;
 const PROPER_PAIR_FLAG = 0x2;

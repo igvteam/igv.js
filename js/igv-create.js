@@ -22,24 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
+import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
-import GenomeUtils from "./genome/genome";
-import WindowSizePanel from "./windowSizePanel";
-import InputDialog from "./ui/inputDialog";
-import DataRangeDialog from "./ui/dataRangeDialog";
-import TrackRemovalDialog from "./ui/trackRemovalDialog";
-import AlertDialog from "./ui/alertDialog";
-import UserFeedback from "./ui/userFeedback";
-import SVGSaveControl from "./ui/svgSaveControl";
-import ZoomWidget from "./ui/zoomWidget";
-import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget";
-import TrackLabelControl from "./ui/trackLabelControl";
-import CenterGuide from "./ui/centerGuide";
-import CursorGuide from "./ui/cursorGuide";
-import NavbarManager from "./navbarManager";
-import igvxhr from "./igvxhr";
-import oauth from "./oauth";
-import {createIcon} from "./igv-icons";
+import GenomeUtils from "./genome/genome.js";
+import WindowSizePanel from "./windowSizePanel.js";
+import InputDialog from "./ui/inputDialog.js";
+import DataRangeDialog from "./ui/dataRangeDialog.js";
+import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
+import AlertDialog from "./ui/alertDialog.js";
+import UserFeedback from "./ui/userFeedback.js";
+import SVGSaveControl from "./ui/svgSaveControl.js";
+import ZoomWidget from "./ui/zoomWidget.js";
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
+import TrackLabelControl from "./ui/trackLabelControl.js";
+import CenterGuide from "./ui/centerGuide.js";
+import CursorGuide from "./ui/cursorGuide.js";
+import NavbarManager from "./navbarManager.js";
+import igvxhr from "./igvxhr.js";
+import oauth from "./oauth.js";
+import {createIcon} from "./igv-icons.js";
 
 const version = "@VERSION";
 
@@ -52,7 +54,7 @@ let allBrowsers = [];
  * @param config - configuration options.
  *
  */
-function createBrowser(parentDiv, config) {
+async function createBrowser(parentDiv, config) {
 
 
     if (undefined === config) config = {};

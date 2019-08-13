@@ -23,13 +23,13 @@
  * THE SOFTWARE.
  */
 
-import oauth from "./oauth";
-import google from "./google/googleUtils";
-import {unbgzf, bgzBlockSize} from './bam/bgzf';
-import Zlib from "../vendor/zlib_and_gzip";
-import {getFilename, isFilePath} from './util/fileUtils'
-import {parseUri, decodeDataURI} from "./util/uriUtils"
-import {getBrowser} from "./igv-create";
+import oauth from "./oauth.js";
+import google from "./google/googleUtils.js";
+import {unbgzf, bgzBlockSize} from './bam/bgzf.js';
+import Zlib from "./vendor/zlib_and_gzip.js";
+import {getFilename, isFilePath} from './util/fileUtils.js'
+import {parseUri, decodeDataURI} from "./util/uriUtils.js"
+import {getBrowser} from "./igv-create.js";
 
 
 var NONE = 0;

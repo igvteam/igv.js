@@ -1,3 +1,4 @@
+import $ from "../vendor/jquery-3.3.1.slim.js";
 
 /**
  * Configure item list for track "gear" menu.

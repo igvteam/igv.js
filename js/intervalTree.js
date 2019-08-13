@@ -32,7 +32,7 @@
  *   Search       findOverlapping
  */
 
-import {getBrowser} from "./igv-create";
+import {getBrowser} from "./igv-create.js";
 
 var BLACK = 1;
 var RED = 2;

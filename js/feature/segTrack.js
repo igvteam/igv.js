@@ -23,14 +23,14 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from './featureSource';
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import IGVMath from "../igv-math";
-import {createCheckbox} from "../igv-icons";
-import {GradientColorScale} from "../util/colorScale";
-import {extend} from "../util/igvUtils";
-import {isSimpleType} from "../util/igvUtils";
+import FeatureSource from './featureSource.js';
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import IGVMath from "../igv-math.js";
+import {createCheckbox} from "../igv-icons.js";
+import {GradientColorScale} from "../util/colorScale.js";
+import {extend} from "../util/igvUtils.js";
+import {isSimpleType} from "../util/igvUtils.js";
 
 const SegTrack = extend(TrackBase,
 

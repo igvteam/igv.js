@@ -23,11 +23,12 @@
  * THE SOFTWARE.
  */
 
-import IGVGraphics from "./igv-canvas";
-import IGVColor from "./igv-color";
-import GenomeUtils from "./genome/genome";
-import {createIcon} from "./igv-icons";
-import {numberFormatter} from "./util/stringUtils";
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import IGVGraphics from "./igv-canvas.js";
+import IGVColor from "./igv-color.js";
+import GenomeUtils from "./genome/genome.js";
+import {createIcon} from "./igv-icons.js";
+import {numberFormatter} from "./util/stringUtils.js";
 
 const RulerTrack = function (browser) {
 

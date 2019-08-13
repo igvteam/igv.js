@@ -23,16 +23,17 @@
  * THE SOFTWARE.
  */
 
-import BamSource from "./bamSource";
-import PairedAlignment from "./pairedAlignment";
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import paintAxis from "../util/paintAxis";
-import IGVColor from "../igv-color";
-import {createCheckbox} from "../igv-icons";
-import {numberFormatter} from "../util/stringUtils";
-import {nucleotideColors, nucleotideColorComponents, PaletteColorTable} from "../util/colorPalletes";
-import {extend} from "../util/igvUtils";
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import BamSource from "./bamSource.js";
+import PairedAlignment from "./pairedAlignment.js";
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import paintAxis from "../util/paintAxis.js";
+import IGVColor from "../igv-color.js";
+import {createCheckbox} from "../igv-icons.js";
+import {numberFormatter} from "../util/stringUtils.js";
+import {nucleotideColors, nucleotideColorComponents, PaletteColorTable} from "../util/colorPalletes.js";
+import {extend} from "../util/igvUtils.js";
 
 const type = "alignment";
 

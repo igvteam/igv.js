@@ -23,13 +23,13 @@
  * THE SOFTWARE.
  */
 
-import Cytoband from "./cytoband";
-import FastaSequence from "./fasta";
-import igvxhr from "../igvxhr";
-import Zlib from "../../vendor/zlib_and_gzip";
-import {splitLines} from "../util/stringUtils";
-import {decodeDataURI} from "../util/uriUtils";
-import {buildOptions} from "../util/igvUtils";
+import Cytoband from "./cytoband.js";
+import FastaSequence from "./fasta.js";
+import igvxhr from "../igvxhr.js";
+import Zlib from "../vendor/zlib_and_gzip.js";
+import {splitLines} from "../util/stringUtils.js";
+import {decodeDataURI} from "../util/uriUtils.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 let KNOWN_GENOMES;
 

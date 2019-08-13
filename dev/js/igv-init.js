@@ -1,30 +1,5 @@
 import {createBrowser} from "../../js/igv-create";
 import GtexUtils from "../../js/gtex/gtexUtils";
-
-// const options =
-//     {
-//         reference: {
-//             fastaURL: "../local/caeJap1/chrUn.fa",
-//             indexURL: "../local/caeJap1/chrUn.fa.fai"
-//         },
-//
-//         tracks: [
-//             {
-//                 name: "Genes",
-//                 type: "annotation",
-//                 format: "refgene",
-//                 url: "../local/caeJap1/xenoRefGene.txt.gz",
-//                 indexed: false
-//             }
-//         ]
-//     };
-//
-//
-// ig.createBrowser(document.getElementById('igvDiv'), options)
-//     .then(function (browser) {
-//         return browser;
-//     })
-
 import google from "../../js/google/googleUtils";
 import igvxhr from "../../js/igvxhr";
 

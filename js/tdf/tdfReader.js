@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  */
 
-import BinaryParser from "../binary";
-import igvxhr from "../igvxhr";
-import Zlib from "../../vendor/zlib_and_gzip";
-import {buildOptions} from "../util/igvUtils";
+import BinaryParser from "../binary.js";
+import igvxhr from "../igvxhr.js";
+import Zlib from "../vendor/zlib_and_gzip.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const GZIP_FLAG = 0x1;
 

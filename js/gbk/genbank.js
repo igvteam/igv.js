@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import getDataWrapper from "../feature/dataWrapper";
+import getDataWrapper from "../feature/dataWrapper.js";
 
 const wsRegex = /(\s+)/;
 

@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import BinaryParser from "../binary";
-import igvxhr from "../igvxhr";
-import {buildOptions} from "../util/igvUtils";
+import BinaryParser from "../binary.js";
+import igvxhr from "../igvxhr.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 /**
  *

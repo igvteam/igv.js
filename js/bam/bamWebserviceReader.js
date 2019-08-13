@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "./alignmentContainer";
-import BamUtils from "./bamUtils";
-import igvxhr from "../igvxhr";
-import {buildOptions} from "../util/igvUtils";
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import igvxhr from "../igvxhr.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 /**
  * Class for reading bam records from an igv.js-flask server

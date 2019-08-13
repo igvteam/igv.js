@@ -23,17 +23,18 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from './featureSource';
-import TDFSource from "../tdf/tdfSource";
-import TrackBase from "../trackBase";
-import BWSource from "../bigwig/bwSource";
-import IGVGraphics from "../igv-canvas";
-import paintAxis from "../util/paintAxis";
-import IGVColor from "../igv-color";
-import {dataRangeMenuItem} from "../util/menuUtils";
-import {createCheckbox} from "../igv-icons";
-import {numberFormatter} from "../util/stringUtils";
-import {extend} from "../util/igvUtils";
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import FeatureSource from './featureSource.js';
+import TDFSource from "../tdf/tdfSource.js";
+import TrackBase from "../trackBase.js";
+import BWSource from "../bigwig/bwSource.js";
+import IGVGraphics from "../igv-canvas.js";
+import paintAxis from "../util/paintAxis.js";
+import IGVColor from "../igv-color.js";
+import {dataRangeMenuItem} from "../util/menuUtils.js";
+import {createCheckbox} from "../igv-icons.js";
+import {numberFormatter} from "../util/stringUtils.js";
+import {extend} from "../util/igvUtils.js";
 
 const WigTrack = extend(TrackBase,
 

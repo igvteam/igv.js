@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 
 /**
  * Make the target element movable by clicking and dragging on the handle.  This is not a general purprose function,

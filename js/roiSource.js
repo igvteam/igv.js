@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import FeatureFileReader from "./feature/featureFileReader";
-import GenomicInterval from "./genome/genomicInterval";
+import FeatureFileReader from "./feature/featureFileReader.js";
+import GenomicInterval from "./genome/genomicInterval.js";
 
 /**
  *

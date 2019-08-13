@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
+import igvxhr from "../igvxhr.js";
 
 // Experimental class for fetching features from an mpg webservice.
 // http://immvar.broadinstitute.org:3000/load_data?chromosome=&start=&end=&categories=

@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import getDataWrapper from "./dataWrapper";
-import IGVColor from "../igv-color";
-import {getFormat} from "../util/trackUtils";
+import getDataWrapper from "./dataWrapper.js";
+import IGVColor from "../igv-color.js";
+import {getFormat} from "../util/trackUtils.js";
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods

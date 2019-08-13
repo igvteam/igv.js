@@ -1,5 +1,5 @@
-import igvxhr from "../igvxhr";
-import {numberFormatter} from "../util/stringUtils";
+import igvxhr from "../igvxhr.js";
+import {numberFormatter} from "../util/stringUtils.js";
 
 const CivicReader = function (config) {
             this.config = config;

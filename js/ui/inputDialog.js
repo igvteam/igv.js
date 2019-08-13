@@ -23,8 +23,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import makeDraggable from "./draggable";
-import {attachDialogCloseHandlerWithParent} from "./ui-utils";
+
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
 
 const InputDialog = function ($parent) {
     var self = this,

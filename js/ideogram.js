@@ -27,9 +27,10 @@
 // Chromosome ideogram
 //
 
-import IGVGraphics from "./igv-canvas";
-import IGVColor from "./igv-color";
-import {translateMouseCoordinates} from "./util/domUtils";
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import IGVGraphics from "./igv-canvas.js";
+import IGVColor from "./igv-color.js";
+import {translateMouseCoordinates} from "./util/domUtils.js";
 
 const IdeoPanel = function ($parent, panelWidth, browser) {
     this.browser = browser;

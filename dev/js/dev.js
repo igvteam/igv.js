@@ -1,9 +1,11 @@
-var igvdev = {
+import igvxhr from "../../js/igvxhr.js";
+
+const igvdev = {
 
     createTrackList:  function (div, file, browser) {
 
 
-        return igv.xhr.loadJson(file)
+        return igvxhr.loadJson(file)
 
             .then(function (tracks) {
 
@@ -57,3 +59,5 @@ var igvdev = {
 
     }
 }
+
+export default igvdev;

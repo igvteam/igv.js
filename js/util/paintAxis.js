@@ -1,4 +1,4 @@
-import IGVGraphics from "../igv-canvas";
+import IGVGraphics from "../igv-canvas.js";
 
 function paintAxis(ctx, pixelWidth, pixelHeight) {
 

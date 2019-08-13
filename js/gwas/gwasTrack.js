@@ -23,12 +23,12 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from '../feature/featureSource';
-import T2DVariantSource from "./t2dVariantSource";
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import {BinnedColorScale} from "../util/colorScale";
-import {extend} from "../util/igvUtils";
+import FeatureSource from '../feature/featureSource.js';
+import T2DVariantSource from "./t2dVariantSource.js";
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import {BinnedColorScale} from "../util/colorScale.js";
+import {extend} from "../util/igvUtils.js";
 
 const DEFAULT_POPOVER_WINDOW = 100000000;
 const type = "gwas";

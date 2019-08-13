@@ -24,15 +24,16 @@
  * THE SOFTWARE.
  */
 
-import FeatureSource from '../feature/featureSource';
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import {createCheckbox} from "../igv-icons";
-import {extend} from "../util/igvUtils";
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import FeatureSource from '../feature/featureSource.js';
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import {createCheckbox} from "../igv-icons.js";
+import {extend} from "../util/igvUtils.js";
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
-const topMargin = 10
+const topMargin = 10;
 
 const VariantTrack = extend(TrackBase,
 

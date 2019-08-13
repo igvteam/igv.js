@@ -24,9 +24,10 @@
  * THE SOFTWARE.
  */
 
-import {translateMouseCoordinates} from "./util/domUtils";
-import {validateLocusExtent} from "./util/igvUtils";
-import {guid} from "./util/domUtils";
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import {translateMouseCoordinates} from "./util/domUtils.js";
+import {validateLocusExtent} from "./util/igvUtils.js";
+import {guid} from "./util/domUtils.js";
 
 const RulerSweeper = function (viewport) {
     this.viewport = viewport;

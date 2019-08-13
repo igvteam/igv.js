@@ -24,12 +24,13 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "../bam/alignmentContainer";
-import BamUtils from "../bam/bamUtils";
-import BamAlignment from "../bam/bamAlignment";
-import AlignmentBlock from "../bam/alignmentBlock";
-import igvxhr from "../igvxhr";
-import {buildOptions} from "../util/igvUtils";
+import gmodCRAM from "../vendor/cram-bundle.js"
+import AlignmentContainer from "../bam/alignmentContainer.js";
+import BamUtils from "../bam/bamUtils.js";
+import BamAlignment from "../bam/bamAlignment.js";
+import AlignmentBlock from "../bam/alignmentBlock.js";
+import igvxhr from "../igvxhr.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const READ_STRAND_FLAG = 0x10;
 const MATE_STRAND_FLAG = 0x20;

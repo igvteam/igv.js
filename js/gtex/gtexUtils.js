@@ -1,4 +1,4 @@
-import igvxhr from "../igvxhr";
+import igvxhr from "../igvxhr.js";
 
 const GtexUtils = {
 

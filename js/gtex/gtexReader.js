@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
+import igvxhr from "../igvxhr.js";
 
 const GtexReader = function (config) {
 

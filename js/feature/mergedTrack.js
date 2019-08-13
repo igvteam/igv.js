@@ -24,9 +24,9 @@
  * THE SOFTWARE.
  */
 
-import TrackBase from "../trackBase";
-import {inferTrackTypes} from "../util/trackUtils";
-import {extend} from "../util/igvUtils";
+import TrackBase from "../trackBase.js";
+import {inferTrackTypes} from "../util/trackUtils.js";
+import {extend} from "../util/igvUtils.js";
 
 const MergedTrack = extend(TrackBase, function (config, browser) {
 

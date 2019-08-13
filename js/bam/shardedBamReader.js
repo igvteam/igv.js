@@ -23,10 +23,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import BamReader from "./bamReader";
-import AlignmentContainer from "./alignmentContainer";
-import BamUtils from "./bamUtils";
-import {getBrowser} from "../igv-create";
+import BamReader from "./bamReader.js";
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import {getBrowser} from "../igv-create.js";
 
 const ShardedBamReader = function (config, genome) {
 

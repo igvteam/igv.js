@@ -24,12 +24,12 @@
  * THE SOFTWARE.
  */
 
-import BamAlignment from "./bamAlignment";
-import AlignmentBlock from "./alignmentBlock";
-import igvxhr from "../igvxhr";
-import  {unbgzf} from './bgzf';
-import {splitLines} from "../util/stringUtils";
-import BamFilter from "./bamFilter";
+import BamAlignment from "./bamAlignment.js";
+import AlignmentBlock from "./alignmentBlock.js";
+import igvxhr from "../igvxhr.js";
+import  {unbgzf} from './bgzf.js';
+import {splitLines} from "../util/stringUtils.js";
+import BamFilter from "./bamFilter.js";
 
 /**
  * This code is based on the Biodalliance BAM reader by Thomas Down,  2011

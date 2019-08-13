@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {numberFormatter} from "./util/stringUtils";
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import {numberFormatter} from "./util/stringUtils.js";
 
 const WindowSizePanel = function ($parent, browser) {
 

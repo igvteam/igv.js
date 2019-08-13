@@ -24,12 +24,8 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 11/27/16.
- */
-
-import TDFReader from "./tdfReader";
-import GenomicInterval from "../genome/genomicInterval";
+import TDFReader from "./tdfReader.js";
+import GenomicInterval from "../genome/genomicInterval.js";
 
 const TDFSource = function (config, genome) {
 

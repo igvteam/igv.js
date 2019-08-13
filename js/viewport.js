@@ -1,13 +1,15 @@
 /**
  * Created by dat on 9/16/16.
  */
+
+import $ from "./vendor/jquery-3.3.1.slim.js";
 import C2S from "./canvas2svg.js";
-import Popover from "./ui/popover";
-import RulerSweeper from "./rulerSweeper";
-import GenomeUtils from "./genome/genome";
-import {createIcon} from "./igv-icons";
-import {pageCoordinates, translateMouseCoordinates} from "./util/domUtils";
-import {download} from "./util/igvUtils";
+import Popover from "./ui/popover.js";
+import RulerSweeper from "./rulerSweeper.js";
+import GenomeUtils from "./genome/genome.js";
+import {createIcon} from "./igv-icons.js";
+import {pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
+import {download} from "./util/igvUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 

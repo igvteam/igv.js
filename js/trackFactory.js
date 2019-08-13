@@ -1,14 +1,14 @@
-import FeatureTrack from "./feature/featureTrack";
-import SequenceTrack from "./sequenceTrack";
-import WigTrack from "./feature/wigTrack";
-import SegTrack from "./feature/segTrack";
-import MergedTrack from "./feature/mergedTrack";
-import BAMTrack from "./bam/bamTrack";
-import InteractionTrack from "./feature/interactionTrack";
-import VariantTrack from "./variant/variantTrack";
-import EqtlTrack from "./gtex/eqtlTrack";
-import GWASTrack from "./gwas/gwasTrack";
-import RnaStructTrack from "./rna/rnaStruct";
+import FeatureTrack from "./feature/featureTrack.js";
+import SequenceTrack from "./sequenceTrack.js";
+import WigTrack from "./feature/wigTrack.js";
+import SegTrack from "./feature/segTrack.js";
+import MergedTrack from "./feature/mergedTrack.js";
+import BAMTrack from "./bam/bamTrack.js";
+import InteractionTrack from "./feature/interactionTrack.js";
+import VariantTrack from "./variant/variantTrack.js";
+import EqtlTrack from "./gtex/eqtlTrack.js";
+import GWASTrack from "./gwas/gwasTrack.js";
+import RnaStructTrack from "./rna/rnaStruct.js";
 
 const TrackFactory = {
     'sequence': (config, browser) => {

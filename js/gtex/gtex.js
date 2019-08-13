@@ -23,8 +23,6 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
-
 const GtexSelection = function (gene, snp) {
 
     this.geneColors = {};

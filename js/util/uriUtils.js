@@ -1,3 +1,5 @@
+import Zlib from "../vendor/zlib_and_gzip.js";
+
 /**
  * @param dataURI
  * @returns {Array<number>|Uint8Array}

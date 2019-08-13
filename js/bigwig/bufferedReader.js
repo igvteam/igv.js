@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "../igvxhr";
-import {buildOptions} from "../util/igvUtils";
+import igvxhr from "../igvxhr.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 const BufferedReader = function (config, contentLength, bufferSize) {
         this.path = config.url;

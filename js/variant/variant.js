@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import TrackBase from "../trackBase";
+import TrackBase from "../trackBase.js";
 
 /**
  * Parser for VCF files.

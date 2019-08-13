@@ -1,4 +1,6 @@
-import {createIcon} from "../igv-icons";
+
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import {createIcon} from "../igv-icons.js";
 
 function attachDialogCloseHandlerWithParent($parent, closeHandler) {
 

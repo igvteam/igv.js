@@ -23,8 +23,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import igvxhr from "../igvxhr";
-import {isString} from "../util/stringUtils";
+import igvxhr from "../igvxhr.js";
+import {isString} from "../util/stringUtils.js";
 
 const CustomServiceReader = function (config) {
 

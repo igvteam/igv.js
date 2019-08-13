@@ -1,3 +1,5 @@
+import $ from "../vendor/jquery-3.3.1.slim.js";
+
 function pageCoordinates(e) {
 
     if (e.type.startsWith("touch")) {
@@ -24,10 +26,10 @@ function translateMouseCoordinates(e, target) {
         console.log('translateMouseCoordinates - $target.offset() is undefined.');
     }
 
-    const pageCoordinates = pageCoordinates(e);
+    const coords = pageCoordinates(e);
 
-    posx = pageCoordinates.x - $target.offset().left;
-    posy = pageCoordinates.y - $target.offset().top;
+    posx = coords.x - $target.offset().left;
+    posy = coords.y - $target.offset().top;
 
     return {x: posx, y: posy}
 };

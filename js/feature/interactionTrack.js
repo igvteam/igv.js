@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 
-import FeatureParser from "./featureParsers";
-import FeatureCache from "./featureCache";
-import TrackBase from "../trackBase";
-import IGVGraphics from "../igv-canvas";
-import IGVColor from "../igv-color";
-import igvxhr from "../igvxhr";
-import {extend, buildOptions} from "../util/igvUtils";
+import FeatureParser from "./featureParsers.js";
+import FeatureCache from "./featureCache.js";
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import IGVColor from "../igv-color.js";
+import igvxhr from "../igvxhr.js";
+import {extend, buildOptions} from "../util/igvUtils.js";
 
 const InteractionTrack = extend(TrackBase,
 

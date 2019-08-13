@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import BWReader from "./bwReader";
+import BWReader from "./bwReader.js";
 
 const BWSource = function (config, genome) {
     this.reader = new BWReader(config, genome);

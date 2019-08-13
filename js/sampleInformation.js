@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "./igvxhr";
-import {splitLines} from "./util/stringUtils";
-import {buildOptions} from "./util/igvUtils";
+import igvxhr from "./igvxhr.js";
+import {splitLines} from "./util/stringUtils.js";
+import {buildOptions} from "./util/igvUtils.js";
 
 const SampleInformation = function () {
     this.attributes = {};

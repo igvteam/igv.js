@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import IGVGraphics from "./igv-canvas";
-import {nucleotideColors} from "./util/colorPalletes";
+import IGVGraphics from "./igv-canvas.js";
+import {nucleotideColors} from "./util/colorPalletes.js";
 
 const SequenceTrack = function (config, browser) {
 

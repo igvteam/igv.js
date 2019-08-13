@@ -24,7 +24,7 @@
  * THE SOFTWARE.
  */
 
-import IntervalTree from "../intervalTree";
+import IntervalTree from "../intervalTree.js";
 
 const FeatureUtils = {
 

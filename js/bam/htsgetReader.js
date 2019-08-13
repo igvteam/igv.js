@@ -24,10 +24,10 @@
  * THE SOFTWARE.
  */
 
-import AlignmentContainer from "./alignmentContainer";
-import BamUtils from "./bamUtils";
-import igvxhr from "../igvxhr";
-import  {unbgzf, bgzBlockSize} from './bgzf';
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import igvxhr from "../igvxhr.js";
+import  {unbgzf, bgzBlockSize} from './bgzf.js';
 
 const HtsgetReader = function (config, genome) {
 

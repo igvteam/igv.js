@@ -23,9 +23,9 @@
  * THE SOFTWARE.
  */
 
-import {createVCFVariant} from "./variant";
-import getDataWrapper from "../feature/dataWrapper";
-import {splitStringRespectingQuotes} from "../util/stringUtils";
+import {createVCFVariant} from "./variant.js";
+import getDataWrapper from "../feature/dataWrapper.js";
+import {splitStringRespectingQuotes} from "../util/stringUtils.js";
 
 /**
  * Parser for VCF files.

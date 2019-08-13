@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {getFilename, isFilePath} from './fileUtils'
-import FileFormats from "../feature/fileFormats";
+import {isFilePath} from './fileUtils.js'
+import FileFormats from "../feature/fileFormats.js";
 
 const knownFileExtensions = new Set([
 
@@ -68,7 +68,7 @@ function getFormat(name) {
     // if (igv.browser && igv.browser.formats && igv.browser.format[name]) {
     //     return expandFormat(igv.browser.formats[name]);
     // } else
-        if (FileFormats && FileFormats[name]) {
+    if (FileFormats && FileFormats[name]) {
         return expandFormat(FileFormats[name]);
     } else {
         return undefined;
@@ -93,51 +93,40 @@ function getFormat(name) {
 
 function inferTrackTypes(config) {
 
-    function translateDeprecatedTypes(config) {
+    // function inferFileFormat(config) {
+    //
+    //     var path;
+    //
+    //     if (config.format) {
+    //         config.format = config.format.toLowerCase();
+    //         return;
+    //     }
+    //
+    //     path = isFilePath(config.url) ? config.url.name : config.url;
+    //
+    //     config.format = inferFileFormat(path);
+    // }
 
-        if (config.featureType) {  // Translate deprecated "feature" type
-            config.type = config.type || config.featureType;
-            config.featureType = undefined;
-        }
-        if ("bed" === config.type) {
-            config.type = "annotation";
-            config.format = config.format || "bed";
-        } else if ("annotations" === config.type) {
-            config.type = "annotation"
-        } else if ("alignments" === config.type) {
-            config.type = "alignment"
-        } else if ("bam" === config.type) {
-            config.type = "alignment";
-            config.format = "bam"
-        } else if ("vcf" === config.type) {
-            config.type = "variant";
-            config.format = "vcf"
-        } else if ("t2d" === config.type) {
-            config.type = "gwas";
-        } else if ("FusionJuncSpan" === config.type && !config.format) {
-            config.format = "fusionjuncspan";
-        } else if ("aed" === config.type) {
-            config.type = "annotation";
-            config.format = config.format || "aed";
+
+    translateDeprecatedTypes(config);
+
+    if (undefined === config.sourceType && config.url) {
+        config.sourceType = "file";
+    }
+
+    if ("file" === config.sourceType) {
+        if (undefined === config.format) {
+            var path;
+            if (config.format) {
+                config.format = config.format.toLowerCase();
+                return;
+            }
+            path = isFilePath(config.url) ? config.url.name : config.url;
+            config.format = inferFileFormat(path);
         }
     }
 
-    function inferFileFormat(config) {
-
-        var path;
-
-        if (config.format) {
-            config.format = config.format.toLowerCase();
-            return;
-        }
-
-        path = isFilePath(config.url) ? config.url.name : config.url;
-
-        config.format = inferFileFormat(path);
-    }
-
-    function inferTrackType(config) {
-
+    if (undefined === config.type) {
         if (config.type) return;
 
         if (config.format) {
@@ -169,27 +158,11 @@ function inferTrackTypes(config) {
                     break;
                 default:
                     config.type = "annotation";
+
             }
         }
+
     }
-
-    translateDeprecatedTypes(config);
-
-    if (undefined === config.sourceType && config.url) {
-        config.sourceType = "file";
-    }
-
-    if ("file" === config.sourceType) {
-        if (undefined === config.format) {
-            inferFileFormat(config);
-        }
-    }
-
-    if (undefined === config.type) {
-        inferTrackType(config);
-    }
-
-
 }
 
 function inferFileFormat(fn) {
@@ -256,5 +229,35 @@ function inferIndexPath(url, extension) {
         return url + "." + extension;
     }
 }
+
+function translateDeprecatedTypes(config) {
+
+    if (config.featureType) {  // Translate deprecated "feature" type
+        config.type = config.type || config.featureType;
+        config.featureType = undefined;
+    }
+    if ("bed" === config.type) {
+        config.type = "annotation";
+        config.format = config.format || "bed";
+    } else if ("annotations" === config.type) {
+        config.type = "annotation"
+    } else if ("alignments" === config.type) {
+        config.type = "alignment"
+    } else if ("bam" === config.type) {
+        config.type = "alignment";
+        config.format = "bam"
+    } else if ("vcf" === config.type) {
+        config.type = "variant";
+        config.format = "vcf"
+    } else if ("t2d" === config.type) {
+        config.type = "gwas";
+    } else if ("FusionJuncSpan" === config.type && !config.format) {
+        config.format = "fusionjuncspan";
+    } else if ("aed" === config.type) {
+        config.type = "annotation";
+        config.format = config.format || "aed";
+    }
+}
+
 
 export {getFormat, inferTrackTypes, inferFileFormat, inferIndexPath};

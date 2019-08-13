@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {splitLines} from "../util/stringUtils";
+import {splitLines} from "../util/stringUtils.js";
 
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
