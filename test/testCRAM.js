@@ -1,5 +1,7 @@
-function runCRAMTests() {
+import CramReader from "../js/cram/cramReader.js";
+import FastaSequence from "../js/genome/fasta.js";
 
+function runCRAMTests() {
 
     QUnit.test("CRAM header", function (assert) {
 
@@ -26,7 +28,7 @@ function runCRAMTests() {
 
         var done = assert.async();
 
-        const cramReader = new igv.CramReader({
+        const cramReader = new CramReader({
                 url: 'data/cram/ce_5.tmp.cram',
                 indexURL: 'data/cram/ce_5.tmp.cram.crai'
             },
@@ -58,7 +60,7 @@ function runCRAMTests() {
 
 
         // Mock genome object
-        const fasta = new igv.FastaSequence({
+        const fasta = new FastaSequence({
             fastaURL: 'data/cram/hg19_test.fasta',
             indexed: false
         });
@@ -75,7 +77,7 @@ function runCRAMTests() {
                     sequence: fasta
                 };
 
-                const cramReader = new igv.CramReader({
+                const cramReader = new CramReader({
                         url: 'data/cram/na12889.cram',
                         indexURL: 'data/cram/na12889.cram.crai'
                     },
@@ -152,7 +154,7 @@ function runCRAMTests() {
         var done = assert.async();
 
 
-        const cramReader = new igv.CramReader({
+        const cramReader = new CramReader({
             url: 'data/cram/na12889_lossy.cram',
             indexURL: 'data/cram/na12889_lossy.cram.crai',
             seqFetch: function (seqId, start, end) {
@@ -189,7 +191,7 @@ function runCRAMTests() {
         var done = assert.async();
 
 
-        const cramReader = new igv.CramReader({
+        const cramReader = new CramReader({
             url: 'data/cram/na12889_lossy.cram',
             indexURL: 'data/cram/na12889_lossy.cram.crai',
             seqFetch: function (seqId, start, end) {
@@ -231,7 +233,7 @@ function runCRAMTests() {
         var done = assert.async();
 
 
-        const cramReader = new igv.CramReader({
+        const cramReader = new CramReader({
             url: 'data/cram/na12889_lossy.cram',
             indexURL: 'data/cram/na12889_lossy.cram.crai',
             seqFetch: function (seqId, start, end) {

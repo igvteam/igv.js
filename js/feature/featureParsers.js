@@ -1081,7 +1081,7 @@ function AedFeature(aed, allColumns) {
     this.name = null;
     this.color = null;
 
-    for (i = 0; i < allColumns.length; i++) {
+    for (let i = 0; i < allColumns.length; i++) {
         token = allColumns[i];
         if (!token) {
             // Skip empty fields

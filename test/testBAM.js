@@ -1,5 +1,6 @@
-function runBAMTests() {
+import BamReader from "../js/bam/bamReader.js";
 
+function runBAMTests() {
 
     QUnit.test("BAM alignments", function (assert) {
 
@@ -9,7 +10,7 @@ function runBAMTests() {
         const bpStart = 155140000;
         const bpEnd = 155160000;
 
-        const bamReader = new igv.BamReader({
+        const bamReader = new BamReader({
             type: 'bam',
             url: 'data/bam/na12889.bam',
             indexURL: 'data/bam/na12889.bam.bai'
@@ -83,5 +84,5 @@ function runBAMTests() {
 
 }
 
-
+export default runBAMTests;
 
