@@ -80,8 +80,9 @@ module.exports = function (grunt) {
         'embed-css',
         'webpack:var',
         'webpack:umd',
-        'concat:igv_esm'
-    ]); //'clean:tmp']);
+        'concat:igv_esm',
+        'clean:tmp'
+    ]); 
 
     grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
