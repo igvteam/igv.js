@@ -1,4 +1,6 @@
-const webpackConfig = require('./webpack.config.js');
+const configFor = require('./webpack.config.generator.js');
+const webpackVarConfig = configFor('var');
+const webpackUmdConfig = configFor('umd');
 
 module.exports = function (grunt) {
 
@@ -33,8 +35,8 @@ module.exports = function (grunt) {
             options: {
                 stats: !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
             },
-            prod: webpackConfig,
-            dev: Object.assign({watch: true}, webpackConfig)
+            var: webpackVarConfig,
+            umd: webpackUmdConfig
         },
 
 
@@ -46,23 +48,12 @@ module.exports = function (grunt) {
                 ],
                 dest: 'tmp/igv-all.css'
             },
-            igv: {
-                src: [
-                    'wrapper/header.js',
-                    'tmp/embedCss.js',
-                    'tmp/igv.var.js',
-                    'wrapper/footer.js'
-                ],
-                dest: 'dist/igv.min.js'
-            },
             igv_esm: {
                 src: [
-                    'wrapper/header-esm.js',
-                    'tmp/embedCss.js',
-                    'tmp/igv.var.js',
+                    'dist/igv.esm.min.js',
                     'wrapper/footer-esm.js'
                 ],
-                dest: 'dist/igv.esm.js'
+                dest: 'dist/igv.esm.min.js'
             },
         },
 
@@ -87,8 +78,8 @@ module.exports = function (grunt) {
         'clean:dist',
         'concat:css',
         'embed-css',
-        'webpack:prod',
-        'concat:igv',
+        'webpack:var',
+        'webpack:umd',
         'concat:igv_esm'
     ]); //'clean:tmp']);
 
