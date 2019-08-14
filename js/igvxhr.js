@@ -489,7 +489,7 @@ async function getGoogleAccessToken() {
 
     const authInstance = gapi.auth2.getAuthInstance();
     if (!authInstance) {
-        igv.browser.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+        getBrowser().presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
         return undefined;
     }
 
