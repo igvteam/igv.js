@@ -41,26 +41,20 @@ const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format 
  * @constructor
  */
 const BamReader = function (config, genome) {
-
     this.config = config;
-
     this.genome = genome;
-
     this.bamPath = config.url;
 
     // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
     this.baiPath = config.indexURL || inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
-
     BamUtils.setReaderDefaults(this, config);
-
-};
+}
 
 BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
 
     const chrToIndex = await getChrIndex.call(this)
     const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr;
     const chrId = chrToIndex[queryChr];
-
     const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
 
     if (chrId === undefined) {

@@ -203,7 +203,6 @@ BinaryParser.prototype.getVPointer = function () {
     //       }
 }
 
-
 function VPointer(block, offset) {
     this.block = block;
     this.offset = offset;

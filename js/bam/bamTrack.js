@@ -633,9 +633,7 @@ const BAMTrack = extend(TrackBase,
                 nameValues.push('<HR/>');
                 nameValues.push({name: 'DEL', value: coverage.del.toString()});
                 nameValues.push({name: 'INS', value: coverage.ins.toString()});
-
             }
-
 
             return nameValues;
 
