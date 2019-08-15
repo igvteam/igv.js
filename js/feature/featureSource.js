@@ -132,12 +132,11 @@ function addFeaturesToDB(featureList) {
     featureList.forEach(function (feature) {
         if (feature.name) {
             //TODO igv.browser => igv.Globals or igv.FeatureDB
-            self.config.browser.featureDB[feature.name.toLowerCase()] = feature;
+            self.config.browser.featureDB[feature.name.toUpperCase()] = feature;
         }
     });
 
 }
-
 
 /**
  * Required function for all data source objects.  Fetches features for the
@@ -148,7 +147,6 @@ function addFeaturesToDB(featureList) {
  * @param bpEnd
  * @param bpPerPixel
  */
-
 FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
     const reader = this.reader;

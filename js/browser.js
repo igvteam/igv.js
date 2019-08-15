@@ -1486,7 +1486,7 @@ Browser.prototype.search = async function (string, init) {
                 result.push(genomicState);
             } else {
                 // Try local feature cache.    This is created from feature tracks tagged "searchable"
-                const feature = self.featureDB[locus.toLowerCase()];
+                const feature = self.featureDB[locus.toUpperCase()];
                 if (feature) {
                     const chromosome = self.genome.getChromosome(feature.chr);
                     if (chromosome) {
@@ -1522,7 +1522,7 @@ Browser.prototype.search = async function (string, init) {
         }
 
         async function searchWebService(locus) {
-            let path = searchConfig.url.replace("$FEATURE$", locus);
+            let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase);
             if (path.indexOf("$GENOME$") > -1) {
                 path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
             }
