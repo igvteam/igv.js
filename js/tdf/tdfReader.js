@@ -40,258 +40,210 @@ const TDFReader = function (config, genome) {
 };
 
 
-TDFReader.prototype.readHeader = function () {
-
-    var self = this;
+TDFReader.prototype.readHeader = async function () {
 
     if (this.magic !== undefined) {
-        return Promise.resolve(this);   // Already read
+        return this;   // Already read
     }
 
-    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: {start: 0, size: 64000}}))
-
-        .then(function (data) {
-
-            var binaryParser = new BinaryParser(new DataView(data));
-
-            self.magic = binaryParser.getInt();
-            self.version = binaryParser.getInt();
-            self.indexPos = binaryParser.getLong();
-            self.indexSize = binaryParser.getInt();
-            var headerSize = binaryParser.getInt();
+    let data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: {start: 0, size: 64000}}))
+    let binaryParser = new BinaryParser(new DataView(data));
+    this.magic = binaryParser.getInt();
+    this.version = binaryParser.getInt();
+    this.indexPos = binaryParser.getLong();
+    this.indexSize = binaryParser.getInt();
+    const headerSize = binaryParser.getInt();
 
 
-            if (self.version >= 2) {
-                var nWindowFunctions = binaryParser.getInt();
-                self.windowFunctions = [];
-                while (nWindowFunctions-- > 0) {
-                    self.windowFunctions.push(binaryParser.getString());
-                }
-            }
+    if (this.version >= 2) {
+        let nWindowFunctions = binaryParser.getInt();
+        this.windowFunctions = [];
+        while (nWindowFunctions-- > 0) {
+            this.windowFunctions.push(binaryParser.getString());
+        }
+    }
 
-            self.trackType = binaryParser.getString();
-            self.trackLine = binaryParser.getString();
+    this.trackType = binaryParser.getString();
+    this.trackLine = binaryParser.getString();
 
-            var nTracks = binaryParser.getInt();
-            self.trackNames = [];
-            while (nTracks-- > 0) {
-                self.trackNames.push(binaryParser.getString());
-            }
+    let nTracks = binaryParser.getInt();
+    this.trackNames = [];
+    while (nTracks-- > 0) {
+        this.trackNames.push(binaryParser.getString());
+    }
+    this.genomeID = binaryParser.getString();
+    this.flags = binaryParser.getInt();
+    this.compressed = (this.flags & GZIP_FLAG) != 0;
 
-            self.genomeID = binaryParser.getString();
-            self.flags = binaryParser.getInt();
+    // Now read index
+    data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+        range: {
+            start: this.indexPos,
+            size: this.indexSize
+        }
+    }))
+    binaryParser = new BinaryParser(new DataView(data));
+    this.datasetIndex = {};
+    let nEntries = binaryParser.getInt();
+    while (nEntries-- > 0) {
+        const name = binaryParser.getString();
+        const pos = binaryParser.getLong();
+        const size = binaryParser.getInt();
+        this.datasetIndex[name] = {position: pos, size: size};
+    }
 
-            self.compressed = (self.flags & GZIP_FLAG) != 0;
+    this.groupIndex = {};
+    nEntries = binaryParser.getInt();
+    while (nEntries-- > 0) {
+        const name = binaryParser.getString();
+        const pos = binaryParser.getLong();
+        const size = binaryParser.getInt();
+        this.groupIndex[name] = {position: pos, size: size};
+    }
 
-            // Now read index
-            return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
-                range: {
-                    start: self.indexPos,
-                    size: self.indexSize
-                }
-            }))
-        })
-        .then(function (data) {
-
-            var binaryParser = new BinaryParser(new DataView(data));
-
-            self.datasetIndex = {};
-            var nEntries = binaryParser.getInt();
-            while (nEntries-- > 0) {
-                var name = binaryParser.getString();
-                var pos = binaryParser.getLong();
-                var size = binaryParser.getInt();
-                self.datasetIndex[name] = {position: pos, size: size};
-            }
-
-            self.groupIndex = {};
-            nEntries = binaryParser.getInt();
-            while (nEntries-- > 0) {
-                name = binaryParser.getString();
-                pos = binaryParser.getLong();
-                size = binaryParser.getInt();
-                self.groupIndex[name] = {position: pos, size: size};
-            }
-
-            return self;   // The header data is stored in "self"
-
-        })
-
+    return this;
 }
 
-TDFReader.prototype.readDataset = function (chr, windowFunction, zoom) {
+TDFReader.prototype.readDataset = async function (chr, windowFunction, zoom) {
 
-    var self = this,
-        dsName,
-        key;
+    const key = chr + "_" + windowFunction + "_" + zoom;
 
-    key = chr + "_" + windowFunction + "_" + zoom;
+    if (this.datasetCache[key]) {
+        return this.datasetCache[key];
 
-    if (self.datasetCache[key]) {
-        return Promise.resolve(self.datasetCache[key]);
     } else {
-        return self.readHeader()
+        await this.readHeader()
+        const wf = (this.version < 2) ? "" : "/" + windowFunction;
+        const zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString();
 
-            .then(function (ignore) {
+        let dsName;
+        if (windowFunction === "raw") {
+            dsName = "/" + chr + "/raw";
+        } else {
+            dsName = "/" + chr + "/z" + zoomString + wf;
+        }
+        const indexEntry = this.datasetIndex[dsName];
 
-                var wf = (self.version < 2) ? "" : "/" + windowFunction,
-                    zoomString = (chr.toLowerCase() === "all" || zoom === undefined) ? "0" : zoom.toString(),
-                    indexEntry;
+        if (indexEntry === undefined) {
+            return undefined;
+        }
 
-                if (windowFunction === "raw") {
-                    dsName = "/" + chr + "/raw";
-                } else {
-                    dsName = "/" + chr + "/z" + zoomString + wf;
-                }
-                indexEntry = self.datasetIndex[dsName];
+        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: indexEntry.position,
+                size: indexEntry.size
+            }
+        }));
 
-                if (indexEntry === undefined) {
-                    return undefined;
-                } else {
+        if (!data) {
+            return undefined;
+        }
 
-                    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
-                        range: {
-                            start: indexEntry.position,
-                            size: indexEntry.size
-                        }
-                    }))
-                }
-            })
-            .then(function (data) {
+        const binaryParser = new BinaryParser(new DataView(data));
+        let nAttributes = binaryParser.getInt();
+        const attributes = {};
+        while (nAttributes-- > 0) {
+            attributes[binaryParser.getString()] = binaryParser.getString();
+        }
+        const dataType = binaryParser.getString();
+        const tileWidth = binaryParser.getFloat();
+        let nTiles = binaryParser.getInt();
+        const tiles = [];
+        while (nTiles-- > 0) {
+            tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
+        }
 
-                if (!data) {
-                    return undefined;
-                }
-
-                var binaryParser = new BinaryParser(new DataView(data));
-
-                var nAttributes = binaryParser.getInt();
-                var attributes = {};
-                while (nAttributes-- > 0) {
-                    attributes[binaryParser.getString()] = binaryParser.getString();
-                }
-
-                var dataType = binaryParser.getString();
-                var tileWidth = binaryParser.getFloat();
-
-                var nTiles = binaryParser.getInt();
-                var tiles = [];
-                while (nTiles-- > 0) {
-                    tiles.push({position: binaryParser.getLong(), size: binaryParser.getInt()});
-                }
-
-                var dataset = {
-                    name: dsName,
-                    attributes: attributes,
-                    dataType: dataType,
-                    tileWidth: tileWidth,
-                    tiles: tiles
-                };
-
-                self.datasetCache[key] = dataset;
-
-                return dataset;
-
-            })
+        const dataset = {
+            name: dsName,
+            attributes: attributes,
+            dataType: dataType,
+            tileWidth: tileWidth,
+            tiles: tiles
+        };
+        this.datasetCache[key] = dataset;
+        return dataset;
     }
-
-
 }
 
-TDFReader.prototype.readRootGroup = function () {
+TDFReader.prototype.readRootGroup = async function () {
 
-    const self = this;
     const genome = this.genome;
     const rootGroup = this.groupCache["/"];
-
     if (rootGroup) {
-        return Promise.resolve(rootGroup);
+        return rootGroup;
     } else {
-        return self.readGroup("/").then(function (group) {
 
-            const names = group["chromosomes"];
-            const maxZoomString = group["maxZoom"];
+        const group = await this.readGroup("/");
+        const names = group["chromosomes"];
+        const maxZoomString = group["maxZoom"];
 
-            // Now parse out interesting attributes.  This is a side effect, and bad bad bad,  but the alternative is messy as well.
-            if (maxZoomString) {
-                self.maxZoom = Number(maxZoomString);
-            }
+        // Now parse out interesting attributes.  This is a side effect, but the alternative is messy as well.
+        if (maxZoomString) {
+            this.maxZoom = Number(maxZoomString);
+        }
 
-            // Chromosome names
-            self.chrAliasTable = {};
-            if (names) {
-                names.split(",").forEach(function (chr) {
-                    var canonicalName = genome.getChromosomeName(chr);
-                    self.chrAliasTable[canonicalName] = chr;
-                })
-            }
-            return group;
-        })
+        // Chromosome names
+        this.chrAliasTable = {};
+        if (names) {
+            names.split(",").forEach(function (chr) {
+                const canonicalName = genome.getChromosomeName(chr);
+                this.chrAliasTable[canonicalName] = chr;
+            })
+        }
+
+        this.groupCache["/"] = group;
+        return group;
     }
 }
 
-TDFReader.prototype.readGroup = function (name) {
+TDFReader.prototype.readGroup = async function (name) {
 
-    var self = this, group;
-
-    var group = self.groupCache[name];
+    const group = this.groupCache[name];
     if (group) {
-        return Promise.resolve(group);
+        return group;
     } else {
-        return self.readHeader()
 
-            .then(function (reader) {
+        await this.readHeader()
+        const indexEntry = this.groupIndex[name];
+        if (indexEntry === undefined) {
+            return undefined;
+        }
 
-                var indexEntry = self.groupIndex[name];
+        const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+            range: {
+                start: indexEntry.position,
+                size: indexEntry.size
+            }
+        }))
 
-                if (indexEntry === undefined) {
-                    return undefined;
-                } else {
+        if (!data) {
+            return undefined;
+        }
 
-                    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
-                        range: {
-                            start: indexEntry.position,
-                            size: indexEntry.size
-                        }
-                    }))
-                }
-            })
-            .then(function (data) {
-
-                if (!data) {
-                    return undefined;
-                }
-
-                var binaryParser = new BinaryParser(new DataView(data));
-
-                var nAttributes = binaryParser.getInt();
-                var group = {name: name};
-                while (nAttributes-- > 0) {
-                    group[binaryParser.getString()] = binaryParser.getString();
-                }
-
-                self.groupCache[name] = group;
-
-                return group;
-            })
+        const binaryParser = new BinaryParser(new DataView(data));
+        const group = {name: name};
+        let nAttributes = binaryParser.getInt();
+        while (nAttributes-- > 0) {
+            const key = binaryParser.getString();
+            const value = binaryParser.getString();
+            group[key] = value;
+        }
+        this.groupCache[name] = group;
+        return group;
     }
 }
 
 
 function createFixedStep(binaryParser, nTracks) {
-    var nPositions = binaryParser.getInt(),
-        start = binaryParser.getInt(),
-        span = binaryParser.getFloat(),
-        np = nPositions,
-        nt = nTracks,
-        data,
-        dtrack;
+    const nPositions = binaryParser.getInt();
+    const start = binaryParser.getInt();
+    const span = binaryParser.getFloat();
 
-
-    data = [];
+    const data = [];
+    let nt = nTracks;
     while (nt-- > 0) {
-        np = nPositions;
-        dtrack = [];
+        let np = nPositions;
+        const dtrack = [];
         while (np-- > 0) {
             dtrack.push(binaryParser.getFloat());
         }
@@ -310,25 +262,22 @@ function createFixedStep(binaryParser, nTracks) {
 
 function createVariableStep(binaryParser, nTracks) {
 
-    var tileStart = binaryParser.getInt(),
-        span = binaryParser.getFloat(),
-        nPositions = binaryParser.getInt(),
-        np = nPositions,
-        nt = nTracks,
-        start = [],
-        data,
-        dtrack;
+    const tileStart = binaryParser.getInt();
+    const span = binaryParser.getFloat();
+    const nPositions = binaryParser.getInt();
+    const start = [];
 
+    let np = nPositions;
     while (np-- > 0) {
         start.push(binaryParser.getInt());
     }
+    const nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
 
-    var nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
-
-    data = [];
+    const data = [];
+    let nt = nTracks;
     while (nt-- > 0) {
         np = nPositions;
-        dtrack = [];
+        const dtrack = [];
         while (np-- > 0) {
             dtrack.push(binaryParser.getFloat());
         }
@@ -347,29 +296,27 @@ function createVariableStep(binaryParser, nTracks) {
 }
 
 function createBed(binaryParser, nTracks, type) {
-    var nPositions, start, end, nS, data, name, n, nt, np, dtrack;
 
-    nPositions = binaryParser.getInt();
+    const nPositions = binaryParser.getInt();
 
-    n = nPositions;
-    start = [];
+    let n = nPositions;
+    const start = [];
     while (n-- > 0) {
         start.push(binaryParser.getInt());
     }
 
     n = nPositions;
-    end = [];
+    const end = [];
     while (n-- > 0) {
         end.push(binaryParser.getInt());
     }
 
-    var nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
-
-    data = [];
-    nt = nTracks;
+    const nS = binaryParser.getInt();  // # of samples, ignored but should === nTracks
+    const data = [];
+    let nt = nTracks;
     while (nt-- > 0) {
-        np = nPositions;
-        dtrack = [];
+        let np = nPositions;
+        const dtrack = [];
         while (np-- > 0) {
             dtrack.push(binaryParser.getFloat());
         }
@@ -378,7 +325,7 @@ function createBed(binaryParser, nTracks, type) {
 
     if (type === "bedWithName") {
         n = nPositions;
-        name = [];
+        const name = [];
         while (n-- > 0) {
             name.push(binaryParser.getString());
         }
@@ -396,9 +343,7 @@ function createBed(binaryParser, nTracks, type) {
 
 }
 
-TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
-
-    var self = this;
+TDFReader.prototype.readTiles = async function (tileIndeces, nTracks) {
 
     tileIndeces.sort(function (a, b) {
         return a.position - b.position;
@@ -412,107 +357,87 @@ TDFReader.prototype.readTiles = function (tileIndeces, nTracks) {
         return Promise.resolve([]);
     }
 
-    var firstEntry = tileIndeces[0];
-    var lastEntry = tileIndeces[tileIndeces.length - 1];
-    var position = firstEntry.position;
-    var size = (lastEntry.position + lastEntry.size) - position;
-
-
-    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
+    const firstEntry = tileIndeces[0];
+    const lastEntry = tileIndeces[tileIndeces.length - 1];
+    const position = firstEntry.position;
+    const size = (lastEntry.position + lastEntry.size) - position;
+    const data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
         range: {
             start: position,
             size: size
         }
     }))
-        .then(function (data) {
 
-            var tiles = [];
+    const tiles = [];
 
-            // Loop through and decode tiles
-            tileIndeces.forEach(function (indexEntry) {
+    // Loop through and decode tiles
+    for (let indexEntry of tileIndeces) {
+        const start = indexEntry.position - position;
+        const size = indexEntry.size;
+        if (size > 0) {
+            let tileData;
+            if (this.compressed) {
+                const inflate = new Zlib.Inflate(new Uint8Array(data, start, size));
+                const plain = inflate.decompress();
+                tileData = plain.buffer;
+            } else {
+                tileData = data.slice(start, start + size);
+            }
 
-                var start = indexEntry.position - position;
-                var size = indexEntry.size;
-                if (size > 0) {
-                    var tileData;
-
-                    if (self.compressed) {
-                        var inflate = new Zlib.Inflate(new Uint8Array(data, start, size));
-                        var plain = inflate.decompress();
-                        tileData = plain.buffer;
-                    } else {
-                        tileData = data.slice(start, start + size);
-                    }
-
-
-                    var binaryParser = new BinaryParser(new DataView(tileData));
-                    var type = binaryParser.getString();
-                    var tile;
-
-                    switch (type) {
-                        case "fixedStep":
-                            tile = createFixedStep(binaryParser, nTracks);
-                            break;
-                        case "variableStep":
-                            tile = createVariableStep(binaryParser, nTracks);
-                            break;
-                        case "bed":
-                        case "bedWithName":
-                            tile = createBed(binaryParser, nTracks, type);
-                            break;
-                        default:
-                            throw "Unknown tile type: " + type;
-                    }
-
-                    tiles.push(tile);
-                }
-            });
-
-            return tiles;
-
-        });
-
-    // Read raw data for all tiles into a buffer
+            const binaryParser = new BinaryParser(new DataView(tileData));
+            const type = binaryParser.getString();
+            let tile;
+            switch (type) {
+                case "fixedStep":
+                    tile = createFixedStep(binaryParser, nTracks);
+                    break;
+                case "variableStep":
+                    tile = createVariableStep(binaryParser, nTracks);
+                    break;
+                case "bed":
+                case "bedWithName":
+                    tile = createBed(binaryParser, nTracks, type);
+                    break;
+                default:
+                    throw "Unknown tile type: " + type;
+            }
+            tiles.push(tile);
+        }
+    }
+    return tiles;
 }
 
-TDFReader.prototype.readTile = function (indexEntry, nTracks) {
+TDFReader.prototype.readTile = async function (indexEntry, nTracks) {
 
-    var self = this;
-
-    return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
+    let data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
         range: {
             start: indexEntry.position,
             size: indexEntry.size
         }
     }))
-        .then(function (data) {
 
-            if (self.compressed) {
-                var inflate = new Zlib.Inflate(new Uint8Array(data));
-                var plain = inflate.decompress();
-                data = plain.buffer;
-            }
+    if (this.compressed) {
+        const inflate = new Zlib.Inflate(new Uint8Array(data));
+        const plain = inflate.decompress();
+        data = plain.buffer;
+    }
 
-            var binaryParser = new BinaryParser(new DataView(data));
-
-            var type = binaryParser.getString();
-
-            switch (type) {
-                case "fixedStep":
-                    return createFixedStep(binaryParser, nTracks);
-                    break;
-                case "variableStep":
-                    return createVariableStep(binaryParser, nTracks);
-                    break;
-                case "bed":
-                case "bedWithName":
-                    return createBed(binaryParser, nTracks, type);
-                    break;
-                default:
-                    throw "Unknown tile type: " + type;
-            }
-        });
-
+    const binaryParser = new BinaryParser(new DataView(data));
+    const type = binaryParser.getString();
+    switch (type) {
+        case "fixedStep":
+            return createFixedStep(binaryParser, nTracks);
+            break;
+        case "variableStep":
+            return createVariableStep(binaryParser, nTracks);
+            break;
+        case "bed":
+        case "bedWithName":
+            return createBed(binaryParser, nTracks, type);
+            break;
+        default:
+            throw "Unknown tile type: " + type;
+    }
 }
 
 export default TDFReader;

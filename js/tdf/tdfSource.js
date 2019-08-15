@@ -34,93 +34,64 @@ const TDFSource = function (config, genome) {
     this.reader = new TDFReader(config, genome);
 };
 
-TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
-    const self = this;
+    await getRootGroup().call(this);
+
     const genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
     const genome = this.genome;
 
     if (chr.toLowerCase() === "all") {
-        return Promise.resolve([]);      // Whole genome view not yet supported
+        return [];      // Whole genome view not yet supported
     }
 
     genomicInterval.bpPerPixel = bpPerPixel;
+    const group = await getRootGroup();
+    const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
+    let queryChr = this.reader.chrAliasTable[chr];
+    let maxZoom = this.reader.maxZoom;
+    if (queryChr === undefined) queryChr = chr;
+    if (maxZoom === undefined) maxZoom = -1;
+
+    const wf = zoom > maxZoom ? "raw" : this.windowFunction;
+    const dataset = await this.reader.readDataset(queryChr, wf, zoom);
+    if (dataset == null) {
+        return [];
+    }
+
+    const tileWidth = dataset.tileWidth;
+    const startTile = Math.floor(bpStart / tileWidth);
+    const endTile = Math.floor(bpEnd / tileWidth);
+    const NTRACKS = 1;   // TODO read this
+    const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
+    const features = [];
+    for (let tile of tiles) {
+        switch (tile.type) {
+            case "bed":
+                decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            case "variableStep":
+                decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            case "fixedStep":
+                decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            default:
+                throw ("Unknown tile type: " + tile.type);
+        }
+    }
+    features.sort(function (a, b) {
+        return a.start - b.start;
+    })
+    return features;
 
 
-    return getRootGroup()
-
-        .then(function (group) {
-
-            var zoom = zoomLevelForScale(chr, bpPerPixel, genome),
-                queryChr = self.reader.chrAliasTable[chr],
-                maxZoom = self.reader.maxZoom,
-                wf;
-
-            if (queryChr === undefined) queryChr = chr;
-            if (maxZoom === undefined) maxZoom = -1;
-
-            wf = zoom > maxZoom ? "raw" : self.windowFunction;
-
-            return self.reader.readDataset(queryChr, wf, zoom);
-        })
-
-        .then(function (dataset) {
-
-            if (dataset == null) {
-                return [];
-            }
-
-            var tileWidth = dataset.tileWidth,
-                startTile = Math.floor(bpStart / tileWidth),
-                endTile = Math.floor(bpEnd / tileWidth),
-                i,
-                p = [],
-                NTRACKS = 1;   // TODO read this
-
-
-            return self.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
-
-        })
-
-        .then(function (tiles) {
-
-            var features = [];
-
-            tiles.forEach(function (tile) {
-                switch (tile.type) {
-                    case "bed":
-                        decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                        break;
-                    case "variableStep":
-                        decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                        break;
-                    case "fixedStep":
-                        decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                        break;
-                    default:
-                        reject("Unknown tile type: " + tile.type);
-                        return;
-                }
-            });
-
-            features.sort(function (a, b) {
-                return a.start - b.start;
-            })
-
-
-            return features;
-        })
-
-
-    function getRootGroup() {
-        if (self.rootGroup) {
-            return Promise.resolve(self.rootGroup);
+    async function getRootGroup() {
+        if (this.rootGroup) {
+            return this.rootGroup;
         } else {
-            return self.reader.readRootGroup()
-                .then(function (rootGroup) {
-                    self.rootGroup = rootGroup;
-                    return rootGroup;
-                });
+            this.rootGroup = await this.reader.readRootGroup()
+            return this.rootGroup;
         }
     }
 }
@@ -131,20 +102,15 @@ TDFSource.prototype.supportsWholeGenome = function () {
 
 function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    var nPositions = tile.nPositions,
-        starts = tile.start,
-        ends = tile.end,
-        data = tile.data[0],   // Single track for now
-        i;
-
-    for (i = 0; i < nPositions; i++) {
-
-        var s = starts[i];
-        var e = ends[i];
-
+    const nPositions = tile.nPositions;
+    const starts = tile.start;
+    const ends = tile.end;
+    const data = tile.data[0];   // Single track for now
+    for (let i = 0; i < nPositions; i++) {
+        const s = starts[i];
+        const e = ends[i];
         if (e < bpStart) continue;
         if (s > bpEnd) break;
-
         features.push({
             chr: chr,
             start: s,
@@ -156,20 +122,15 @@ function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
 function decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    var nPositions = tile.nPositions,
-        starts = tile.start,
-        span = tile.span,
-        data = tile.data[0],   // Single track for now
-        i;
-
-    for (i = 0; i < nPositions; i++) {
-
-        var s = starts[i];
-        var e = s + span;
-
+    const nPositions = tile.nPositions;
+    const starts = tile.start;
+    const span = tile.span;
+    const data = tile.data[0];   // Single track for now
+    for (let i = 0; i < nPositions; i++) {
+        const s = starts[i];
+        const e = s + span;
         if (e < bpStart) continue;
         if (s > bpEnd) break;
-
         features.push({
             chr: chr,
             start: s,
@@ -181,20 +142,15 @@ function decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
 function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-    var nPositions = tile.nPositions,
-        s = tile.start,
-        span = tile.span,
-        data = tile.data[0],   // Single track for now
-        i;
+    const nPositions = tile.nPositions;
+    let s = tile.start;
+    const span = tile.span;
+    const data = tile.data[0];   // Single track for now
 
-    for (i = 0; i < nPositions; i++) {
-
-        var e = s + span;
-
+    for (let i = 0; i < nPositions; i++) {
+        const e = s + span;
         if (s > bpEnd) break;
-
         if (e >= bpStart) {
-
             if (!Number.isNaN(data[i])) {
                 features.push({
                     chr: chr,
@@ -204,7 +160,6 @@ function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
                 });
             }
         }
-
         s = e;
     }
 }

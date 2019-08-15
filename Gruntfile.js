@@ -66,7 +66,6 @@ module.exports = function (grunt) {
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -82,7 +81,7 @@ module.exports = function (grunt) {
         'webpack:umd',
         'concat:igv_esm',
         'clean:tmp'
-    ]); 
+    ]);
 
     grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
