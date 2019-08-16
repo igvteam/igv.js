@@ -1522,7 +1522,7 @@ Browser.prototype.search = async function (string, init) {
         }
 
         async function searchWebService(locus) {
-            let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase);
+            let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
             if (path.indexOf("$GENOME$") > -1) {
                 path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
             }
