@@ -1,5 +1,5 @@
 const configFor = require('./webpack.config.generator.js');
-const webpackVarConfig = configFor('var');
+const webpackEsmConfig = configFor('esm');
 const webpackUmdConfig = configFor('umd');
 
 module.exports = function (grunt) {
@@ -35,7 +35,7 @@ module.exports = function (grunt) {
             options: {
                 stats: !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
             },
-            var: webpackVarConfig,
+            esm: webpackEsmConfig,
             umd: webpackUmdConfig
         },
 
@@ -77,8 +77,8 @@ module.exports = function (grunt) {
         'clean:dist',
         'concat:css',
         'embed-css',
-        'webpack:var',
         'webpack:umd',
+        'webpack:esm',
         'concat:igv_esm',
         'clean:tmp'
     ]);

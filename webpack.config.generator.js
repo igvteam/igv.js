@@ -2,27 +2,18 @@ const path = require('path')
 
 function configFor(target) {
 
-    let filenameQualifier;
-    switch (target) {
-        case 'var':
-            filenameQualifier = '.esm';
-            break;
-        case 'umd':
-            filenameQualifier = '';
-            break;
-        default:
-            filenameQualifier = '.' + target;
-    }
+    let filenameQualifier =  'umd' === target ? '' :  '.' + target;
+    let libraryTarget = 'esm' === target ? 'var' : target
 
     return {
         mode: 'production',
-        entry: ['babel-polyfill', './tmp/embedCss.js', './js/igv-create.js'],
+        entry: ['babel-polyfill', './tmp/embedCss.js', './js/api.js'],
         target: 'web',
         output: {
             path: path.resolve(__dirname, 'dist'),
             filename: `igv${filenameQualifier}.min.js`,
             library: 'igv',
-            libraryTarget: target
+            libraryTarget: libraryTarget
         },
         module: {
             rules: [
