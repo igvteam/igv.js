@@ -1,7 +1,10 @@
 /*!
  * Font Awesome Free 5.0.8 by @fontawesome - https://fontawesome.com
  * License - https://fontawesome.com/license (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License)
+ *
+ * NOTE: namespace modified for igv.js to avoid conflicts with enclosing page.
  */
+
 svg:not(:root).svg-inline--fa5 {
   overflow: visible;
   }

@@ -120,37 +120,42 @@ BamSource.prototype.setShowSoftClips = function (bool) {
 
 BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
 
-    const genome = this.genome;
-    const showSoftClips = this.showSoftClips;
+    try {
+        const genome = this.genome;
+        const showSoftClips = this.showSoftClips;
 
-    if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-        return this.alignmentContainer;
+        if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+            return this.alignmentContainer;
 
-    } else {
-        const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
-        let alignments = alignmentContainer.alignments;
-        if (!this.viewAsPairs) {
-            alignments = unpairAlignments([{alignments: alignments}]);
-        }
-        const hasAlignments = alignments.length > 0;
-        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
-        alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
-
-        this.alignmentContainer = alignmentContainer;
-
-        if (!hasAlignments) {
-            return alignmentContainer;
         } else {
+            const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
+            let alignments = alignmentContainer.alignments;
+            if (!this.viewAsPairs) {
+                alignments = unpairAlignments([{alignments: alignments}]);
+            }
+            const hasAlignments = alignments.length > 0;
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
+            alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
-            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
-            if (sequence) {
-                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                alignmentContainer.sequence = sequence;           // TODO -- fix this
+            this.alignmentContainer = alignmentContainer;
+
+            if (!hasAlignments) {
                 return alignmentContainer;
             } else {
-                console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+
+                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+                if (sequence) {
+                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                    alignmentContainer.sequence = sequence;           // TODO -- fix this
+                    return alignmentContainer;
+                } else {
+                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+                }
             }
         }
+    } catch (e) {
+        console.error(e);
+        throw e;
     }
 }
 
@@ -232,41 +237,47 @@ function packAlignmentRows(alignments, start, end, showSoftClips) {
         let lastAllocatedCount = 0;
         const packedAlignmentRows = [];
         const alignmentSpace = 8;
-        while (allocatedCount < alignments.length) {
-            const alignmentRow = new BamAlignmentRow();
-            while (nextStart <= end) {
-                let bucket = undefined;
-                while (!bucket && nextStart <= end) {
-                    const index = nextStart - bucketStart;
-                    if (bucketList[index] === undefined) {
-                        ++nextStart;                     // No alignments at this index
-                    } else {
-                        bucket = bucketList[index];
+        try {
+            while (allocatedCount < alignments.length) {
+                const alignmentRow = new BamAlignmentRow();
+                while (nextStart <= end) {
+                    let bucket = undefined;
+                    let index;
+                    while (!bucket && nextStart <= end) {
+                        index = nextStart - bucketStart;
+                        if (bucketList[index] === undefined) {
+                            ++nextStart;                     // No alignments at this index
+                        } else {
+                            bucket = bucketList[index];
+                        }
+                    } // while (bucket)
+                    if (!bucket) {
+                        break;
                     }
-                } // while (bucket)
-                if (!bucket) {
-                    break;
+                    const alignment = bucket.pop();
+                    if (0 === bucket.length) {
+                        bucketList[index] = undefined;
+                    }
+
+                    alignmentRow.alignments.push(alignment);
+                    nextStart = showSoftClips ?
+                        alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
+                        alignment.start + alignment.lengthOnRef + alignmentSpace;
+                    ++allocatedCount;
+                } // while (nextStart)
+
+                if (alignmentRow.alignments.length > 0) {
+                    packedAlignmentRows.push(alignmentRow);
                 }
-                const alignment = bucket.pop();
-                if (0 === bucket.length) {
-                    bucketList[index] = undefined;
-                }
 
-                alignmentRow.alignments.push(alignment);
-                nextStart = showSoftClips ?
-                    alignment.scStart + alignment.scLengthOnRef + alignmentSpace :
-                    alignment.start + alignment.lengthOnRef + alignmentSpace;
-                ++allocatedCount;
-            } // while (nextStart)
-
-            if (alignmentRow.alignments.length > 0) {
-                packedAlignmentRows.push(alignmentRow);
-            }
-
-            nextStart = bucketStart;
-            if (allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
-            lastAllocatedCount = allocatedCount;
-        } // while (allocatedCount)
+                nextStart = bucketStart;
+                if (allocatedCount === lastAllocatedCount) break;   // Protect from infinite loops
+                lastAllocatedCount = allocatedCount;
+            } // while (allocatedCount)
+        } catch (e) {
+            console.error(e);
+            throw e;
+        }
 
         return packedAlignmentRows;
     }

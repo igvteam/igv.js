@@ -9,7 +9,7 @@ import runCoverageColoredRenderingTests from "./testCoverageColoredRendering.js"
 import runWigTests from "./testWig.js";
 import runGFFTests from "./testGFF.js";
 import runFastaTests from "./testFasta.js";
-
+import runSegTests from './testSeg.js';
 import runTabixTests from "./testTabix.js";
 import runGenomeTests from "./testGenome.js";
 import runTDFTests from "./testTDF.js";
@@ -33,7 +33,7 @@ runCoverageColoredRenderingTests();
 runWigTests();
 runGFFTests();
 runFastaTests();
-//runSegTests();
+runSegTests();
 runTabixTests();
 runGenomeTests();
 runTDFTests();

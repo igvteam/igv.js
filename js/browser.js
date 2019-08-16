@@ -77,6 +77,7 @@ const Browser = function (options, trackContainerDiv) {
     this.$spinner = $('<div class="igv-track-container-spinner">');
     this.$spinner.append(createIcon("spinner"));
     $(this.trackContainerDiv).append(this.$spinner);
+    this.stopSpinner();
 
     addMouseHandlers.call(this);
 
@@ -131,7 +132,7 @@ function initialize(options) {
 Browser.prototype.startSpinner = function () {
     const $spinner = this.$spinner;
     if ($spinner) {
-        $spinner.addClass("fa5-spin");
+        $spinner.addClass("igv-fa5-spin");
         $spinner.show();
     }
 };
@@ -140,7 +141,7 @@ Browser.prototype.stopSpinner = function () {
     const $spinner = this.$spinner;
     if ($spinner) {
         $spinner.hide();
-        $spinner.removeClass("fa5-spin");
+        $spinner.removeClass("igv-fa5-spin");
     }
 };
 

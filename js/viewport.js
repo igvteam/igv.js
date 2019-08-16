@@ -13,7 +13,7 @@ import {download} from "./util/igvUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
-function ViewPort  (trackView, $container, genomicState, width) {
+function ViewPort(trackView, $container, genomicState, width) {
 
     const self = this;
 
@@ -79,7 +79,6 @@ function ViewPort  (trackView, $container, genomicState, width) {
 
         this.$spinner = $('<div class="igv-viewport-spinner">');
         this.$spinner.append(createIcon("spinner"));
-
         this.$viewport.append(this.$spinner);
         this.stopSpinner();
 
@@ -187,7 +186,7 @@ ViewPort.prototype.startSpinner = function () {
 
     const $spinner = this.$spinner;
     if ($spinner) {
-        $spinner.addClass("fa5-spin");
+        $spinner.addClass("igv-fa5-spin");
         $spinner.show();
     }
 };
@@ -197,7 +196,7 @@ ViewPort.prototype.stopSpinner = function () {
     const $spinner = this.$spinner;
     if ($spinner) {
         $spinner.hide();
-        $spinner.removeClass("fa5-spin");
+        $spinner.removeClass("igv-fa5-spin");
     }
 };
 
@@ -1008,29 +1007,20 @@ function addMouseHandlers() {
     }
 }
 
-function getFeatures(chr, start, end, bpPerPixel) {
+async function getFeatures(chr, start, end, bpPerPixel) {
 
-    const self = this;
+    const track = this.trackView.track;
 
-    const track = self.trackView.track;
+    if (this.tile && this.tile.containsRange(chr, start, end, bpPerPixel)) {
+        return this.tile.features;
 
-    if (self.tile && self.tile.containsRange(chr, start, end, bpPerPixel)) {
-        return Promise.resolve(self.tile.features);
     } else if (typeof track.getFeatures === "function") {
-
-        return track.getFeatures(chr, start, end, bpPerPixel)
-
-            .then(function (features) {
-
-                self.cachedFeatures = features;      // TODO -- associate with "tile"
-
-                self.checkContentHeight();
-
-                return features;
-
-            })
+        const features = await track.getFeatures(chr, start, end, bpPerPixel, this);
+        this.cachedFeatures = features;      // TODO -- associate with "tile"
+        this.checkContentHeight();
+        return features;
     } else {
-        return Promise.resolve(undefined);
+        return undefined;
     }
 }
 

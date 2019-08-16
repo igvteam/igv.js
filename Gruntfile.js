@@ -39,15 +39,7 @@ module.exports = function (grunt) {
             umd: webpackUmdConfig
         },
 
-
         concat: {
-            css: {
-                src: [
-                    'css/igv.css',
-                    'vendor/fa-svg-with-js.css'
-                ],
-                dest: 'tmp/igv-all.css'
-            },
             igv_esm: {
                 src: [
                     'dist/igv.esm.min.js',
@@ -75,7 +67,6 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', [
         'clean:dist',
-        'concat:css',
         'embed-css',
         'webpack:umd',
         'webpack:esm',
@@ -87,20 +78,13 @@ module.exports = function (grunt) {
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
-        var ping,
-            pong,
-            foo;
-
-        ping = grunt.file.read('tmp/igv-all.css');
+        let ping = grunt.file.read('css/igv.css');
         ping = ping.replace(/\r\n/g, '\\n');
-        pong = ping.replace(/\n/g, '\\n');
-        ping = pong.replace(/"/g, '\\"');
-
-        foo = grunt.file.read('wrapper/embedCss.js');
+        ping = ping.replace(/\n/g, '\\n');
+        ping = ping.replace(/"/g, '\\"');
+        let foo = grunt.file.read('wrapper/embedCss.js');
         foo = foo.replace('_CSS_', ping);
-
         grunt.file.write('tmp/embedCss.js', foo);
     });
-
 };
 

@@ -1,4 +1,5 @@
 import igvxhr from "../../js/igvxhr.js";
+import GtexUtils from "../../js/gtex/gtexUtils.js";
 
 const igvdev = {
 
@@ -34,7 +35,7 @@ const igvdev = {
 
                 })
 
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
+                return GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
