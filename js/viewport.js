@@ -1018,7 +1018,7 @@ function getFeatures(chr, start, end, bpPerPixel) {
         return Promise.resolve(self.tile.features);
     } else if (typeof track.getFeatures === "function") {
 
-        return track.getFeatures(chr, start, end, bpPerPixel, self)
+        return track.getFeatures(chr, start, end, bpPerPixel)
 
             .then(function (features) {
 

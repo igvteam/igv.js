@@ -368,10 +368,6 @@ function createStandardControls(browser, config) {
 
 function setDefaults(config) {
 
-    if (undefined === config.visibilityWindow) {
-        config.visibilityWindow = -1;
-    }
-
     if (undefined === config.promisified) {
         config.promisified = false;
     }

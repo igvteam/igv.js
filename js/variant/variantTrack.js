@@ -114,12 +114,12 @@ VariantTrack.prototype.getCallsetsLength = function () {
     return this.callSets.length;
 }
 
-VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
+VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
     if (this.header === undefined) {
         this.header = await this.getFileHeader();
     }
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
 
 }
 

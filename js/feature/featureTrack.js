@@ -108,6 +108,7 @@ FeatureTrack.prototype.postInit = async function () {
         this.visibilityWindow === undefined &&
         typeof this.featureSource.defaultVisibilityWindow === 'function') {
         this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
+        this.featureSource.visibilityWindow = this.visibilityWindow;
     }
 
     return this;
@@ -128,7 +129,7 @@ FeatureTrack.prototype.readFileHeader = async function () {
 }
 
 FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, self.visibilityWindow);
+    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
 };
 
 
