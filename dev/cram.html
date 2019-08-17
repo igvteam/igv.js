@@ -13,45 +13,42 @@
     <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
     <link rel="stylesheet" type="text/css" href="css/dev.css"/>
 
-    <!-- Vendor CSS -->
-    <link rel="stylesheet" type="text/css" href="../css/fa-svg-with-js.css"/>
-
 </head>
 
 <body>
 
-<h3>1000 Genomes low coverage CRAMs - click to load</h3>
-
-<div id="trackList"></div>
+<h1>1000 Genomes CRAM file</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import google from "../js/google/googleUtils.js";
-    import {createBrowser} from "../js/igv-create.js";
-    import igvdev from "./js/dev.js"
+    import * as igv from "../js/api.js";
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-            .then(function (google) {
-
-                const options =
+        var options =
+            {
+                genome: "hg19",
+                locus: "chr8:128,747,267-128,754,546",
+                tracks: [
                     {
-                        locus: 'muc1',
-                        genome: "hg38",
-                        flanking: 1000,
-                        queryParametersSupported: true
-                    };
+                        type: 'alignment',
+                        format: 'cram',
+                        url: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram',
+                        indexURL: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram.crai',
+                        name: 'HG00096'
+                    }
 
-                createBrowser(document.getElementById('igvDiv'), options)
-                    .then(function (browser) {
-                        igvdev.createTrackList(document.getElementById('trackList'), '../test/lowCoverageCrams.json', browser);
-                        return browser;
-                    })
+                ]
+            };
 
+        var igvDiv = document.getElementById("igvDiv");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
             })
     });
 
