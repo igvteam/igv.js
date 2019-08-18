@@ -1,18 +1,21 @@
+import BWSource from "../js/bigwig/bwSource.js";
+import BWReader from "../js/bigwig/bwReader.js";
+
 function runBigwigTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
     function createMockObjects(bpPerPixel) {
 
-        igv.browser = igv.browser || {};
-        igv.browser.referenceFrame = {bpPerPixel: bpPerPixel};
+        // igv.browser = igv.browser || {};
+        // igv.browser.referenceFrame = {bpPerPixel: bpPerPixel};
 
     }
 
     QUnit.test("No data", function (assert) {
         var done = assert.async();
 
-        var bw = new igv.BWSource(
+        var bw = new BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
 
@@ -31,7 +34,7 @@ function runBigwigTests() {
     QUnit.test("Many chromosomes", function (assert) {
         var done = assert.async();
 
-        var bw = new igv.BWSource(
+        var bw = new BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
 
@@ -60,7 +63,7 @@ function runBigwigTests() {
 
         createMockObjects();
 
-        bwReader = new igv.BWReader({url: url});
+        bwReader = new BWReader({url: url});
         assert.ok(bwReader);
 
         bwReader.loadHeader().then(function () {
@@ -112,7 +115,7 @@ function runBigwigTests() {
         createMockObjects();
 
         var url = dataURL + "bigwig/bigWigExample.bw",
-            bwReader = new igv.BWReader({url: url});
+            bwReader = new BWReader({url: url});
 
         bwReader.loadHeader().then(function () {
 
@@ -142,7 +145,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource({url: url});
+        var bWSource = new BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
 
@@ -169,7 +172,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bwReader = new igv.BWReader({url: url});
+        var bwReader = new BWReader({url: url});
 
         bwReader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel).then(function (features) {
 
@@ -196,7 +199,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource({url: url});
+        var bWSource = new BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel)
             .then(function (features) {
@@ -224,7 +227,7 @@ function runBigwigTests() {
 
         createMockObjects(bpPerPixel);
 
-        var bWSource = new igv.BWSource({url: url});
+        var bWSource = new BWSource({url: url});
 
         bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(function (features) {
 
@@ -238,6 +241,6 @@ function runBigwigTests() {
             assert.ok(false);
         });
     });
-
-
 }
+
+export default runBigwigTests;

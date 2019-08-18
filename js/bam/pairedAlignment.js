@@ -25,91 +25,81 @@
  */
 
 
-var igv = (function (igv) {
+const PairedAlignment = function (firstAlignment) {
 
+    this.paired = true;
+    this.firstAlignment = firstAlignment;
+    this.chr = firstAlignment.chr;
+    this.readName = firstAlignment.readName;
 
-    igv.PairedAlignment = function (firstAlignment) {
-
-        this.paired = true;
-        this.firstAlignment = firstAlignment;
-        this.chr = firstAlignment.chr;
-        this.readName = firstAlignment.readName;
-
-        if (firstAlignment.start < firstAlignment.mate.position) {
-            this.start = firstAlignment.start;
-            this.scStart = firstAlignment.scStart;
-            this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef;
-            this.connectingEnd = firstAlignment.mate.position;
-        }
-        else {
-            this.start = firstAlignment.mate.position;
-            this.scStart = this.start;
-            this.connectingStart = firstAlignment.mate.position;
-            this.connectingEnd = firstAlignment.start;
-        }
-
-        this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
-        this.lengthOnRef = this.end - this.start;
-
-        let scEnd = Math.max(this.end, firstAlignment.scStart + firstAlignment.scLengthOnRef);
-        this.scLengthOnRef = scEnd - this.scStart;
-
+    if (firstAlignment.start < firstAlignment.mate.position) {
+        this.start = firstAlignment.start;
+        this.scStart = firstAlignment.scStart;
+        this.connectingStart = firstAlignment.start + firstAlignment.lengthOnRef;
+        this.connectingEnd = firstAlignment.mate.position;
+    } else {
+        this.start = firstAlignment.mate.position;
+        this.scStart = this.start;
+        this.connectingStart = firstAlignment.mate.position;
+        this.connectingEnd = firstAlignment.start;
     }
 
-    igv.PairedAlignment.prototype.setSecondAlignment = function (secondAlignment) {
+    this.end = Math.max(firstAlignment.mate.position, firstAlignment.start + firstAlignment.lengthOnRef);  // Approximate
+    this.lengthOnRef = this.end - this.start;
 
-        // TODO -- check the chrs are equal,  error otherwise
-        this.secondAlignment = secondAlignment;
-        const firstAlignment = this.firstAlignment;
+    let scEnd = Math.max(this.end, firstAlignment.scStart + firstAlignment.scLengthOnRef);
+    this.scLengthOnRef = scEnd - this.scStart;
 
-        if (secondAlignment.start > firstAlignment.start) {
-            this.connectingEnd = secondAlignment.start;
-        }
-        else {
-            this.connectingStart = secondAlignment.start + secondAlignment.lengthOnRef;
-        }
+}
 
-        this.start = Math.min(firstAlignment.start, secondAlignment.start);
-        this.end = Math.max(firstAlignment.start + firstAlignment.lengthOnRef, secondAlignment.start + secondAlignment.lengthOnRef)
-        this.lengthOnRef = this.end - this.start;
+PairedAlignment.prototype.setSecondAlignment = function (secondAlignment) {
 
-        this.scStart = Math.min(firstAlignment.scStart, secondAlignment.scStart);
-        const scEnd = Math.max(firstAlignment.scStart + firstAlignment.scLengthOnRef, secondAlignment.scStart + secondAlignment.scLengthOnRef);
-        this.scLengthOnRef = scEnd - this.scStart;
+    // TODO -- check the chrs are equal,  error otherwise
+    this.secondAlignment = secondAlignment;
+    const firstAlignment = this.firstAlignment;
 
+    if (secondAlignment.start > firstAlignment.start) {
+        this.connectingEnd = secondAlignment.start;
+    } else {
+        this.connectingStart = secondAlignment.start + secondAlignment.lengthOnRef;
     }
 
-    igv.PairedAlignment.prototype.popupData = function (genomicLocation) {
+    this.start = Math.min(firstAlignment.start, secondAlignment.start);
+    this.end = Math.max(firstAlignment.start + firstAlignment.lengthOnRef, secondAlignment.start + secondAlignment.lengthOnRef)
+    this.lengthOnRef = this.end - this.start;
 
-        var nameValues = [];
+    this.scStart = Math.min(firstAlignment.scStart, secondAlignment.scStart);
+    const scEnd = Math.max(firstAlignment.scStart + firstAlignment.scLengthOnRef, secondAlignment.scStart + secondAlignment.scLengthOnRef);
+    this.scLengthOnRef = scEnd - this.scStart;
 
-        nameValues = nameValues.concat(this.firstAlignment.popupData(genomicLocation));
+}
 
-        if (this.secondAlignment) {
-            nameValues.push("-------------------------------");
-            nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation));
-        }
-        return nameValues;
+PairedAlignment.prototype.popupData = function (genomicLocation) {
+
+    var nameValues = [];
+
+    nameValues = nameValues.concat(this.firstAlignment.popupData(genomicLocation));
+
+    if (this.secondAlignment) {
+        nameValues.push("-------------------------------");
+        nameValues = nameValues.concat(this.secondAlignment.popupData(genomicLocation));
     }
+    return nameValues;
+}
 
-    igv.PairedAlignment.prototype.isPaired = function () {
-        return true; // By definition
+PairedAlignment.prototype.isPaired = function () {
+    return true; // By definition
+}
+
+PairedAlignment.prototype.firstOfPairStrand = function () {
+
+    if (this.firstAlignment.isFirstOfPair()) {
+        return this.firstAlignment.strand;
+    } else if (this.secondAlignment && this.secondAlignment.isFirstOfPair()) {
+        return this.secondAlignment.strand;
+    } else {
+        return this.firstAlignment.mate.strand;    // Assumption is mate is first-of-pair
     }
+}
 
-    igv.PairedAlignment.prototype.firstOfPairStrand = function () {
-
-        if (this.firstAlignment.isFirstOfPair()) {
-            return this.firstAlignment.strand;
-        }
-        else if (this.secondAlignment && this.secondAlignment.isFirstOfPair()) {
-            return this.secondAlignment.strand;
-        }
-        else {
-            return this.firstAlignment.mate.strand;    // Assumption is mate is first-of-pair
-        }
-    }
-
-
-    return igv;
-
-})(igv || {});
+export default PairedAlignment;

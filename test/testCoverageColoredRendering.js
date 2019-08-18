@@ -115,5 +115,6 @@ function runCoverageColoredRenderingTests(assert) {
         }
 
     });
-
 }
+
+export default runCoverageColoredRenderingTests;

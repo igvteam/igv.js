@@ -24,214 +24,158 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 11/27/16.
- */
+import TDFReader from "./tdfReader.js";
+import GenomicInterval from "../genome/genomicInterval.js";
 
+const TDFSource = function (config, genome) {
 
-var igv = (function (igv) {
+    this.genome = genome;
+    this.windowFunction = config.windowFunction || "mean";
+    this.reader = new TDFReader(config, genome);
+};
 
-    "use strict";
+TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
-    igv.TDFSource = function (config, genome) {
+    await getRootGroup().call(this);
 
-        this.genome = genome;
-        this.windowFunction = config.windowFunction || "mean";
-        this.reader = new igv.TDFReader(config, genome);
-    };
+    const genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
+    const genome = this.genome;
 
-    igv.TDFSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
+    if (chr.toLowerCase() === "all") {
+        return [];      // Whole genome view not yet supported
+    }
 
-        const self = this;
-        const    genomicInterval = new igv.GenomicInterval(chr, bpStart, bpEnd);
-        const genome = this.genome;
+    genomicInterval.bpPerPixel = bpPerPixel;
+    const group = await getRootGroup();
+    const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
+    let queryChr = this.reader.chrAliasTable[chr];
+    let maxZoom = this.reader.maxZoom;
+    if (queryChr === undefined) queryChr = chr;
+    if (maxZoom === undefined) maxZoom = -1;
 
-        if (chr.toLowerCase() === "all") {
-            return Promise.resolve([]);      // Whole genome view not yet supported
+    const wf = zoom > maxZoom ? "raw" : this.windowFunction;
+    const dataset = await this.reader.readDataset(queryChr, wf, zoom);
+    if (dataset == null) {
+        return [];
+    }
+
+    const tileWidth = dataset.tileWidth;
+    const startTile = Math.floor(bpStart / tileWidth);
+    const endTile = Math.floor(bpEnd / tileWidth);
+    const NTRACKS = 1;   // TODO read this
+    const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
+    const features = [];
+    for (let tile of tiles) {
+        switch (tile.type) {
+            case "bed":
+                decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            case "variableStep":
+                decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            case "fixedStep":
+                decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                break;
+            default:
+                throw ("Unknown tile type: " + tile.type);
         }
-
-        genomicInterval.bpPerPixel = bpPerPixel;
-
-
-        return getRootGroup()
-
-            .then(function (group) {
-
-                var zoom = zoomLevelForScale(chr, bpPerPixel, genome),
-                    queryChr = self.reader.chrAliasTable[chr],
-                    maxZoom = self.reader.maxZoom,
-                    wf;
-
-                if (queryChr === undefined) queryChr = chr;
-                if (maxZoom === undefined) maxZoom = -1;
-
-                wf = zoom > maxZoom ? "raw" : self.windowFunction;
-
-                return self.reader.readDataset(queryChr, wf, zoom);
-            })
-
-            .then(function (dataset) {
-
-                if (dataset == null) {
-                    return [];
-                }
-
-                var tileWidth = dataset.tileWidth,
-                    startTile = Math.floor(bpStart / tileWidth),
-                    endTile = Math.floor(bpEnd / tileWidth),
-                    i,
-                    p = [],
-                    NTRACKS = 1;   // TODO read this
+    }
+    features.sort(function (a, b) {
+        return a.start - b.start;
+    })
+    return features;
 
 
-                return self.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
+    async function getRootGroup() {
+        if (this.rootGroup) {
+            return this.rootGroup;
+        } else {
+            this.rootGroup = await this.reader.readRootGroup()
+            return this.rootGroup;
+        }
+    }
+}
 
-            })
+TDFSource.prototype.supportsWholeGenome = function () {
+    return false;
+}
 
-            .then(function (tiles) {
+function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
 
-                var features = [];
+    const nPositions = tile.nPositions;
+    const starts = tile.start;
+    const ends = tile.end;
+    const data = tile.data[0];   // Single track for now
+    for (let i = 0; i < nPositions; i++) {
+        const s = starts[i];
+        const e = ends[i];
+        if (e < bpStart) continue;
+        if (s > bpEnd) break;
+        features.push({
+            chr: chr,
+            start: s,
+            end: e,
+            value: data[i]
+        });
+    }
+}
 
-                tiles.forEach(function (tile) {
-                    switch (tile.type) {
-                        case "bed":
-                            decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                            break;
-                        case "variableStep":
-                            decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                            break;
-                        case "fixedStep":
-                            decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
-                            break;
-                        default:
-                            reject("Unknown tile type: " + tile.type);
-                            return;
-                    }
+function decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
+
+    const nPositions = tile.nPositions;
+    const starts = tile.start;
+    const span = tile.span;
+    const data = tile.data[0];   // Single track for now
+    for (let i = 0; i < nPositions; i++) {
+        const s = starts[i];
+        const e = s + span;
+        if (e < bpStart) continue;
+        if (s > bpEnd) break;
+        features.push({
+            chr: chr,
+            start: s,
+            end: e,
+            value: data[i]
+        });
+    }
+}
+
+function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
+
+    const nPositions = tile.nPositions;
+    let s = tile.start;
+    const span = tile.span;
+    const data = tile.data[0];   // Single track for now
+
+    for (let i = 0; i < nPositions; i++) {
+        const e = s + span;
+        if (s > bpEnd) break;
+        if (e >= bpStart) {
+            if (!Number.isNaN(data[i])) {
+                features.push({
+                    chr: chr,
+                    start: s,
+                    end: e,
+                    value: data[i]
                 });
-
-                features.sort(function (a, b) {
-                    return a.start - b.start;
-                })
-
-
-                return features;
-            })
-
-
-        function getRootGroup() {
-            if (self.rootGroup) {
-                return Promise.resolve(self.rootGroup);
-            } else {
-                return self.reader.readRootGroup()
-                    .then(function (rootGroup) {
-                        self.rootGroup = rootGroup;
-                        return rootGroup;
-                    });
             }
         }
+        s = e;
     }
-    
-    igv.TDFSource.prototype.supportsWholeGenome = function() {
-        return false;
-    }
-
-    function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
-
-        var nPositions = tile.nPositions,
-            starts = tile.start,
-            ends = tile.end,
-            data = tile.data[0],   // Single track for now
-            i;
-
-        for (i = 0; i < nPositions; i++) {
-
-            var s = starts[i];
-            var e = ends[i];
-
-            if (e < bpStart) continue;
-            if (s > bpEnd) break;
-
-            features.push({
-                chr: chr,
-                start: s,
-                end: e,
-                value: data[i]
-            });
-        }
-    }
-
-    function decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
-
-        var nPositions = tile.nPositions,
-            starts = tile.start,
-            span = tile.span,
-            data = tile.data[0],   // Single track for now
-            i;
-
-        for (i = 0; i < nPositions; i++) {
-
-            var s = starts[i];
-            var e = s + span;
-
-            if (e < bpStart) continue;
-            if (s > bpEnd) break;
-
-            features.push({
-                chr: chr,
-                start: s,
-                end: e,
-                value: data[i]
-            });
-        }
-    }
-
-    function decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {
-
-        var nPositions = tile.nPositions,
-            s = tile.start,
-            span = tile.span,
-            data = tile.data[0],   // Single track for now
-            i;
-
-        for (i = 0; i < nPositions; i++) {
-
-            var e = s + span;
-
-            if (s > bpEnd) break;
-
-            if (e >= bpStart) {
-
-                if (!Number.isNaN(data[i])) {
-                    features.push({
-                        chr: chr,
-                        start: s,
-                        end: e,
-                        value: data[i]
-                    });
-                }
-            }
-
-            s = e;
-        }
-    }
+}
 
 
-    var log2 = Math.log(2);
+var log2 = Math.log(2);
 
-    function zoomLevelForScale(chr, bpPerPixel, genome) {
+function zoomLevelForScale(chr, bpPerPixel, genome) {
 
-        // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  IGV computes zoom levels assuming
-        // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
-        // Zoom level 1 is magnified 2X,  and so forth
+    // Convert bpPerPixel to IGV "zoom" level.   This is a bit convoluted,  IGV computes zoom levels assuming
+    // display in a 700 pixel window.  The fully zoomed out view of a chromosome is zoom level "0".
+    // Zoom level 1 is magnified 2X,  and so forth
 
-        var chrSize = genome.getChromosome(chr).bpLength;
+    var chrSize = genome.getChromosome(chr).bpLength;
 
-        return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2);
-    }
+    return Math.ceil(Math.log(Math.max(0, (chrSize / (bpPerPixel * 700)))) / log2);
+}
 
-
-    return igv;
-
-
-})
-(igv || {});
+export default TDFSource;

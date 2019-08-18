@@ -24,75 +24,69 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by dat on 9/1/16.
- */
-var igv = (function (igv) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import {createIcon} from "../igv-icons.js";
 
-    "use strict";
+const ZoomWidget = function (browser, $parent) {
 
-    igv.ZoomWidget = function (browser, $parent) {
+    let $div;
 
-        let $div;
+    this.$zoomContainer = $('<div class="igv-zoom-widget">');
+    $parent.append(this.$zoomContainer);
 
-        this.$zoomContainer = $('<div class="igv-zoom-widget">');
-        $parent.append(this.$zoomContainer);
+    // zoom out
+    $div = $('<div>');
+    this.$zoomContainer.append($div);
 
-        // zoom out
-        $div = $('<div>');
-        this.$zoomContainer.append($div);
+    $div.append(createIcon("minus-circle"));
 
-        $div.append(igv.createIcon("minus-circle"));
+    $div.on('click', function () {
+        browser.zoomOut();
+    });
 
-        $div.on('click', function () {
-            browser.zoomOut();
-        });
+    // Range slider
+    $div = $('<div>');
+    this.$zoomContainer.append($div);
 
-        // Range slider
-        $div = $('<div>');
-        this.$zoomContainer.append($div);
+    this.$slider = $('<input type="range"/>');
+    $div.append(this.$slider);
 
-        this.$slider = $('<input type="range"/>');
-        $div.append(this.$slider);
+    this.$slider.on('change', function (e) {
+        browser.zoomWithRangePercentage(e.target.value / 100.0);
+    });
 
-        this.$slider.on('change', function (e) {
-            browser.zoomWithRangePercentage(e.target.value/100.0);
-        });
+    // zoom in
+    $div = $('<div>');
+    this.$zoomContainer.append($div);
 
-        // zoom in
-        $div = $('<div>');
-        this.$zoomContainer.append($div);
+    $div.append(createIcon("plus-circle"));
 
-        $div.append(igv.createIcon("plus-circle"));
+    $div.on('click', function () {
+        browser.zoomIn();
+    });
 
-        $div.on('click', function () {
-            browser.zoomIn();
-        });
+    this.currentChr = undefined;
 
-        this.currentChr = undefined;
+    let self = this;
+    browser.on('locuschange', function () {
+        browser.updateZoomSlider(self.$slider);
+    })
+};
 
-        let self = this;
-        browser.on('locuschange', function () {
-            browser.updateZoomSlider(self.$slider);
-        })
-    };
+ZoomWidget.prototype.hide = function () {
+    this.$zoomContainer.hide();
+};
 
-    igv.ZoomWidget.prototype.hide = function () {
-        this.$zoomContainer.hide();
-    };
+ZoomWidget.prototype.show = function () {
+    this.$zoomContainer.show()
+};
 
-    igv.ZoomWidget.prototype.show = function () {
-        this.$zoomContainer.show()
-    };
+ZoomWidget.prototype.hideSlider = function () {
+    this.$slider.hide();
+};
 
-    igv.ZoomWidget.prototype.hideSlider = function () {
-        this.$slider.hide();
-    };
+ZoomWidget.prototype.showSlider = function () {
+    this.$slider.show();
+};
 
-    igv.ZoomWidget.prototype.showSlider = function () {
-        this.$slider.show();
-    };
-
-    return igv;
-
-})(igv || {});
+export default ZoomWidget;

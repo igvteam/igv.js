@@ -1,3 +1,5 @@
+import HtsgetReader from "../js/bam/htsgetReader.js";
+
 function runHtsgetTests() {
     // mock object
 
@@ -44,7 +46,7 @@ function runHtsgetTests() {
             s = 10000,
             end = 10100;
 
-        var reader = new igv.HtsgetReader({endpoint: url, id: id});
+        var reader = new HtsgetReader({endpoint: url, id: id});
         reader.readAlignments(chr, s, end).then(function (alignmentContainer) {
 
             assert.ok(alignmentContainer);
@@ -53,3 +55,5 @@ function runHtsgetTests() {
         });
     });
 }
+
+export default runHtsgetTests;

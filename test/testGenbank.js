@@ -1,5 +1,6 @@
-function runGenbankTests() {
+import igvxhr from "../js/igvxhr.js";
 
+function runGenbankTests() {
 
     QUnit.test("pten genbank", function (assert) {
 
@@ -9,7 +10,7 @@ function runGenbankTests() {
         const parser = new igv.GenbankParser({});
 
 
-        return igv.xhr.loadString(url, {})
+        return igvxhr.loadString(url, {})
 
             .then(function (data) {
                 return parser.parseFeatures(data);
@@ -56,3 +57,5 @@ function runGenbankTests() {
     assertEquals(105338, genbankParser.getSequenceLenth());*/
 
 }
+
+export default runGenbankTests;

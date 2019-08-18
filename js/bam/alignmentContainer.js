@@ -23,11 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-"use strict";
-
-var igv = (function (igv) {
-
+import PairedAlignment from "./pairedAlignment.js";
 
     function canBePaired(alignment) {
         return alignment.isPaired() &&
@@ -38,7 +34,7 @@ var igv = (function (igv) {
     }
 
 
-    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported) {
+const AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported) {
 
         this.chr = chr;
         this.start = Math.floor(start);
@@ -68,7 +64,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.AlignmentContainer.prototype.push = function (alignment) {
+AlignmentContainer.prototype.push = function (alignment) {
 
         if (this.filter(alignment) === false) return;
 
@@ -91,11 +87,11 @@ var igv = (function (igv) {
 
     }
 
-    igv.AlignmentContainer.prototype.forEach = function (callback) {
+AlignmentContainer.prototype.forEach = function (callback) {
         this.alignments.forEach(callback);
     }
 
-    igv.AlignmentContainer.prototype.finish = function () {
+AlignmentContainer.prototype.finish = function () {
 
         if (this.currentBucket !== undefined) {
             finishBucket.call(this);
@@ -111,13 +107,13 @@ var igv = (function (igv) {
         this.pairedEndStats.compute();
     }
 
-    igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
+AlignmentContainer.prototype.contains = function (chr, start, end) {
         return this.chr == chr &&
             this.start <= start &&
             this.end >= end;
     }
 
-    igv.AlignmentContainer.prototype.hasDownsampledIntervals = function () {
+AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         return this.downsampledIntervals && this.downsampledIntervals.length > 0;
     }
 
@@ -157,13 +153,13 @@ var igv = (function (igv) {
                 return;
             }
         }
-        
+
         if (this.alignments.length < this.samplingDepth) {
 
             if (this.pairsSupported && canBePaired(alignment)) {
 
                 // First alignment in a pair
-                pairedAlignment = new igv.PairedAlignment(alignment);
+            pairedAlignment = new PairedAlignment(alignment);
                 this.paired = true;
                 this.pairsCache[alignment.readName] = pairedAlignment;
                 this.alignments.push(pairedAlignment);
@@ -178,7 +174,7 @@ var igv = (function (igv) {
             idx = Math.floor(Math.random() * (this.samplingDepth + this.downsampledCount - 1));
 
             if (idx < this.samplingDepth) {
-                
+
                 // Keep the new item
                 //  idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 replacedAlignment = this.alignments[idx];   // To be replaced
@@ -189,7 +185,7 @@ var igv = (function (igv) {
                         this.pairsCache[replacedAlignment.readName] = undefined;
                     }
 
-                    pairedAlignment = new igv.PairedAlignment(alignment);
+                pairedAlignment = new PairedAlignment(alignment);
                     this.paired = true;
                     this.pairsCache[alignment.readName] = pairedAlignment;
                     this.alignments[idx] = pairedAlignment;
@@ -267,7 +263,7 @@ var igv = (function (igv) {
         function incBlockCount(block) {
 
             if('S' === block.type) return;
-            
+
             const seq = alignment.seq;
             const qual = alignment.qual;
             const seqOffset = block.seqOffset;
@@ -334,7 +330,7 @@ var igv = (function (igv) {
 
         var myself = this,
             mismatchQualitySum,
-             threshold = t * ((qualityWeight && this.qual) ? this.qual : this.total);
+            threshold = t * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
@@ -422,7 +418,4 @@ var igv = (function (igv) {
 
     }
 
-
-    return igv;
-
-})(igv || {});
+export default AlignmentContainer;
