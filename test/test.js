@@ -1,87 +1,47 @@
-var igvtest = {
+import runBigwigTests from "./testBigwig.js";
+import runBAMTests from "./testBAM.js";
+import runBAMIndexTests from "./testBamIndex.js";
+import runAedTests from "./testAED.js";
+import runBedTests from "./testBED.js";
+import runBEDGraphTests from "./testBEDGraph.js";
+import runBufferedReaderTests from "./testBufferedReader.js";
+import runCoverageColoredRenderingTests from "./testCoverageColoredRendering.js";
+import runWigTests from "./testWig.js";
+import runGFFTests from "./testGFF.js";
+import runFastaTests from "./testFasta.js";
+import runSegTests from './testSeg.js';
+import runTabixTests from "./testTabix.js";
+import runGenomeTests from "./testGenome.js";
+import runTDFTests from "./testTDF.js";
+import runSampleInformationTests from "./testSampleInformation.js";
+import runHtsgetTests from "./testHtsgetReader.js";
+import runSessionTests from "./testSessions.js";
+import runVariantTests from "./testVariant.js";
+import runBrowserTests from "./testBrowser.js";
+import runUtilTests from "./testUtils.js";
+import runIgvXhrTests from "./testIgvXhr.js";
+import runCRAMTests from "./testCRAM.js";
 
-    runTests: function () {
-        runBigwigTests();
-        runBAMTests();
-        runBAMIndexTests();
-        runAedTests();
-        runBedTests();
-        runBEDGraphTests();
-        runBufferedReaderTests();
-        runCoverageColoredRenderingTests();
-        runWigTests();
-        runGFFTests();
-        runFastaTests();
-        runSegTests();
-        runTabixTests();
-        runGenomeTests();
-        runTDFTests();
-        runSampleInformationTests();
-        runHtsgetTests();
-        runSessionTests();
-        runVariantTests();
-        runBrowserTests();
-        runUtilTests();
-        runIgvXhrTests();
-        runCRAMTests();
-        runCoreTests();
-    },
-
-    createTrackList:  function (div, file, browser) {
-
-
-        return igv.xhr.loadJson(file)
-
-            .then(function (tracks) {
-
-                tracks.forEach(function (track) {
-
-                    var trackDiv, name;
-
-                    if (track.HEADING) {
-                        div.insertAdjacentHTML("beforeend",
-                            "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                            + track.HEADING + "</div>");
-                    }
-                    else {
-                        trackDiv = document.createElement('div');
-                        trackDiv.innerHTML = track.name;
-                        trackDiv.addEventListener('click', function (event) {
-
-                            // Convert to json to insure we can load json representations (not strictly neccessary).
-                            var json = JSON.stringify(track);
-
-                            browser.loadTrack(json);
-                        });
-
-                        div.appendChild(trackDiv);
-                    }
-
-                })
-
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
-            })
-
-            .then(function (json) {
-
-                let tissueSummary = json['tissueInfo'];
-
-                div.insertAdjacentHTML("beforeend",
-                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
-
-                tissueSummary.forEach((ts) => {
-
-                    let trackDiv = document.createElement('div');
-
-                    trackDiv.innerHTML = (ts['tissueSiteDetailId'].split('_').join(' '));
-                    trackDiv.addEventListener('click', function (event) {
-                        browser.loadTrack(igv.GtexUtils.trackConfiguration(ts));
-                    });
-
-                    div.appendChild(trackDiv)
-
-                })
-            });
-
-    }
-};
+runBigwigTests();
+runBAMTests();
+runBAMIndexTests();
+runAedTests();
+runBedTests();
+runBEDGraphTests();
+runBufferedReaderTests();
+runCoverageColoredRenderingTests();
+runWigTests();
+runGFFTests();
+runFastaTests();
+runSegTests();
+runTabixTests();
+runGenomeTests();
+runTDFTests();
+runSampleInformationTests();
+runHtsgetTests();
+runSessionTests();
+runVariantTests();
+runBrowserTests();
+runUtilTests();
+runIgvXhrTests();
+runCRAMTests();

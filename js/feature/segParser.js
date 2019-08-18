@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {splitLines} from "../util/stringUtils.js";
+
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
  *
@@ -32,81 +34,74 @@
  *
  */
 
-"use strict";
 
-var igv = (function (igv) {
-
-    var sampleKeyColumn = 0,
-        sampleColumn = 0,
-        chrColumn = 1,
-        startColumn = 2,
-        endColumn = 3;
+var sampleKeyColumn = 0,
+    sampleColumn = 0,
+    chrColumn = 1,
+    startColumn = 2,
+    endColumn = 3;
 
 
-    igv.SegParser = function () {
-   }
+const SegParser = function () {
+}
 
-    igv.SegParser.prototype.parseHeader = function (data) {
+SegParser.prototype.parseHeader = function (data) {
 
-        var lines = igv.splitLines(data),
-            len = lines.length,
-            line,
-            i,
-            tokens;
+    var lines = splitLines(data),
+        len = lines.length,
+        line,
+        i,
+        tokens;
 
-        for (i = 0; i < len; i++) {
-            line = lines[i];
-            if (line.startsWith("#")) {
-                continue;
-            }
-            else {
-                tokens = line.split("\t");
-                this.header = {headings: tokens, lineCount: i + 1};
-                return this.header;
-                break;
-            }
+    for (i = 0; i < len; i++) {
+        line = lines[i];
+        if (line.startsWith("#")) {
+            continue;
+        } else {
+            tokens = line.split("\t");
+            this.header = {headings: tokens, lineCount: i + 1};
+            return this.header;
+            break;
         }
-
-        return this.header;
     }
 
+    return this.header;
+}
 
-    igv.SegParser.prototype.parseFeatures = function (data) {
 
-        var lines = data ? igv.splitLines(data) : [] ,
-            len = lines.length,
-            tokens, allFeatures = [], line, i, dataColumn;
+SegParser.prototype.parseFeatures = function (data) {
 
-        if (!this.header) {
-            this.header = this.parseHeader(data);
+    var lines = data ? splitLines(data) : [],
+        len = lines.length,
+        tokens, allFeatures = [], line, i, dataColumn;
+
+    if (!this.header) {
+        this.header = this.parseHeader(data);
+    }
+    dataColumn = this.header.headings.length - 1;
+
+
+    for (i = this.header.lineCount; i < len; i++) {
+
+        line = lines[i];
+
+        tokens = lines[i].split("\t");
+
+        if (tokens.length > dataColumn) {
+
+            allFeatures.push({
+                sampleKey: tokens[sampleKeyColumn],
+                sample: tokens[sampleColumn],
+                chr: tokens[chrColumn],
+                start: parseInt(tokens[startColumn]),
+                end: parseInt(tokens[endColumn]),
+                value: parseFloat(tokens[dataColumn])
+            });
         }
-        dataColumn = this.header.headings.length - 1;
-
-
-        for (i = this.header.lineCount; i < len; i++) {
-
-            line = lines[i];
-
-            tokens = lines[i].split("\t");
-
-            if (tokens.length > dataColumn) {
-
-                allFeatures.push({
-                    sampleKey: tokens[sampleKeyColumn],
-                    sample: tokens[sampleColumn],
-                    chr: tokens[chrColumn],
-                    start: parseInt(tokens[startColumn]),
-                    end: parseInt(tokens[endColumn]),
-                    value: parseFloat(tokens[dataColumn])
-                });
-            }
-        }
-
-        return allFeatures;
-
     }
 
+    return allFeatures;
 
-    return igv;
-})
-(igv || {});
+}
+
+export default SegParser;

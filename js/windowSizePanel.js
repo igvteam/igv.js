@@ -23,28 +23,57 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import {numberFormatter} from "./util/stringUtils.js";
 
-    igv.WindowSizePanel = function ($parent, browser) {
+const WindowSizePanel = function ($parent, browser) {
 
-        this.$content = $('<div class="igv-windowsizepanel-content-div">');
-        $parent.append(this.$content);
-        this.browser = browser;
+    this.$content = $('<div class="igv-windowsizepanel-content-div">');
+    $parent.append(this.$content);
+    this.browser = browser;
 
-    };
+};
 
-    igv.WindowSizePanel.prototype.show = function () {
-        this.$content.show();
-    };
+WindowSizePanel.prototype.show = function () {
+    this.$content.show();
+};
 
-    igv.WindowSizePanel.prototype.hide = function () {
-        this.$content.hide();
-    };
+WindowSizePanel.prototype.hide = function () {
+    this.$content.hide();
+};
 
-    igv.WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-        this.$content.text( igv.prettyBasePairNumber(Math.round( this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel )) );
-    };
+WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
+    this.$content.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+};
 
-    return igv;
-})
-(igv || {});
+
+function prettyBasePairNumber  (raw) {
+
+    var denom,
+        units,
+        value,
+        floored;
+
+    if (raw > 1e7) {
+        denom = 1e6;
+        units = " mb";
+    } else if (raw > 1e4) {
+
+        denom = 1e3;
+        units = " kb";
+
+        value = raw / denom;
+        floored = Math.floor(value);
+        return numberFormatter(floored) + units;
+    } else {
+        return numberFormatter(raw) + " bp";
+    }
+
+    value = raw / denom;
+    floored = Math.floor(value);
+
+    return floored.toString() + units;
+};
+
+
+export default WindowSizePanel;

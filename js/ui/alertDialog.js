@@ -23,110 +23,105 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 4/29/15.
- */
-var igv = (function (igv) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
 
-    igv.AlertDialog = function ($parent, browser) {
+const AlertDialog = function ($parent) {
 
-        this.$parent = $parent;
-        this.browser = browser;
+    this.$parent = $parent;
 
-        // container
-        this.$container = $("<div>", { class:'igv-alert-dialog-container' });
-        $parent.append(this.$container);
-        this.$container.offset( { left:0, top:0 } );
+    // container
+    this.$container = $("<div>", {class: 'igv-alert-dialog-container'});
+    $parent.append(this.$container);
+    this.$container.offset({left: 0, top: 0});
 
-        // header
-        let $header = $("<div>");
-        this.$container.append($header);
+    // header
+    let $header = $("<div>");
+    this.$container.append($header);
 
-        // body container
-        let $div = $("<div>", { id:'igv-alert-dialog-body' });
-        this.$container.append( $div );
+    // body container
+    let $div = $("<div>", {id: 'igv-alert-dialog-body'});
+    this.$container.append($div);
 
-        // body copy
-        this.$body = $("<div>", { id:'igv-alert-dialog-body-copy' });
-        $div.append( this.$body );
+    // body copy
+    this.$body = $("<div>", {id: 'igv-alert-dialog-body-copy'});
+    $div.append(this.$body);
 
-        let self = this;
-        // igv.attachDialogCloseHandlerWithParent($header, function () {
-        //     self.$body.html('');
-        //     self.$container.offset( { left:0, top:0 } );
-        //     self.$container.hide();
-        // });
+    let self = this;
+    // attachDialogCloseHandlerWithParent($header, function () {
+    //     self.$body.html('');
+    //     self.$container.offset( { left:0, top:0 } );
+    //     self.$container.hide();
+    // });
 
-        // ok container
-        let $ok_container = $("<div>");
-        this.$container.append($ok_container);
+    // ok container
+    let $ok_container = $("<div>");
+    this.$container.append($ok_container);
 
-        // ok
-        this.$ok = $("<div>");
-        $ok_container.append(this.$ok);
+    // ok
+    this.$ok = $("<div>");
+    $ok_container.append(this.$ok);
 
-        this.$ok.text('OK');
+    this.$ok.text('OK');
 
-        this.$ok.on('click', function () {
-            self.$body.html('');
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+    this.$ok.on('click', function () {
+        self.$body.html('');
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-        igv.makeDraggable(this.$container.get(0), $header.get(0));
+    makeDraggable(this.$container.get(0), $header.get(0));
 
-        this.$container.hide();
-    };
+    this.$container.hide();
+};
 
-    igv.AlertDialog.prototype.configure = function (config) {
-        this.$body.html(config.label);
-    };
+AlertDialog.prototype.configure = function (config) {
+    this.$body.html(config.label);
+};
 
-    igv.AlertDialog.prototype.presentMessageWithCallback = function (message, callback) {
+AlertDialog.prototype.presentMessageWithCallback = function (message, callback) {
 
-        this.$body.text(message);
+    this.$body.text(message);
 
-        let css =
-            {
-                left: (this.$parent.width() - this.$container.width())/2,
-                top: (this.$parent.height() - this.$container.height())/2
-            };
-        this.$container.css(css);
+    let css =
+        {
+            left: (this.$parent.width() - this.$container.width()) / 2,
+            top: (this.$parent.height() - this.$container.height()) / 2
+        };
+    this.$container.css(css);
 
-        this.$container.show();
+    this.$container.show();
 
-        this.$ok.text('OK');
+    this.$ok.text('OK');
 
-        let self = this;
-        this.$ok.on('click', function () {
+    let self = this;
+    this.$ok.on('click', function () {
 
-            callback('OK');
+        callback('OK');
 
-            self.$body.html('');
-            self.$container.offset( { left:0, top:0 } );
-            self.$container.hide();
-        });
+        self.$body.html('');
+        self.$container.offset({left: 0, top: 0});
+        self.$container.hide();
+    });
 
-    };
+};
 
 
-    igv.AlertDialog.prototype.present = function ($alternativeParent) {
+AlertDialog.prototype.present = function ($alternativeParent) {
 
-        var obj,
-            $p;
+    var obj,
+        $p;
 
-        $p = $alternativeParent || this.$parent;
-        obj =
-            {
-                left: ($p.width() - this.$container.width())/2,
-                top: ($p.height() - this.$container.height())/2
+    $p = $alternativeParent || this.$parent;
+    obj =
+        {
+            left: ($p.width() - this.$container.width()) / 2,
+            top: ($p.height() - this.$container.height()) / 2
 
-            };
-        this.$container.css(obj);
+        };
+    this.$container.css(obj);
 
-        this.$container.show();
-    };
+    this.$container.show();
+};
 
-    return igv;
-
-})(igv || {});
+export default AlertDialog;

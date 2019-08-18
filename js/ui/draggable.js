@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import $ from "../vendor/jquery-3.3.1.slim.js";
 
 /**
  * Make the target element movable by clicking and dragging on the handle.  This is not a general purprose function,
@@ -31,86 +32,82 @@
  * target is absolutely positioned in pixel coordinates
 
  */
-var igv = (function (igv) {
+const namespace = ".igv_drag";
 
-    const namespace = ".igv_drag";
+let dragData;   // Its assumed we are only dragging one element at a time.
 
-    let dragData;   // Its assumed we are only dragging one element at a time.
+function makeDraggable(target, handle) {
 
-    igv.makeDraggable = function (target, handle) {
+    $(handle).on('mousedown' + namespace, dragStart.bind(target));
 
-        $(handle).on('mousedown' + namespace, dragStart.bind(target));
-
-    };
+};
 
 
-    function dragStart(event) {
+function dragStart(event) {
 
-        event.stopPropagation();
-        event.preventDefault();
+    event.stopPropagation();
+    event.preventDefault();
 
-        const styleX = Math.round(parseFloat(this.style.left.replace("px", "")));
-        const styleY = Math.round(parseFloat(this.style.top.replace("px", "")));
-        const dragFunction = drag.bind(this);
-        const dragEndFunction = dragEnd.bind(this);
+    const styleX = Math.round(parseFloat(this.style.left.replace("px", "")));
+    const styleY = Math.round(parseFloat(this.style.top.replace("px", "")));
+    const dragFunction = drag.bind(this);
+    const dragEndFunction = dragEnd.bind(this);
 
-        dragData =
-            {
-                dragFunction: dragFunction,
-                dragEndFunction: dragEndFunction,
-                dx: styleX - event.screenX,
-                dy: styleY - event.screenY
-            };
+    dragData =
+        {
+            dragFunction: dragFunction,
+            dragEndFunction: dragEndFunction,
+            dx: styleX - event.screenX,
+            dy: styleY - event.screenY
+        };
 
-        $(document).on('mousemove' + namespace, dragFunction);
-        $(document).on('mouseup' + namespace, dragEndFunction);
-        $(document).on('mouseleave' + namespace, dragEndFunction);
-        $(document).on('mouseexit' + namespace, dragEndFunction);
+    $(document).on('mousemove' + namespace, dragFunction);
+    $(document).on('mouseup' + namespace, dragEndFunction);
+    $(document).on('mouseleave' + namespace, dragEndFunction);
+    $(document).on('mouseexit' + namespace, dragEndFunction);
 
+}
+
+function drag(event) {
+
+    if (!dragData) {
+        console.log("No drag data!");
+        return;
     }
 
-    function drag(event) {
+    event.stopPropagation();
+    event.preventDefault();
 
-        if(!dragData) {
-            console.log("No drag data!");
-            return;
-        }
+    const styleX = dragData.dx + event.screenX;
+    const styleY = dragData.dy + event.screenY;
 
-        event.stopPropagation();
-        event.preventDefault();
+    this.style.left = styleX + "px";
+    this.style.top = styleY + "px";
 
-        const styleX = dragData.dx + event.screenX;
-        const styleY = dragData.dy + event.screenY;
+    // console.log('drag ' + 'x ' + styleX + ' y ' + styleY);
+}
 
-        this.style.left = styleX + "px";
-        this.style.top = styleY + "px";
+function dragEnd(event) {
 
-        // console.log('drag ' + 'x ' + styleX + ' y ' + styleY);
+    if (!dragData) {
+        console.log("No drag data!");
+        return;
     }
 
-    function dragEnd(event) {
 
-        if(!dragData) {
-            console.log("No drag data!");
-            return;
-        }
+    event.stopPropagation();
+    event.preventDefault();
 
+    const styleX = dragData.dx + event.screenX;
+    const styleY = dragData.dy + event.screenY;
 
-        event.stopPropagation();
-        event.preventDefault();
+    // console.log('drag end ' + 'x ' + styleX + ' y ' + styleY);
 
-        const styleX = dragData.dx + event.screenX;
-        const styleY = dragData.dy + event.screenY;
+    this.style.left = styleX + "px";
+    this.style.top = styleY + "px";
 
-        // console.log('drag end ' + 'x ' + styleX + ' y ' + styleY);
+    $(document).off(namespace);
+    dragData = undefined;
+}
 
-        this.style.left = styleX + "px";
-        this.style.top = styleY + "px";
-
-        $(document).off(namespace);
-        dragData = undefined;
-    }
-
-    return igv;
-
-})(igv || {});
+export default makeDraggable;

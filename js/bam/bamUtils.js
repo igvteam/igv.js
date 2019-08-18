@@ -24,17 +24,20 @@
  * THE SOFTWARE.
  */
 
+import BamAlignment from "./bamAlignment.js";
+import AlignmentBlock from "./alignmentBlock.js";
+import igvxhr from "../igvxhr.js";
+import  {unbgzf} from './bgzf.js';
+import {splitLines} from "../util/stringUtils.js";
+import BamFilter from "./bamFilter.js";
+
 /**
- * Bits of this code are based on the Biodalliance BAM reader by Thomas Down,  2011
+ * This code is based on the Biodalliance BAM reader by Thomas Down,  2011
  *
  * https://github.com/dasmoth/dalliance/blob/master/js/bam.js
  */
 
-"use strict";
-
-var igv = (function (igv) {
-
-    const SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
+  const SEQ_DECODER = ['=', 'A', 'C', 'x', 'G', 'x', 'x', 'x', 'T', 'x', 'x', 'x', 'x', 'x', 'x', 'N'];
     const CIGAR_DECODER = ['M', 'I', 'D', 'N', 'S', 'H', 'P', '=', 'X', '?', '?', '?', '?', '?', '?', '?'];
     const READ_STRAND_FLAG = 0x10;
     const MATE_STRAND_FLAG = 0x20;
@@ -46,20 +49,20 @@ var igv = (function (igv) {
     const DEFAULT_SAMPLING_DEPTH = 500;
     const MAXIMUM_SAMPLING_DEPTH = 10000;
 
-    igv.BamUtils = {
+    const BamUtils = {
 
         readHeader: function (url, options, genome) {
 
-            return igv.xhr.loadArrayBuffer(url, options)
+            return igvxhr.loadArrayBuffer(url, options)
 
                 .then(function (compressedBuffer) {
 
                     var header, unc, uncba;
 
-                    unc = igv.unbgzf(compressedBuffer);
+                    unc = unbgzf(compressedBuffer);
                     uncba = new Uint8Array(unc);
 
-                    header = igv.BamUtils.decodeBamHeader(uncba, genome);
+                    header = BamUtils.decodeBamHeader(uncba, genome);
 
                     return header;
 
@@ -193,7 +196,7 @@ var igv = (function (igv) {
          * @param max                maximum genomic position
          * @param chrIdx             chromosome index
          * @param chrNames            array of chromosome names
-         * @param filter             a igv.BamFilter object
+         * @param filter             a BamFilter object
          */
         decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
@@ -201,7 +204,7 @@ var igv = (function (igv) {
 
                 const blockSize = readInt(ba, offset);
                 const blockEnd = offset + blockSize + 4;
-                const alignment = new igv.BamAlignment();
+                const alignment = new BamAlignment();
                 const refID = readInt(ba, offset + 4);
                 const pos = readInt(ba, offset + 8);
 
@@ -266,7 +269,7 @@ var igv = (function (igv) {
                 alignment.fragmentLength = tlen;
                 alignment.mq = mq;
 
-                igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
+                BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
                 alignment.end = alignment.start + alignment.lengthOnRef;
 
@@ -325,7 +328,7 @@ var igv = (function (igv) {
             var lines, i, j, len, tokens, blocks, pos, qualString, rnext, pnext, lengthOnRef,
                 alignment, cigarArray, started;
 
-            lines = igv.splitLines(sam);
+            lines = splitLines(sam);
             len = lines.length;
             started = false;
 
@@ -333,7 +336,7 @@ var igv = (function (igv) {
 
                 tokens = lines[i].split('\t');
 
-                alignment = new igv.BamAlignment();
+                alignment = new BamAlignment();
 
                 alignment.chr = tokens[2];
                 alignment.start = Number.parseInt(tokens[3]) - 1;
@@ -397,7 +400,7 @@ var igv = (function (igv) {
 
         setReaderDefaults: function (reader, config) {
 
-            reader.filter = new igv.BamFilter(config.filter);
+            reader.filter = new BamFilter(config.filter);
 
             if (config.readgroup) {
                 reader.filter.readgroups = new Set([config.readgroup]);
@@ -408,7 +411,7 @@ var igv = (function (igv) {
             reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;
 
             if (reader.samplingDepth > MAXIMUM_SAMPLING_DEPTH) {
-                igv.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH);
+                console.log("Warning: attempt to set sampling depth > maximum value of " + MAXIMUM_SAMPLING_DEPTH);
                 reader.samplingDepth = MAXIMUM_SAMPLING_DEPTH;
             }
 
@@ -507,7 +510,7 @@ var igv = (function (igv) {
                         alignment.scStart -= c.len;
                         scPos -= c.len;
                     }
-                    blocks.push(new igv.AlignmentBlock({
+                    blocks.push(new AlignmentBlock({
                         start: scPos,
                         seqOffset: seqOffset,
                         len: c.len,
@@ -536,7 +539,7 @@ var igv = (function (igv) {
                     if (insertions === undefined) {
                         insertions = [];
                     }
-                    insertions.push(new igv.AlignmentBlock({
+                    insertions.push(new AlignmentBlock({
                         start: pos,
                         len: c.len,
                         seqOffset: seqOffset,
@@ -550,7 +553,7 @@ var igv = (function (igv) {
                 case '=' :
                 case 'X' :
 
-                    blocks.push(new igv.AlignmentBlock({
+                    blocks.push(new AlignmentBlock({
                         start: pos,
                         seqOffset: seqOffset,
                         len: c.len,
@@ -635,9 +638,6 @@ var igv = (function (igv) {
         return tagDict;
     }
 
-    return igv;
-
-})
-(igv || {});
+export default BamUtils;
 
 

@@ -22,57 +22,54 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-var igv = (function (igv) {
 
-    igv.NavbarManager = function (browser) {
-        this.browser = browser;
-    };
+const NavbarManager = function (browser) {
+    this.browser = browser;
+};
 
-    igv.NavbarManager.prototype.navbarDidResize = function (width, isWholeGenomeView) {
-        updateNavbar.call(this, createResponsiveClassSchedule.call(this, width, isWholeGenomeView));
-    };
+NavbarManager.prototype.navbarDidResize = function (width, isWholeGenomeView) {
+    updateNavbar.call(this, createResponsiveClassSchedule.call(this, width, isWholeGenomeView));
+};
 
-    function updateNavbar (responsiveClassSchedule) {
+function updateNavbar(responsiveClassSchedule) {
 
-        this.browser[ '$toggle_button_container' ].removeClass();
-        this.browser[ '$toggle_button_container' ].addClass(responsiveClassSchedule[ '$toggle_button_container' ]);
+    this.browser['$toggle_button_container'].removeClass();
+    this.browser['$toggle_button_container'].addClass(responsiveClassSchedule['$toggle_button_container']);
 
-        this.browser.zoomWidget[ '$zoomContainer' ].removeClass();
-        this.browser.zoomWidget[ '$zoomContainer' ].addClass(responsiveClassSchedule[ '$zoomContainer' ]);
+    this.browser.zoomWidget['$zoomContainer'].removeClass();
+    this.browser.zoomWidget['$zoomContainer'].addClass(responsiveClassSchedule['$zoomContainer']);
+}
+
+function createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
+
+    let candidates = {};
+
+    if (isWholeGenomeView) {
+        this.browser.windowSizePanel.hide();
+    } else {
+        this.browser.windowSizePanel.show();
     }
 
-    function createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
-
-        let candidates = {};
-
-        if (isWholeGenomeView) {
-            this.browser.windowSizePanel.hide();
-        } else {
-            this.browser.windowSizePanel.show();
-        }
-
-        if (navbarWidth > 990) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
-            candidates['$zoomContainer'] = 'igv-zoom-widget';
-        } else if (navbarWidth > 860) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-        } else if (navbarWidth > 540) {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-        } else {
-            candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
-            candidates['$zoomContainer'] = 'igv-zoom-widget-900';
-            this.browser.windowSizePanel.hide();
-        }
-
-        if (isWholeGenomeView) {
-            candidates['$zoomContainer'] = 'igv-zoom-widget-hidden';
-        }
-
-        return candidates;
+    if (navbarWidth > 990) {
+        candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
+        candidates['$zoomContainer'] = 'igv-zoom-widget';
+    } else if (navbarWidth > 860) {
+        candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container';
+        candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+    } else if (navbarWidth > 540) {
+        candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
+        candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+    } else {
+        candidates['$toggle_button_container'] = 'igv-nav-bar-toggle-button-container-750';
+        candidates['$zoomContainer'] = 'igv-zoom-widget-900';
+        this.browser.windowSizePanel.hide();
     }
 
-    return igv;
+    if (isWholeGenomeView) {
+        candidates['$zoomContainer'] = 'igv-zoom-widget-hidden';
+    }
 
-})(igv || {});
+    return candidates;
+}
+
+export default NavbarManager;

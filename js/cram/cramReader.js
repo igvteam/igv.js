@@ -24,454 +24,451 @@
  * THE SOFTWARE.
  */
 
-"use strict";
+import gmodCRAM from "../vendor/cram-bundle.js"
+import AlignmentContainer from "../bam/alignmentContainer.js";
+import BamUtils from "../bam/bamUtils.js";
+import BamAlignment from "../bam/bamAlignment.js";
+import AlignmentBlock from "../bam/alignmentBlock.js";
+import igvxhr from "../igvxhr.js";
+import {buildOptions} from "../util/igvUtils.js";
 
-var igv = (function (igv) {
+const READ_STRAND_FLAG = 0x10;
+const MATE_STRAND_FLAG = 0x20;
+
+const CRAM_MATE_STRAND_FLAG = 0x1;
+const CRAM_MATE_MAPPED_FLAG = 0x2;
+
+/**
+ * Class for reading a bam file
+ *
+ * @param config
+ * @constructor
+ */
+const CramReader = function (config, genome, browser) {
+
+    const self = this;
+
+    this.config = config;
+    this.browser = browser;
+    this.genome = genome;
+
+    this.cramFile = new gmodCRAM.CramFile({
+        filehandle: new FileHandler(config.url),
+        seqFetch: config.seqFetch || seqFetch.bind(this),
+        checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
+    })
+
+    const indexFileHandle = new FileHandler(config.indexURL)
+    this.indexedCramFile = new gmodCRAM.IndexedCramFile({
+        cram: this.cramFile,
+        index: new gmodCRAM.CraiIndex({
+            filehandle: indexFileHandle
+        }),
+        fetchSizeLimit: 30000000
+    });
+
+    BamUtils.setReaderDefaults(this, config);
+
+}
 
 
-    const READ_STRAND_FLAG = 0x10;
-    const MATE_STRAND_FLAG = 0x20;
+function seqFetch(seqID, start, end) {
 
-    const CRAM_MATE_STRAND_FLAG = 0x1;
-    const CRAM_MATE_MAPPED_FLAG = 0x2;
+    const sequence = this.genome.sequence;
+    const genome = this.genome;
 
-    /**
-     * Class for reading a bam file
-     *
-     * @param config
-     * @constructor
-     */
-    igv.CramReader = function (config, genome, browser) {
-
-        const self = this;
-
-        this.config = config;
-        this.browser = browser;
-        this.genome = genome;
-
-        this.cramFile = new gmodCRAM.CramFile({
-            filehandle: new FileHandler(config.url),
-            seqFetch: config.seqFetch || seqFetch.bind(this),
-            checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
-        })
-
-        const indexFileHandle = new FileHandler(config.indexURL)
-        this.indexedCramFile = new gmodCRAM.IndexedCramFile({
-            cram: this.cramFile,
-            index: new gmodCRAM.CraiIndex({
-                filehandle: indexFileHandle
-            }),
-            fetchSizeLimit: 30000000
+    return this.getHeader()
+        .then(function (header) {
+            const chrName = genome.getChromosomeName(header.chrNames[seqID])
+            return sequence.getSequence(chrName, start - 1, end);
         });
-
-        igv.BamUtils.setReaderDefaults(this, config);
-
-    }
+}
 
 
-    function seqFetch(seqID, start, end) {
+/**
+ * Parse the sequence dictionary from the SAM header and build chr name tables.  This function
+ * is public so it can be unit tested.
+ *
+ * @returns {PromiseLike<chrName, chrToIndex, chrAliasTable}>}
+ */
 
-        const sequence = this.genome.sequence;
+CramReader.prototype.getHeader = function () {
+
+    if (this.header) {
+        return Promise.resolve(this.header);
+    } else {
+        const self = this;
         const genome = this.genome;
 
-        return this.getHeader()
-            .then(function (header) {
-                const chrName = genome.getChromosomeName(header.chrNames[seqID])
-                return sequence.getSequence(chrName, start - 1, end);
+        return this.cramFile.getSamHeader()
+
+            .then(function (samHeader) {
+
+                const chrToIndex = {};
+                const chrNames = [];
+                const chrAliasTable = {};
+                const readGroups = [];
+
+                for (let line of samHeader) {
+
+                    if ('SQ' === line.tag) {
+                        for (let d of line.data) {
+                            if (d.tag === "SN") {
+                                const seq = d.value;
+                                chrToIndex[seq] = chrNames.length;
+                                chrNames.push(seq);
+                                if (genome) {
+                                    const alias = genome.getChromosomeName(seq);
+                                    chrAliasTable[alias] = seq;
+                                }
+                                break;
+                            }
+                        }
+                    } else if ('RG' === line.tag) {
+                        readGroups.push(line.data);
+                    }
+                }
+
+                self.header = {
+                    chrNames: chrNames,
+                    chrToIndex: chrToIndex,
+                    chrAliasTable: chrAliasTable,
+                    readGroups: readGroups
+                }
+
+                return self.header;
             });
     }
+}
 
 
-    /**
-     * Parse the sequence dictionary from the SAM header and build chr name tables.  This function
-     * is public so it can be unit tested.
-     *
-     * @returns {PromiseLike<chrName, chrToIndex, chrAliasTable}>}
-     */
+CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
-    igv.CramReader.prototype.getHeader = function () {
+    var self = this;
+    const browser = this.browser
 
-        if (this.header) {
-            return Promise.resolve(this.header);
-        }
+    return this.getHeader()
 
-        else {
-            const self = this;
-            const genome = this.genome;
+        .then(function (header) {
 
-            return this.cramFile.getSamHeader()
+            const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+            const chrIdx = header.chrToIndex[queryChr];
+            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
 
-                .then(function (samHeader) {
+            if (chrIdx === undefined) {
+                return Promise.resolve(alignmentContainer);
 
-                    const chrToIndex = {};
-                    const chrNames = [];
-                    const chrAliasTable = {};
-                    const readGroups = [];
+            } else {
+                return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
 
-                    for (let line of samHeader) {
+                    .then(function (records) {
 
-                        if ('SQ' === line.tag) {
-                            for(let d of line.data) {
-                                if(d.tag === "SN") {
-                                    const seq = d.value;
-                                    chrToIndex[seq] = chrNames.length;
-                                    chrNames.push(seq);
-                                    if (genome) {
-                                        const alias = genome.getChromosomeName(seq);
-                                        chrAliasTable[alias] = seq;
-                                    }
-                                    break;
-                                }
+                        for (let record of records) {
+
+                            const refID = record.sequenceId;
+                            const pos = record.alignmentStart;
+                            const alignmentEnd = pos + record.lengthOnRef;
+
+                            if (refID < 0) {
+                                continue;   // unmapped read
+                            } else if (refID > chrIdx || pos > bpEnd) {
+                                return;    // off right edge, we're done
+                            } else if (refID < chrIdx) {
+                                continue;   // Sequence to left of start, not sure this is possible
                             }
+                            if (alignmentEnd < bpStart) {
+                                continue;
+                            }  // Record out-of-range "to the left", skip to next one
+
+                            const alignment = decodeCramRecord(record, header.chrNames);
+
+                            //  if (filter.pass(alignment)) {
+                            alignmentContainer.push(alignment);
+                            //  }
                         }
-                        else if ('RG' === line.tag) {
-                            readGroups.push(line.data);
+
+                        alignmentContainer.finish();
+                        return alignmentContainer;
+                    })
+                    .catch(function (error) {
+                        let message = error.message;
+                        if (message && message.indexOf("MD5") >= 0) {
+                            "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                         }
-                    }
+                        browser.presentAlert(message)
+                        throw error
+                    })
+            }
 
-                    self.header = {
-                        chrNames: chrNames,
-                        chrToIndex: chrToIndex,
-                        chrAliasTable: chrAliasTable,
-                        readGroups: readGroups
-                    }
+            function decodeCramRecord(record, chrNames) {
 
-                    return self.header;
-                });
-        }
-    }
+                const alignment = new BamAlignment();
 
+                alignment.chr = chrNames[record.sequenceId];
+                alignment.start = record.alignmentStart - 1;
+                alignment.lengthOnRef = record.lengthOnRef;
+                alignment.flags = record.flags;
+                alignment.strand = !(record.flags & READ_STRAND_FLAG);
+                alignment.fragmentLength = record.templateLength || record.templateSize;
+                alignment.mq = record.mappingQuality;
+                alignment.end = record.alignmentStart + record.lengthOnRef;
+                alignment.readGroupId = record.readGroupId;
 
-    igv.CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
+                if (record.mate && record.mate.sequenceId !== undefined) {
+                    const strand = record.mate.flags !== undefined ?
+                        !(record.mate.flags & CRAM_MATE_STRAND_FLAG) :
+                        !(record.flags & MATE_STRAND_FLAG);
 
-        var self = this;
-        const browser = this.browser
-
-        return this.getHeader()
-
-            .then(function (header) {
-
-                const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-                const chrIdx = header.chrToIndex[queryChr];
-                const alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
-
-                if (chrIdx === undefined) {
-                    return Promise.resolve(alignmentContainer);
-
-                } else {
-                    return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
-
-                        .then(function (records) {
-
-                            for (let record of records) {
-
-                                const refID = record.sequenceId;
-                                const pos = record.alignmentStart;
-                                const alignmentEnd = pos + record.lengthOnRef;
-
-                                if (refID < 0) {
-                                    continue;   // unmapped read
-                                }
-                                else if (refID > chrIdx || pos > bpEnd) {
-                                    return;    // off right edge, we're done
-                                }
-                                else if (refID < chrIdx) {
-                                    continue;   // Sequence to left of start, not sure this is possible
-                                }
-                                if (alignmentEnd < bpStart) {
-                                    continue;
-                                }  // Record out-of-range "to the left", skip to next one
-
-                                const alignment = decodeCramRecord(record, header.chrNames);
-
-                                //  if (filter.pass(alignment)) {
-                                alignmentContainer.push(alignment);
-                                //  }
-                            }
-
-                            alignmentContainer.finish();
-                            return alignmentContainer;
-                        })
-                        .catch(function (error) {
-                            let message = error.message;
-                            if (message && message.indexOf("MD5") >= 0) {
-                                "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
-                            }
-                            browser.presentAlert(message)
-                            throw error
-                        })
+                    alignment.mate = {
+                        chr: chrNames[record.mate.sequenceId],
+                        position: record.mate.alignmentStart,
+                        strand: strand
+                    };
                 }
 
-                function decodeCramRecord(record, chrNames) {
+                alignment.seq = record.getReadBases();
+                alignment.qual = record.qualityScores;
+                alignment.tagDict = record.tags;
+                alignment.readName = record.readName;
 
-                    const alignment = new igv.BamAlignment();
+                // TODO -- cigar encoded in tag?
+                // BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
 
-                    alignment.chr = chrNames[record.sequenceId];
-                    alignment.start = record.alignmentStart - 1;
-                    alignment.lengthOnRef = record.lengthOnRef;
-                    alignment.flags = record.flags;
-                    alignment.strand = !(record.flags & READ_STRAND_FLAG);
-                    alignment.fragmentLength = record.templateLength || record.templateSize;
-                    alignment.mq = record.mappingQuality;
-                    alignment.end = record.alignmentStart + record.lengthOnRef;
-                    alignment.readGroupId = record.readGroupId;
+                makeBlocks(record, alignment);
 
-                    if (record.mate && record.mate.sequenceId !== undefined) {
-                        const strand = record.mate.flags !== undefined ?
-                            !(record.mate.flags & CRAM_MATE_STRAND_FLAG) :
-                            !(record.flags & MATE_STRAND_FLAG);
-
-                        alignment.mate = {
-                            chr: chrNames[record.mate.sequenceId],
-                            position: record.mate.alignmentStart,
-                            strand: strand
-                        };
-                    }
-
-                    alignment.seq = record.getReadBases();
-                    alignment.qual = record.qualityScores;
-                    alignment.tagDict = record.tags;
-                    alignment.readName = record.readName;
-
-                    // TODO -- cigar encoded in tag?
-                    // igv.BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
-
-                    makeBlocks(record, alignment);
-
-                    if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
-                        alignment.fragmentLength = -alignment.fragmentLength
-                    }
-
-                    igv.BamUtils.setPairOrientation(alignment);
-
-                    return alignment;
-
+                if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                    alignment.fragmentLength = -alignment.fragmentLength
                 }
 
-                function makeBlocks(cramRecord, alignment) {
+                BamUtils.setPairOrientation(alignment);
 
-                    const blocks = [];
-                    let insertions;
-                    let gapType;
-                    let basesUsed = 0;
-                    let cigarString = '';
+                return alignment;
 
-                    alignment.scStart = alignment.start;
-                    alignment.scLengthOnRef = alignment.lengthOnRef;
+            }
 
-                    if (cramRecord.readFeatures) {
+            function makeBlocks(cramRecord, alignment) {
 
-                        for (let feature of cramRecord.readFeatures) {
+                const blocks = [];
+                let insertions;
+                let gapType;
+                let basesUsed = 0;
+                let cigarString = '';
 
-                            const code = feature.code;
-                            const data = feature.data;
-                            const readPos = feature.pos - 1;
-                            const refPos = feature.refPos - 1;
+                alignment.scStart = alignment.start;
+                alignment.scLengthOnRef = alignment.lengthOnRef;
 
-                            if (alignment.readName === 'SRR062635.16695874') {
-                                console.log("");
-                            }
+                if (cramRecord.readFeatures) {
 
-                            switch (code) {
-                                case 'S' :
-                                case 'I':
-                                case 'i':
-                                case 'N':
-                                case 'D':
-                                    if (readPos > basesUsed) {
-                                        const len = readPos - basesUsed;
-                                        blocks.push(new igv.AlignmentBlock({
-                                            start: refPos - len,
-                                            seqOffset: basesUsed,
-                                            len: len,
-                                            type: 'M',
-                                            gapType: gapType
-                                        }));
-                                        basesUsed += len;
+                    for (let feature of cramRecord.readFeatures) {
 
-                                        cigarString += len + 'M';
+                        const code = feature.code;
+                        const data = feature.data;
+                        const readPos = feature.pos - 1;
+                        const refPos = feature.refPos - 1;
+
+                        if (alignment.readName === 'SRR062635.16695874') {
+                            console.log("");
+                        }
+
+                        switch (code) {
+                            case 'S' :
+                            case 'I':
+                            case 'i':
+                            case 'N':
+                            case 'D':
+                                if (readPos > basesUsed) {
+                                    const len = readPos - basesUsed;
+                                    blocks.push(new AlignmentBlock({
+                                        start: refPos - len,
+                                        seqOffset: basesUsed,
+                                        len: len,
+                                        type: 'M',
+                                        gapType: gapType
+                                    }));
+                                    basesUsed += len;
+
+                                    cigarString += len + 'M';
+                                }
+
+
+                                if ('S' === code) {
+                                    let scPos = refPos;
+
+                                    alignment.scLengthOnRef += data.length;
+                                    if (readPos === 0) {
+                                        alignment.scStart -= data.length;
+                                        scPos -= data.length;
                                     }
 
-
-                                    if ('S' === code) {
-                                        let scPos = refPos;
-
-                                        alignment.scLengthOnRef += data.length;
-                                        if (readPos === 0) {
-                                            alignment.scStart -= data.length;
-                                            scPos -= data.length;
-                                        }
-
-                                        const len = data.length;
-                                        blocks.push(new igv.AlignmentBlock({
-                                            start: scPos,
-                                            seqOffset: basesUsed,
-                                            len: len,
-                                            type: 'S'
-                                        }));
-                                        basesUsed += len;
-                                        gapType = 'S';
-                                        cigarString += len + code;
+                                    const len = data.length;
+                                    blocks.push(new AlignmentBlock({
+                                        start: scPos,
+                                        seqOffset: basesUsed,
+                                        len: len,
+                                        type: 'S'
+                                    }));
+                                    basesUsed += len;
+                                    gapType = 'S';
+                                    cigarString += len + code;
+                                } else if ('I' === code || 'i' === code) {
+                                    if (insertions === undefined) {
+                                        insertions = [];
                                     }
-                                    else if ('I' === code || 'i' === code) {
-                                        if (insertions === undefined) {
-                                            insertions = [];
-                                        }
-                                        const len = 'i' === code ? 1 : data.length;
-                                        insertions.push(new igv.AlignmentBlock({
-                                            start: refPos - 1,
-                                            len: len,
-                                            seqOffset: basesUsed,
-                                            type: 'I'
-                                        }));
-                                        basesUsed += len;
-                                        gapType = 'I';
-                                        cigarString += len + code;
-                                    } else if ('D' === code || 'N' === code) {
-                                        gapType = code;
-                                        cigarString += data + code;
-                                    }
-                                    break;
-
-                                case 'H':
-                                case 'P':
+                                    const len = 'i' === code ? 1 : data.length;
+                                    insertions.push(new AlignmentBlock({
+                                        start: refPos - 1,
+                                        len: len,
+                                        seqOffset: basesUsed,
+                                        type: 'I'
+                                    }));
+                                    basesUsed += len;
+                                    gapType = 'I';
+                                    cigarString += len + code;
+                                } else if ('D' === code || 'N' === code) {
+                                    gapType = code;
                                     cigarString += data + code;
+                                }
+                                break;
 
-                                default :
-                                //  Ignore
-                            }
+                            case 'H':
+                            case 'P':
+                                cigarString += data + code;
+
+                            default :
+                            //  Ignore
                         }
                     }
-
-                    // Last block
-                    const len = cramRecord.readLength - basesUsed;
-                    if (len > 0) {
-                        blocks.push(new igv.AlignmentBlock({
-                            start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
-                            seqOffset: basesUsed,
-                            len: len,
-                            type: 'M',
-                            gapType: gapType
-                        }));
-
-                        cigarString += len + 'M';
-                    }
-
-                    alignment.blocks = blocks;
-                    alignment.insertions = insertions;
-                    alignment.cigar = cigarString;
-
                 }
 
-            });
+                // Last block
+                const len = cramRecord.readLength - basesUsed;
+                if (len > 0) {
+                    blocks.push(new AlignmentBlock({
+                        start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
+                        seqOffset: basesUsed,
+                        len: len,
+                        type: 'M',
+                        gapType: gapType
+                    }));
+
+                    cigarString += len + 'M';
+                }
+
+                alignment.blocks = blocks;
+                alignment.insertions = insertions;
+                alignment.cigar = cigarString;
+
+            }
+
+        });
+}
+
+class FileHandler {
+
+    constructor(source) {
+        this.position = 0
+        this.url = source
+        this.cache = new BufferCache({
+            fetch: (start, length) => this._fetch(start, length),
+        })
     }
 
-    class FileHandler {
+    async _fetch(position, length) {
 
-        constructor(source) {
-            this.position = 0
-            this.url = source
-            this.cache = new BufferCache({
-                fetch: (start, length) => this._fetch(start, length),
+        const loadRange = {start: position, size: length};
+        this._stat = {size: undefined}
+        return igvxhr.loadArrayBuffer(this.url, buildOptions({}, {range: loadRange}))
+            .then(function (arrayBuffer) {
+                const nodeBuffer = Buffer.from(arrayBuffer)
+                return nodeBuffer
             })
-        }
-
-        async _fetch(position, length) {
-
-            const loadRange = {start: position, size: length};
-            this._stat = {size: undefined}
-            return igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}, {range: loadRange}))
-                .then(function (arrayBuffer) {
-                    const nodeBuffer = Buffer.from(arrayBuffer)
-                    return nodeBuffer
-                })
-        }
-
-        async read(buffer, offset = 0, length = Infinity, position = 0) {
-            let readPosition = position
-            if (readPosition === null) {
-                readPosition = this.position
-                this.position += length
-            }
-            return this.cache.get(buffer, offset, length, position)
-        }
-
-        async readFile() {
-            const arrayBuffer = await igv.xhr.loadArrayBuffer(this.url, igv.buildOptions({}))
-            return Buffer.from(arrayBuffer)
-        }
-
-        async stat() {
-            if (!this._stat) {
-                const buf = Buffer.allocUnsafe(10)
-                await this.read(buf, 0, 10, 0)
-                if (!this._stat)
-                    throw new Error(`unable to determine size of file at ${this.url}`)
-            }
-            return this._stat
-        }
     }
 
-    class BufferCache {
+    async read(buffer, offset = 0, length = Infinity, position = 0) {
+        let readPosition = position
+        if (readPosition === null) {
+            readPosition = this.position
+            this.position += length
+        }
+        return this.cache.get(buffer, offset, length, position)
+    }
 
-        constructor({fetch, size = 10000000, chunkSize = 32768}) {
+    async readFile() {
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions({}))
+        return Buffer.from(arrayBuffer)
+    }
 
-            this.fetch = fetch
-            this.chunkSize = chunkSize
-            this.lruCache = new QuickLRU({maxSize: Math.floor(size / chunkSize)})
+    async stat() {
+        if (!this._stat) {
+            const buf = Buffer.allocUnsafe(10)
+            await this.read(buf, 0, 10, 0)
+            if (!this._stat)
+                throw new Error(`unable to determine size of file at ${this.url}`)
+        }
+        return this._stat
+    }
+}
+
+class BufferCache {
+
+    constructor({fetch, size = 10000000, chunkSize = 32768}) {
+
+        this.fetch = fetch
+        this.chunkSize = chunkSize
+        this.lruCache = new QuickLRU({maxSize: Math.floor(size / chunkSize)})
+    }
+
+    async get(outputBuffer, offset, length, position) {
+        if (outputBuffer.length < offset + length)
+            throw new Error('output buffer not big enough for request')
+
+        // calculate the list of chunks involved in this fetch
+        const firstChunk = Math.floor(position / this.chunkSize)
+        const lastChunk = Math.floor((position + length) / this.chunkSize)
+
+        // fetch them all as necessary
+        const fetches = new Array(lastChunk - firstChunk + 1)
+        for (let chunk = firstChunk; chunk <= lastChunk; chunk += 1) {
+            fetches[chunk - firstChunk] = this._getChunk(chunk).then(data => ({
+                data,
+                chunkNumber: chunk,
+            }))
         }
 
-        async get(outputBuffer, offset, length, position) {
-            if (outputBuffer.length < offset + length)
-                throw new Error('output buffer not big enough for request')
+        // stitch together the response buffer using them
+        const chunks = await Promise.all(fetches)
+        const chunksOffset = position - chunks[0].chunkNumber * this.chunkSize
+        chunks.forEach(({data, chunkNumber}) => {
+            const chunkPositionStart = chunkNumber * this.chunkSize
+            let copyStart = 0
+            let copyEnd = this.chunkSize
+            let copyOffset =
+                offset + (chunkNumber - firstChunk) * this.chunkSize - chunksOffset
 
-            // calculate the list of chunks involved in this fetch
-            const firstChunk = Math.floor(position / this.chunkSize)
-            const lastChunk = Math.floor((position + length) / this.chunkSize)
-
-            // fetch them all as necessary
-            const fetches = new Array(lastChunk - firstChunk + 1)
-            for (let chunk = firstChunk; chunk <= lastChunk; chunk += 1) {
-                fetches[chunk - firstChunk] = this._getChunk(chunk).then(data => ({
-                    data,
-                    chunkNumber: chunk,
-                }))
+            if (chunkNumber === firstChunk) {
+                copyOffset = offset
+                copyStart = chunksOffset
+            }
+            if (chunkNumber === lastChunk) {
+                copyEnd = position + length - chunkPositionStart
             }
 
-            // stitch together the response buffer using them
-            const chunks = await Promise.all(fetches)
-            const chunksOffset = position - chunks[0].chunkNumber * this.chunkSize
-            chunks.forEach(({data, chunkNumber}) => {
-                const chunkPositionStart = chunkNumber * this.chunkSize
-                let copyStart = 0
-                let copyEnd = this.chunkSize
-                let copyOffset =
-                    offset + (chunkNumber - firstChunk) * this.chunkSize - chunksOffset
-
-                if (chunkNumber === firstChunk) {
-                    copyOffset = offset
-                    copyStart = chunksOffset
-                }
-                if (chunkNumber === lastChunk) {
-                    copyEnd = position + length - chunkPositionStart
-                }
-
-                data.copy(outputBuffer, copyOffset, copyStart, copyEnd)
-            })
-        }
-
-        _getChunk(chunkNumber) {
-            const cachedPromise = this.lruCache.get(chunkNumber)
-            if (cachedPromise) return cachedPromise
-
-            const freshPromise = this.fetch(
-                chunkNumber * this.chunkSize,
-                this.chunkSize,
-            )
-            this.lruCache.set(chunkNumber, freshPromise)
-            return freshPromise
-        }
+            data.copy(outputBuffer, copyOffset, copyStart, copyEnd)
+        })
     }
+
+    _getChunk(chunkNumber) {
+        const cachedPromise = this.lruCache.get(chunkNumber)
+        if (cachedPromise) return cachedPromise
+
+        const freshPromise = this.fetch(
+            chunkNumber * this.chunkSize,
+            this.chunkSize,
+        )
+        this.lruCache.set(chunkNumber, freshPromise)
+        return freshPromise
+    }
+}
 
 
 // From https://github.com/sindresorhus/quick-lru
@@ -485,121 +482,119 @@ var igv = (function (igv) {
 //
 //     THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-    'use strict';
+'use strict';
 
-    class QuickLRU {
-        constructor(options = {}) {
-            if (!(options.maxSize && options.maxSize > 0)) {
-                throw new TypeError('`maxSize` must be a number greater than 0');
-            }
+class QuickLRU {
+    constructor(options = {}) {
+        if (!(options.maxSize && options.maxSize > 0)) {
+            throw new TypeError('`maxSize` must be a number greater than 0');
+        }
 
-            this.maxSize = options.maxSize;
+        this.maxSize = options.maxSize;
+        this.cache = new Map();
+        this.oldCache = new Map();
+        this._size = 0;
+    }
+
+    _set(key, value) {
+        this.cache.set(key, value);
+        this._size++;
+
+        if (this._size >= this.maxSize) {
+            this._size = 0;
+            this.oldCache = this.cache;
             this.cache = new Map();
-            this.oldCache = new Map();
-            this._size = 0;
-        }
-
-        _set(key, value) {
-            this.cache.set(key, value);
-            this._size++;
-
-            if (this._size >= this.maxSize) {
-                this._size = 0;
-                this.oldCache = this.cache;
-                this.cache = new Map();
-            }
-        }
-
-        get(key) {
-            if (this.cache.has(key)) {
-                return this.cache.get(key);
-            }
-
-            if (this.oldCache.has(key)) {
-                const value = this.oldCache.get(key);
-                this._set(key, value);
-                return value;
-            }
-        }
-
-        set(key, value) {
-            if (this.cache.has(key)) {
-                this.cache.set(key, value);
-            } else {
-                this._set(key, value);
-            }
-
-            return this;
-        }
-
-        has(key) {
-            return this.cache.has(key) || this.oldCache.has(key);
-        }
-
-        peek(key) {
-            if (this.cache.has(key)) {
-                return this.cache.get(key);
-            }
-
-            if (this.oldCache.has(key)) {
-                return this.oldCache.get(key);
-            }
-        }
-
-        delete(key) {
-            const deleted = this.cache.delete(key);
-            if (deleted) {
-                this._size--;
-            }
-
-            return this.oldCache.delete(key) || deleted;
-        }
-
-        clear() {
-            this.cache.clear();
-            this.oldCache.clear();
-            this._size = 0;
-        }
-
-        * keys() {
-            for (const [key] of this) {
-                yield key;
-            }
-        }
-
-        * values() {
-            for (const [, value] of this) {
-                yield value;
-            }
-        }
-
-        * [Symbol.iterator]() {
-            for (const item of this.cache) {
-                yield item;
-            }
-
-            for (const item of this.oldCache) {
-                const [key] = item;
-                if (!this.cache.has(key)) {
-                    yield item;
-                }
-            }
-        }
-
-        get size() {
-            let oldCacheSize = 0;
-            for (const key of this.oldCache.keys()) {
-                if (!this.cache.has(key)) {
-                    oldCacheSize++;
-                }
-            }
-
-            return this._size + oldCacheSize;
         }
     }
 
-    return igv;
-})
-(igv || {});
+    get(key) {
+        if (this.cache.has(key)) {
+            return this.cache.get(key);
+        }
+
+        if (this.oldCache.has(key)) {
+            const value = this.oldCache.get(key);
+            this._set(key, value);
+            return value;
+        }
+    }
+
+    set(key, value) {
+        if (this.cache.has(key)) {
+            this.cache.set(key, value);
+        } else {
+            this._set(key, value);
+        }
+
+        return this;
+    }
+
+    has(key) {
+        return this.cache.has(key) || this.oldCache.has(key);
+    }
+
+    peek(key) {
+        if (this.cache.has(key)) {
+            return this.cache.get(key);
+        }
+
+        if (this.oldCache.has(key)) {
+            return this.oldCache.get(key);
+        }
+    }
+
+    delete(key) {
+        const deleted = this.cache.delete(key);
+        if (deleted) {
+            this._size--;
+        }
+
+        return this.oldCache.delete(key) || deleted;
+    }
+
+    clear() {
+        this.cache.clear();
+        this.oldCache.clear();
+        this._size = 0;
+    }
+
+    * keys() {
+        for (const [key] of this) {
+            yield key;
+        }
+    }
+
+    * values() {
+        for (const [, value] of this) {
+            yield value;
+        }
+    }
+
+    * [Symbol.iterator]() {
+        for (const item of this.cache) {
+            yield item;
+        }
+
+        for (const item of this.oldCache) {
+            const [key] = item;
+            if (!this.cache.has(key)) {
+                yield item;
+            }
+        }
+    }
+
+    get size() {
+        let oldCacheSize = 0;
+        for (const key of this.oldCache.keys()) {
+            if (!this.cache.has(key)) {
+                oldCacheSize++;
+            }
+        }
+
+        return this._size + oldCacheSize;
+    }
+}
+
+export default CramReader;
 
 

@@ -1,5 +1,6 @@
-function runTrackLineTests() {
+import WigTrack from "../js/feature/wigTrack.js";
 
+function runTrackLineTests() {
 
     const browser = {
         genome: {
@@ -13,7 +14,7 @@ function runTrackLineTests() {
 
         var done = assert.async();
 
-        const wigTrack = igv.trackFactory["wig"]({
+        const wigTrack = new WigTrack({
                 format: 'bedgraph',
                 url: 'data/wig/bedgraph-example-uscs.bedgraph'
             },
@@ -33,7 +34,7 @@ function runTrackLineTests() {
             .catch(function (error) {
                 console.log(error);
             });
-
     });
-
 }
+
+export default runTrackLineTests;

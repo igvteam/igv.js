@@ -1,3 +1,5 @@
+import {createBrowser} from "../js/igv-create.js";
+
 function runSessionTests() {
 
     const div = document.createElement("div");
@@ -7,7 +9,7 @@ function runSessionTests() {
 
         var done = assert.async();
 
-        igv.createBrowser(div,
+        createBrowser(div,
             {
                 genome: "hg19"
             })
@@ -35,7 +37,7 @@ function runSessionTests() {
 
         var done = assert.async();
 
-        igv.createBrowser(div,
+        createBrowser(div,
             {
                 genome: "hg19"
             })
@@ -59,6 +61,8 @@ function runSessionTests() {
             })
     });
 }
+
+export default runSessionTests;
 
 
 

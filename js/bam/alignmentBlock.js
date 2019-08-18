@@ -29,19 +29,14 @@
  */
 
 
-var igv = (function (igv) {
-
-
-    igv.AlignmentBlock = function (b) {
-        if (b) {
-            Object.assign(this, b);
-        }
+const AlignmentBlock = function (b) {
+    if (b) {
+        Object.assign(this, b);
     }
+}
 
-    igv.AlignmentBlock.prototype.seqIndexAt = function (genomicLocation) {
-        return Math.floor(genomicLocation) - this.start + this.seqOffset
-    }
+AlignmentBlock.prototype.seqIndexAt = function (genomicLocation) {
+    return Math.floor(genomicLocation) - this.start + this.seqOffset
+}
 
-    return igv;
-
-})(igv || {});
+export default AlignmentBlock;

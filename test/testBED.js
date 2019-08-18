@@ -1,5 +1,7 @@
-function runBedTests() {
+import FeatureFileReader from "../js/feature/featureFileReader.js";
+import FeatureSource from "../js/feature/featureSource.js";
 
+function runBedTests() {
 
     // mock objects
     const genome = {
@@ -74,7 +76,7 @@ function runBedTests() {
             url: "data/bed/gwasCatalog.test.txt"
         }
 
-        const reader = new igv.FeatureFileReader(config);
+        const reader = new FeatureFileReader(config);
 
         reader.readFeatures("chr1", 0, Number.MAX_VALUE)
             .then(features => {
@@ -101,7 +103,7 @@ function runBedTests() {
             url: "data/bed/wgRna.test.txt"
         }
 
-        const reader = new igv.FeatureFileReader(config);
+        const reader = new FeatureFileReader(config);
 
         reader.readFeatures("chr1", 0, Number.MAX_VALUE)
             .then(features => {
@@ -128,7 +130,7 @@ function runBedTests() {
             url: "data/bed/cpgIslandExt.test.txt"
         }
 
-        const reader = new igv.FeatureFileReader(config);
+        const reader = new FeatureFileReader(config);
 
         reader.readFeatures("chr1", 0, Number.MAX_VALUE)
             .then(features => {
@@ -154,7 +156,7 @@ function runBedTests() {
             url: "data/bed/ensGene.test.txt"
         }
 
-        const reader = new igv.FeatureFileReader(config);
+        const reader = new FeatureFileReader(config);
 
         reader.readFeatures("chr1", 0, Number.MAX_VALUE)
             .then(features => {
@@ -200,7 +202,7 @@ function runBedTests() {
             url: "data/bed/Low_complexity.rmask"
         }
 
-        const reader = new igv.FeatureFileReader(config);
+        const reader = new FeatureFileReader(config);
 
         reader.readFeatures("chr1", 0, Number.MAX_VALUE)
 
@@ -231,7 +233,7 @@ function runBedTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd = 67684468,
-            featureSource = new igv.FeatureSource({
+            featureSource = new FeatureSource({
                     format: 'bed',
                     indexed: false,
                     url: 'data/bed/basic_feature_3_columns.bed'
@@ -257,7 +259,7 @@ function runBedTests() {
 
         var done = assert.async();
 
-        var featureSource = new igv.FeatureSource({
+        var featureSource = new FeatureSource({
                 format: 'bed',
                 indexed: false,
                 url: 'data/bed/basic_feature_3_columns.bed'
@@ -281,7 +283,7 @@ function runBedTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd = 67684468,
-            featureSource = new igv.FeatureSource({
+            featureSource = new FeatureSource({
                     format: 'bed',
                     url: 'data/bed/basic_feature_3_columns.bed.gzipped'
                 },
@@ -307,7 +309,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new igv.FeatureSource({
+        featureSource = new FeatureSource({
             format: 'broadPeak',
             url: "data/peak/test.broadPeak"
         });
@@ -345,7 +347,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new igv.FeatureSource({
+        featureSource = new FeatureSource({
                 format: 'refflat',
                 url: "data/bed/myc_refFlat.txt"
             },
@@ -385,7 +387,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new igv.FeatureSource({
+        featureSource = new FeatureSource({
                 format: 'genePred',
                 url: "data/bed/genePred_myc_hg38.txt"
             },
@@ -425,7 +427,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new igv.FeatureSource({
+        featureSource = new FeatureSource({
                 format: 'refgene',
                 url: "data/bed/myc_refGene_genePredExt.txt"
             },
@@ -452,7 +454,7 @@ function runBedTests() {
             done();
 
         }, undefined);
-
     });
-
 }
+
+export default runBedTests;
