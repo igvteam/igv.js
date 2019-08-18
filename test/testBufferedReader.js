@@ -1,3 +1,5 @@
+import BufferedReader from "../js/bigwig/bufferedReader.js";
+
 function runBufferedReaderTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
@@ -7,7 +9,7 @@ function runBufferedReaderTests() {
 
         var url = dataURL + "misc/BufferedReaderTest.bin";
         var range = {start: 25, size: 100};
-        var bufferedReader = new igv.BufferedReader({url: url}, 16);
+        var bufferedReader = new BufferedReader({url: url}, 16);
 
         bufferedReader.dataViewForRange(range).then(function (dataView) {
 
@@ -29,3 +31,5 @@ function runBufferedReaderTests() {
 
     });
 }
+
+export default runBufferedReaderTests;

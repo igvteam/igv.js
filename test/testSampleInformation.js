@@ -1,12 +1,11 @@
+import loadPlinkFile from "../js/sampleInformation.js";
+
 function runSampleInformationTests() {
 
-
     // mock object
-
-    igv.browser = {
+    const browser = {
         getFormat: function () {
         },
-
         genome: {
             getChromosome: function (chr) {
             },
@@ -19,14 +18,13 @@ function runSampleInformationTests() {
     QUnit.test('Load Plink', function (assert) {
         var done = assert.async();
 
-        igv.sampleInformation.loadPlinkFile('data/misc/pedigree.fam')
+        loadPlinkFile('data/misc/pedigree.fam')
 
-            .then(function (attributes) {
+            .then(function (sampleInformation) {
 
+                const attributes = sampleInformation.getAttributes('SS0012979');
                 assert.ok(attributes);
-                console.log(attributes);
-                assert.equal(attributes['SS0012979'].familyId, 14109);
-                assert.equal(igv.sampleInformation.getAttributes('SS0012979').familyId, 14109);
+                assert.equal(attributes.familyId, 14109);
                 done();
             })
 
@@ -37,5 +35,6 @@ function runSampleInformationTests() {
             });
 
     })
-
 }
+
+export default runSampleInformationTests;

@@ -24,24 +24,19 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by dat on 6/14/19.
- */
-var igv = (function (igv) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
 
-    igv.SVGSaveControl = function ($parent, browser) {
+const SVGSaveControl = function ($parent, browser) {
 
-        let $button = $('<div class="igv-nav-bar-button">');
-        $parent.append($button);
+    let $button = $('<div class="igv-nav-bar-button">');
+    $parent.append($button);
 
-        $button.text('Save SVG');
+    $button.text('Save SVG');
 
-        $button.on('click.svg-save-control', () => {
-            // browser.renderSVG({ $container: $('#igv-svg-container') })
-            browser.renderSVG({});
-        });
-    };
+    $button.on('click.svg-save-control', () => {
+        // browser.renderSVG({ $container: $('#igv-svg-container') })
+        browser.renderSVG({});
+    });
+};
 
-    return igv;
-
-}) (igv || {});
+export default SVGSaveControl;

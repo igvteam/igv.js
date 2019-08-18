@@ -23,213 +23,205 @@
  * THE SOFTWARE.
  */
 
+import {createVCFVariant} from "./variant.js";
+import getDataWrapper from "../feature/dataWrapper.js";
+import {splitStringRespectingQuotes} from "../util/stringUtils.js";
 
 /**
  * Parser for VCF files.
  */
+const VcfParser = function (type) {
+    this.type = type;
+}
 
-var igv = (function (igv) {
+VcfParser.prototype.parseHeader = function (data) {
 
+    var dataWrapper,
+        tokens,
+        line,
+        j,
+        header = {},
+        id,
+        values,
+        ltIdx,
+        gtIdx,
+        type;
 
-    igv.VcfParser = function (type) {
-        this.type = type;
+    dataWrapper = getDataWrapper(data);
+
+    // First line must be file format
+    line = dataWrapper.nextLine();
+    if (line.startsWith("##fileformat")) {
+        header.version = line.substr(13);
+    } else {
+        throw new Error("Invalid VCF file: missing fileformat line");
     }
 
-    igv.VcfParser.prototype.parseHeader = function (data) {
+    while (line = dataWrapper.nextLine()) {
 
-        var dataWrapper,
-            tokens,
-            line,
-            j,
-            header = {},
-            id,
-            values,
-            ltIdx,
-            gtIdx,
-            type;
+        if (line.startsWith("#")) {
 
-        dataWrapper = igv.getDataWrapper(data);
+            id = null;
+            values = {};
 
-        // First line must be file format
-        line = dataWrapper.nextLine();
-        if (line.startsWith("##fileformat")) {
-            header.version = line.substr(13);
-        }
-        else {
-            throw new Error("Invalid VCF file: missing fileformat line");
-        }
+            if (line.startsWith("##")) {
 
-        while (line = dataWrapper.nextLine()) {
+                if (line.startsWith("##INFO") || line.startsWith("##FILTER") || line.startsWith("##FORMAT")) {
 
-            if (line.startsWith("#")) {
+                    ltIdx = line.indexOf("<");
+                    gtIdx = line.lastIndexOf(">");
 
-                id = null;
-                values = {};
+                    if (!(ltIdx > 2 && gtIdx > 0)) {
+                        console.log("Malformed VCF header line: " + line);
+                        continue;
+                    }
 
-                if (line.startsWith("##")) {
+                    type = line.substring(2, ltIdx - 1);
+                    if (!header[type]) header[type] = {};
 
-                    if (line.startsWith("##INFO") || line.startsWith("##FILTER") || line.startsWith("##FORMAT")) {
+                    //##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
+                    // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
+                    // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
 
-                        ltIdx = line.indexOf("<");
-                        gtIdx = line.lastIndexOf(">");
+                    tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
 
-                        if (!(ltIdx > 2 && gtIdx > 0)) {
-                            console.log("Malformed VCF header line: " + line);
-                            continue;
-                        }
-
-                        type = line.substring(2, ltIdx - 1);
-                        if (!header[type])  header[type] = {};
-
-                        //##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
-                        // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
-                        // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
-
-                        tokens = igv.splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
-
-                        tokens.forEach(function (token) {
-                            var kv = token.split("=");
-                            if (kv.length > 1) {
-                                if (kv[0] === "ID") {
-                                    id = kv[1];
-                                }
-                                else {
-                                    values[kv[0]] = kv[1];
-                                }
+                    tokens.forEach(function (token) {
+                        var kv = token.split("=");
+                        if (kv.length > 1) {
+                            if (kv[0] === "ID") {
+                                id = kv[1];
+                            } else {
+                                values[kv[0]] = kv[1];
                             }
-                        });
-
-                        if (id) {
-                            header[type][id] = values;
                         }
+                    });
+
+                    if (id) {
+                        header[type][id] = values;
                     }
-                    else {
-                        // Ignoring other ## header lines
-                    }
+                } else {
+                    // Ignoring other ## header lines
                 }
-                else if (line.startsWith("#CHROM")) {
-                    tokens = line.split("\t");
-
-                    if (tokens.length > 8) {
-
-                        // call set names -- use column index for id
-                        header.callSets = [];
-                        for (j = 9; j < tokens.length; j++) {
-                            header.callSets.push({id: j, name: tokens[j]});
-                        }
-                    }
-                }
-
-            }
-            else {
-                break;
-            }
-
-        }
-
-        this.header = header;  // Will need to intrepret genotypes and info field
-
-        return header;
-    }
-
-    function extractCallFields(tokens) {
-
-        var callFields = {
-                genotypeIndex: -1,
-                fields: tokens
-            },
-            i;
-
-        for (i = 0; i < tokens.length; i++) {
-            if ("GT" === tokens[i]) {
-                callFields.genotypeIndex = i;
-            }
-        }
-
-        return callFields;
-
-    }
-
-    /**
-     * Parse data as a collection of Variant objects.
-     *
-     * @param data
-     * @returns {Array}
-     */
-    igv.VcfParser.prototype.parseFeatures = function (data) {
-
-        var dataWrapper,
-            line,
-            allFeatures = [],
-            callSets = this.header.callSets,
-            variant,
-            tokens,
-            callFields,
-            index,
-            token;
-
-
-        dataWrapper = igv.getDataWrapper(data);
-
-        while (line = dataWrapper.nextLine()) {
-
-            if (!line.startsWith("#")) {
-
+            } else if (line.startsWith("#CHROM")) {
                 tokens = line.split("\t");
 
-                if (tokens.length >= 8) {
-                
-                    variant = igv.createVCFVariant(tokens);
+                if (tokens.length > 8) {
 
-                    if (variant.isRefBlock())  continue;     // Skip reference blocks
-                   
-                    variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
-                    allFeatures.push(variant);
+                    // call set names -- use column index for id
+                    header.callSets = [];
+                    for (j = 9; j < tokens.length; j++) {
+                        header.callSets.push({id: j, name: tokens[j]});
+                    }
+                }
+            }
 
-                    if (tokens.length > 9) {
+        } else {
+            break;
+        }
 
-                        // Format
-                        callFields = extractCallFields(tokens[8].split(":"));
+    }
 
-                        variant.calls = {};
+    this.header = header;  // Will need to intrepret genotypes and info field
 
-                        for (index = 9; index < tokens.length; index++) {
+    return header;
+}
 
-                            token = tokens[index];
+function extractCallFields(tokens) {
 
-                            var callSet = callSets[index - 9],
-                                call = {
-                                    callSetName: callSet.name,
-                                    info: {}
-                                };
+    var callFields = {
+            genotypeIndex: -1,
+            fields: tokens
+        },
+        i;
 
-                            variant.calls[callSet.id] = call;
+    for (i = 0; i < tokens.length; i++) {
+        if ("GT" === tokens[i]) {
+            callFields.genotypeIndex = i;
+        }
+    }
 
-                            token.split(":").forEach(function (callToken, idx) {
+    return callFields;
 
-                                switch (idx) {
-                                    case callFields.genotypeIndex:
-                                        call.genotype = [];
-                                        callToken.split(/[\|\/]/).forEach(function (s) {
-                                            call.genotype.push(parseInt(s));
-                                        });
-                                        break;
+}
 
-                                    default:
-                                        call.info[callFields.fields[idx]] = callToken;
-                                }
-                            });
-                        }
+/**
+ * Parse data as a collection of Variant objects.
+ *
+ * @param data
+ * @returns {Array}
+ */
+VcfParser.prototype.parseFeatures = function (data) {
 
+    var dataWrapper,
+        line,
+        allFeatures = [],
+        callSets = this.header.callSets,
+        variant,
+        tokens,
+        callFields,
+        index,
+        token;
+
+
+    dataWrapper = getDataWrapper(data);
+
+    while (line = dataWrapper.nextLine()) {
+
+        if (!line.startsWith("#")) {
+
+            tokens = line.split("\t");
+
+            if (tokens.length >= 8) {
+
+                variant = createVCFVariant(tokens);
+
+                if (variant.isRefBlock()) continue;     // Skip reference blocks
+
+                variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
+                allFeatures.push(variant);
+
+                if (tokens.length > 9) {
+
+                    // Format
+                    callFields = extractCallFields(tokens[8].split(":"));
+
+                    variant.calls = {};
+
+                    for (index = 9; index < tokens.length; index++) {
+
+                        token = tokens[index];
+
+                        var callSet = callSets[index - 9],
+                            call = {
+                                callSetName: callSet.name,
+                                info: {}
+                            };
+
+                        variant.calls[callSet.id] = call;
+
+                        token.split(":").forEach(function (callToken, idx) {
+
+                            switch (idx) {
+                                case callFields.genotypeIndex:
+                                    call.genotype = [];
+                                    callToken.split(/[\|\/]/).forEach(function (s) {
+                                        call.genotype.push(parseInt(s));
+                                    });
+                                    break;
+
+                                default:
+                                    call.info[callFields.fields[idx]] = callToken;
+                            }
+                        });
                     }
 
                 }
+
             }
         }
-
-        return allFeatures;
     }
 
+    return allFeatures;
+}
 
-    return igv;
-})(igv || {});
+export default VcfParser;

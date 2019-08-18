@@ -23,108 +23,96 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 4/7/14.
- */
+import BWReader from "./bwReader.js";
+
+const BWSource = function (config, genome) {
+    this.reader = new BWReader(config, genome);
+    this.genome = genome;
+    this.wgValues = {};
+};
 
 
-var igv = (function (igv) {
+BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
 
-    igv.BWSource = function (config, genome) {
-        this.reader = new igv.BWReader(config, genome);
-        this.genome = genome;
-        this.wgValues = {};
-    };
+    let self = this;
 
-
-    igv.BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
-
-        var self = this;
-
-        if (chr.toLowerCase() === "all") {
-            return self.getWGValues(windowFunction);
-        } else {
-            return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
-        }
+    if (chr.toLowerCase() === "all") {
+        return self.getWGValues(windowFunction);
+    } else {
+        return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
     }
+}
 
 
-    igv.BWSource.prototype.getDefaultRange = function () {
+BWSource.prototype.getDefaultRange = function () {
 
-        if (this.reader.totalSummary != undefined) {
-            return this.reader.totalSummary.defaultRange;
-        }
-        else {
-            return undefined;
-        }
+    if (this.reader.totalSummary != undefined) {
+        return this.reader.totalSummary.defaultRange;
+    } else {
+        return undefined;
     }
+}
 
-    igv.BWSource.prototype.defaultVisibilityWindow = function () {
+BWSource.prototype.defaultVisibilityWindow = function () {
 
-        if (this.reader.type === 'bigwig') {
-            return Promise.resolve(undefined);
-        }
-        else {
-            // bigbed
-            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
-            return this.reader.loadHeader()
-                .then(function (header) {
-                    // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-                    return 1000 * (genomeSize / header.dataCount);
-                })
-        }
+    if (this.reader.type === 'bigwig') {
+        return Promise.resolve(undefined);
+    } else {
+        // bigbed
+        let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
+        return this.reader.loadHeader()
+            .then(function (header) {
+                // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
+                return 1000 * (genomeSize / header.dataCount);
+            })
     }
+}
 
-    igv.BWSource.prototype.getWGValues = function (windowFunction) {
-        var self = this,
-            bpPerPixel,
-            nominalScreenWidth = 500;      // This doesn't need to be precise
-        
-        const genome = this.genome;
+BWSource.prototype.getWGValues = function (windowFunction) {
+    let self = this,
+        bpPerPixel,
+        nominalScreenWidth = 500;      // This doesn't need to be precise
 
-        if (self.wgValues[windowFunction]) {
-            return Promise.resolve(self.wgValues[windowFunction]);
-        }
-        else {
+    const genome = this.genome;
 
-            bpPerPixel = genome.getGenomeLength() / nominalScreenWidth;
+    if (self.wgValues[windowFunction]) {
+        return Promise.resolve(self.wgValues[windowFunction]);
+    } else {
 
-            return self.reader.readWGFeatures(bpPerPixel, windowFunction)
+        bpPerPixel = genome.getGenomeLength() / nominalScreenWidth;
 
-                .then(function (features) {
+        return self.reader.readWGFeatures(bpPerPixel, windowFunction)
 
-                    var wgValues = [];
+            .then(function (features) {
 
-                    features.forEach(function (f) {
+                let wgValues = [];
 
-                        var wgFeature, offset, chr;
+                features.forEach(function (f) {
 
-                        chr = f.chr;
-                        offset = genome.getCumulativeOffset(chr);
+                    let wgFeature, offset, chr;
 
-                        wgFeature = Object.assign({}, f);
-                        wgFeature.chr = "all";
-                        wgFeature.start = offset + f.start;
-                        wgFeature.end = offset + f.end;
-                        wgValues.push(wgFeature);
-                    })
+                    chr = f.chr;
+                    offset = genome.getCumulativeOffset(chr);
 
-                    self.wgValues[windowFunction] = wgValues;
-
-                    return wgValues;
-
+                    wgFeature = Object.assign({}, f);
+                    wgFeature.chr = "all";
+                    wgFeature.start = offset + f.start;
+                    wgFeature.end = offset + f.end;
+                    wgValues.push(wgFeature);
                 })
 
-        }
+                self.wgValues[windowFunction] = wgValues;
+
+                return wgValues;
+
+            })
+
     }
+}
 
-    igv.BWSource.prototype.supportsWholeGenome = function() {
-        return true;
-    }
-
-
-    return igv;
+BWSource.prototype.supportsWholeGenome = function () {
+    return true;
+}
 
 
-})
-(igv || {});
+export default BWSource;

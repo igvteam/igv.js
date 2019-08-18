@@ -24,10 +24,7 @@
  * THE SOFTWARE.
  */
 
-var igv = (function (igv) {
-
-
-    igv.getDataWrapper = function(data) {
+function getDataWrapper (data) {
 
         if (typeof(data) == 'string' || data instanceof String) {
             return new StringDataWrapper(data);
@@ -110,6 +107,4 @@ var igv = (function (igv) {
     ByteArrayDataWrapper.prototype.nextLineNoTrim = ByteArrayDataWrapper.prototype.nextLine;
 
 
-    return igv;
-})
-(igv || {});
+export default getDataWrapper;

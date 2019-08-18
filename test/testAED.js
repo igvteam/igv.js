@@ -1,5 +1,6 @@
-function runAedTests() {
+import FeatureSource from "../js/feature/featureSource.js";
 
+function runAedTests() {
 
     const genome = {
         getChromosomeName: function (chr) {
@@ -14,7 +15,7 @@ function runAedTests() {
         var chr = "chr2",
             bpStart = 0,
             bpEnd = Number.MAX_VALUE,
-            featureSource = new igv.FeatureSource({
+            featureSource = new FeatureSource({
                 format: 'aed',
                 indexed: false,
                 url: 'data/aed/utf8-bom.aed'
@@ -45,3 +46,5 @@ function runAedTests() {
             });
     });
 }
+
+export default runAedTests;

@@ -1,16 +1,16 @@
-var igv = (function (igv) {
+import igvxhr from "../igvxhr.js";
+import {numberFormatter} from "../util/stringUtils.js";
 
-
-        igv.CivicReader = function (config) {
+const CivicReader = function (config) {
             this.config = config;
         }
 
-        igv.CivicReader.prototype.readFeatures = function (chr, start, end) {
+        CivicReader.prototype.readFeatures = function (chr, start, end) {
 
 
             const self = this;
 
-            return igv.xhr.loadJson(this.config.url + "/variants/?count=5000")
+            return igvxhr.loadJson(this.config.url + "/variants/?count=5000")
 
                 .then(function (json) {
 
@@ -71,8 +71,8 @@ var igv = (function (igv) {
             }
 
             this.locationString = (this.chr + ":" +
-                igv.numberFormatter(this.start + 1) + "-" +
-                igv.numberFormatter(this.end));
+                numberFormatter(this.start + 1) + "-" +
+                numberFormatter(this.end));
 
             // Color based on actionability score
             if (this.actionabilityScore !== undefined) {
@@ -132,8 +132,4 @@ var igv = (function (igv) {
 
         }
 
-        return igv;
-
-
-    }
-)(igv || {});
+export default CivicReader;

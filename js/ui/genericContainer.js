@@ -23,15 +23,20 @@
  * THE SOFTWARE.
  */
 
-igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
+import {createIcon} from "../igv-icons.js";
+import {guid} from "../util/domUtils.js";
+
+const GenericContainer = function ({$parent, width, height, closeHandler}) {
 
     var self = this,
         $header,
         $fa;
 
-    this.namespace = '.generic_container_' + igv.guid();
+    this.namespace = '.generic_container_' + guid();
 
-    let $container = $('<div>', { class: 'igv-generic-container' });
+    let $container = $('<div>', {class: 'igv-generic-container'});
     $parent.append($container);
     this.$container = $container;
 
@@ -44,8 +49,8 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
     }
 
     let bbox = $parent.get(0).getBoundingClientRect();
-    this.origin = { x: bbox.x, y: bbox.y };
-    this.$container.offset( { left: this.origin.x, top: this.origin.y } );
+    this.origin = {x: bbox.x, y: bbox.y};
+    this.$container.offset({left: this.origin.x, top: this.origin.y});
 
     // header
     $header = $('<div>');
@@ -55,7 +60,7 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
     let $div = $('<i>');
     $header.append($div);
 
-    $div.append( igv.createIcon("times") );
+    $div.append(createIcon("times"));
 
     $div.on('mousedown' + self.namespace, function (e) {
         e.stopPropagation();
@@ -77,6 +82,7 @@ igv.genericContainer = function ({ $parent, width, height, closeHandler }) {
         closeHandler(e);
     });
 
-    igv.makeDraggable(this.$container.get(0), $header.get(0));
+    makeDraggable(this.$container.get(0), $header.get(0));
+}
 
-};
+export default GenericContainer;

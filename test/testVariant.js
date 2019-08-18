@@ -1,3 +1,5 @@
+import {createGAVariant} from "../js/variant/variant.js";
+
 function runVariantTests() {
 
     // Mock objects
@@ -53,7 +55,7 @@ function runVariantTests() {
 
         var obj = JSON.parse(json);
 
-        var variant = igv.createGAVariant(obj);
+        var variant = createGAVariant(obj);
 
         assert.ok(variant.isRefBlock());
         done();
@@ -66,7 +68,7 @@ function runVariantTests() {
 
         var obj = JSON.parse(json);
 
-        var variant = igv.createGAVariant(obj);
+        var variant = createGAVariant(obj);
 
         assert.ok(variant.isRefBlock() === false);
 
@@ -81,7 +83,7 @@ function runVariantTests() {
 
         var obj = JSON.parse(json);
 
-        var variant = igv.createGAVariant(obj);
+        var variant = createGAVariant(obj);
 
         assert.ok(variant.isRefBlock() === false);
 
@@ -90,3 +92,5 @@ function runVariantTests() {
         done();
     });
 }
+
+export default runVariantTests;

@@ -1,8 +1,6 @@
-// Tests in this file require a server which supports range-byte requests, e.g. Apache.
+import GenomeUtils from "../js/genome/genome.js";
 
 function runGenomeTests() {
-
-    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
     QUnit.test("Genome coordinates", function (assert) {
         var done = assert.async();
@@ -13,25 +11,15 @@ function runGenomeTests() {
                 cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
             };
 
-
-        igv.GenomeUtils.loadGenome(reference).then(function (genome) {
-
+        GenomeUtils.loadGenome(reference).then(function (genome) {
             assert.ok(genome);
-
             assert.equal(86, genome.chromosomeNames.length);
-
             assert.equal(genome.getCumulativeOffset("2"), 249250621);
-
             done();
-
         }).catch(function (error) {
             assert.ok(false, error);  // failed
         });
-
-
     });
-
-
 }
 
-
+export default runGenomeTests;
