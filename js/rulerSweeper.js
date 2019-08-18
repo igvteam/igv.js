@@ -23,137 +23,131 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-var igv = (function (igv) {
 
-    igv.RulerSweeper = function (viewport) {
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import {translateMouseCoordinates} from "./util/domUtils.js";
+import {validateLocusExtent} from "./util/igvUtils.js";
+import {guid} from "./util/domUtils.js";
 
-        var guid;
+const RulerSweeper = function (viewport) {
+    this.viewport = viewport;
+    this.browser = viewport.browser;
+    this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+    $(viewport.contentDiv).append(this.$rulerSweeper);
+    this.namespace = '.sweeper_' + guid();
+    this.addMouseHandlers();
+};
 
-        this.viewport = viewport;
-        this.browser = viewport.browser;
+RulerSweeper.prototype.disableMouseHandlers = function () {
 
-        this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-        $(viewport.contentDiv).append(this.$rulerSweeper);
+    $(document).off(this.namespace);
+    this.viewport.$viewport.off(this.namespace);
+};
 
-        guid = igv.guid();
-        this.namespace = '.sweeper_' + guid;
+RulerSweeper.prototype.addMouseHandlers = function () {
 
-        this.addMouseHandlers();
-    };
+    const browser = this.browser;
+    const self = this;
 
-    igv.RulerSweeper.prototype.disableMouseHandlers = function () {
+    var isMouseDown,
+        isMouseIn,
+        mouseDown,
+        left,
+        threshold,
+        width,
+        dx;
 
-        $(document).off(this.namespace);
-        this.viewport.$viewport.off(this.namespace);
-    };
+    this.disableMouseHandlers();
 
-    igv.RulerSweeper.prototype.addMouseHandlers = function () {
+    isMouseDown = isMouseIn = mouseDown = undefined;
 
-        const browser = this.browser;
-        const self = this;
+    threshold = 1;
 
-        var isMouseDown,
-            isMouseIn,
-            mouseDown,
-            left,
-            threshold,
-            width,
-            dx;
+    $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
 
-        this.disableMouseHandlers();
+        isMouseIn = true;
 
-        isMouseDown = isMouseIn = mouseDown = undefined;
+        mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
 
-        threshold = 1;
+        if (true === isMouseDown) {
 
-        $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
+            self.$rulerSweeper.show();
 
-            isMouseIn = true;
+            width = threshold;
+            left = mouseDown;
+            self.$rulerSweeper.css({left: left + 'px'});
+            self.$rulerSweeper.width(width);
 
-            mouseDown = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
+        }
 
-            if (true === isMouseDown ) {
+    });
 
-                self.$rulerSweeper.show();
+    $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
+        var mouseCurrent;
 
-                width = threshold;
-                left = mouseDown;
-                self.$rulerSweeper.css({ left: left + 'px' });
-                self.$rulerSweeper.width(width);
+        if (isMouseDown && isMouseIn) {
 
+            mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
+            mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
+            mouseCurrent = Math.max(mouseCurrent, 0);
+
+            dx = mouseCurrent - mouseDown;
+
+            width = Math.abs(dx);
+            self.$rulerSweeper.width(width);
+
+            if (dx < 0) {
+                left = mouseDown + dx;
+                self.$rulerSweeper.css({left: left + 'px'});
             }
 
-        });
+        }
 
-        $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
-            var mouseCurrent;
+    });
 
-            if (isMouseDown && isMouseIn) {
+    $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
 
-                mouseCurrent = igv.translateMouseCoordinates(e, self.viewport.$viewport).x;
-                mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
-                mouseCurrent = Math.max(mouseCurrent, 0);
+        let extent;
 
-                dx = mouseCurrent - mouseDown;
+        if (true === isMouseDown && true === isMouseIn) {
 
-                width = Math.abs(dx);
-                self.$rulerSweeper.width(width);
+            isMouseDown = isMouseIn = undefined;
 
-                if (dx < 0) {
-                    left = mouseDown + dx;
-                    self.$rulerSweeper.css({ left: left + 'px' });
-                }
+            self.$rulerSweeper.hide();
 
+            extent = {};
+            extent.start = bp.call(self, left);
+            extent.end = bp.call(self, left + width);
+
+            if (width > threshold) {
+
+                validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+
+                self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
+                self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);
+
+                browser.updateViews(self.viewport.genomicState);
             }
 
-        });
+        }
 
-        $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
+    });
 
-            let extent;
+    this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
 
-            if (true === isMouseDown && true === isMouseIn) {
+        isMouseDown = true;
+    });
 
-                isMouseDown = isMouseIn = undefined;
+};
 
-                self.$rulerSweeper.hide();
-
-                extent = {};
-                extent.start = bp.call(self, left);
-                extent.end   = bp.call(self, left + width);
-
-                if (width > threshold) {
-
-                    igv.Browser.validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
-
-                    self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
-                    self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);
-
-                    browser.updateViews(self.viewport.genomicState);
-                }
-
-            }
-
-        });
-
-        this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
-
-            isMouseDown = true;
-        });
-
-    };
-
-    igv.RulerSweeper.prototype.dispose = function () {
-        this.disableMouseHandlers();
-    };
+RulerSweeper.prototype.dispose = function () {
+    this.disableMouseHandlers();
+};
 
 
-    function bp(pixel) {
-        return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
-    }
+function bp(pixel) {
+    return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
+}
 
 
-
-    return igv;
-
-}) (igv || {});
+export default RulerSweeper;

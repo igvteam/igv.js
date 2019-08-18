@@ -23,19 +23,28 @@
  * THE SOFTWARE.
  */
 
+import $ from "./vendor/jquery-3.3.1.slim.js";
+import ViewPort from "./viewport.js";
+import FeatureUtils from "./feature/featureUtils.js";
+import RulerTrack from "./rulerTrack.js";
+import TrackGearPopover from "./ui/trackGearPopover.js";
+import GenericContainer from "./ui/genericContainer.js";
+import IGVColor from "./igv-color.js";
+import {trackMenuItemList} from "./util/menuUtils.js";
+import {createIcon} from "./igv-icons.js";
+import {pageCoordinates, guid} from "./util/domUtils.js";
+import {appleCrayonPalette} from "./util/colorPalletes.js";
+import {doAutoscale} from "./util/igvUtils.js";
 
-var igv = (function (igv) {
 
     var dragged,
         dragDestination;
 
-    igv.TrackView = function (browser, $container, track) {
+const TrackView = function (browser, $container, track) {
 
         var self = this,
             width,
-            $track,
-            config,
-            guid;
+        $track;
 
         this.browser = browser;
         this.track = track;
@@ -45,10 +54,9 @@ var igv = (function (igv) {
         this.trackDiv = $track.get(0);
         $container.append($track);
 
-        guid = igv.guid();
-        this.namespace = '.trackview_' + guid;
+    this.namespace = '.trackview_' + guid();
 
-        if (this.track instanceof igv.RulerTrack) {
+    if (this.track instanceof RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
         }
 
@@ -70,7 +78,7 @@ var igv = (function (igv) {
         browser.genomicStateList.forEach(function (genomicState) {
 
             var viewport;
-            viewport = new igv.Viewport(self, self.$viewportContainer, genomicState, width);
+        viewport = new ViewPort(self, self.$viewportContainer, genomicState, width);
             self.viewports.push(viewport);
 
         });
@@ -82,10 +90,10 @@ var igv = (function (igv) {
         if (true === this.track.ignoreTrackMenu) {
             // do nothing
         } else {
-            igv.appendRightHandGutter.call(this, $(this.trackDiv));
+        appendRightHandGutter.call(this, $(this.trackDiv));
         }
 
-        if (this.track instanceof igv.RulerTrack) {
+    if (this.track instanceof RulerTrack) {
             // do nuthin
         } else {
             attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
@@ -93,7 +101,7 @@ var igv = (function (igv) {
 
         if ("sequence" === this.track.type) {
             // do nothing
-        } else if (this.track instanceof igv.RulerTrack) {
+    } else if (this.track instanceof RulerTrack) {
             // do nothing
         } else {
             this.createColorPicker();
@@ -102,7 +110,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackView.prototype.renderSVGContext = function (context, offset) {
+TrackView.prototype.renderSVGContext = function (context, offset) {
 
         for (let viewport of this.viewports) {
 
@@ -120,7 +128,7 @@ var igv = (function (igv) {
 
     };
 
-    igv.TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
+TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
 
@@ -132,7 +140,7 @@ var igv = (function (igv) {
         return $viewportContainer;
     };
 
-    igv.TrackView.prototype.removeViewportWithLocusIndex = function (index) {
+TrackView.prototype.removeViewportWithLocusIndex = function (index) {
 
         this.viewports[index].$viewport.remove();
         this.viewports.splice(index, 1);
@@ -140,7 +148,7 @@ var igv = (function (igv) {
         this.decorateViewports();
     };
 
-    igv.TrackView.prototype.decorateViewports = function () {
+TrackView.prototype.decorateViewports = function () {
         var self = this;
 
         this.viewports.forEach(function (viewport, index) {
@@ -197,38 +205,36 @@ var igv = (function (igv) {
 
     }
 
-    igv.appendRightHandGutter = function ($parent) {
-
+function appendRightHandGutter($parent) {
         let $div = $('<div class="igv-right-hand-gutter">');
         $parent.append($div);
+    createTrackGearPopover.call(this, $div);
+}
 
-        igv.createTrackGearPopover.call(this, $div);
-    };
-
-    igv.createTrackGearPopover = function ($parent) {
+function createTrackGearPopover($parent) {
 
         let $cogContainer = $("<div>", {class: 'igv-trackgear-container'});
         $parent.append($cogContainer);
 
-        $cogContainer.append(igv.createIcon('cog'));
+    $cogContainer.append(createIcon('cog'));
 
-        this.trackGearPopover = new igv.TrackGearPopover($parent);
+    this.trackGearPopover = new TrackGearPopover($parent);
         this.trackGearPopover.$popover.hide();
 
         let self = this;
         $cogContainer.click(function (e) {
             e.preventDefault();
             e.stopPropagation();
-            self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, igv.trackMenuItemList(self));
+        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, trackMenuItemList(self));
         });
 
-    };
+}
 
     function resizeControlCanvas(width, height) {
 
         var devicePixelRatio = window.devicePixelRatio;
 
-        if (typeof this.track.paintAxis === 'function') {
+    if (this.leftHandGutter) {
 
             if (this.controlCanvas) {
                 $(this.controlCanvas).remove();
@@ -293,11 +299,11 @@ var igv = (function (igv) {
         });
     }
 
-    igv.TrackView.prototype.dataRange = function () {
+TrackView.prototype.dataRange = function () {
         return this.track.dataRange ? this.track.dataRange : undefined;
     };
 
-    igv.TrackView.prototype.setDataRange = function (min, max, autoscale) {
+TrackView.prototype.setDataRange = function (min, max, autoscale) {
 
         if (min !== undefined) {
             this.track.dataRange.min = min;
@@ -315,13 +321,13 @@ var igv = (function (igv) {
         this.repaintViews();
     };
 
-    igv.TrackView.prototype.setColor = function (color) {
+TrackView.prototype.setColor = function (color) {
         this.track.color = color;
         this.track.config.color = color;
         this.repaintViews(true);
     };
 
-    igv.TrackView.prototype.createColorPicker = function () {
+TrackView.prototype.createColorPicker = function () {
 
         let self = this;
 
@@ -337,22 +343,22 @@ var igv = (function (igv) {
                 }
             };
 
-        this.colorPicker = new igv.genericContainer(config);
+    this.colorPicker = new GenericContainer(config);
 
-        igv.createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
+    createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
 
         self.colorPicker.$container.hide();
 
     };
 
-    igv.TrackView.prototype.presentColorPicker = function () {
+TrackView.prototype.presentColorPicker = function () {
         const bbox = this.trackDiv.getBoundingClientRect();
         this.colorPicker.origin = {x: bbox.x, y: 0};
         this.colorPicker.$container.offset({left: this.colorPicker.origin.x, top: this.colorPicker.origin.y});
         this.colorPicker.$container.show();
     };
 
-    igv.TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
+TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
 
         if (!force) {
             if (this.track.minHeight) {
@@ -391,13 +397,13 @@ var igv = (function (igv) {
         }
     }
 
-    igv.TrackView.prototype.isLoading = function () {
+TrackView.prototype.isLoading = function () {
         for (let i = 0; i < this.viewports.length; i++) {
             if (this.viewports[i].isLoading()) return true;
         }
     };
 
-    igv.TrackView.prototype.resize = function () {
+TrackView.prototype.resize = function () {
 
         var width;
 
@@ -419,7 +425,7 @@ var igv = (function (igv) {
      * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
      * e.g. color, sort order, etc, but do not change the genomic state.
      */
-    igv.TrackView.prototype.repaintViews = function () {
+TrackView.prototype.repaintViews = function () {
         this.viewports.forEach(function (viewport) {
             viewport.repaint();
         });
@@ -444,7 +450,7 @@ var igv = (function (igv) {
     /**
      * Update viewports to reflect current genomic state, possibly loading additional data.
      */
-    igv.TrackView.prototype.updateViews = async function (force) {
+TrackView.prototype.updateViews = async function (force) {
 
         if (!(this.browser && this.browser.genomicStateList)) return;
 
@@ -473,7 +479,7 @@ var igv = (function (igv) {
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
                 if (vp.tile && vp.tile.features) {
-                    allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
 
                 }
             }
@@ -481,7 +487,7 @@ var igv = (function (igv) {
             if (typeof this.track.doAutoscale === 'function') {
                 this.track.doAutoscale(allFeatures);
             } else {
-                this.track.dataRange = igv.doAutoscale(allFeatures);
+            this.track.dataRange = doAutoscale(allFeatures);
             }
         }
 
@@ -505,7 +511,7 @@ var igv = (function (igv) {
     /**
      * Return a promise to get all in-view features.  Used for group autoscaling.
      */
-    igv.TrackView.prototype.getInViewFeatures = async function (force) {
+TrackView.prototype.getInViewFeatures = async function (force) {
 
         if (!(this.browser && this.browser.genomicStateList)) {
             return [];
@@ -525,7 +531,7 @@ var igv = (function (igv) {
                 const referenceFrame = vp.genomicState.referenceFrame;
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-                allFeatures = allFeatures.concat(igv.FeatureUtils.findOverlapping(vp.tile.features, start, end));
+            allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
             }
         }
         return allFeatures;
@@ -559,7 +565,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.TrackView.prototype.checkContentHeight = function () {
+TrackView.prototype.checkContentHeight = function () {
         this.viewports.forEach(function (vp) {
             vp.checkContentHeight();
         })
@@ -588,7 +594,7 @@ var igv = (function (igv) {
         }
     }
 
-    igv.TrackView.prototype.maxContentHeight = function () {
+TrackView.prototype.maxContentHeight = function () {
         return maxContentHeight(this.viewports);
     }
 
@@ -605,7 +611,7 @@ var igv = (function (igv) {
     /**
      * Do any cleanup here
      */
-    igv.TrackView.prototype.dispose = function () {
+TrackView.prototype.dispose = function () {
 
         const self = this;
 
@@ -655,14 +661,14 @@ var igv = (function (igv) {
     };
 
 
-    igv.TrackView.prototype.scrollBy = function (delta) {
+TrackView.prototype.scrollBy = function (delta) {
         console.log("scrollby " + delta)
         this.scrollbar.moveScrollerBy(delta);
     };
 
-    igv.createColorSwatchSelector = function ($genericContainer, colorHandler, defaultColor) {
+function createColorSwatchSelector($genericContainer, colorHandler, defaultColor) {
 
-        let appleColors = Object.values(igv.appleCrayonPalette);
+    let appleColors = Object.values(appleCrayonPalette);
 
         if (defaultColor && !(typeof defaultColor === 'function')) {
 
@@ -670,7 +676,7 @@ var igv = (function (igv) {
             appleColors.splice(11, 1);
 
             // Add default color.
-            appleColors.unshift(igv.Color.rgbToHex(defaultColor));
+        appleColors.unshift(IGVColor.rgbToHex(defaultColor));
         }
 
         for (let color of appleColors) {
@@ -713,8 +719,7 @@ var igv = (function (igv) {
         const self = this;
         let lastY;
 
-        const guid = igv.guid();
-        const namespace = '.trackscrollbar' + guid;
+    const namespace = '.trackscrollbar' + guid();
         this.namespace = namespace;
 
         const $outerScroll = $('<div class="igv-scrollbar-outer-div">');
@@ -742,7 +747,7 @@ var igv = (function (igv) {
 
             event.preventDefault();
 
-            const page = igv.pageCoordinates(event);
+        const page = pageCoordinates(event);
 
             lastY = page.y;
 
@@ -759,7 +764,7 @@ var igv = (function (igv) {
             event.preventDefault();
             event.stopPropagation();
 
-            const page = igv.pageCoordinates(event);
+        const page = pageCoordinates(event);
             self.moveScrollerBy(page.y - lastY);
             lastY = page.y;
 
@@ -821,8 +826,4 @@ var igv = (function (igv) {
         }
     };
 
-
-    return igv;
-
-
-})(igv || {});
+export default TrackView

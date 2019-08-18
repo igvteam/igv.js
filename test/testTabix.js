@@ -1,3 +1,7 @@
+import loadBamIndex from "../js/bam/bamIndex.js";
+import {unbgzf} from "../js/bam/bgzf.js";
+import igvxhr from "../js/igvxhr.js";
+
 function runTabixTests() {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
@@ -12,8 +16,7 @@ function runTabixTests() {
             indexPath = dataURL + "tabix/TSVC.vcf.gz.tbi",
             config = {};
 
-        igv.loadBamIndex(indexPath, config, true).then(function (bamIndex) {
-
+        loadBamIndex(indexPath, config, true).then(function (bamIndex) {
             assert.ok(bamIndex);
             done();
         }).catch(function (error) {
@@ -24,23 +27,19 @@ function runTabixTests() {
     });
 
     QUnit.test("bgzip", async function (assert) {
-
         var done = assert.async();
-
         const url = "data/bed/missing_linefeed.bed.gz"
-        const data = await igv.xhr.load(url,
+        const data = await igvxhr.load(url,
             {
                 responseType: "arraybuffer",
             })
-
-        const result = igv.unbgzf(data)
+        const result = unbgzf(data)
         assert.ok(result)
-
         done()
-
     })
-
 }
+
+export default runTabixTests;
 
 
 

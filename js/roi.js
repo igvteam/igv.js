@@ -23,74 +23,71 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+import FeatureSource from './feature/featureSource.js'
+import IGVGraphics from "./igv-canvas.js";
 
-var igv = (function (igv) {
+var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 
-    var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
+const ROI = function (config, genome) {
+    this.config = config;
+    this.name = config.name;
+    this.roiSource = new FeatureSource(config, genome);
+    this.color = config.color || defaultHighlightColor;
+};
 
-    igv.ROI = function (config, genome) {
-        this.config = config;
-        this.name = config.name;
-        this.roiSource = new igv.FeatureSource(config, genome);
-        this.color = config.color || defaultHighlightColor;
-    };
+ROI.prototype.getFeatures = function (chr, start, end) {
 
-    igv.ROI.prototype.getFeatures = function (chr, start, end) {
+    return this.roiSource.getFeatures(chr, start, end);
+};
 
-        return this.roiSource.getFeatures(chr, start, end);
-    };
+ROI.prototype.draw = function (drawConfiguration) {
 
-    igv.ROI.prototype.draw = function (drawConfiguration) {
+    var endBP,
+        region,
+        coord,
+        regions,
+        len;
 
-        var endBP,
-            region,
-            coord,
-            regions,
-            len;
-
-        regions = drawConfiguration.features;
-        if (!regions) {
-            return;
-        }
-
-        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
-        for (var i = 0, len = regions.length; i < len; i++) {
-
-            region = regions[ i ];
-            if (region.end < drawConfiguration.bpStart) {
-                continue;
-            }
-
-            if (region.start > endBP) {
-                break;
-            }
-
-            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-            igv.graphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, { fillStyle: this.color });
-        }
-
-
-    };
-
-    function coordinates(region, startBP, bpp) {
-
-        var ss,
-            ee,
-            width;
-
-        ss = Math.round((region.start - startBP) / bpp);
-        ee = Math.round((region.end - startBP) / bpp);
-        width = ee - ss;
-
-        if (width < 3) {
-            width = 3;
-            ss -= 1;
-        }
-
-        return { x: ss, width: width };
+    regions = drawConfiguration.features;
+    if (!regions) {
+        return;
     }
 
-    return igv;
+    endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
+    for (var i = 0, len = regions.length; i < len; i++) {
 
-})
-(igv || {});
+        region = regions[i];
+        if (region.end < drawConfiguration.bpStart) {
+            continue;
+        }
+
+        if (region.start > endBP) {
+            break;
+        }
+
+        coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
+        IGVGraphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+    }
+
+
+};
+
+function coordinates(region, startBP, bpp) {
+
+    var ss,
+        ee,
+        width;
+
+    ss = Math.round((region.start - startBP) / bpp);
+    ee = Math.round((region.end - startBP) / bpp);
+    width = ee - ss;
+
+    if (width < 3) {
+        width = 3;
+        ss -= 1;
+    }
+
+    return {x: ss, width: width};
+}
+
+export default ROI

@@ -2,56 +2,52 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-
     <title>Test browser removal</title>
-
-    <link rel="stylesheet" href="vendor/qunit.css" type="text/css"/>
-
-    <script src="../dist/igv.min.js"></script>
-
-
+    <link rel="stylesheet" href="../js/vendor/qunit.css" type="text/css"/>
+    <script src="../../dist/igv.min.js"></script>
 </head>
 <body>
 
-<div><h2>This test creates and removes a browser instance every 3 seconds.  Use with devtools to search for resource leaks</h2></div>
+<div><h2>This test creates and removes a browser instance every 3 seconds. Use with devtools to search for resource
+    leaks</h2></div>
 
 <div id="igvDiv"></div>
 
-<script type="text/javascript">
-    document.addEventListener('DOMContentLoaded', function () {
+<script type="module">
 
-        const div = document.getElementById("igvDiv");
-        const n = 10;
-        let i = 0;
+    import {createBrowser, removeBrowser} from "../js/igv-create.js";
 
-        createRemove();
+    const div = document.getElementById("igvDiv");
+    const n = 10;
+    let i = 0;
 
-        function createRemove() {
+    createRemove();
 
-            igv.createBrowser(div, {
-                genome: "hg19",
-                locus: "myc"
+    function createRemove() {
+
+        createBrowser(div, {
+            genome: "hg19",
+            locus: "myc"
+        })
+            .then(function (browser) {
+
+                const id = setTimeout(function () {
+
+                    clearTimeout(id);
+
+                    removeBrowser(browser);
+
+                    if (++i < n) {
+                        createRemove();
+                    }
+
+                }, 3000);
+
             })
-                .then(function (browser) {
-
-                    const id =setTimeout(function () {
-
-                        clearTimeout(id);
-
-                        igv.removeBrowser(browser);
-
-                        if (++i < n) {
-                            createRemove();
-                        }
-
-                    }, 3000);
-
-                })
-                .catch(function (error) {
-                    console.error(error);
-                })
-        }
-    })
+            .catch(function (error) {
+                console.error(error);
+            })
+    }
 
 </script>
 </body>

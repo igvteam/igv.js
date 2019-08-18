@@ -1,4 +1,4 @@
-// Tests in this file require a server which supports range-byte requests, e.g. Apache.
+import FastaSequence from "../js/genome/fasta.js";
 
 function runFastaTests() {
 
@@ -7,7 +7,7 @@ function runFastaTests() {
     QUnit.test("FastaSequence - Test fasata with no index", function (assert) {
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence(
+        var sequence = new FastaSequence(
             {
                 fastaURL: dataURL + "fasta/test.fasta",
                 indexed: false
@@ -41,7 +41,7 @@ function runFastaTests() {
     QUnit.test("FastaSequence - Test getSequence", function (assert) {
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init()
 
@@ -73,7 +73,7 @@ function runFastaTests() {
     QUnit.test("FastaSequence - Test readSequence", function (assert) {
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init()
 
@@ -105,7 +105,7 @@ function runFastaTests() {
     QUnit.test("FastaSequence - Test readSequence - with unknown sequence", function (assert) {
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
 
         sequence.init()
             .then(function () {
@@ -137,7 +137,7 @@ function runFastaTests() {
 
         var done = assert.async();
 
-        var sequence = new igv.FastaSequence({fastaURL: "data/fasta/sliced.fasta", indexed: false});
+        var sequence = new FastaSequence({fastaURL: "data/fasta/sliced.fasta", indexed: false});
 
         sequence.init()
 
@@ -204,3 +204,4 @@ function runFastaTests() {
     })
 }
 
+export default runFastaTests;

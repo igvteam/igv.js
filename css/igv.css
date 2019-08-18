@@ -1262,4 +1262,23 @@
   border: 0;
   display: block; }
 
+.igv-fa5-spin {
+  -webkit-animation: igv-fa5-spin 2s infinite linear;
+  animation: igv-fa5-spin 2s infinite linear; }
+
+@-webkit-keyframes igv-fa5-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+@keyframes igv-fa5-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+
 /*# sourceMappingURL=igv.css.map */

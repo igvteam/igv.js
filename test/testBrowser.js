@@ -1,3 +1,5 @@
+import {createBrowser, removeBrowser} from "../js/igv-create.js";
+
 function runBrowserTests() {
 
     // Mock objects
@@ -12,7 +14,7 @@ function runBrowserTests() {
             showNavigation: false
         };
 
-        igv.createBrowser(div, options)
+        createBrowser(div, options)
             .then(function (browser) {
                 assert.ok(browser);
                 done();
@@ -34,7 +36,7 @@ function runBrowserTests() {
             showRuler: false
         };
 
-        igv.createBrowser(div, options)
+        createBrowser(div, options)
             .then(function (browser) {
                 assert.ok(browser);
                 done();
@@ -60,13 +62,13 @@ function runBrowserTests() {
 
         function createRemove() {
 
-            igv.createBrowser(div, {
+            createBrowser(div, {
                 genome: "hg19",
                 locus: "myc"
             })
                 .then(function (browser) {
 
-                    igv.removeBrowser(browser);
+                    removeBrowser(browser);
                     if (i++ < 10) {
                         createRemove();
                     } else {
@@ -84,6 +86,6 @@ function runBrowserTests() {
         }
 
     })
-
-
 }
+
+export default runBrowserTests;

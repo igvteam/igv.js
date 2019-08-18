@@ -1,4 +1,6 @@
-const webpackConfig = require('./webpack.config.js');
+const configFor = require('./webpack.config.generator.js');
+const webpackEsmConfig = configFor('esm');
+const webpackUmdConfig = configFor('umd');
 
 module.exports = function (grunt) {
 
@@ -33,87 +35,18 @@ module.exports = function (grunt) {
             options: {
                 stats: !process.env.NODE_ENV || process.env.NODE_ENV === 'development'
             },
-            prod: webpackConfig,
-            dev: Object.assign({ watch: true }, webpackConfig)
+            esm: webpackEsmConfig,
+            umd: webpackUmdConfig
         },
-
 
         concat: {
-            igv: {
-                src: [
-                    'wrapper/header.js',
-                    'tmp/embedCss.js',
-                    'vendor/jquery-3.3.1.slim.js',
-                    'vendor/underscore.js',
-                    'vendor/zlib_and_gzip.js',
-                    'vendor/inflate.js',
-                    'vendor/jquery.mousewheel.js',
-                    'vendor/rbtree.js',
-                    'vendor/tdigest.js',
-                    'vendor/cram-bundle.js',
-                    'js/**/*.js',
-                    'wrapper/footer.js'
-                ],
-                dest: 'tmp/igv.js'
-            },
             igv_esm: {
                 src: [
-                    'wrapper/header-esm.js',
-                    'tmp/embedCss.js',
-                    'vendor/jquery-3.3.1.slim.js',
-                    'vendor/underscore.js',
-                    'vendor/zlib_and_gzip.js',
-                    'vendor/inflate.js',
-                    'vendor/jquery.mousewheel.js',
-                    'vendor/rbtree.js',
-                    'vendor/tdigest.js',
-                    'vendor/cram-bundle.js',
-                    'js/**/*.js',
+                    'dist/igv.esm.min.js',
                     'wrapper/footer-esm.js'
                 ],
-                dest: 'dist/igv.esm.js'
-            },
-            zlib: {
-                src: [
-                    'vendor/zlib/zlib.js',
-                    'vendor/zlib/zip.js',
-                    'vendor/zlib/huffman.js',
-                    'vendor/zlib/rawinflate.js',
-                    'vendor/zlib/rawinflate_stream.js',
-                    'vendor/zlib/inflate.js',
-                    'vendor/zlib/inflate_stream.js',
-                    'vendor/zlib/gunzip.js',
-                    'vendor/zlib/gunzip_member.js',
-                    'vendor/zlib/gzip.js',
-                    'vendor/zlib/heap.js',
-                    'vendor/zlib/rawdeflate.js',
-                    'vendor/zlib/unzip.js',
-                    'vendor/zlib/util.js',
-                    'vendor/zlib/adler32.js',
-                    'vendor/zlib/bitstream.js',
-                    'vendor/zlib/crc32.js',
-                    'vendor/zlib/deflate.js'
-                ],
-                dest: 'vendor/zlib_and_gzip.js'
-            },
-            css: {
-                src: [
-                    'css/igv.css',
-                    'vendor/fa-svg-with-js.css'
-                ],
-                dest: 'tmp/igv-all.css'
-            }
-        },
-
-        uglify: {
-            options: {
-                mangle: false,
-                sourceMap: true
-            },
-            igv_esm: {
-                src: 'dist/igv.esm.js',
                 dest: 'dist/igv.esm.min.js'
-            }
+            },
         },
 
         clean: {
@@ -125,7 +58,6 @@ module.exports = function (grunt) {
 
     // 3. Where we tell Grunt we plan to use this plug-in.
     grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-uglify-es');
     grunt.loadNpmTasks('grunt-qunit-puppeteer');
     grunt.loadNpmTasks('grunt-contrib-connect');
     grunt.loadNpmTasks('grunt-contrib-clean');
@@ -133,28 +65,26 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-webpack');
 
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
-    grunt.registerTask('default', ['clean:dist', 'concat:css', 'embed-css', 'concat:igv', 'webpack:prod', 'concat:igv_esm', 'uglify:igv_esm', 'clean:tmp']);
-
-    grunt.registerTask('doc', ['md2html']);
+    grunt.registerTask('default', [
+        'clean:dist',
+        'embed-css',
+        'webpack:umd',
+        'webpack:esm',
+        'concat:igv_esm',
+        'clean:tmp'
+    ]);
 
     grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
     grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
 
-        var ping,
-            pong,
-            foo;
-
-        ping = grunt.file.read('tmp/igv-all.css');
+        let ping = grunt.file.read('css/igv.css');
         ping = ping.replace(/\r\n/g, '\\n');
-        pong = ping.replace(/\n/g, '\\n');
-        ping = pong.replace(/"/g, '\\"');
-
-        foo = grunt.file.read('wrapper/embedCss.js');
+        ping = ping.replace(/\n/g, '\\n');
+        ping = ping.replace(/"/g, '\\"');
+        let foo = grunt.file.read('wrapper/embedCss.js');
         foo = foo.replace('_CSS_', ping);
-
         grunt.file.write('tmp/embedCss.js', foo);
     });
-
 };
 

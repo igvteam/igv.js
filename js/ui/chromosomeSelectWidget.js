@@ -23,45 +23,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-var igv = (function (igv) {
 
-    igv.ChromosomeSelectWidget = function (browser, $parent) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
 
-        this.showAllChromosomes = browser.config.showAllChromosomes
+const ChromosomeSelectWidget = function (browser, $parent) {
 
-        this.$container = $('<div>', { class:'igv-chromosome-select-widget-container' });
-        $parent.append(this.$container);
+    this.showAllChromosomes = browser.config.showAllChromosomes
 
-        this.$select = $('<select>', { 'name': 'chromosome-select-widget' });
-        this.$container.append(this.$select);
+    this.$container = $('<div>', {class: 'igv-chromosome-select-widget-container'});
+    $parent.append(this.$container);
 
-        this.$select.on('change', function () {
-            const value = $(this).val();
-            if(value !== '') {
-                browser.search($(this).val());
-                $(this).blur();
-            }
-        });
+    this.$select = $('<select>', {'name': 'chromosome-select-widget'});
+    this.$container.append(this.$select);
 
-    };
-
-    igv.ChromosomeSelectWidget.prototype.update = function (genome) {
-
-
-        this.$select.empty();
-        const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
-        list.unshift('all');
-        list.unshift('');
-        for(let name of list) {
-            var $o;
-            $o = $('<option>', { 'value':name });
-            this.$select.append($o);
-            $o.text(name);
+    this.$select.on('change', function () {
+        const value = $(this).val();
+        if (value !== '') {
+            browser.search($(this).val());
+            $(this).blur();
         }
+    });
 
-    };
+};
 
-    return igv;
+ChromosomeSelectWidget.prototype.update = function (genome) {
 
-})(igv || {});
+
+    this.$select.empty();
+    const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
+    list.unshift('all');
+    list.unshift('');
+    for (let name of list) {
+        var $o;
+        $o = $('<option>', {'value': name});
+        this.$select.append($o);
+        $o.text(name);
+    }
+
+};
+
+export default ChromosomeSelectWidget;
 

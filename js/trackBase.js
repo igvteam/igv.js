@@ -23,250 +23,230 @@
  * THE SOFTWARE.
  */
 
+import FeatureUtils from "./feature/featureUtils.js";
+import {isFilePath} from './util/fileUtils.js'
+import {isSimpleType} from "./util/igvUtils.js";
+
 /**
- * Author:  Jim Robinson,  2018
+ * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
+ * by prototype chaining.
+ *
+ * @param config
+ * @param browser
+ * @constructor
  */
+const TrackBase = function (config, browser) {
 
-"use strict";
-
-var igv = (function (igv) {
-
-
-    igv.extend = function (parent, child) {
-
-        child.prototype = Object.create(parent.prototype);
-        child.prototype.constructor = child;
-        child.prototype._super = Object.getPrototypeOf(child.prototype);
-        return child;
+    if (config.displayMode) {
+        config.displayMode = config.displayMode.toUpperCase();
     }
 
-    /**
-     * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
-     * by prototype chaining.
-     *
-     * @param config
-     * @param browser
-     * @constructor
-     */
-    igv.TrackBase = function (config, browser) {
+    this.config = config;
+    this.browser = browser;
+    this.url = config.url;
+    this.type = config.type;
+    this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
 
-        if (config.displayMode) {
-            config.displayMode = config.displayMode.toUpperCase();
-        }
-
-        this.config = config;
-        this.browser = browser;
-        this.url = config.url;
-        this.type = config.type;
-        this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
-
-        config.name = config.name || config.label;   // synonym for name, label is deprecated
-        if (config.name) {
-            this.name = config.name;
-        }
-        else {
-            if (igv.isFilePath(config.url)) this.name = config.url.name;
-            else this.name = config.url;
-        }
-
-        this.order = config.order;
-
-        if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
-            this.color = "rgb(155,20,20)";
-        }
-        else {
-            this.color = config.color || config.defaultColor || "rgb(0,0,150)";
-        }
-
-
-        this.autoscaleGroup = config.autoscaleGroup;
-
-        this.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
-
-        this.height = config.height || 100;
-        this.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
-        this.minHeight = config.minHeight || Math.min(25, this.height);
-        this.maxHeight = config.maxHeight || Math.max(1000, this.height);
-
-        this.visibilityWindow = config.visibilityWindow;
-
-    };
-
-    /**
-     * Default implementation -- return the current state of the "this" object, which should be a this.  Used
-     * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
-     * current state.  Only simple properties (string, number, boolean) are updated.
-     */
-    igv.TrackBase.prototype.getState = function () {
-
-        const config = Object.assign({}, this.config);
-        const self = this;
-
-        Object.keys(config).forEach(function (key) {
-            const value = self[key];
-            if (value && (igv.isSimpleType(value) || typeof value === "boolean")) {
-                config[key] = value;
-            }
-        })
-
-        return config;
-    };
-
-    igv.TrackBase.prototype.supportsWholeGenome = function () {
-        return false;
+    config.name = config.name || config.label;   // synonym for name, label is deprecated
+    if (config.name) {
+        this.name = config.name;
+    } else {
+        if (isFilePath(config.url)) this.name = config.url.name;
+        else this.name = config.url;
     }
 
-    igv.TrackBase.prototype.clickedFeatures = function (clickState) {
+    this.order = config.order;
 
-        // We use the cached features rather than method to avoid async load.  If the
-        // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        const features = clickState.viewport.getCachedFeatures();
-
-        if (!features || features.length === 0) {
-            return [];
-        }
-
-        const genomicLocation = clickState.genomicLocation;
-
-        // We need some tolerance around genomicLocation
-        const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
-        const ss = Math.floor(genomicLocation) - tolerance;
-        const ee = Math.ceil(genomicLocation) + tolerance;
-
-        return (igv.FeatureUtils.findOverlapping(features, ss, ee));
-    };
-
-    /**
-     * Set certain track properties, usually from a "track" line.  Not all UCSC properties are supported.
-     * @param properties
-     */
-    igv.TrackBase.prototype.setTrackProperties = function (properties) {
-        for (let key of Object.keys(properties)) {
-            switch (key) {
-                case "name":
-                case "useScore":
-                    this[key] = properties[key]
-                    break;
-                case "visibility":
-                    //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
-                    const viz = properties[key];
-                    switch (viz) {
-                        case "2":
-                        case "3":
-                        case "pack":
-                        case "full":
-                            this.displayMode = "EXPANDED"
-                            break;
-                        case "4":
-                        case "squish":
-                            this.displayMode = "SQUISHED"
-                            break;
-                        case "1":
-                        case "dense":
-                            this.displayMode = "COLLAPSED"
-                    }
-                    break;
-                case "color":
-                case "altColor":
-                    this[key] = "rgb(" + properties[key] + ")";
-                    break;
-                case "featureVisiblityWindow":
-                    this.visibilityWindow = Number.parseInt(properties[key]);
-            }
-        }
+    if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
+        this.color = "rgb(155,20,20)";
+    } else {
+        this.color = config.color || config.defaultColor || "rgb(0,0,150)";
     }
 
-    /**
-     * Default popup text function -- just extracts string and number properties in random order.
-     * @param feature
-     * @returns {Array}
-     */
-    igv.TrackBase.extractPopupData = function (feature, genomeId) {
 
-        const filteredProperties = new Set(['row', 'color']);
-        const data = [];
+    this.autoscaleGroup = config.autoscaleGroup;
 
-        let alleles, alleleFreqs;
-        for (var property in feature) {
+    this.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
-            if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
-                igv.isSimpleType(feature[property])) {
+    this.height = config.height || 100;
+    this.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
+    this.minHeight = config.minHeight || Math.min(25, this.height);
+    this.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
-                data.push({name: property, value: feature[property]});
+    this.visibilityWindow = config.visibilityWindow;
 
-                if (property === "alleles") {
-                    alleles = feature[property];
-                } else if (property === "alleleFreqs") {
-                    alleleFreqs = feature[property];
+};
+
+/**
+ * Default implementation -- return the current state of the "this" object, which should be a this.  Used
+ * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
+ * current state.  Only simple properties (string, number, boolean) are updated.
+ */
+TrackBase.prototype.getState = function () {
+
+    const config = Object.assign({}, this.config);
+    const self = this;
+
+    Object.keys(config).forEach(function (key) {
+        const value = self[key];
+        if (value && (isSimpleType(value) || typeof value === "boolean")) {
+            config[key] = value;
+        }
+    })
+
+    return config;
+};
+
+TrackBase.prototype.supportsWholeGenome = function () {
+    return false;
+}
+
+TrackBase.prototype.clickedFeatures = function (clickState) {
+
+    // We use the cached features rather than method to avoid async load.  If the
+    // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+    const features = clickState.viewport.getCachedFeatures();
+
+    if (!features || features.length === 0) {
+        return [];
+    }
+
+    const genomicLocation = clickState.genomicLocation;
+
+    // We need some tolerance around genomicLocation
+    const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
+    const ss = Math.floor(genomicLocation) - tolerance;
+    const ee = Math.ceil(genomicLocation) + tolerance;
+
+    return (FeatureUtils.findOverlapping(features, ss, ee));
+};
+
+/**
+ * Set certain track properties, usually from a "track" line.  Not all UCSC properties are supported.
+ * @param properties
+ */
+TrackBase.prototype.setTrackProperties = function (properties) {
+    for (let key of Object.keys(properties)) {
+        switch (key) {
+            case "name":
+            case "useScore":
+                this[key] = properties[key]
+                break;
+            case "visibility":
+                //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
+                const viz = properties[key];
+                switch (viz) {
+                    case "2":
+                    case "3":
+                    case "pack":
+                    case "full":
+                        this.displayMode = "EXPANDED"
+                        break;
+                    case "4":
+                    case "squish":
+                        this.displayMode = "SQUISHED"
+                        break;
+                    case "1":
+                    case "dense":
+                        this.displayMode = "COLLAPSED"
                 }
+                break;
+            case "color":
+            case "altColor":
+                this[key] = "rgb(" + properties[key] + ")";
+                break;
+            case "featureVisiblityWindow":
+                this.visibilityWindow = Number.parseInt(properties[key]);
+        }
+    }
+}
+
+/**
+ * Default popup text function -- just extracts string and number properties in random order.
+ * @param feature
+ * @returns {Array}
+ */
+TrackBase.extractPopupData = function (feature, genomeId) {
+
+    const filteredProperties = new Set(['row', 'color']);
+    const data = [];
+
+    let alleles, alleleFreqs;
+    for (var property in feature) {
+
+        if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
+            isSimpleType(feature[property])) {
+
+            data.push({name: property, value: feature[property]});
+
+            if (property === "alleles") {
+                alleles = feature[property];
+            } else if (property === "alleleFreqs") {
+                alleleFreqs = feature[property];
             }
         }
+    }
 
-        //const genomeId = this.getGenomeId()
-        if (alleles && alleleFreqs) {
+    //const genomeId = this.getGenomeId()
+    if (alleles && alleleFreqs) {
 
-            if (alleles.endsWith(",")) {
-                alleles = alleles.substr(0, alleles.length - 1);
+        if (alleles.endsWith(",")) {
+            alleles = alleles.substr(0, alleles.length - 1);
+        }
+        if (alleleFreqs.endsWith(",")) {
+            alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
+        }
+
+        let a = alleles.split(",");
+        let af = alleleFreqs.split(",");
+        if (af.length > 1) {
+            let b = [];
+            for (let i = 0; i < af.length; i++) {
+                b.push({a: a[i], af: Number.parseFloat(af[i])});
             }
-            if (alleleFreqs.endsWith(",")) {
-                alleleFreqs = alleleFreqs.substr(0, alleleFreqs.length - 1);
-            }
+            b.sort(function (x, y) {
+                return x.af - y.af
+            });
 
-            let a = alleles.split(",");
-            let af = alleleFreqs.split(",");
-            if (af.length > 1) {
-                let b = [];
-                for (let i = 0; i < af.length; i++) {
-                    b.push({a: a[i], af: Number.parseFloat(af[i])});
-                }
-                b.sort(function (x, y) {
-                    return x.af - y.af
-                });
-
-                let ref = b[b.length - 1].a;
-                if (ref.length === 1) {
-                    for (let i = b.length - 2; i >= 0; i--) {
-                        let alt = b[i].a;
-                        if (alt.length === 1) {
-                            const cravatLink = igv.TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
-                            if (cravatLink) {
-                                data.push("<hr/>");
-                                data.push(cravatLink);
-                            }
+            let ref = b[b.length - 1].a;
+            if (ref.length === 1) {
+                for (let i = b.length - 2; i >= 0; i--) {
+                    let alt = b[i].a;
+                    if (alt.length === 1) {
+                        const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
+                        if (cravatLink) {
+                            data.push("<hr/>");
+                            data.push(cravatLink);
                         }
                     }
                 }
             }
         }
-
-
-        return data;
-
-
-    }
-
-    igv.TrackBase.prototype.getGenomeId = function () {
-        return this.browser.genome ? this.browser.genome.id : undefined
-    }
-
-    igv.TrackBase.getCravatLink = function (chr, position, ref, alt, genomeID) {
-
-        if ("hg38" === genomeID || "GRCh38" === genomeID) {
-
-            const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
-
-            return "<a target='_blank' " +
-                "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
-                cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
-        }
-        else {
-            return undefined
-        }
     }
 
 
+    return data;
 
-    return igv;
+
+}
+
+TrackBase.prototype.getGenomeId = function () {
+    return this.browser.genome ? this.browser.genome.id : undefined
+}
+
+TrackBase.getCravatLink = function (chr, position, ref, alt, genomeID) {
+
+    if ("hg38" === genomeID || "GRCh38" === genomeID) {
+
+        const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
+
+        return "<a target='_blank' " +
+            "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
+            cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+    } else {
+        return undefined
+    }
+}
 
 
-})(igv || {});
+export default TrackBase;

@@ -1,9 +1,12 @@
-var igvdev = {
+import igvxhr from "../../js/igvxhr.js";
+import GtexUtils from "../../js/gtex/gtexUtils.js";
+
+const igvdev = {
 
     createTrackList:  function (div, file, browser) {
 
 
-        return igv.xhr.loadJson(file)
+        return igvxhr.loadJson(file)
 
             .then(function (tracks) {
 
@@ -32,7 +35,7 @@ var igvdev = {
 
                 })
 
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
+                return GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
@@ -57,3 +60,5 @@ var igvdev = {
 
     }
 }
+
+export default igvdev;
