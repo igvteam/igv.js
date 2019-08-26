@@ -150,7 +150,6 @@ var igv = (function (igv) {
         const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const maxRows = this.config.maxRows || 500;
         const featureCache = await getFeatureCache.call(this)
         const isQueryable = this.queryable;
 
@@ -221,7 +220,8 @@ var igv = (function (igv) {
         }
 
         // Assign overlapping features to rows
-        packFeatures(featureList, this.maxRows);
+        const maxRows = this.config.maxRows || 500;
+        packFeatures(featureList, maxRows);
 
         // Note - replacing previous cache with new one
         this.featureCache = this.queryable ?
