@@ -222,7 +222,8 @@ FeatureSource.prototype.ingestFeatures = function (featureList, genomicInterval)
 
     // Assign overlapping features to rows
     if (this.config.format !== "wig") {
-        packFeatures(featureList, this.maxRows);
+        const maxRows = this.config.maxRows || 500
+        packFeatures(featureList, maxRows);
     }
 
     // Note - replacing previous cache with new one
