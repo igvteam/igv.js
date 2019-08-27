@@ -34,14 +34,16 @@ import PairedAlignment from "./pairedAlignment.js";
     }
 
 
-const AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported) {
+const AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold) {
 
         this.chr = chr;
         this.start = Math.floor(start);
         this.end = Math.ceil(end);
         this.length = (end - start);
+        
+        this.alleleFreqThreshold = alleleFreqThreshold;
 
-        this.coverageMap = new CoverageMap(chr, start, end);
+        this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold);
         this.alignments = [];
         this.downsampledIntervals = [];
 
@@ -209,7 +211,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
 
     // TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
-    function CoverageMap(chr, start, end) {
+    function CoverageMap(chr, start, end, alleleFreqThreshold) {
 
         this.chr = chr;
         this.bpStart = start;
@@ -219,7 +221,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
         this.maximum = 0;
 
-        this.threshold = 0.2;
+        this.threshold = alleleFreqThreshold;
         this.qualityWeight = true;
     }
 
@@ -242,7 +244,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
                 for(let i = offset; i < offset + del.len; i++) {
                     if(i < 0) continue;
                     if (!this.coverage[i]) {
-                        this.coverage[i] = new Coverage();
+                        this.coverage[i] = new Coverage(self.threshold);
                     }
                     this.coverage[i].del++;
                 }
@@ -254,7 +256,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
                 const i = del.start - this.bpStart;
                     if(i < 0) continue;
                     if (!this.coverage[i]) {
-                        this.coverage[i] = new Coverage();
+                        this.coverage[i] = new Coverage(self.threshold);
                     }
                     this.coverage[i].ins++;
             }
@@ -271,7 +273,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             for (let i = block.start - self.bpStart, j = 0; j < block.len; i++, j++) {
 
                 if (!self.coverage[i]) {
-                    self.coverage[i] = new Coverage();
+                    self.coverage[i] = new Coverage(self.threshold);
                 }
 
                 const base = seq.charAt(seqOffset + j);
@@ -290,7 +292,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         }
     }
 
-    function Coverage() {
+    function Coverage(alleleThreshold) {
         this.posA = 0;
         this.negA = 0;
 
@@ -320,9 +322,10 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.total = 0;
         this.del = 0;
         this.ins = 0;
+
+        this.t = alleleThreshold;
     }
 
-    const t = 0.2;
     const qualityWeight = true;
 
 
@@ -330,7 +333,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
         var myself = this,
             mismatchQualitySum,
-            threshold = t * ((qualityWeight && this.qual) ? this.qual : this.total);
+            threshold = this.t * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
