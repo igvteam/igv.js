@@ -153,7 +153,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
             const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
             const chrIdx = header.chrToIndex[queryChr];
-            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold);
 
             if (chrIdx === undefined) {
                 return Promise.resolve(alignmentContainer);

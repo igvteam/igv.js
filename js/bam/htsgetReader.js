@@ -74,7 +74,7 @@ HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
 
             const chrIdx = self.header.chrToIndex[chr];
 
-            const alignmentContainer = new AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+            const alignmentContainer = new AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold);
             BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
             alignmentContainer.finish();
 
