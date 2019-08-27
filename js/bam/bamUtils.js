@@ -45,6 +45,7 @@ import BamFilter from "./bamFilter.js";
     const BAM1_MAGIC_BYTES = new Uint8Array([0x42, 0x41, 0x4d, 0x01]); // BAM\1
     const BAM1_MAGIC_NUMBER = readInt(BAM1_MAGIC_BYTES, 0);
 
+    const DEFAULT_ALLELE_FREQ_THRESHOLD = 0.2;
     const DEFAULT_SAMPLING_WINDOW_SIZE = 100;
     const DEFAULT_SAMPLING_DEPTH = 500;
     const MAXIMUM_SAMPLING_DEPTH = 10000;
@@ -405,7 +406,8 @@ import BamFilter from "./bamFilter.js";
             if (config.readgroup) {
                 reader.filter.readgroups = new Set([config.readgroup]);
             }
-
+            
+            reader.alleleFreqThreshold = config.alleleFreqThreshold === undefined ? DEFAULT_ALLELE_FREQ_THRESHOLD : config.alleleFreqThreshold;
 
             reader.samplingWindowSize = config.samplingWindowSize === undefined ? DEFAULT_SAMPLING_WINDOW_SIZE : config.samplingWindowSize;
             reader.samplingDepth = config.samplingDepth === undefined ? DEFAULT_SAMPLING_DEPTH : config.samplingDepth;

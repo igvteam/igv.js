@@ -56,7 +56,7 @@ BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpE
         const header = this.header;
         const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
         const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
-        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
         for(let a of qAlignments) {
             alignmentContainer.push(a);
         }

@@ -71,7 +71,7 @@ BamWebserviceReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
                     chrId = header.chrToIndex[queryChr];
 
-                    alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
+                    alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold);
 
                     BamUtils.decodeSamRecords(sam, alignmentContainer, queryChr, bpStart, bpEnd, self.filter);
 
