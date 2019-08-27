@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>SVG - Dev</title>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
+    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link rel="stylesheet" type="text/css" href="css/save_to_svg.css"/>
+
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+</head>
+
+<body>
+
+<div>
+    <button onclick="bookmark();">Bookmark</button>
+</div>
+
+<h3>Example tracks - click to load</h3>
+
+<div id="trackList"></div>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+<div id='igv-draw-svg-button-container'>
+    <button id='igv-draw-svg-button' type="button">
+        <label>Draw SVG</label>
+    </button>
+</div>
+
+<div id="igv-svg-container">
+
+</div>
+
+</body>
+
+<script type="module">
+
+    import {createBrowser} from "../js/igv-create.js";
+    import GtexUtils from "../js/gtex/gtexUtils.js";
+    import google from "../js/google/googleUtils.js";
+    import igvxhr from "../js/igvxhr.js";
+
+    (async () => {
+
+        await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
+
+        const config =
+            {
+                genome: "hg19",
+                //  locus: [ 'egfr', 'myc' ],
+                locus: "myc",
+                flanking: 1000,
+                queryParametersSupported: true,
+                showAllChromosomes: true,
+
+            };
+
+        let browser = await createBrowser(document.getElementById('igv-app-container'), config);
+
+        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser);
+
+        $('#igv-draw-svg-button').on('click', () => {
+            browser.renderSVG({ $container: $('#igv-svg-container') });
+        });
+
+    })();
+
+    function createTrackList(div, file, browser) {
+
+
+        return igvxhr.loadJson(file)
+
+            .then(function (tracks) {
+
+                tracks.forEach(function (track) {
+
+                    var trackDiv, name;
+
+                    if (track.HEADING) {
+                        div.insertAdjacentHTML("beforeend",
+                            "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
+                            + track.HEADING + "</div>");
+                    } else {
+                        trackDiv = document.createElement('div');
+                        trackDiv.innerHTML = track.name;
+                        trackDiv.addEventListener('click', function (event) {
+
+                            // Convert to json to insure we can load json representations (not strictly neccessary).
+                            var json = JSON.stringify(track);
+
+                            browser.loadTrack(json);
+                        });
+
+                        div.appendChild(trackDiv);
+                    }
+
+                })
+
+                return GtexUtils.getTissueInfo("gtex_v7")
+            })
+
+            .then(function (json) {
+
+                div.insertAdjacentHTML("beforeend",
+                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
+
+                json['tissueInfo'].forEach(function (obj) {
+
+                    let trackDiv = document.createElement('div');
+                    trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
+                    trackDiv.addEventListener('click', function (event) {
+
+                        browser.loadTrack(igv.GtexUtils.trackConfiguration(obj));
+
+                    });
+
+                    div.appendChild(trackDiv)
+
+                })
+            });
+
+    }
+
+    function bookmark() {
+        window.history.pushState({}, "IGV", browser.sessionURL());
+    }
+</script>
+</html>
