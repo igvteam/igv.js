@@ -284,4 +284,4 @@ function parseLocusString (string) {
 
 
 
-export {getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};
+export { knownFileExtensions, getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};
