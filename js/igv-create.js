@@ -41,7 +41,7 @@ import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
-import google from "./google/googleUtils";
+import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
 
 const version = "@VERSION";
