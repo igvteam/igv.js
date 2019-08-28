@@ -34,10 +34,11 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
-    import GtexUtils from "../js/gtex/gtexUtils.js";
-    import google from "../js/google/googleUtils.js";
-    import igvxhr from "../js/igvxhr.js";
+    import * as igv from "../js/api.js";
+    // import {createBrowser} from "../js/igv-create.js";
+    // import GtexUtils from "../js/gtex/gtexUtils.js";
+     import google from "../js/google/googleUtils.js";
+    // import igvxhr from "../js/igvxhr.js";
 
     let browser;
     google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
@@ -55,7 +56,7 @@
 
                 };
 
-            createBrowser(document.getElementById('igvDiv'), options)
+            igv.createBrowser(document.getElementById('igvDiv'), options)
                 .then(function (b) {
                     browser = b;
 
@@ -72,7 +73,7 @@
     function createTrackList(div, file, browser) {
 
 
-        return igvxhr.loadJson(file)
+        return igv.xhr.loadJson(file)
 
             .then(function (tracks) {
 
@@ -100,7 +101,7 @@
 
                 })
 
-                return GtexUtils.getTissueInfo("gtex_v7")
+                return igv.GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
