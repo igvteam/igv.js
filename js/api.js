@@ -18,6 +18,13 @@ function setGoogleOauthToken(accessToken) {
 const xhr = igvxhr;
 
 export {
+    createBrowser,
+    removeBrowser,
+    visibilityChange,
+    getBrowser,
+    setGoogleOauthToken,
+    oauth,
+    //exports below are not supported and will be removed over time
     getFilename,
     getExtension,
     isFilePath,
@@ -29,10 +36,4 @@ export {
     createIcon,
     GtexUtils,
     xhr,
-    getDataWrapper,
-    createBrowser,
-    removeBrowser,
-    visibilityChange,
-    getBrowser,
-    setGoogleOauthToken,
-    oauth };
+    getDataWrapper};
