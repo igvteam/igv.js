@@ -8,7 +8,7 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import { createIcon } from "./igv-icons.js";
 import { guid } from "./util/domUtils.js";
 import { attachDialogCloseHandlerWithParent } from "./ui/ui-utils.js";
-import { getFilename, getExtension, isFilePath } from "./util/fileUtils";
+import { getFilename, getExtension, isFilePath } from "./util/fileUtils.js";
 import { inferTrackTypes, inferFileFormat, knownFileExtensions } from './util/trackUtils.js';
 
 function setGoogleOauthToken(accessToken) {
