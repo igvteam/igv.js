@@ -103,8 +103,6 @@ function ViewPort(trackView, $container, genomicState, width) {
 
         this.setTrackLabel(trackView.track.name);
 
-        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-        console.log(`track label. Offset: x ${ x } y ${ y }. Size ${ width } x ${ height }.`);
 
         if (false === self.browser.trackLabelsVisible) {
             this.$trackLabel.hide();
@@ -655,8 +653,18 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
 
     draw.call(this, drawConfig, features);
 
-    context.restore();
+    if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
 
+        const shim = 4;
+        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        // context.addTrackGroupWithTranslationAndClipRect((`${ id }_track_label`), x, y, width, height, 0);
+        context.strokeText(this.$trackLabel.text(), x, y + height - shim);
+        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
+        context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
+
+    }
+
+    context.restore();
 
 };
 
