@@ -292,14 +292,14 @@ import BamFilter from "./bamFilter.js";
 
 
                 let qualArray;
-                if (lseq === 1 && String.fromCharCode(ba[p + j] + 33) === '*') {
-                    // TODO == how to represent this?
-                } else {
+                // if (lseq === 1 && String.fromCharCode(ba[p] + 33) === '*') {
+                //     // TODO == how to represent this?
+                // } else {
                     qualArray = [];
                     for (let j = 0; j < lseq; ++j) {
                         qualArray.push(ba[p + j]);
                     }
-                }
+                //}
                 p += lseq;
 
                 if (mateChrIdx >= 0) {
