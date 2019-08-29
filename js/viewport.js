@@ -10,6 +10,7 @@ import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import {pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
+import {relativeDOMBBox} from "./util/domUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -102,6 +103,9 @@ function ViewPort(trackView, $container, genomicState, width) {
 
         this.setTrackLabel(trackView.track.name);
 
+        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        console.log(`track label. Offset: x ${ x } y ${ y }. Size ${ width } x ${ height }.`);
+
         if (false === self.browser.trackLabelsVisible) {
             this.$trackLabel.hide();
         }
@@ -156,23 +160,19 @@ function createZoomInNotice($parent) {
 
 ViewPort.prototype.isVisible = function () {
     return this.$viewport.width()
-}
+};
 
 
 // UI
 ViewPort.prototype.setTrackLabel = function (label) {
 
-    const $label = this.$trackLabel;
-    const track = this.trackView.track;
+    this.trackView.track.name = this.trackView.track.config.name = label;
 
-    track.name = label;
-    track.config.name = label;
+    this.$trackLabel.empty();
+    this.$trackLabel.html(label);
 
-    $label.empty();
-    $label.html(track.name);
-
-    const txt = $label.text();
-    $label.attr('title', txt);
+    const txt = this.$trackLabel.text();
+    this.$trackLabel.attr('title', txt);
 };
 
 
@@ -595,39 +595,32 @@ ViewPort.prototype.saveImage = function () {
 
 ViewPort.prototype.renderSVGContext = function (context, offset) {
 
-    const yScrollDelta = $(this.contentDiv).position().top;
-    const viewportBBox = this.$viewport.get(0).getBoundingClientRect();
-
-
     let str = this.trackView.track.name || this.trackView.track.id;
     str = str.replace(/\W/g, '');
 
-    const index = this.browser.genomicStateList.indexOf(this.genomicState);
-    const id = str.toLowerCase() + '_genomic_index_' + index;
+    const genomicStateIndex = this.browser.genomicStateList.indexOf(this.genomicState);
+    const id = str.toLowerCase() + '_genomic_state_index_' + genomicStateIndex;
 
     // If present, paint axis canvas. Only in first multi-locus panel.
-    if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
+    if (0 === genomicStateIndex && typeof this.trackView.track.paintAxis === 'function') {
 
-        const w = $(this.trackView.controlCanvas).width();
-        const h = $(this.trackView.controlCanvas).height();
-
-        context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - w, offset.deltaY, w, h, 0);
+        const bbox = this.trackView.controlCanvas.getBoundingClientRect();
+        context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
 
         context.save();
-        this.trackView.track.paintAxis(context, w, h);
+        this.trackView.track.paintAxis(context, bbox.width, bbox.height);
         context.restore();
     }
 
-    const dx = offset.deltaX + (index * context.multiLocusGap);
+    const yScrollDelta = $(this.contentDiv).position().top;
+    const dx = offset.deltaX + (genomicStateIndex * context.multiLocusGap);
     const dy = offset.deltaY + yScrollDelta;
+    const { width, height } = this.$viewport.get(0).getBoundingClientRect();
 
-    context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, viewportBBox.width, viewportBBox.height, -yScrollDelta);
+    context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
 
-    const width = this.$viewport.width();
-    const height = this.$viewport.height();
-
-    let referenceFrame = this.genomicState.referenceFrame;
-
+    let { referenceFrame } = this.genomicState;
+    let { start: bpStart, bpPerPixel } = referenceFrame;
     context.save();
 
     const drawConfig =
@@ -636,7 +629,7 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
 
             viewport: this,
 
-            referenceFrame: referenceFrame,
+            referenceFrame,
 
             genomicState: this.genomicState,
 
@@ -648,10 +641,10 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
             viewportContainerX: 0,
             viewportContainerWidth: this.browser.viewportContainerWidth(),
 
-            bpStart: referenceFrame.start,
-            bpEnd: referenceFrame.start + width * referenceFrame.bpPerPixel,
+            bpStart,
+            bpEnd: bpStart + (width * bpPerPixel),
 
-            bpPerPixel: referenceFrame.bpPerPixel,
+            bpPerPixel,
 
             selection: this.selection
         };
