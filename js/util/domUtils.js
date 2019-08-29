@@ -3,11 +3,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js";
 const relativeDOMBBox = (parentElement, childElement) => {
     const { x: x_p, y: y_p, width: width_p, height: height_p } = parentElement.getBoundingClientRect();
     const { x: x_c, y: y_c, width: width_c, height: height_c } = childElement.getBoundingClientRect();
-
-    console.log(`track label. Offset: x ${ x_c - x_p } y ${ y_c - y_p }. Size ${ width_c } x ${ height_c }.`);
-
     return { x: (x_c - x_p), y: (y_c - y_p), width: width_c, height:height_c };
-
 };
 
 function pageCoordinates(e) {
