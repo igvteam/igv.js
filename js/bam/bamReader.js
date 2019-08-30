@@ -28,7 +28,7 @@ import loadBamIndex from "./bamIndex.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import igvxhr from "../igvxhr.js";
-import  {unbgzf, bgzBlockSize} from './bgzf.js';
+import {bgzBlockSize, unbgzf} from './bgzf.js';
 import {inferIndexPath} from "../util/trackUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 
@@ -80,7 +80,6 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
                 const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
                 lastBlockSize = bgzBlockSize(abuffer)
             }
-
             const fetchMin = c.minv.block
             const fetchMax = c.maxv.block + lastBlockSize
             const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
@@ -90,20 +89,13 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
         const compressedChunks = await Promise.all(promises)
 
         for (let i = 0; i < chunks.length; i++) {
-            try {
-                const compressed = compressedChunks[i]
-                const c = chunks[i]
-                var ba = new Uint8Array(unbgzf(compressed)); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-                BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
-            } catch (e) {
-                console.error("Error decompressing chunk " + i)
-            }
-
+            const compressed = compressedChunks[i]
+            const c = chunks[i]
+            var ba = new Uint8Array(unbgzf(compressed)); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+            BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
         }
-
         alignmentContainer.finish();
         return alignmentContainer;
-
     }
 }
 
