@@ -286,9 +286,11 @@ BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
             return 30;
         } else {
             const idx = block.seqIndexAt(genomicLocation);
-            //  if (idx >= 0 && idx < this.qual.length) {
+            if (idx >= 0 && this.qual && idx < this.qual.length) {
             return this.qual[idx];
-            //  }
+            } else {
+                return 30;
+            }
         }
     } else {
         return undefined;
