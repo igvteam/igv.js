@@ -94,7 +94,7 @@ var igv = (function (igv) {
                 // Legacy support -- deprecated
                 type: "plain",
                 //url: 'https://portals.broadinstitute.org/webservices/igv/locus?genome=$GENOME$&name=$FEATURE$',
-                url: 'https:igv.org/services/locus.php?genome=$GENOME$&name=$FEATURE$',
+                url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
                 coords: 0,
                 chromosomeField: "chromosome",
                 startField: "start",
