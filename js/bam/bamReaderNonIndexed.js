@@ -68,12 +68,12 @@ BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpE
             const data = decodeDataURI(this.bamPath);
             const unc = unbgzf(data.buffer);
             parseAlignments.call(this, new Uint8Array(unc));
-            return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
+            return fetchAlignments.call(this, chr, bpStart, bpEnd);
         } else {
             const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
             const unc = unbgzf(arrayBuffer);
             parseAlignments.call(this, new Uint8Array(unc));
-            return fetchAlignments(chr, bpStart, bpEnd);
+            return fetchAlignments.call(this, chr, bpStart, bpEnd);
         }
     }
 
@@ -83,6 +83,21 @@ BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpE
         BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames);
         this.alignmentCache = new FeatureCache(alignments, genome);
     }
+
+    function fetchAlignments(chr, bpStart, bpEnd) {
+
+        var header, queryChr, qAlignments, alignmentContainer;
+        header = this.header;
+        queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+        qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
+        alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
+        qAlignments.forEach(function (a) {
+            alignmentContainer.push(a);
+        });
+        alignmentContainer.finish();
+        return alignmentContainer;
+    }
+
 };
 
 function decodeDataURI(dataURI) {
