@@ -16,86 +16,77 @@ const MAX_GZIP_BLOCK_SIZE = (1 << 16);
  * @param config
  * @param tabix
  *
- * @returns a Promised for the bam or tabix index.  The fulfill function takes the index as an argument.
  */
 async function loadBamIndex(indexURL, config, tabix, genome) {
 
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
 
-    var indices = [],
-        magic, nbin, nintv, nref, parser,
-        blockMin = Number.MAX_VALUE,
-        blockMax = 0,
-        binIndex, linearIndex, binNumber, cs, ce, b, i, ref, sequenceIndexMap;
+    const indices = []
+    let blockMin = Number.MAX_VALUE,
+        blockMax = 0
 
     if (!arrayBuffer) {
-        fullfill(null);
         return;
     }
 
     if (tabix) {
-        var inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+        const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
         arrayBuffer = inflate.decompress().buffer;
     }
 
-    parser = new BinaryParser(new DataView(arrayBuffer));
+    const parser = new BinaryParser(new DataView(arrayBuffer));
 
-    magic = parser.getInt();
-
+    const magic = parser.getInt();
+    const sequenceIndexMap = {};
     if (magic === BAI_MAGIC || (tabix && magic === TABIX_MAGIC)) {
 
-        nref = parser.getInt();
-
+        const nref = parser.getInt();
         if (tabix) {
             // Tabix header parameters aren't used, but they must be read to advance the pointer
-            var format = parser.getInt();
-            var col_seq = parser.getInt();
-            var col_beg = parser.getInt();
-            var col_end = parser.getInt();
-            var meta = parser.getInt();
-            var skip = parser.getInt();
-            var l_nm = parser.getInt();
+            const format = parser.getInt()
+            const col_seq = parser.getInt()
+            const col_beg = parser.getInt()
+            const col_end = parser.getInt()
+            const meta = parser.getInt()
+            const skip = parser.getInt()
+            const l_nm = parser.getInt()
 
-            sequenceIndexMap = {};
-            for (i = 0; i < nref; i++) {
-                var seq_name = parser.getString();
-
+            for (let i = 0; i < nref; i++) {
+                let seq_name = parser.getString();
                 // Translate to "official" chr name.
                 if (genome) {
                     seq_name = genome.getChromosomeName(seq_name);
                 }
-
                 sequenceIndexMap[seq_name] = i;
             }
         }
 
-        for (ref = 0; ref < nref; ref++) {
 
-            binIndex = {};
-            linearIndex = [];
+        for (let ref = 0; ref < nref; ref++) {
 
-            nbin = parser.getInt();
+            const binIndex = {};
+            const linearIndex = [];
+            const nbin = parser.getInt();
+            for (let b = 0; b < nbin; b++) {
 
-            for (b = 0; b < nbin; b++) {
-
-                binNumber = parser.getInt();
+                const binNumber = parser.getInt();
 
                 if (binNumber === 37450) {
                     // This is a psuedo bin, not used but we have to consume the bytes
-                    nchnk = parser.getInt(); // # of chunks for this bin
-                    cs = parser.getVPointer();   // unmapped beg
-                    ce = parser.getVPointer();   // unmapped end
-                    var n_maped = parser.getLong();
-                    var nUnmapped = parser.getLong();
+                    const nchnk = parser.getInt(); // # of chunks for this bin
+                    const cs = parser.getVPointer();   // unmapped beg
+                    const ce = parser.getVPointer();   // unmapped end
+                    const n_maped = parser.getLong()
+                    const nUnmapped = parser.getLong()
 
                 } else {
 
                     binIndex[binNumber] = [];
-                    var nchnk = parser.getInt(); // # of chunks for this bin
+                    const nchnk = parser.getInt(); // # of chunks for this bin
 
-                    for (i = 0; i < nchnk; i++) {
-                        cs = parser.getVPointer();    //chunk_beg
-                        ce = parser.getVPointer();    //chunk_end
+                    for (let i = 0; i < nchnk; i++) {
+                        const cs = parser.getVPointer();    //chunk_beg
+                        const ce = parser.getVPointer();    //chunk_end
                         if (cs && ce) {
                             if (cs.block < blockMin) {
                                 blockMin = cs.block;    // Block containing first alignment
@@ -109,10 +100,9 @@ async function loadBamIndex(indexURL, config, tabix, genome) {
                 }
             }
 
-
-            nintv = parser.getInt();
-            for (i = 0; i < nintv; i++) {
-                cs = parser.getVPointer();
+            const nintv = parser.getInt();
+            for (let i = 0; i < nintv; i++) {
+                const cs = parser.getVPointer();
                 linearIndex.push(cs);   // Might be null
             }
 
@@ -151,45 +141,35 @@ const BamIndex = function (indices, blockMin, blockMax, sequenceIndexMap, tabix)
  */
 BamIndex.prototype.blocksForRange = function (refId, min, max) {
 
-    var bam = this,
-        ba = bam.indices[refId],
-        overlappingBins,
-        chunks,
-        nintv,
-        lowest,
-        minLin,
-        maxLin,
-        vp,
-        i;
-
+    const bam = this;
+    const ba = bam.indices[refId];
 
     if (!ba) {
         return [];
     } else {
-
-        overlappingBins = reg2bins(min, max);        // List of bin #s that overlap min, max
-        chunks = [];
+        const overlappingBins = reg2bins(min, max);        // List of bin #s that overlap min, max
+        const chunks = [];
 
         // Find chunks in overlapping bins.  Leaf bins (< 4681) are not pruned
         overlappingBins.forEach(function (bin) {
             if (ba.binIndex[bin]) {
-                var binChunks = ba.binIndex[bin],
-                    nchnk = binChunks.length;
-                for (var c = 0; c < nchnk; ++c) {
-                    var cs = binChunks[c][0];
-                    var ce = binChunks[c][1];
+                const binChunks = ba.binIndex[bin],
+                    nchnk = binChunks.length
+                for (let c = 0; c < nchnk; ++c) {
+                    const cs = binChunks[c][0]
+                    const ce = binChunks[c][1]
                     chunks.push({minv: cs, maxv: ce, bin: bin});
                 }
             }
         });
 
         // Use the linear index to find minimum file position of chunks that could contain alignments in the region
-        nintv = ba.linearIndex.length;
-        lowest = null;
-        minLin = Math.min(min >> 14, nintv - 1);
-        maxLin = Math.min(max >> 14, nintv - 1);
-        for (i = minLin; i <= maxLin; ++i) {
-            vp = ba.linearIndex[i];
+        const nintv = ba.linearIndex.length;
+        let lowest = null;
+        const minLin = Math.min(min >> 14, nintv - 1);
+        const maxLin = Math.min(max >> 14, nintv - 1);
+        for (let i = minLin; i <= maxLin; ++i) {
+            const vp = ba.linearIndex[i];
             if (vp) {
                 // todo -- I think, but am not sure, that the values in the linear index have to be in increasing order.  So the first non-null should be minimum
                 if (!lowest || vp.isLessThan(lowest)) {
@@ -205,14 +185,14 @@ BamIndex.prototype.blocksForRange = function (refId, min, max) {
 
 function optimizeChunks(chunks, lowest) {
 
-    var mergedChunks = [],
-        lastChunk = null;
+    const mergedChunks = []
+    let lastChunk = null
 
     if (chunks.length === 0) return chunks;
 
     chunks.sort(function (c0, c1) {
-        var dif = c0.minv.block - c1.minv.block;
-        if (dif != 0) {
+        const dif = c0.minv.block - c1.minv.block
+        if (dif !== 0) {
             return dif;
         } else {
             return c0.minv.offset - c1.minv.offset;
@@ -246,7 +226,9 @@ function optimizeChunks(chunks, lowest) {
  *
  */
 function reg2bins(beg, end) {
-    var i = 0, k, list = [];
+    const i = 0
+    let k
+    const list = []
     if (end >= 1 << 29) end = 1 << 29;
     --end;
     list.push(0);
