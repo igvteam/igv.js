@@ -27,6 +27,7 @@ import BinaryParser from "../binary.js";
 import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
 
+const SEQUENCE_DICTIONARY_FLAG = 0x8000;  // if we have a sequence dictionary in our header
 /**
  *
  * @param indexFile
@@ -132,7 +133,7 @@ function loadTribbleIndex(indexFile, config, genome) {
     });
 };
 
-TribbleIndex = function (chrIndexTable) {
+const TribbleIndex = function (chrIndexTable) {
     this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index
 };
 

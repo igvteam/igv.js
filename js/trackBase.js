@@ -161,6 +161,10 @@ TrackBase.prototype.setTrackProperties = function (properties) {
     }
 }
 
+TrackBase.prototype.getVisibilityWindow = function() {
+    return this.visibilityWindow;
+}
+
 /**
  * Default popup text function -- just extracts string and number properties in random order.
  * @param feature

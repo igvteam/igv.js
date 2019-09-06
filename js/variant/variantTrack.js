@@ -30,6 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
+import {isString} from "../util/stringUtils.js"
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
@@ -71,13 +72,17 @@ const VariantTrack = extend(TrackBase,
 
 VariantTrack.prototype.postInit = async function () {
 
-    const header = await this.getFileHeader();   // cricital, don't remove
-    if (this.callSets) {
-        const length = this.callSets.length;
-        this.visibilityWindow = Math.max(1000, DEFAULT_VISIBILITY_WINDOW - length * (DEFAULT_VISIBILITY_WINDOW / 100));
-
-    } else {
-        this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
+    const header = await this.getFileHeader();   // cricital, don't remove'
+    if (undefined === this.visibilityWindow) {
+        const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
+        if(isString(fn) && fn.toLowerCase().includes("gnomad") ) {
+            this.visibilityWindow = 1000;  // these are known to be very dense
+        } else if (this.callSets) {
+            const length = this.callSets.length;
+            this.visibilityWindow = Math.max(1000, DEFAULT_VISIBILITY_WINDOW - length * (DEFAULT_VISIBILITY_WINDOW / 100));
+        } else {
+            this.visibilityWindow = DEFAULT_VISIBILITY_WINDOW;
+        }
     }
     return this;
 

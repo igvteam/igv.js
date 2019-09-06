@@ -244,10 +244,12 @@ ViewPort.prototype.checkZoomIn = function () {
         if (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
             return true;
         } else {
+            const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
+                this.trackView.track.getVisibilityWindow() :
+                this.trackView.track.visibilityWindow;
             return (
-                this.trackView.track.visibilityWindow !== undefined &&
-                this.trackView.track.visibilityWindow > 0 &&
-                (referenceFrame.bpPerPixel * this.$viewport.width() > this.trackView.track.visibilityWindow));
+                visibilityWindow !== undefined && visibilityWindow > 0 &&
+                (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
         }
     }
 }
