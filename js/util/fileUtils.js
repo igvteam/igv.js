@@ -18,7 +18,7 @@ function getExtension(config) {
     //Strip aux extensions .gz, .tab, and .txt
     if (filename.endsWith(".gz")) {
         filename = filename.substr(0, filename.length - 3);
-    } else if (filename.endsWith(".txt") || filename.endsWith(".tab")) {
+    } else if (filename.endsWith(".txt") || filename.endsWith(".tab") || filename.endsWith(".bgz")) {
         filename = filename.substr(0, filename.length - 4);
     }
 

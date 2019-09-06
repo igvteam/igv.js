@@ -167,7 +167,7 @@ FeatureFileReader.prototype.loadIndex = function () {
 
     let idxFile = this.config.indexURL;
 
-    if (this.filename.endsWith('.gz')) {
+    if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
 
         if (!idxFile) {
             idxFile = this.config.url + '.tbi';
@@ -297,11 +297,13 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 FeatureFileReader.prototype.getIndex = function () {
 
     var self = this;
-    if (self.index !== undefined || self.indexed === false) {
-        return Promise.resolve(self.index);
+    if (this.index !== undefined || this.indexed === false) {
+        return Promise.resolve(this.index);
     }
 
-    if (self.indexURL || self.indexed || (typeof self.config.url === 'string' && self.config.url.endsWith(".gz"))) {
+    if (this.indexURL ||
+        this.indexed || 
+        (typeof this.config.url === 'string' && (this.config.url.endsWith(".gz") || this.config.url.endsWith('.bgz')))) {
 
         return self.loadIndex()
 

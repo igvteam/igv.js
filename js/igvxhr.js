@@ -356,7 +356,7 @@ function loadStringFromFile(localfile, options) {
         var fileReader = new FileReader();
 
         var compression = NONE;
-        if (options.bgz) {
+        if (options.bgz || localfile.name.endsWith(".bgz")) {
             compression = BGZF;
         } else if (localfile.name.endsWith(".gz")) {
             compression = GZIP;

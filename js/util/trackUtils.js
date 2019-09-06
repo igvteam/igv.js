@@ -173,8 +173,10 @@ function inferFileFormat(fn) {
 
     // Special case -- UCSC refgene files
     if (fn.endsWith("refgene.txt.gz") ||
+        fn.endsWith("refgene.txt.bgz") ||
         fn.endsWith("refgene.txt") ||
-        fn.endsWith("refgene.sorted.txt.gz")) {
+        fn.endsWith("refgene.sorted.txt.gz") ||
+        fn.endsWith("refgene.sorted.txt.bgz")) {
         return "refgene";
     }
 
@@ -190,7 +192,7 @@ function inferFileFormat(fn) {
         fn = fn.substr(0, fn.length - 3);
     }
 
-    if (fn.endsWith(".txt") || fn.endsWith(".tab")) {
+    if (fn.endsWith(".txt") || fn.endsWith(".tab") || fn.endsWith(".bgz")) {
         fn = fn.substr(0, fn.length - 4);
     }
 
