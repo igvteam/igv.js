@@ -312,7 +312,7 @@ ViewPort.prototype.loadFeatures = async function () {
         return this.tile;
     } catch (error) {
         this.showMessage(NOT_LOADED_MESSAGE);
-        //throw error;
+        console.error(error)
     } finally {
         this.loading = false;
         this.stopSpinner();

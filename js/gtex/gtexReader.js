@@ -29,85 +29,47 @@ const GtexReader = function (config) {
 
     this.config = config;
     this.url = config.url;
-    this.tissueName = config.tissueName;
+    this.tissueId = config.tissueSiteDetailId;
     this.indexed = true;
-    this.datasetId = config.datasetId || "gtex_v7"
+    this.datasetId = config.datasetId || "gtex_v8"
 };
 
-//{
-//    "release": "v6",
-//    "singleTissueEqtl": [
-//    {
-//        "beta": -0.171944779728988,
-//        "chromosome": "3",
-//        "gencodeId": "ENSG00000168827.10",
-//        "geneSymbol": "GFM1",
-//        "pValue": 1.22963421134407e-09,
-//        "snpId": "rs3765025",
-//        "start": 158310846,
-//        "tissueName": "Thyroid"
-//    },
-// "singleTissueEqtl": [
-//     {
-//         "beta": 0.388922,
-//         "chromosome": "12",
-//         "gencodeId": "ENSG00000245017.2",
-//         "geneSymbol": "RP11-181C3.1",
-//         "geneSymbolUpper": "RP11-181C3.1",
-//         "pValue": 5.76253e-06,
-//         "release": "v7",
-//         "snpId": "rs10860345",
-//         "start": 98972466,
-//         "tissueName": "Adrenal_Gland",
-//         "variantId": "12_98972466_T_C_b37"
-//     }
-//
-// http://vgtxportaltest.broadinstitute.org:9000/v6/singleTissueEqtlByLocation?tissueName=Thyroid&chromosome=3&start=158310650&end=158311650
+GtexReader.prototype.readFeatures = async function (chr, bpStart, bpEnd) {
 
-GtexReader.prototype.readFeatures = function (chr, bpStart, bpEnd) {
 
     let self = this,
-        queryChr = chr.startsWith("chr") ? chr.substr(3) : chr,
+        queryChr = chr.startsWith("chr") ? chr : "chr" + chr,
         queryStart = Math.floor(bpStart),
         queryEnd = Math.ceil(bpEnd),
         datasetId = this.datasetId,
         queryURL = this.url + "?chromosome=" + queryChr + "&start=" + queryStart + "&end=" + queryEnd +
-            "&tissueName=" + this.tissueName + "&datasetId=" + datasetId;
+            "&tissueSiteDetailId=" + this.tissueId + "&datasetId=" + datasetId;
 
-    return new Promise(function (fulfill, reject) {
+    const json = await igvxhr.loadJson(queryURL, {
+        withCredentials: self.config.withCredentials
+    })
+    if (json && json.singleTissueEqtl) {
+        //variants = json.variants;
+        //variants.sort(function (a, b) {
+        //    return a.POS - b.POS;
+        //});
+        //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
 
-        igvxhr.loadJson(queryURL, {
-            withCredentials: self.config.withCredentials
-        }).then(function (json) {
+        json.singleTissueEqtl.forEach(function (eqtl) {
+            eqtl.chr = eqtl.chromosome;
+            eqtl.position = eqtl.pos;
+            eqtl.start = eqtl.pos - 1;
+            eqtl.end = eqtl.start + 1;
+            eqtl.snp = eqtl.snpId;
+            eqtl.geneName = eqtl.geneSymbol;
+            eqtl.geneId = eqtl.gencodeId;
 
-            var variants;
+        });
 
-            if (json && json.singleTissueEqtl) {
-                //variants = json.variants;
-                //variants.sort(function (a, b) {
-                //    return a.POS - b.POS;
-                //});
-                //source.cache = new FeatureCache(chr, queryStart, queryEnd, variants);
-
-                json.singleTissueEqtl.forEach(function (eqtl) {
-                    eqtl.chr = "chr" + eqtl.chromosome;
-                    eqtl.position = eqtl.pos;
-                    eqtl.start = eqtl.pos - 1;
-                    eqtl.end = eqtl.start + 1;
-                    eqtl.snp = eqtl.snpId;
-                    eqtl.geneName = eqtl.geneSymbol;
-                    eqtl.geneId = eqtl.gencodeId;
-
-                });
-
-                fulfill(json.singleTissueEqtl);
-            } else {
-                fulfill(null);
-            }
-
-        }).catch(reject);
-
-    });
+        return json.singleTissueEqtl;
+    } else {
+        return undefined;
+    }
 }
 
 export default GtexReader;
