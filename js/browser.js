@@ -29,7 +29,7 @@ import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
-import GtexSelection from "./gtex/gtex.js";
+import GtexSelection from "./gtex/gtexSelection.js";
 import XMLSession from "./session/igvXmlSession.js";
 import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
