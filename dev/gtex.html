@@ -29,47 +29,64 @@
 
     import * as igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
-
-        let options = {
-            type: "GTEX",
-            genome: "hg19",
-            locus: 'HOXD-AS1',
-            flanking: 75000,
-            search: {
-                url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
-                resultsField: 'features',
-                geneField: 'geneSymbol',
-                snpField: 'snpId'
-            },
+    let options = {
+        type: "GTEX",
+        showSVGButton: false,
+        datasetId: 'gtex_v8',
+        locus: 'WASH7P',
+        reference: {
+            id: 'hg38',
+            fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            indexURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+            cytobandURL: "http://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt",
             tracks: [
                 {
-                    name: 'GWAS Catalog',
+                    name: 'Genes',
                     type: 'annotation',
-                    format: 'gtexgwas',
-                    url: 'https://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
-                    indexed: false,
-                    color: 'rgb(100,200,200)',
+                    url: 'https://storage.googleapis.com/gtex-igv-files/gencode.v26.GRCh38.genes.name.bed',
                     displayMode: 'EXPANDED',
-                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
-                },
-                {
-                    type: "eqtl",
-                    sourceType: "gtex-ws",
-                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
-                    tissueName: "Muscle_Skeletal",
-                    name: "Muscle Skeletal",
-                    visibilityWindow: 1000000
+                    height: 100,
+                    autoHeight: true,
+                    removable: false,
+                    order: Number.MAX_VALUE // pinning track to bottom
                 }
             ]
-        }
+        },
+        //locus: params.location, // something like: chr1:1-500,000
+        flanking: 75000,
+        search: {
+            url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
+            resultsField: 'features',
+            geneField: 'geneSymbol',
+            snpField: 'snpId'
+        },
+        tracks: [
+            {
+                name: 'GWAS Catalog',
+                type: 'annotation',
+                format: 'gtexgwas',
+                url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
+                indexed: false,
+                color: 'rgb(100,200,200)',
+                displayMode: 'EXPANDED',
+                order: Number.MAX_SAFE_INTEGER // 2nd to last track
+            },
+            {
+                type: "eqtl",
+                sourceType: "gtex-ws",
+                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                tissueSiteDetailId: "Muscle_Skeletal",
+                name: "Muscle Skeletal",
+                visibilityWindow: 1000000
+            }
+        ]
+    }
 
 
-        igv.createBrowser(document.getElementById('igv-div'), options)
-            .then(function (browser) {
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
 
-            })
-    })
+        })
 
 
 </script>

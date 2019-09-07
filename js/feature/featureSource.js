@@ -185,14 +185,16 @@ FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPer
             // If a visibility window is defined, potentially expand query interval.
             // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
             // indicating whole chromosome should be read at once.
-            if (visibilityWindow === undefined || visibilityWindow <= 0) {
-                // Whole chromosome
-                intervalStart = 0;
-                intervalEnd = Number.MAX_VALUE;
-            } else if (visibilityWindow !== undefined && visibilityWindow > (bpEnd - bpStart)) {
-                const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
-                intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
-                intervalEnd = bpStart + expansionWindow;
+            if (undefined !== visibilityWindow) {
+                if (visibilityWindow <= 0) {
+                    // Whole chromosome
+                    intervalStart = 0;
+                    intervalEnd = Number.MAX_VALUE;
+                } else if (visibilityWindow > (bpEnd - bpStart)) {
+                    const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
+                    intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
+                    intervalEnd = bpStart + expansionWindow;
+                }
             }
             genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
