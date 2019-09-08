@@ -89,7 +89,7 @@ const TrackView = function (browser, $container, track) {
     if (true === this.track.ignoreTrackMenu) {
         // do nothing
     } else {
-        appendRightHandGutter.call(this, $(this.trackDiv));
+        this.appendRightHandGutter( $(this.trackDiv));
     }
 
     if (this.track instanceof RulerTrack) {
