@@ -10,9 +10,14 @@ import { guid } from "./util/domUtils.js";
 import { attachDialogCloseHandlerWithParent } from "./ui/ui-utils.js";
 import { getFilename, getExtension, isFilePath } from "./util/fileUtils.js";
 import { inferTrackTypes, inferFileFormat, knownFileExtensions } from './util/trackUtils.js';
+import google from "./google/googleUtils.js";
 
 function setGoogleOauthToken(accessToken) {
     return oauth.setToken(accessToken);
+}
+
+function setApiKey(apiKey) {
+    return google.setApiKey(apiKey);
 }
 
 const xhr = igvxhr;
@@ -36,4 +41,6 @@ export {
     createIcon,
     GtexUtils,
     xhr,
-    getDataWrapper};
+    getDataWrapper,
+
+};
