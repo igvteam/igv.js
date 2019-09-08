@@ -1,6 +1,8 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import {createIcon} from "../igv-icons.js";
+import {appleCrayonPalette} from "../util/colorPalletes"
+import IGVColor from "../igv-color"
 
 function attachDialogCloseHandlerWithParent($parent, closeHandler) {
 
@@ -14,85 +16,56 @@ function attachDialogCloseHandlerWithParent($parent, closeHandler) {
         e.stopPropagation();
         closeHandler()
     });
+};
 
-    // $container.on('touchend', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    //     closeHandler()
-    // });
-    //
-    // $container.on('mousedown', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    // });
-    //
-    // $container.on('mouseup', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    // });
-    //
-    // $container.on('touchstart', function (e) {
-    //     e.preventDefault();
-    //     e.stopPropagation();
-    // });
+function createColorSwatchSelector($genericContainer, colorHandler, defaultColor) {
+
+    let appleColors = Object.values(appleCrayonPalette);
+
+    if (defaultColor && !(typeof defaultColor === 'function')) {
+
+        // Remove 'snow' color.
+        appleColors.splice(11, 1);
+
+        // Add default color.
+        appleColors.unshift(IGVColor.rgbToHex(defaultColor));
+    }
+
+    for (let color of appleColors) {
+
+        let $swatch = $('<div>', {class: 'igv-color-swatch'});
+        $genericContainer.append($swatch);
+
+        $swatch.css('background-color', color);
+
+        if ('white' === color) {
+            // do nothing
+            console.log('-');
+        } else {
+
+            $swatch.hover(() => {
+                    $swatch.get(0).style.borderColor = color;
+                },
+                () => {
+                    $swatch.get(0).style.borderColor = 'white';
+                });
+
+            $swatch.on('click.trackview', (event) => {
+                event.stopPropagation();
+                colorHandler(color);
+            });
+
+            $swatch.on('touchend.trackview', (event) => {
+                event.stopPropagation();
+                colorHandler(color);
+            });
+
+        }
+
+    }
 
 };
 
-export {attachDialogCloseHandlerWithParent}
 
+export {attachDialogCloseHandlerWithParent, createColorSwatchSelector}
 
-/**
- * Find spinner
- */
-// function getSpinnerObjectWithParentElement(parentElement) {
-//     return $(parentElement).find("div.igv-spinner-container");
-// };
-
-/**
- * Start the spinner for the parent element, if it has one
- */
-// function startSpinnerAtParentElement(parentElement) {
-//
-//     var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
-//
-//     if (spinnerObject) {
-//         spinnerObject.show();
-//     }
-//
-// };
-
-/**
- * Stop the spinner for the parent element, if it has one
- * @param parentElement
- */
-// function stopSpinnerAtParentElement(parentElement) {
-//
-//     var spinnerObject = igv.getSpinnerObjectWithParentElement(parentElement);
-//
-//     if (spinnerObject) {
-//         spinnerObject.hide();
-//     }
-//
-// };
-
-// igv.makeToggleButton = function (label, configurationKey, get$Target, continuation) {
-//
-//     var $button;
-//
-//     $button = $('<div class="igv-nav-bar-button">');
-//     $button.text(label);
-//
-//     $button.click(function () {
-//
-//         var $target = get$Target();
-//
-//         $target.toggle();
-//
-//         if (continuation) {
-//             continuation();
-//         }
-//     });
-//
-//
-//     return $button;
-// };
