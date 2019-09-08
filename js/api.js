@@ -42,5 +42,5 @@ export {
     GtexUtils,
     xhr,
     getDataWrapper,
-
+    setApiKey
 };
