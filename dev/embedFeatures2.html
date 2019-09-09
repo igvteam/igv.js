@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!-- IGV CSS -->
+    <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
+    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+
+</head>
+
+<body>
+
+<h1>Example illustrating embedding features in a track in lieu of a URL</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import *  as igv from "../js/api.js";
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var igvDiv = document.getElementById("igv-div");
+        var options = {
+            genome: "hg19",
+            locus: "1:3,218,585-3,218,714",
+            tracks: [{
+                name: "NexusHub",
+                type: "annotation",
+                format: "bed",
+                expandedRowHeight: 100,
+                searchable: true,
+                displayMode: "EXPANDED",
+                features: [
+                    {
+                        chr: "1",
+                        start: 3218610,
+                        end: 3218650,
+                        strand:"+",
+                        name: "TCGA-OR-A5J2-01"
+                    },
+                    {
+                        chr: "1",
+                        start: 3218630,
+                        end: 3218690,
+                        strand:"-",
+                        name: "TCGA-OR-A5J2-01"
+                    }
+                ],
+                indexed: false
+            }]
+        };
+        igv.createBrowser(igvDiv, options);
+
+
+    });
+
+</script>
+
+</body>
+
+</html>
