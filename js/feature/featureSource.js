@@ -59,6 +59,7 @@ const FeatureSource = function (config, genome) {
 
     if (config.features && Array.isArray(config.features)) {
         let features = config.features;
+        packFeatures(features);
         if (config.mappings) {
             mapProperties(features, config.mappings)
         }
@@ -242,12 +243,13 @@ FeatureSource.prototype.ingestFeatures = function (featureList, genomicInterval)
 
 function packFeatures(features, maxRows) {
 
+
+    maxRows = maxRows || 1000;
     if (features == null || features.length === 0) {
         return;
     }
 
     // Segregate by chromosome
-
     var chrFeatureMap = {},
         chrs = [];
     features.forEach(function (feature) {
@@ -267,7 +269,6 @@ function packFeatures(features, maxRows) {
     // Loop through chrosomosomes and pack features;
 
     chrs.forEach(function (chr) {
-
         pack(chrFeatureMap[chr], maxRows);
     });
 
@@ -282,22 +283,19 @@ function packFeatures(features, maxRows) {
         })
         rows.push(-1000);
 
-        featureList.forEach(function (feature) {
-
+        for(let feature of featureList) {
             let r = 0
             const len = Math.min(rows.length, maxRows)
             for (r = 0; r < len; r++) {
                 if (feature.start > rows[r]) {
                     feature.row = r;
                     rows[r] = feature.end;
-                    return;
+                    break;
                 }
             }
             feature.row = r;
             rows[r] = feature.end;
-
-
-        });
+        }
     }
 }
 
