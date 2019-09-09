@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "build": "grunt",
-    "test": "grunt test",
+    "test": "webpack test/test.js -o test/testBundle.js; grunt test",
     "grunt": "node node_modules/grunt/bin/grunt",
     "prepack": "node_modules/grunt/bin/grunt",
     "http-server": "node_modules/http-server/bin/http-server ."
