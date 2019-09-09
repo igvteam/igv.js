@@ -17,7 +17,7 @@ module.exports = function (grunt) {
                         outputConsole: false,
                         outputAllAssertions: false
                     },
-                    qunitPage: 'http://0.0.0.0:8000/test/runTests.html'
+                    qunitPage: 'http://0.0.0.0:8000/test/runTestBundle.html'
                 }
             }
         },
