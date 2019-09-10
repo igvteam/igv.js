@@ -43,8 +43,6 @@ import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
-import TrackFactory from "./trackFactory"
-import ROI from "./roi"
 
 const version = "@VERSION";
 
