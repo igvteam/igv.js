@@ -1,8 +1,8 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import {createIcon} from "../igv-icons.js";
-import {appleCrayonPalette} from "../util/colorPalletes"
-import IGVColor from "../igv-color"
+import {appleCrayonPalette} from "../util/colorPalletes.js"
+import IGVColor from "../igv-color.js"
 
 function attachDialogCloseHandlerWithParent($parent, closeHandler) {
 
