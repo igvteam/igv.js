@@ -119,7 +119,7 @@ This creates a dist folder with the following files
 To run the tests from the command line
 
 ```
-    grunt test
+npm run test
 ```
 
 To run the tests in a browser start an [http-server](https://www.npmjs.com/package/http-server)
