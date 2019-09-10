@@ -657,9 +657,14 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
 
         const shim = 4;
         const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-        // context.addTrackGroupWithTranslationAndClipRect((`${ id }_track_label`), x, y, width, height, 0);
-        context.strokeText(this.$trackLabel.text(), x, y + height - shim);
+
+        context.font = "12px Arial";
+        context.fillStyle = 'rgb(68, 68, 68)';
+        context.fillText(this.$trackLabel.text(), x, y + height - shim);
+
         const { width: stringWidth } = context.measureText(this.$trackLabel.text());
+
+        context.strokeStyle = 'rgb(68, 68, 68)';
         context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
 
     }
