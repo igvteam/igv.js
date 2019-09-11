@@ -24,7 +24,7 @@
  */
 
 import igvxhr from "../igvxhr.js";
-import {getBrowser} from "../igv-create.js";
+import {presentAlert} from "../ui/alerts.js";
 
 const VARIANT = "VARIANT";
 const TRAIT = "TRAIT";
@@ -99,7 +99,7 @@ T2DVariantSource.prototype.getFeatures = function (chr, bpStart, bpEnd) {
 
                     if (json.error_code) {
                         //alert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")");
-                        getBrowser().presentAlert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")", undefined);
+                        presentAlert("Error querying trait " + self.trait + "  (error_code=" + json.error_code + ")", undefined);
                         fulfill(null);
                     } else {
                         variants = self.jsonToVariants(json, self.config);
