@@ -11,10 +11,10 @@
   ],
   "module": "js/api.js",
   "scripts": {
-    "build": "grunt",
-    "test": "webpack test/test.js -o test/testBundle.js; grunt test",
+    "build": "node wrapper/generateEmbedCss.js; grunt",
+    "test": "node wrapper/generateEmbedCss.js; webpack test/test.js -o test/testBundle.js; grunt test",
     "grunt": "node node_modules/grunt/bin/grunt",
-    "prepack": "node_modules/grunt/bin/grunt",
+    "prepack": "npm run build",
     "http-server": "node_modules/http-server/bin/http-server ."
   },
   "author": {
@@ -43,6 +43,7 @@
   "browserslist": "> 1%, not dead",
   "devDependencies": {
     "@babel/core": "^7.4.5",
+    "@babel/plugin-transform-regenerator": "^7.4.5",
     "@babel/preset-env": "^7.4.5",
     "babel-loader": "^8.0.6",
     "babel-plugin-transform-remove-console": "^6.9.4",
@@ -58,6 +59,9 @@
     "grunt-qunit-puppeteer": "^1.0.13",
     "grunt-webpack": "^3.1.3",
     "http-server": "^0.11.1",
+    "i": "^0.3.6",
+    "npm": "^6.11.3",
+    "regenerator-runtime": "^0.13.3",
     "sass": "^1.22.9",
     "shelljs": "^0.8.3",
     "webpack": "^4.34.0",

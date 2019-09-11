@@ -2,12 +2,12 @@ const path = require('path')
 
 function configFor(target) {
 
-    let filenameQualifier =  'umd' === target ? '' :  '.' + target;
+    let filenameQualifier = 'umd' === target ? '' : '.' + target;
     let libraryTarget = 'esm' === target ? 'var' : target
 
     return {
-        mode: 'production',
-        entry: ['babel-polyfill', './tmp/embedCss.js', './js/api.js'],
+        mode: 'development',
+        entry: ['regenerator-runtime/runtime', './js/api.js'],
         target: 'web',
         output: {
             path: path.resolve(__dirname, 'dist'),
@@ -23,14 +23,12 @@ function configFor(target) {
                         loader: 'babel-loader',
                         options: {
                             presets: [
-                                ["@babel/preset-env", {
-                                    "targets": {
-                                        // The % refers to the global coverage of users from browserslist
-                                        "browsers": ">0.1%"
-                                    }
-                                }]
+                                '@babel/preset-env',
+
                             ],
-                            plugins: [["transform-remove-console", {"exclude": ["error", "warn"]}]]
+                            plugins: [
+                                "@babel/plugin-transform-regenerator",
+                                ["transform-remove-console", {"exclude": ["error", "warn"]}]]
                         },
 
                     },
