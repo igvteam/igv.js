@@ -32,7 +32,7 @@
  *   Search       findOverlapping
  */
 
-import {getBrowser} from "./igv-create.js";
+import {presentAlert} from "./ui/alerts.js";
 
 var BLACK = 1;
 var RED = 2;
@@ -312,7 +312,7 @@ Interval.prototype.overlaps = function (other) {
         return (this.low <= other.high && other.low <= this.high);
     } catch (e) {
         //alert(e);
-        getBrowser().presentAlert(e, undefined);
+        presentAlert(e, undefined);
     }
 }
 
