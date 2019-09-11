@@ -600,7 +600,24 @@ Browser.prototype.loadTrack = async function (config) {
         return Promise.resolve();
     }
 
-    await resolveTrackProperties(config)
+    if (isString(config.url) && config.url.startsWith("https://drive.google.com")) {
+        const json = await google.getDriveFileInfo(config.url)
+        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
+        if (!config.filename) {
+            config.filename = json.originalFileName;
+        }
+        if (!config.format) {
+            config.format = inferFileFormat(config.filename);
+        }
+        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
+            config.indexURL = google.driveDownloadURL(config.indexURL);
+        }
+
+    } else {
+        if (config.url && !config.filename) {
+            config.filename = getFilename(config.url);
+        }
+    }
 
     inferTrackTypes(config);
 
@@ -641,36 +658,8 @@ Browser.prototype.loadTrack = async function (config) {
     } finally {
         if (!config.noSpinner) this.stopSpinner();
     }
-
-    async function resolveTrackProperties(config) {
-
-        if (isString(config.url) && config.url.startsWith("https://drive.google.com")) {
-
-            const json = await google.getDriveFileInfo(config.url)
-
-            config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
-            if (!config.filename) {
-                config.filename = json.originalFileName;
-            }
-            if (!config.format) {
-                config.format = inferFileFormat(config.filename);
-            }
-            if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-                config.indexURL = google.driveDownloadURL(config.indexURL);
-            }
-
-            return config;
-
-
-        } else {
-            if (config.url && !config.filename) {
-                config.filename = getFilename(config.url);
-            }
-            return config;
-        }
-    }
-
 }
+
 
 Browser.prototype.createTrack = function (config) {
 
