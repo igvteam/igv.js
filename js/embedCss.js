@@ -10,4 +10,4 @@ function embedCSS() {
 
 }
 
-export default embedCSS()
+export default embedCSS
