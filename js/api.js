@@ -23,6 +23,7 @@ import AlertDialog from "./ui/alertDialog.js";
 import InputDialog from "./ui/inputDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
+import embedCss from "./embedCss.js"
 
 function setGoogleOauthToken(accessToken) {
     return oauth.setToken(accessToken);
@@ -40,6 +41,8 @@ function appendRightHandGutter($parent) {
 const xhr = igvxhr;
 const Color = IGVColor;
 const graphics = IGVGraphics;
+
+embedCss();
 
 export {
     createBrowser,
