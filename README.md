@@ -105,7 +105,7 @@ Building igv.js and running the examples requires [node.js](https://nodejs.org/)
 git clone https://github.com/igvteam/igv.js.git
 cd igv.js
 npm install
-npm run grunt
+npm run build
 ```
 
 This creates a dist folder with the following files
