@@ -135,7 +135,7 @@ To run the examples start an [http-server](https://www.npmjs.com/package/http-se
 
     npm run http-server
 
-Then open [http://localhost:8080/index.html](http://localhost:8080/index.html).
+Then open [http://localhost:8080/examples](http://localhost:8080/examples).
 
 
 # Supported Browsers
