@@ -5,8 +5,11 @@
   "main": "dist/igv.esm.js",
   "files": [
     "dist/**",
-    "examples/**"
+    "examples/**",
+    "js/**",
+    "css/**"
   ],
+  "module": "js/api.js",
   "scripts": {
     "build": "grunt",
     "test": "webpack test/test.js -o test/testBundle.js; grunt test",
