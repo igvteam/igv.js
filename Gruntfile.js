@@ -67,7 +67,6 @@ module.exports = function (grunt) {
     // 4. Where we tell Grunt what to do when we type "grunt" into the terminal.
     grunt.registerTask('default', [
         'clean:dist',
-        'embed-css',
         'webpack:umd',
         'webpack:esm',
         'concat:igv_esm',
@@ -76,15 +75,5 @@ module.exports = function (grunt) {
 
     grunt.registerTask('test', ['connect', 'qunit_puppeteer:test']);
 
-    grunt.task.registerTask('embed-css', 'One line-ify igv.css.', function () {
-
-        let ping = grunt.file.read('css/igv.css');
-        ping = ping.replace(/\r\n/g, '\\n');
-        ping = ping.replace(/\n/g, '\\n');
-        ping = ping.replace(/"/g, '\\"');
-        let foo = grunt.file.read('wrapper/embedCss.js');
-        foo = foo.replace('_CSS_', ping);
-        grunt.file.write('tmp/embedCss.js', foo);
-    });
 };
 

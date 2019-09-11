@@ -1,4 +1,4 @@
-(function () {
+function embedCSS() {
 
     var css =  '_CSS_';
 
@@ -8,4 +8,6 @@
 
     document.head.insertBefore(style, document.head.childNodes[ document.head.childNodes.length - 1 ]);
 
-})();
+}
+
+export default embedCSS
