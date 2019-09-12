@@ -6,7 +6,7 @@ function configFor(target) {
     let libraryTarget = 'esm' === target ? 'var' : target
 
     return {
-        mode: 'development',
+        mode: 'production',
         entry: ['regenerator-runtime/runtime', './js/api.js'],
         target: 'web',
         output: {
