@@ -15,7 +15,6 @@
     "build-umd": "node wrapper/injectRuntime.js; npx terser --compress --mangle --source-map \"url='igv.min.js.map'\" --output  dist/igv.min.js -- dist/igv.js",
     "build-es6": "npx terser --module --compress --mangle --source-map \"url='igv.esm.min.js.map'\" --output  dist/igv.esm.min.js -- dist/igv.esm.js",
     "test": "node runTests.js",
-    "grunt": "node node_modules/grunt/bin/grunt",
     "prepack": "npm run build",
     "http-server": "node_modules/http-server/bin/http-server ."
   },
