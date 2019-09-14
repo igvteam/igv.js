@@ -2,45 +2,45 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>IGV - Custom Track Click - Popover</title>
 
     <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
 
     <!-- Examples CSS -->
-    <link rel="stylesheet" href="css/custom-track-click.css">
+    <link href="css/custom-track-click.css" rel="stylesheet">
 
     <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    <script crossorigin="anonymous"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script crossorigin="anonymous"
             integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 
     <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    <script crossorigin="anonymous"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
 <body>
 
-<main role="main" class="container">
+<main class="container" role="main">
 
     <div class="igv-custom-track-click-container">
         <h2>
@@ -62,65 +62,62 @@
     </div>
 
     <div class="row">
-        <div id="igv-custom-track-popover" class="col-sm-12"></div>
+        <div class="col-sm-12" id="igv-custom-track-popover"></div>
     </div>
 
 </main>
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    $(document).ready(function () {
+    var options =
+        {
+            showNavigation: true,
+            locus: "chr1:155,160,475-155,184,282",
+            genome: "hg19",
+        };
 
-        var options =
-            {
-                showNavigation: true,
-                locus: "chr1:155,160,475-155,184,282",
-                genome: "hg19",
-            };
+    var igv_custom_track_popover = $('#igv-custom-track-popover');
 
-        var igv_custom_track_popover = $('#igv-custom-track-popover');
+    igv.createBrowser(igv_custom_track_popover.get(0), options)
 
-        createBrowser(igv_custom_track_popover.get(0), options)
+        .then(function (browser) {
+            browser.on('trackclick', function (track, popoverData) {
 
-            .then(function (browser) {
-                browser.on('trackclick', function (track, popoverData) {
+                var markup = "<table class=\"igv-popover-table\">";
 
-                    var markup = "<table class=\"igv-popover-table\">";
+                // Don't show a pop-over when there's no data.
+                if (!popoverData || !popoverData.length) {
+                    return false;
+                }
 
-                    // Don't show a pop-over when there's no data.
-                    if (!popoverData || !popoverData.length) {
-                        return false;
+                popoverData.forEach(function (nameValue) {
+
+                    if (nameValue.name) {
+
+                        var value = nameValue.name.toLowerCase() === 'name'
+                            ? '<a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
+                            : nameValue.value;
+
+                        markup += "<tr><td class=\"igv-popover-td\">"
+                            + "<div class=\"igv-popover-name-value\">"
+                            + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>"
+                            + "<span class=\"igv-popover-value\">" + value + "</span>"
+                            + "</div>" + "</td></tr>";
+                    } else {
+                        // not a name/value pair
+                        markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
                     }
-
-                    popoverData.forEach(function (nameValue) {
-
-                        if (nameValue.name) {
-
-                            var value = nameValue.name.toLowerCase() === 'name'
-                                ? '<a href="https://uswest.ensembl.org/Multi/Search/Results?q=' + nameValue.value + '">' + nameValue.value + '</a>'
-                                : nameValue.value;
-
-                            markup += "<tr><td class=\"igv-popover-td\">"
-                                + "<div class=\"igv-popover-name-value\">"
-                                + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>"
-                                + "<span class=\"igv-popover-value\">" + value + "</span>"
-                                + "</div>" + "</td></tr>";
-                        } else {
-                            // not a name/value pair
-                            markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
-                        }
-                    });
-
-                    markup += "</table>";
-
-                    // By returning a string from the trackclick handler we're asking IGV to use our custom HTML in its pop-over.
-                    return markup;
                 });
-            });
 
-    });
+                markup += "</table>";
+
+                // By returning a string from the trackclick handler we're asking IGV to use our custom HTML in its pop-over.
+                return markup;
+            });
+        });
+
 
 </script>
 

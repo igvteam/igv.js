@@ -1,17 +1,19 @@
+import igvxhr from "../../js/igvxhr.js";
+
 var cBio = {
 
 
     fetchStudies: function () {
 
         let url = "http://www.cbioportal.org/api/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
-        return igv.xhr.loadJson(url);
+        return igvxhr.loadJson(url);
     },
 
     fetchSamplesByStudy: function (study) {
 
         let url = "http://www.cbioportal.org/api/studies/" + study + "/samples";
 
-        return igv.xhr.loadJson(url)
+        return igvxhr.loadJson(url)
 
             .then(function (samples) {
 
@@ -38,7 +40,7 @@ var cBio = {
                 let url = "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY";
                 let body = JSON.stringify(sampleStudyList);
 
-                return igv.xhr.loadJson(url, {method: "POST", sendData: body})
+                return igvxhr.loadJson(url, {method: "POST", sendData: body})
 
             })
     },
@@ -121,3 +123,5 @@ var cBio = {
 //     "chromosome": "1",
 //     "numberOfProbes": 958
 // }
+
+export default cBio;

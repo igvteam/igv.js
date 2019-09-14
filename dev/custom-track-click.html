@@ -2,45 +2,45 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>IGV - Custom Track Click</title>
 
     <!-- Bootstrap 4 - CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
-          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <link crossorigin="anonymous" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" rel="stylesheet">
 
     <!-- Examples CSS -->
-    <link rel="stylesheet" href="css/custom-track-click.css">
+    <link href="css/custom-track-click.css" rel="stylesheet">
 
     <!-- Bootstrap 4 Dependancies - jQuery | Popper -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
+    <script crossorigin="anonymous"
             integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-            crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+            src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+    <script crossorigin="anonymous"
             integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
-            crossorigin="anonymous"></script>
+            src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
 
     <!-- Bootstrap 4 - JS -->
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+    <script crossorigin="anonymous"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-            crossorigin="anonymous"></script>
+            src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
 
     <!-- IGV JS-->
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
 <body>
 
-<main role="main" class="container">
+<main class="container" role="main">
 
     <div class="igv-custom-track-click-container">
         <h2>IGV.js <code>trackclick</code> Event Example 2</h2>
@@ -58,8 +58,8 @@
     </div>
 
     <div class="row">
-        <div id="igv-custom-track-click" class="col-sm-9"></div>
-        <div id="igv-custom-track-click-selected-genes" class="col-sm-3">
+        <div class="col-sm-9" id="igv-custom-track-click"></div>
+        <div class="col-sm-3" id="igv-custom-track-click-selected-genes">
             <h4>Selected Genes</h4>
             <ul id="geneList">
 
@@ -71,43 +71,43 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
     $(document).ready(function () {
 
-       var options =
-        {
-            showNavigation: true,
-            locus: "chr1:155,160,475-155,184,282",
-            genome: "hg19",
+        var options =
+            {
+                showNavigation: true,
+                locus: "chr1:155,160,475-155,184,282",
+                genome: "hg19",
 
-        };
+            };
 
         var igv_custom_track_click = $('#igv-custom-track-click');
 
-        createBrowser(igv_custom_track_click.get(0), options)
+        igv.createBrowser(igv_custom_track_click.get(0), options)
 
-                .then(function (browser) {
+            .then(function (browser) {
 
-                    var genesInList = {};
+                var genesInList = {};
 
-                    browser.on('trackclick', function (track, popoverData) {
-                        var symbol = null;
-                        popoverData.forEach(function (nameValue) {
-                            if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
-                                symbol = nameValue.value;
-                            }
-                        });
-
-                        if (symbol && !genesInList[symbol]) {
-                            genesInList[symbol] = true;
-                            $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>');
+                browser.on('trackclick', function (track, popoverData) {
+                    var symbol = null;
+                    popoverData.forEach(function (nameValue) {
+                        if (nameValue.name && nameValue.name.toLowerCase() === 'name') {
+                            symbol = nameValue.value;
                         }
-
-                        return false // Prevent default pop-over behavior
-                        //return true;  // Do default pop-over behavior
                     });
+
+                    if (symbol && !genesInList[symbol]) {
+                        genesInList[symbol] = true;
+                        $("#geneList").append('<li><a href="http://uswest.ensembl.org/Multi/Search/Results?q=' + symbol + '">' + symbol + '</a></li>');
+                    }
+
+                    return false // Prevent default pop-over behavior
+                    //return true;  // Do default pop-over behavior
                 });
+            });
     });
 
 </script>

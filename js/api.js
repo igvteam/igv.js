@@ -44,7 +44,7 @@ const graphics = IGVGraphics;
 
 embedCss();
 
-export {
+export default {
     createBrowser,
     removeBrowser,
     visibilityChange,
