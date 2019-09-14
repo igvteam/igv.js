@@ -2,18 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
@@ -25,37 +24,33 @@
 <script type="module">
 
     import google from "../js/google/googleUtils.js";
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
+    google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-        google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+        .then(function (google) {
 
-            .then(function (google) {
+            const options =
+                {
+                    genome: "hg38",
+                    locus: "chr1:16760749",
+                    tracks: [
+                        {
+                            name: "VCF Indels",
+                            type: "variant",
+                            format: "vcf",
+                            indexed: false,
+                            url: "../test/data/vcf/example-indels/example.vcf"
+                        }
+                    ]
+                };
 
-                const options =
-                    {
-                        genome: "hg38",
-                        locus: "chr1:16760749",
-                        tracks: [
-                            {
-                                name: "VCF Indels",
-                                type: "variant",
-                                format: "vcf",
-                                indexed: false,
-                                url: "../test/data/vcf/example-indels/example.vcf"
-                            }
-                        ]
-                    };
+            igv.createBrowser(document.getElementById('igvDiv'), options)
+                .then(function (browser) {
 
-                createBrowser(document.getElementById('igvDiv'), options)
-                    .then(function (browser) {
+                })
 
-                    })
-
-            })
-    });
-
+        })
 
 </script>
 

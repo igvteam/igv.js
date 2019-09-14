@@ -3,7 +3,7 @@ import GtexUtils from "../../js/gtex/gtexUtils.js";
 
 const igvdev = {
 
-    createTrackList:  function (div, file, browser) {
+    createTrackList: function (div, file, browser) {
 
 
         return igvxhr.loadJson(file)
@@ -18,8 +18,7 @@ const igvdev = {
                         div.insertAdjacentHTML("beforeend",
                             "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
                             + track.HEADING + "</div>");
-                    }
-                    else {
+                    } else {
                         trackDiv = document.createElement('div');
                         trackDiv.innerHTML = track.name;
                         trackDiv.addEventListener('click', function (event) {
@@ -43,7 +42,7 @@ const igvdev = {
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                json[ 'tissueInfo' ].forEach(function (obj) {
+                json['tissueInfo'].forEach(function (obj) {
 
                     let trackDiv = document.createElement('div');
                     trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));

@@ -2,17 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
 
     <title>igv.js</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
@@ -24,59 +24,57 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
+    var igvDiv = document.getElementById("igv-div");
+    var options =
+        {
+            reference: {
+                "id": "hg19",
+                "fastaURL": "data/hg19.snippet.fasta",
+                "indexed": false,
+                "cytobandURL": "data/cytoband.hg19.snippet.txt",
+                "tracks": [
+                    {
+                        "name": "RefGene",
+                        "url": "data/refgene.hg19.snippet.bed"
+                    }
+                ]
+            },
+            locus: 'chr20:1233820-1235180',
+            tracks:
+                [
+                    {
+                        "name": "Copy number",
+                        "type": "seg",
+                        "displayMode": "EXPANDED",
+                        "height": 100,
+                        "isLog": true,
+                        "features": [
+                            {
+                                "chr": "chr20",
+                                "start": 1233820,
+                                "end": 1235000,
+                                "value": 0.8239,
+                                "sample": "TCGA-OR-A5J2-01"
+                            },
+                            {
+                                "chr": "chr20",
+                                "start": 1234500,
+                                "end": 1235180,
+                                "value": -0.8391,
+                                "sample": "TCGA-OR-A5J3-01"
+                            }
+                        ]
+                    }
+                ]
+        }
 
-        var igvDiv = document.getElementById("igv-div");
-        var options =
-            {
-                reference: {
-                    "id": "hg19",
-                    "fastaURL": "data/hg19.snippet.fasta",
-                    "indexed": false,
-                    "cytobandURL": "data/cytoband.hg19.snippet.txt",
-                    "tracks": [
-                        {
-                            "name": "RefGene",
-                            "url": "data/refgene.hg19.snippet.bed"
-                        }
-                    ]
-                },
-                locus: 'chr20:1233820-1235180',
-                tracks:
-                    [
-                        {
-                            "name": "Copy number",
-                            "type": "seg",
-                            "displayMode": "EXPANDED",
-                            "height": 100,
-                            "isLog": true,
-                            "features": [
-                                {
-                                    "chr": "chr20",
-                                    "start": 1233820,
-                                    "end": 1235000,
-                                    "value": 0.8239,
-                                    "sample": "TCGA-OR-A5J2-01"
-                                },
-                                {
-                                    "chr": "chr20",
-                                    "start": 1234500,
-                                    "end": 1235180,
-                                    "value": -0.8391,
-                                    "sample": "TCGA-OR-A5J3-01"
-                                }
-                            ]
-                        }
-                    ]
-            }
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
-        createBrowser(igvDiv, options)
-            .then(function (browser) {
-                console.log("Created IGV browser");
-            })
-    });
 
 </script>
 

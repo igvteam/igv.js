@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
@@ -22,7 +22,7 @@
     <label>Session file: <input id="session" type="file"/></label>
 </div>
 <div>
-    <button onclick="loadSession()">Load session</button>
+    <button id="loadSessionBtn">Load session</button>
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
@@ -30,10 +30,26 @@
 
 <script type="text/javascript">
 
+
+</script>
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        showRuler: true,
+        showChromosomeWidget: true,
+        genome: "hg19"
+    };
+
     let igvBrowser;
+    igv.createBrowser(div, options)
+        .then(function (browser) {
+            igvBrowser = browser;
+        })
 
     function loadSession() {
-
         var sessionFile = document.getElementById('session').files[0];
         igvBrowser
             .loadSession({file: sessionFile})
@@ -42,26 +58,7 @@
             })
     }
 
-</script>
-<script type="module">
-
-    import {createBrowser} from "../js/igv-create.js";
-
-    const div = document.getElementById("myDiv");
-
-    const options = {
-        showRuler: true,
-        showChromosomeWidget: true,
-        genome: "hg19"
-    };
-
-    createBrowser(div, options).then(function (browser) {
-        igvBrowser = browser;
-        //
-        // const session = "data:application/gzip;base64,H4sIAAbNClwC/w3Hx5KiQAAA0F/Z8spWMWiDMlt7gBaVHCTfmtzkgSbo1Pz77ru978OUF/mU92l++Pz1fSjQTJDnaP9zyBBBn2gcW5wigoeeLt94/JOgOefA7weYZUFIDNhukD4zTzM4X3XxOl/AcLGbJFUsEcOeLS0MN+/+9aA/smPcNGMWQamC+2uJd41ecPHm1wkc1/lN36k1OCV0wcEWG5RrViKREo6hlnmy0TAGUQDcUSDn6sq/G0uU2ODEh3u1uTS3aCcVlukgJrYQqSQetG1UpizAvnX/6urT7Wrns1NrpJMm3ryEmqzfZBbm5l1NGiojprBFk1EitJAqym03atrjwu2KjFpfkmZx7PbgbTh67giLsmGPudn9DFaPEWAjHut0iXp2hhi9CGllRt2tm4YNxglQ7O8M10+ZCtTJ3GmMwqxYPO/RlVjb3C7zta7K9a/bjsJYbuPUYPdwKlu+1ja2q+2zo6n3RlEweQFv9fXKcuJx3J7bs2vb+pWubs5TelQMH3V4YsBC0QX0awas4CoIwt/Dz88/fLgIFuABAAA=";
-        // browser.loadSession(session);
-
-    })
+    document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
 
 
 </script>

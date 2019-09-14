@@ -6,14 +6,12 @@
     "url": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
     "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai"
   },
-
   {
     "type": "annotation",
     "name": "genes - dropbox",
     "format": "gtf",
     "url": "https://www.dropbox.com/s/4fk2wk0eulam1j0/genes.gtf.gz?dl=0",
     "indexURL": "https://www.dropbox.com/s/wtaqm2k7ag87xrj/genes.gtf.gz.tbi?dl=0"
-
   },
   {
     "type": "annotation",
@@ -22,7 +20,6 @@
     "filename": "genes.gtf.gz",
     "url": "https://drive.google.com/open?id=1ANNz7TTL_rBue-mXqwnvcQZEP6JiVBbH&key=AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0",
     "indexURL": "https://drive.google.com/open?id=1TqiSv8uRnaqHpn9E7DJcol8Qy9HPPbAs&key=AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0"
-
   },
   {
     "type": "alignment",
@@ -49,14 +46,14 @@
     "name": "Heart SLC25S3 - Google Drive",
     "format": "cram",
     "url": "https://drive.google.com/open?id=1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo",
-    "indexURL":"https://drive.google.com/open?id=1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2"
+    "indexURL": "https://drive.google.com/open?id=1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2"
   },
   {
     "type": "alignment",
     "name": "Heart SLC25S3 - Google Drive - Form 2",
     "format": "cram",
     "url": "https://drive.google.com/a/cloud.ucsd.edu/file/d/1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo/view?usp=sharing",
-    "indexURL":"https://drive.google.com/a/cloud.ucsd.edu/file/d/1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2/view?usp=sharing"
+    "indexURL": "https://drive.google.com/a/cloud.ucsd.edu/file/d/1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2/view?usp=sharing"
   },
   {
     "type": "alignment",

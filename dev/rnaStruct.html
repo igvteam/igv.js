@@ -2,18 +2,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
@@ -36,7 +35,9 @@
 </script>
 
 <script type="module">
-    import {createBrowser} from "../js/igv-create.js";
+
+    import igv from "../js/api.js";
+
     const div = document.getElementById("myDiv");
     const options = {
         reference: {
@@ -59,7 +60,7 @@
         ]
     };
 
-    createBrowser(div, options);
+    igv.createBrowser(div, options);
 
 
 </script>
