@@ -2,18 +2,18 @@
 <html lang="en">
 
 <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="//igv.org/web/img/favicon.ico" rel="shortcut icon">
     <title>IGV Examples - Locus Change Event</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
@@ -46,30 +46,27 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
+    var HASH_PREFIX = "#/locus/";
+    var currentHash = window.location.hash;
+    var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
 
-        var HASH_PREFIX = "#/locus/";
-        var currentHash = window.location.hash;
-        var locus = (0 === currentHash && currentHash.indexOf(HASH_PREFIX)) ? currentHash.substr(HASH_PREFIX.length) : "chr1:155,160,475-155,184,282";
+    var options = {
+        locus: locus,
+        genome: "hg19"
+    };
 
-        var options = {
-            locus: locus,
-            genome: "hg19"
-        };
+    var browser = igv.createBrowser(document.getElementById("igvDiv"), options)
 
-        var browser = createBrowser(document.getElementById("igvDiv"), options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
 
-                .then(function (browser) {
-                    console.log("Created IGV browser");
+            browser.on('locuschange', function (referenceFrame) {
+                window.location.replace(HASH_PREFIX + referenceFrame.label);
+            });
+        });
 
-                    browser.on('locuschange', function (referenceFrame) {
-                        window.location.replace(HASH_PREFIX + referenceFrame.label);
-                    });
-                });
-
-    });
 
 </script>
 

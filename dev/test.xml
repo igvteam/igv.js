@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<Session genome="http://homer.ucsd.edu/cbenner/test/report-170817//homo_sapiens/genome.fa" hasGeneTrack="false" ucscID="hg38"
+<Session genome="http://homer.ucsd.edu/cbenner/test/report-170817//homo_sapiens/genome.fa" hasGeneTrack="false"
+         ucscID="hg38"
          hasSequenceTrack="true" locus="All" nextAutoscaleGroup="1" path="igv_session.xml" version="8">
     <Resources>
         <Resource path="http://homer.ucsd.edu/cbenner/test/report-170817//homo_sapiens/mSTART.1nt.pos.bw"/>

@@ -2,29 +2,29 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
 <body>
 
 <div id="controlDiv" style="border: 1px solid red; padding: 20px;">
-    <button id="myBtn" style="font-size: 24px" >Add Track, list names</button>
+    <button id="myBtn" style="font-size: 24px">Add Track, list names</button>
 </div>
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import * as igv from "../js/api.js";
+    import igv from "../js/api.js";
 
     let browser;
 

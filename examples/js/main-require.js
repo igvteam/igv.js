@@ -11,7 +11,7 @@ requirejs.config({
 
 // Start loading the main app file. Put all of
 // your application logic in there.
-requirejs(['igv.min'], function (igv) {
+requirejs(['igv'], function (igv) {
 
 
     var igvDiv = document.getElementById("igv-div");

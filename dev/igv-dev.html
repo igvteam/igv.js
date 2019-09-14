@@ -2,16 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
@@ -19,25 +18,21 @@
 <body>
 
 <div>
-    <button onclick="bookmark();">Bookmark</button>
+    <button id="bmBtn">Bookmark</button>
 </div>
 
 <h3>Example tracks - click to load</h3>
 
 <div id="trackList"></div>
 
-<button onclick="printLocus()">Print Locus</button>
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 </body>
 
 <script type="module">
 
-    import * as igv from "../js/api.js";
-    // import {createBrowser} from "../js/igv-create.js";
-    // import GtexUtils from "../js/gtex/gtexUtils.js";
-     import google from "../js/google/googleUtils.js";
-    // import igvxhr from "../js/igvxhr.js";
+    import igv from "../js/api.js";
+    import google from "../js/google/googleUtils.js";
 
     let browser;
     google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
@@ -128,5 +123,8 @@
     function bookmark() {
         window.history.pushState({}, "IGV", browser.sessionURL());
     }
+
+    document.getElementById("bmBtn").addEventListener("click", bookmark);
+
 </script>
 </html>

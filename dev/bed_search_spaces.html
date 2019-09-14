@@ -2,57 +2,54 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
 
 <body>
 
-<h1>Try searching for  'kan2 marker'</h1>
+<h1>Try searching for 'kan2 marker'</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
+    const options =
+        {
+            genome: "hg19",
+            flanking: 1000,
+            tracks: [
+                {
+                    name: "Annotations",
+                    type: "annotation",
+                    format: "bed",
+                    delimiter: "\t",
+                    url: "../test/data/bed/names_with_spaces.bed",
+                    indexed: false,
+                    searchable: true,
+                }
+            ]
+        };
 
-        const options =
-            {
-                genome: "hg19",
-                flanking: 1000,
-                tracks: [
-                    {
-                        name: "Annotations",
-                        type: "annotation",
-                        format: "bed",
-                        delimiter: "\t",
-                        url: "../test/data/bed/names_with_spaces.bed",
-                        indexed: false,
-                        searchable: true,
-                    }
-                ]
-            };
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
 
-        createBrowser(document.getElementById('igvDiv'), options)
-            .then(function (browser) {
+        })
 
-            })
-
-    });
 
 </script>
 

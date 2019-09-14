@@ -18,7 +18,7 @@ function initClient() {
                 'scope': scope
             });
         })
-        
+
         .then(function (ignore) {
             gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
         })
@@ -39,7 +39,7 @@ function initClient() {
                     igv.browser = b;
                 })
 
-            
+
         })
 
     //
@@ -64,7 +64,6 @@ function initClient() {
 }
 
 
-
 // Create and render a Picker object for picking files.
 function createPicker() {
     var view, view2, accessToken;
@@ -83,7 +82,6 @@ function createPicker() {
                 view2.setIncludeFolders(true)
 
 
-
                 picker = new google.picker
                     .PickerBuilder()
                     .setAppId(igv.google.properties["project_number"])
@@ -96,8 +94,7 @@ function createPicker() {
                     .build();
 
                 picker.setVisible(true);
-            }
-            else {
+            } else {
                 igv.browser.presentAlert("Sign into Google before using picker");
             }
         })
@@ -153,22 +150,22 @@ function createPicker() {
             name = doc[google.picker.Document.NAME];
             id = doc[google.picker.Document.ID];
 
-           /// format = igv.inferFileFormat(name);
+            /// format = igv.inferFileFormat(name);
 
-           // if (!format) {
-           //     alert("Unrecognized file format: " + name);
-           // }
-           // else {
+            // if (!format) {
+            //     alert("Unrecognized file format: " + name);
+            // }
+            // else {
 
-                downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
+            downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
 
-                igv.browser.loadSession({
-                    url: downloadURL,
-                    filename: name,
-                    //name: name,
-                    //format: format
-                })
-           // }
+            igv.browser.loadSession({
+                url: downloadURL,
+                filename: name,
+                //name: name,
+                //format: format
+            })
+            // }
         }
 
     }

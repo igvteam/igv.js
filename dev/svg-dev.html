@@ -2,26 +2,22 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>SVG - Dev</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
-    <link rel="stylesheet" type="text/css" href="css/save_to_svg.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+    <link href="css/save_to_svg.css" rel="stylesheet" type="text/css"/>
 
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
 </head>
 
 <body>
-
-<div>
-    <button onclick="bookmark();">Bookmark</button>
-</div>
 
 <h3>Example tracks - click to load</h3>
 
@@ -45,10 +41,8 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
-    import GtexUtils from "../js/gtex/gtexUtils.js";
+    import igv from "../js/api.js";
     import google from "../js/google/googleUtils.js";
-    import igvxhr from "../js/igvxhr.js";
 
     (async () => {
 
@@ -65,12 +59,12 @@
 
             };
 
-        let browser = await createBrowser(document.getElementById('igv-app-container'), config);
+        let browser = await igv.createBrowser(document.getElementById('igv-app-container'), config);
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser);
 
         $('#igv-draw-svg-button').on('click', () => {
-            browser.renderSVG({ $container: $('#igv-svg-container') });
+            browser.renderSVG({$container: $('#igv-svg-container')});
         });
 
     })();
@@ -78,7 +72,7 @@
     function createTrackList(div, file, browser) {
 
 
-        return igvxhr.loadJson(file)
+        return igv.xhr.loadJson(file)
 
             .then(function (tracks) {
 
@@ -106,7 +100,7 @@
 
                 })
 
-                return GtexUtils.getTissueInfo("gtex_v7")
+                return igv.GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
@@ -131,8 +125,5 @@
 
     }
 
-    function bookmark() {
-        window.history.pushState({}, "IGV", browser.sessionURL());
-    }
 </script>
 </html>
