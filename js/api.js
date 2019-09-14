@@ -6,7 +6,7 @@ import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {guid} from "./util/domUtils.js";
+import {guid,pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
 import {attachDialogCloseHandlerWithParent, createColorSwatchSelector} from "./ui/ui-utils.js";
 import {getExtension, getFilename, isFilePath} from "./util/fileUtils.js";
 import {inferFileFormat, inferTrackTypes, knownFileExtensions} from './util/trackUtils.js';
@@ -65,6 +65,8 @@ export default {
     appendRightHandGutter,
     attachDialogCloseHandlerWithParent,
     guid,
+    pageCoordinates,
+    translateMouseCoordinates,
     createIcon,
     GtexUtils,
     xhr,
