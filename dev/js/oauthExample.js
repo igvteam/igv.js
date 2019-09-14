@@ -61,7 +61,7 @@ function initClient() {
         const user = gapi.auth2.getAuthInstance().currentUser.get();
         const token = user.getAuthResponse().access_token;
         igv.oauth.google.setToken(token);
-       // igv.oauth.setToken(token, "*googleapis*");
+        // igv.oauth.setToken(token, "*googleapis*");
     }
 
 }
@@ -99,8 +99,7 @@ function createPicker() {
                     .build();
 
                 picker.setVisible(true);
-            }
-            else {
+            } else {
                 igv.browser.presentAlert("Sign into Google before using picker");
             }
         })
@@ -153,8 +152,7 @@ function createPicker() {
 
             if (!format) {
                 alert("Unrecognized file format: " + name);
-            }
-            else {
+            } else {
 
                 downloadURL = "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media";
 

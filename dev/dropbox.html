@@ -2,16 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
     <!-- IGV CSS -->
 
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
@@ -22,27 +22,25 @@
 
 <script type="module">
 
-    import {createBrowser} from "../js/igv-create.js";
+    import igv from "../js/api.js";
 
-    document.addEventListener("DOMContentLoaded", function () {
+    const options = {
+        genome: "hg19",
+        locus: "egfr",
+        tracks: [
+            {
+                url: 'https://www.dropbox.com/s/pgpe92b3locpztq/egfr_hg38.bed?dl=0',
+                label: 'Protected bed'
+            },
+            {
+                url: 'https://www.dropbox.com/s/1630ue6t1co7lsg/egfr_hg38.bed.gz?dl=0',
+                label: 'Protected bed'
+            }
+        ]
+    };
 
-        const options = {
-            genome: "hg19",
-            locus: "egfr",
-            tracks: [
-                {
-                    url: 'https://www.dropbox.com/s/pgpe92b3locpztq/egfr_hg38.bed?dl=0',
-                    label: 'Protected bed'
-                },
-                {
-                    url: 'https://www.dropbox.com/s/1630ue6t1co7lsg/egfr_hg38.bed.gz?dl=0',
-                    label: 'Protected bed'
-                }
-            ]
-        };
+    igv.createBrowser(document.getElementById("myDiv"), options);
 
-        createBrowser(document.getElementById("myDiv"), options);
-    })
 </script>
 
 </body>
