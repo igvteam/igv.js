@@ -6,9 +6,7 @@
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
   "files": [
-    "dist/**",
-    "examples/**",
-    "js/**"
+    "dist/**"
   ],
   "scripts": {
     "build": "node wrapper/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
@@ -16,7 +14,7 @@
     "build-es6": "npx terser --module --compress --mangle --source-map \"url='igv.esm.min.js.map'\" --output  dist/igv.esm.min.js -- dist/igv.esm.js",
     "test": "node runTests.js",
     "prepack": "npm run build",
-    "http-server": "node_modules/http-server/bin/http-server ."
+    "http-server": "npx http-server ."
   },
   "author": {
     "name": "Jim Robinson"
@@ -54,6 +52,7 @@
     "rollup": "^1.21.2",
     "rollup-plugin-babel": "^4.3.3",
     "rollup-plugin-node-resolve": "^5.2.0",
+    "rollup-plugin-strip": "^1.2.2",
     "sass": "^1.22.9",
     "serve-static": "^1.14.1",
     "terser": "^4.3.1"
