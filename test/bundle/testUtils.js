@@ -33,7 +33,7 @@ function runUtilTests() {
      */
     QUnit.test("Track menu helper", function (assert) {
         const itemList = ['<hr/>'];
-        const result = igv.trackMenuItemListHelper(itemList);
+        const result = igv.MenuUtils.trackMenuItemListHelper(itemList);
         assert.equal(result.length, 1);
     });
 
