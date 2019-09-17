@@ -26,7 +26,7 @@
 import BamReader from "./bamReader.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
-import {presentAlert} from "../ui/alerts.js";
+import Alert from "../ui/alert.js";
 
 const ShardedBamReader = function (config, genome) {
 
@@ -86,7 +86,7 @@ ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
 
             .catch(function (error) {
                 console.error(error);
-                presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                Alert.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                 self.bamReaders[queryChr] = "none";
                 return new AlignmentContainer(chr, start, end);   // Empty alignment container
             })

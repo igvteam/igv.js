@@ -32,7 +32,7 @@
  *   Search       findOverlapping
  */
 
-import {presentAlert} from "./ui/alerts.js";
+import Alert from "./ui/alert.js";
 
 var BLACK = 1;
 var RED = 2;
@@ -312,7 +312,7 @@ Interval.prototype.overlaps = function (other) {
         return (this.low <= other.high && other.low <= this.high);
     } catch (e) {
         //alert(e);
-        presentAlert(e, undefined);
+        Alert.presentAlert(e, undefined);
     }
 }
 

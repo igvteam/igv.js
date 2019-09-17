@@ -4,49 +4,58 @@ import $ from "../vendor/jquery-3.3.1.slim.js";
  * Configure item list for track "gear" menu.
  * @param trackView
  */
-function trackMenuItemList(trackView) {
+const MenuUtils = {
+    trackMenuItemList: function (trackView) {
 
-    const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp']);
+        const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp']);
 
-    const hasVizWindow = trackView.track.config && trackView.track.config.visibilityWindow !== undefined;
+        const hasVizWindow = trackView.track.config && trackView.track.config.visibilityWindow !== undefined;
 
-    let menuItems = [];
+        let menuItems = [];
 
-    if (trackView.track.config.type !== 'sequence') {
-        menuItems.push(trackRenameMenuItem(trackView));
-        menuItems.push(trackHeightMenuItem(trackView));
-    }
+        if (trackView.track.config.type !== 'sequence') {
+            menuItems.push(trackRenameMenuItem(trackView));
+            menuItems.push(trackHeightMenuItem(trackView));
+        }
 
-    if (doProvideColoSwatchWidget(trackView.track)) {
-        menuItems.push(colorPickerMenuItem(trackView))
-    }
+        if (doProvideColoSwatchWidget(trackView.track)) {
+            menuItems.push(colorPickerMenuItem(trackView))
+        }
 
-    if (trackView.track.menuItemList) {
-        menuItems = menuItems.concat(trackView.track.menuItemList());
-    }
+        if (trackView.track.menuItemList) {
+            menuItems = menuItems.concat(trackView.track.menuItemList());
+        }
 
-    if (hasVizWindow || vizWindowTypes.has(trackView.track.config.type)) {
-        menuItems.push('<hr/>');
-        menuItems.push(visibilityWindowMenuItem(trackView));
-    }
+        if (hasVizWindow || vizWindowTypes.has(trackView.track.config.type)) {
+            menuItems.push('<hr/>');
+            menuItems.push(visibilityWindowMenuItem(trackView));
+        }
 
-    if (trackView.track.removable !== false) {
-        menuItems.push('<hr/>');
-        menuItems.push(trackRemovalMenuItem(trackView));
-    }
+        if (trackView.track.removable !== false) {
+            menuItems.push('<hr/>');
+            menuItems.push(trackRemovalMenuItem(trackView));
+        }
 
-    return menuItems;
-}
+        return menuItems;
+    },
 
-function doProvideColoSwatchWidget(track) {
-    return (
-        "alignment" === track.type ||
-        "annotation" === track.type ||
-        "variant" === track.type ||
-        "wig" === track.type);
-};
+    dataRangeMenuItem: function (trackView) {
 
-function trackMenuItemListHelper(itemList, $popover) {
+        var $e,
+            clickHandler;
+
+        $e = $('<div>');
+        $e.text('Set data range');
+
+        clickHandler = function () {
+            trackView.browser.dataRangeDialog.configure({trackView: trackView});
+            trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
+        };
+
+        return {object: $e, click: clickHandler};
+    },
+
+    trackMenuItemListHelper: function(itemList, $popover) {
 
     var list = [];
 
@@ -100,9 +109,20 @@ function trackMenuItemListHelper(itemList, $popover) {
     }
 
     return list;
+}
+
+}
+
+function doProvideColoSwatchWidget(track) {
+    return (
+        "alignment" === track.type ||
+        "annotation" === track.type ||
+        "variant" === track.type ||
+        "wig" === track.type);
 };
 
-function visibilityWindowMenuItem  (trackView) {
+
+function visibilityWindowMenuItem(trackView) {
 
     const menuClickHandler = function () {
 
@@ -155,21 +175,6 @@ function trackRemovalMenuItem(trackView) {
 
 };
 
-function dataRangeMenuItem  (trackView) {
-
-    var $e,
-        clickHandler;
-
-    $e = $('<div>');
-    $e.text('Set data range');
-
-    clickHandler = function () {
-        trackView.browser.dataRangeDialog.configure({trackView: trackView});
-        trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
-    };
-
-    return {object: $e, click: clickHandler};
-};
 
 function colorPickerMenuItem(trackView) {
     var $e,
@@ -274,7 +279,7 @@ function trackHeightMenuItem(trackView) {
 
 }
 
-function getTrackLabelText (track) {
+function getTrackLabelText(track) {
     var vp,
         txt;
 
@@ -284,7 +289,7 @@ function getTrackLabelText (track) {
     return txt;
 };
 
-export {trackMenuItemList, trackMenuItemListHelper, dataRangeMenuItem}
+export default MenuUtils;
 
 
 /**
