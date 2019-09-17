@@ -28,7 +28,7 @@ var igv = (function (igv) {
                 var si1 = ba[12];
                 var si2 = ba[13];
                 var slen = (ba[15] << 8) | (ba[14]);
-                var bsize = (ba[17] << 8) | (ba[16]) + 1;
+                var bsize = ((ba[17] << 8) | (ba[16])) + 1;
 
                 var start = 12 + xlen + ptr;    // Start of CDATA
                 var bytesLeft = data.byteLength - start;
@@ -69,7 +69,7 @@ var igv = (function (igv) {
     igv.bgzBlockSize = function (data) {
 
         const ba = new Uint8Array(data);
-        const bsize = (ba[17] << 8) | (ba[16]) + 1;
+        const bsize = ((ba[17] << 8) | (ba[16])) + 1;
         return bsize;
 
 
