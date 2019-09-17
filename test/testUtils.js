@@ -1,7 +1,9 @@
 import {parseLocusString, inferTrackTypes} from "../js/util/trackUtils.js";
-import {trackMenuItemListHelper} from "../js/util/menuUtils.js";
 import {parseUri, decodeDataURI} from "../js/util/uriUtils.js";
 import Browser from "../js/browser.js";
+import MenuUtils from "../js/util/menuUtils.js"
+
+const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
 function runUtilTests() {
 

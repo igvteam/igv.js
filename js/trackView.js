@@ -29,7 +29,7 @@ import FeatureUtils from "./feature/featureUtils.js";
 import RulerTrack from "./rulerTrack.js";
 import TrackGearPopover from "./ui/trackGearPopover.js";
 import GenericContainer from "./ui/genericContainer.js";
-import {trackMenuItemList} from "./util/menuUtils.js";
+import MenuUtils from "./util/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates} from "./util/domUtils.js";
 import {doAutoscale} from "./util/igvUtils.js";
@@ -225,7 +225,7 @@ function createTrackGearPopover ($parent) {
     $cogContainer.click(function (e) {
         e.preventDefault();
         e.stopPropagation();
-        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, trackMenuItemList(self));
+        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(self));
     });
 
 }

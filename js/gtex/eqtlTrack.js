@@ -28,10 +28,12 @@ import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import IGVMath from "../igv-math.js";
-import {dataRangeMenuItem} from "../util/menuUtils.js";
+import MenuUtils from "../util/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
 import GtexUtils from "./gtexUtils.js";
+
+const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const EqtlTrack = extend(TrackBase,
 
