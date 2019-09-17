@@ -25,8 +25,10 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import makeDraggable from "./draggable.js";
-import {trackMenuItemListHelper} from "../util/menuUtils.js";
 import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
+import MenuUtils from "../util/menuUtils.js"
+
+const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
 const TrackGearPopover = function ($parent) {
 

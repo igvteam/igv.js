@@ -23,7 +23,9 @@ import AlertDialog from "./ui/alertDialog.js";
 import InputDialog from "./ui/inputDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
-import embedCss from "./embedCss.js"
+import embedCss from "./embedCss.js";
+import MenuUtils from "./util/menuUtils.js";
+import Alert from "./ui/alert.js"
 
 function setGoogleOauthToken(accessToken) {
     return oauth.setToken(accessToken);
@@ -83,5 +85,7 @@ export default {
     AlertDialog,
     InputDialog,
     TrackRemovalDialog,
-    DataRangeDialog
+    DataRangeDialog,
+    MenuUtils,
+    Alert
 };
