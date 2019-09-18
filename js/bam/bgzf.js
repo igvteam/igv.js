@@ -1,3 +1,4 @@
+
 import Zlib from "../vendor/zlib_and_gzip.js";
 
 const BLOCK_HEADER_LENGTH = 18;
@@ -25,7 +26,7 @@ function unbgzf(data, lim) {
             const si1 = ba[12];
             const si2 = ba[13];
             const slen = (ba[15] << 8) | (ba[14]);
-            const bsize = (ba[17] << 8) | (ba[16]) + 1;
+            const bsize = ((ba[17] << 8) | (ba[16])) + 1;
             const start = 12 + xlen + ptr;    // Start of CDATA
             const bytesLeft = data.byteLength - start;
             const cDataSize = bsize - xlen - 19;
