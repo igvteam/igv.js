@@ -1,3 +1,5 @@
+import TDFReader from "../js/tdf/tdfReader.js";
+
 function runTDFTests() {
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
@@ -26,7 +28,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        tdfReader = new igv.TDFReader({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
         assert.ok(tdfReader);
 
         tdfReader.readHeader().then(function () {
@@ -48,7 +50,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        tdfReader = new igv.TDFReader({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
         assert.ok(tdfReader);
 
         tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
@@ -72,7 +74,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        tdfReader = new igv.TDFReader({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
         assert.ok(tdfReader);
 
         tdfReader.readGroup("/").then(function (group) {
@@ -94,7 +96,7 @@ function runTDFTests() {
         var url = dataURL + "tdf/gstt1_sample.bam.tdf",
             tdfReader;
 
-        tdfReader = new igv.TDFReader({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
         assert.ok(tdfReader);
 
         tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
@@ -126,7 +128,7 @@ function runTDFTests() {
             tdfReader;
 
 
-        tdfReader = new igv.TDFReader({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
         assert.ok(tdfReader);
 
         tdfReader.readDataset("chr22", "raw").then(function (dataset) {
@@ -161,7 +163,7 @@ function runTDFTests() {
     //         tdfReader;
 
 
-    //     tdfReader = new igv.TDFReader({url: url}, genome);
+    //     tdfReader = new TDFReader({url: url}, genome);
     //     assert.ok(tdfReader);
 
     //     tdfReader.readRootGroup().then(function (group) {
@@ -188,7 +190,7 @@ function runTDFTests() {
     //         bpPerPixel = 1;
 
 
-    //     tdfSource = new igv.TDFSource({url: url}, genome);
+    //     tdfSource = new TDFSource({url: url}, genome);
 
     //     tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
 
@@ -212,7 +214,7 @@ function runTDFTests() {
     //         bpPerPixel = 51304566 / (Math.pow(2, 6) *700);
 
 
-    //     tdfSource = new igv.TDFSource({url: url}, genome);
+    //     tdfSource = new TDFSource({url: url}, genome);
 
     //     tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
 
@@ -224,3 +226,5 @@ function runTDFTests() {
     // });
 
 }
+
+export default runTDFTests;

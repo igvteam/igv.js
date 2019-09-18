@@ -23,11 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
-"use strict";
-
-var igv = (function (igv) {
-
+import PairedAlignment from "./pairedAlignment.js";
 
     function canBePaired(alignment) {
         return alignment.isPaired() &&
@@ -38,14 +34,16 @@ var igv = (function (igv) {
     }
 
 
-    igv.AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported) {
+const AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold) {
 
         this.chr = chr;
         this.start = Math.floor(start);
         this.end = Math.ceil(end);
         this.length = (end - start);
+        
+        this.alleleFreqThreshold = alleleFreqThreshold;
 
-        this.coverageMap = new CoverageMap(chr, start, end);
+        this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold);
         this.alignments = [];
         this.downsampledIntervals = [];
 
@@ -68,7 +66,7 @@ var igv = (function (igv) {
 
     }
 
-    igv.AlignmentContainer.prototype.push = function (alignment) {
+AlignmentContainer.prototype.push = function (alignment) {
 
         if (this.filter(alignment) === false) return;
 
@@ -91,11 +89,11 @@ var igv = (function (igv) {
 
     }
 
-    igv.AlignmentContainer.prototype.forEach = function (callback) {
+AlignmentContainer.prototype.forEach = function (callback) {
         this.alignments.forEach(callback);
     }
 
-    igv.AlignmentContainer.prototype.finish = function () {
+AlignmentContainer.prototype.finish = function () {
 
         if (this.currentBucket !== undefined) {
             finishBucket.call(this);
@@ -111,13 +109,13 @@ var igv = (function (igv) {
         this.pairedEndStats.compute();
     }
 
-    igv.AlignmentContainer.prototype.contains = function (chr, start, end) {
+AlignmentContainer.prototype.contains = function (chr, start, end) {
         return this.chr == chr &&
             this.start <= start &&
             this.end >= end;
     }
 
-    igv.AlignmentContainer.prototype.hasDownsampledIntervals = function () {
+AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         return this.downsampledIntervals && this.downsampledIntervals.length > 0;
     }
 
@@ -157,13 +155,13 @@ var igv = (function (igv) {
                 return;
             }
         }
-        
+
         if (this.alignments.length < this.samplingDepth) {
 
             if (this.pairsSupported && canBePaired(alignment)) {
 
                 // First alignment in a pair
-                pairedAlignment = new igv.PairedAlignment(alignment);
+            pairedAlignment = new PairedAlignment(alignment);
                 this.paired = true;
                 this.pairsCache[alignment.readName] = pairedAlignment;
                 this.alignments.push(pairedAlignment);
@@ -178,7 +176,7 @@ var igv = (function (igv) {
             idx = Math.floor(Math.random() * (this.samplingDepth + this.downsampledCount - 1));
 
             if (idx < this.samplingDepth) {
-                
+
                 // Keep the new item
                 //  idx = Math.floor(Math.random() * (this.alignments.length - 1));
                 replacedAlignment = this.alignments[idx];   // To be replaced
@@ -189,7 +187,7 @@ var igv = (function (igv) {
                         this.pairsCache[replacedAlignment.readName] = undefined;
                     }
 
-                    pairedAlignment = new igv.PairedAlignment(alignment);
+                pairedAlignment = new PairedAlignment(alignment);
                     this.paired = true;
                     this.pairsCache[alignment.readName] = pairedAlignment;
                     this.alignments[idx] = pairedAlignment;
@@ -213,7 +211,7 @@ var igv = (function (igv) {
 
 
     // TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
-    function CoverageMap(chr, start, end) {
+    function CoverageMap(chr, start, end, alleleFreqThreshold) {
 
         this.chr = chr;
         this.bpStart = start;
@@ -223,7 +221,7 @@ var igv = (function (igv) {
 
         this.maximum = 0;
 
-        this.threshold = 0.2;
+        this.threshold = alleleFreqThreshold;
         this.qualityWeight = true;
     }
 
@@ -240,10 +238,34 @@ var igv = (function (igv) {
             });
         }
 
+        if(alignment.deletions) {
+            for(let del of alignment.deletions) {
+                const offset = del.start - self.bpStart;
+                for(let i = offset; i < offset + del.len; i++) {
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage(self.threshold);
+                    }
+                    this.coverage[i].del++;
+                }
+            }
+        }
+
+        if(alignment.insertions) {
+            for(let del of alignment.insertions) {
+                const i = del.start - this.bpStart;
+                    if(i < 0) continue;
+                    if (!this.coverage[i]) {
+                        this.coverage[i] = new Coverage(self.threshold);
+                    }
+                    this.coverage[i].ins++;
+            }
+        }
+
         function incBlockCount(block) {
 
             if('S' === block.type) return;
-            
+
             const seq = alignment.seq;
             const qual = alignment.qual;
             const seqOffset = block.seqOffset;
@@ -251,7 +273,7 @@ var igv = (function (igv) {
             for (let i = block.start - self.bpStart, j = 0; j < block.len; i++, j++) {
 
                 if (!self.coverage[i]) {
-                    self.coverage[i] = new Coverage();
+                    self.coverage[i] = new Coverage(self.threshold);
                 }
 
                 const base = seq.charAt(seqOffset + j);
@@ -270,7 +292,7 @@ var igv = (function (igv) {
         }
     }
 
-    function Coverage() {
+    function Coverage(alleleThreshold) {
         this.posA = 0;
         this.negA = 0;
 
@@ -298,9 +320,12 @@ var igv = (function (igv) {
         this.qual = 0;
 
         this.total = 0;
+        this.del = 0;
+        this.ins = 0;
+
+        this.t = alleleThreshold;
     }
 
-    const t = 0.2;
     const qualityWeight = true;
 
 
@@ -308,7 +333,7 @@ var igv = (function (igv) {
 
         var myself = this,
             mismatchQualitySum,
-             threshold = t * ((qualityWeight && this.qual) ? this.qual : this.total);
+            threshold = this.t * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
@@ -396,7 +421,4 @@ var igv = (function (igv) {
 
     }
 
-
-    return igv;
-
-})(igv || {});
+export default AlignmentContainer;

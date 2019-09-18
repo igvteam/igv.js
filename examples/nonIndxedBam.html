@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href=../img/favicon.ico>
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+<h1>Non-indxed BAM file</h1>
+<h2>Use this for small files only</h2>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+        var options =
+            {
+                genome: "hg19",
+                locus: "slc25a3",
+                tracks: [
+                    {
+                        type: 'alignment',
+                        format: 'bam',
+                        url: 'https://www.dropbox.com/s/tb6vueic5t1bvcv/heart_slc25a3.bam?dl=0',
+                        indexed: false,
+                        name: 'Heart'
+                    }
+
+                ]
+            };
+
+        var igvDiv = document.getElementById("igvDiv");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    });
+
+</script>
+
+</body>
+
+</html>

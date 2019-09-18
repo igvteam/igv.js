@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/api.js";
+    import google from "../js/google/googleUtils.js";
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        gapi.load('client:auth2', function () {
+
+            google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
+
+                .then(function (properties) {
+                    var scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
+
+                    return gapi.client.init({
+                        'clientId': properties["client_id"],
+                        'scope': scope
+                    })
+                })
+                .then(function (ignore) {
+
+
+                    const options =
+                        {
+                            genome: "hg19",
+                            flanking: 1000,
+                            queryParametersSupported: true,
+                            showAllChromosomes: true,
+                            tracks: [
+                                //     {
+                                //         name: "test https",
+                                //         type: "annotation",
+                                //         format: "bed",
+                                //         url: "https://storage.cloud.google.com/fc-1a8d5e53-0ccc-4668-8f16-93fa04d2985d/13f2f0bd-1221-46d0-ab93-7a53a558b5ce/PBS/7692cd4e-8175-4f28-bd8f-b30469f45669/call-pbs/pbs.bed"
+                                //     },
+                                //     {
+                                //         name: "test gs",
+                                //         type: "annotation",
+                                //         format: "bed",
+                                //         url: "gs://fc-1a8d5e53-0ccc-4668-8f16-93fa04d2985d/13f2f0bd-1221-46d0-ab93-7a53a558b5ce/PBS/7692cd4e-8175-4f28-bd8f-b30469f45669/call-pbs/pbs.bed"
+                                //     },
+                                //      {
+                                //          name: "public bw",
+                                //          type: "wig",
+                                //          format: "bigwig",
+                                //          url: "https://drive.google.com/open?id=1qVjFw1nH-6dOJcat5NmtFQg1Tza_vE6X"
+                                //      },
+                                //      {
+                                //          name: "private bw",
+                                //          type: "wig",
+                                //          format: "bigwig",
+                                //          url: "https://drive.google.com/open?id=1m9ey9pmSQUAGTUObTHiSC0RrRWG0YyEy"
+                                //      }
+
+
+                                {
+                                    name: "CCLE GS",
+                                    type: "alignment",
+                                    format: "bam",
+                                    url: "gs://gdc-ccle-open/98a0206b-29f5-42d3-957b-6480e2fde185/G20483.HCC-15.2.bam",
+                                    indexURL: "gs://gdc-ccle-open/78c0b917-0e41-4faa-a96c-3550b8377d78/G20483.HCC-15.2.bam.bai",
+                                    pairConnectorColor: "rgb(255,0,0)"
+                                }
+
+                            ]
+                        };
+
+                    igv.createBrowser(document.getElementById('igvDiv'), options)
+                        .then(function (browser) {
+
+                        })
+
+                })
+        })
+    })
+
+
+</script>
+
+</body>
+
+</html>

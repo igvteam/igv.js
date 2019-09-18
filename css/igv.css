@@ -1007,6 +1007,17 @@
   pointer-events: none;
   color: #737373; }
 
+.igv-track-container-spinner {
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  color: #737373; }
+
 .igv-ruler-sweeper-div {
   display: none;
   pointer-events: none;
@@ -1250,5 +1261,24 @@
   padding: 0;
   border: 0;
   display: block; }
+
+.igv-fa5-spin {
+  -webkit-animation: igv-fa5-spin 2s infinite linear;
+  animation: igv-fa5-spin 2s infinite linear; }
+
+@-webkit-keyframes igv-fa5-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
+@keyframes igv-fa5-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg); }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg); } }
 
 /*# sourceMappingURL=igv.css.map */

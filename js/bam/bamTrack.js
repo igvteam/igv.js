@@ -23,9 +23,18 @@
  * THE SOFTWARE.
  */
 
-"use strict";
-
-var igv = (function (igv) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import BamSource from "./bamSource.js";
+import PairedAlignment from "./pairedAlignment.js";
+import TrackBase from "../trackBase.js";
+import IGVGraphics from "../igv-canvas.js";
+import paintAxis from "../util/paintAxis.js";
+import IGVColor from "../igv-color.js";
+import {createCheckbox} from "../igv-icons.js";
+import {numberFormatter} from "../util/stringUtils.js";
+import {nucleotideColors, nucleotideColorComponents, PaletteColorTable} from "../util/colorPalletes.js";
+import {extend} from "../util/igvUtils.js";
+import {parseLocusString} from "../util/trackUtils.js";
 
     const type = "alignment";
 
@@ -37,25 +46,8 @@ var igv = (function (igv) {
     var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
     var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
-    let BAMTrack;
 
-    if (!igv.trackFactory) {
-        igv.trackFactory = {};
-    }
-
-    igv.trackFactory[type] = function (config, browser) {
-
-        if (!BAMTrack) {
-            defineClass();
-        }
-
-        return new BAMTrack(config, browser);
-    }
-
-
-    function defineClass() {
-
-        BAMTrack = igv.extend(igv.TrackBase,
+const BAMTrack = extend(TrackBase,
             function (config, browser) {
 
                 this.type = type;
@@ -63,13 +55,13 @@ var igv = (function (igv) {
                 // Override default track height for bams
                 if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
-                igv.TrackBase.call(this, config, browser);
+        TrackBase.call(this, config, browser);
 
                 if (config.coverageTrackHeight === undefined) {
                     config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
                 }
 
-                this.featureSource = new igv.BamSource(config, browser);
+        this.featureSource = new BamSource(config, browser);
                 this.coverageTrack = new CoverageTrack(config, this);
                 this.alignmentTrack = new AlignmentTrack(config, this);
 
@@ -100,7 +92,7 @@ var igv = (function (igv) {
                 // Assign sort objects to a genomic state
                 function assignSort(currentSorts, sort) {
 
-                    const range = igv.parseLocusString(sort.locus);
+            const range = parseLocusString(sort.locus);
 
                     // Loop through current genomic states, assign sort to first matching state
                     for (let gs of browser.genomicStateList) {
@@ -201,8 +193,7 @@ var igv = (function (igv) {
 
         BAMTrack.prototype.draw = function (options) {
 
-
-            igv.graphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
             if (this.coverageTrack.height > 0) {
                 this.coverageTrack.draw(options);
@@ -294,7 +285,7 @@ var igv = (function (igv) {
 
             menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
             menuItems.push({
-                object: igv.createCheckbox("Show all bases", self.showAllBases),
+        object: createCheckbox("Show all bases", self.showAllBases),
                 click: function () {
 
                     const $fa = $(this).find('i');
@@ -319,7 +310,7 @@ var igv = (function (igv) {
             if (self.pairsSupported && self.alignmentTrack.hasPairs) {
 
                 menuItems.push({
-                    object: igv.createCheckbox("View as pairs", self.viewAsPairs),
+            object: createCheckbox("View as pairs", self.viewAsPairs),
                     click: function () {
 
                         const $fa = $(this).find('i');
@@ -342,7 +333,7 @@ var igv = (function (igv) {
             }
 
             menuItems.push({
-                object: igv.createCheckbox("Show soft clips", self.showSoftClips),
+        object: createCheckbox("Show soft clips", self.showSoftClips),
                 click: function () {
 
                     const $fa = $(this).find('i');
@@ -368,7 +359,7 @@ var igv = (function (igv) {
             function colorByCB(menuItem, showCheck) {
 
 
-                const $e = igv.createCheckbox(menuItem.label, showCheck);
+        const $e = createCheckbox(menuItem.label, showCheck);
 
                 const clickHandler = function () {
 
@@ -390,7 +381,7 @@ var igv = (function (igv) {
                                 self.alignmentTrack.colorByTag = tag;
                                 self.config.colorByTag = tag;
 
-                                self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
+                        self.alignmentTrack.tagColors = new PaletteColorTable("Set1");
                                 $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                             }
 
@@ -438,9 +429,9 @@ var igv = (function (igv) {
 
             let baseColor;
             if (alpha >= 1) {
-                baseColor = igv.nucleotideColors[nucleotide];
+        baseColor = nucleotideColors[nucleotide];
             } else {
-                const foregroundColor = igv.nucleotideColorComponents[nucleotide];
+        const foregroundColor = nucleotideColorComponents[nucleotide];
                 if (!foregroundColor) {
                     return undefined;
                 }
@@ -496,7 +487,7 @@ var igv = (function (igv) {
 
             this.height = config.coverageTrackHeight;
             this.dataRange = {min: 0};   // Leav max undefined
-            this.paintAxis = igv.paintAxis;
+    this.paintAxis = paintAxis;
         };
 
         CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
@@ -530,10 +521,10 @@ var igv = (function (igv) {
             // If alignment track color is != default, use it
             let color = this.parent.coverageColor;
             if (this.parent.color !== DEFAULT_ALIGNMENT_COLOR) {
-                color = igv.Color.darkenLighten(this.parent.color, -35);
+        color = IGVColor.darkenLighten(this.parent.color, -35);
             }
 
-            igv.graphics.setProperties(ctx, {
+    IGVGraphics.setProperties(ctx, {
                 fillStyle: color,
                 strokeStyle: color
             });
@@ -553,8 +544,8 @@ var igv = (function (igv) {
                 const x = Math.floor((bp - bpStart) / bpPerPixel);
 
 
-                // igv.graphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
-                igv.graphics.fillRect(ctx, x, y, w, h);
+        // IGVGraphics.setProperties(ctx, {fillStyle: "rgba(0, 200, 0, 0.25)", strokeStyle: "rgba(0, 200, 0, 0.25)" });
+        IGVGraphics.fillRect(ctx, x, y, w, h);
             }
 
             // coverage mismatch coloring -- don't try to do this in above loop, color bar will be overwritten when w<1
@@ -575,8 +566,8 @@ var igv = (function (igv) {
                     const refBase = sequence[i];
                     if (item.isMismatch(refBase)) {
 
-                        igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[refBase]});
-                        igv.graphics.fillRect(ctx, x, y, w, h);
+                IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]});
+                IGVGraphics.fillRect(ctx, x, y, w, h);
 
                         let accumulatedHeight = 0.0;
                         for (let nucleotide of ["A", "C", "T", "G"]) {
@@ -588,8 +579,8 @@ var igv = (function (igv) {
                             y = (this.height - hh) - accumulatedHeight;
                             accumulatedHeight += hh;
 
-                            igv.graphics.setProperties(ctx, {fillStyle: igv.nucleotideColors[nucleotide]});
-                            igv.graphics.fillRect(ctx, x, y, w, hh);
+                    IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[nucleotide]});
+                    IGVGraphics.fillRect(ctx, x, y, w, hh);
                         }
                     }
                 }
@@ -610,8 +601,7 @@ var igv = (function (igv) {
 
             if (coverage) {
 
-
-                nameValues.push(referenceFrame.chrName + ":" + igv.numberFormatter(1 + genomicLocation));
+                nameValues.push(referenceFrame.chrName + ":" + numberFormatter(1 + genomicLocation));
 
                 nameValues.push({name: 'Total Count', value: coverage.total});
 
@@ -619,7 +609,6 @@ var igv = (function (igv) {
                 let tmp = coverage.posA + coverage.negA;
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posA + "+, " + coverage.negA + "- )";
                 nameValues.push({name: 'A', value: tmp});
-
 
                 // C
                 tmp = coverage.posC + coverage.negC;
@@ -641,8 +630,10 @@ var igv = (function (igv) {
                 if (tmp > 0) tmp = tmp.toString() + " (" + Math.round((tmp / coverage.total) * 100.0) + "%, " + coverage.posN + "+, " + coverage.negN + "- )";
                 nameValues.push({name: 'N', value: tmp});
 
+                nameValues.push('<HR/>');
+                nameValues.push({name: 'DEL', value: coverage.del.toString()});
+                nameValues.push({name: 'INS', value: coverage.ins.toString()});
             }
-
 
             return nameValues;
 
@@ -713,6 +704,7 @@ var igv = (function (igv) {
 
             let alignmentRowYInset = 0;
 
+            ctx.save();
             if (this.top) ctx.translate(0, this.top);
 
             if (alignmentContainer.hasDownsampledIntervals()) {
@@ -726,7 +718,7 @@ var igv = (function (igv) {
                         xBlockStart += 1;
                         xBlockEnd -= 1;
                     }
-                    igv.graphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
+            IGVGraphics.fillRect(ctx, xBlockStart, 2, (xBlockEnd - xBlockStart), downsampleRowHeight - 2, {fillStyle: "black"});
                 })
 
             } else {
@@ -756,7 +748,7 @@ var igv = (function (igv) {
                             continue;
                         }
 
-                        if (alignment instanceof igv.PairedAlignment) {
+                if (alignment instanceof PairedAlignment) {
 
                             drawPairConnector.call(this, alignment, alignmentY, alignmentHeight);
 
@@ -773,7 +765,7 @@ var igv = (function (igv) {
                     }
                 }
             }
-
+            ctx.restore();
 
             // alignment is a PairedAlignment
             function drawPairConnector(alignment, yRect, alignmentHeight) {
@@ -787,10 +779,10 @@ var igv = (function (igv) {
                     return;
                 }
                 if (alignment.mq <= 0) {
-                    connectorColor = igv.Color.addAlpha(connectorColor, 0.15);
+            connectorColor = IGVColor.addAlpha(connectorColor, 0.15);
                 }
-                igv.graphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor});
-                igv.graphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
+        IGVGraphics.setProperties(ctx, {fillStyle: connectorColor, strokeStyle: connectorColor});
+        IGVGraphics.strokeLine(ctx, xBlockStart, yStrokedLine, xBlockEnd, yStrokedLine);
 
             }
 
@@ -813,10 +805,10 @@ var igv = (function (igv) {
                 }
 
                 if (alignment.mq <= 0) {
-                    alignmentColor = igv.Color.addAlpha(alignmentColor, 0.15);
+            alignmentColor = IGVColor.addAlpha(alignmentColor, 0.15);
                 }
 
-                igv.graphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
+        IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
                 for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
@@ -836,7 +828,7 @@ var igv = (function (igv) {
                             const refOffset = block.start - bpStart
                             const xBlockStart = refOffset / bpPerPixel - 1
                             const widthBlock = 3
-                            igv.graphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                    IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
                         }
                     }
                 }
@@ -863,9 +855,9 @@ var igv = (function (igv) {
 
                     if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                         if ("D" === block.gapType) {
-                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
+                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
                         } else if ("N" === block.gapType) {
-                            igv.graphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
+                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
                         }
                     }
                     lastBlockEnd = blockEndPixel;
@@ -913,16 +905,16 @@ var igv = (function (igv) {
                                 yRect];
 
                         }
-                        igv.graphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
+                IGVGraphics.fillPolygon(ctx, xListPixel, yListPixel, {fillStyle: alignmentColor});
 
                         if (strokeOutline) {
-                            igv.graphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
+                    IGVGraphics.strokePolygon(ctx, xListPixel, yListPixel, {strokeStyle: blockOutlineColor});
                         }
                     }
 
                     // Internal block
                     else {
-                        igv.graphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
+                IGVGraphics.fillRect(ctx, blockStartPixel, yRect, blockWidthPixel, alignmentHeight, {fillStyle: alignmentColor});
 
                         if (strokeOutline) {
                             ctx.save();
@@ -959,7 +951,7 @@ var igv = (function (igv) {
                                     const readQual = qual[seqOffset + i];
                                     baseColor = shadedBaseColor(readQual, readChar, i + block.start);
                                 } else {
-                                    baseColor = igv.nucleotideColors[readChar];
+                            baseColor = nucleotideColors[readChar];
                                 }
                                 if (baseColor) {
                                     const xPixel = ((block.start + i) - bpStart) / bpPerPixel;
@@ -987,11 +979,11 @@ var igv = (function (igv) {
                         const fontHeight = Math.min(10, bbox.height)
                         context.font = '' + fontHeight + 'px sans-serif';
                         center = bbox.x + (bbox.width / 2.0);
-                        igv.graphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color});
+                IGVGraphics.strokeText(context, char, center - (context.measureText(char).width / 2), fontHeight - 1 + bbox.y, {strokeStyle: color});
                     } else {
 
                         // render colored block
-                        igv.graphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color});
+                IGVGraphics.fillRect(context, bbox.x, bbox.y, bbox.width, bbox.height, {fillStyle: color});
                     }
                 }
             }
@@ -1153,7 +1145,7 @@ var igv = (function (igv) {
 
                 case "firstOfPairStrand":
 
-                    if (alignment instanceof igv.PairedAlignment) {
+            if (alignment instanceof PairedAlignment) {
                         color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
                     } else if (alignment.isPaired()) {
 
@@ -1203,7 +1195,7 @@ var igv = (function (igv) {
                         } else {
 
                             if (!self.tagColors) {
-                                self.tagColors = new igv.PaletteColorTable("Set1");
+                        self.tagColors = new PaletteColorTable("Set1");
                             }
                             color = self.tagColors.getColor(tagValue);
                         }
@@ -1264,8 +1256,6 @@ var igv = (function (igv) {
                 "R2R1": "RL",
                 "F1F2": "RL"
             }
-        };
-
     }
 
     function getChrColor(chr) {
@@ -1276,7 +1266,7 @@ var igv = (function (igv) {
             chrColorMap[chr] = color;
             return color;
         } else {
-            const color = igv.Color.randomRGB();
+        const color = IGVColor.randomRGB();
             chrColorMap[chr] = color;
             return color;
         }
@@ -1342,8 +1332,4 @@ var igv = (function (igv) {
         "chr48": "rgb(20, 255, 177)",
     }
 
-
-    return igv;
-
-})
-(igv || {});
+export default BAMTrack;

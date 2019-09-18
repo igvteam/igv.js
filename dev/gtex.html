@@ -3,161 +3,17 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=../img/favicon.ico>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
 
     <!-- IGV CSS -->
-    <link rel="stylesheet" type="text/css" href="../css/igv.css"/>
-    <link rel="stylesheet" type="text/css" href="css/dev.css"/>
 
-    <!-- Vendor CSS -->
-    <link rel="stylesheet" type="text/css" href="../vendor/fa-svg-with-js.css"/>
-
-    <script src="js/dev.js"></script>
-
-
-    <!-- Vendor JS -->
-    <script src="../vendor/jquery-3.3.1.slim.js"></script>
-    <script src="../vendor/underscore.js"></script>
-    <script src="../vendor/zlib_and_gzip.js"></script>
-    <script src="../vendor/inflate.js"></script>
-    <script src="../vendor/cram-bundle.js"></script>
-
-    <!-- IGV JS -->
-    <script src="../js/igv-icons.js"></script>
-    <script src="../js/session/igvXmlSession.js"></script>
-    <script src="../js/feature/mergedTrack.js"></script>
-
-
-
-    <script src="../js/bam/bamReader.js"></script>
-    <script src="../js/bam/bamReaderNonIndexed.js"></script>
-    <script src="../js/bam/bgzf.js"></script>
-    <script src="../js/bam/bamSource.js"></script>
-    <script src="../js/bam/bamTrack.js"></script>
-    <script src="../js/bam/bamAlignment.js"></script>
-    <script src="../js/bam/bamAlignmentRow.js"></script>
-    <script src="../js/bam/bamIndex.js"></script>
-    <script src="../js/bam/alignmentContainer.js"></script>
-    <script src="../js/bam/pairedAlignment.js"></script>
-    <script src="../js/bam/bamUtils.js"></script>
-    <script src="../js/bam/bamWebserviceReader.js"></script>
-    <script src="../js/bam/htsgetReader.js"></script>
-    <script src="../js/bam/alignmentBlock.js"></script>
-    <script src="../js/bam/shardedBamReader.js"></script>
-    <script src="../js/cram/cramReader.js"></script>
-
-    <script src="../js/bigQuery/ccp.js"></script>
-
-    <script src="../js/bigwig/bufferedReader.js"></script>
-    <script src="../js/bigwig/bwReader.js"></script>
-    <script src="../js/bigwig/bwSource.js"></script>
-
-
-    <script src="../js/feature/featureCache.js"></script>
-    <script src="../js/feature/gffHelper.js"></script>
-    <script src="../js/feature/featureSource.js"></script>
-    <script src="../js/feature/featureParsers.js"></script>
-    <script src="../js/feature/tribble.js"></script>
-    <script src="../js/feature/featureFileReader.js"></script>
-    <script src="../js/feature/customServiceReader.js"></script>
-
-
-    <script src="../js/feature/featureTrack.js"></script>
-    <script src="../js/feature/wigTrack.js"></script>
-    <script src="../js/feature/featureUtils.js"></script>
-    <script src="../js/feature/segParser.js"></script>
-    <script src="../js/feature/segTrack.js"></script>
-    <script src="../js/feature/dataWrapper.js"></script>
-    <script src="../js/feature/interactionTrack.js"></script>
-    <script src="../js/rna/rnaStruct.js"></script>
-    <script src="../js/feature/ucscServiceReader.js"></script>
-
-    <script src="../js/google/ga4ghAlignmentReader.js"></script>
-    <script src="../js/google/ga4ghVariantReader.js"></script>
-    <script src="../js/google/ga4ghHelper.js"></script>
-    <script src="../js/google/googleUtils.js"></script>
-    <script src="../js/oauth.js"></script>
-
-    <script src="../js/gtex/eqtlTrack.js"></script>
-    <script src="../js/gtex/gtexReader.js"></script>
-    <script src="../js/gtex/gtex.js"></script>
-    <script src="../js/gtex/immvarReader.js"></script>
-
-    <script src="../js/gwas/t2dVariantSource.js"></script>
-    <script src="../js/gwas/gwasTrack.js"></script>
-
-    <script src="../js/tdf/tdfReader.js"></script>
-    <script src="../js/tdf/tdfSource.js"></script>
-
-    <script src="../js/ui/draggable.js"></script>
-    <script src="../js/ui/trackMenuPopupDialog.js"></script>
-    <script src="../js/ui/dataRangeDialog.js"></script>
-    <script src="../js/ui/inputDialog.js"></script>
-    <script src="../js/ui/trackRemovalDialog.js"></script>
-    <script src="../js/ui/alertDialog.js"></script>
-    <script src="../js/ui/cursorGuide.js"></script>
-    <script src="../js/ui/centerGuide.js"></script>
-    <script src="../js/ui/trackLabelControl.js"></script>
-    <script src="../js/ui/userFeedback.js"></script>
-    <script src="../js/ui/alertDialog.js"></script>
-    <script src="../js/ui/popover.js"></script>
-    <script src="../js/ui/chromosomeSelectWidget.js"></script>
-    <script src="../js/ui/zoomWidget.js"></script>
-    <script src="../js/ui/svgSaveControl.js"></script>
-
-    <script src="../js/variant/vcfParser.js"></script>
-    <script src="../js/variant/variant.js"></script>
-    <script src="../js/variant/variantTrack.js"></script>
-
-    <script src="../js/sampleInformation.js"></script>
-    <script src="../js/igv-create.js"></script>
-    <script src="../js/browser.js"></script>
-    <script src="../js/ideogram.js"></script>
-    <script src="../js/windowSizePanel.js"></script>
-    <script src="../js/referenceFrame.js"></script>
-    <script src="../js/igv-canvas.js"></script>
-    <script src="../js/genome.js"></script>
-    <script src="../js/trackView.js"></script>
-    <script src="../js/viewport.js"></script>
-    <script src="../js/ui/genericContainer.js"></script>
-    <script src="../js/ui/trackGearPopover.js"></script>
-
-    <script src="../js/rulerTrack.js"></script>
-    <script src="../js/rulerSweeper.js"></script>
-
-    <script src="../js/igv-math.js"></script>
-    <script src="../js/igv-color.js"></script>
-    <script src="../js/igv-utils.js"></script>
-    <script src="../js/parseUtils.js"></script>
-    <script src="../js/fasta.js"></script>
-    <script src="../js/sequenceTrack.js"></script>
-
-
-    <script src="../js/igvxhr.js"></script>
-    <script src="../js/binary.js"></script>
-
-    <script src="../js/intervalTree.js"></script>
-
-    <script src="../js/trackCore.js"></script>
-    <script src="../js/trackBase.js"></script>
-
-    <script src="../js/roi.js"></script>
-    <script src="../js/roiSource.js"></script>
-    <script src="../js/civic/civicReader.js"></script>
-
-    <script src="../js/feature/fileFormats.js"></script>
-
-    <script src="../vendor/tdigest.js"></script>
-    <script src="../vendor/rbtree.js"></script>
-    <script src="../js/canvas2svg.js"></script>
-
-    <script src="../js/navbarManager.js"></script>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
 
 </head>
@@ -169,67 +25,68 @@
 
 <div id="igvDiv"></div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../js/api.js";
 
-
-        let options = {
-            type: "GTEX",
-            reference: {
-                id: 'hg19',
-                fastaURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta",
-                indexURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/hg19.fasta.fai",
-                cytobandURL: "http://dn7ywbm9isq8j.cloudfront.net/genomes/seq/hg19/cytoBand.txt",
-                tracks: [
-                    {
-                        name: 'Genes',
-                        type: 'annotation',
-                        url: 'https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v19.genes.v7_model.patched_contigs.sorted.bed',
-                        displayMode: 'EXPANDED',
-                        height: 100,
-                        autoHeight: true,
-                        removable: false,
-                        order: Number.MAX_VALUE // pinning track to bottom
-                    }
-                ]
-            },
-            locus: 'HOXD-AS1',
-            flanking: 75000,
-            search: {
-                url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
-                resultsField: 'features',
-                geneField: 'geneSymbol',
-                snpField: 'snpId'
-            },
+    let options = {
+        type: "GTEX",
+        showSVGButton: false,
+        datasetId: 'gtex_v8',
+        locus: 'WASH7P',
+        reference: {
+            id: 'hg38',
+            fastaURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            indexURL: "http://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+            cytobandURL: "http://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg38/cytoBandIdeo.txt",
             tracks: [
                 {
-                    name: 'GWAS Catalog',
+                    name: 'Genes',
                     type: 'annotation',
-                    format: 'gtexgwas',
-                    url: 'http://dn7ywbm9isq8j.cloudfront.net/annotations/hg19/gwas/v2_newest_converted_GWAS_catalog_SNPs_Pval5E08_hg19_040115.bed',
-                    indexed: false,
-                    color: 'rgb(100,200,200)',
+                    url: 'https://storage.googleapis.com/gtex-igv-files/gencode.v26.GRCh38.genes.name.bed',
                     displayMode: 'EXPANDED',
-                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
-                },
-                {
-                    type: "eqtl",
-                    sourceType: "gtex-ws",
-                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
-                    tissueName: "Muscle_Skeletal",
-                    name: "Muscle Skeletal",
-                    visibilityWindow: 1000000
+                    height: 100,
+                    autoHeight: true,
+                    removable: false,
+                    order: Number.MAX_VALUE // pinning track to bottom
                 }
             ]
-        }
+        },
+        //locus: params.location, // something like: chr1:1-500,000
+        flanking: 75000,
+        search: {
+            url: 'https://gtexportal.org/rest/v1/reference/features/$FEATURE$',
+            resultsField: 'features',
+            geneField: 'geneSymbol',
+            snpField: 'snpId'
+        },
+        tracks: [
+            {
+                name: 'GWAS Catalog',
+                type: 'annotation',
+                format: 'gtexgwas',
+                url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
+                indexed: false,
+                color: 'rgb(100,200,200)',
+                displayMode: 'EXPANDED',
+                order: Number.MAX_SAFE_INTEGER // 2nd to last track
+            },
+            {
+                type: "eqtl",
+                sourceType: "gtex-ws",
+                url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                tissueSiteDetailId: "Muscle_Skeletal",
+                name: "Muscle Skeletal",
+                visibilityWindow: 1000000
+            }
+        ]
+    }
 
 
-        igv.createBrowser(document.getElementById('igvDiv'), options)
-            .then(function (browser) {
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
 
-            })
-    })
+        })
 
 
 </script>

@@ -1,9 +1,12 @@
-var igvdev = {
+import igvxhr from "../../js/igvxhr.js";
+import GtexUtils from "../../js/gtex/gtexUtils.js";
 
-    createTrackList:  function (div, file, browser) {
+const igvdev = {
+
+    createTrackList: function (div, file, browser) {
 
 
-        return igv.xhr.loadJson(file)
+        return igvxhr.loadJson(file)
 
             .then(function (tracks) {
 
@@ -15,8 +18,7 @@ var igvdev = {
                         div.insertAdjacentHTML("beforeend",
                             "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
                             + track.HEADING + "</div>");
-                    }
-                    else {
+                    } else {
                         trackDiv = document.createElement('div');
                         trackDiv.innerHTML = track.name;
                         trackDiv.addEventListener('click', function (event) {
@@ -32,7 +34,7 @@ var igvdev = {
 
                 })
 
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
+                return GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
@@ -40,7 +42,7 @@ var igvdev = {
                 div.insertAdjacentHTML("beforeend",
                     "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                json[ 'tissueInfo' ].forEach(function (obj) {
+                json['tissueInfo'].forEach(function (obj) {
 
                     let trackDiv = document.createElement('div');
                     trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
@@ -57,3 +59,5 @@ var igvdev = {
 
     }
 }
+
+export default igvdev;

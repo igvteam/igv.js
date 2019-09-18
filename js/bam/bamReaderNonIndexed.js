@@ -24,132 +24,100 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by jrobinso on 11/10/17.
- */
+import FeatureCache from "../feature/featureCache.js";
+import AlignmentContainer from "./alignmentContainer.js";
+import BamUtils from "./bamUtils.js";
+import igvxhr from "../igvxhr.js";
+import {unbgzf, bgzBlockSize} from './bgzf.js';
+import {isString} from "../util/stringUtils.js";
+//import {decodeDataURI} from "../util/uriUtils.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 /**
- * Reads an entire bam file
+ * Class for reading a bam file
+ *
+ * @param config
+ * @constructor
  */
-var igv = (function (igv) {
-
-    /**
-     * Class for reading a bam file
-     *
-     * @param config
-     * @constructor
-     */
-    igv.BamReaderNonIndexed = function (config, genome) {
-
-        this.config = config;
-        
-        this.genome = genome;
-
-        this.bamPath = config.url;
-
-        this.isDataUri = igv.isString(config.url) && config.url.startsWith("data:");
-
-        igv.BamUtils.setReaderDefaults(this, config);
-
-    };
+const BamReaderNonIndexed = function (config, genome) {
+    this.config = config;
+    this.genome = genome;
+    this.bamPath = config.url;
+    this.isDataUri = isString(config.url) && config.url.startsWith("data:");
+    BamUtils.setReaderDefaults(this, config);
+}
 
 
-    // Return an alignment container
-    igv.BamReaderNonIndexed.prototype.readAlignments = function (chr, bpStart, bpEnd) {
+// Return an alignment container
+BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
 
-        const self = this;
-        const genome = this.genome;
-        
-        if (this.alignmentCache) {
-
-            return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
+    const genome = this.genome;
+    if (this.alignmentCache) {
+        const header = this.header;
+        const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+        const qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+        for(let a of qAlignments) {
+            alignmentContainer.push(a);
         }
+        alignmentContainer.finish();
+        return alignmentContainer;
 
-        else {
-
-            if(this.isDataUri)  {
-
-                var data =  decodeDataURI(this.bamPath);
-                var unc = igv.unbgzf(data.buffer);
-                parseAlignments(new Uint8Array(unc));
-                return Promise.resolve(fetchAlignments(chr, bpStart, bpEnd));
-            }
-            else {
-                return igv.xhr.loadArrayBuffer(self.bamPath, igv.buildOptions(self.config))
-
-                    .then(function (arrayBuffer) {
-
-                        var unc = igv.unbgzf(arrayBuffer);
-
-                        parseAlignments(new Uint8Array(unc));
-
-                        return fetchAlignments(chr, bpStart, bpEnd);
-
-                    });
-            }
-
-        }
-
-        function parseAlignments(data) {
-
-            var alignments = [];
-
-            self.header = igv.BamUtils.decodeBamHeader(data);
-
-            igv.BamUtils.decodeBamRecords(data, self.header.size, alignments, self.header.chrNames);
-
-            self.alignmentCache = new igv.FeatureCache(alignments, genome);
-        }
-
-
-        function fetchAlignments(chr, bpStart, bpEnd) {
-
-            var header, queryChr, qAlignments, alignmentContainer;
-
-            header = self.header;
-
-            queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-
-            qAlignments = self.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
-
-            alignmentContainer = new igv.AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported);
-
-            qAlignments.forEach(function (a) {
-                alignmentContainer.push(a);
-            });
-
-            alignmentContainer.finish();
-
-            return alignmentContainer;
-        }
-
-
-    };
-
-    function decodeDataURI(dataURI) {
-        var bytes,
-            split = dataURI.split(','),
-            info = split[0].split(':')[1],
-            dataString = split[1];
-
-        if (info.indexOf('base64') >= 0) {
-            dataString = atob(dataString);
+    } else {
+        if (this.isDataUri) {
+            const data = decodeDataURI(this.bamPath);
+            const unc = unbgzf(data.buffer);
+            parseAlignments.call(this, new Uint8Array(unc));
+            return fetchAlignments.call(this, chr, bpStart, bpEnd);
         } else {
-            dataString = decodeURI(dataString);
+            const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
+            const unc = unbgzf(arrayBuffer);
+            parseAlignments.call(this, new Uint8Array(unc));
+            return fetchAlignments.call(this, chr, bpStart, bpEnd);
         }
-
-        bytes = new Uint8Array(dataString.length);
-        for (var i = 0; i < dataString.length; i++) {
-            bytes[i] = dataString.charCodeAt(i);
-        }
-
-        return bytes;
     }
 
+    function parseAlignments(data) {
+        const alignments = [];
+        this.header = BamUtils.decodeBamHeader(data);
+        BamUtils.decodeBamRecords(data, this.header.size, alignments, this.header.chrNames);
+        this.alignmentCache = new FeatureCache(alignments, genome);
+    }
 
-    return igv;
+    function fetchAlignments(chr, bpStart, bpEnd) {
 
-})
-(igv || {});
+        var header, queryChr, qAlignments, alignmentContainer;
+        header = this.header;
+        queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+        qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
+        alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
+        qAlignments.forEach(function (a) {
+            alignmentContainer.push(a);
+        });
+        alignmentContainer.finish();
+        return alignmentContainer;
+    }
+
+};
+
+function decodeDataURI(dataURI) {
+
+    const split = dataURI.split(',');
+    const info = split[0].split(':')[1];
+    let dataString = split[1];
+
+    if (info.indexOf('base64') >= 0) {
+        dataString = atob(dataString);
+    } else {
+        dataString = decodeURI(dataString);
+    }
+
+    const bytes = new Uint8Array(dataString.length);
+    for (var i = 0; i < dataString.length; i++) {
+        bytes[i] = dataString.charCodeAt(i);
+    }
+    return bytes;
+}
 
 
+export default BamReaderNonIndexed;

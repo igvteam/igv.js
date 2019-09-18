@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <script src="https://igv.org/web/snapshot/dist/igv.min.js"></script>
+
+
+
+</head>
+
+<body>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+
+        var options =
+            {
+                genome: "hg19",
+                locus: "3:185791817-185791856",
+                tracks: [
+                    {
+                        type: 'alignment',
+                        format: 'bam',
+                        url: 'https://www.dropbox.com/s/q2cbg77tr5hm3df/deep_coverage.bam?dl=0',
+                        indexURL: 'https://www.dropbox.com/s/0zfka7a5gmgbeql/deep_coverage.bam.bai?dl=0',
+                        samplingDepth: '2000',
+                        alignmentRowHeight: 10,
+                        colorBy: "strand",
+                        name: 'TEST'
+                    }
+                ]
+            };
+
+        var igvDiv = document.getElementById("igv-div");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+
+    });
+
+</script>
+
+</body>
+
+</html>

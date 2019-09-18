@@ -1,10 +1,11 @@
 .side-by-side-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: flex-start;
-  width: 100%;
-  margin: 16px; }
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: flex-start;
+    width: 100%;
+    margin: 16px;
+}
 
 /*# sourceMappingURL=multiple-browsers.css.map */

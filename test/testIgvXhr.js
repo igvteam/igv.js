@@ -1,3 +1,5 @@
+import igvxhr from "../js/igvxhr.js";
+
 function runIgvXhrTests() {
 
     var range = {start: 25, size: 100};
@@ -25,7 +27,7 @@ function runIgvXhrTests() {
 
         var url = "data/misc/BufferedReaderTest.bin";
 
-        igv.xhr.load(url,
+        igvxhr.load(url,
             {
                 responseType: "arraybuffer",
                 range: range
@@ -43,7 +45,7 @@ function runIgvXhrTests() {
 
         var url = "data/misc/BufferedReaderTest.bin";
 
-        igv.xhr.loadArrayBuffer(url,
+        igvxhr.loadArrayBuffer(url,
             {
                 range: range
             })
@@ -60,7 +62,7 @@ function runIgvXhrTests() {
 
         var url = "data/json/example.json";
 
-        igv.xhr.loadString(url, {})
+        igvxhr.loadString(url, {})
 
             .then(function (result) {
 
@@ -78,7 +80,7 @@ function runIgvXhrTests() {
 
         var url = "data/json/example.json";
 
-        igv.xhr.loadJson(url, {})
+        igvxhr.loadJson(url, {})
 
             .then(function (result) {
 
@@ -96,7 +98,7 @@ function runIgvXhrTests() {
 
         var url = "data/json/example.json.gz";
 
-        igv.xhr.loadString(url, {})
+        igvxhr.loadString(url, {})
 
             .then(function (result) {
 
@@ -115,7 +117,7 @@ function runIgvXhrTests() {
 
         var url = "data/json/example.json.bgz";
 
-        igv.xhr.loadString(url, {bgz: true})
+        igvxhr.loadString(url, {bgz: true})
 
             .then(function (result) {
 
@@ -128,3 +130,5 @@ function runIgvXhrTests() {
 
     });
 }
+
+export default runIgvXhrTests;

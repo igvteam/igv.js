@@ -23,86 +23,86 @@
  * THE SOFTWARE.
  */
 
-/**
- * Created by turner on 1/8/19.
- */
-var igv = (function (igv) {
+import $ from "../vendor/jquery-3.3.1.slim.js";
+import makeDraggable from "./draggable.js";
+import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
+import MenuUtils from "../util/menuUtils.js"
 
-    igv.TrackGearPopover = function ($parent) {
+const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
-        // popover container
-        this.$popover = $('<div>', { class: 'igv-trackgear-popover' });
-        $parent.append(this.$popover);
+const TrackGearPopover = function ($parent) {
 
-        // popover header
-        let $popoverHeader = $('<div>', { class: 'igv-trackgear-popover-header' });
-        this.$popover.append($popoverHeader);
+    // popover container
+    this.$popover = $('<div>', {class: 'igv-trackgear-popover'});
+    $parent.append(this.$popover);
 
-        let self = this;
-        igv.attachDialogCloseHandlerWithParent($popoverHeader, function () {
-            self.$popover.hide();
-        });
+    // popover header
+    let $popoverHeader = $('<div>', {class: 'igv-trackgear-popover-header'});
+    this.$popover.append($popoverHeader);
 
-        this.$popoverContent = $('<div>');
-        this.$popover.append(this.$popoverContent);
+    let self = this;
+    attachDialogCloseHandlerWithParent($popoverHeader, function () {
+        self.$popover.hide();
+    });
 
-        igv.makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
+    this.$popoverContent = $('<div>');
+    this.$popover.append(this.$popoverContent);
 
-        $popoverHeader.on('click.track_gear_popover', function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            // absorb click to prevent it leaking through to parent DOM element
-        });
+    makeDraggable(this.$popover.get(0), $popoverHeader.get(0));
 
-    };
+    $popoverHeader.on('click.track_gear_popover', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        // absorb click to prevent it leaking through to parent DOM element
+    });
 
-    igv.TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
+};
 
-        var self = this,
-            $container;
+TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
 
-        if (list.length > 0) {
+    var self = this,
+        $container;
 
-            this.$popoverContent.empty();
+    if (list.length > 0) {
 
-            list = igv.trackMenuItemListHelper(list, self.$popover);
+        this.$popoverContent.empty();
 
-            for (let item of list) {
+        list = trackMenuItemListHelper(list, self.$popover);
 
-                if (item.init) {
-                    item.init();
-                }
+        for (let item of list) {
 
-                let $e = item.object;
-                if (0 === list.indexOf(item)) {
-                    $e.removeClass('igv-track-menu-border-top');
-                }
-
-                if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-trackgear-popover-check-container')) {
-                    // do nothing
-                } else if ($e.is('div')) {
-                    $e.addClass('igv-trackgear-popover-shim');
-                }
-
-                this.$popoverContent.append($e);
-
+            if (item.init) {
+                item.init();
             }
 
-            this.$popover.css({ left: (dx + 'px'), top: (dy + 'px') });
-            this.$popover.show();
+            let $e = item.object;
+            if (0 === list.indexOf(item)) {
+                $e.removeClass('igv-track-menu-border-top');
+            }
+
+            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-trackgear-popover-check-container')) {
+                // do nothing
+            } else if ($e.is('div')) {
+                $e.addClass('igv-trackgear-popover-shim');
+            }
+
+            this.$popoverContent.append($e);
 
         }
-    };
 
-    igv.TrackGearPopover.prototype.dispose = function () {
-        this.$popover.empty();
-        this.$popoverContent.empty();
-        Object.keys(this).forEach(function (key) {
-            this[key] = undefined;
-        })
-    };
+        this.$popover.css({left: (dx + 'px'), top: (dy + 'px')});
+        this.$popover.show();
 
-    return igv;
+    }
+};
 
-})(igv || {});
+TrackGearPopover.prototype.dispose = function () {
+    this.$popover.empty();
+    this.$popoverContent.empty();
+    Object.keys(this).forEach(function (key) {
+        this[key] = undefined;
+    })
+};
+
+export default TrackGearPopover;
 
