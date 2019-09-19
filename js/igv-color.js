@@ -182,7 +182,7 @@ const IGVColor = {
         min = IGVMath.clamp(min, 0, 255);
         max = IGVMath.clamp(max, 0, 255);
 
-        var g = Math.round(random(min, max)).toString(10);
+        var g = Math.round(Math.random(min, max)).toString(10);
 
         return "rgb(" + g + "," + g + "," + g + ")";
     },
@@ -192,9 +192,9 @@ const IGVColor = {
         min = IGVMath.clamp(min, 0, 255);
         max = IGVMath.clamp(max, 0, 255);
 
-        var r = Math.round(random(min, max)).toString(10);
-        var g = Math.round(random(min, max)).toString(10);
-        var b = Math.round(random(min, max)).toString(10);
+        var r = Math.round(Math.random(min, max)).toString(10);
+        var g = Math.round(Math.random(min, max)).toString(10);
+        var b = Math.round(Math.random(min, max)).toString(10);
 
         return "rgb(" + r + "," + g + "," + b + ")";
     },
@@ -204,9 +204,9 @@ const IGVColor = {
         min = IGVMath.clamp(min, 0, 255);
         max = IGVMath.clamp(max, 0, 255);
 
-        var r = Math.round(random(min, max)).toString(10);
-        var g = Math.round(random(min, max)).toString(10);
-        var b = Math.round(random(min, max)).toString(10);
+        var r = Math.round(Math.random(min, max)).toString(10);
+        var g = Math.round(Math.random(min, max)).toString(10);
+        var b = Math.round(Math.random(min, max)).toString(10);
 
         return "rgba(" + r + "," + g + "," + b + "," + alpha + ")";
     },
