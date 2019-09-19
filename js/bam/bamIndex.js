@@ -178,12 +178,12 @@ BamIndex.prototype.blocksForRange = function (refId, min, max) {
             }
         }
 
-        return optimizeChunks(chunks, lowest);
+        return optimizeChunks(chunks, lowest, min, max);
     }
 
 };
 
-function optimizeChunks(chunks, lowest) {
+function optimizeChunks(chunks, lowest, min, max) {
 
     const mergedChunks = []
     let lastChunk = null
@@ -201,7 +201,7 @@ function optimizeChunks(chunks, lowest) {
 
     chunks.forEach(function (chunk) {
 
-        if (!lowest || chunk.maxv.isGreaterThan(lowest)) {
+        if (!lowest || chunk.maxv.isGreaterThan(lowest) && chunkCouldOverlapWithRange(chunk, min, max)) {
             if (lastChunk === null) {
                 mergedChunks.push(chunk);
                 lastChunk = chunk;
@@ -219,6 +219,102 @@ function optimizeChunks(chunks, lowest) {
     });
 
     return mergedChunks;
+}
+
+/**
+ * Returns the number of basepairs that a bin spans.
+ */
+function binSpan(bin) {
+    if (bin === 0) {
+        return Math.pow(2, 29);
+    } else if (1 <= bin && bin <= 8) {
+        return Math.pow(2, 26);
+    } else if (9 <= bin && bin <= 72) {
+        return Math.pow(2, 23);
+    } else if (73 <= bin && bin <= 584) {
+        return Math.pow(2, 20);
+    } else if (585 <= bin && bin <= 4680) {
+        return Math.pow(2, 17);
+    } else {
+        return Math.pow(2, 14);
+    }
+}
+
+/**
+ * Returns the basepairs where a bin's children intersect
+ */
+function bpsWhereChildrenIntersect(bin) {
+    const childSpan = binSpan(bin) / Math.pow(2, 3);
+    const numBinsAtLvl = Math.pow(2, 29) / childSpan;
+    const numIntersectionPoints = numBinsAtLvl - 1;
+
+    let ret = [];
+    let offset = childSpan;
+    for (let i = 0; i < numIntersectionPoints; ++i) {
+        ret.push(offset);
+        offset += childSpan;
+    }
+
+    return ret;
+}
+
+/**
+ * Returns true if the given chunk could overlap with the genomic
+ * range [min, max].
+ */
+function chunkCouldOverlapWithRange(chunk, min, max) {
+    // If the chunk begins and ends with a different `coffset`
+    // (see bam spec) then it must intersect multiple bgzf
+    // blocks. In this case, the uncompressed span cannot be
+    // calculated, so pessimistically assume that the chunk
+    // *could* overlap with the query range.
+    if (chunk.minv.block !== chunk.maxv.block) {
+        return true;
+    }
+
+    // If the chunk is in a "leaf" bin of the rtree, we
+    // pessimistically assume that the chunk *could* overlap with
+    // the query range (it's a leaf bin, so it *probably* does
+    // intersect the query range anyway).
+    if (4681 <= chunk.bin && chunk.bin <= 37448) {
+        return true;
+    }
+
+    // Because all of the data is in one bgzf block (see above),
+    // we can compute the uncompressed span of the chunk
+    const uncompressedSize = chunk.maxv.offset - chunk.minv.offset;
+
+    // Assuming *all* of the data in the span is, in fact, purely
+    // 4-bit basepairs with no quality scores, tag names,
+    // etc. then the theoretical maximum number of base pairs the
+    // chunk may contain can be calculated from its size.
+    const BPS_IN_BYTE = 2;
+    const maxBpsInChunk = BPS_IN_BYTE * uncompressedSize;
+
+    // Because the chunk is in a non-leaf bin (see above) then,
+    // logically, it *must* have intersected a child bin. The
+    // points within a bin that children intersect are specified
+    // in the BAI spec.
+    const intersectionPoints = bpsWhereChildrenIntersect(chunk.bin);
+
+    // In the worst possible case, a chunk could represent one
+    // read that is `maxBpsInChunk` base pairs away from an
+    // intersection point. Therefore, if the queried genomic range
+    // is more than `maxBpsInChunk` away from *all* intersection
+    // points then the data in the chunk cannot possibly represent
+    // something in the query range.
+    const queryRangeOverlapsAnRtreeIntersectionPoint =
+          intersectionPoints.some(intersectionPoint => {
+              const intersectStart = intersectionPoint - maxBpsInChunk;
+              const intersectEnd = intersectionPoint + maxBpsInChunk;
+
+              const noOverlap =
+                    (chunk.maxv.offset < intersectStart || intersectEnd < chunk.minv.offset);
+
+              return !noOverlap;
+          });
+
+    return queryRangeOverlapsAnRtreeIntersectionPoint;
 }
 
 /**
