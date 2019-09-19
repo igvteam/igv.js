@@ -198,6 +198,8 @@ const BamUtils = {
      * @param chrIdx             chromosome index
      * @param chrNames            array of chromosome names
      * @param filter             a BamFilter object
+     *
+     * @return true if we have moved beyond the right end of the genomic range.
      */
     decodeBamRecords: function (ba, offset, alignmentContainer, chrNames, chrIdx, min, max, filter) {
 
@@ -216,7 +218,7 @@ const BamUtils = {
                 offset = blockEnd;
                 continue;   // unmapped read
             } else if (chrIdx !== undefined && (refID > chrIdx || pos > max)) {
-                return;    // off right edge, we're done
+                return true;    // off right edge, we're done
             } else if (chrIdx !== undefined && (refID < chrIdx)) {
                 offset = blockEnd;
                 continue;   // ref ID to left of start, not sure this is possible

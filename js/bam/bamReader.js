@@ -69,7 +69,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             return alignmentContainer;
         }
 
-        const promises = [];
+        let counter = 1;
         for (let c of chunks) {
 
             let lastBlockSize
@@ -83,16 +83,17 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             const fetchMin = c.minv.block
             const fetchMax = c.maxv.block + lastBlockSize
             const range = {start: fetchMin, size: fetchMax - fetchMin + 1};
-            promises.push(igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range})))
-        }
 
-        const compressedChunks = await Promise.all(promises)
+            const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}));
 
-        for (let i = 0; i < chunks.length; i++) {
-            const compressed = compressedChunks[i]
-            const c = chunks[i]
             var ba = new Uint8Array(unbgzf(compressed)); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
-            BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
+            const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
+
+            if(done) {
+                console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
+                break;
+            }
+            counter++;
         }
         alignmentContainer.finish();
         return alignmentContainer;
