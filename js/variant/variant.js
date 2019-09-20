@@ -81,7 +81,9 @@ function init(variant) {
         variant.start = variant.pos - 1;      // convert to 0-based coordinate convention
         variant.end = variant.start + ref.length
 
-    } else if ("SV" === variant.type && variant.info["END"]) {
+    }
+
+    if (variant.info["END"]) {
         variant.start = variant.pos - 1;
         variant.end = Number.parseInt(variant.info["END"]);
 
@@ -94,8 +96,6 @@ function init(variant) {
         for (let alt of altTokens) {
 
             variant.alleles.push(alt);
-            let alleleStart
-            let alleleEnd
 
             // We don't yet handle  SV and other special alt representations
             if ("SV" !== variant.type && isKnownAlt(alt)) {
@@ -132,12 +132,11 @@ function init(variant) {
                     }
                 }
 
-                alleleStart = variant.pos + s - 1;      // -1 for zero based coordinates
-                alleleEnd = alleleStart + Math.max(1, lengthOnRef)     // insertions have zero length on ref, but we give them 1
+                const alleleStart = variant.pos + s - 1;      // -1 for zero based coordinates
+                const alleleEnd = alleleStart + Math.max(1, lengthOnRef)     // insertions have zero length on ref, but we give them 1
+                variant.start = Math.min(variant.start, alleleStart);
+                variant.end = Math.max(variant.end, alleleEnd);
             }
-
-            variant.start = Math.min(variant.start, alleleStart);
-            variant.end = Math.max(variant.end, alleleEnd);
 
         }
     }
@@ -164,9 +163,10 @@ Variant.prototype.popupData = function (genomicLocation, genomeId) {
     var self = this,
         fields, gt;
 
+    const posString = this.end === this.pos ? this.pos : `${this.pos}-${this.end}`;
     fields = [
         {name: "Chr", value: this.chr},
-        {name: "Pos", value: this.pos},
+        {name: "Pos", value: posString},
         {name: "Names", value: this.names ? this.names : ""},
         {name: "Ref", value: this.referenceBases},
         {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},

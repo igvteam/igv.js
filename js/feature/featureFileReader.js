@@ -63,7 +63,7 @@ const FeatureFileReader = function (config, genome) {
 
     this.format = this.config.format;
 
-    this.parser = this.getParser(this.format, this.config.decode);
+    this.parser = this.getParser(this.format, this.config.decode, this.config);
 };
 
 /**
@@ -146,11 +146,11 @@ FeatureFileReader.prototype.readHeader = async function () {
 
 };
 
-FeatureFileReader.prototype.getParser = function (format, decode) {
+FeatureFileReader.prototype.getParser = function (format, decode, config) {
 
     switch (format) {
         case "vcf":
-            return new VcfParser();
+            return new VcfParser(config);
         case "seg" :
             return new SegParser();
         default:
