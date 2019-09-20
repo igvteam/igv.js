@@ -113,11 +113,10 @@ TrackBase.prototype.clickedFeatures = function (clickState) {
 
     const genomicLocation = clickState.genomicLocation;
 
-    // We need some tolerance around genomicLocation
-    const tolerance = 3 * clickState.referenceFrame.bpPerPixel;
+    // When zoomed out we need some tolerance around genomicLocation
+    const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0;
     const ss = Math.floor(genomicLocation) - tolerance;
-    const ee = Math.ceil(genomicLocation) + tolerance;
-
+    const ee = Math.floor(genomicLocation) + tolerance;
     return (FeatureUtils.findOverlapping(features, ss, ee));
 };
 
