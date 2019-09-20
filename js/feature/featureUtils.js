@@ -157,7 +157,7 @@ const FeatureUtils = {
                     for (let i = 0; i < len; i++) {
                         const feature = intervalFeatures[i];
                         if (feature.start > end) break;
-                        else if (feature.end >= start) {
+                        else if (feature.end > start) {
                             featureList.push(feature);
                         }
                     }
