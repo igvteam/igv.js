@@ -215,6 +215,8 @@ function optimizeChunks(chunks, lowest) {
                     lastChunk = chunk;
                 }
             }
+        } else {
+            console.log(`skipping chunk ${chunk}`)
         }
     });
 
