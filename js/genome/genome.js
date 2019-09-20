@@ -197,9 +197,8 @@ Genome.prototype.getCytobands = function (chr) {
 Genome.prototype.getLongestChromosome = function () {
 
     var longestChr,
-        key,
         chromosomes = this.chromosomes;
-    for (key in chromosomes) {
+    for (let key in chromosomes) {
         if (chromosomes.hasOwnProperty(key)) {
             var chr = chromosomes[key];
             if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
@@ -328,7 +327,7 @@ function loadCytobands(cytobandUrl, config) {
             var chr = tokens[0];
             if (!lastChr) lastChr = chr;
 
-            if (chr != lastChr) {
+            if (chr !== lastChr) {
 
                 cytobands[lastChr] = bands;
                 bands = [];
@@ -337,7 +336,7 @@ function loadCytobands(cytobandUrl, config) {
                 c++;
             }
 
-            if (tokens.length == 5) {
+            if (tokens.length === 5) {
                 //10	0	3000000	p15.3	gneg
                 var chr = tokens[0];
                 var start = parseInt(tokens[1]);
@@ -398,7 +397,7 @@ function loadAliases(aliasURL, config) {
                 aliases = [];
 
             lines.forEach(function (line) {
-                if (!line.startsWith("#") & line.length > 0) aliases.push(line.split("\t"));
+                if (!line.startsWith("#") && line.length > 0) aliases.push(line.split("\t"));
             });
 
             return aliases;

@@ -73,7 +73,7 @@ TDFReader.prototype.readHeader = async function () {
     }
     this.genomeID = binaryParser.getString();
     this.flags = binaryParser.getInt();
-    this.compressed = (this.flags & GZIP_FLAG) != 0;
+    this.compressed = (this.flags & GZIP_FLAG) !== 0;
 
     // Now read index
     data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
@@ -427,14 +427,11 @@ TDFReader.prototype.readTile = async function (indexEntry, nTracks) {
     switch (type) {
         case "fixedStep":
             return createFixedStep(binaryParser, nTracks);
-            break;
         case "variableStep":
             return createVariableStep(binaryParser, nTracks);
-            break;
         case "bed":
         case "bedWithName":
             return createBed(binaryParser, nTracks, type);
-            break;
         default:
             throw "Unknown tile type: " + type;
     }

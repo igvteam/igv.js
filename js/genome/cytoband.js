@@ -5,11 +5,11 @@ const Cytoband = function (start, end, name, typestain) {
     this.stain = 0;
 
     // Set the type, either p, n, or c
-    if (typestain == 'acen') {
+    if (typestain === 'acen') {
         this.type = 'c';
     } else {
         this.type = typestain.charAt(1);
-        if (this.type == 'p') {
+        if (this.type === 'p') {
             this.stain = parseInt(typestain.substring(4));
         }
     }

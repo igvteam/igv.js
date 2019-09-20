@@ -116,13 +116,10 @@ function inferTrackTypes(config) {
 
     if ("file" === config.sourceType) {
         if (undefined === config.format) {
-            var path;
-            if (config.format) {
-                config.format = config.format.toLowerCase();
-                return;
-            }
-            path = isFilePath(config.url) ? config.url.name : config.url;
+            const path = isFilePath(config.url) ? config.url.name : config.url;
             config.format = inferFileFormat(path);
+        } else {
+            config.format = config.format.toLowerCase();
         }
     }
 
@@ -265,7 +262,7 @@ function translateDeprecatedTypes(config) {
  * Parse a locus string and return a range object.  Locus string is of the form chr:start-end.  End is optional
  *
  */
-function parseLocusString (string) {
+function parseLocusString(string) {
 
     const t1 = string.split(":");
     const t2 = t1[1].split("-");
@@ -285,5 +282,4 @@ function parseLocusString (string) {
 }
 
 
-
-export { knownFileExtensions, getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};
+export {knownFileExtensions, getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};

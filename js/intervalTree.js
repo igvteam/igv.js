@@ -55,16 +55,16 @@ IntervalTree.prototype.insert = function (start, end, value) {
     var x = new Node(interval);
     this.treeInsert(x);
     x.color = RED;
-    while (x != this.root && x.parent.color == RED) {
-        if (x.parent == x.parent.parent.left) {
+    while (x !== this.root && x.parent.color === RED) {
+        if (x.parent === x.parent.parent.left) {
             var y = x.parent.parent.right;
-            if (y.color == RED) {
+            if (y.color === RED) {
                 x.parent.color = BLACK;
                 y.color = BLACK;
                 x.parent.parent.color = RED;
                 x = x.parent.parent;
             } else {
-                if (x == x.parent.right) {
+                if (x === x.parent.right) {
                     x = x.parent;
                     leftRotate.call(this, x);
                 }
@@ -74,13 +74,13 @@ IntervalTree.prototype.insert = function (start, end, value) {
             }
         } else {
             var y = x.parent.parent.left;
-            if (y.color == RED) {
+            if (y.color === RED) {
                 x.parent.color = BLACK;
                 y.color = BLACK;
                 x.parent.parent.color = RED;
                 x = x.parent.parent;
             } else {
-                if (x == x.parent.left) {
+                if (x === x.parent.left) {
                     x = x.parent;
                     rightRotate.call(this, x);
                 }
@@ -133,8 +133,8 @@ IntervalTree.prototype.logIntervals = function () {
 
         indent += 5;
 
-        if (node.left != NIL) logNode(node.left, indent);
-        if (node.right != NIL) logNode(node.right, indent);
+        if (node.left !== NIL) logNode(node.left, indent);
+        if (node.right !== NIL) logNode(node.right, indent);
     }
 
 }
@@ -148,8 +148,8 @@ IntervalTree.prototype.mapIntervals = function (func) {
 
         func(node.interval);
 
-        if (node.left != NIL) applyInterval(node.left);
-        if (node.right != NIL) applyInterval(node.right);
+        if (node.left !== NIL) applyInterval(node.left);
+        if (node.right !== NIL) applyInterval(node.right);
     }
 }
 
@@ -159,11 +159,11 @@ function searchAll(interval, node, results) {
         results.push(node.interval);
     }
 
-    if (node.left != NIL && node.left.max >= interval.low) {
+    if (node.left !== NIL && node.left.max >= interval.low) {
         searchAll.call(this, interval, node.left, results);
     }
 
-    if (node.right != NIL && node.right.min <= interval.high) {
+    if (node.right !== NIL && node.right.min <= interval.high) {
         searchAll.call(this, interval, node.right, results);
     }
 
@@ -173,14 +173,14 @@ function searchAll(interval, node, results) {
 function leftRotate(x) {
     var y = x.right;
     x.right = y.left;
-    if (y.left != NIL) {
+    if (y.left !== NIL) {
         y.left.parent = x;
     }
     y.parent = x.parent;
-    if (x.parent == NIL) {
+    if (x.parent === NIL) {
         this.root = y;
     } else {
-        if (x.parent.left == x) {
+        if (x.parent.left === x) {
             x.parent.left = y;
         } else {
             x.parent.right = y;
@@ -198,14 +198,14 @@ function leftRotate(x) {
 function rightRotate(x) {
     var y = x.left;
     x.left = y.right;
-    if (y.right != NIL) {
+    if (y.right !== NIL) {
         y.right.parent = x;
     }
     y.parent = x.parent;
-    if (x.parent == NIL) {
+    if (x.parent === NIL) {
         this.root = y;
     } else {
-        if (x.parent.right == x) {
+        if (x.parent.right === x) {
             x.parent.right = y;
         } else {
             x.parent.left = y;
@@ -229,7 +229,7 @@ function rightRotate(x) {
 IntervalTree.prototype.treeInsert = function (x) {
     var node = this.root;
     var y = NIL;
-    while (node != NIL) {
+    while (node !== NIL) {
         y = node;
         if (x.interval.low <= node.interval.low) {
             node = node.left;
@@ -239,7 +239,7 @@ IntervalTree.prototype.treeInsert = function (x) {
     }
     x.parent = y;
 
-    if (y == NIL) {
+    if (y === NIL) {
         this.root = x;
         x.left = x.right = NIL;
     } else {
@@ -256,7 +256,7 @@ IntervalTree.prototype.treeInsert = function (x) {
 
 // Applies the statistic update on the node and its ancestors.
 function applyUpdate(node) {
-    while (node != NIL) {
+    while (node !== NIL) {
         var nodeMax = node.left.max > node.right.max ? node.left.max : node.right.max;
         var intervalHigh = node.interval.high;
         node.max = nodeMax > intervalHigh ? nodeMax : intervalHigh;
@@ -281,11 +281,11 @@ Interval.prototype.equals = function (other) {
     if (!other) {
         return false;
     }
-    if (this == other) {
+    if (this === other) {
         return true;
     }
-    return (this.low == otherInterval.low &&
-        this.high == otherInterval.high);
+    return (this.low === otherInterval.low &&
+        this.high === otherInterval.high);
 
 }
 

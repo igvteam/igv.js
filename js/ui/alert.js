@@ -1,15 +1,14 @@
 // TODO -- eliminate dependence on getBrowser
-import {getBrowser} from "../igv-create.js"
+import {getBrowser} from "../igv-create.js";
 
 const Alert = {
     presentAlert: function (message) {
-        getBrowser().presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+        getBrowser().presentAlert(message);
     },
 
 // TODO -- eliminate dependence on getBrowser
     presentMessageWithCallback: function (message, fn) {
-        getBrowser().presentMessageWithCallback("Google Login required", function () {
-        })
+        getBrowser().presentMessageWithCallback(message, fn);
     }
 }
 
