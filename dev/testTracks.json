@@ -321,6 +321,12 @@
     "HEADING": "VCF"
   },
   {
+    "url": "gs://gatk-tutorials/workshop_1908/2-germline/gvcfs/father.g.vcf.gz",
+    "indexURL": "gs://gatk-tutorials/workshop_1908/2-germline/gvcfs/father.g.vcf.gz.tbi",
+    "name": "GATK gcvf - chr20:10,000,029-10,000,201"
+  },
+
+  {
     "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
     "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
     "name": "1KG Sites"
