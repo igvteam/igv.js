@@ -75,7 +75,7 @@ VariantTrack.prototype.postInit = async function () {
     const header = await this.getFileHeader();   // cricital, don't remove'
     if (undefined === this.visibilityWindow) {
         const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
-        if(isString(fn) && fn.toLowerCase().includes("gnomad") ) {
+        if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
             this.visibilityWindow = 1000;  // these are known to be very dense
         } else if (this.callSets) {
             const length = this.callSets.length;
@@ -284,7 +284,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
                     if (row >= 0 && row < callSets.length) {
                         const cs = callSets[row];
                         const call = variant.calls[cs.id];
-                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
+                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID));
                     }
                 }
             }
@@ -336,7 +336,7 @@ function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
         popupData.push({name: 'genotypeLikelihood', value: call.genotypeLikelihood.toString()});
     }
 
-    if(sampleInformation) {
+    if (sampleInformation) {
         var attr = sampleInformation.getAttributes(call.callSetName);
         if (attr) {
             Object.keys(attr).forEach(function (attrName) {
