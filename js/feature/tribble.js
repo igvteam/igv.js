@@ -82,7 +82,7 @@ function loadTribbleIndex(indexFile, config, genome) {
             var indexedFileTS = parser.getLong();
             var indexedFileMD5 = parser.getString();
             var flags = parser.getInt();
-            if (version < 3 && (flags & SEQUENCE_DICTIONARY_FLAG) == SEQUENCE_DICTIONARY_FLAG) {
+            if (version < 3 && (flags & SEQUENCE_DICTIONARY_FLAG) === SEQUENCE_DICTIONARY_FLAG) {
                 // readSequenceDictionary(dis);
             }
 
@@ -169,7 +169,7 @@ TribbleIndex.prototype.blocksForRange = function (queryChr, min, max) { //functi
             var startPos = blocks[startBinNumber].min;
             var endPos = blocks[endBinNumber].max;
             var size = endPos - startPos;
-            if (size == 0) {
+            if (size === 0) {
                 return [];
             } else {
                 var mergedBlock = {minv: {block: startPos, offset: 0}, maxv: {block: endPos, offset: 0}};

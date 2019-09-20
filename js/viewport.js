@@ -8,9 +8,8 @@ import Popover from "./ui/popover.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
-import {pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
+import {pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
-import {relativeDOMBBox} from "./util/domUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -324,7 +323,7 @@ ViewPort.prototype.loadFeatures = async function () {
  * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
  * Should be renamed.
  */
-ViewPort.prototype.repaint = function (tile) {
+ViewPort.prototype.repaint = async function (tile) {
 
     var self = this;
 
@@ -400,7 +399,7 @@ ViewPort.prototype.repaint = function (tile) {
     newCanvas.style.top = canvasTop + "px";
     drawConfiguration.context = ctx;
     ctx.translate(0, -canvasTop)
-    draw.call(this, drawConfiguration, features);
+    await draw.call(this, drawConfiguration, features);
     // ctx.translate(0, canvasTop);
     // ctx.restore();
 
@@ -423,7 +422,7 @@ ViewPort.prototype.repaint = function (tile) {
  * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
  * Should be renamed.
  */
-ViewPort.prototype.toSVG = function (tile) {
+ViewPort.prototype.toSVG = async function (tile) {
 
     const genomicState = this.genomicState;
     const referenceFrame = genomicState.referenceFrame;
@@ -468,7 +467,7 @@ ViewPort.prototype.toSVG = function (tile) {
             viewportContainerWidth: this.browser.viewportContainerWidth()
         };
 
-    draw.call(this, drawConfiguration, features);
+    await draw.call(this, drawConfiguration, features);
 
     return ctx.getSerializedSvg(true);
 
@@ -593,7 +592,7 @@ ViewPort.prototype.saveImage = function () {
     download(filename, data);
 };
 
-ViewPort.prototype.renderSVGContext = function (context, offset) {
+ViewPort.prototype.renderSVGContext = async function (context, offset) {
 
     let str = this.trackView.track.name || this.trackView.track.id;
     str = str.replace(/\W/g, '');
@@ -615,12 +614,12 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
     const yScrollDelta = $(this.contentDiv).position().top;
     const dx = offset.deltaX + (genomicStateIndex * context.multiLocusGap);
     const dy = offset.deltaY + yScrollDelta;
-    const { width, height } = this.$viewport.get(0).getBoundingClientRect();
+    const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
     context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
 
-    let { referenceFrame } = this.genomicState;
-    let { start: bpStart, bpPerPixel } = referenceFrame;
+    let {referenceFrame} = this.genomicState;
+    let {start: bpStart, bpPerPixel} = referenceFrame;
     context.save();
 
     const drawConfig =
@@ -651,18 +650,18 @@ ViewPort.prototype.renderSVGContext = function (context, offset) {
 
     const features = this.tile ? this.tile.features : [];
 
-    draw.call(this, drawConfig, features);
+    await draw.call(this, drawConfig, features);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
 
         const shim = 4;
-        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
         context.font = "12px Arial";
         context.fillStyle = 'rgb(68, 68, 68)';
         context.fillText(this.$trackLabel.text(), x, y + height - shim);
 
-        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
 
         context.strokeStyle = 'rgb(68, 68, 68)';
         context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);

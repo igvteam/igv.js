@@ -6,7 +6,7 @@ const GenomicInterval = function (chr, start, end, features) {
 }
 
 GenomicInterval.prototype.contains = function (chr, start, end) {
-    return this.chr == chr &&
+    return this.chr === chr &&
         this.start <= start &&
         this.end >= end;
 }

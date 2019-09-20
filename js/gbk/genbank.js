@@ -197,7 +197,7 @@ GenbankParser.prototype.parseFeatures = function (data) {
                 if (tmp.length() > 0)
                     if (tmp.charAt(0) === '/') {
 
-                        if (currentLocQualifier.charAt(0) == '/') {
+                        if (currentLocQualifier.charAt(0) === '/') {
 
                             let tokens = currentLocQualifier.split("=", 2);
 

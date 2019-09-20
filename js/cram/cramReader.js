@@ -56,9 +56,9 @@ const CramReader = function (config, genome, browser) {
         filehandle: new FileHandler(config.url),
         seqFetch: config.seqFetch || seqFetch.bind(this),
         checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
-    })
+    });
 
-    const indexFileHandle = new FileHandler(config.indexURL)
+    const indexFileHandle = new FileHandler(config.indexURL);
     this.indexedCramFile = new gmodCRAM.IndexedCramFile({
         cram: this.cramFile,
         index: new gmodCRAM.CraiIndex({
@@ -193,7 +193,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                     .catch(function (error) {
                         let message = error.message;
                         if (message && message.indexOf("MD5") >= 0) {
-                            "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
+                            message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                         }
                         browser.presentAlert(message)
                         throw error
@@ -333,7 +333,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                             case 'H':
                             case 'P':
                                 cigarString += data + code;
-
+                                break;
                             default :
                             //  Ignore
                         }

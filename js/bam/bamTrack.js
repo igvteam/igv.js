@@ -643,7 +643,7 @@ const BAMTrack = extend(TrackBase,
 
             this.parent = parent;
             this.featureSource = parent.featureSource;
-            this.top = config.coverageTrackHeight == 0 ? 0 : config.coverageTrackHeight + 5;
+            this.top = config.coverageTrackHeight === 0 ? 0 : config.coverageTrackHeight + 5;
             this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
             this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
@@ -817,7 +817,7 @@ const BAMTrack = extend(TrackBase,
                     // Somewhat complex test, neccessary to insure gaps are drawn.
                     // If this is not the last block, and the next block starts before the orign (off screen to left)
                     // then skip.
-                    if ((b != blocks.length - 1) && blocks[b + 1].start < bpStart) continue;
+                    if ((b !== blocks.length - 1) && blocks[b + 1].start < bpStart) continue;
 
                     drawBlock.call(this, block);
 

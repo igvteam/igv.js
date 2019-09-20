@@ -266,11 +266,11 @@ function estimateTheta(x) {
         }
     }
 
-    let left = idx == 0 ? 0 : coa[idx - 1];
+    let left = idx === 0 ? 0 : coa[idx - 1];
     let right = idx < coa.length ? coa[idx] : 1;
     let r = (x - left) / (right - left);
 
-    let thetaLeft = idx == 0 ? 0 : theta[idx - 1];
+    let thetaLeft = idx === 0 ? 0 : theta[idx - 1];
     let thetaRight = idx < theta.length ? theta[idx] : Math.PI / 2;
 
     return thetaLeft + r * (thetaRight - thetaLeft);
