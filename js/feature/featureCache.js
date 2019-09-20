@@ -53,7 +53,7 @@ FeatureCache.prototype.queryFeatures = function (chr, start, end) {
 
     const intervals = tree.findOverlapping(start, end);
 
-    if (intervals.length == 0) {
+    if (intervals.length === 0) {
         return [];
     } else {
         // Trim the list of features in the intervals to those

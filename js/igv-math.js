@@ -161,13 +161,13 @@ BinaryHeap.prototype = {
         // To remove a value, we must search through the array to find
         // it.
         for (var i = 0; i < length; i++) {
-            if (this.content[i] != node) continue;
+            if (this.content[i] !== node) continue;
             // When it is found, the process seen in 'pop' is repeated
             // to fill up the hole.
             var end = this.content.pop();
             // If the element we popped was the one we needed to remove,
             // we're done.
-            if (i == length - 1) break;
+            if (i === length - 1) break;
             // Otherwise, we replace the removed element with the popped
             // one, and allow it to float up or sink down as appropriate.
             this.content[i] = end;

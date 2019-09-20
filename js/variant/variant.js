@@ -55,8 +55,7 @@ function createVCFVariant(tokens) {
         });
 
         return info;
-    };
-
+    }
 }
 
 function init(variant) {

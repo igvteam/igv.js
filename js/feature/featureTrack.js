@@ -616,9 +616,9 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.display === "COLLAPSED") {
         py = this.margin;
     }
-    if (this.displayMode === "SQUISHED" && feature.row != undefined) {
+    if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
         py = this.margin + rowHeight * feature.row;
-    } else if (this.displayMode === "EXPANDED" && feature.row != undefined) {
+    } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
         py = this.margin + rowHeight * feature.row;
     }
 

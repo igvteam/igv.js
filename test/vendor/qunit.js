@@ -2359,7 +2359,7 @@
   		value: function equal(actual, expected, message) {
 
   			// eslint-disable-next-line eqeqeq
-  			var result = expected == actual;
+  			var result = expected === actual;
 
   			this.pushResult({
   				result: result,
@@ -2373,7 +2373,7 @@
   		value: function notEqual(actual, expected, message) {
 
   			// eslint-disable-next-line eqeqeq
-  			var result = expected != actual;
+  			var result = expected !== actual;
 
   			this.pushResult({
   				result: result,

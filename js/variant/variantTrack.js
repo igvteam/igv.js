@@ -221,8 +221,8 @@ VariantTrack.prototype.draw = function (options) {
                         let allVar = true;  // until proven otherwise
                         let allRef = true;
                         call.genotype.forEach(function (g) {
-                            if (g != 0) allRef = false;
-                            if (g == 0) allVar = false;
+                            if (g !== 0) allRef = false;
+                            if (g === 0) allVar = false;
                         });
 
                         if (allRef) {
@@ -265,7 +265,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
             popupData.push('<HR>')
         }
 
-        if ("COLLAPSED" == self.displayMode) {
+        if ("COLLAPSED" === self.displayMode) {
             Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
         } else {
             const yOffset = clickState.y

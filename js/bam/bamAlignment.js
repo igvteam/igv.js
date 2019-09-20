@@ -126,7 +126,7 @@ BamAlignment.prototype.tags = function () {
             var type = String.fromCharCode(ba[p + 2]);
             var value;
 
-            if (type == 'A') {
+            if (type === 'A') {
                 value = String.fromCharCode(ba[p + 3]);
                 p += 4;
             } else if (type === 'i' || type === 'I') {

@@ -41,7 +41,7 @@ const extend = function (parent, child) {
 function isSimpleType(value) {
     const simpleTypes = new Set(["boolean", "number", "string", "symbol"]);
     const valueType = typeof value;
-    return (value != undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
+    return (value !== undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
 }
 
 const buildOptions = function (config, options) {

@@ -56,11 +56,10 @@ SegParser.prototype.parseHeader = function (data) {
     for (i = 0; i < len; i++) {
         line = lines[i];
         if (line.startsWith("#")) {
-            continue;
+            // skip
         } else {
             tokens = line.split("\t");
             this.header = {headings: tokens, lineCount: i + 1};
-            return this.header;
             break;
         }
     }

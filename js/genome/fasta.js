@@ -169,7 +169,7 @@ FastaSequence.prototype.getIndex = function () {
                     var tokens = lines[lineNo++].split("\t");
                     var nTokens = tokens.length;
 
-                    if (nTokens == 5) {
+                    if (nTokens === 5) {
                         // Parse the index line.
                         var chr = tokens[0];
                         var size = parseInt(tokens[1]);
@@ -224,7 +224,7 @@ FastaSequence.prototype.loadAll = function () {
         while (lineNo < len) {
             nextLine = lines[lineNo++].trim();
             if (nextLine.startsWith("#") || nextLine.length === 0) {
-                continue;
+                // skip
             } else if (nextLine.startsWith(">")) {
                 if (currentSeq) {
                     self.chromosomeNames.push(currentChr);
