@@ -85,7 +85,7 @@ const FeatureSource = function (config, genome) {
         this.queryable = false;
     } else {
         this.reader = new FeatureFileReader(config, genome);
-        if (config.queryable != undefined) {
+        if (config.queryable !== undefined) {
             this.queryable = config.queryable
         } else if (queryableFormats.has(config.format)) {
             this.queryable = queryableFormats.has(config.format) || reader.indexed;

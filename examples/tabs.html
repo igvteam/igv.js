@@ -153,7 +153,7 @@
 
             tabs.forEach(function (tab) {
 
-                if (tab.id == selectedId) {
+                if (tab.id === selectedId) {
                     tab.link.className = 'selected';
                     tab.content.className = 'tabContent';
                 } else {
@@ -171,7 +171,7 @@
 
         function getFirstChildWithTagName(element, tagName) {
             for (var i = 0; i < element.childNodes.length; i++) {
-                if (element.childNodes[i].nodeName == tagName) return element.childNodes[i];
+                if (element.childNodes[i].nodeName === tagName) return element.childNodes[i];
             }
         }
 

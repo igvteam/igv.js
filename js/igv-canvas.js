@@ -133,10 +133,10 @@ const IGVGraphics = {
                 var value = transforms[transform];
 
                 // TODO: Add error checking for robustness
-                if (transform == 'translate') {
+                if (transform === 'translate') {
                     ctx.translate(value['x'], value['y']);
                 }
-                if (transform == 'rotate') {
+                if (transform === 'rotate') {
                     ctx.rotate(value['angle'] * Math.PI / 180);
                 }
             }
@@ -167,10 +167,10 @@ const IGVGraphics = {
                 var value = transforms[transform];
 
                 // TODO: Add error checking for robustness
-                if (transform == 'translate') {
+                if (transform === 'translate') {
                     ctx.translate(value['x'], value['y']);
                 }
-                if (transform == 'rotate') {
+                if (transform === 'rotate') {
                     ctx.rotate(value['angle'] * Math.PI / 180);
                 }
             }
@@ -228,7 +228,7 @@ const IGVGraphics = {
             IGVGraphics.setProperties(ctx, properties);
         }
 
-        if (dashLen == undefined) dashLen = 2;
+        if (dashLen === undefined) dashLen = 2;
         ctx.moveTo(x1, y1);
 
         var dX = x2 - x1;
@@ -241,9 +241,9 @@ const IGVGraphics = {
         while (q++ < dashes) {
             x1 += dashX;
             y1 += dashY;
-            ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x1, y1);
+            ctx[q % 2 === 0 ? 'moveTo' : 'lineTo'](x1, y1);
         }
-        ctx[q % 2 == 0 ? 'moveTo' : 'lineTo'](x2, y2);
+        ctx[q % 2 === 0 ? 'moveTo' : 'lineTo'](x2, y2);
 
         if (properties) ctx.restore();
     },

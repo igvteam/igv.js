@@ -110,7 +110,7 @@ AlignmentContainer.prototype.finish = function () {
     }
 
 AlignmentContainer.prototype.contains = function (chr, start, end) {
-        return this.chr == chr &&
+        return this.chr === chr &&
             this.start <= start &&
             this.end >= end;
     }
@@ -383,7 +383,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
             var po = alignment.pairOrientation;
 
-            if (typeof po === "string" && po.length == 4) {
+            if (typeof po === "string" && po.length === 4) {
                 var tmp = '' + po.charAt(0) + po.charAt(2);
                 switch (tmp) {
                     case 'FF':

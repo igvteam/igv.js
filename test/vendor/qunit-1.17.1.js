@@ -1305,7 +1305,7 @@ QUnit.assert = Assert.prototype = {
 	 */
 	equal: function( actual, expected, message ) {
 		/*jshint eqeqeq:false */
-		this.push( expected == actual, actual, expected, message );
+		this.push( expected === actual, actual, expected, message );
 	},
 
 	/**
@@ -1314,7 +1314,7 @@ QUnit.assert = Assert.prototype = {
 	 */
 	notEqual: function( actual, expected, message ) {
 		/*jshint eqeqeq:false */
-		this.push( expected != actual, actual, expected, message );
+		this.push( expected !== actual, actual, expected, message );
 	},
 
 	/**
@@ -1476,7 +1476,7 @@ QUnit.equiv = (function() {
 					// declaration
 					// e.g. var i = 1;
 					// var j = new Number(1);
-					return a == b;
+					return a === b;
 				} else {
 					return a === b;
 				}
@@ -2048,7 +2048,7 @@ QUnit.diff = (function() {
 
 		for ( i = 0; i < n.length - 1; i++ ) {
 			if ( n[ i ].text != null && n[ i + 1 ].text == null && n[ i ].row + 1 < o.length && o[ n[ i ].row + 1 ].text == null &&
-				n[ i + 1 ] == o[ n[ i ].row + 1 ] ) {
+				n[ i + 1 ] === o[ n[ i ].row + 1 ] ) {
 
 				n[ i + 1 ] = {
 					text: n[ i + 1 ],
@@ -2063,7 +2063,7 @@ QUnit.diff = (function() {
 
 		for ( i = n.length - 1; i > 0; i-- ) {
 			if ( n[ i ].text != null && n[ i - 1 ].text == null && n[ i ].row > 0 && o[ n[ i ].row - 1 ].text == null &&
-				n[ i - 1 ] == o[ n[ i ].row - 1 ] ) {
+				n[ i - 1 ] === o[ n[ i ].row - 1 ] ) {
 
 				n[ i - 1 ] = {
 					text: n[ i - 1 ],

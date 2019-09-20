@@ -46,7 +46,7 @@ function unbgzf(data, lim) {
     }
 
     // Concatenate decompressed blocks
-    if (oBlockList.length == 1) {
+    if (oBlockList.length === 1) {
         return oBlockList[0];
     } else {
         const out = new Uint8Array(totalSize);
@@ -73,7 +73,7 @@ const hasSubarray = (typeof testArray.subarray === 'function');
 const hasSlice = false; /* (typeof testArray.slice === 'function'); */ // Chrome slice performance is so dire that we're currently not using it...
 
 function arrayCopy(src, srcOffset, dest, destOffset, count) {
-    if (count == 0) {
+    if (count === 0) {
         return;
     }
     if (!src) {
@@ -81,11 +81,11 @@ function arrayCopy(src, srcOffset, dest, destOffset, count) {
     } else if (!dest) {
         throw "Undef dest";
     }
-    if (srcOffset == 0 && count == src.length) {
+    if (srcOffset === 0 && count === src.length) {
         arrayCopy_fast(src, dest, destOffset);
     } else if (hasSubarray) {
         arrayCopy_fast(src.subarray(srcOffset, srcOffset + count), dest, destOffset);
-    } else if (src.BYTES_PER_ELEMENT == 1 && count > 100) {
+    } else if (src.BYTES_PER_ELEMENT === 1 && count > 100) {
         arrayCopy_fast(new Uint8Array(src.buffer, src.byteOffset + srcOffset, count), dest, destOffset);
     } else {
         arrayCopy_slow(src, srcOffset, dest, destOffset, count);

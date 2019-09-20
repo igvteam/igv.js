@@ -60,7 +60,7 @@ function ga4ghSearch(options) {
             if (pageToken) {
                 body.pageToken = pageToken;
             } else {
-                if (body.pageToken != undefined) delete body.pageToken;    // Remove previous page token, if any
+                if (body.pageToken !== undefined) delete body.pageToken;    // Remove previous page token, if any
             }
 
             var sendData = JSON.stringify(body);

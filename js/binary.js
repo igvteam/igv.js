@@ -121,9 +121,9 @@ BinaryParser.prototype.getString = function (len) {
 
     var s = "";
     var c;
-    while ((c = this.view.getUint8(this.position++)) != 0) {
+    while ((c = this.view.getUint8(this.position++)) !== 0) {
         s += String.fromCharCode(c);
-        if (len && s.length == len) break;
+        if (len && s.length === len) break;
     }
     return s;
 }

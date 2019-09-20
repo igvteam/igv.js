@@ -311,7 +311,7 @@ SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
                 if (!s1) s1 = d2 * Number.MAX_VALUE;
                 if (!s2) s2 = d2 * Number.MAX_VALUE;
 
-                if (s1 == s2) return 0;
+                if (s1 === s2) return 0;
                 else if (s1 > s2) return d2;
                 else return d2 * -1;
 

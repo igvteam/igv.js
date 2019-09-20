@@ -54,7 +54,7 @@ BamAlignmentRow.prototype.findAlignment = function (genomicLocation) {
     return centerAlignment;
 
     function alignmentContains(a, genomicLocation) {
-        return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef
+        return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
     }
 }
 

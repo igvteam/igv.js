@@ -153,7 +153,7 @@ const igvxhr = {
                     }
                     const range = options.range;
                     const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
-                    const isSafari = navigator.vendor.indexOf("Apple") == 0 && /\sSafari\//.test(navigator.userAgent);
+                    const isSafari = navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
 
                     if (range && isChrome && !isAmazonV4Signed(url)) {
                         // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
@@ -198,8 +198,8 @@ const igvxhr = {
 
                     xhr.onload = function (event) {
                         // when the url points to a local file, the status is 0 but that is no error
-                        if (xhr.status == 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                            if (range && xhr.status != 206 && range.start !== 0) {
+                        if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
+                            if (range && xhr.status !== 206 && range.start !== 0) {
                                 // For small files a range starting at 0 can return the whole file => 200
                                 handleError("ERROR: range-byte header was ignored for url: " + url);
                             } else {
@@ -275,7 +275,7 @@ const igvxhr = {
                     }
                 });
             }
-        };
+        }
     },
 
     loadArrayBuffer: function (url, options) {
@@ -294,7 +294,7 @@ const igvxhr = {
 
         var method = options.method || (options.sendData ? "POST" : "GET");
 
-        if (method == "POST") options.contentType = "application/json";
+        if (method === "POST") options.contentType = "application/json";
 
         return igvxhr.load(url, options)
 

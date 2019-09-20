@@ -111,7 +111,7 @@ BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPix
         .then(function (leafItems) {
 
 
-            if (!leafItems || leafItems.length == 0) {
+            if (!leafItems || leafItems.length === 0) {
                 return [];
             } else {
 
@@ -208,7 +208,7 @@ BWReader.prototype.loadHeader = function () {
 
                 if (magic === BIGWIG_MAGIC_LTH) {
                     self.type = "BigWig";
-                } else if (magic == BIGBED_MAGIC_LTH) {
+                } else if (magic === BIGBED_MAGIC_LTH) {
                     self.type = "BigBed";
                 } else {
                     //Try big endian order
@@ -220,7 +220,7 @@ BWReader.prototype.loadHeader = function () {
 
                     if (magic === BIGWIG_MAGIC_HTL) {
                         self.type = "BigWig";
-                    } else if (magic == BIGBED_MAGIC_HTL) {
+                    } else if (magic === BIGBED_MAGIC_HTL) {
                         self.type = "BigBed";
                     } else {
                         // TODO -- error, unknown file type  or BE
@@ -373,7 +373,7 @@ RPTree.prototype.readNode = function (filePosition, bufferedReader) {
 
             binaryParser = new BinaryParser(dataView, self.littleEndian);
             type = binaryParser.getByte();
-            isLeaf = (type === 1) ? true : false;
+            isLeaf = (type === 1);
             reserved = binaryParser.getByte();
             count = binaryParser.getUShort();
 
@@ -470,7 +470,7 @@ RPTree.prototype.findLeafItemsOverlapping = function (chrIdx1, startBase, chrIdx
 
             }
 
-            if (nodeId != undefined) processing.delete(nodeId);
+            if (nodeId !== undefined) processing.delete(nodeId);
 
             // Wait until all nodes are processed
             if (processing.size === 0) {
@@ -551,7 +551,7 @@ function BPTree(binaryParser, startOffset, genome) {
             currOffset;
 
 
-        if (type == 1) {
+        if (type === 1) {
 
             for (i = 0; i < count; i++) {
 
@@ -591,8 +591,8 @@ function overlaps(item, chrIdx1, startBase, chrIdx2, endBase) {
         return false;
     }
 
-    return ((chrIdx2 > item.startChrom) || (chrIdx2 == item.startChrom && endBase >= item.startBase)) &&
-        ((chrIdx1 < item.endChrom) || (chrIdx1 == item.endChrom && startBase <= item.endBase));
+    return ((chrIdx2 > item.startChrom) || (chrIdx2 === item.startChrom && endBase >= item.startBase)) &&
+        ((chrIdx1 < item.endChrom) || (chrIdx1 === item.endChrom && startBase <= item.endBase));
 
 
 }
@@ -606,7 +606,6 @@ function BWTotalSummary(byteBuffer) {
         this.maxVal = byteBuffer.getDouble();
         this.sumData = byteBuffer.getDouble();
         this.sumSquares = byteBuffer.getDouble();
-
         computeStats.call(this);
     } else {
         this.basesCovered = 0;
@@ -619,19 +618,6 @@ function BWTotalSummary(byteBuffer) {
     }
 }
 
-
-BWTotalSummary.prototype.updateStats = function (stats) {
-
-    this.basesCovered += stats.count;
-    this.sumData += status.sumData;
-    this.sumSquares += sumSquares;
-    this.minVal = MIN(_minVal, min);
-    this.maxVal = MAX(_maxVal, max);
-
-    computeStats.call(this);
-
-}
-
 function computeStats() {
     let n = this.basesCovered;
     if (n > 0) {
@@ -642,8 +628,8 @@ function computeStats() {
             max = this.maxVal > 0 ? this.mean + 2 * this.stddev : 0;
 
         this.defaultRange = {
-            min: 0,
-            max: this.mean + 3 * this.stddev
+            min: min,
+            max: max
         }
     }
 }
@@ -822,7 +808,7 @@ function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, ch
                 value = maxVal;
                 break;
             default:
-                value = validCount == 0 ? 0 : sumData / validCount;
+                value = validCount === 0 ? 0 : sumData / validCount;
         }
 
         if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;

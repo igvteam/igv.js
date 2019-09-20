@@ -446,7 +446,7 @@ function parseTrackLine(line) {
     for (let str of tmp) {
         if (!str) return;
         var kv = str.split('=', 2);
-        if (kv.length == 2) {
+        if (kv.length === 2) {
             const key = kv[0].trim();
             const value = kv[1].trim();
             properties[key] = value;
@@ -937,7 +937,6 @@ function decodeGtexGWAS(tokens, ignore) {
         'Odds ratio or beta': tokens[6],
     }
     if (tokens.length > 6) {
-        'https://www.ncbi.nlm.nih.gov/pubmed/'
         feature['PUBMEDID'] = `<a target = "blank" href = "https://www.ncbi.nlm.nih.gov/pubmed/${tokens[7]}">${tokens[7]}</a>`
     }
     return feature
@@ -975,7 +974,7 @@ function decodeGFF(tokens, ignore) {
     var attributes = {};
     for (let kv of attributeString.split(';')) {
         const t = kv.trim().split(delim, 2)
-        if (t.length == 2) {
+        if (t.length === 2) {
             const key = t[0].trim();
             let value = t[1].trim();
 
@@ -1394,9 +1393,9 @@ function decodeCustom(tokens, ignore) {
 
         format.fields.forEach(function (field, index) {
 
-            if (index != format.chr &&
-                index != format.start &&
-                index != format.end) {
+            if (index !== format.chr &&
+                index !== format.start &&
+                index !== format.end) {
 
                 feature[field] = tokens[index];
             }
