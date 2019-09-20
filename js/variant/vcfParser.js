@@ -30,10 +30,8 @@ import {splitStringRespectingQuotes} from "../util/stringUtils.js";
 /**
  * Parser for VCF files.
  */
-const VcfParser = function (config) {
-    this.filterRefBlocks = (config === undefined || config.filterRefBlocks === undefined)?
-        false :
-        config.filterRefBlocks;
+const VcfParser = function () {
+
 }
 
 VcfParser.prototype.parseHeader = function (data) {
@@ -176,9 +174,6 @@ VcfParser.prototype.parseFeatures = function (data) {
             if (tokens.length >= 8) {
 
                 variant = createVCFVariant(tokens);
-
-                if (this.filterRefBlocks && variant.isRefBlock()) continue;     // Skip reference blocks
-
                 variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                 allFeatures.push(variant);
 

@@ -40,16 +40,6 @@ function runVariantTests() {
         done();
     });
 
-    QUnit.test("Test gcvf mixed variants", async function (assert) {
-
-        const url = "data/vcf/gvcf_mixed.vcf";
-        const data = await igvxhr.loadString(url)
-        const parser = new VcfParser();
-        const header = await parser.parseHeader(data);
-        const variants = await parser.parseFeatures(data);
-        assert.equal(variants.length, 5);
-    });
-
     QUnit.test("Test gcvf non-ref variants", async function (assert) {
 
         const url = "data/vcf/gvcf_non_ref.vcf";
@@ -58,7 +48,23 @@ function runVariantTests() {
         const header = await parser.parseHeader(data);
         const variants = await parser.parseFeatures(data);
         assert.equal(variants.length, 4);
+        for(let v of variants) {
+            assert.equal(v.type, "NONVARIANT");
+        }
     });
+
+    QUnit.test("Test gcvf mixed variants", async function (assert) {
+        const url = "data/vcf/gvcf_mixed.vcf";
+        const data = await igvxhr.loadString(url)
+        const parser = new VcfParser();
+        const header = await parser.parseHeader(data);
+        const variants = await parser.parseFeatures(data);
+        assert.equal(variants.length, 5);
+        for(let v of variants) {
+            assert.equal(v.type, "MIXED");
+        }
+    });
+
 }
 
 export default runVariantTests;
