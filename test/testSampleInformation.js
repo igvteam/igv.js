@@ -24,7 +24,7 @@ function runSampleInformationTests() {
 
                 const attributes = sampleInformation.getAttributes('SS0012979');
                 assert.ok(attributes);
-                assert.equal(attributes.familyId, 14109);
+                assert.equal(attributes.familyId, "14109");
                 done();
             })
 
