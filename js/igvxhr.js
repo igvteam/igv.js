@@ -469,7 +469,7 @@ function arrayBufferToString(arraybuffer, compression) {
     } else {
         return decodeUTF8(plain);
     }
-};
+}
 
 function isGoogleDrive(url) {
     return url.includes("drive.google.com") || url.includes("www.googleapis.com/drive");

@@ -1004,7 +1004,7 @@ const BAMTrack = extend(TrackBase,
             for (let row of alignmentContainer.packedAlignmentRows) {
                 row.updateScore(genomicLocation, alignmentContainer, sortOption, direction);
             }
-            ;
+            
 
             alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
 

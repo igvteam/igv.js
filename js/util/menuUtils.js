@@ -119,7 +119,7 @@ function doProvideColoSwatchWidget(track) {
         "annotation" === track.type ||
         "variant" === track.type ||
         "wig" === track.type);
-};
+}
 
 
 function visibilityWindowMenuItem(trackView) {
@@ -157,7 +157,7 @@ function visibilityWindowMenuItem(trackView) {
     return {object: $e, click: menuClickHandler};
 
 
-};
+}
 
 function trackRemovalMenuItem(trackView) {
 
@@ -173,7 +173,7 @@ function trackRemovalMenuItem(trackView) {
 
     return {object: $e, click: menuClickHandler};
 
-};
+}
 
 
 function colorPickerMenuItem(trackView) {
@@ -192,7 +192,7 @@ function colorPickerMenuItem(trackView) {
         click: clickHandler
     };
 
-};
+}
 
 function trackRenameMenuItem(trackView) {
 
@@ -229,7 +229,7 @@ function trackRenameMenuItem(trackView) {
     return {object: $e, click: menuClickHandler};
 
 
-};
+}
 
 function trackHeightMenuItem(trackView) {
 
@@ -287,7 +287,7 @@ function getTrackLabelText(track) {
     txt = vp.$trackLabel.text();
 
     return txt;
-};
+}
 
 export default MenuUtils;
 

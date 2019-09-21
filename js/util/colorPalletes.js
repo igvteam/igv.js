@@ -177,7 +177,7 @@ function PaletteColorTable  (palette) {
     this.nextIdx = 0;
     this.colorGenerator = new RandomColorGenerator();
 
-};
+}
 
 PaletteColorTable.prototype.getColor = function (key) {
 
@@ -201,7 +201,7 @@ function RandomColorGenerator() {
     this.hue = Math.random();
     this.goldenRatio = 0.618033988749895;
     this.hexwidth = 2;
-};
+}
 
 RandomColorGenerator.prototype.hsvToRgb = function (h, s, v) {
     var h_i = Math.floor(h * 6),
@@ -256,7 +256,7 @@ RandomColorGenerator.prototype.get = function (saturation, value) {
 // Returns a random number between min (inclusive) and max (exclusive)
 function random(min, max) {
     return Math.random() * (max - min) + min;
-};
+}
 // Used to generate color list
 // let hexs = [];
 // for (let rgbList of Object.values(colorPalettes)) {
