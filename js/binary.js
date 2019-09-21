@@ -103,11 +103,11 @@ BinaryParser.prototype.getLong = function () {
 
     var value = 0;
     if (this.littleEndian) {
-        for (var i = b.length - 1; i >= 0; i--) {
+        for (let i = b.length - 1; i >= 0; i--) {
             value = (value * 256) + b[i];
         }
     } else {
-        for (var i = 0; i < b.length; i++) {
+        for (let i = 0; i < b.length; i++) {
             value = (value * 256) + b[i];
         }
     }

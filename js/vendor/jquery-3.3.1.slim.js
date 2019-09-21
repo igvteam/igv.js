@@ -16,9 +16,6 @@
 // * no global definition
 // * noConflict not supported (as _ is encapsulated its not needed)
 
-var jQuery;
-
-
 // Edge <= 12 - 13+, Firefox <=18 - 45+, IE 10 - 11, Safari 5.1 - 9+, iOS 6 - 9.1
 // throw exceptions when non-strict code (e.g., ASP.NET 4.5) accesses strict mode
 // arguments.callee.caller (trac-13335). But as of jQuery 3.0 (2016), strict mode should be common
@@ -101,7 +98,7 @@ function toType(obj) {
         typeof obj;
 }
 
-/* global Symbol */
+// global Symbol
 // Defining this global in .eslintrc.json would create a danger of using the global
 // unguarded in another place, it seems safer to define global only for this module
 
@@ -631,6 +628,7 @@ var Sizzle =
 
             // CSS string/identifier serialization
             // https://drafts.csswg.org/cssom/#common-serializing-idioms
+            // eslint-disable-next-line no-control-regex
             rcssescape = /([\0-\x1f\x7f]|^-?\d)|^-$|[^\0-\x1f\x7f-\uFFFF\w-]/g,
             fcssescape = function (ch, asCodePoint) {
                 if (asCodePoint) {

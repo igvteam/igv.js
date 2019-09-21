@@ -25,12 +25,11 @@
 
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
-import {unbgzf, bgzBlockSize} from './bam/bgzf.js';
+import {unbgzf} from './bam/bgzf.js';
 import Zlib from "./vendor/zlib_and_gzip.js";
-import {getFilename, isFilePath} from './util/fileUtils.js'
-import {parseUri, decodeDataURI} from "./util/uriUtils.js"
+import {getFilename} from './util/fileUtils.js'
+import {decodeDataURI, parseUri} from "./util/uriUtils.js"
 import Alert from "./ui/alert.js"
-
 
 
 var NONE = 0;
@@ -132,7 +131,7 @@ const igvxhr = {
 
             async function getLoadPromise(url, options) {
 
-                return new Promise(async function (fullfill, reject) {
+                return new Promise(function (fullfill, reject) {
 
                     // Various Google tansformations
                     if (google.isGoogleURL(url)) {
@@ -603,4 +602,4 @@ function getGlobalObject() {
     }
 }
 
-export default igvxhr;
+export default igvxhr

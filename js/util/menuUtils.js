@@ -96,6 +96,7 @@ const MenuUtils = {
                     e.stopPropagation();
                 })
 
+                // eslint-disable-next-line no-inner-declarations
                 function handleClick(e) {
                     item.click();
                     $popover.hide();

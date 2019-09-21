@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import igv from "./api.js"
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";

@@ -299,17 +299,15 @@ Browser.prototype.loadSession = async function (options) {
 
 Browser.prototype.loadSessionObject = async function (session) {
 
-    const self = this;
+    this.removeAllTracks(true);
 
-    self.removeAllTracks(true);
-
-    const genome = await self.loadGenome(session.reference || session.genome, session.locus)
+    const genome = await this.loadGenome(session.reference || session.genome, session.locus)
 
     // Restore gtex selections.
     if (session.gtexSelections) {
 
         const genomicStates = {};
-        for (let gs of self.genomicStateList) {
+        for (let gs of this.genomicStateList) {
             genomicStates[gs.locusSearchString] = gs;
         }
 
@@ -324,40 +322,41 @@ Browser.prototype.loadSessionObject = async function (session) {
     }
 
     if (session.roi) {
-        self.roi = [];
-        session.roi.forEach(function (r) {
-            self.roi.push(new ROI(r, self.genome));
-        });
+        this.roi = [];
+        for(let r of session.roi) {
+            this.roi.push(new ROI(r, genome));
+        }
     }
 
-    if (!session.tracks) session.tracks = [];
+    if (!session.tracks) {
+        // eslint-disable-next-line require-atomic-updates
+        session.tracks = [];
+    }
     if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
         session.tracks.push({type: "sequence", order: -Number.MAX_VALUE})
     }
 
-    await self.loadTrackList(session.tracks);
+    await this.loadTrackList(session.tracks);
 
     var panelWidth;
 
-    if (false !== session.showIdeogram && !self.ideoPanel) {
-        panelWidth = self.viewportContainerWidth() / self.genomicStateList.length;
-        self.ideoPanel = new IdeoPanel(self.$contentHeader, panelWidth, self);
-        self.ideoPanel.repaint();
+    if (false !== session.showIdeogram && !this.ideoPanel) {
+        panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
+        this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+        this.ideoPanel.repaint();
     }
 
-    self.updateLocusSearchWidget(self.genomicStateList[0]);
+    this.updateLocusSearchWidget(this.genomicStateList[0]);
 
-    self.windowSizePanel.updateWithGenomicState(self.genomicStateList[0]);
+    this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
 
     // Resize is called to address minor alignment problems with multi-locus view.
-    self.resize();
+    this.resize();
 
 }
 
 
 Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
-
-    var self = this;
 
     // idOrConfig might be json
     if (isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -368,43 +367,43 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
         }
     }
 
-    const genomeConfig = await expandReference(idOrConfig)
+    const genomeConfig = await expandReference.call(this, idOrConfig)
     const genome = await GenomeUtils.loadGenome(genomeConfig)
-    const genomeChange = self.genome && (self.genome.id !== genome.id);
-    self.genome = genome;
-    self.$current_genome.text(genome.id || '');
-    self.$current_genome.attr('title', genome.id || '');
-    self.chromosomeSelectWidget.update(genome);
+    const genomeChange = this.genome && (this.genome.id !== genome.id);
+    this.genome = genome;
+    this.$current_genome.text(genome.id || '');
+    this.$current_genome.attr('title', genome.id || '');
+    this.chromosomeSelectWidget.update(genome);
     if (genomeChange) {
-        self.removeAllTracks();
+        this.removeAllTracks();
     }
-    self.genome = genome;
+    this.genome = genome;
 
     let genomicStateList
     try {
-        genomicStateList = await self.search(getInitialLocus(initialLocus, genome), true)
+        genomicStateList = await this.search(getInitialLocus(initialLocus, genome), true)
     } catch (error) {
         // Couldn't find initial locus
         console.error(error);
-        genomicStateList = await self.search(self.genome.getHomeChromosomeName());
+        genomicStateList = await this.search(this.genome.getHomeChromosomeName());
     }
-    self.genomicStateList = genomicStateList;
-    if (self.genomicStateList.length > 0) {
-        if (!self.rulerTrack && false !== self.config.showRuler) {
-            self.rulerTrack = new RulerTrack(self);
-            self.addTrack(self.rulerTrack);
+    this.genomicStateList = genomicStateList;
+    if (this.genomicStateList.length > 0) {
+        if (!this.rulerTrack && false !== this.config.showRuler) {
+            this.rulerTrack = new RulerTrack(this);
+            this.addTrack(this.rulerTrack);
         }
     } else {
-        const errorString = 'Unrecognized locus ' + self.config.locus;
-        self.presentAlert(errorString, undefined);
+        const errorString = 'Unrecognized locus ' + this.config.locus;
+        this.presentAlert(errorString, undefined);
     }
 
     if (genomeConfig.tracks) {
-        await self.loadTrackList(genomeConfig.tracks);
+        await this.loadTrackList(genomeConfig.tracks);
     }
 
-    self.resize();    // Force recomputation and repaint
-    return self.genome;
+    this.resize();    // Force recomputation and repaint
+    return this.genome;
 
 
     // Expand a genome id to a reference object, if needed
@@ -426,7 +425,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 
             var reference = knownGenomes[genomeID];
             if (!reference) {
-                self.presentAlert("Uknown genome id: " + genomeID, undefined);
+                this.presentAlert("Uknown genome id: " + genomeID, undefined);
             }
             return reference;
         } else {
@@ -597,7 +596,7 @@ Browser.prototype.loadTrack = async function (config) {
 
     if (!knowHowToLoad(config)) {
         this.presentAlert("The following track could not be loaded.  Is this a local file? " + config.name);
-        return Promise.resolve();
+        return;
     }
 
     if (isString(config.url) && config.url.startsWith("https://drive.google.com")) {
@@ -1658,7 +1657,7 @@ Browser.prototype.search = async function (string, init) {
 
                     locusObject.start = locusObject.end = undefined;
 
-                    numeric = b[0].replace(/\,/g, '');
+                    numeric = b[0].replace(/,/g, '');
                     if (isNaN(numeric)) {
                         return undefined;
                     }
@@ -1671,7 +1670,7 @@ Browser.prototype.search = async function (string, init) {
 
                     if (2 === b.length) {
 
-                        numeric = b[1].replace(/\,/g, '');
+                        numeric = b[1].replace(/,/g, '');
                         if (isNaN(numeric)) {
                             return false;
                         }
@@ -1849,7 +1848,7 @@ Browser.prototype.compressedSession = function () {
     compressedBytes = new Zlib.RawDeflate(bytes).compress();            // UInt8Arry
     compressedString = String.fromCharCode.apply(null, compressedBytes);      // Convert to string
     enc = btoa(compressedString);
-    enc = enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/\=/g, '-');   // URL safe
+    enc = enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/=/g, '-');   // URL safe
 
     //console.log(json);
     //console.log(enc);

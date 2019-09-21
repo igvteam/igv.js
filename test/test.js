@@ -21,7 +21,9 @@ import runBrowserTests from "./testBrowser.js";
 import runUtilTests from "./testUtils.js";
 import runIgvXhrTests from "./testIgvXhr.js";
 import runCRAMTests from "./testCRAM.js";
+import runTribbleTests from "./testTribble.js";
 
+//runTribbleTests();
 runBigwigTests();
 runBAMTests();
 runBAMIndexTests();
