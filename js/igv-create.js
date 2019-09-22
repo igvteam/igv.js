@@ -75,11 +75,6 @@ async function createBrowser(parentDiv, config) {
 
     const browser = new Browser(config, $('<div class="igv-track-container-div">')[0]);
 
-    // Backward compatibility -- globally visible.   This will be removed in a future release
-    if (typeof igv !== 'undefined' && !igv.browser) {
-        igv.browser = browser;
-    }
-
     browser.parent = parentDiv;
 
     $(parentDiv).append(browser.$root);
@@ -173,7 +168,7 @@ async function createBrowser(parentDiv, config) {
         }
     }
 
-};
+}
 
 function removeBrowser(browser) {
     browser.dispose();

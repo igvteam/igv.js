@@ -114,7 +114,7 @@ const CivicReader = function (config) {
                     if (!typeString) typeString = vt.display_name;
                     else typeString += ", " + vt.display_name;
                 }
-                ;
+                
                 pd.push({name: name, value: typeString});
             }
 

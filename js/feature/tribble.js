@@ -131,7 +131,7 @@ function loadTribbleIndex(indexFile, config, genome) {
         }
 
     });
-};
+}
 
 const TribbleIndex = function (chrIndexTable) {
     this.chrIndex = chrIndexTable;      // Dictionary of chr -> tribble index

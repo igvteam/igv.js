@@ -73,7 +73,7 @@ function prettyBasePairNumber  (raw) {
     floored = Math.floor(value);
 
     return floored.toString() + units;
-};
+}
 
 
 export default WindowSizePanel;

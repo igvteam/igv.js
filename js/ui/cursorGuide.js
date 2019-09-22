@@ -162,6 +162,6 @@ function getMouseXY(domElement, event) {
         };
 
     return xy;
-};
+}
 
 export default CursorGuide;

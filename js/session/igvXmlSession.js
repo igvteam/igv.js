@@ -43,10 +43,10 @@ const XMLSession = function (xmlString, knownGenomes) {
     self.tracks = [];
 
     var resourceMap = {};
-    Array.from(elements).forEach(function (res, idx) {
+    Array.from(elements).forEach(function (r, idx) {
         var res = {
-            url: res.getAttribute("path"),
-            indexURL: res.getAttribute("index"),
+            url: r.getAttribute("path"),
+            indexURL: r.getAttribute("index"),
             order: idx
         };
         self.tracks.push(res);
