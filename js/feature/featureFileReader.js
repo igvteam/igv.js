@@ -213,7 +213,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
         return [];
     } else {
 
-        blocks.forEach(async function (block) {
+        for (let block of blocks) {
 
             const startPos = block.minv.block
             const startOffset = block.minv.offset
@@ -260,13 +260,20 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
                 // Filter features not in requested range.
                 for (let f of slicedFeatures) {
+                    if(f.chr !== chr) {
+                        if(allFeatures.length === 0) {
+                            continue;  //adjacent chr to the left
+                        } else {
+                            break; //adjacent chr to the right
+                        }
+                    }
                     if (f.start > end) break;
                     if (f.end >= start && f.start <= end) {
                         allFeatures.push(f);
                     }
                 }
             }
-        });
+        }
     }
 
     allFeatures.sort(function (a, b) {
