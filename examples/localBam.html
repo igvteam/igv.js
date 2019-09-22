@@ -28,14 +28,6 @@
     <div id="fileNameDiv"></div>
     </p>
 
-    <p>
-        <label>Goto
-            <input id="locationInput" type="text"/>
-            <button onclick="goto()">Go</button>
-        </label>
-
-    </p>
-
 </div>
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; border-style: inset; height: auto">
@@ -63,11 +55,6 @@
             })
 
     })
-
-    function goto() {
-        var locus = document.getElementById("locationInput").value;
-        igv.browser.search(locus);
-    }
 
     function load() {
 
