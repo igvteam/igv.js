@@ -43,6 +43,7 @@
     ],
     "require-atomic-updates": [
       "off"
-    ]
+    ],
+    "no-inner-declarations": "off"
   }
 }

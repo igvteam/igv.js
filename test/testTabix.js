@@ -37,6 +37,7 @@ function runTabixTests() {
         assert.ok(result)
         done()
     })
+
 }
 
 export default runTabixTests;
