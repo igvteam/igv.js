@@ -33,6 +33,7 @@ import {isFilePath} from '../util/fileUtils.js'
 import {isString} from "../util/stringUtils.js";
 import {parseUri, decodeDataURI} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
+import loadTribbleIndex from "./tribble.js";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
