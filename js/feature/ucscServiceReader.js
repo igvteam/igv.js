@@ -38,7 +38,7 @@ const UCSCServiceReader = function (config, genome) {
         let e = Math.ceil(end);
 
         if(this.genome) {
-            const c = genome.getChromosome(chr);
+            const c = this.genome.getChromosome(chr);
             if(c && e > c.bpLength) {
                 e = c.bpLength;
             }

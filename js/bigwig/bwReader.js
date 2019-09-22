@@ -122,7 +122,7 @@ BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPix
                     start = Math.min(start, item.dataOffset);
                     end = Math.max(end, item.dataOffset + item.dataSize);
                 }
-                ;
+                
 
                 const size = end - start;
 

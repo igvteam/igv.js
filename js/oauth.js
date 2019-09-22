@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import google from "./google/googleUtils.js"
+
 const oauth = {
 
     oauthTokens: {},
@@ -74,18 +76,6 @@ const oauth = {
         }
     }
 };
-
-
-/**
- * @deprecated - use oauth.google.setToken
- *
- * @param token
- */
-if(typeof igv !== 'undefined') {
-    igv.setGoogleOauthToken = function (token) {
-        oauth.google.access_token = token;
-    }
-}
 
 
 /**

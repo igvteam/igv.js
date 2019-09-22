@@ -73,7 +73,7 @@ function createTrackList(div, file, browser) {
                 trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
                 trackDiv.addEventListener('click', function (event) {
 
-                    browser.loadTrack(igv.GtexUtils.trackConfiguration(obj));
+                    browser.loadTrack(GtexUtils.trackConfiguration(obj));
 
                 });
 

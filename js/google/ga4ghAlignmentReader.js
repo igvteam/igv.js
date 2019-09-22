@@ -141,7 +141,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         }
                     } else {
                         // No browser object, can't build map.  This can occur when run from unit tests
-                        fulfill(self.chrAliasTable);
+                        return self.chrAliasTable;
                     }
                 })
         }
@@ -152,12 +152,11 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
      *
 
      */
-    function decodeGa4ghReads(json) {
+    function decodeGa4ghReads(j) {
 
         var i,
-            jsonRecords = json.alignments,
+            jsonRecords = j.alignments,
             len = jsonRecords.length,
-            json,
             alignment,
             jsonAlignment,
             cigarDecoded,
@@ -167,38 +166,38 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
         for (i = 0; i < len; i++) {
 
-            json = jsonRecords[i];
+            let record = jsonRecords[i];
 
             alignment = new BamAlignment();
 
-            alignment.readName = json.fragmentName;
-            alignment.properPlacement = json.properPlacement;
-            alignment.duplicateFragment = json.duplicateFragment;
-            alignment.numberReads = json.numberReads;
-            alignment.fragmentLength = json.fragmentLength;
-            alignment.readNumber = json.readNumber;
-            alignment.failedVendorQualityChecks = json.failedVendorQualityChecks;
-            alignment.secondaryAlignment = json.secondaryAlignment;
-            alignment.supplementaryAlignment = json.supplementaryAlignment;
-            alignment.seq = json.alignedSequence;
-            alignment.qual = json.alignedQuality;
-            alignment.matePos = json.nextMatePosition;
-            alignment.tagDict = json.info;
-            alignment.flags = encodeFlags(json);
+            alignment.readName = record.fragmentName;
+            alignment.properPlacement = record.properPlacement;
+            alignment.duplicateFragment = record.duplicateFragment;
+            alignment.numberReads = record.numberReads;
+            alignment.fragmentLength = record.fragmentLength;
+            alignment.readNumber = record.readNumber;
+            alignment.failedVendorQualityChecks = record.failedVendorQualityChecks;
+            alignment.secondaryAlignment = record.secondaryAlignment;
+            alignment.supplementaryAlignment = record.supplementaryAlignment;
+            alignment.seq = record.alignedSequence;
+            alignment.qual = record.alignedQuality;
+            alignment.matePos = record.nextMatePosition;
+            alignment.tagDict = record.info;
+            alignment.flags = encodeFlags(record);
 
 
-            jsonAlignment = json.alignment;
+            jsonAlignment = record.alignment;
             if (jsonAlignment) {
                 alignment.mapped = true;
 
-                alignment.chr = json.alignment.position.referenceName;
+                alignment.chr = record.alignment.position.referenceName;
                 if (genome) alignment.chr = genome.getChromosomeName(alignment.chr);
 
-                alignment.start = parseInt(json.alignment.position.position);
-                alignment.strand = !(json.alignment.position.reverseStrand);
-                alignment.mq = json.alignment.mappingQuality;
-                alignment.cigar = encodeCigar(json.alignment.cigar);
-                cigarDecoded = translateCigar(json.alignment.cigar);
+                alignment.start = parseInt(record.alignment.position.position);
+                alignment.strand = !(record.alignment.position.reverseStrand);
+                alignment.mq = record.alignment.mappingQuality;
+                alignment.cigar = encodeCigar(record.alignment.cigar);
+                cigarDecoded = translateCigar(record.alignment.cigar);
 
                 alignment.lengthOnRef = cigarDecoded.lengthOnRef;
 
@@ -210,7 +209,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                 alignment.mapped = false;
             }
 
-            mate = json.nextMatePosition;
+            mate = record.nextMatePosition;
             if (mate) {
                 alignment.mate = {
                     chr: mate.referenceFrame,

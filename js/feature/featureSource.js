@@ -88,7 +88,7 @@ const FeatureSource = function (config, genome) {
         if (config.queryable !== undefined) {
             this.queryable = config.queryable
         } else if (queryableFormats.has(config.format)) {
-            this.queryable = queryableFormats.has(config.format) || reader.indexed;
+            this.queryable = queryableFormats.has(config.format) || this.reader.indexed;
         } else {
             // Leav undefined -- will defer until we know if reader has an index
         }

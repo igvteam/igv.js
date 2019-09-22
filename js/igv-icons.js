@@ -38,7 +38,7 @@ function createWrappedIcon(name, color) {
     let $wrapper = $('<i>');
     $wrapper.append($svg);
     return $wrapper;
-};
+}
 
 function createCheckbox(name, initialState) {
 

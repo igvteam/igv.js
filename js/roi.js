@@ -45,8 +45,7 @@ ROI.prototype.draw = function (drawConfiguration) {
     var endBP,
         region,
         coord,
-        regions,
-        len;
+        regions;
 
     regions = drawConfiguration.features;
     if (!regions) {
