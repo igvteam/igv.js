@@ -115,6 +115,7 @@
 
         igv.createBrowser(igv_example_api, options)
                 .then(function (browser) {
+                    igv.browser = browser;
                     console.log("Created IGV browser");
                 })
 
