@@ -88,4 +88,5 @@ export default {
     DataRangeDialog,
     MenuUtils,
     Alert
-};
+}
+

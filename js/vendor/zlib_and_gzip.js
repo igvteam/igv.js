@@ -4,6 +4,7 @@
  */
 
 var USE_TYPEDARRAY = true;
+const ZLIB_STREAM_RAW_INFLATE_BUFFER_SIZE = 65000;
 
 var Zlib = {
   Huffman: {},
@@ -1563,11 +1564,6 @@ Zlib.RawInflate.prototype.concatBufferDynamic = function() {
   return this.buffer;
 };
 
-
-
-
-var buildHuffmanTable = Zlib.Huffman.buildHuffmanTable;
-
 /**
  * @param {!(Uint8Array|Array.<number>)} input input buffer.
  * @param {number} ip input buffer pointer.
@@ -1577,6 +1573,7 @@ var buildHuffmanTable = Zlib.Huffman.buildHuffmanTable;
 Zlib.RawInflateStream = function(input, ip, opt_buffersize) {
   /** @type {!Array.<(Array|Uint8Array)>} */
   this.blocks = [];
+
   /** @type {number} block size. */
   this.bufferSize =
     opt_buffersize ? opt_buffersize : ZLIB_STREAM_RAW_INFLATE_BUFFER_SIZE;
@@ -3742,35 +3739,34 @@ Zlib.RawDeflate.Lz77Match.LengthCodeTable = (function(table) {
    */
   function code(length) {
     switch (true) {
-      case (length === 3): return [257, length - 3, 0]; break;
-      case (length === 4): return [258, length - 4, 0]; break;
-      case (length === 5): return [259, length - 5, 0]; break;
-      case (length === 6): return [260, length - 6, 0]; break;
-      case (length === 7): return [261, length - 7, 0]; break;
-      case (length === 8): return [262, length - 8, 0]; break;
-      case (length === 9): return [263, length - 9, 0]; break;
-      case (length === 10): return [264, length - 10, 0]; break;
-      case (length <= 12): return [265, length - 11, 1]; break;
-      case (length <= 14): return [266, length - 13, 1]; break;
-      case (length <= 16): return [267, length - 15, 1]; break;
-      case (length <= 18): return [268, length - 17, 1]; break;
-      case (length <= 22): return [269, length - 19, 2]; break;
-      case (length <= 26): return [270, length - 23, 2]; break;
-      case (length <= 30): return [271, length - 27, 2]; break;
-      case (length <= 34): return [272, length - 31, 2]; break;
-      case (length <= 42): return [273, length - 35, 3]; break;
-      case (length <= 50): return [274, length - 43, 3]; break;
-      case (length <= 58): return [275, length - 51, 3]; break;
-      case (length <= 66): return [276, length - 59, 3]; break;
-      case (length <= 82): return [277, length - 67, 4]; break;
-      case (length <= 98): return [278, length - 83, 4]; break;
-      case (length <= 114): return [279, length - 99, 4]; break;
-      case (length <= 130): return [280, length - 115, 4]; break;
-      case (length <= 162): return [281, length - 131, 5]; break;
-      case (length <= 194): return [282, length - 163, 5]; break;
-      case (length <= 226): return [283, length - 195, 5]; break;
-      case (length <= 257): return [284, length - 227, 5]; break;
-      case (length === 258): return [285, length - 258, 0]; break;
+      case (length === 3): return [257, length - 3, 0];
+      case (length === 4): return [258, length - 4, 0];
+      case (length === 5): return [259, length - 5, 0];
+      case (length === 6): return [260, length - 6, 0];
+      case (length === 7): return [261, length - 7, 0];
+      case (length === 9): return [263, length - 9, 0];
+      case (length === 10): return [264, length - 10, 0];
+      case (length <= 12): return [265, length - 11, 1];
+      case (length <= 14): return [266, length - 13, 1];
+      case (length <= 16): return [267, length - 15, 1];
+      case (length <= 18): return [268, length - 17, 1];
+      case (length <= 22): return [269, length - 19, 2];
+      case (length <= 26): return [270, length - 23, 2];
+      case (length <= 30): return [271, length - 27, 2];
+      case (length <= 34): return [272, length - 31, 2];
+      case (length <= 42): return [273, length - 35, 3];
+      case (length <= 50): return [274, length - 43, 3];
+      case (length <= 58): return [275, length - 51, 3];
+      case (length <= 66): return [276, length - 59, 3];
+      case (length <= 82): return [277, length - 67, 4];
+      case (length <= 98): return [278, length - 83, 4];
+      case (length <= 114): return [279, length - 99, 4];
+      case (length <= 130): return [280, length - 115, 4];
+      case (length <= 162): return [281, length - 131, 5];
+      case (length <= 194): return [282, length - 163, 5];
+      case (length <= 226): return [283, length - 195, 5];
+      case (length <= 257): return [284, length - 227, 5];
+      case (length === 258): return [285, length - 258, 0];
       default: throw 'invalid length: ' + length;
     }
   }
