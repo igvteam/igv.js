@@ -19,7 +19,7 @@ function runTribbleTests() {
 
         const done = assert.async();
 
-        const index = await loadTribbleIndex('https://data.broadinstitute.org/igvdata/t2d/recomb_decode.bedgraph', {}, genome);
+        const index = await loadTribbleIndex('https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx', {}, genome);
         assert.ok(index);
 
         //var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);

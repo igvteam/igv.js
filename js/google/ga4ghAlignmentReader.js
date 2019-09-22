@@ -152,10 +152,10 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
      *
 
      */
-    function decodeGa4ghReads(json) {
+    function decodeGa4ghReads(j) {
 
         var i,
-            jsonRecords = json.alignments,
+            jsonRecords = j.alignments,
             len = jsonRecords.length,
             alignment,
             jsonAlignment,

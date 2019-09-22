@@ -47,3 +47,4 @@ runBrowserTests();
 runUtilTests();
 runIgvXhrTests();
 runCRAMTests();
+runTribbleTests();

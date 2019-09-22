@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import igv from "./api.js"
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
@@ -75,11 +74,6 @@ async function createBrowser(parentDiv, config) {
     setTrackOrder(config);
 
     const browser = new Browser(config, $('<div class="igv-track-container-div">')[0]);
-
-    // Backward compatibility -- globally visible.   This will be removed in a future release
-    if (typeof igv !== 'undefined' && !igv.browser) {
-        igv.browser = browser;
-    }
 
     browser.parent = parentDiv;
 
