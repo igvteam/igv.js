@@ -797,9 +797,8 @@ function decodeBedGraph(tokens, ignore) {
     chr = tokens[0];
     start = parseInt(tokens[1]);
     end = parseInt(tokens[2]);
-
     value = parseFloat(tokens[3]);
-
+    const feature = {chr: chr, start: start, end: end, value: value};
     // Optional extra columns
     if (this.header) {
         let colorColumn = this.header.colorColumn;
@@ -807,8 +806,7 @@ function decodeBedGraph(tokens, ignore) {
             feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
     }
-
-    return {chr: chr, start: start, end: end, value: value};
+    return feature;
 }
 
 function decodeWig(tokens, wig) {
@@ -1196,7 +1194,7 @@ function decodeAed(tokens, ignore) {
 function decodeBedpe(tokens, ignore) {
 
     if (tokens.length < 6) {
-        console.log("Skipping line: " + nextLine);
+        console.log("Skipping line: " + tokens.join(''));
         return undefined;
     }
 
@@ -1254,7 +1252,7 @@ function decodeBedpe(tokens, ignore) {
 function decodeInteract(tokens, ignore) {
 
     if (tokens.length < 6) {
-        console.log("Skipping line: " + nextLine);
+        console.log("Skipping line: " + tokens.join(''));
         return undefined;
     }
 

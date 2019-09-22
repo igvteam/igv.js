@@ -141,7 +141,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         }
                     } else {
                         // No browser object, can't build map.  This can occur when run from unit tests
-                        fulfill(self.chrAliasTable);
+                        return self.chrAliasTable;
                     }
                 })
         }
@@ -152,10 +152,10 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
      *
 
      */
-    function decodeGa4ghReads(json) {
+    function decodeGa4ghReads(j) {
 
         var i,
-            jsonRecords = json.alignments,
+            jsonRecords = j.alignments,
             len = jsonRecords.length,
             json,
             alignment,

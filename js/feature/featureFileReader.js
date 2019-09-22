@@ -27,13 +27,13 @@ import FeatureParser from "./featureParsers.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
 import loadBamIndex from "../bam/bamIndex.js";
+import loadTribbleIndex from "./tribble.js"
 import igvxhr from "../igvxhr.js";
-import  {unbgzf, bgzBlockSize} from '../bam/bgzf.js';
+import {bgzBlockSize, unbgzf} from '../bam/bgzf.js';
 import {isFilePath} from '../util/fileUtils.js'
 import {isString} from "../util/stringUtils.js";
-import {parseUri, decodeDataURI} from "../util/uriUtils.js";
+import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
-import loadTribbleIndex from "./tribble.js";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -205,95 +205,77 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
     const parser = this.parser
     const tabix = this.index.tabix
     const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
-    const promises = []
+    const allFeatures = []
 
     const blocks = this.index.blocksForRange(refId, start, end);
 
     if (!blocks || blocks.length === 0) {
-        return Promise.resolve([]);
+        return [];
     } else {
 
-        blocks.forEach(function (block) {
+        blocks.forEach(async function (block) {
 
-            promises.push(new Promise(async function (fullfill, reject) {
+            const startPos = block.minv.block
+            const startOffset = block.minv.offset
+            const endOffset = block.maxv.offset
+            let endPos
 
-                const startPos = block.minv.block
-                const startOffset = block.minv.offset
-                const endOffset = block.maxv.offset
-                let endPos
-
-                if (tabix) {
-                    let lastBlockSize = 0
-                    if (endOffset > 0) {
-                        const bsizeOptions = buildOptions(config, {
-                            range: {
-                                start: block.maxv.block,
-                                size: 26
-                            }
-                        });
-                        const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
-                        lastBlockSize = bgzBlockSize(abuffer)
-                    }
-                    endPos = block.maxv.block + lastBlockSize;
-                } else {
-                    endPos = block.maxv.block;
-                }
-
-                const options = buildOptions(config, {
-                    range: {
-                        start: startPos,
-                        size: endPos - startPos + 1
-                    }
-                });
-
-                const success = function (inflated) {
-                    const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                    const slicedFeatures = parser.parseFeatures(slicedData);
-
-                    // Filter features not in requested range.
-                    const filteredFeatures = [];
-                    for (let f of slicedFeatures) {
-                        if (f.start > end) break;
-                        if (f.end >= start && f.start <= end) {
-                            filteredFeatures.push(f);
+            if (tabix) {
+                let lastBlockSize = 0
+                if (endOffset > 0) {
+                    const bsizeOptions = buildOptions(config, {
+                        range: {
+                            start: block.maxv.block,
+                            size: 26
                         }
-                    }
-                    fullfill(filteredFeatures);
-                };
-
-                if (tabix) {
-                    igvxhr
-                        .loadArrayBuffer(config.url, options)
-                        .then(function (data) {
-                            const inflated = new Uint8Array(unbgzf(data))
-                            success(inflated)
-                        })
-                        .catch(reject);
-                } else {
-                    igvxhr
-                        .loadString(config.url, options)
-                        .then(success)
-                        .catch(reject);
+                    });
+                    const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
+                    lastBlockSize = bgzBlockSize(abuffer)
                 }
-            }))
-        });
-
-        const featureArrays = await Promise.all(promises)
-
-        let allFeatures = featureArrays[0];
-        if (allFeatures.length > 1) {
-            allFeatures = featureArrays[0];
-            for (let i = 1; i < featureArrays.length; i++) {
-                allFeatures = allFeatures.concat(featureArrays[i]);
+                endPos = block.maxv.block + lastBlockSize;
+            } else {
+                endPos = block.maxv.block;
             }
-            allFeatures.sort(function (a, b) {
-                return a.start - b.start;
-            });
-        }
 
-        return allFeatures;
+            const options = buildOptions(config, {
+                range: {
+                    start: startPos,
+                    size: endPos - startPos + 1
+                }
+            });
+
+            if (tabix) {
+                const data = await igvxhr.loadArrayBuffer(config.url, options);
+                const inflated = new Uint8Array(unbgzf(data));
+                parse(inflated);
+
+            } else {
+                const inflated = igvxhr.loadString(config.url, options);
+                parse(inflated);
+            }
+
+            function parse(inflated) {
+                const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                const slicedFeatures = parser.parseFeatures(slicedData);
+
+                // Filter features not in requested range.
+                for (let f of slicedFeatures) {
+                    if (f.start > end) break;
+                    if (f.end >= start && f.start <= end) {
+                        allFeatures.push(f);
+                    }
+                }
+            }
+        });
     }
+
+    allFeatures.sort(function (a, b) {
+        return a.start - b.start;
+    });
+
+    return allFeatures;
 }
+
 
 FeatureFileReader.prototype.getIndex = function () {
 
@@ -303,7 +285,7 @@ FeatureFileReader.prototype.getIndex = function () {
     }
 
     if (this.indexURL ||
-        this.indexed || 
+        this.indexed ||
         (typeof this.config.url === 'string' && (this.config.url.endsWith(".gz") || this.config.url.endsWith('.bgz')))) {
 
         return self.loadIndex()
