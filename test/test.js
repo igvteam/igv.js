@@ -23,11 +23,11 @@ import runIgvXhrTests from "./testIgvXhr.js";
 import runCRAMTests from "./testCRAM.js";
 import runTribbleTests from "./testTribble.js";
 
-//runTribbleTests();
-runBigwigTests();
-runBAMTests();
-runBAMIndexTests();
-runAedTests();
+
+// runBigwigTests();
+// runBAMTests();
+// runBAMIndexTests();
+// runAedTests();
 runBedTests();
 runBEDGraphTests();
 runBufferedReaderTests();
