@@ -133,8 +133,7 @@ TrackBase.prototype.setTrackProperties = function (properties) {
                 break;
             case "visibility":
                 //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
-                const viz = properties[key];
-                switch (viz) {
+                switch (properties[key]) {
                     case "2":
                     case "3":
                     case "pack":

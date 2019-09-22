@@ -446,3 +446,4 @@ function double_rotate(root, dir) {
     return single_rotate(root, dir);
 }
 
+export default RBTree

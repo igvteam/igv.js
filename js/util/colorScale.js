@@ -9,7 +9,7 @@
 function BinnedColorScale (cs) {
     this.thresholds = cs.thresholds;
     this.colors = cs.colors;
-};
+}
 
 BinnedColorScale.prototype.getColor = function (value) {
 

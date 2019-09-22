@@ -40,7 +40,7 @@ function makeDraggable(target, handle) {
 
     $(handle).on('mousedown' + namespace, dragStart.bind(target));
 
-};
+}
 
 
 function dragStart(event) {

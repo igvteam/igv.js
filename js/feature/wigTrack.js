@@ -294,7 +294,7 @@ function binarySearch(features, position, tolerance) {
         stopIndex = features.length - 1,
         index = (startIndex + stopIndex) >> 1,
         candidateFeature,
-        tmp, delta;
+        tmp;
 
 
     // Use binary search to get the index of at least 1 feature in the click tolerance bounds

@@ -15,7 +15,7 @@ function attachDialogCloseHandlerWithParent($parent, closeHandler) {
         e.stopPropagation();
         closeHandler()
     });
-};
+}
 
 function createColorSwatchSelector($genericContainer, colorHandler, defaultColor) {
 
@@ -63,7 +63,7 @@ function createColorSwatchSelector($genericContainer, colorHandler, defaultColor
 
     }
 
-};
+}
 
 
 export {attachDialogCloseHandlerWithParent, createColorSwatchSelector}

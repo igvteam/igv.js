@@ -57,7 +57,7 @@ IntervalTree.prototype.insert = function (start, end, value) {
     x.color = RED;
     while (x !== this.root && x.parent.color === RED) {
         if (x.parent === x.parent.parent.left) {
-            var y = x.parent.parent.right;
+            let y = x.parent.parent.right;
             if (y.color === RED) {
                 x.parent.color = BLACK;
                 y.color = BLACK;
@@ -73,7 +73,7 @@ IntervalTree.prototype.insert = function (start, end, value) {
                 rightRotate.call(this, x.parent.parent);
             }
         } else {
-            var y = x.parent.parent.left;
+            let y = x.parent.parent.left;
             if (y.color === RED) {
                 x.parent.color = BLACK;
                 y.color = BLACK;
@@ -284,8 +284,8 @@ Interval.prototype.equals = function (other) {
     if (this === other) {
         return true;
     }
-    return (this.low === otherInterval.low &&
-        this.high === otherInterval.high);
+    return (this.low === other.low &&
+        this.high === other.high);
 
 }
 

@@ -45,7 +45,7 @@ function parseUri  (str) {
     });
 
     return uri;
-};
+}
 
 const options = {
     strictMode: false,

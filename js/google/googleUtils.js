@@ -92,7 +92,6 @@ const google = {
         },
 
         driveDownloadURL: function (link) {
-            var i1, i2, id;
             // Return a google drive download url for the sharable link
             //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
             //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing

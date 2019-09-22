@@ -6,6 +6,7 @@
 // approximate distribution percentiles from a stream of reals
 //
 
+import RBTree from "./rbtree.js";
 
 function TDigest(delta, K, CX) {
     // allocate a TDigest structure.

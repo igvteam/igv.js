@@ -493,6 +493,7 @@ function makeBlocks(alignment, cigarArray) {
 
     for (let c of cigarArray) {
 
+        let scPos
         switch (c.ltr) {
             case 'H' :
                 break; // ignore hard clips
@@ -500,7 +501,7 @@ function makeBlocks(alignment, cigarArray) {
                 break; // ignore pads
             case 'S' :
 
-                let scPos = pos;
+                scPos = pos;
                 alignment.scLengthOnRef += c.len;
                 if (blocks.length === 0) {
                     alignment.scStart -= c.len;

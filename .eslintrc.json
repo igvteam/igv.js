@@ -1,0 +1,48 @@
+{
+  "env": {
+    "browser": true,
+    "es6": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "gapi": "readonly",
+    "Buffer": "readonly",
+    "QUnit": "readonly",
+    "global": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "rules": {
+    "no-unused-vars": [
+      "off"
+    ],
+    "no-prototype-builtins": [
+      "off"
+    ],
+    "no-empty": [
+      "off"
+    ],
+    "no-useless-escape": [
+      "off"
+    ],
+    "no-cond-assign": [
+      "off"
+    ],
+    "no-constant-condition": [
+      "error",
+      {
+        "checkLoops": false
+      }
+    ],
+    "eslint no-control-regex": [
+      "off"
+    ],
+    "require-atomic-updates": [
+      "off"
+    ]
+  }
+}

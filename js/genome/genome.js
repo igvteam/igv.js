@@ -338,7 +338,6 @@ function loadCytobands(cytobandUrl, config) {
 
             if (tokens.length === 5) {
                 //10	0	3000000	p15.3	gneg
-                var chr = tokens[0];
                 var start = parseInt(tokens[1]);
                 var end = parseInt(tokens[2]);
                 var name = tokens[3];
