@@ -9,8 +9,8 @@
     "dist/**"
   ],
   "scripts": {
-    "build": "node wrapper/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
-    "build-umd": "node wrapper/injectRuntime.js; npx terser --compress --mangle --source-map \"url='igv.min.js.map'\" --output  dist/igv.min.js -- dist/igv.js",
+    "build": "node scripts/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
+    "build-umd": "node scripts/injectRuntime.js; npx terser --compress --mangle --source-map \"url='igv.min.js.map' \" --output  dist/igv.min.js -- dist/igv.js",
     "build-es6": "npx terser --module --compress --mangle --source-map \"url='igv.esm.min.js.map'\" --output  dist/igv.esm.min.js -- dist/igv.esm.js",
     "test": "node runTests.js",
     "prepack": "npm run build",
@@ -45,6 +45,7 @@
     "@babel/plugin-transform-regenerator": "^7.4.5",
     "@babel/plugin-transform-runtime": "^7.6.0",
     "@babel/preset-env": "^7.6.0",
+    "babel-plugin-transform-runtime": "^6.23.0",
     "eslint": "^6.4.0",
     "finalhandler": "^1.1.2",
     "http-server": "^0.11.1",
