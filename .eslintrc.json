@@ -10,7 +10,8 @@
     "gapi": "readonly",
     "Buffer": "readonly",
     "QUnit": "readonly",
-    "global": "readonly"
+    "global": "readonly",
+    "require": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2018,
