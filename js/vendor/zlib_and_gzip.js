@@ -227,11 +227,11 @@ Zlib.Zip.prototype.compress = function() {
   for (i = 0, il = files.length; i < il; ++i) {
     file = files[i];
     filenameLength =
-      (file.option['filename']) ? file.option['filename'].length : 0;
+        (file.option['filename']) ? file.option['filename'].length : 0;
     extraFieldLength =
-      (file.option['extraField']) ? file.option['extraField'].length : 0;
+        (file.option['extraField']) ? file.option['extraField'].length : 0;
     commentLength =
-      (file.option['comment']) ? file.option['comment'].length : 0;
+        (file.option['comment']) ? file.option['comment'].length : 0;
 
     // 圧縮されていなかったら圧縮
     if (!file.compressed) {
@@ -267,8 +267,8 @@ Zlib.Zip.prototype.compress = function() {
 
       for (j = 0; j < 12; ++j) {
         buffer[j] = this.encode(
-          key,
-          i === 11 ? (file.crc32 & 0xff) : (Math.random() * 256 | 0)
+            key,
+            i === 11 ? (file.crc32 & 0xff) : (Math.random() * 256 | 0)
         );
       }
 
@@ -281,20 +281,20 @@ Zlib.Zip.prototype.compress = function() {
 
     // 必要バッファサイズの計算
     localFileSize +=
-      // local file header
-      30 + filenameLength +
-      // file data
-      file.buffer.length;
+        // local file header
+        30 + filenameLength +
+        // file data
+        file.buffer.length;
 
     centralDirectorySize +=
-      // file header
-      46 + filenameLength + commentLength;
+        // file header
+        46 + filenameLength + commentLength;
   }
 
   // end of central directory
   endOfCentralDirectorySize = 22 + (this.comment ? this.comment.length : 0);
   output = new (USE_TYPEDARRAY ? Uint8Array : Array)(
-    localFileSize + centralDirectorySize + endOfCentralDirectorySize
+      localFileSize + centralDirectorySize + endOfCentralDirectorySize
   );
   op1 = 0;
   op2 = localFileSize;
@@ -304,10 +304,10 @@ Zlib.Zip.prototype.compress = function() {
   for (i = 0, il = files.length; i < il; ++i) {
     file = files[i];
     filenameLength =
-      file.option['filename'] ? file.option['filename'].length :  0;
+        file.option['filename'] ? file.option['filename'].length :  0;
     extraFieldLength = 0; // TODO
     commentLength =
-      file.option['comment'] ? file.option['comment'].length : 0;
+        file.option['comment'] ? file.option['comment'].length : 0;
 
     //-------------------------------------------------------------------------
     // local file header & file header
@@ -331,9 +331,9 @@ Zlib.Zip.prototype.compress = function() {
     needVersion = 20;
     output[op2++] = needVersion & 0xff;
     output[op2++] =
-      /** @type {Zlib.Zip.OperatingSystem} */
-      (file.option['os']) ||
-      Zlib.Zip.OperatingSystem.MSDOS;
+        /** @type {Zlib.Zip.OperatingSystem} */
+        (file.option['os']) ||
+        Zlib.Zip.OperatingSystem.MSDOS;
 
     // need version
     output[op1++] = output[op2++] =  needVersion       & 0xff;
@@ -349,26 +349,26 @@ Zlib.Zip.prototype.compress = function() {
 
     // compression method
     compressionMethod =
-      /** @type {Zlib.Zip.CompressionMethod} */
-      (file.option['compressionMethod']);
+        /** @type {Zlib.Zip.CompressionMethod} */
+        (file.option['compressionMethod']);
     output[op1++] = output[op2++] =  compressionMethod       & 0xff;
     output[op1++] = output[op2++] = (compressionMethod >> 8) & 0xff;
 
     // date
     date = /** @type {(Date|undefined)} */(file.option['date']) || new Date();
     output[op1++] = output[op2++] =
-      ((date.getMinutes() & 0x7) << 5) |
-      (date.getSeconds() / 2 | 0);
+        ((date.getMinutes() & 0x7) << 5) |
+        (date.getSeconds() / 2 | 0);
     output[op1++] = output[op2++] =
-      (date.getHours()   << 3) |
-      (date.getMinutes() >> 3);
+        (date.getHours()   << 3) |
+        (date.getMinutes() >> 3);
     //
     output[op1++] = output[op2++] =
-      ((date.getMonth() + 1 & 0x7) << 5) |
-      (date.getDate());
+        ((date.getMonth() + 1 & 0x7) << 5) |
+        (date.getDate());
     output[op1++] = output[op2++] =
-      ((date.getFullYear() - 1980 & 0x7f) << 1) |
-      (date.getMonth() + 1 >> 3);
+        ((date.getFullYear() - 1980 & 0x7f) << 1) |
+        (date.getMonth() + 1 >> 3);
 
     // CRC-32
     crc32 = file.crc32;
@@ -582,7 +582,7 @@ Zlib.Zip.prototype.encode = function(key, n) {
 Zlib.Zip.prototype.updateKeys = function(key, n) {
   key[0] = Zlib.CRC32.single(key[0], n);
   key[1] =
-    (((((key[1] + (key[0] & 0xff)) * 20173 >>> 0) * 6681) >>> 0) + 1) >>> 0;
+      (((((key[1] + (key[0] & 0xff)) * 20173 >>> 0) * 6681) >>> 0) + 1) >>> 0;
   key[2] = Zlib.CRC32.single(key[2], key[1] >>> 24);
 };
 
@@ -767,11 +767,11 @@ Zlib.RawInflate = function(input, opt_params) {
     case Zlib.RawInflate.BufferType.BLOCK:
       this.op = Zlib.RawInflate.MaxBackwardLength;
       this.output =
-        new (USE_TYPEDARRAY ? Uint8Array : Array)(
-          Zlib.RawInflate.MaxBackwardLength +
-          this.bufferSize +
-          Zlib.RawInflate.MaxCopyLength
-        );
+          new (USE_TYPEDARRAY ? Uint8Array : Array)(
+              Zlib.RawInflate.MaxBackwardLength +
+              this.bufferSize +
+              Zlib.RawInflate.MaxCopyLength
+          );
       break;
     case Zlib.RawInflate.BufferType.ADAPTIVE:
       this.op = 0;
@@ -895,10 +895,10 @@ Zlib.RawInflate.FixedLiteralLengthTable = (function(table) {
 
   for (i = 0, il = lengths.length; i < il; ++i) {
     lengths[i] =
-      (i <= 143) ? 8 :
-      (i <= 255) ? 9 :
-      (i <= 279) ? 7 :
-      8;
+        (i <= 143) ? 8 :
+            (i <= 255) ? 9 :
+                (i <= 279) ? 7 :
+                    8;
   }
 
   return buildHuffmanTable(lengths);
@@ -937,19 +937,19 @@ Zlib.RawInflate.prototype.parseBlock = function() {
   // BTYPE
   hdr >>>= 1;
   switch (hdr) {
-    // uncompressed
+      // uncompressed
     case 0:
       this.parseUncompressedBlock();
       break;
-    // fixed huffman
+      // fixed huffman
     case 1:
       this.parseFixedHuffmanBlock();
       break;
-    // dynamic huffman
+      // dynamic huffman
     case 2:
       this.parseDynamicHuffmanBlock();
       break;
-    // reserved or other
+      // reserved or other
     default:
       throw new Error('unknown BTYPE: ' + hdr);
   }
@@ -1137,14 +1137,14 @@ Zlib.RawInflate.prototype.parseFixedHuffmanBlock = function() {
   switch (this.bufferType) {
     case Zlib.RawInflate.BufferType.ADAPTIVE:
       this.decodeHuffmanAdaptive(
-        Zlib.RawInflate.FixedLiteralLengthTable,
-        Zlib.RawInflate.FixedDistanceTable
+          Zlib.RawInflate.FixedLiteralLengthTable,
+          Zlib.RawInflate.FixedDistanceTable
       );
       break;
     case Zlib.RawInflate.BufferType.BLOCK:
       this.decodeHuffmanBlock(
-        Zlib.RawInflate.FixedLiteralLengthTable,
-        Zlib.RawInflate.FixedDistanceTable
+          Zlib.RawInflate.FixedLiteralLengthTable,
+          Zlib.RawInflate.FixedDistanceTable
       );
       break;
     default:
@@ -1164,7 +1164,7 @@ Zlib.RawInflate.prototype.parseDynamicHuffmanBlock = function() {
   var hclen = this.readBits(4) + 4;
   /** @type {!(Uint8Array|Array.<number>)} code lengths. */
   var codeLengths =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.RawInflate.Order.length);
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.RawInflate.Order.length);
   /** @type {!Array} code lengths table. */
   var codeLengthsTable;
   /** @type {!(Uint8Array|Array.<number>)} literal and length code table. */
@@ -1222,11 +1222,11 @@ Zlib.RawInflate.prototype.parseDynamicHuffmanBlock = function() {
   }
 
   litlenTable = USE_TYPEDARRAY
-    ? buildHuffmanTable(lengthTable.subarray(0, hlit))
-    : buildHuffmanTable(lengthTable.slice(0, hlit));
+      ? buildHuffmanTable(lengthTable.subarray(0, hlit))
+      : buildHuffmanTable(lengthTable.slice(0, hlit));
   distTable = USE_TYPEDARRAY
-    ? buildHuffmanTable(lengthTable.subarray(hlit))
-    : buildHuffmanTable(lengthTable.slice(hlit));
+      ? buildHuffmanTable(lengthTable.subarray(hlit))
+      : buildHuffmanTable(lengthTable.slice(hlit));
 
   switch (this.bufferType) {
     case Zlib.RawInflate.BufferType.ADAPTIVE:
@@ -1390,9 +1390,9 @@ Zlib.RawInflate.prototype.decodeHuffmanAdaptive = function(litlen, dist) {
 Zlib.RawInflate.prototype.expandBufferBlock = function(opt_param) {
   /** @type {!(Array.<number>|Uint8Array)} store buffer. */
   var buffer =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(
-        this.op - Zlib.RawInflate.MaxBackwardLength
-    );
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(
+          this.op - Zlib.RawInflate.MaxBackwardLength
+      );
   /** @type {number} backward base point */
   var backward = this.op - Zlib.RawInflate.MaxBackwardLength;
   /** @type {number} copy index. */
@@ -1417,7 +1417,7 @@ Zlib.RawInflate.prototype.expandBufferBlock = function(opt_param) {
   // copy to backward buffer
   if (USE_TYPEDARRAY) {
     output.set(
-      output.subarray(backward, backward + Zlib.RawInflate.MaxBackwardLength)
+        output.subarray(backward, backward + Zlib.RawInflate.MaxBackwardLength)
     );
   } else {
     for (i = 0; i < Zlib.RawInflate.MaxBackwardLength; ++i) {
@@ -1462,11 +1462,11 @@ Zlib.RawInflate.prototype.expandBufferAdaptive = function(opt_param) {
   // calculate new buffer size
   if (ratio < 2) {
     maxHuffCode =
-      (input.length - this.ip) / this.currentLitlenTable[2];
+        (input.length - this.ip) / this.currentLitlenTable[2];
     maxInflateSize = (maxHuffCode / 2 * 258) | 0;
     newSize = maxInflateSize < output.length ?
-      output.length + maxInflateSize :
-      output.length << 1;
+        output.length + maxInflateSize :
+        output.length << 1;
   } else {
     newSize = output.length * ratio;
   }
@@ -1513,8 +1513,8 @@ Zlib.RawInflate.prototype.concatBufferBlock = function() {
   // single buffer
   if (blocks.length === 0) {
     return USE_TYPEDARRAY ?
-      this.output.subarray(Zlib.RawInflate.MaxBackwardLength, this.op) :
-      this.output.slice(Zlib.RawInflate.MaxBackwardLength, this.op);
+        this.output.subarray(Zlib.RawInflate.MaxBackwardLength, this.op) :
+        this.output.slice(Zlib.RawInflate.MaxBackwardLength, this.op);
   }
 
   // copy to buffer
@@ -1564,6 +1564,11 @@ Zlib.RawInflate.prototype.concatBufferDynamic = function() {
   return this.buffer;
 };
 
+
+
+
+var buildHuffmanTable = Zlib.Huffman.buildHuffmanTable;
+
 /**
  * @param {!(Uint8Array|Array.<number>)} input input buffer.
  * @param {number} ip input buffer pointer.
@@ -1573,10 +1578,9 @@ Zlib.RawInflate.prototype.concatBufferDynamic = function() {
 Zlib.RawInflateStream = function(input, ip, opt_buffersize) {
   /** @type {!Array.<(Array|Uint8Array)>} */
   this.blocks = [];
-
   /** @type {number} block size. */
   this.bufferSize =
-    opt_buffersize ? opt_buffersize : ZLIB_STREAM_RAW_INFLATE_BUFFER_SIZE;
+      opt_buffersize ? opt_buffersize : ZLIB_STREAM_RAW_INFLATE_BUFFER_SIZE;
   /** @type {!number} total output buffer pointer. */
   this.totalpos = 0;
   /** @type {!number} input buffer pointer. */
@@ -1658,14 +1662,14 @@ Zlib.RawInflateStream.prototype.decompress = function(newInput, ip) {
   // decompress
   while (!stop) {
     switch (this.status) {
-      // block header
+        // block header
       case Zlib.RawInflateStream.Status.INITIALIZED:
       case Zlib.RawInflateStream.Status.BLOCK_HEADER_START:
         if (this.readBlockHeader() < 0) {
           stop = true;
         }
         break;
-      // block body
+        // block body
       case Zlib.RawInflateStream.Status.BLOCK_HEADER_END: /* FALLTHROUGH */
       case Zlib.RawInflateStream.Status.BLOCK_BODY_START:
         switch(this.currentBlockType) {
@@ -1686,7 +1690,7 @@ Zlib.RawInflateStream.prototype.decompress = function(newInput, ip) {
             break;
         }
         break;
-      // decode data
+        // decode data
       case Zlib.RawInflateStream.Status.BLOCK_BODY_END:
       case Zlib.RawInflateStream.Status.DECODE_BLOCK_START:
         switch(this.currentBlockType) {
@@ -1802,10 +1806,10 @@ Zlib.RawInflateStream.FixedLiteralLengthTable = (function(table) {
 
   for (i = 0, il = lengths.length; i < il; ++i) {
     lengths[i] =
-      (i <= 143) ? 8 :
-      (i <= 255) ? 9 :
-      (i <= 279) ? 7 :
-      8;
+        (i <= 143) ? 8 :
+            (i <= 255) ? 9 :
+                (i <= 279) ? 7 :
+                    8;
   }
 
   return buildHuffmanTable(lengths);
@@ -2075,7 +2079,7 @@ Zlib.RawInflateStream.prototype.parseDynamicHuffmanBlock = function() {
   var hclen;
   /** @type {!(Uint8Array|Array)} code lengths. */
   var codeLengths =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.RawInflateStream.Order.length);
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.RawInflateStream.Order.length);
   /** @type {!Array} code lengths table. */
   var codeLengthsTable;
   /** @type {!(Uint32Array|Array)} literal and length code lengths. */
@@ -2168,11 +2172,11 @@ Zlib.RawInflateStream.prototype.parseDynamicHuffmanBlock = function() {
     distLengths = new (USE_TYPEDARRAY ? Uint8Array : Array)(hdist);
 
     this.litlenTable = USE_TYPEDARRAY
-      ? buildHuffmanTable(lengthTable.subarray(0, hlit))
-      : buildHuffmanTable(lengthTable.slice(0, hlit));
+        ? buildHuffmanTable(lengthTable.subarray(0, hlit))
+        : buildHuffmanTable(lengthTable.slice(0, hlit));
     this.distTable = USE_TYPEDARRAY
-      ? buildHuffmanTable(lengthTable.subarray(hlit))
-      : buildHuffmanTable(lengthTable.slice(hlit));
+        ? buildHuffmanTable(lengthTable.subarray(hlit))
+        : buildHuffmanTable(lengthTable.slice(hlit));
   }
 
   this.status = Zlib.RawInflateStream.Status.BLOCK_BODY_END;
@@ -2319,11 +2323,11 @@ Zlib.RawInflateStream.prototype.expandBuffer = function(opt_param) {
   // calculate new buffer size
   if (ratio < 2) {
     maxHuffCode =
-      (input.length - this.ip) / this.litlenTable[2];
+        (input.length - this.ip) / this.litlenTable[2];
     maxInflateSize = (maxHuffCode / 2 * 258) | 0;
     newSize = maxInflateSize < output.length ?
-      output.length + maxInflateSize :
-      output.length << 1;
+        output.length + maxInflateSize :
+        output.length << 1;
   } else {
     newSize = output.length * ratio;
   }
@@ -2361,7 +2365,7 @@ Zlib.RawInflateStream.prototype.concatBuffer = function() {
     }
   } else {
     buffer =
-      USE_TYPEDARRAY ? this.output.subarray(this.sp, op) : this.output.slice(this.sp, op);
+        USE_TYPEDARRAY ? this.output.subarray(this.sp, op) : this.output.slice(this.sp, op);
   }
 
   this.sp = op;
@@ -2478,8 +2482,8 @@ Zlib.Inflate.prototype.decompress = function() {
   // verify adler-32
   if (this.verify) {
     adler32 = (
-      input[this.ip++] << 24 | input[this.ip++] << 16 |
-      input[this.ip++] << 8 | input[this.ip++]
+        input[this.ip++] << 24 | input[this.ip++] << 16 |
+        input[this.ip++] << 8 | input[this.ip++]
     ) >>> 0;
 
     if (adler32 !== Zlib.Adler32(buffer)) {
@@ -2543,8 +2547,8 @@ Zlib.InflateStream.prototype.decompress = function(input) {
   buffer = this.rawinflate.decompress(this.input, this.ip);
   if (this.rawinflate.ip !== 0) {
     this.input = USE_TYPEDARRAY ?
-      this.input.subarray(this.rawinflate.ip) :
-      this.input.slice(this.rawinflate.ip);
+        this.input.subarray(this.rawinflate.ip) :
+        this.input.slice(this.rawinflate.ip);
     this.ip = 0;
   }
 
@@ -2697,9 +2701,9 @@ Zlib.Gunzip.prototype.decodeMember = function() {
 
   // modification time
   mtime = (input[ip++])       |
-          (input[ip++] << 8)  |
-          (input[ip++] << 16) |
-          (input[ip++] << 24);
+      (input[ip++] << 8)  |
+      (input[ip++] << 16) |
+      (input[ip++] << 24);
   member.mtime = new Date(mtime * 1000);
 
   // extra flags
@@ -2741,7 +2745,7 @@ Zlib.Gunzip.prototype.decodeMember = function() {
   // isize を事前に取得すると展開後のサイズが分かるため、
   // inflate処理のバッファサイズが事前に分かり、高速になる
   isize = (input[input.length - 4])       | (input[input.length - 3] << 8) |
-          (input[input.length - 2] << 16) | (input[input.length - 1] << 24);
+      (input[input.length - 2] << 16) | (input[input.length - 1] << 24);
 
   // isize の妥当性チェック
   // ハフマン符号では最小 2-bit のため、最大で 1/4 になる
@@ -2760,8 +2764,8 @@ Zlib.Gunzip.prototype.decodeMember = function() {
 
   // crc32
   member.crc32 = crc32 =
-    ((input[ip++])       | (input[ip++] << 8) |
-     (input[ip++] << 16) | (input[ip++] << 24)) >>> 0;
+      ((input[ip++])       | (input[ip++] << 8) |
+          (input[ip++] << 16) | (input[ip++] << 24)) >>> 0;
   if (Zlib.CRC32.calc(inflated) !== crc32) {
     throw new Error('invalid CRC-32 checksum: 0x' +
         Zlib.CRC32.calc(inflated).toString(16) + ' / 0x' + crc32.toString(16));
@@ -2769,8 +2773,8 @@ Zlib.Gunzip.prototype.decodeMember = function() {
 
   // input size
   member.isize = isize =
-    ((input[ip++])       | (input[ip++] << 8) |
-     (input[ip++] << 16) | (input[ip++] << 24)) >>> 0;
+      ((input[ip++])       | (input[ip++] << 8) |
+          (input[ip++] << 16) | (input[ip++] << 24)) >>> 0;
   if ((inflated.length & 0xffffffff) !== isize) {
     throw new Error('invalid input size: ' +
         (inflated.length & 0xffffffff) + ' / ' + isize);
@@ -2951,7 +2955,7 @@ Zlib.Gzip.prototype.compress = function() {
   var il;
   /** @type {!(Array|Uint8Array)} output buffer. */
   var output =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.Gzip.DefaultBufferSize);
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.Gzip.DefaultBufferSize);
   /** @type {number} output buffer pointer. */
   var op = 0;
 
@@ -3154,7 +3158,7 @@ Zlib.Heap.prototype.push = function(index, value) {
       heap[parent + 1] = swap;
 
       current = parent;
-    // 入れ替えが必要なくなったらそこで抜ける
+      // 入れ替えが必要なくなったらそこで抜ける
     } else {
       break;
     }
@@ -3246,7 +3250,7 @@ Zlib.RawDeflate = function(input, opt_params) {
   this.freqsDist;
   /** @type {!(Array.<number>|Uint8Array)} */
   this.input =
-    (USE_TYPEDARRAY && input instanceof Array) ? new Uint8Array(input) : input;
+      (USE_TYPEDARRAY && input instanceof Array) ? new Uint8Array(input) : input;
   /** @type {!(Array.<number>|Uint8Array)} output output buffer. */
   this.output;
   /** @type {number} pos output buffer position. */
@@ -3262,8 +3266,8 @@ Zlib.RawDeflate = function(input, opt_params) {
     }
     if (opt_params['outputBuffer']) {
       this.output =
-        (USE_TYPEDARRAY && opt_params['outputBuffer'] instanceof Array) ?
-        new Uint8Array(opt_params['outputBuffer']) : opt_params['outputBuffer'];
+          (USE_TYPEDARRAY && opt_params['outputBuffer'] instanceof Array) ?
+              new Uint8Array(opt_params['outputBuffer']) : opt_params['outputBuffer'];
     }
     if (typeof opt_params['outputIndex'] === 'number') {
       this.op = opt_params['outputIndex'];
@@ -3363,8 +3367,8 @@ Zlib.RawDeflate.prototype.compress = function() {
       // each 65535-Byte (length header: 16-bit)
       for (position = 0, length = input.length; position < length;) {
         blockArray = USE_TYPEDARRAY ?
-          input.subarray(position, position + 0xffff) :
-          input.slice(position, position + 0xffff);
+            input.subarray(position, position + 0xffff) :
+            input.slice(position, position + 0xffff);
         position += blockArray.length;
         this.makeNocompressBlock(blockArray, (position === length));
       }
@@ -3391,62 +3395,62 @@ Zlib.RawDeflate.prototype.compress = function() {
  * @return {!(Array.<number>|Uint8Array)} 非圧縮ブロック byte array.
  */
 Zlib.RawDeflate.prototype.makeNocompressBlock =
-function(blockArray, isFinalBlock) {
-  /** @type {number} */
-  var bfinal;
-  /** @type {Zlib.RawDeflate.CompressionType} */
-  var btype;
-  /** @type {number} */
-  var len;
-  /** @type {number} */
-  var nlen;
-  /** @type {number} */
-  var i;
-  /** @type {number} */
-  var il;
+    function(blockArray, isFinalBlock) {
+      /** @type {number} */
+      var bfinal;
+      /** @type {Zlib.RawDeflate.CompressionType} */
+      var btype;
+      /** @type {number} */
+      var len;
+      /** @type {number} */
+      var nlen;
+      /** @type {number} */
+      var i;
+      /** @type {number} */
+      var il;
 
-  var output = this.output;
-  var op = this.op;
+      var output = this.output;
+      var op = this.op;
 
-  // expand buffer
-  if (USE_TYPEDARRAY) {
-    output = new Uint8Array(this.output.buffer);
-    while (output.length <= op + blockArray.length + 5) {
-      output = new Uint8Array(output.length << 1);
-    }
-    output.set(this.output);
-  }
+      // expand buffer
+      if (USE_TYPEDARRAY) {
+        output = new Uint8Array(this.output.buffer);
+        while (output.length <= op + blockArray.length + 5) {
+          output = new Uint8Array(output.length << 1);
+        }
+        output.set(this.output);
+      }
 
-  // header
-  bfinal = isFinalBlock ? 1 : 0;
-  btype = Zlib.RawDeflate.CompressionType.NONE;
-  output[op++] = (bfinal) | (btype << 1);
+      // header
+      bfinal = isFinalBlock ? 1 : 0;
+      btype = Zlib.RawDeflate.CompressionType.NONE;
+      output[op++] = (bfinal) | (btype << 1);
 
-  // length
-  len = blockArray.length;
-  nlen = (~len + 0x10000) & 0xffff;
-  output[op++] =          len & 0xff;
-  output[op++] =  (len >>> 8) & 0xff;
-  output[op++] =         nlen & 0xff;
-  output[op++] = (nlen >>> 8) & 0xff;
+      // length
+      len = blockArray.length;
+      nlen = (~len + 0x10000) & 0xffff;
+      output[op++] =          len & 0xff;
+      output[op++] =  (len >>> 8) & 0xff;
+      output[op++] =         nlen & 0xff;
+      output[op++] = (nlen >>> 8) & 0xff;
 
-  // copy buffer
-  if (USE_TYPEDARRAY) {
-     output.set(blockArray, op);
-     op += blockArray.length;
-     output = output.subarray(0, op);
-  } else {
-    for (i = 0, il = blockArray.length; i < il; ++i) {
-      output[op++] = blockArray[i];
-    }
-    output.length = op;
-  }
+      // copy buffer
+      if (USE_TYPEDARRAY) {
+        output.set(blockArray, op);
+        op += blockArray.length;
+        output = output.subarray(0, op);
+      } else {
+        for (i = 0, il = blockArray.length; i < il; ++i) {
+          output[op++] = blockArray[i];
+        }
+        output.length = op;
+      }
 
-  this.op = op;
-  this.output = output;
+      this.op = op;
+      this.output = output;
 
-  return output;
-};
+      return output;
+    };
 
 /**
  * 固定ハフマンブロックの作成
@@ -3455,29 +3459,29 @@ function(blockArray, isFinalBlock) {
  * @return {!(Array.<number>|Uint8Array)} 固定ハフマン符号化ブロック byte array.
  */
 Zlib.RawDeflate.prototype.makeFixedHuffmanBlock =
-function(blockArray, isFinalBlock) {
-  /** @type {Zlib.BitStream} */
-  var stream = new Zlib.BitStream(USE_TYPEDARRAY ?
-    new Uint8Array(this.output.buffer) : this.output, this.op);
-  /** @type {number} */
-  var bfinal;
-  /** @type {Zlib.RawDeflate.CompressionType} */
-  var btype;
-  /** @type {!(Array.<number>|Uint16Array)} */
-  var data;
+    function(blockArray, isFinalBlock) {
+      /** @type {Zlib.BitStream} */
+      var stream = new Zlib.BitStream(USE_TYPEDARRAY ?
+          new Uint8Array(this.output.buffer) : this.output, this.op);
+      /** @type {number} */
+      var bfinal;
+      /** @type {Zlib.RawDeflate.CompressionType} */
+      var btype;
+      /** @type {!(Array.<number>|Uint16Array)} */
+      var data;
 
-  // header
-  bfinal = isFinalBlock ? 1 : 0;
-  btype = Zlib.RawDeflate.CompressionType.FIXED;
+      // header
+      bfinal = isFinalBlock ? 1 : 0;
+      btype = Zlib.RawDeflate.CompressionType.FIXED;
 
-  stream.writeBits(bfinal, 1, true);
-  stream.writeBits(btype, 2, true);
+      stream.writeBits(bfinal, 1, true);
+      stream.writeBits(btype, 2, true);
 
-  data = this.lz77(blockArray);
-  this.fixedHuffman(data, stream);
+      data = this.lz77(blockArray);
+      this.fixedHuffman(data, stream);
 
-  return stream.finish();
-};
+      return stream.finish();
+    };
 
 /**
  * 動的ハフマンブロックの作成
@@ -3486,121 +3490,121 @@ function(blockArray, isFinalBlock) {
  * @return {!(Array.<number>|Uint8Array)} 動的ハフマン符号ブロック byte array.
  */
 Zlib.RawDeflate.prototype.makeDynamicHuffmanBlock =
-function(blockArray, isFinalBlock) {
-  /** @type {Zlib.BitStream} */
-  var stream = new Zlib.BitStream(USE_TYPEDARRAY ?
-    new Uint8Array(this.output.buffer) : this.output, this.op);
-  /** @type {number} */
-  var bfinal;
-  /** @type {Zlib.RawDeflate.CompressionType} */
-  var btype;
-  /** @type {!(Array.<number>|Uint16Array)} */
-  var data;
-  /** @type {number} */
-  var hlit;
-  /** @type {number} */
-  var hdist;
-  /** @type {number} */
-  var hclen;
-  /** @const @type {Array.<number>} */
-  var hclenOrder =
-        [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
-  /** @type {!(Array.<number>|Uint8Array)} */
-  var litLenLengths;
-  /** @type {!(Array.<number>|Uint16Array)} */
-  var litLenCodes;
-  /** @type {!(Array.<number>|Uint8Array)} */
-  var distLengths;
-  /** @type {!(Array.<number>|Uint16Array)} */
-  var distCodes;
-  /** @type {{
-   *   codes: !(Array.<number>|Uint32Array),
-   *   freqs: !(Array.<number>|Uint8Array)
-   * }} */
-  var treeSymbols;
-  /** @type {!(Array.<number>|Uint8Array)} */
-  var treeLengths;
-  /** @type {Array} */
-  var transLengths = new Array(19);
-  /** @type {!(Array.<number>|Uint16Array)} */
-  var treeCodes;
-  /** @type {number} */
-  var code;
-  /** @type {number} */
-  var bitlen;
-  /** @type {number} */
-  var i;
-  /** @type {number} */
-  var il;
+    function(blockArray, isFinalBlock) {
+      /** @type {Zlib.BitStream} */
+      var stream = new Zlib.BitStream(USE_TYPEDARRAY ?
+          new Uint8Array(this.output.buffer) : this.output, this.op);
+      /** @type {number} */
+      var bfinal;
+      /** @type {Zlib.RawDeflate.CompressionType} */
+      var btype;
+      /** @type {!(Array.<number>|Uint16Array)} */
+      var data;
+      /** @type {number} */
+      var hlit;
+      /** @type {number} */
+      var hdist;
+      /** @type {number} */
+      var hclen;
+      /** @const @type {Array.<number>} */
+      var hclenOrder =
+          [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15];
+      /** @type {!(Array.<number>|Uint8Array)} */
+      var litLenLengths;
+      /** @type {!(Array.<number>|Uint16Array)} */
+      var litLenCodes;
+      /** @type {!(Array.<number>|Uint8Array)} */
+      var distLengths;
+      /** @type {!(Array.<number>|Uint16Array)} */
+      var distCodes;
+      /** @type {{
+       *   codes: !(Array.<number>|Uint32Array),
+       *   freqs: !(Array.<number>|Uint8Array)
+       * }} */
+      var treeSymbols;
+      /** @type {!(Array.<number>|Uint8Array)} */
+      var treeLengths;
+      /** @type {Array} */
+      var transLengths = new Array(19);
+      /** @type {!(Array.<number>|Uint16Array)} */
+      var treeCodes;
+      /** @type {number} */
+      var code;
+      /** @type {number} */
+      var bitlen;
+      /** @type {number} */
+      var i;
+      /** @type {number} */
+      var il;
 
-  // header
-  bfinal = isFinalBlock ? 1 : 0;
-  btype = Zlib.RawDeflate.CompressionType.DYNAMIC;
+      // header
+      bfinal = isFinalBlock ? 1 : 0;
+      btype = Zlib.RawDeflate.CompressionType.DYNAMIC;
 
-  stream.writeBits(bfinal, 1, true);
-  stream.writeBits(btype, 2, true);
+      stream.writeBits(bfinal, 1, true);
+      stream.writeBits(btype, 2, true);
 
-  data = this.lz77(blockArray);
+      data = this.lz77(blockArray);
 
-  // リテラル・長さ, 距離のハフマン符号と符号長の算出
-  litLenLengths = this.getLengths_(this.freqsLitLen, 15);
-  litLenCodes = this.getCodesFromLengths_(litLenLengths);
-  distLengths = this.getLengths_(this.freqsDist, 7);
-  distCodes = this.getCodesFromLengths_(distLengths);
+      // リテラル・長さ, 距離のハフマン符号と符号長の算出
+      litLenLengths = this.getLengths_(this.freqsLitLen, 15);
+      litLenCodes = this.getCodesFromLengths_(litLenLengths);
+      distLengths = this.getLengths_(this.freqsDist, 7);
+      distCodes = this.getCodesFromLengths_(distLengths);
 
-  // HLIT, HDIST の決定
-  for (hlit = 286; hlit > 257 && litLenLengths[hlit - 1] === 0; hlit--) {}
-  for (hdist = 30; hdist > 1 && distLengths[hdist - 1] === 0; hdist--) {}
+      // HLIT, HDIST の決定
+      for (hlit = 286; hlit > 257 && litLenLengths[hlit - 1] === 0; hlit--) {}
+      for (hdist = 30; hdist > 1 && distLengths[hdist - 1] === 0; hdist--) {}
 
-  // HCLEN
-  treeSymbols =
-    this.getTreeSymbols_(hlit, litLenLengths, hdist, distLengths);
-  treeLengths = this.getLengths_(treeSymbols.freqs, 7);
-  for (i = 0; i < 19; i++) {
-    transLengths[i] = treeLengths[hclenOrder[i]];
-  }
-  for (hclen = 19; hclen > 4 && transLengths[hclen - 1] === 0; hclen--) {}
+      // HCLEN
+      treeSymbols =
+          this.getTreeSymbols_(hlit, litLenLengths, hdist, distLengths);
+      treeLengths = this.getLengths_(treeSymbols.freqs, 7);
+      for (i = 0; i < 19; i++) {
+        transLengths[i] = treeLengths[hclenOrder[i]];
+      }
+      for (hclen = 19; hclen > 4 && transLengths[hclen - 1] === 0; hclen--) {}
 
-  treeCodes = this.getCodesFromLengths_(treeLengths);
+      treeCodes = this.getCodesFromLengths_(treeLengths);
 
-  // 出力
-  stream.writeBits(hlit - 257, 5, true);
-  stream.writeBits(hdist - 1, 5, true);
-  stream.writeBits(hclen - 4, 4, true);
-  for (i = 0; i < hclen; i++) {
-    stream.writeBits(transLengths[i], 3, true);
-  }
-
-  // ツリーの出力
-  for (i = 0, il = treeSymbols.codes.length; i < il; i++) {
-    code = treeSymbols.codes[i];
-
-    stream.writeBits(treeCodes[code], treeLengths[code], true);
-
-    // extra bits
-    if (code >= 16) {
-      i++;
-      switch (code) {
-        case 16: bitlen = 2; break;
-        case 17: bitlen = 3; break;
-        case 18: bitlen = 7; break;
-        default:
-          throw 'invalid code: ' + code;
+      // 出力
+      stream.writeBits(hlit - 257, 5, true);
+      stream.writeBits(hdist - 1, 5, true);
+      stream.writeBits(hclen - 4, 4, true);
+      for (i = 0; i < hclen; i++) {
+        stream.writeBits(transLengths[i], 3, true);
       }
 
-      stream.writeBits(treeSymbols.codes[i], bitlen, true);
-    }
-  }
+      // ツリーの出力
+      for (i = 0, il = treeSymbols.codes.length; i < il; i++) {
+        code = treeSymbols.codes[i];
 
-  this.dynamicHuffman(
-    data,
-    [litLenCodes, litLenLengths],
-    [distCodes, distLengths],
-    stream
-  );
+        stream.writeBits(treeCodes[code], treeLengths[code], true);
 
-  return stream.finish();
-};
+        // extra bits
+        if (code >= 16) {
+          i++;
+          switch (code) {
+            case 16: bitlen = 2; break;
+            case 17: bitlen = 3; break;
+            case 18: bitlen = 7; break;
+            default:
+              throw 'invalid code: ' + code;
+          }
+
+          stream.writeBits(treeSymbols.codes[i], bitlen, true);
+        }
+      }
+
+      this.dynamicHuffman(
+          data,
+          [litLenCodes, litLenLengths],
+          [distCodes, distLengths],
+          stream
+      );
+
+      return stream.finish();
+    };
 
 
 /**
@@ -3610,53 +3614,53 @@ function(blockArray, isFinalBlock) {
  * @return {!Zlib.BitStream} ハフマン符号化済みビットストリームオブジェクト.
  */
 Zlib.RawDeflate.prototype.dynamicHuffman =
-function(dataArray, litLen, dist, stream) {
-  /** @type {number} */
-  var index;
-  /** @type {number} */
-  var length;
-  /** @type {number} */
-  var literal;
-  /** @type {number} */
-  var code;
-  /** @type {number} */
-  var litLenCodes;
-  /** @type {number} */
-  var litLenLengths;
-  /** @type {number} */
-  var distCodes;
-  /** @type {number} */
-  var distLengths;
+    function(dataArray, litLen, dist, stream) {
+      /** @type {number} */
+      var index;
+      /** @type {number} */
+      var length;
+      /** @type {number} */
+      var literal;
+      /** @type {number} */
+      var code;
+      /** @type {number} */
+      var litLenCodes;
+      /** @type {number} */
+      var litLenLengths;
+      /** @type {number} */
+      var distCodes;
+      /** @type {number} */
+      var distLengths;
 
-  litLenCodes = litLen[0];
-  litLenLengths = litLen[1];
-  distCodes = dist[0];
-  distLengths = dist[1];
+      litLenCodes = litLen[0];
+      litLenLengths = litLen[1];
+      distCodes = dist[0];
+      distLengths = dist[1];
 
-  // 符号を BitStream に書き込んでいく
-  for (index = 0, length = dataArray.length; index < length; ++index) {
-    literal = dataArray[index];
+      // 符号を BitStream に書き込んでいく
+      for (index = 0, length = dataArray.length; index < length; ++index) {
+        literal = dataArray[index];
 
-    // literal or length
-    stream.writeBits(litLenCodes[literal], litLenLengths[literal], true);
+        // literal or length
+        stream.writeBits(litLenCodes[literal], litLenLengths[literal], true);
 
-    // 長さ・距離符号
-    if (literal > 256) {
-      // length extra
-      stream.writeBits(dataArray[++index], dataArray[++index], true);
-      // distance
-      code = dataArray[++index];
-      stream.writeBits(distCodes[code], distLengths[code], true);
-      // distance extra
-      stream.writeBits(dataArray[++index], dataArray[++index], true);
-    // 終端
-    } else if (literal === 256) {
-      break;
-    }
-  }
+        // 長さ・距離符号
+        if (literal > 256) {
+          // length extra
+          stream.writeBits(dataArray[++index], dataArray[++index], true);
+          // distance
+          code = dataArray[++index];
+          stream.writeBits(distCodes[code], distLengths[code], true);
+          // distance extra
+          stream.writeBits(dataArray[++index], dataArray[++index], true);
+          // 終端
+        } else if (literal === 256) {
+          break;
+        }
+      }
 
-  return stream;
-};
+      return stream;
+    };
 
 /**
  * 固定ハフマン符号化
@@ -3678,8 +3682,8 @@ Zlib.RawDeflate.prototype.fixedHuffman = function(dataArray, stream) {
 
     // 符号の書き込み
     Zlib.BitStream.prototype.writeBits.apply(
-      stream,
-      Zlib.RawDeflate.FixedHuffmanTable[literal]
+        stream,
+        Zlib.RawDeflate.FixedHuffmanTable[literal]
     );
 
     // 長さ・距離符号
@@ -3690,7 +3694,7 @@ Zlib.RawDeflate.prototype.fixedHuffman = function(dataArray, stream) {
       stream.writeBits(dataArray[++index], 5);
       // distance extra
       stream.writeBits(dataArray[++index], dataArray[++index], true);
-    // 終端
+      // 終端
     } else if (literal === 0x100) {
       break;
     }
@@ -3739,34 +3743,35 @@ Zlib.RawDeflate.Lz77Match.LengthCodeTable = (function(table) {
    */
   function code(length) {
     switch (true) {
-      case (length === 3): return [257, length - 3, 0];
-      case (length === 4): return [258, length - 4, 0];
-      case (length === 5): return [259, length - 5, 0];
-      case (length === 6): return [260, length - 6, 0];
-      case (length === 7): return [261, length - 7, 0];
-      case (length === 9): return [263, length - 9, 0];
-      case (length === 10): return [264, length - 10, 0];
-      case (length <= 12): return [265, length - 11, 1];
-      case (length <= 14): return [266, length - 13, 1];
-      case (length <= 16): return [267, length - 15, 1];
-      case (length <= 18): return [268, length - 17, 1];
-      case (length <= 22): return [269, length - 19, 2];
-      case (length <= 26): return [270, length - 23, 2];
-      case (length <= 30): return [271, length - 27, 2];
-      case (length <= 34): return [272, length - 31, 2];
-      case (length <= 42): return [273, length - 35, 3];
-      case (length <= 50): return [274, length - 43, 3];
-      case (length <= 58): return [275, length - 51, 3];
-      case (length <= 66): return [276, length - 59, 3];
-      case (length <= 82): return [277, length - 67, 4];
-      case (length <= 98): return [278, length - 83, 4];
-      case (length <= 114): return [279, length - 99, 4];
-      case (length <= 130): return [280, length - 115, 4];
-      case (length <= 162): return [281, length - 131, 5];
-      case (length <= 194): return [282, length - 163, 5];
-      case (length <= 226): return [283, length - 195, 5];
-      case (length <= 257): return [284, length - 227, 5];
-      case (length === 258): return [285, length - 258, 0];
+      case (length === 3): return [257, length - 3, 0]; break;
+      case (length === 4): return [258, length - 4, 0]; break;
+      case (length === 5): return [259, length - 5, 0]; break;
+      case (length === 6): return [260, length - 6, 0]; break;
+      case (length === 7): return [261, length - 7, 0]; break;
+      case (length === 8): return [262, length - 8, 0]; break;
+      case (length === 9): return [263, length - 9, 0]; break;
+      case (length === 10): return [264, length - 10, 0]; break;
+      case (length <= 12): return [265, length - 11, 1]; break;
+      case (length <= 14): return [266, length - 13, 1]; break;
+      case (length <= 16): return [267, length - 15, 1]; break;
+      case (length <= 18): return [268, length - 17, 1]; break;
+      case (length <= 22): return [269, length - 19, 2]; break;
+      case (length <= 26): return [270, length - 23, 2]; break;
+      case (length <= 30): return [271, length - 27, 2]; break;
+      case (length <= 34): return [272, length - 31, 2]; break;
+      case (length <= 42): return [273, length - 35, 3]; break;
+      case (length <= 50): return [274, length - 43, 3]; break;
+      case (length <= 58): return [275, length - 51, 3]; break;
+      case (length <= 66): return [276, length - 59, 3]; break;
+      case (length <= 82): return [277, length - 67, 4]; break;
+      case (length <= 98): return [278, length - 83, 4]; break;
+      case (length <= 114): return [279, length - 99, 4]; break;
+      case (length <= 130): return [280, length - 115, 4]; break;
+      case (length <= 162): return [281, length - 131, 5]; break;
+      case (length <= 194): return [282, length - 163, 5]; break;
+      case (length <= 226): return [283, length - 195, 5]; break;
+      case (length <= 257): return [284, length - 227, 5]; break;
+      case (length === 258): return [285, length - 258, 0]; break;
       default: throw 'invalid length: ' + length;
     }
   }
@@ -3882,7 +3887,7 @@ Zlib.RawDeflate.prototype.lz77 = function(dataArray) {
   var prevMatch;
   /** @type {!(Array.<number>|Uint16Array)} lz77 buffer */
   var lz77buf = USE_TYPEDARRAY ?
-    new Uint16Array(dataArray.length * 2) : [];
+      new Uint16Array(dataArray.length * 2) : [];
   /** @type {number} lz77 output buffer pointer */
   var pos = 0;
   /** @type {number} lz77 skip length */
@@ -3988,7 +3993,7 @@ Zlib.RawDeflate.prototype.lz77 = function(dataArray) {
       } else {
         writeMatch(longestMatch, 0);
       }
-    // 前回マッチしていて今回マッチがなかったら前回のを採用
+      // 前回マッチしていて今回マッチがなかったら前回のを採用
     } else if (prevMatch) {
       writeMatch(prevMatch, -1);
     } else {
@@ -4007,7 +4012,7 @@ Zlib.RawDeflate.prototype.lz77 = function(dataArray) {
   this.freqsDist = freqsDist;
 
   return /** @type {!(Uint16Array|Array.<number>)} */ (
-    USE_TYPEDARRAY ?  lz77buf.subarray(0, pos) : lz77buf
+      USE_TYPEDARRAY ?  lz77buf.subarray(0, pos) : lz77buf
   );
 };
 
@@ -4020,49 +4025,49 @@ Zlib.RawDeflate.prototype.lz77 = function(dataArray) {
  * @private
  */
 Zlib.RawDeflate.prototype.searchLongestMatch_ =
-function(data, position, matchList) {
-  var match,
-      currentMatch,
-      matchMax = 0, matchLength,
-      i, j, l, dl = data.length;
+    function(data, position, matchList) {
+      var match,
+          currentMatch,
+          matchMax = 0, matchLength,
+          i, j, l, dl = data.length;
 
-  // 候補を後ろから 1 つずつ絞り込んでゆく
-  permatch:
-  for (i = 0, l = matchList.length; i < l; i++) {
-    match = matchList[l - i - 1];
-    matchLength = Zlib.RawDeflate.Lz77MinLength;
+      // 候補を後ろから 1 つずつ絞り込んでゆく
+      permatch:
+          for (i = 0, l = matchList.length; i < l; i++) {
+            match = matchList[l - i - 1];
+            matchLength = Zlib.RawDeflate.Lz77MinLength;
 
-    // 前回までの最長一致を末尾から一致検索する
-    if (matchMax > Zlib.RawDeflate.Lz77MinLength) {
-      for (j = matchMax; j > Zlib.RawDeflate.Lz77MinLength; j--) {
-        if (data[match + j - 1] !== data[position + j - 1]) {
-          continue permatch;
-        }
-      }
-      matchLength = matchMax;
-    }
+            // 前回までの最長一致を末尾から一致検索する
+            if (matchMax > Zlib.RawDeflate.Lz77MinLength) {
+              for (j = matchMax; j > Zlib.RawDeflate.Lz77MinLength; j--) {
+                if (data[match + j - 1] !== data[position + j - 1]) {
+                  continue permatch;
+                }
+              }
+              matchLength = matchMax;
+            }
 
-    // 最長一致探索
-    while (matchLength < Zlib.RawDeflate.Lz77MaxLength &&
-           position + matchLength < dl &&
-           data[match + matchLength] === data[position + matchLength]) {
-      ++matchLength;
-    }
+            // 最長一致探索
+            while (matchLength < Zlib.RawDeflate.Lz77MaxLength &&
+            position + matchLength < dl &&
+            data[match + matchLength] === data[position + matchLength]) {
+              ++matchLength;
+            }
 
-    // マッチ長が同じ場合は後方を優先
-    if (matchLength > matchMax) {
-      currentMatch = match;
-      matchMax = matchLength;
-    }
+            // マッチ長が同じ場合は後方を優先
+            if (matchLength > matchMax) {
+              currentMatch = match;
+              matchMax = matchLength;
+            }
 
-    // 最長が確定したら後の処理は省略
-    if (matchLength === Zlib.RawDeflate.Lz77MaxLength) {
-      break;
-    }
-  }
+            // 最長が確定したら後の処理は省略
+            if (matchLength === Zlib.RawDeflate.Lz77MaxLength) {
+              break;
+            }
+          }
 
-  return new Zlib.RawDeflate.Lz77Match(matchMax, position - currentMatch);
-};
+      return new Zlib.RawDeflate.Lz77Match(matchMax, position - currentMatch);
+    };
 
 /**
  * Tree-Transmit Symbols の算出
@@ -4077,105 +4082,105 @@ function(data, position, matchList) {
  * }} Tree-Transmit Symbols.
  */
 Zlib.RawDeflate.prototype.getTreeSymbols_ =
-function(hlit, litlenLengths, hdist, distLengths) {
-  var src = new (USE_TYPEDARRAY ? Uint32Array : Array)(hlit + hdist),
-      i, j, runLength, l,
-      result = new (USE_TYPEDARRAY ? Uint32Array : Array)(286 + 30),
-      nResult,
-      rpt,
-      freqs = new (USE_TYPEDARRAY ? Uint8Array : Array)(19);
+    function(hlit, litlenLengths, hdist, distLengths) {
+      var src = new (USE_TYPEDARRAY ? Uint32Array : Array)(hlit + hdist),
+          i, j, runLength, l,
+          result = new (USE_TYPEDARRAY ? Uint32Array : Array)(286 + 30),
+          nResult,
+          rpt,
+          freqs = new (USE_TYPEDARRAY ? Uint8Array : Array)(19);
 
-  j = 0;
-  for (i = 0; i < hlit; i++) {
-    src[j++] = litlenLengths[i];
-  }
-  for (i = 0; i < hdist; i++) {
-    src[j++] = distLengths[i];
-  }
+      j = 0;
+      for (i = 0; i < hlit; i++) {
+        src[j++] = litlenLengths[i];
+      }
+      for (i = 0; i < hdist; i++) {
+        src[j++] = distLengths[i];
+      }
 
-  // 初期化
-  if (!USE_TYPEDARRAY) {
-    for (i = 0, l = freqs.length; i < l; ++i) {
-      freqs[i] = 0;
-    }
-  }
-
-  // 符号化
-  nResult = 0;
-  for (i = 0, l = src.length; i < l; i += j) {
-    // Run Length Encoding
-    for (j = 1; i + j < l && src[i + j] === src[i]; ++j) {}
-
-    runLength = j;
-
-    if (src[i] === 0) {
-      // 0 の繰り返しが 3 回未満ならばそのまま
-      if (runLength < 3) {
-        while (runLength-- > 0) {
-          result[nResult++] = 0;
-          freqs[0]++;
-        }
-      } else {
-        while (runLength > 0) {
-          // 繰り返しは最大 138 までなので切り詰める
-          rpt = (runLength < 138 ? runLength : 138);
-
-          if (rpt > runLength - 3 && rpt < runLength) {
-            rpt = runLength - 3;
-          }
-
-          // 3-10 回 -> 17
-          if (rpt <= 10) {
-            result[nResult++] = 17;
-            result[nResult++] = rpt - 3;
-            freqs[17]++;
-          // 11-138 回 -> 18
-          } else {
-            result[nResult++] = 18;
-            result[nResult++] = rpt - 11;
-            freqs[18]++;
-          }
-
-          runLength -= rpt;
+      // 初期化
+      if (!USE_TYPEDARRAY) {
+        for (i = 0, l = freqs.length; i < l; ++i) {
+          freqs[i] = 0;
         }
       }
-    } else {
-      result[nResult++] = src[i];
-      freqs[src[i]]++;
-      runLength--;
 
-      // 繰り返し回数が3回未満ならばランレングス符号は要らない
-      if (runLength < 3) {
-        while (runLength-- > 0) {
+      // 符号化
+      nResult = 0;
+      for (i = 0, l = src.length; i < l; i += j) {
+        // Run Length Encoding
+        for (j = 1; i + j < l && src[i + j] === src[i]; ++j) {}
+
+        runLength = j;
+
+        if (src[i] === 0) {
+          // 0 の繰り返しが 3 回未満ならばそのまま
+          if (runLength < 3) {
+            while (runLength-- > 0) {
+              result[nResult++] = 0;
+              freqs[0]++;
+            }
+          } else {
+            while (runLength > 0) {
+              // 繰り返しは最大 138 までなので切り詰める
+              rpt = (runLength < 138 ? runLength : 138);
+
+              if (rpt > runLength - 3 && rpt < runLength) {
+                rpt = runLength - 3;
+              }
+
+              // 3-10 回 -> 17
+              if (rpt <= 10) {
+                result[nResult++] = 17;
+                result[nResult++] = rpt - 3;
+                freqs[17]++;
+                // 11-138 回 -> 18
+              } else {
+                result[nResult++] = 18;
+                result[nResult++] = rpt - 11;
+                freqs[18]++;
+              }
+
+              runLength -= rpt;
+            }
+          }
+        } else {
           result[nResult++] = src[i];
           freqs[src[i]]++;
-        }
-      // 3 回以上ならばランレングス符号化
-      } else {
-        while (runLength > 0) {
-          // runLengthを 3-6 で分割
-          rpt = (runLength < 6 ? runLength : 6);
+          runLength--;
 
-          if (rpt > runLength - 3 && rpt < runLength) {
-            rpt = runLength - 3;
+          // 繰り返し回数が3回未満ならばランレングス符号は要らない
+          if (runLength < 3) {
+            while (runLength-- > 0) {
+              result[nResult++] = src[i];
+              freqs[src[i]]++;
+            }
+            // 3 回以上ならばランレングス符号化
+          } else {
+            while (runLength > 0) {
+              // runLengthを 3-6 で分割
+              rpt = (runLength < 6 ? runLength : 6);
+
+              if (rpt > runLength - 3 && rpt < runLength) {
+                rpt = runLength - 3;
+              }
+
+              result[nResult++] = 16;
+              result[nResult++] = rpt - 3;
+              freqs[16]++;
+
+              runLength -= rpt;
+            }
           }
-
-          result[nResult++] = 16;
-          result[nResult++] = rpt - 3;
-          freqs[16]++;
-
-          runLength -= rpt;
         }
       }
-    }
-  }
 
-  return {
-    codes:
-      USE_TYPEDARRAY ? result.subarray(0, nResult) : result.slice(0, nResult),
-    freqs: freqs
-  };
-};
+      return {
+        codes:
+            USE_TYPEDARRAY ? result.subarray(0, nResult) : result.slice(0, nResult),
+        freqs: freqs
+      };
+    };
 
 /**
  * ハフマン符号の長さを取得する
@@ -4409,8 +4414,8 @@ Zlib.Unzip = function(input, opt_params) {
   opt_params = opt_params || {};
   /** @type {!(Array.<number>|Uint8Array)} */
   this.input =
-    (USE_TYPEDARRAY && (input instanceof Array)) ?
-    new Uint8Array(input) : input;
+      (USE_TYPEDARRAY && (input instanceof Array)) ?
+          new Uint8Array(input) : input;
   /** @type {number} */
   this.ip = 0;
   /** @type {number} */
@@ -4550,20 +4555,20 @@ Zlib.Unzip.FileHeader.prototype.parse = function() {
 
   // crc-32
   this.crc32 = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // compressed size
   this.compressedSize = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // uncompressed size
   this.plainSize = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // file name length
@@ -4583,30 +4588,30 @@ Zlib.Unzip.FileHeader.prototype.parse = function() {
 
   // external file attributes
   this.externalFileAttributes =
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24);
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24);
 
   // relative offset of local header
   this.relativeOffset = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // file name
   this.filename = String.fromCharCode.apply(null, USE_TYPEDARRAY ?
-    input.subarray(ip, ip += this.fileNameLength) :
-    input.slice(ip, ip += this.fileNameLength)
+      input.subarray(ip, ip += this.fileNameLength) :
+      input.slice(ip, ip += this.fileNameLength)
   );
 
   // extra field
   this.extraField = USE_TYPEDARRAY ?
-    input.subarray(ip, ip += this.extraFieldLength) :
-    input.slice(ip, ip += this.extraFieldLength);
+      input.subarray(ip, ip += this.extraFieldLength) :
+      input.slice(ip, ip += this.extraFieldLength);
 
   // file comment
   this.comment = USE_TYPEDARRAY ?
-    input.subarray(ip, ip + this.fileCommentLength) :
-    input.slice(ip, ip + this.fileCommentLength);
+      input.subarray(ip, ip + this.fileCommentLength) :
+      input.slice(ip, ip + this.fileCommentLength);
 
   this.length = ip - this.offset;
 };
@@ -4682,20 +4687,20 @@ Zlib.Unzip.LocalFileHeader.prototype.parse = function() {
 
   // crc-32
   this.crc32 = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // compressed size
   this.compressedSize = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // uncompressed size
   this.plainSize = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // file name length
@@ -4706,14 +4711,14 @@ Zlib.Unzip.LocalFileHeader.prototype.parse = function() {
 
   // file name
   this.filename = String.fromCharCode.apply(null, USE_TYPEDARRAY ?
-    input.subarray(ip, ip += this.fileNameLength) :
-    input.slice(ip, ip += this.fileNameLength)
+      input.subarray(ip, ip += this.fileNameLength) :
+      input.slice(ip, ip += this.fileNameLength)
   );
 
   // extra field
   this.extraField = USE_TYPEDARRAY ?
-    input.subarray(ip, ip += this.extraFieldLength) :
-    input.slice(ip, ip += this.extraFieldLength);
+      input.subarray(ip, ip += this.extraFieldLength) :
+      input.slice(ip, ip += this.extraFieldLength);
 
   this.length = ip - this.offset;
 };
@@ -4771,14 +4776,14 @@ Zlib.Unzip.prototype.parseEndOfCentralDirectoryRecord = function() {
 
   // size of the central directory
   this.centralDirectorySize = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // offset of start of central directory with respect to the starting disk number
   this.centralDirectoryOffset = (
-    (input[ip++]      ) | (input[ip++] <<  8) |
-    (input[ip++] << 16) | (input[ip++] << 24)
+      (input[ip++]      ) | (input[ip++] <<  8) |
+      (input[ip++] << 16) | (input[ip++] << 24)
   ) >>> 0;
 
   // .ZIP file comment length
@@ -4786,8 +4791,8 @@ Zlib.Unzip.prototype.parseEndOfCentralDirectoryRecord = function() {
 
   // .ZIP file comment
   this.comment = USE_TYPEDARRAY ?
-    input.subarray(ip, ip + this.commentLength) :
-    input.slice(ip, ip + this.commentLength);
+      input.subarray(ip, ip + this.commentLength) :
+      input.slice(ip, ip + this.commentLength);
 };
 
 Zlib.Unzip.prototype.parseFileHeader = function() {
@@ -4894,8 +4899,8 @@ Zlib.Unzip.prototype.getFileData = function(index, opt_params) {
   switch (localFileHeader.compression) {
     case Zlib.Unzip.CompressionMethod.STORE:
       buffer = USE_TYPEDARRAY ?
-        this.input.subarray(offset, offset + length) :
-        this.input.slice(offset, offset + length);
+          this.input.subarray(offset, offset + length) :
+          this.input.slice(offset, offset + length);
       break;
     case Zlib.Unzip.CompressionMethod.DEFLATE:
       buffer = new Zlib.RawInflate(this.input, {
@@ -4911,8 +4916,8 @@ Zlib.Unzip.prototype.getFileData = function(index, opt_params) {
     crc32 = Zlib.CRC32.calc(buffer);
     if (localFileHeader.crc32 !== crc32) {
       throw new Error(
-        'wrong crc: file=0x' + localFileHeader.crc32.toString(16) +
-        ', data=0x' + crc32.toString(16)
+          'wrong crc: file=0x' + localFileHeader.crc32.toString(16) +
+          ', data=0x' + crc32.toString(16)
       );
     }
   }
@@ -5053,7 +5058,7 @@ Zlib.Adler32.update = function(adler, array) {
 
   while (len > 0) {
     tlen = len > Zlib.Adler32.OptimizationParameter ?
-      Zlib.Adler32.OptimizationParameter : len;
+        Zlib.Adler32.OptimizationParameter : len;
     len -= tlen;
     do {
       s1 += array[i++];
@@ -5091,8 +5096,8 @@ Zlib.BitStream = function(buffer, bufferPosition) {
   this.bitindex = 0;
   /** @type {!(Array|Uint8Array)} bit-stream output buffer. */
   this.buffer = buffer instanceof (USE_TYPEDARRAY ? Uint8Array : Array) ?
-    buffer :
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.BitStream.DefaultBlockSize);
+      buffer :
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.BitStream.DefaultBlockSize);
 
   // 入力された index が足りなかったら拡張するが、倍にしてもダメなら不正とする
   if (this.buffer.length * 2 <= this.index) {
@@ -5122,7 +5127,7 @@ Zlib.BitStream.prototype.expandBuffer = function() {
   var il = oldbuf.length;
   /** @type {!(Array|Uint8Array)} new buffer. */
   var buffer =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(il << 1);
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(il << 1);
 
   // copy buffer
   if (USE_TYPEDARRAY) {
@@ -5162,22 +5167,22 @@ Zlib.BitStream.prototype.writeBits = function(number, n, reverse) {
    */
   function rev32_(n) {
     return (Zlib.BitStream.ReverseTable[n & 0xFF] << 24) |
-      (Zlib.BitStream.ReverseTable[n >>> 8 & 0xFF] << 16) |
-      (Zlib.BitStream.ReverseTable[n >>> 16 & 0xFF] << 8) |
-      Zlib.BitStream.ReverseTable[n >>> 24 & 0xFF];
+        (Zlib.BitStream.ReverseTable[n >>> 8 & 0xFF] << 16) |
+        (Zlib.BitStream.ReverseTable[n >>> 16 & 0xFF] << 8) |
+        Zlib.BitStream.ReverseTable[n >>> 24 & 0xFF];
   }
 
   if (reverse && n > 1) {
     number = n > 8 ?
-      rev32_(number) >> (32 - n) :
-      Zlib.BitStream.ReverseTable[number] >> (8 - n);
+        rev32_(number) >> (32 - n) :
+        Zlib.BitStream.ReverseTable[number] >> (8 - n);
   }
 
   // Byte 境界を超えないとき
   if (n + bitindex < 8) {
     current = (current << n) | number;
     bitindex += n;
-  // Byte 境界を超えるとき
+    // Byte 境界を超えるとき
   } else {
     for (i = 0; i < n; ++i) {
       current = (current << 1) | ((number >> n - i - 1) & 1);
@@ -5418,7 +5423,7 @@ Zlib.Deflate = function(input, opt_params) {
   this.input = input;
   /** @type {!(Array|Uint8Array)} */
   this.output =
-    new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.Deflate.DefaultBufferSize);
+      new (USE_TYPEDARRAY ? Uint8Array : Array)(Zlib.Deflate.DefaultBufferSize);
   /** @type {Zlib.Deflate.CompressionType} */
   this.compressionType = Zlib.Deflate.CompressionType.DYNAMIC;
   /** @type {Zlib.RawDeflate} */
@@ -5557,6 +5562,7 @@ Zlib.Deflate.prototype.compress = function() {
 
   return output;
 };
+
 
 export default Zlib;
 
