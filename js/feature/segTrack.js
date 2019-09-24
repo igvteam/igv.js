@@ -119,11 +119,7 @@ SegTrack.prototype.menuItemList = function () {
 
 
 SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-
-    var self = this;
-
-    return self.featureSource.getFeatures(chr, bpStart, bpEnd);
-
+    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
 };
 
 
@@ -149,7 +145,7 @@ SegTrack.prototype.draw = function (options) {
         const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
         const xScale = bpPerPixel;
 
-        updateSampleKeys.call(this, featureList);
+        this.updateSampleKeys(featureList);
 
         // Create a map for fast id -> row lookup
         const samples = {};
@@ -261,9 +257,7 @@ SegTrack.prototype.computePixelHeight = function (features) {
     if (!features) return 0;
 
     const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
-
-    updateSampleKeys.call(this, features);
-
+    this.updateSampleKeys(features);
     return this.sampleKeys.length * sampleHeight;
 };
 
@@ -279,7 +273,7 @@ SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
 
         .then(function (featureList) {
 
-            updateSampleKeys.call(self, featureList);
+            this.updateSampleKeys(featureList);
 
             const scores = {};
             const bpLength = bpEnd - bpStart + 1;
@@ -423,13 +417,12 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 
 };
 
-
 SegTrack.prototype.supportsWholeGenome = function () {
     return this.featureSource.supportsWholeGenome();
 }
 
 
-function updateSampleKeys(featureList) {
+SegTrack.prototype.updateSampleKeys = function(featureList) {
 
     const samples = new Set(this.sampleKeys);
 
