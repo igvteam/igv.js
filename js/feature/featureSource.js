@@ -160,7 +160,7 @@ FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPer
         if (isQueryable) {   // queryable sources don't support whole genome view
             return [];
         } else {
-            if (featureCache.count > 100000) {
+            if (featureCache.count > 500000) {
                 this.supportsWG = false;
                 return [];
             } else {
@@ -302,10 +302,6 @@ function packFeatures(features, maxRows) {
 // TODO -- filter by pixel size
 FeatureSource.prototype.getWGFeatures = function (allFeatures) {
 
-    if (this.wgFeatures) {
-        return this.wgFeatures;
-
-    }
     const genome = this.genome;
     const wgChromosomeNames = new Set(genome.wgChromosomeNames);
     const wgFeatures = [];
@@ -353,8 +349,6 @@ FeatureSource.prototype.getWGFeatures = function (allFeatures) {
     wgFeatures.sort(function (a, b) {
         return a.start - b.start;
     });
-
-    this.wgFeatures = wgFeatures;
 
     return wgFeatures;
 
