@@ -29,8 +29,7 @@ import IGVGraphics from "../igv-canvas.js";
 import IGVMath from "../igv-math.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
-import {extend} from "../util/igvUtils.js";
-import {isSimpleType} from "../util/igvUtils.js";
+import {extend, isSimpleType} from "../util/igvUtils.js";
 
 const SegTrack = extend(TrackBase,
 
@@ -264,59 +263,43 @@ SegTrack.prototype.computePixelHeight = function (features) {
 /**
  * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
  */
-SegTrack.prototype.sortSamples = function (chr, bpStart, bpEnd, direction) {
+SegTrack.prototype.sortSamples = async function (chr, bpStart, bpEnd, direction) {
 
-    const self = this;
+    const featureList = await this.featureSource.getFeatures(chr, bpStart, bpEnd);
+    this.updateSampleKeys(featureList);
 
+    const scores = {};
+    const bpLength = bpEnd - bpStart + 1;
 
-    this.featureSource.getFeatures(chr, bpStart, bpEnd)
+    // Compute weighted average score for each sample
+    for (let segment of featureList) {
 
-        .then(function (featureList) {
+        if (segment.end < bpStart) continue;
+        if (segment.start > bpEnd) break;
 
-            this.updateSampleKeys(featureList);
+        const min = Math.max(bpStart, segment.start);
+        const max = Math.min(bpEnd, segment.end);
+        const f = (max - min) / bpLength;
 
-            const scores = {};
-            const bpLength = bpEnd - bpStart + 1;
+        const sampleKey = segment.sampleKey || segment.sample
+        const s = scores[sampleKey] || 0;
+        scores[sampleKey] = s + f * segment.value;
+    }
 
-            // Compute weighted average score for each sample
-            for (let segment of featureList) {
+    // Now sort sample names by score
+    const d2 = (direction === "ASC" ? 1 : -1);
+    this.sampleKeys.sort(function (a, b) {
+        let s1 = scores[a];
+        let s2 = scores[b];
+        if (!s1) s1 = d2 * Number.MAX_VALUE;
+        if (!s2) s2 = d2 * Number.MAX_VALUE;
+        if (s1 === s2) return 0;
+        else if (s1 > s2) return d2;
+        else return d2 * -1;
+    });
 
-                if (segment.end < bpStart) continue;
-                if (segment.start > bpEnd) break;
-
-                const min = Math.max(bpStart, segment.start);
-                const max = Math.min(bpEnd, segment.end);
-                const f = (max - min) / bpLength;
-
-                const sampleKey = segment.sampleKey || segment.sample
-                const s = scores[sampleKey] || 0;
-                scores[sampleKey] = s + f * segment.value;
-
-            }
-
-
-            // Now sort sample names by score
-
-            const d2 = (direction === "ASC" ? 1 : -1);
-            self.sampleKeys.sort(function (a, b) {
-
-                var s1 = scores[a];
-                var s2 = scores[b];
-                if (!s1) s1 = d2 * Number.MAX_VALUE;
-                if (!s2) s2 = d2 * Number.MAX_VALUE;
-
-                if (s1 === s2) return 0;
-                else if (s1 > s2) return d2;
-                else return d2 * -1;
-
-            });
-
-
-            self.trackView.repaintViews();
-            // self.trackView.$viewport.scrollTop(0);
-
-
-        })
+    this.trackView.repaintViews();
+    // self.trackView.$viewport.scrollTop(0);
 };
 
 SegTrack.prototype.clickedFeatures = function (clickState) {
@@ -422,7 +405,7 @@ SegTrack.prototype.supportsWholeGenome = function () {
 }
 
 
-SegTrack.prototype.updateSampleKeys = function(featureList) {
+SegTrack.prototype.updateSampleKeys = function (featureList) {
 
     const samples = new Set(this.sampleKeys);
 
