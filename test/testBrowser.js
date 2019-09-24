@@ -84,7 +84,6 @@ function runBrowserTests() {
                     done();
                 })
         }
-
     })
 }
 
