@@ -1835,25 +1835,6 @@ Browser.prototype.toJSON = function () {
     return json;        // This is an object, not a json string
 
 }
-// igv.Browser.prototype.compressedSession = function () {
-//
-//     var json, bytes, deflate, compressedBytes, compressedString, enc;
-//
-//     json = JSON.stringify(this.toJSON());
-//     bytes = [];
-//     for (var i = 0; i < json.length; i++) {
-//         bytes.push(json.charCodeAt(i));
-//     }
-//     compressedBytes = new Zlib.RawDeflate(bytes).compress();            // UInt8Arry
-//     compressedString = String.fromCharCode.apply(null, compressedBytes);      // Convert to string
-//     enc = btoa(compressedString);
-//     enc = enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/\=/g, '-');   // URL safe
-//
-//     //console.log(json);
-//     //console.log(enc);
-//
-//     return enc;
-// }
 
 Browser.prototype.compressedSession = function () {
 

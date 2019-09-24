@@ -84,14 +84,14 @@ function ViewPort(trackView, $container, genomicState, width) {
 
         if ("sequence" !== trackView.track.type) {
 
-            this.popover = new Popover(self.browser.$content);
+            this.popover = new Popover(this.browser.$content);
 
             let str = trackView.track.name.toLowerCase().split(' ').join('_');
             str = str + '_' + this.browser.genomicStateList.indexOf(this.genomicState);
 
             this.popover.$popover.attr('id', str);
 
-            self.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
+            this.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
         }
     }
 
@@ -103,7 +103,7 @@ function ViewPort(trackView, $container, genomicState, width) {
         this.setTrackLabel(trackView.track.name);
 
 
-        if (false === self.browser.trackLabelsVisible) {
+        if (false === this.browser.trackLabelsVisible) {
             this.$trackLabel.hide();
         }
 
