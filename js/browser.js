@@ -38,13 +38,13 @@ import IdeoPanel from "./ideogram.js";
 import ReferenceFrame from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
 import Zlib from "./vendor/zlib_and_gzip.js";
-import {getFilename, isFilePath} from './util/fileUtils.js'
-import {inferTrackTypes, inferFileFormat} from "./util/trackUtils.js";
+import {getFilename} from './util/fileUtils.js'
+import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {isString, splitLines, numberFormatter} from "./util/stringUtils.js"
-import {pageCoordinates, guid} from "./util/domUtils.js";
+import {isString, numberFormatter, splitLines} from "./util/stringUtils.js"
+import {guid, pageCoordinates} from "./util/domUtils.js";
 import {decodeDataURI} from "./util/uriUtils.js";
-import {download, validateLocusExtent, doAutoscale} from "./util/igvUtils.js";
+import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
 
 
@@ -323,7 +323,7 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     if (session.roi) {
         this.roi = [];
-        for(let r of session.roi) {
+        for (let r of session.roi) {
             this.roi.push(new ROI(r, genome));
         }
     }
@@ -594,6 +594,13 @@ Browser.prototype.loadTrack = async function (config) {
         config = JSON.parse(config);
     }
 
+    if (isString(config.url)) {
+        config.url = config.url.trim();
+    }
+    if (config.indexURL && isString(config.indexURL)) {
+        config.indexURL = config.indexURL.trim();
+    }
+
     if (!knowHowToLoad(config)) {
         this.presentAlert("The following track could not be loaded.  Is this a local file? " + config.name);
         return;
@@ -696,7 +703,7 @@ Browser.prototype.createTrack = function (config) {
 
     if (config.roi && track) {
         track.roi = [];
-        for(let r of config.roi) {
+        for (let r of config.roi) {
             track.roi.push(new ROI(r, this.genome));
         }
     }
