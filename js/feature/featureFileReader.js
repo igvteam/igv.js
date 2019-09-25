@@ -205,7 +205,8 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
     const parser = this.parser
     const tabix = this.index.tabix
     const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
-    const allFeatures = []
+    const allFeatures = [];
+    const genome = this.genome;
 
     const blocks = this.index.blocksForRange(refId, start, end);
 
@@ -260,7 +261,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
                 // Filter features not in requested range.
                 for (let f of slicedFeatures) {
-                    if(f.chr !== chr) {
+                    if(genome.getChromosomeName(f.chr) !== chr) {
                         if(allFeatures.length === 0) {
                             continue;  //adjacent chr to the left
                         } else {
