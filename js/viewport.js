@@ -302,7 +302,18 @@ ViewPort.prototype.loadFeatures = async function () {
     // console.log('get features');
     try {
         const features = await getFeatures.call(this, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
-        this.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features);
+
+        let roiFeatures = [];
+        const roi = mergeArrays(this.browser.roi, this.trackView.track.roi)
+        if (roi) {
+            for (let r of roi) {
+                const f = await
+                    r.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
+                roiFeatures.push({track: r, features: f})
+            }
+        }
+
+        this.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures);
         this.loading = false;
         this.hideMessage();
         this.stopSpinner();
@@ -338,7 +349,7 @@ ViewPort.prototype.repaint = async function (tile) {
     const isWGV = GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame);
 
     const features = tile.features;
-
+    const roiFeatures = tile.roiFeatures;
     const genomicState = this.genomicState;
     const referenceFrame = genomicState.referenceFrame;
     const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
@@ -399,7 +410,7 @@ ViewPort.prototype.repaint = async function (tile) {
     newCanvas.style.top = canvasTop + "px";
     drawConfiguration.context = ctx;
     ctx.translate(0, -canvasTop)
-    await draw.call(this, drawConfiguration, features);
+    draw.call(this, drawConfiguration, features, roiFeatures);
     // ctx.translate(0, canvasTop);
     // ctx.restore();
 
@@ -428,6 +439,7 @@ ViewPort.prototype.toSVG = async function (tile) {
     const referenceFrame = genomicState.referenceFrame;
     const bpPerPixel = tile.bpPerPixel;
     const features = tile.features;
+    const roiFeatures = tile.roiFeatures;
     const pixelWidth = this.$viewport.width();
     const pixelHeight = this.$viewport.height();
     const bpStart = referenceFrame.start;
@@ -467,32 +479,23 @@ ViewPort.prototype.toSVG = async function (tile) {
             viewportContainerWidth: this.browser.viewportContainerWidth()
         };
 
-    await draw.call(this, drawConfiguration, features);
+    draw.call(this, drawConfiguration, features, roiFeatures);
 
     return ctx.getSerializedSvg(true);
 
 };
 
-async function draw(drawConfiguration, features) {
+function draw(drawConfiguration, features, roiFeatures) {
 
     if (features) {
         drawConfiguration.features = features;
         this.trackView.track.draw(drawConfiguration);
     }
 
-    const browser = this.browser;
-
-    const roi = mergeArrays(browser.roi, this.trackView.track.roi)
-
-    if (roi) {
-        for (let r of roi) {
-            const f = await
-                r.getFeatures(drawConfiguration.referenceFrame.chrName, drawConfiguration.bpStart, drawConfiguration.bpEnd)
-            if (f && f.length > 0) {
-                drawConfiguration.features = f;
-                r.draw(drawConfiguration);
-            }
-
+    if (roiFeatures) {
+        for (let r of roiFeatures) {
+            drawConfiguration.features = r.features;
+            r.track.draw(drawConfiguration);
         }
     }
 }
@@ -650,7 +653,7 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
 
     const features = this.tile ? this.tile.features : [];
 
-    await draw.call(this, drawConfig, features);
+    draw.call(this, drawConfig, features, this.tile.roiFeatures);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
 
@@ -714,12 +717,13 @@ ViewPort.prototype.getCachedFeatures = function () {
     return this.tile ? this.tile.features : [];
 };
 
-var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features) {
+var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
     this.chr = chr;
     this.startBP = tileStart;
     this.endBP = tileEnd;
     this.bpPerPixel = bpPerPixel;
     this.features = features;
+    this.roiFeatures = roiFeatures;
 };
 
 Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
