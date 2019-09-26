@@ -25,26 +25,14 @@ function runWigTests() {
         assert.ok(featureSource, "featureSource");
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-            //fixedStep chrom=chr19 start=49307401 step=300 span=200
-            var ss = 49307401,
-                step = 300,
-                span = 200,
-                value = 1000;
-
             assert.ok(features);
             assert.equal(features.length, 10);
 
-            //features.forEach(function (feature) {
-            //
-            //    assert.equal(feature.start, ss);
-            //    assert.equal(feature.end, ss + span);
-            //    assert.equal(feature.value, value);
-            //
-            //    ss += step;
-            //    value -= 100;
-            //
-            //});
+            //fixedStep chrom=chr19 start=49307401 step=300 span=200
+            // fixedStep uses 1-based coordinate, igv.js uses 0-based
+            assert.equal(features[0].start, 49307400);
+            assert.equal(features[0].end - features[0].start, 200);
+            assert.equal(features[1].start - features[0].start, 300);
 
             done();
         }).catch(function (error) {
@@ -65,7 +53,7 @@ function runWigTests() {
         assert.ok(wigFeatureSource);
 
         //variableStep chrom=chr19 span=150
-        var starts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
+        var wigStarts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
         var values = [10.0, 12.5, 15.0, 17.5, 20.0, 17.5, 15.0, 12.5, 10.0];
         const span = 150;
 
@@ -82,8 +70,8 @@ function runWigTests() {
             //fixedStep chrom=chr19 start=49307401 step=300 span=200
             features.forEach(function (feature, index) {
 
-                assert.equal(feature.start, starts[index]);
-                assert.equal(feature.end, starts[index] + span);
+                assert.equal(feature.start, wigStarts[index] - 1);
+                assert.equal(feature.end, wigStarts[index] - 1 + span);
                 assert.equal(feature.value, values[index]);
 
             });
