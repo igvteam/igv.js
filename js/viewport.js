@@ -656,22 +656,7 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
     draw.call(this, drawConfig, features, this.tile.roiFeatures);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-
-        const shim = 4;
-        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
-        context.fillStyle = "white";
-        context.fillRect(x - shim, y, width + (2 * shim), height);
-
-        context.font = "12px Arial";
-        context.fillStyle = 'rgb(68, 68, 68)';
-        context.fillText(this.$trackLabel.text(), x, y + height - shim);
-
-
-        context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
-
+        renderTrackLabelSVG.call(this, context);
     }
 
     context.restore();
@@ -697,7 +682,6 @@ ViewPort.prototype.saveSVG = function () {
 
         });
 
-    // const bpPerPixel = this.tile.bpPerPixel;
     const { start, bpPerPixel } = this.genomicState.referenceFrame;
 
     const drawConfiguration =
@@ -722,19 +706,7 @@ ViewPort.prototype.saveSVG = function () {
     draw.call(this, drawConfiguration, this.tile.features);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-
-        const shim = 4;
-        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-
-        context.font = "12px Arial";
-        context.fillStyle = 'rgb(68, 68, 68)';
-        context.fillText(this.$trackLabel.text(), x, y + height - shim);
-
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
-
-        context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
-
+        renderTrackLabelSVG.call(this, context);
     }
 
     const svg = drawConfiguration.context.getSerializedSvg(true);
@@ -746,6 +718,25 @@ ViewPort.prototype.saveSVG = function () {
     download(filename, data);
 
 };
+
+function renderTrackLabelSVG(context) {
+
+        const shim = 4;
+        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        context.fillStyle = "white";
+        context.fillRect(x - shim, y, width, height);
+
+        context.font = "12px Arial";
+        context.fillStyle = 'rgb(68, 68, 68)';
+        context.fillText(this.$trackLabel.text(), x, y + height - shim);
+
+
+        context.strokeStyle = 'rgb(68, 68, 68)';
+        context.strokeRect(x - shim, y, width, height);
+
+}
 
 /**
  * Called when the associated track is removed.  Do any needed cleanup here.
