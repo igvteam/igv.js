@@ -642,6 +642,7 @@ CoverageTrack.prototype.popupData = function (config) {
 var AlignmentTrack = function (config, parent) {
 
     this.parent = parent;
+    this.browser = parent.browser;
     this.featureSource = parent.featureSource;
     this.top = config.coverageTrackHeight === 0 ? 0 : config.coverageTrackHeight + 5;
     this.alignmentRowHeight = config.alignmentRowHeight || 14;
@@ -1038,6 +1039,8 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
         list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
     }
 
+    list.push({label: 'View read sequence', click: viewReadSequence});
+
     return list;
 
     function sortRows() {
@@ -1068,6 +1071,14 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
             self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
         }
     }
+
+    function viewReadSequence() {
+        const alignment = clickedObject;
+        if(!alignment || !alignment.seq) return;
+        const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
+        self.browser.presentAlert(seqstring);
+    }
+
 };
 
 AlignmentTrack.prototype.getClickedObject = function (viewport, y, genomicLocation) {
