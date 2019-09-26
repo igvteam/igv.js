@@ -614,7 +614,7 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
 
 };
 
-ViewPort.prototype.saveSVG = async function () {
+ViewPort.prototype.saveSVG = function () {
 
     const width = this.$viewport.width();
     const height = this.$viewport.height();
@@ -655,12 +655,7 @@ ViewPort.prototype.saveSVG = async function () {
             viewportContainerWidth: this.browser.viewportContainerWidth()
         };
 
-    try {
-        await draw.call(this, drawConfiguration, this.tile.features);
-    } catch (e) {
-        console.warn(e.message)
-    }
-
+    draw.call(this, drawConfiguration, this.tile.features);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
 
