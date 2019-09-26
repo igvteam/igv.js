@@ -658,7 +658,6 @@ TrackView.prototype.dispose = function () {
 
 
 TrackView.prototype.scrollBy = function (delta) {
-    console.log("scrollby " + delta)
     this.scrollbar.moveScrollerBy(delta);
 };
 
