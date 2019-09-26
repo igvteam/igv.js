@@ -614,7 +614,7 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
 
 };
 
-ViewPort.prototype.saveSVG = function () {
+ViewPort.prototype.saveSVG = async function () {
 
     const width = this.$viewport.width();
     const height = this.$viewport.height();
@@ -655,40 +655,36 @@ ViewPort.prototype.saveSVG = function () {
             viewportContainerWidth: this.browser.viewportContainerWidth()
         };
 
-    (async (config) => {
-
-        try {
-            await draw.call(this, config, this.tile.features);
-        } catch (e) {
-            console.warn(e.message)
-        }
+    try {
+        await draw.call(this, drawConfiguration, this.tile.features);
+    } catch (e) {
+        console.warn(e.message)
+    }
 
 
-        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
+    if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
 
-            const shim = 4;
-            const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        const shim = 4;
+        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
-            context.font = "12px Arial";
-            context.fillStyle = 'rgb(68, 68, 68)';
-            context.fillText(this.$trackLabel.text(), x, y + height - shim);
+        context.font = "12px Arial";
+        context.fillStyle = 'rgb(68, 68, 68)';
+        context.fillText(this.$trackLabel.text(), x, y + height - shim);
 
-            const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
 
-            context.strokeStyle = 'rgb(68, 68, 68)';
-            context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
+        context.strokeStyle = 'rgb(68, 68, 68)';
+        context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
 
-        }
+    }
 
-        const svg = config.context.getSerializedSvg(true);
+    const svg = drawConfiguration.context.getSerializedSvg(true);
 
-        const data = URL.createObjectURL(new Blob([ svg ], { type: "application/octet-stream" }));
+    const data = URL.createObjectURL(new Blob([ svg ], { type: "application/octet-stream" }));
 
-        const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-        const filename = str + ".svg";
-        download(filename, data);
-
-    })(drawConfiguration);
+    const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
+    const filename = str + ".svg";
+    download(filename, data);
 
 };
 
