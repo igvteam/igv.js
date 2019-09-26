@@ -338,7 +338,7 @@ function parseFixedStep(line) {
 
     var tokens = line.split(/\s+/),
         cc = tokens[1].split("=")[1],
-        ss = parseInt(tokens[2].split("=")[1], 10),
+        ss = parseInt(tokens[2].split("=")[1] - 1, 10),
         step = parseInt(tokens[3].split("=")[1], 10),
         span = (tokens.length > 4) ? parseInt(tokens[4].split("=")[1], 10) : 1;
 
@@ -828,7 +828,7 @@ function decodeWig(tokens, wig) {
 
         if (tokens.length < 2) return null;
 
-        ss = parseInt(tokens[0], 10);
+        ss = parseInt(tokens[0], 10) - 1;
         ee = ss + wig.span;
         value = parseFloat(tokens[1]);
         return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value};

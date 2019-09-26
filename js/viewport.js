@@ -660,11 +660,14 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
         const shim = 4;
         const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        context.fillStyle = "white";
+        context.fillRect(x - shim, y, width + (2 * shim), height);
+
         context.font = "12px Arial";
         context.fillStyle = 'rgb(68, 68, 68)';
         context.fillText(this.$trackLabel.text(), x, y + height - shim);
 
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
 
         context.strokeStyle = 'rgb(68, 68, 68)';
         context.strokeRect(x - shim, y, stringWidth + (2 * shim), height);
