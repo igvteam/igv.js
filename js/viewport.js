@@ -721,20 +721,21 @@ ViewPort.prototype.saveSVG = function () {
 
 function renderTrackLabelSVG(context) {
 
-        const shim = 4;
-        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
         context.fillStyle = "white";
-        context.fillRect(x - shim, y, width, height);
+        context.fillRect(x, y, width, height);
 
         context.font = "12px Arial";
         context.fillStyle = 'rgb(68, 68, 68)';
-        context.fillText(this.$trackLabel.text(), x, y + height - shim);
 
+        const dx = 0.25 * (width - stringWidth);
+        const dy = 0.7 * (height - 12);
+        context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
 
         context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(x - shim, y, width, height);
+        context.strokeRect(x, y, width, height);
 
 }
 
