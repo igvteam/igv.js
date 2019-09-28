@@ -100,12 +100,11 @@ FeatureFileReader.prototype.readHeader = async function () {
             header.features = features;
 
         } else {
-
-            const index = await this.getIndex()
-            if (index) {
+            let index;
+            if (this.config.indexURL || this.config.indexed) {
+                index = await this.getIndex()
 
                 // Load the file header (not HTTP header) for an indexed file.
-
                 let maxSize = "vcf" === this.config.format ? 65000 : 1000
                 if (index.tabix) {
                     const bsizeOptions = buildOptions(this.config, {
@@ -117,15 +116,10 @@ FeatureFileReader.prototype.readHeader = async function () {
                     const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
                     const bsize = bgzBlockSize(abuffer)
                     maxSize = index.firstAlignmentBlock + bsize;
-                } else {
-
                 }
-
                 const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-
                 const data = await igvxhr.loadString(this.config.url, options)
                 header = this.parser.parseHeader(data);
-
 
             } else {
                 // If this is a non-indexed file we will load all features in advance
@@ -133,7 +127,6 @@ FeatureFileReader.prototype.readHeader = async function () {
                 header = this.header || {};
                 header.features = features;
             }
-
 
             if (header && this.parser) {
                 this.parser.header = header;
@@ -167,7 +160,6 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
 FeatureFileReader.prototype.loadIndex = function () {
 
     let idxFile = this.config.indexURL;
-
     if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
 
         if (!idxFile) {
@@ -261,8 +253,8 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
                 // Filter features not in requested range.
                 for (let f of slicedFeatures) {
-                    if(genome.getChromosomeName(f.chr) !== chr) {
-                        if(allFeatures.length === 0) {
+                    if (genome.getChromosomeName(f.chr) !== chr) {
+                        if (allFeatures.length === 0) {
                             continue;  //adjacent chr to the left
                         } else {
                             break; //adjacent chr to the right
@@ -285,38 +277,34 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 }
 
 
-FeatureFileReader.prototype.getIndex = function () {
+FeatureFileReader.prototype.getIndex = async function () {
 
-    var self = this;
+
     if (this.index !== undefined || this.indexed === false) {
-        return Promise.resolve(this.index);
+        return this.index;
     }
 
-    if (this.indexURL ||
-        this.indexed ||
-        (typeof this.config.url === 'string' && (this.config.url.endsWith(".gz") || this.config.url.endsWith('.bgz')))) {
+    if (false !== this.indexed) {
 
-        return self.loadIndex()
-
-            .then(function (indexOrUndefined) {
-                if (indexOrUndefined) {
-                    self.index = indexOrUndefined;
-                    self.indexed = true;
-                } else {
-                    self.indexed = false;
-                }
-                return self.index;
-            })
-            .catch(function (error) {
-                self.indexed = false;
-                if (self.config.indexURL !== undefined) {
-                    self.config.browser.presentAlert("Index file not found.  Check track configuration", undefined)
-                }
-            });
-    } else {
-        self.indexed = false;
-        return Promise.resolve(undefined);
+        try {
+            const indexOrUndefined = await this.loadIndex()
+            if (indexOrUndefined) {
+                this.index = indexOrUndefined;
+                this.indexed = true;
+            } else {
+                this.indexed = false;
+            }
+            return this.index;
+        } catch (e) {
+            //If an explicit indexlURL was supplied rethrow the error.  Otherwise just mark the file as not index
+            if (this.config.url) {
+                throw e;
+            } else {
+                this.indexed = false;
+            }
+        }
     }
+    return undefined;
 };
 
 FeatureFileReader.prototype.loadFeaturesFromDataURI = async function () {
