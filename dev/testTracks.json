@@ -1,5 +1,10 @@
 [
   {
+    "name": "gnomad",
+    "url": "https://storage.googleapis.com/gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.22.vcf.bgz",
+    "indexURL": "https://storage.googleapis.com/gnomad-public/release/2.1.1/vcf/genomes/gnomad.genomes.r2.1.1.sites.22.vcf.bgz.tbi"
+  },
+  {
     "type": "alignment",
     "name": "HG02450 - Broad",
     "format": "bam",
