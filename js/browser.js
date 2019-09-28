@@ -661,6 +661,10 @@ Browser.prototype.loadTrack = async function (config) {
         this.addTrack(newTrack);
 
         return newTrack;
+    } catch (error) {
+        console.error(error);
+        const msg = error.message || error.toString();
+        this.presentAlert(msg, undefined);
     } finally {
         if (!config.noSpinner) this.stopSpinner();
     }
