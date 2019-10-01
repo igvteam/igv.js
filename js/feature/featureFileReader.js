@@ -157,7 +157,7 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
 /**
  * Return a Promise for the async loaded index
  */
-FeatureFileReader.prototype.loadIndex = function () {
+FeatureFileReader.prototype.loadIndex = async function () {
 
     let idxFile = this.config.indexURL;
     if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
