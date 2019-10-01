@@ -351,10 +351,14 @@ function loadFileSlice(localfile, options) {
 }
 
 function loadStringFromFile(localfile, options) {
-    return new Promise(function (fullfill, reject) {
+
+    options = options || {};
+
+    let blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
+
+    return new Promise(function (resolve, reject) {
 
         var fileReader = new FileReader();
-
         var compression = NONE;
         if (options.bgz || localfile.name.endsWith(".bgz")) {
             compression = BGZF;
@@ -364,21 +368,21 @@ function loadStringFromFile(localfile, options) {
 
         fileReader.onload = function (e) {
             if (compression === NONE) {
-                return fullfill(fileReader.result);
+                return resolve(fileReader.result);
             } else {
-                return fullfill(arrayBufferToString(fileReader.result, compression));
+                return resolve(arrayBufferToString(fileReader.result, compression));
             }
         };
 
         fileReader.onerror = function (e) {
-            console.log("reject uploading local file " + localfile.name);
-            reject(null, fileReader);
+            const error = fileReader.error;
+            reject(error + " " + localfile.name, fileReader);
         };
 
         if (compression === NONE) {
-            fileReader.readAsText(localfile);
+            fileReader.readAsText(blob);
         } else {
-            fileReader.readAsArrayBuffer(localfile);
+            fileReader.readAsArrayBuffer(blob);
         }
     });
 
