@@ -376,7 +376,7 @@ BAMTrack.prototype.menuItemList = function () {
                     self.alignmentTrack.colorBy = 'tag';
                     self.config.colorBy = 'tag';
 
-                    const tag = self.trackView.browser.inputDialog.$input.val().trim();
+                    const tag = self.browser.inputDialog.$input.val().trim();
                     if (tag !== self.alignmentTrack.colorByTag) {
                         self.alignmentTrack.colorByTag = tag;
                         self.config.colorByTag = tag;
@@ -395,8 +395,8 @@ BAMTrack.prototype.menuItemList = function () {
                         click: clickFunction
                     };
 
-                self.trackView.browser.inputDialog.configure(config);
-                self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
+                self.browser.inputDialog.configure(config);
+                self.browser.inputDialog.present($(self.trackView.trackDiv));
 
             } else {
 
@@ -994,23 +994,16 @@ AlignmentTrack.prototype.draw = function (options) {
 
 AlignmentTrack.prototype.sortAlignmentRows = function (options, alignmentContainer) {
 
-    const genomicLocation = options.position;
-    const sortOption = options.sortOption;
     const direction = options.direction
-
     if (alignmentContainer === null) {
         alignmentContainer = this.featureSource.alignmentContainer;
     }
-
     for (let row of alignmentContainer.packedAlignmentRows) {
-        row.updateScore(genomicLocation, alignmentContainer, sortOption, direction);
+        row.updateScore(options, alignmentContainer);
     }
 
-
     alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-
         const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
-
         return true === direction ? i : -i;
     });
 
@@ -1028,22 +1021,57 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     const self = this;
     const viewport = clickState.viewport;
     const genomicState = clickState.viewport.genomicState;
-    const genomicLocation = clickState.genomicLocation;
-    const list = [];
-
-    list.push({label: 'Sort by base', click: sortRows});
-
     const clickedObject = this.getClickedObject(clickState.viewport, clickState.y, clickState.genomicLocation);
     const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
+    const list = [];
+
+    list.push({label: 'Sort by base', click: sortByBase});
+    list.push({label: 'Sort by tag', click: sortByTag});
+    list.push('<hr/>');
+
     if (isSingleAlignment && clickedObject.isMateMapped()) {
         list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
     }
-
     list.push({label: 'View read sequence', click: viewReadSequence});
+    list.push('<hr/>');
 
     return list;
 
-    function sortRows() {
+    function sortByTag() {
+
+        //self.alignmentTrack.colorBy = 'tag';
+        //self.config.colorBy = 'tag';
+        const config =
+            {
+                label: 'Tag Name',
+                input: self.sortByTag ? self.sortByTag : '',
+                click: function () {
+                    const tag = self.browser.inputDialog.$input.val().trim();
+                    self.sortByTag = tag;
+                    sortRows({
+                        chr: genomicState.referenceFrame.chrName,
+                        position: Math.floor(clickState.genomicLocation),
+                        sortOption: "TAG",
+                        tag: tag
+                    })
+                }
+            };
+
+        self.browser.inputDialog.configure(config);
+        self.browser.inputDialog.present($(self.parent.trackView.trackDiv));
+
+
+    }
+
+    function sortByBase() {
+        sortRows({
+            chr: genomicState.referenceFrame.chrName,
+            position: Math.floor(clickState.genomicLocation),
+            sortOption: "NUCLEOTIDE"
+        })
+    }
+
+    function sortRows(options) {
 
         if (!clickState.viewport.tile) {
             return;
@@ -1051,14 +1079,8 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
 
         const currentSorts = self.parent.sortObjects;
         const cs = currentSorts[viewport.genomicState.id];
-        const direction = cs ? !cs.direction : true;
+        options.direction = cs ? !cs.direction : true;
 
-        const options = {
-            chr: genomicState.referenceFrame.chrName,
-            position: Math.floor(clickState.genomicLocation),
-            sortOption: "NUCLEOTIDE",
-            direction: direction
-        };
         self.sortAlignmentRows(options, clickState.viewport.getCachedFeatures());
         self.parent.trackView.repaintViews();
 
@@ -1068,13 +1090,13 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     function viewMateInSplitScreen() {
         if (clickedObject.mate) {
             self.highlightedAlignmentReadNamed = clickedObject.readName;
-            self.parent.trackView.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
+            self.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
         }
     }
 
     function viewReadSequence() {
         const alignment = clickedObject;
-        if(!alignment || !alignment.seq) return;
+        if (!alignment || !alignment.seq) return;
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
         self.browser.presentAlert(seqstring);
     }
@@ -1198,7 +1220,6 @@ AlignmentTrack.prototype.getAlignmentColor = function (alignment) {
         case "tag":
             tagValue = alignment.tags()[self.colorByTag];
             if (tagValue !== undefined) {
-
                 if (self.bamColorTag === self.colorByTag) {
                     // UCSC style color option
                     color = "rgb(" + tagValue + ")";

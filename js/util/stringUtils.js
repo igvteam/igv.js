@@ -1,11 +1,9 @@
-
-
 /**
  * Covers string literals and String objects
  * @param x
  * @returns {boolean}
  */
-function isString (x) {
+function isString(x) {
     return typeof x === "string" || x instanceof String
 }
 
@@ -28,7 +26,7 @@ const splitLines = function (string) {
 }
 
 
-function splitStringRespectingQuotes (string, delim) {
+function splitStringRespectingQuotes(string, delim) {
 
     var tokens = [],
         len = string.length,
@@ -44,12 +42,10 @@ function splitStringRespectingQuotes (string, delim) {
             c = string.charAt(i);
             if (c === '"') {
                 quote = !quote;
-            }
-            else if (!quote && c === delim) {
+            } else if (!quote && c === delim) {
                 n++;
                 tokens[n] = "";
-            }
-            else {
+            } else {
                 tokens[n] += c;
             }
         }
@@ -57,4 +53,11 @@ function splitStringRespectingQuotes (string, delim) {
     return tokens;
 }
 
-export  {isString, numberFormatter, splitLines, splitStringRespectingQuotes};
+function hashCode(s) {
+    return s.split("").reduce(function (a, b) {
+        a = ((a << 5) - a) + b.charCodeAt(0);
+        return a & a
+    }, 0);
+}
+
+export {isString, numberFormatter, splitLines, splitStringRespectingQuotes, hashCode};
