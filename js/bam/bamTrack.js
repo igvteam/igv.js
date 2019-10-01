@@ -233,38 +233,6 @@ BAMTrack.prototype.menuItemList = function () {
 
     const menuItems = [];
 
-    // const $separator = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-    // menuItems.push({name: undefined, object: $separator, click: undefined, init: undefined});
-    //
-    // const clickFunction = function () {
-    //
-    //     self.alignmentTrack.colorBy = 'tag';
-    //     self.config.colorBy = 'tag';
-    //
-    //     const tag = self.trackView.browser.inputDialog.$input.val().trim();
-    //     if (tag !== self.alignmentTrack.colorByTag) {
-    //         self.alignmentTrack.colorByTag = tag;
-    //         self.config.colorByTag = tag;
-    //
-    //         self.alignmentTrack.tagColors = new igv.PaletteColorTable("Set1");
-    //         $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-    //     }
-    //
-    //     self.trackView.repaintViews();
-    // };
-    //
-    // const config =
-    //     {
-    //         label: 'Row Height',
-    //         input: self.alignmentRowHeight.toString(),
-    //         click: clickFunction
-    //     };
-    //
-    // self.trackView.browser.inputDialog.configure(config);
-    // self.trackView.browser.inputDialog.present($(self.trackView.trackDiv));
-    //
-
-
     const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
     $e.text('Color by');
     menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
@@ -1026,6 +994,7 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     const list = [];
 
     list.push({label: 'Sort by base', click: sortByBase});
+    list.push({label: 'Sort by read strand', click: sortByStrand});
     list.push({label: 'Sort by tag', click: sortByTag});
     list.push('<hr/>');
 
@@ -1034,13 +1003,24 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     }
     list.push({label: 'View read sequence', click: viewReadSequence});
     list.push('<hr/>');
-
     return list;
 
-    function sortByTag() {
+    function sortByStrand() {
+        sortRows({
+            chr: genomicState.referenceFrame.chrName,
+            position: Math.floor(clickState.genomicLocation),
+            sortOption: "STRAND"
+        })
+    }
 
-        //self.alignmentTrack.colorBy = 'tag';
-        //self.config.colorBy = 'tag';
+    function sortByBase() {
+        sortRows({
+            chr: genomicState.referenceFrame.chrName,
+            position: Math.floor(clickState.genomicLocation),
+            sortOption: "NUCLEOTIDE"
+        })
+    }
+    function sortByTag() {
         const config =
             {
                 label: 'Tag Name',
@@ -1056,19 +1036,8 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
                     })
                 }
             };
-
         self.browser.inputDialog.configure(config);
         self.browser.inputDialog.present($(self.parent.trackView.trackDiv));
-
-
-    }
-
-    function sortByBase() {
-        sortRows({
-            chr: genomicState.referenceFrame.chrName,
-            position: Math.floor(clickState.genomicLocation),
-            sortOption: "NUCLEOTIDE"
-        })
     }
 
     function sortRows(options) {
