@@ -206,7 +206,7 @@ function optimizeChunks(chunks, lowest) {
                 mergedChunks.push(chunk);
                 lastChunk = chunk;
             } else {
-                if ((chunk.minv.block - lastChunk.maxv.block) < 65000) { // Merge chunks that are withing 65k of each other
+                if (canMerge(lastChunk, chunk)) {
                     if (chunk.maxv.isGreaterThan(lastChunk.maxv)) {
                         lastChunk.maxv = chunk.maxv;
                     }
@@ -221,6 +221,15 @@ function optimizeChunks(chunks, lowest) {
     });
 
     return mergedChunks;
+}
+
+function canMerge(chunk1, chunk2) {
+    return (chunk2.minv.block - chunk1.maxv.block) < 65000 &&
+        (chunk2.maxv.block -  chunk1.minv.block) < 5000000;
+        // lastChunk.minv.block === lastChunk.maxv.block &&
+        // lastChunk.maxv.block === chunk.minv.block &&
+        // chunk.minv.block === chunk.maxv.block
+
 }
 
 /**
