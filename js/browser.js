@@ -37,7 +37,6 @@ import loadPlinkFile from "./sampleInformation.js";
 import IdeoPanel from "./ideogram.js";
 import ReferenceFrame from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
-import Zlib from "./vendor/zlib_and_gzip.js";
 import {getFilename} from './util/fileUtils.js'
 import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
@@ -46,6 +45,7 @@ import {guid, pageCoordinates} from "./util/domUtils.js";
 import {decodeDataURI} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
+import {uncompressString, compressString} from "./util/stringUtils.js"
 
 
 const Browser = function (options, trackContainerDiv) {
@@ -1852,20 +1852,7 @@ Browser.prototype.compressedSession = function () {
     var json, bytes, deflate, compressedBytes, compressedString, enc;
 
     json = JSON.stringify(this.toJSON());
-    bytes = [];
-    for (var i = 0; i < json.length; i++) {
-        bytes.push(json.charCodeAt(i));
-    }
-    compressedBytes = new Zlib.RawDeflate(bytes).compress();            // UInt8Arry
-    compressedString = String.fromCharCode.apply(null, compressedBytes);      // Convert to string
-    enc = btoa(compressedString);
-    enc = enc.replace(/\+/g, '.').replace(/\//g, '_').replace(/=/g, '-');   // URL safe
-
-    // console.log(json);
-    // console.log(compressedString);
-    // console.log(enc);
-
-    return enc;
+    return compressString(json);
 }
 
 Browser.uncompressSession = function (url) {
@@ -1874,26 +1861,16 @@ Browser.uncompressSession = function (url) {
     if (url.indexOf('/gzip;base64') > 0) {
         //Proper dataURI
         bytes = decodeDataURI(url);
+        let json = ''
+        for (let b of bytes) {
+            json += String.fromCharCode(b)
+        }
+        return json;
     } else {
 
         let enc = url.substring(5);
-        enc = enc.replace(/\./g, '+').replace(/_/g, '/').replace(/-/g, '=')
-
-        const compressedString = atob(enc);
-        const compressedBytes = [];
-        for (let i = 0; i < compressedString.length; i++) {
-            compressedBytes.push(compressedString.charCodeAt(i));
-        }
-        bytes = new Zlib.RawInflate(compressedBytes).decompress();
+        return uncompressString(enc);
     }
-    let json = ''
-    for (let b of bytes) {
-        json += String.fromCharCode(b)
-    }
-
-    return json;
-
-
 }
 
 Browser.prototype.sessionURL = function () {
