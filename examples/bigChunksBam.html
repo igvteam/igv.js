@@ -3,13 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <script src="https://igv.org/web/snapshot/dist/igv.min.js"></script>
 </head>
 <body>
 
 <div id="igv-div"></div>
-<script type="module">
+<script type="text/javascript">
 
-    import igv from "../js/api.js";
+    //import igv from "http://igv.org/web/snapshot/dist/igv.esm.js";
     var igvDiv = document.getElementById("igv-div");
     var options =
         {
@@ -18,10 +19,8 @@
             tracks: [
                 {
                     "name": "Test",
-                   // "url": "https://idea-cdn.s3.eu-west-2.amazonaws.com/out.marked.bam",
-                  //  "indexURL": "https://idea-cdn.s3.eu-west-2.amazonaws.com/out.marked.bai",
-                    "url": "../out.marked.bam",
-                    "indexURL": "../out.marked.bam.bai",
+                    "url": "https://idea-cdn.s3.eu-west-2.amazonaws.com/out.marked.bam",
+                    "indexURL": "https://idea-cdn.s3.eu-west-2.amazonaws.com/out.marked.bai",
                     "format": "bam"
                 }
             ]
