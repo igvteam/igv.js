@@ -658,7 +658,12 @@ Browser.prototype.loadTrack = async function (config) {
             await newTrack.postInit();
         }
 
-        this.addTrack(newTrack);
+        if(config.sync) {
+            await this.addTrack(newTrack);
+        }
+        else {
+            this.addTrack(newTrack);
+        }
 
         return newTrack;
     } catch (error) {
@@ -730,7 +735,7 @@ Browser.prototype.createTrack = function (config) {
  *
  * @param track
  */
-Browser.prototype.addTrack = function (track) {
+Browser.prototype.addTrack = async function (track) {
 
     var trackView;
     trackView = new TrackView(this, $(this.trackContainerDiv), track);
@@ -741,7 +746,7 @@ Browser.prototype.addTrack = function (track) {
     this.reorderTracks();
     if (!track.autoscaleGroup) {
         // Group autoscale groups will get updated later (as a group)
-        trackView.updateViews();
+        return trackView.updateViews();
     }
 
 };
@@ -1162,21 +1167,15 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
 
 Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
 
-    if (this.loadInProgress()) {
-        return;
-    }
-
-    let self = this;
-
     let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
-    viewports.forEach((viewport) => {
+    for(let viewport of viewports) {
 
         const referenceFrame = viewport.genomicState.referenceFrame
         const chromosome = referenceFrame.getChromosome();
         const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
 
         const bppThreshold = scaleFactor < 1.0 ?
-            self.minimumBases() / viewport.$viewport.width() :
+            this.minimumBases() / viewport.$viewport.width() :
             chromosomeLengthBP / viewport.$viewport.width();
 
         const centerBP = undefined === centerBPOrUndefined ?
@@ -1194,9 +1193,9 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
         referenceFrame.start = centerBP - (viewportWidthBP / 2)
         referenceFrame.bpPerPixel = bpp;
         referenceFrame.clamp(viewport.$viewport.width())
-        self.updateViews(viewport.genomicState);
+        this.updateViews(viewport.genomicState);
 
-    });
+    }
 
 
 };
