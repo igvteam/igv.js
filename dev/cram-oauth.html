@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>1000 Genomes CRAM file</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/api.js";
+    
+    var options =
+        {
+            genome: "hg19",
+            locus: "slc25a3",
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'cram',
+                    url: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram',
+                    indexURL: 'gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.cram.crai',
+                    name: 'HG00096',
+                    color: 'blue',
+                    oauthToken: 'ya29.Im6bB4L-Bev-smRR0-zfIm_0A8tdNpAZeSXnM2HemgQ6Ny5IuZdXIQu08IVoHqclBxNDs2FobrA6_MTMSDaBrWfKP_jBoOxzDNkwId1SXIoZHzc7xtJzUJIh_p96fXHGP0OqNp9pv-ikcXPJF7ueyg'
+                }
+
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+
+
+</script>
+
+</body>
+
+</html>
