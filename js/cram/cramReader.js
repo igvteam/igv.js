@@ -53,12 +53,12 @@ const CramReader = function (config, genome, browser) {
     this.genome = genome;
 
     this.cramFile = new gmodCRAM.CramFile({
-        filehandle: new FileHandler(config.url),
+        filehandle: new FileHandler(config.url, config),
         seqFetch: config.seqFetch || seqFetch.bind(this),
         checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
     });
 
-    const indexFileHandle = new FileHandler(config.indexURL);
+    const indexFileHandle = new FileHandler(config.indexURL, config);
     this.indexedCramFile = new gmodCRAM.IndexedCramFile({
         cram: this.cramFile,
         index: new gmodCRAM.CraiIndex({
@@ -365,9 +365,10 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
 class FileHandler {
 
-    constructor(source) {
-        this.position = 0
-        this.url = source
+    constructor(source, config) {
+        this.position = 0;
+        this.url = source;
+        this.config = config;
         this.cache = new BufferCache({
             fetch: (start, length) => this._fetch(start, length),
         })
@@ -376,12 +377,9 @@ class FileHandler {
     async _fetch(position, length) {
 
         const loadRange = {start: position, size: length};
-        this._stat = {size: undefined}
-        return igvxhr.loadArrayBuffer(this.url, buildOptions({}, {range: loadRange}))
-            .then(function (arrayBuffer) {
-                const nodeBuffer = Buffer.from(arrayBuffer)
-                return nodeBuffer
-            })
+        this._stat = {size: undefined};
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config, {range: loadRange}));
+        return Buffer.from(arrayBuffer);
     }
 
     async read(buffer, offset = 0, length = Infinity, position = 0) {
@@ -394,7 +392,7 @@ class FileHandler {
     }
 
     async readFile() {
-        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions({}))
+        const arrayBuffer = await igvxhr.loadArrayBuffer(this.url, buildOptions(this.config))
         return Buffer.from(arrayBuffer)
     }
 
