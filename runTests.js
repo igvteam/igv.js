@@ -22,7 +22,7 @@ const qunitArgs = {
     //     outputAllAssertions: false
     // },
     // Path to qunit tests suite
-    targetUrl: `http://0.0.0.0:8000/test/runTests.html`,
+    targetUrl: 'http://127.0.0.1:8000/test/runTests.html',
     // (optional, 30000 by default) global timeout for the tests suite
     timeout: 100000,
     // (optional, false by default) should the browser console be redirected or not
