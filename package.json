@@ -1,16 +1,17 @@
 {
   "name": "igv",
-  "version": "2.3.0",
+  "version": "2.3.1",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
   "files": [
-    "dist/**"
+    "dist/**",
+    "js/**"
   ],
   "scripts": {
     "build": "node scripts/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
-    "build-umd": "node scripts/injectRuntime.js; npx terser --compress --mangle --source-map \"url='igv.min.js.map' \" --output  dist/igv.min.js -- dist/igv.js",
+    "build-umd": "node scripts/injectRuntime.js && npx terser --compress --mangle --source-map \"url='igv.min.js.map' \" --output  dist/igv.min.js -- dist/igv.js",
     "build-es6": "npx terser --module --compress --mangle --source-map \"url='igv.esm.min.js.map'\" --output  dist/igv.esm.min.js -- dist/igv.esm.js",
     "test": "node runTests.js",
     "prepack": "npm run build",
