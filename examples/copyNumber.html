@@ -25,8 +25,11 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-       var igvDiv = document.getElementById("igv-div");
-       var options =
+        var version = igv.version();
+        console.log("Using IGV version: " + version);
+
+        var igvDiv = document.getElementById("igv-div");
+        var options =
             {
                 genome: "hg19",
                 tracks:
@@ -42,9 +45,9 @@
 
 
         igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
 
     });
 
