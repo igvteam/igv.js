@@ -241,7 +241,7 @@ BAMTrack.prototype.menuItemList = function () {
     if (self.alignmentTrack.hasPairs) {
         colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
         colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
-        colorByMenuItems.push({key: 'fragmentLength', label: 'fragment length'});
+        colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'});
     }
     const tagLabel = 'tag' + (self.alignmentTrack.colorByTag ? ' (' + self.alignmentTrack.colorByTag + ')' : '');
     colorByMenuItems.push({key: 'tag', label: tagLabel});
@@ -993,9 +993,13 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
     const list = [];
 
-    list.push({label: 'Sort by base', click: sortByBase});
-    list.push({label: 'Sort by read strand', click: sortByStrand});
-    list.push({label: 'Sort by tag', click: sortByTag});
+    list.push('<b>Sort by...</b>')
+    list.push({label: '&nbsp; base', click: () => sortByOption("NUCLEOTIDE")});
+    list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")});
+    list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")});
+    list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")});
+    list.push({label: '&nbsp; mapping quality', click: () => sortByOption("MQ")});
+    list.push({label: '&nbsp; tag', click: sortByTag});
     list.push('<hr/>');
 
     if (isSingleAlignment && clickedObject.isMateMapped()) {
@@ -1005,19 +1009,12 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     list.push('<hr/>');
     return list;
 
-    function sortByStrand() {
-        sortRows({
-            chr: genomicState.referenceFrame.chrName,
-            position: Math.floor(clickState.genomicLocation),
-            sortOption: "STRAND"
-        })
-    }
 
-    function sortByBase() {
+    function sortByOption(option) {
         sortRows({
             chr: genomicState.referenceFrame.chrName,
             position: Math.floor(clickState.genomicLocation),
-            sortOption: "NUCLEOTIDE"
+            sortOption: option
         })
     }
     function sortByTag() {

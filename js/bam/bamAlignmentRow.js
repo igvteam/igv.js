@@ -75,6 +75,7 @@ BamAlignmentRow.prototype.calculateScore = function (options, alignmentContainer
         return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
     }
 
+    let mate;
     switch (sortOption) {
         case "NUCLEOTIDE": {
             const readBase = alignment.readBaseAt(genomicLocation);
@@ -98,6 +99,21 @@ BamAlignmentRow.prototype.calculateScore = function (options, alignmentContainer
                 return Number.MAX_VALUE;
             }
         }
+        case "INSERT_SIZE":
+            return -Math.abs(alignment.fragmentLength);
+        case "MATE_CHR":
+            mate = alignment.mate;
+            if (!mate) {
+                return Number.MAX_VALUE;
+            } else {
+                if (mate.chr ===alignment.chr) {
+                    return Number.MAX_VALUE - 1;
+                } else {
+                    return hashCode(mate.chr);
+                }
+            }
+        case "MQ":
+            return alignment.mq === undefined ? Number.MAX_VALUE : -alignment.mq;
         default:
             return Number.MAX_VALUE;
     }
