@@ -10,7 +10,7 @@
     "js/**"
   ],
   "scripts": {
-    "build": "node scripts/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
+    "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
     "build-umd": "node scripts/injectRuntime.js && npx terser --compress --mangle --source-map \"url='igv.min.js.map' \" --output  dist/igv.min.js -- dist/igv.js",
     "build-es6": "npx terser --module --compress --mangle --source-map \"url='igv.esm.min.js.map'\" --output  dist/igv.esm.min.js -- dist/igv.esm.js",
     "test": "node runTests.js",
