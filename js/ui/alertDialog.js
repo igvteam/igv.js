@@ -24,7 +24,6 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import makeDraggable from "./draggable.js";
 
 const httpMessages =
     {
@@ -67,7 +66,6 @@ const AlertDialog = function ($parent) {
         self.$container.hide();
     });
 
-    makeDraggable(this.$container.get(0), $header.get(0));
     this.$container.hide();
 };
 
