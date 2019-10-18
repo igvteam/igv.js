@@ -85,7 +85,7 @@
 .igv-alert-dialog-container {
   position: fixed;
   z-index: 2048;
-  top: 50%;
+  top: 30%;
   left: 50%;
   margin: -150px 0 0 -150px;
   width: 300px;
