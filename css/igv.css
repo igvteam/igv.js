@@ -83,9 +83,11 @@
     color: #0f0f0f; }
 
 .igv-alert-dialog-container {
-  position: absolute;
-  top: 0;
-  left: 0;
+  position: fixed;
+  z-index: 2048;
+  top: 50%;
+  left: 50%;
+  margin: -150px 0 0 -150px;
   width: 300px;
   height: 256px;
   border-color: #7F7F7F;

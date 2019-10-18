@@ -1,15 +1,19 @@
-// TODO -- eliminate dependence on getBrowser
-import {getBrowser} from "../igv-create.js";
+import AlertDialog from "./alertDialog.js"
+
+// The global Alert dialog
+
+let alertDialog
 
 const Alert = {
-    presentAlert: function (message) {
-        getBrowser().presentAlert(message);
+    init($root) {
+        if (!alertDialog) {
+            alertDialog = new AlertDialog($root);
+        }
     },
 
-// TODO -- eliminate dependence on getBrowser
-    presentMessageWithCallback: function (message, fn) {
-        getBrowser().presentMessageWithCallback(message, fn);
-    }
+    presentAlert: function (alert, callback) {
+        alertDialog.present(alert, callback);
+    },
 }
 
 export default Alert;
