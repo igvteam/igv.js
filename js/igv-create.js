@@ -45,8 +45,6 @@ import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
 
-const version = "@VERSION";
-
 let allBrowsers = [];
 
 /**

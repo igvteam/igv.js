@@ -26,6 +26,7 @@ import DataRangeDialog from "./ui/dataRangeDialog.js";
 import embedCss from "./embedCss.js";
 import MenuUtils from "./util/menuUtils.js";
 import Alert from "./ui/alert.js"
+import version from "./version.js"
 
 function setGoogleOauthToken(accessToken) {
     return oauth.setToken(accessToken);
@@ -52,10 +53,10 @@ export default {
     visibilityChange,
     setGoogleOauthToken,
     oauth,
-
-    download,
+    version,
 
     //exports below are not supported and will be removed over time
+    download,
     getBrowser,
     doAutoscale,
     graphics,
