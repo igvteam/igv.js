@@ -72,7 +72,7 @@ const MenuUtils = {
                 $e = item.object
             } else if (typeof item.label === 'string') {
                 $e = $('<div>');
-                $e.text(item.label)
+                $e.html(item.label)
             } else if (typeof item === 'string') {
 
                 if (item.startsWith("<")) {
