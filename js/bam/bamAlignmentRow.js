@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import {hashCode} from "../util/stringUtils.js"
+import {hashCode, isString} from "../util/stringUtils.js"
 
 const BamAlignmentRow = function () {
 
@@ -93,7 +93,7 @@ BamAlignmentRow.prototype.calculateScore = function (options, alignmentContainer
             const tagKey = options.tag;
             const tagValue = alignment.tags()[tagKey];
             if (tagValue !== undefined) {
-                return hashCode(tagValue);
+                return isString(tagValue) ? hashCode(tagValue) : tagValue;
             } else {
                 return Number.MAX_VALUE;
             }
