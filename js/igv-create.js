@@ -30,6 +30,7 @@ import WindowSizePanel from "./windowSizePanel.js";
 import InputDialog from "./ui/inputDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
+import Alert from "./ui/alert.js";
 import AlertDialog from "./ui/alertDialog.js";
 import UserFeedback from "./ui/userFeedback.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
@@ -57,6 +58,7 @@ let allBrowsers = [];
  */
 async function createBrowser(parentDiv, config) {
 
+    Alert.init($(parentDiv));
 
     if (undefined === config) config = {};
 

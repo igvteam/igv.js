@@ -1,5 +1,6 @@
 
 $igv-alert-dialog-width: 300px;
+$igv-alert-dialog-margin: -150px;
 $igv-alert-dialog-height: 256px;
 
 $igv-alert-dialog-header-height: 24px;
@@ -9,9 +10,11 @@ $igv-alert-dialog-body-copy-margin: 16px;
 
 .igv-alert-dialog-container {
 
-  position: absolute;
-  top: 0;
-  left:0;
+  position: fixed;
+  z-index: 2048;
+  top:50%;
+  left:50%;
+  margin:$igv-alert-dialog-margin 0 0 $igv-alert-dialog-margin;
   width:$igv-alert-dialog-width;
   height:$igv-alert-dialog-height;
 

@@ -1884,31 +1884,9 @@ Browser.prototype.sessionURL = function () {
 
 }
 
-const httpMessages =
-    {
-        "401": "Access unauthorized",
-        "403": "Access forbidden",
-        "404": "Not found"
-    };
-
-Browser.prototype.presentAlert = function (alert, $parent) {
-
-    var string;
-
-    string = alert.message || alert;
-
-    if (httpMessages.hasOwnProperty(string)) {
-        string = httpMessages[string];
-    }
-
-    this.alertDialog.configure({label: string});
-    this.alertDialog.present($parent);
+Browser.prototype.presentAlert = function (alert) {
+    this.alertDialog.present(alert);
 };
-
-Browser.prototype.presentMessageWithCallback = function (message, callback) {
-    this.alertDialog.presentMessageWithCallback(message, callback);
-};
-
 
 /**
  * Record a mouse click on a specific viewport.   This might be the start of a drag operation.   Dragging
