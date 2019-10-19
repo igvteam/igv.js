@@ -6,8 +6,7 @@
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
   "files": [
-    "dist/**",
-    "js/**"
+    "dist/**"
   ],
   "scripts": {
     "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config && npm run build-umd && npm run build-es6",
