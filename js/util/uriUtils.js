@@ -1,10 +1,16 @@
 import Zlib from "../vendor/zlib_and_gzip.js";
 
+if (typeof process === 'object' && typeof window === 'undefined') {
+    global.atob = function (str) {
+        return Buffer.from(str, 'base64').toString('binary');
+    }
+}
+
 /**
  * @param dataURI
  * @returns {Array<number>|Uint8Array}
  */
-function decodeDataURI  (dataURI) {
+function decodeDataURI(dataURI) {
 
     const split = dataURI.split(',');
     const info = split[0].split(':')[1];
@@ -21,7 +27,7 @@ function decodeDataURI  (dataURI) {
     }
 
     let plain
-    if(info.indexOf('gzip') > 0) {
+    if (info.indexOf('gzip') > 0) {
         const inflate = new Zlib.Gunzip(bytes)
         plain = inflate.decompress()
     } else {
@@ -30,7 +36,7 @@ function decodeDataURI  (dataURI) {
     return plain
 }
 
-function parseUri  (str) {
+function parseUri(str) {
 
     var o = options,
         m = o.parser[o.strictMode ? "strict" : "loose"].exec(str),
