@@ -103,7 +103,7 @@ const BAMTrack = extend(TrackBase,
                         chr: range.chr,
                         position: range.start,
                         sortOption: sort.option || "NUCLEOTIDE",
-                        direction: sort.direction || "ASC"
+                        direction: sort.direction === undefined ? true : "ASC" === sort.direction
                     }
 
                     break;
@@ -132,9 +132,8 @@ BAMTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel
 
     if (sort) {
         if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
-
             self.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
-
+            self.trackView.repaintViews();
         } else {
             delete self.sortObjects[viewport.genomicState.id];
         }
