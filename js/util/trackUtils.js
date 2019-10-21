@@ -269,11 +269,11 @@ function parseLocusString(string) {
 
     const range = {
         chr: t1[0],
-        start: Number.parseInt(t2[0]) - 1
+        start: Number.parseInt(t2[0].replace(/,/g, '')) - 1
     };
 
     if (t2.length > 1) {
-        range.end = Number.parseInt(t2[1]);
+        range.end = Number.parseInt(t2[1].replace(/,/g, ''));
     } else {
         range.end = range.start + 1;
     }
