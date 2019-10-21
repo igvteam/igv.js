@@ -36,7 +36,7 @@ const TDFSource = function (config, genome) {
 
 TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
-    await getRootGroup().call(this);
+    await getRootGroup.call(this);
 
     const genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
     const genome = this.genome;
@@ -46,7 +46,7 @@ TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixe
     }
 
     genomicInterval.bpPerPixel = bpPerPixel;
-    const group = await getRootGroup();
+    const group = await getRootGroup.call(this);
     const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
     let queryChr = this.reader.chrAliasTable[chr];
     let maxZoom = this.reader.maxZoom;
