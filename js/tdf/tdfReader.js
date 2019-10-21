@@ -183,13 +183,14 @@ TDFReader.prototype.readRootGroup = async function () {
         }
 
         // Chromosome names
-        this.chrAliasTable = {};
+        const chrAliasTable = {};
         if (names) {
             names.split(",").forEach(function (chr) {
                 const canonicalName = genome.getChromosomeName(chr);
-                this.chrAliasTable[canonicalName] = chr;
+                chrAliasTable[canonicalName] = chr;
             })
         }
+        this.chrAliasTable = chrAliasTable;
 
         this.groupCache["/"] = group;
         return group;
