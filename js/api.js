@@ -10,8 +10,9 @@ import {guid,pageCoordinates, translateMouseCoordinates} from "./util/domUtils.j
 import {attachDialogCloseHandlerWithParent, createColorSwatchSelector} from "./ui/ui-utils.js";
 import {getExtension, getFilename, isFilePath} from "./util/fileUtils.js";
 import {inferFileFormat, inferTrackTypes, knownFileExtensions} from './util/trackUtils.js';
-import {isString, numberFormatter, splitLines} from "./util/stringUtils.js";
+import {uncompressString, isString, numberFormatter, splitLines} from "./util/stringUtils.js";
 import { doAutoscale, download } from './util/igvUtils.js';
+import {decodeDataURI} from "./util/uriUtils.js";
 import IGVColor from "./igv-color.js";
 import IGVGraphics from "./igv-canvas.js";
 import google from "./google/googleUtils.js";
@@ -56,6 +57,8 @@ export default {
     version,
 
     //exports below are not supported and will be removed over time
+    decodeDataURI,
+    uncompressString,
     download,
     getBrowser,
     doAutoscale,
