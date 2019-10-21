@@ -1,4 +1,5 @@
 import TDFReader from "../js/tdf/tdfReader.js";
+import TDFSource from "../js/tdf/tdfSource.js";
 
 function runTDFTests() {
 
@@ -17,10 +18,28 @@ function runTDFTests() {
     }
 
 
-    function reject(error) {
-        console.log(error);
-        assert.ok(false);
-    }
+    QUnit.test("TDF source get features (zoom)", function(assert) {
+        var done = assert.async();
+
+        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
+            tdfSource,
+            chr = "22",
+            bpstart = 24049020,
+            end = 24375399,
+            bpPerPixel = 51304566 / (Math.pow(2, 6) *700);
+
+
+        tdfSource = new TDFSource({url: url}, genome);
+
+        tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
+
+            assert.ok(features);
+
+            done();
+
+        }).catch(function (error) {console.log(error); assert.ok(false); });
+    });
+
 
     QUnit.test("TDF header", function(assert) {
         var done = assert.async();
@@ -154,76 +173,51 @@ function runTDFTests() {
 
     // TODO -- NEED FIXED STEP TILE TEST
 
-    // eweitz 2018-09-06: Disable for now, due to consistent failure
-    //
-    // QUnit.test("TDF root group", function(assert) {
-    //     var done = assert.async();
 
-    //     var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-    //         tdfReader;
+    QUnit.test("TDF root group", function(assert) {
+        var done = assert.async();
 
-
-    //     tdfReader = new TDFReader({url: url}, genome);
-    //     assert.ok(tdfReader);
-
-    //     tdfReader.readRootGroup().then(function (group) {
-
-    //         assert.ok(group);
-    //         assert.ok(tdfReader.chrAliasTable);
-    //         assert.equal(7, tdfReader.maxZoom);
-
-    //         done();
-
-    //     }).catch(function (error) {console.log(error); assert.ok(false); });
-    // });
-
-    // eweitz 2018-09-06: Disable for now, due to consistent failure
-    //
-    // QUnit.test("TDF source get features (raw)", function(assert) {
-    //     var done = assert.async();
-
-    //     var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-    //         tdfSource,
-    //         chr = "22",
-    //         bpstart = 24376175,
-    //         end = 24376200,
-    //         bpPerPixel = 1;
+        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
+            tdfReader;
 
 
-    //     tdfSource = new TDFSource({url: url}, genome);
+        tdfReader = new TDFReader({url: url}, genome);
+        assert.ok(tdfReader);
 
-    //     tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
+        tdfReader.readRootGroup().then(function (group) {
 
-    //         assert.ok(features);
+            assert.ok(group);
+            assert.ok(tdfReader.chrAliasTable);
+            assert.equal(7, tdfReader.maxZoom);
 
-    //         done();
+            done();
 
-    //     }).catch(function (error) {console.log(error); assert.ok(false); });
-    // });
-
-    // eweitz 2018-09-06: Disable for now, due to consistent failure
-    //
-    // QUnit.test("TDF source get features (zoom)", function(assert) {
-    //     var done = assert.async();
-
-    //     var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-    //         tdfSource,
-    //         chr = "22",
-    //         bpstart = 24049020,
-    //         end = 24375399,
-    //         bpPerPixel = 51304566 / (Math.pow(2, 6) *700);
+        }).catch(function (error) {console.log(error); assert.ok(false); });
+    });
 
 
-    //     tdfSource = new TDFSource({url: url}, genome);
+    QUnit.test("TDF source get features (raw)", function(assert) {
+        var done = assert.async();
 
-    //     tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
+        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
+            tdfSource,
+            chr = "22",
+            bpstart = 24376175,
+            end = 24376200,
+            bpPerPixel = 1;
 
-    //         assert.ok(features);
 
-    //         done();
+        tdfSource = new TDFSource({url: url}, genome);
 
-    //     }).catch(function (error) {console.log(error); assert.ok(false); });
-    // });
+        tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
+
+            assert.ok(features);
+
+            done();
+
+        }).catch(function (error) {console.log(error); assert.ok(false); });
+    });
+
 
 }
 
