@@ -40,12 +40,11 @@ import igvxhr from "./igvxhr.js";
 import {getFilename} from './util/fileUtils.js'
 import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {isString, numberFormatter, splitLines} from "./util/stringUtils.js"
+import {compressString, isString, numberFormatter, splitLines, uncompressString} from "./util/stringUtils.js"
 import {guid, pageCoordinates} from "./util/domUtils.js";
 import {decodeDataURI} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
-import {uncompressString, compressString} from "./util/stringUtils.js"
 
 
 const Browser = function (options, trackContainerDiv) {
@@ -587,6 +586,7 @@ function knowHowToLoad(config) {
  * @param config
  * @returns {*}
  */
+
 Browser.prototype.loadTrack = async function (config) {
 
     // config might be json
@@ -658,11 +658,12 @@ Browser.prototype.loadTrack = async function (config) {
             await newTrack.postInit();
         }
 
-        if(config.sync) {
+        if (config.sync) {
             await this.addTrack(newTrack);
-        }
-        else {
-            this.addTrack(newTrack);
+        } else {
+
+            console.log("Add track " + newTrack.name);
+            if("HG00514.pbmm.lra" !== newTrack.name)  this.addTrack(newTrack);
         }
 
         return newTrack;
@@ -853,7 +854,7 @@ Browser.prototype.visibilityChange = function () {
     this.resize();
 };
 
-Browser.prototype.resize = function () {
+Browser.prototype.resize = async function () {
 
     const self = this;
 
@@ -902,7 +903,7 @@ Browser.prototype.resize = function () {
         this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
     }
 
-    this.updateViews();
+    await this.updateViews();
 
     function resizeWillExceedChromosomeLength(genomicState) {
 
@@ -914,7 +915,7 @@ Browser.prototype.resize = function () {
 
 };
 
-Browser.prototype.updateViews = function (genomicState, views) {
+Browser.prototype.updateViews = async function (genomicState, views) {
 
     var self = this,
         groupAutoscaleTracks, otherTracks;
@@ -939,9 +940,9 @@ Browser.prototype.updateViews = function (genomicState, views) {
 
     // Don't autoscale while dragging.
     if (self.isDragging) {
-        views.forEach(function (trackView) {
-            trackView.updateViews();
-        })
+        for (let trackView of views) {
+            await trackView.updateViews();
+        }
     } else {
         // Group autoscale
         groupAutoscaleTracks = {};
@@ -960,7 +961,8 @@ Browser.prototype.updateViews = function (genomicState, views) {
             }
         })
 
-        Object.keys(groupAutoscaleTracks).forEach(function (group) {
+        const keys = Object.keys(groupAutoscaleTracks);
+        for (let group of keys) {
 
             var groupTrackViews, promises;
 
@@ -971,28 +973,26 @@ Browser.prototype.updateViews = function (genomicState, views) {
                 promises.push(trackView.getInViewFeatures());
             });
 
-            Promise.all(promises)
+            const featureArray = await Promise.all(promises)
 
-                .then(function (featureArray) {
+            var allFeatures = [], dataRange;
 
-                    var allFeatures = [], dataRange;
+            for(let features of featureArray) {
+                allFeatures = allFeatures.concat(features);
+            }
+            dataRange = doAutoscale(allFeatures);
 
-                    featureArray.forEach(function (features) {
-                        allFeatures = allFeatures.concat(features);
-                    })
-                    dataRange = doAutoscale(allFeatures);
+            for(let trackView of groupTrackViews) {
+                trackView.track.dataRange = dataRange;
+                trackView.track.autoscale = false;
+               await trackView.updateViews();
+            }
 
-                    groupTrackViews.forEach(function (trackView) {
-                        trackView.track.dataRange = dataRange;
-                        trackView.track.autoscale = false;
-                        trackView.updateViews();
-                    })
-                })
-        })
+        }
 
-        otherTracks.forEach(function (trackView) {
-            trackView.updateViews();
-        })
+        for(let trackView of otherTracks){
+            await trackView.updateViews();
+        }
     }
 };
 
@@ -1168,7 +1168,7 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
 Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
 
     let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
-    for(let viewport of viewports) {
+    for (let viewport of viewports) {
 
         const referenceFrame = viewport.genomicState.referenceFrame
         const chromosome = referenceFrame.getChromosome();
