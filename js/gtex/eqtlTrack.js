@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
@@ -290,18 +289,7 @@ EqtlTrack.prototype.menuItemList = function () {
     menuItems.push({
         object: createCheckbox("Autoscale", self.autoscale),
         click: function () {
-            var $fa = $(this).find('i');
-
             self.autoscale = !self.autoscale;
-
-            if (true === self.autoscale) {
-                $fa.removeClass('igv-fa-check-hidden');
-                $fa.addClass('igv-fa-check-visible');
-            } else {
-                $fa.removeClass('igv-fa-check-visible');
-                $fa.addClass('igv-fa-check-hidden');
-            }
-
             self.config.autoscale = self.autoscale;
             self.trackView.setDataRange(undefined, undefined, self.autoscale);
         }
