@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from './featureSource.js';
 import TDFSource from "../tdf/tdfSource.js";
 import TrackBase from "../trackBase.js";
@@ -100,18 +99,7 @@ WigTrack.prototype.menuItemList = function () {
     menuItems.push({
         object: createCheckbox("Autoscale", self.autoscale),
         click: function () {
-            var $fa = $(this).find('i');
-
             self.autoscale = !self.autoscale;
-
-            if (true === self.autoscale) {
-                $fa.removeClass('igv-fa-check-hidden');
-                $fa.addClass('igv-fa-check-visible');
-            } else {
-                $fa.removeClass('igv-fa-check-visible');
-                $fa.addClass('igv-fa-check-hidden');
-            }
-
             self.config.autoscale = self.autoscale;
             self.trackView.setDataRange(undefined, undefined, self.autoscale);
         }
