@@ -248,6 +248,10 @@ const BamUtils = {
             let cigar = '';
             let p = offset + 36 + nl;
             const cigarArray = [];
+            // concatenate M,=,EQ,and X
+
+            let lastCigRecord;
+            let mOperators = new Set(['M', 'EQ', 'X', '=']);
             for (let c = 0; c < nc; ++c) {
                 var cigop = readInt(ba, p);
                 var opLen = (cigop >> 4);
@@ -257,7 +261,14 @@ const BamUtils = {
                 cigar = cigar + opLen + opLtr;
                 p += 4;
 
-                cigarArray.push({len: opLen, ltr: opLtr});
+                // if(mOperators.has(opLtr) && mOperators.has(lastCigRecord.ltr)) {
+                //     lastCigRecord.len += opLen;
+                //     lastCigRecord.ltr = 'M'
+                // }
+                // else {
+                    lastCigRecord = {len: opLen, ltr: opLtr};
+                    cigarArray.push(lastCigRecord);
+                //}
             }
 
             alignment.chr = chrNames[refID];
