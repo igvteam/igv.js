@@ -30,7 +30,7 @@ import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import IGVColor from "../igv-color.js";
-import MenuUtils from "../util/menuUtils.js";
+import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";

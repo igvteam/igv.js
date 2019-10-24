@@ -24,7 +24,7 @@ import InputDialog from "./ui/inputDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import embedCss from "./embedCss.js";
-import MenuUtils from "./util/menuUtils.js";
+import MenuUtils from "./ui/menuUtils.js";
 import Alert from "./ui/alert.js"
 import version from "./version.js"
 
