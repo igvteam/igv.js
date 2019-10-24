@@ -56,7 +56,7 @@ function unbgzf(data, lim) {
             arrayCopy(b, 0, out, cursor, b.length);
             cursor += b.length;
         }
-        return out.buffer;
+        return out;
     }
 }
 
