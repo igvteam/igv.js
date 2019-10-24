@@ -599,7 +599,7 @@ var AlignmentTrack = function (config, parent) {
     this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
     this.hideSmallIndels = config.hideSmallIndels;
-    this.indelSizeThreshold = config.indelSizeThreshold || 2;
+    this.indelSizeThreshold = config.indelSizeThreshold || 1;
 
     this.hasPairs = false;   // Until proven otherwise
 };
@@ -756,7 +756,7 @@ AlignmentTrack.prototype.draw = function (options) {
             if (alignment.insertions) {
                 let lastXBlockStart = -1;
                 for (let insertionBlock of alignment.insertions) {
-                    if (this.hideSmallIndels && insertionBlock.len < this.indelSizeThreshold) {
+                    if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
                         continue;
                     }
                     if (insertionBlock.start < bpStart) {
@@ -798,7 +798,7 @@ AlignmentTrack.prototype.draw = function (options) {
 
             if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                 if ("D" === block.gapType) {
-                    if (this.hideSmallIndels && block.len < this.indelSizeThreshold) {
+                    if (blockWidthPixel < 2 && (this.hideSmallIndels && block.len < this.indelSizeThreshold)) {
                         return;
                     }
                     IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
