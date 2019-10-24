@@ -661,9 +661,7 @@ Browser.prototype.loadTrack = async function (config) {
         if (config.sync) {
             await this.addTrack(newTrack);
         } else {
-
-            console.log("Add track " + newTrack.name);
-            if("HG00514.pbmm.lra" !== newTrack.name)  this.addTrack(newTrack);
+            this.addTrack(newTrack);
         }
 
         return newTrack;
