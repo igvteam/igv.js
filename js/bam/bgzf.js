@@ -32,7 +32,7 @@ function unbgzf(data, lim) {
             const cDataSize = bsize - xlen - 19;
             if (bytesLeft < cDataSize) break;
 
-            const a = new Uint8Array(data, start, bytesLeft);
+            const a = new Uint8Array(data, start, cDataSize);
             const inflate = new Zlib.RawInflate(a);
             const unc = inflate.decompress();
 
