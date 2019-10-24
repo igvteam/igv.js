@@ -29,7 +29,7 @@ import FeatureUtils from "./feature/featureUtils.js";
 import RulerTrack from "./rulerTrack.js";
 import TrackGearPopover from "./ui/trackGearPopover.js";
 import GenericContainer from "./ui/genericContainer.js";
-import MenuUtils from "./util/menuUtils.js";
+import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates} from "./util/domUtils.js";
 import {doAutoscale} from "./util/igvUtils.js";
