@@ -35,13 +35,13 @@
   },
   {
     "type": "alignment",
-    "name": "Heart SLC25A3 - Dropbox",
+    "name": "Heart SLC25A3 - Dropbox CRAM",
     "url": "https://www.dropbox.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0",
     "indexURL": "https://www.dropbox.com/s/k3r83ckbo0chtm7/heart_slc25a3.crai?dl=0"
   },
   {
     "type": "alignment",
-    "name": "Heart SLC25A3 - Amazon",
+    "name": "Heart SLC25A3 - Amazon CRAM",
     "format": "cram",
     "url": "https://s3.amazonaws.com/igv.org.test/data/cram/heart_slc25a3.cram",
     "indexURL": "https://s3.amazonaws.com/igv.org.test/data/cram/heart_slc25a3.cram.crai"
