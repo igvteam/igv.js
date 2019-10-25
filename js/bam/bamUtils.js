@@ -61,7 +61,7 @@ const BamUtils = {
                 var header, unc, uncba;
 
                 unc = unbgzf(compressedBuffer);
-                uncba = new Uint8Array(unc);
+                uncba = unc;
 
                 header = BamUtils.decodeBamHeader(uncba, genome);
 
