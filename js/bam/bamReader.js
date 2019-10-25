@@ -86,7 +86,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
 
             const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}));
 
-            var ba = new Uint8Array(unbgzf(compressed)); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+            var ba = unbgzf(compressed); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
             const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
             if(done) {

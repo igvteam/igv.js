@@ -254,19 +254,7 @@ BAMTrack.prototype.menuItemList = function () {
     menuItems.push({
         object: createCheckbox("Show all bases", self.showAllBases),
         click: function () {
-
-            const $fa = $(this).find('i');
-
             self.showAllBases = !self.showAllBases;
-
-            if (true === self.showAllBases) {
-                $fa.removeClass('igv-fa-check-hidden');
-                $fa.addClass('igv-fa-check-visible');
-            } else {
-                $fa.removeClass('igv-fa-check-visible');
-                $fa.addClass('igv-fa-check-hidden');
-            }
-
             self.config.showAllBases = self.showAllBases;
             self.trackView.updateViews(true);
         }
@@ -279,19 +267,7 @@ BAMTrack.prototype.menuItemList = function () {
         menuItems.push({
             object: createCheckbox("View as pairs", self.viewAsPairs),
             click: function () {
-
-                const $fa = $(this).find('i');
-
                 self.viewAsPairs = !self.viewAsPairs;
-
-                if (true === self.viewAsPairs) {
-                    $fa.removeClass('igv-fa-check-hidden');
-                    $fa.addClass('igv-fa-check-visible');
-                } else {
-                    $fa.removeClass('igv-fa-check-visible');
-                    $fa.addClass('igv-fa-check-hidden');
-                }
-
                 self.config.viewAsPairs = self.viewAsPairs;
                 self.featureSource.setViewAsPairs(self.viewAsPairs);
                 self.trackView.updateViews(true);
@@ -302,19 +278,7 @@ BAMTrack.prototype.menuItemList = function () {
     menuItems.push({
         object: createCheckbox("Show soft clips", self.showSoftClips),
         click: function () {
-
-            const $fa = $(this).find('i');
-
             self.showSoftClips = !self.showSoftClips;
-
-            if (true === self.showSoftClips) {
-                $fa.removeClass('igv-fa-check-hidden');
-                $fa.addClass('igv-fa-check-visible');
-            } else {
-                $fa.removeClass('igv-fa-check-visible');
-                $fa.addClass('igv-fa-check-hidden');
-            }
-
             self.config.showSoftClips = self.showSoftClips;
             self.featureSource.setShowSoftClips(self.showSoftClips);
             self.trackView.updateViews(true);
@@ -634,6 +598,9 @@ var AlignmentTrack = function (config, parent) {
     this.colorByTag = config.colorByTag;
     this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
+    this.hideSmallIndels = config.hideSmallIndels;
+    this.indelSizeThreshold = config.indelSizeThreshold || 1;
+
     this.hasPairs = false;   // Until proven otherwise
 };
 
@@ -756,52 +723,60 @@ AlignmentTrack.prototype.draw = function (options) {
 
     function drawSingleAlignment(alignment, yRect, alignmentHeight) {
 
-        var alignmentColor,
-            lastBlockEnd,
-            blocks,
-            block,
-            b,
-            diagnosticColor;
-
-        alignmentColor = this.getAlignmentColor(alignment);
-        const outlineColor = alignmentColor;
-
-        blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
 
         if ((alignment.start + alignment.lengthOnRef) < bpStart || alignment.start > bpEnd) {
             return;
         }
 
+        const blocks = showSoftClips ? alignment.blocks : alignment.blocks.filter(b => 'S' !== b.type);
+
+        let alignmentColor = this.getAlignmentColor(alignment);
+        const outlineColor = alignmentColor;
         if (alignment.mq <= 0) {
             alignmentColor = IGVColor.addAlpha(alignmentColor, 0.15);
         }
-
         IGVGraphics.setProperties(ctx, {fillStyle: alignmentColor, strokeStyle: outlineColor});
 
-        for (b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
+        let lastBlockEnd;
+        for (let b = 0; b < blocks.length; b++) {   // Can't use forEach here -- we need ability to break
 
-            block = blocks[b];
+            const block = blocks[b];
 
             // Somewhat complex test, neccessary to insure gaps are drawn.
-            // If this is not the last block, and the next block starts before the orign (off screen to left)
-            // then skip.
+            // If this is not the last block, and the next block starts before the orign (off screen to left) then skip.
             if ((b !== blocks.length - 1) && blocks[b + 1].start < bpStart) continue;
 
-            drawBlock.call(this, block);
+            drawBlock.call(this, block, b);
 
-            if ((block.start + block.len) > bpEnd) break;  // Do this after drawBlock to insure gaps are drawn
+            if ((block.start + block.len) > bpEnd) {
+                // Do this after drawBlock to insure gaps are drawn
+                break;
+            }
 
             if (alignment.insertions) {
-                for (let block of alignment.insertions) {
-                    const refOffset = block.start - bpStart
+                let lastXBlockStart = -1;
+                for (let insertionBlock of alignment.insertions) {
+                    if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
+                        continue;
+                    }
+                    if (insertionBlock.start < bpStart) {
+                        continue;
+                    }
+                    if (insertionBlock.start > bpEnd) {
+                        break;
+                    }
+                    const refOffset = insertionBlock.start - bpStart
                     const xBlockStart = refOffset / bpPerPixel - 1
-                    const widthBlock = 3
-                    IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                    if ((xBlockStart - lastXBlockStart) > 2) {
+                        const widthBlock = 3
+                        IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                        lastXBlockStart = xBlockStart;
+                    }
                 }
             }
         }
 
-        function drawBlock(block) {
+        function drawBlock(block, b) {
 
 
             const offsetBP = block.start - alignmentContainer.start;
@@ -823,7 +798,11 @@ AlignmentTrack.prototype.draw = function (options) {
 
             if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
                 if ("D" === block.gapType) {
+                    if (blockWidthPixel < 2 && (this.hideSmallIndels && block.len < this.indelSizeThreshold)) {
+                        return;
+                    }
                     IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
+
                 } else if ("N" === block.gapType) {
                     IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
                 }
@@ -1016,6 +995,7 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
             sortOption: option
         })
     }
+
     function sortByTag() {
         const config =
             {

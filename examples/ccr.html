@@ -1,0 +1,555 @@
+
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-112914158-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-112914158-2');
+    </script>
+    <link href='https://fonts.googleapis.com/css?family=Raleway' rel='stylesheet'>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="//igv.org/web/img/favicon.ico">
+    <title>Integrative Genomics Viewer - CCRs</title>
+
+    <!-- jQuery JS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+    <!-- jQuery UI CSS -->
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.2/themes/smoothness/jquery-ui.css"/>
+
+    <!-- Bootstrap CSS - for demo only, NOT REQUIRED FOR IGV, but for some reason, changes header font style in a pleasing way-->
+    <link rel="stylesheet" type="text/css" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+
+    <!-- Bootstrap JS - needed for zoom button -->
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+    <!-- IGV JS-->
+    <script type="text/javascript" src="https://igv.org/web/release/2.3.2/dist/igv.min.js"></script>
+
+    <style>
+        div.igv-track-label {
+            max-width: 500px;
+        }
+        div.indent {
+            margin-left: 50px;
+        }
+        span.label-default {
+            background-color: rgb(0, 0, 255)
+        }
+        span.label-success {
+            background-color: rgb(255, 165, 0)
+        }
+        span.label-warning {
+            background-color: rgb(255, 0, 0)
+        }
+        span.label-danger {
+            background-color: rgb(139, 0, 0)
+        }
+        blockquote {
+            position: relative;
+            display: inline-block;
+            margin-top: 20px;
+            margin-left: 50px;
+            margin-right: 20px;
+            border-left: 7px solid red;
+            background: #eee;
+            padding: 10px 10px 10px 10px;
+            border-radius: 10px;
+            font-family: 'Raleway';
+            color: #333;
+            text-align: left;
+
+            box-shadow: 1px 1px 1px #999,
+            2px 2px 1px #999,
+            3px 3px 1px #999;
+            transition-duration: .3s;
+
+        span.author {
+            position: relative;
+            display: block;
+            text-align: right;
+            margin-top: 5px;
+            color: #999;
+
+        i {
+            position: relative;
+            background: #eee;
+            padding-left: 5px;
+            font-style: italic;
+            z-index: 5;
+        }
+
+        &::before {
+             display: block;
+             content: "";
+             position: absolute;
+             top: 50%;
+             left: 0;
+             width: 100%;
+             height: 1px;
+             background: #ccc;
+             z-index: 1;
+         }
+        }
+        blockquote p {
+            padding: 5px;
+        }
+    </style>
+
+</head>
+
+<body>
+
+<div class="indent">
+
+    <h2 style="font-family:Raleway; font-size:32px; font-weight:normal;">Constrained Coding Regions based on 123,136 human exomes from gnomAD</h2>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed.gz" class="btn btn-info" role="button">Autosome CCR BED File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bedGraph.gz" class="btn btn-info" role="button">Autosome CCR bedGraph File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bw" class="btn btn-info" role="button">Autosome CCR bigWig File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.90orhigher.v2.20180420.bed.gz" class="btn btn-info" role="button">Autosome CCRs >=90% BED File</a>
+    <br>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed.gz" class="btn btn-info" role="button">X Chrom CCR BED File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bedGraph.gz" class="btn btn-info" role="button">X Chrom CCR bedGraph File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bw" class="btn btn-info" role="button">X Chrom CCR bigWig File</a>
+    <a href="https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.90orhigher.v2.20180420.bed.gz" class="btn btn-info" role="button">X Chrom CCRs >=90% BED File</a>
+</div>
+
+<blockquote>
+    <p>For more information on how to interpret the files, query the browser, or to read the manuscript, go to <a href="https://github.com/quinlan-lab/ccrhtml">the GitHub repo</a> for the CCR browser.</p>  <p>See <a href="https://github.com/quinlan-lab/ccr">the model repository</a> or <a href="https://quinlan-lab.github.io/ccr/">its documentation</a> to see how we created the model and how you can create your own version of the CCR model.</p>
+</blockquote>
+
+<!-- container -->
+
+<blockquote style="border-left: 10px solid blue">
+    <label>
+        <p>Add your own local BAM, VCF, GTF, or BED files</p>
+        <p>(indexed BAMs, other files bgzipped and tabixed)</p>
+    </label>
+    <p>
+        Select both the file and the index using the button below.
+    </p>
+    <input id="fileWidget" class="hidden" type="file" multiple="true" accept=".bam,.bai,.gz,.tbi" onchange="load()"/>
+    <label for="fileWidget">
+        <img src="https://s3.us-east-2.amazonaws.com/ccrs/images/searchbar.png" alt="Search img" height="50" width="122">
+    </label>
+
+    <p>
+    <div id="fileNameDiv"></div>
+    </p>
+</blockquote>
+
+<!-- legend -->
+<div class="indent">
+    <h4>CCR BED12 Color Legend</h4>
+    <p>There are colors for each scale of constraint.</p>
+    <span class="label label-default">CCRs &lt; 90th Percentile</span>
+    <span class="label label-success">CCRs &ge; 90th Percentile</span>
+    <span class="label label-warning">CCRs &ge; 95th Percentile</span>
+    <span class="label label-danger">CCRs &ge; 99th Percentile</span>
+</div>
+
+<div class="indent" id="igvDiv" style="margin-top:15px; margin-right: 10px; padding:5px; border:1px solid lightgray"></div>
+
+<script>
+
+    var locus = window.location.hash.substr(1);
+    if (!locus) {
+        locus = "chr20:62,064,356-62,079,335";
+    } else if (locus.includes("+")) {
+        locus=locus.split("+");
+    }
+
+</script>
+
+<script type="text/javascript">
+
+    var igvBrowser;
+
+    $(document).ready(function () {
+
+        var div = $("#igvDiv")[0],
+            options = {
+                showNavigation: true,
+                showIdeogram: true,
+                showRuler: true,
+                reference: {
+                    id: "hg19"
+                },
+                genome: "hg19",
+                locus: locus,
+                tracks: [
+                    {
+                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bw',
+                        name: 'CCRs',
+                        type: "wig",
+                        color: function(value) {
+                            var c;
+                            if (value < 90){
+                                c = "rgb(0,0,255)"
+                            }
+                            if (value >= 90){
+                                c = "rgb(255,165,0)"
+                            }
+                            if (value >= 95){
+                                c = "rgb(255,0,0)"
+                            }
+                            if (value >= 99){
+                                c = "rgb(139,0,0)"
+                            }
+                            return c
+                        },
+                        height: 200,
+                        visibilityWindow: 500000,
+                        order: 1
+                    },
+                    {
+                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bw',
+                        name: 'X-CCRs',
+                        type: "wig",
+                        color: function(value) {
+                            var c;
+                            if (value < 90){
+                                c = "rgb(0,0,255)"
+                            }
+                            if (value >= 90){
+                                c = "rgb(255,165,0)"
+                            }
+                            if (value >= 95){
+                                c = "rgb(255,0,0)"
+                            }
+                            if (value >= 99){
+                                c = "rgb(139,0,0)"
+                            }
+                            return c
+                        },
+                        height: 200,
+                        visibilityWindow: 500000,
+                        order: 2
+                    },
+                    {
+                        name: "CCRs in BED12",
+                        type: "annotation",
+                        format: "bed",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.autosomes.v2.20180420.bed12.bed.gz.tbi",
+                        order: 3,
+                        height: 50,
+                        visibilityWindow: 500000,
+                        displayMode: "EXPANDED"
+                    },
+                    {
+                        name: "X-CCRs in BED12",
+                        type: "annotation",
+                        format: "bed",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/ccrs/ccrs.xchrom.v2.20180420.bed12.bed.gz.tbi",
+                        order: 4,
+                        height: 50,
+                        visibilityWindow: 500000,
+                        displayMode: "EXPANDED"
+                    },
+                    {
+                        name: "Ensembl Transcripts",
+                        type: "annotation",
+                        format: "gtf",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/Homo_sapiens.GRCh37.75.gtf.gz.tbi",
+                        order: 5,
+                        visibilityWindow: 500000,
+                        displayMode: "COLLAPSED",
+                        autoHeight: true
+                    },
+                    {
+                        name: "Pfam domains",
+                        type: "annotation",
+                        format: "bed",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/pfams.bed12.bed.gz.tbi",
+                        order: 6,
+                        height: 50,
+                        color: "#019c01",
+                        visibilityWindow: 500000,
+                        displayMode: "COLLAPSED"
+                    },
+                    {
+                        name: "ClinVar protein-changing pathogenics",
+                        type: "variant",
+                        format: "vcf",
+                        color: "#000000",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/clinvar-functional-pathogenics.vcf.gz.tbi",
+                        order: 7,
+                        visibilityWindow: 500000
+                    },
+                    {
+                        name: "COSMIC Cancer-Related Coding Variants",
+                        type: "variant",
+                        format: "vcf",
+                        color: "#551a8b",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/CosmicCodingMuts.vcf.gz.tbi",
+                        order: 8,
+                        visibilityWindow: 500000
+                    },
+                    {
+                        name: "gnomAD protein-changing high quality variants",
+                        type: "variant",
+                        format: "vcf",
+                        color: "#bebebe",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-functional-pass.vcf.gz.tbi",
+                        order: 9,
+                        visibilityWindow: 500000
+                    },
+                    {
+                        name: "gnomAD coverage at 10x",
+                        url:  "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-coverage.bw",
+                        type: "wig",
+                        color: function(value) {
+                            var c;
+                            if (value < 0.5){
+                                c = "#ff8c00"
+                            }
+                            if (value >= 0.5){
+                                c = "#add8e6"
+                            }
+                            return c
+                        },
+                        height: 50,
+                        order: 10,
+                        visibilityWindow: 500000
+                    },
+                    {
+                        name: "Segmental Duplications",
+                        type: "annotation",
+                        format: "bed",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/hgsegmental.bed.gz.tbi",
+                        order: 11,
+                        visibilityWindow: 500000,
+                        displayMode: "EXPANDED"
+                    },
+                    {
+                        name: "Self-Chains at 90% Identity",
+                        type: "annotation",
+                        format: "bed",
+                        sourceType: "file",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/self-chains.id90.bed.gz.tbi",
+                        order: 12,
+                        visibilityWindow: 500000,
+                        displayMode: "EXPANDED"
+                    },
+                    {
+                        name: "gnomAD: all variants",
+                        type: "variant",
+                        format: "vcf",
+                        color: "#bebebe",
+                        url: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz",
+                        indexURL: "https://s3.us-east-2.amazonaws.com/ccrs/tracks/gnomad-vep-vt.vcf.gz.tbi",
+                        order: 13,
+                        visibilityWindow: 500000
+                    },
+                    {
+                        url: 'https://s3.us-east-2.amazonaws.com/ccrs/tracks/gerp.bw',
+                        name: 'GERP++',
+                        type: "wig",
+                        color: function(value) {
+                            var c;
+                            if (value < 1.7){
+                                c = "rgb(0,0,255)"
+                            }
+                            if (value >= 1.7){
+                                c = "rgb(255,0,0)"
+                            }
+                            return c
+                        },
+                        order: 14
+                    }
+                ]
+            };
+
+        igv.createBrowser(div, options)
+            .then(function (b) {
+                igvBrowser = b;
+            })
+
+    });
+
+    function load() {
+
+        var fileWidget = document.getElementById("fileWidget");
+        var files = fileWidget.files;
+
+        var fileTxt = "<ul>";
+        for (let file of files) {
+            fileTxt += "<li>" + file.name + "</li>";
+        }
+        fileTxt += "</ul>";
+        document.getElementById("fileNameDiv").innerHTML = fileTxt;
+
+
+        // Find BAM files and cache index files.  Note there are 2 index naming conventions, .bam.bai and .bai
+        // This scheme catches both.
+        var bamFiles = [];
+        var indexFiles = {};
+        var vcfFiles = [];
+        var vcftbiFiles = {};
+        var bedFiles = [];
+        var bedtbiFiles = {};
+        var gtfFiles = [];
+        var gtftbiFiles = {};
+
+        for (let file of files) {
+            if (file.name.endsWith(".bam")) {
+                bamFiles.push(file);
+            }
+            else if (file.name.endsWith(".bai")) {
+                var key = getKey(file.name);
+                indexFiles[key] = file;
+            }
+            else if (file.name.endsWith(".vcf.gz")) {
+                vcfFiles.push(file);
+            }
+            else if (file.name.endsWith("vcf.gz.tbi")) {
+                var key = getKey(file.name);
+                vcftbiFiles[key] = file;
+            }
+            else if (file.name.endsWith(".bed.gz")) {
+                bedFiles.push(file);
+            }
+            else if (file.name.endsWith("bed.gz.tbi")) {
+                var key = getKey(file.name);
+                bedtbiFiles[key] = file;
+            }
+            else if (file.name.endsWith(".gtf.gz")) {
+                gtfFiles.push(file);
+            }
+            else if (file.name.endsWith("gtf.gz.tbi")) {
+                var key = getKey(file.name);
+                gtftbiFiles[key] = file;
+            }
+            else {
+                alert("Unsupported file type: " + file.name);
+            }
+        }
+
+        // Create track objects
+        var trackConfigs = [];
+
+        for (let file of bamFiles) {
+
+            var key = getKey(file.name);
+            var indexFile = indexFiles[key];
+            if (indexFile) {
+                trackConfigs.push({
+                    name: file.name,
+                    type: "alignment",
+                    format: "bam",
+                    url: file,
+                    indexURL: indexFile
+                })
+            }
+            else {
+                alert("No index file for: " + file.name);
+            }
+        }
+
+        for (let file of vcfFiles) {
+
+            var key = getKey(file.name);
+            var vcftbiFile = vcftbiFiles[key];
+            if (vcftbiFile) {
+                trackConfigs.push({
+                    name: file.name,
+                    type: "variant",
+                    format: "vcf",
+                    url: file,
+                    indexURL: vcftbiFile
+                })
+            }
+            else {
+                alert("No index file for: " + file.name);
+            }
+        }
+
+        for (let file of bedFiles) {
+
+            var key = getKey(file.name);
+            var bedtbiFile = bedtbiFiles[key];
+            if (bedtbiFile) {
+                trackConfigs.push({
+                    name: file.name,
+                    type: "annotation",
+                    format: "bed",
+                    url: file,
+                    indexURL: bedtbiFile
+                })
+            }
+            else {
+                alert("No index file for: " + file.name);
+            }
+        }
+
+        for (let file of gtfFiles) {
+
+            var key = getKey(file.name);
+            var gtftbiFile = gtftbiFiles[key];
+            if (gtftbiFile) {
+                trackConfigs.push({
+                    name: file.name,
+                    type: "annotation",
+                    format: "gtf",
+                    url: file,
+                    indexURL: gtftbiFile
+                })
+            }
+            else {
+                alert("No index file for: " + file.name);
+            }
+        }
+
+        if (trackConfigs.length > 0) {
+
+            igvBrowser.loadTrackList(trackConfigs);
+
+        }
+
+
+        function getKey(filename) {
+
+            var idx = filename.indexOf(".");
+            if (idx < 0) {
+                console.error("File with no extension: " + filename);
+            }
+            else {
+                return filename.substring(0, idx);
+            }
+
+        }
+
+    }
+
+</script>
+
+</body>
+
+</html>
