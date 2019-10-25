@@ -66,7 +66,7 @@ HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
 
             const compressedData = concatArrays(dataArr);  // In essence a complete bam file
             const unc = unbgzf(compressedData.buffer);
-            const ba = new Uint8Array(unc);
+            const ba = unc;
 
             if (!self.header) {
                 self.header = BamUtils.decodeBamHeader(ba, genome);

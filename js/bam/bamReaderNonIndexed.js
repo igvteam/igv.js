@@ -67,12 +67,12 @@ BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpE
         if (this.isDataUri) {
             const data = decodeDataURI(this.bamPath);
             const unc = unbgzf(data.buffer);
-            parseAlignments.call(this, new Uint8Array(unc));
+            parseAlignments.call(this, unc);
             return fetchAlignments.call(this, chr, bpStart, bpEnd);
         } else {
             const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
             const unc = unbgzf(arrayBuffer);
-            parseAlignments.call(this, new Uint8Array(unc));
+            parseAlignments.call(this, unc);
             return fetchAlignments.call(this, chr, bpStart, bpEnd);
         }
     }

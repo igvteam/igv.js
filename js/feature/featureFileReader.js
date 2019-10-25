@@ -239,7 +239,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
             if (tabix) {
                 const data = await igvxhr.loadArrayBuffer(config.url, options);
-                const inflated = new Uint8Array(unbgzf(data));
+                const inflated = unbgzf(data);
                 parse(inflated);
 
             } else {
