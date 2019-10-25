@@ -462,7 +462,7 @@ function arrayBufferToString(arraybuffer, compression) {
         var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
         plain = inflate.decompress();
     } else if (compression === BGZF) {
-        plain = new Uint8Array(unbgzf(arraybuffer));
+        plain = unbgzf(arraybuffer);
     } else {
         plain = new Uint8Array(arraybuffer);
     }
