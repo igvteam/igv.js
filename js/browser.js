@@ -354,7 +354,6 @@ Browser.prototype.loadSessionObject = async function (session) {
 
 }
 
-
 Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 
     // idOrConfig might be json
@@ -580,6 +579,20 @@ function knowHowToLoad(config) {
     return undefined === url || isString(url) || url instanceof File;
 }
 
+Browser.prototype.loadROI = async function (config) {
+    if (!this.roi) {
+        this.roi = [];
+    }
+    if (Array.isArray(config)) {
+        for (let c of config) {
+            this.roi.push(new ROI(c, this.genome));
+        }
+    } else {
+        this.roi.push(new ROI(config, this.genome));
+    }
+    await this.updateViews(undefined, undefined, true);
+}
+
 /**
  * Return a promise to load a track
  *
@@ -674,7 +687,6 @@ Browser.prototype.loadTrack = async function (config) {
     }
 }
 
-
 Browser.prototype.createTrack = function (config) {
 
     // Lowercase format
@@ -747,8 +759,7 @@ Browser.prototype.addTrack = async function (track) {
         // Group autoscale groups will get updated later (as a group)
         return trackView.updateViews();
     }
-
-};
+}
 
 Browser.prototype.reorderTracks = function () {
 
@@ -913,21 +924,22 @@ Browser.prototype.resize = async function () {
 
 };
 
-Browser.prototype.updateViews = async function (genomicState, views) {
+Browser.prototype.updateViews = async function (genomicState, views, force) {
 
     var self = this,
         groupAutoscaleTracks, otherTracks;
 
-    if (!genomicState) {
-        genomicState = this.genomicStateList[0];
-    }
     if (!views) {
         views = this.trackViews;
     }
 
-    this.updateLocusSearchWidget(genomicState);
-
-    this.windowSizePanel.updateWithGenomicState(genomicState);
+    if (!genomicState && this.genomicStateList && this.genomicStateList.length == 1) {
+        genomicState = this.genomicStateList[0];
+    }
+    if (genomicState) {
+        this.updateLocusSearchWidget(genomicState);
+        this.windowSizePanel.updateWithGenomicState(genomicState);
+    }
 
     if (this.ideoPanel) {
         this.ideoPanel.repaint();
@@ -975,21 +987,21 @@ Browser.prototype.updateViews = async function (genomicState, views) {
 
             var allFeatures = [], dataRange;
 
-            for(let features of featureArray) {
+            for (let features of featureArray) {
                 allFeatures = allFeatures.concat(features);
             }
             dataRange = doAutoscale(allFeatures);
 
-            for(let trackView of groupTrackViews) {
+            for (let trackView of groupTrackViews) {
                 trackView.track.dataRange = dataRange;
                 trackView.track.autoscale = false;
-               await trackView.updateViews();
+                await trackView.updateViews();
             }
 
         }
 
-        for(let trackView of otherTracks){
-            await trackView.updateViews();
+        for (let trackView of otherTracks) {
+            await trackView.updateViews(force);
         }
     }
 };
