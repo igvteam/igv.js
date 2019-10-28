@@ -652,12 +652,8 @@ ViewPort.prototype.renderSVGContext = async function (context, offset) {
         };
 
     const features = this.tile ? this.tile.features : [];
-
-    if (this.tile && this.tile.roiFeatures) {
-        draw.call(this, drawConfig, features, this.tile.roiFeatures);
-    } else {
-        draw.call(this, drawConfig, features, undefined);
-    }
+    const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
+    draw.call(this, drawConfig, features, roiFeatures);
 
     if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
         renderTrackLabelSVG.call(this, context);
