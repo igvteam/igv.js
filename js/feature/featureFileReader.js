@@ -243,7 +243,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                 parse(inflated);
 
             } else {
-                const inflated = igvxhr.loadString(config.url, options);
+                const inflated = await igvxhr.loadString(config.url, options);
                 parse(inflated);
             }
 
