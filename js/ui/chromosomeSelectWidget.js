@@ -51,8 +51,10 @@ ChromosomeSelectWidget.prototype.update = function (genome) {
 
     this.$select.empty();
     const list = this.showAllChromosomes ? genome.chromosomeNames.slice() : genome.wgChromosomeNames.slice();  // slice used to copy list
-    list.unshift('all');
-    list.unshift('');
+    if(genome.supportsWholeGenomeView()) {
+        list.unshift('all');
+        list.unshift('');
+    }
     for (let name of list) {
         var $o;
         $o = $('<option>', {'value': name});
