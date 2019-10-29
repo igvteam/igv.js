@@ -20,12 +20,12 @@
 
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../js/api.js";
 
-        var igvDiv = document.getElementById("igv-div");
-        var options =
+    var igvDiv = document.getElementById("igv-div");
+    var options =
         {
             reference: {
                 id: "myCustomGenome",
@@ -34,7 +34,7 @@
                 cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
                 wholeGenomeView: false
             },
-            locus: 'chr7',
+           // locus: 'chr7',
             tracks: [
                 {
                     url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
@@ -59,12 +59,11 @@
         };
 
 
-        igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
-    });
 
 </script>
 
