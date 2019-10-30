@@ -61,6 +61,7 @@ const FeatureParser = function (format, decode, config) {
         switch (this.format) {
             case "narrowpeak":
             case "broadpeak":
+            case "regionpeak":
             case "peaks":
                 this.decode = decodePeak;
                 this.delimiter = /\s+/;

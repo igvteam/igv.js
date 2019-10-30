@@ -30,6 +30,7 @@ const knownFileExtensions = new Set([
 
     "narrowpeak",
     "broadpeak",
+    "regionpeak",
     "peaks",
     "bedgraph",
     "wig",
