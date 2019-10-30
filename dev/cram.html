@@ -38,10 +38,14 @@
                     name: 'HG00096',
                     //  color: 'blue',
                     //showSoftClips: true
+                    colorBy: "tag",
+                    colorByTag: "XC",
                     sort: {
                         locus: "chr8:128,750,986",
-                        option: "NUCLEOTIDE",
-                        direction: "ASC"
+                        //option: "NUCLEOTIDE",
+                        direction: "ASC",
+                        option: "TAG",
+                        tag: "XC"
                     },
                 }
 
@@ -50,9 +54,10 @@
 
     var igvDiv = document.getElementById("igvDiv");
 
-    browser = igv.createBrowser(igvDiv, options)
+    igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
+            window.igvBrowser = browser;
         })
 
 
