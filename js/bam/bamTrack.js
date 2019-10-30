@@ -103,7 +103,8 @@ const BAMTrack = extend(TrackBase,
                         chr: range.chr,
                         position: range.start,
                         sortOption: sort.option || "NUCLEOTIDE",
-                        direction: sort.direction === undefined ? true : "ASC" === sort.direction
+                        direction: sort.direction === undefined ? true : "ASC" === sort.direction,
+                        tag: sort.tag ? sort.tag.toUpperCase() : undefined
                     }
 
                     break;
@@ -397,11 +398,11 @@ BAMTrack.prototype.getState = function () {
 
         if (s) {
             config.sort = config.sort || [];
-
             config.sort.push({
                 locus: s.chr + ":" + (s.position + 1),
                 option: s.sortOption,
-                direction: s.direction
+                direction: s.direction ? "ASC" : "DESC",
+                tag: s.tag
             });
         }
     }
@@ -595,7 +596,7 @@ var AlignmentTrack = function (config, parent) {
     this.pairColors["LL"] = config.llColor || "rgb(0, 150, 150)";
 
     this.colorBy = config.colorBy || "pairOrientation";
-    this.colorByTag = config.colorByTag;
+    this.colorByTag = config.colorByTag ? config.colorByTag.toUpperCase() : undefined;
     this.bamColorTag = config.bamColorTag === undefined ? "YC" : config.bamColorTag;
 
     this.hideSmallIndels = config.hideSmallIndels;
