@@ -44,7 +44,7 @@ function isSimpleType(value) {
     return (value !== undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
 }
 
-const buildOptions = function (config, options) {
+function buildOptions (config, options) {
 
     var defaultOptions = {
         oauthToken: config.oauthToken,
@@ -54,7 +54,7 @@ const buildOptions = function (config, options) {
     };
 
     return Object.assign(defaultOptions, options);
-};
+}
 
 
 function download  (filename, data) {

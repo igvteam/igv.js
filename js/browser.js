@@ -623,7 +623,7 @@ Browser.prototype.loadTrack = async function (config) {
         const json = await google.getDriveFileInfo(config.url)
         config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
         if (!config.filename) {
-            config.filename = json.originalFileName;
+            config.filename = json.originalFileName || json.name;
         }
         if (!config.format) {
             config.format = inferFileFormat(config.filename);

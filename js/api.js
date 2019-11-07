@@ -55,7 +55,6 @@ export default {
     oauth,
     version,
 
-    //exports below are not supported and will be removed over time
     download,
     getBrowser,
     doAutoscale,
@@ -90,6 +89,7 @@ export default {
     TrackRemovalDialog,
     DataRangeDialog,
     MenuUtils,
-    Alert
+    Alert,
+    google
 }
 
