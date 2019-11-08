@@ -160,19 +160,27 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
 FeatureFileReader.prototype.loadIndex = async function () {
 
     let idxFile = this.config.indexURL;
-    if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
+    try {
+        let index;
+        if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
+            if (!idxFile) {
+                idxFile = this.config.url + '.tbi';
+            }
+            index = await loadBamIndex(idxFile, this.config, true, this.genome);
 
-        if (!idxFile) {
-            idxFile = this.config.url + '.tbi';
+        } else {
+            if (!idxFile) {
+                idxFile = this.config.url + '.idx';
+            }
+            index = await loadTribbleIndex(idxFile, this.config, this.genome);
         }
-        return loadBamIndex(idxFile, this.config, true, this.genome);
-
-    } else {
-
-        if (!idxFile) {
-            idxFile = this.config.url + '.idx';
+        return index;
+    } catch (e) {
+        if(this.config.indexURL) {
+            throw e;
+        } else {
+            return undefined;   // This is an expected condition if an indexFile is not specified.
         }
-        return loadTribbleIndex(idxFile, this.config, this.genome);
     }
 };
 
