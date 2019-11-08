@@ -1186,7 +1186,7 @@ function decodeAed(tokens, ignore) {
 
     var feature = new AedFeature(this.aed, tokens);
 
-    if (!feature.chr || !feature.start || !feature.end) {
+    if (!feature.chr || (!feature.start && feature.start!==0) || !feature.end) {
         console.log('Cannot parse feature: ' + tokens.join(','));
         return undefined;
     }
