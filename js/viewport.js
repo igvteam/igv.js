@@ -487,12 +487,12 @@ ViewPort.prototype.toSVG = async function (tile) {
 
 function draw(drawConfiguration, features, roiFeatures) {
 
-    if (features) {
+    if (features && features.length > 0) {
         drawConfiguration.features = features;
         this.trackView.track.draw(drawConfiguration);
     }
 
-    if (roiFeatures) {
+    if (roiFeatures && roiFeatures.length > 0) {
         for (let r of roiFeatures) {
             drawConfiguration.features = r.features;
             r.track.draw(drawConfiguration);
