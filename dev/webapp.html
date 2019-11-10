@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+<div>
+    <h1>Simulates certain interactions with the igv webapp</h1>
+</div>
+<div>
+    <button id="bmBtn">Bookmark</button>
+</div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    let browser;
+    const options =
+        {
+            queryParametersSupported: true,
+            showChromosomeWidget: true,
+            genome: "hg19",
+            apiKey: "AIzaSyDUUAUFpQEN4mumeMNIRWXSiTh5cPtUAD0",
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (b) {
+            browser = b;
+        })
+
+    function bookmark() {
+        window.history.pushState({}, "IGV", browser.sessionURL());
+    }
+
+    document.getElementById("bmBtn").addEventListener("click", bookmark);
+
+</script>
+
+</body>
+
+</html>

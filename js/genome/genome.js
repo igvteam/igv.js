@@ -159,8 +159,8 @@ var Genome = function (config, sequence, ideograms, aliases) {
 
 }
 
-Genome.prototype.supportsWholeGenomeView = function () {
-    return this.config.wholeGenomeView
+Genome.prototype.showWholeGenomeView = function () {
+    return this.config.wholeGenomeView !== false;
 }
 
 Genome.prototype.toJSON = function () {
@@ -174,7 +174,7 @@ Genome.prototype.getInitialLocus = function () {
 }
 
 Genome.prototype.getHomeChromosomeName = function () {
-    if (this.chromosomes.hasOwnProperty("all")) {
+    if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
         return "all";
     } else {
         const chromosome = this.chromosomes[this.chromosomeNames[0]];
