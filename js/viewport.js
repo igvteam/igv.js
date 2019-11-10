@@ -435,6 +435,11 @@ ViewPort.prototype.repaint = async function (tile) {
  */
 ViewPort.prototype.toSVG = async function (tile) {
 
+    // Nothing to do if zoomInNotice is active
+    if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
+        return;
+    }
+
     const genomicState = this.genomicState;
     const referenceFrame = genomicState.referenceFrame;
     const bpPerPixel = tile.bpPerPixel;
@@ -486,13 +491,12 @@ ViewPort.prototype.toSVG = async function (tile) {
 };
 
 function draw(drawConfiguration, features, roiFeatures) {
-
-    if (features && features.length > 0) {
+    if (features) {
         drawConfiguration.features = features;
         this.trackView.track.draw(drawConfiguration);
     }
 
-    if (roiFeatures && roiFeatures.length > 0) {
+    if (roiFeatures) {
         for (let r of roiFeatures) {
             drawConfiguration.features = r.features;
             r.track.draw(drawConfiguration);
@@ -597,6 +601,12 @@ ViewPort.prototype.saveImage = function () {
 
 ViewPort.prototype.renderSVGContext = async function (context, offset) {
 
+
+    // Nothing to do if zoomInNotice is active
+    if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
+        return;
+    }
+
     let str = this.trackView.track.name || this.trackView.track.id;
     str = str.replace(/\W/g, '');
 
@@ -682,7 +692,7 @@ ViewPort.prototype.saveSVG = function () {
 
         });
 
-    const { start, bpPerPixel } = this.genomicState.referenceFrame;
+    const {start, bpPerPixel} = this.genomicState.referenceFrame;
 
     const drawConfiguration =
         {
@@ -711,7 +721,7 @@ ViewPort.prototype.saveSVG = function () {
 
     const svg = drawConfiguration.context.getSerializedSvg(true);
 
-    const data = URL.createObjectURL(new Blob([ svg ], { type: "application/octet-stream" }));
+    const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
 
     const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
     const filename = str + ".svg";
@@ -721,21 +731,21 @@ ViewPort.prototype.saveSVG = function () {
 
 function renderTrackLabelSVG(context) {
 
-        const { x, y, width, height } = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+    const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
-        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
-        context.fillStyle = "white";
-        context.fillRect(x, y, width, height);
+    const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+    context.fillStyle = "white";
+    context.fillRect(x, y, width, height);
 
-        context.font = "12px Arial";
-        context.fillStyle = 'rgb(68, 68, 68)';
+    context.font = "12px Arial";
+    context.fillStyle = 'rgb(68, 68, 68)';
 
-        const dx = 0.25 * (width - stringWidth);
-        const dy = 0.7 * (height - 12);
-        context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
+    const dx = 0.25 * (width - stringWidth);
+    const dy = 0.7 * (height - 12);
+    context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
 
-        context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(x, y, width, height);
+    context.strokeStyle = 'rgb(68, 68, 68)';
+    context.strokeRect(x, y, width, height);
 
 }
 
