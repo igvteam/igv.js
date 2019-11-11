@@ -202,21 +202,14 @@ WigTrack.prototype.draw = function (options) {
             }
 
         } else {
-            // Draw optimization important for many points -- don't draw if the peak will be occluded by previously drawn features
-            if (x > lastXPixel || ((feature.value > 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue))) {
-                IGVGraphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
-                lastXPixel = x;
-                if (feature.value > 0) {
-                    lastValue = feature.value;
-                } else if (feature.value < 0) {
-                    lastNegValue = feature.value;
-                }
-
+            IGVGraphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+            lastXPixel = x + width;
+            if (feature.value > 0) {
+                lastValue = feature.value;
+            } else if (feature.value < 0) {
+                lastNegValue = feature.value;
             }
-
-
         }
-
     }
 
 };
