@@ -670,7 +670,6 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
-    console.warn('-----', feature)
     var py;
     var rowHeight = this.expandedRowHeight;
 
@@ -694,8 +693,11 @@ function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
     var bezier_control_left_px = (junction_left_px + junction_middle_px)/2;
     var bezier_control_right_px = (junction_middle_px + junction_right_px)/2;
 
-    var spanning_read_count = feature.score;
-    var line_width = 1 + Math.log(spanning_read_count + 1)/Math.log(12);
+    var uniquely_mapped_read_count = feature.score;
+    var total_read_count = feature.name;
+    var multi_mapped_read_count = total_read_count - uniquely_mapped_read_count
+
+    var line_width = 1 + Math.log(uniquely_mapped_read_count + 1)/Math.log(12);
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
     // .bed "name" field used to store unique + multi-mapped read counts, so:
@@ -711,23 +713,8 @@ function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.strokeStyle = line_width > 1.5 ? 'red' : 'blue' ;
     ctx.stroke();
 
-    console.warn('feature.row', feature.row)
-    console.warn('rowHeight', rowHeight)
-    console.warn('py', py)
-    console.warn('top_y', top_y)
-    console.warn('bottom_y', bottom_y)
-    console.warn('rendered splice junction', junction_left_px, junction_right_px, ctx.lineWidth, line_width > 1.5 ? 'red' : 'blue')
-
-
-    console.warn('cy', cy)
-    console.warn('top_y', top_y)
-    console.warn('bottom_y', bottom_y)
-    console.warn('junction_left_px', junction_left_px)
-    console.warn('junction_right_px', junction_right_px)
-    console.warn('spanning_read_count', spanning_read_count)
-    console.warn('bezier curve p1: ', bezier_control_left_px, top_y)
-    console.warn('bezier curve p2: ', bezier_control_right_px, top_y)
-    console.warn('bezier curve p3: ', junction_right_px, bezier_bottom_y)
+    var label = uniquely_mapped_read_count + (multi_mapped_read_count == 0 ? '' : '(+' + multi_mapped_read_count + ')');
+    ctx.fillText(label, junction_middle_px - ctx.measureText(label).width/2, top_y)
 }
 
 // SNP constants
