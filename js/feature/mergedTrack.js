@@ -49,6 +49,8 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
         if (!tconf.type) inferTrackTypes(tconf);
 
         tconf.isMergedTrack = true;
+        tconf.height = config.height;
+
         var t = browser.createTrack(tconf);
 
         if (t) {
