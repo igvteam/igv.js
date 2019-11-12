@@ -84,9 +84,7 @@ MergedTrack.prototype.draw = function (options) {
         trackOptions = Object.assign({}, options);
         trackOptions.features = mergedFeatures[i];
         this.tracks[i].dataRange = dataRange;
-        console.warn('-- drawing', trackOptions.features.length, 'features for', this.tracks[i].name)
         this.tracks[i].draw(trackOptions);
-        console.warn('-- done drawing track', i)
     }
 
 }
