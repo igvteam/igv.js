@@ -48,6 +48,7 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
 
         if (!tconf.type) inferTrackTypes(tconf);
 
+        tconf.isMergedTrack = true;
         var t = browser.createTrack(tconf);
 
         if (t) {
@@ -68,7 +69,6 @@ MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
 }
 
-
 MergedTrack.prototype.draw = function (options) {
 
     var i, len, mergedFeatures, trackOptions, dataRange;
@@ -77,12 +77,16 @@ MergedTrack.prototype.draw = function (options) {
 
     dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
 
+    //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
     for (i = 0, len = this.tracks.length; i < len; i++) {
 
         trackOptions = Object.assign({}, options);
         trackOptions.features = mergedFeatures[i];
         this.tracks[i].dataRange = dataRange;
+        console.warn('-- drawing', trackOptions.features.length, 'features for', this.tracks[i].name)
         this.tracks[i].draw(trackOptions);
+        console.warn('-- done drawing track', i)
     }
 
 }
@@ -126,16 +130,15 @@ function autoscale(chr, featureArrays) {
     //
     // }
     // else {
-    featureArrays.forEach(function (features) {
+    featureArrays.forEach(function (features, i) {
         features.forEach(function (f) {
-            if (!Number.isNaN(f.value)) {
+            if (typeof f.value !== 'undefined' && !Number.isNaN(f.value)) {
                 min = Math.min(min, f.value);
                 max = Math.max(max, f.value);
             }
         });
     });
     //  }
-
     return {min: min, max: max};
 }
 

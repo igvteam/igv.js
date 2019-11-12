@@ -62,7 +62,7 @@ const FeatureTrack = extend(TrackBase,
 
         this.featureHeight = config.featureHeight || 14;
 
-        if ("FusionJuncSpan" === config.type) {
+        if ("FusionJuncSpan" === config.type || 'spliceJunc' === config.type) {
             this.squishedRowHeight = config.squishedRowHeight || 50;
             this.expandedRowHeight = config.expandedRowHeight || 50;
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
@@ -82,6 +82,8 @@ const FeatureTrack = extend(TrackBase,
             this.render = config.render;
         } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
+        } else if ('spliceJunc' === config.type) {
+            this.render = renderSpliceJunc;
         } else if ('snp' === config.type) {
             this.render = renderSnp;
             // colors ordered based on priority least to greatest
@@ -176,7 +178,9 @@ FeatureTrack.prototype.draw = function (options) {
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
 
-    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    if ( typeof this.config.isMergedTrack === 'undefined' || !this.config.isMergedTrack ) {
+        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+    }
 
     if (featureList) {
         let lastPxEnd = [];
@@ -609,7 +613,6 @@ function getFeatureLabelY(featureY, transform) {
  * @param ctx  the canvas 2d context
  */
 function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
-
     var py;
     var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
 
@@ -629,7 +632,6 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
     // draw the junction arc
     var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
     var junction_right_px = Math.round((feature.junction_right - bpStart) / xScale);
-
 
     ctx.beginPath();
     ctx.moveTo(junction_left_px, cy);
@@ -656,6 +658,76 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
         ctx.strokeStyle = 'purple';
         ctx.stroke();
     }
+}
+
+
+/**
+ *
+ * @param feature
+ * @param bpStart  genomic location of the left edge of the current canvas
+ * @param xScale  scale in base-pairs per pixel
+ * @param pixelHeight  pixel height of the current canvas
+ * @param ctx  the canvas 2d context
+ */
+function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
+    console.warn('-----', feature)
+    var py;
+    var rowHeight = this.expandedRowHeight;
+
+    if (this.displayMode === "COLLAPSED") {
+        py = this.margin;
+    } else if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
+        py = this.margin + rowHeight * feature.row;
+    } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
+        py = this.margin + rowHeight * feature.row;
+    }
+
+    var cy = py + 0.5 * rowHeight;
+    var top_y = cy - 0.5 * rowHeight;
+    var bottom_y = cy + 0.5 * rowHeight;
+    var bezier_bottom_y = (bottom_y + cy)/2;
+
+    // draw the junction arc
+    var junction_left_px = Math.round((feature.start - bpStart) / xScale);
+    var junction_right_px = Math.round((feature.end - bpStart) / xScale);
+    var junction_middle_px = (junction_left_px + junction_right_px)/2;
+    var bezier_control_left_px = (junction_left_px + junction_middle_px)/2;
+    var bezier_control_right_px = (junction_middle_px + junction_right_px)/2;
+
+    var spanning_read_count = feature.score;
+    var line_width = 1 + Math.log(spanning_read_count + 1)/Math.log(12);
+
+    // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
+    // .bed "name" field used to store unique + multi-mapped read counts, so:
+    // feature.score:  unique spanning read counts
+    // feature.name:   unique + multi-mapped spanning read counts
+    //example feature:  { chr: "chr17", start: 39662344, end: 39662803, name: "59", row: 0, score: 38, strand: "+"}
+
+    ctx.beginPath();
+    ctx.moveTo(junction_left_px, bezier_bottom_y);
+    ctx.bezierCurveTo(bezier_control_left_px, top_y, bezier_control_right_px, top_y, junction_right_px, bezier_bottom_y);
+
+    ctx.lineWidth = line_width;
+    ctx.strokeStyle = line_width > 1.5 ? 'red' : 'blue' ;
+    ctx.stroke();
+
+    console.warn('feature.row', feature.row)
+    console.warn('rowHeight', rowHeight)
+    console.warn('py', py)
+    console.warn('top_y', top_y)
+    console.warn('bottom_y', bottom_y)
+    console.warn('rendered splice junction', junction_left_px, junction_right_px, ctx.lineWidth, line_width > 1.5 ? 'red' : 'blue')
+
+
+    console.warn('cy', cy)
+    console.warn('top_y', top_y)
+    console.warn('bottom_y', bottom_y)
+    console.warn('junction_left_px', junction_left_px)
+    console.warn('junction_right_px', junction_right_px)
+    console.warn('spanning_read_count', spanning_read_count)
+    console.warn('bezier curve p1: ', bezier_control_left_px, top_y)
+    console.warn('bezier curve p2: ', bezier_control_right_px, top_y)
+    console.warn('bezier curve p3: ', junction_right_px, bezier_bottom_y)
 }
 
 // SNP constants
