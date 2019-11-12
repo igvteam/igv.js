@@ -23,81 +23,46 @@
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="text/javascript">
-  function parseJson(response) {
-    return response.json()
-  }
-
-  function parseToken(json) {
-    return json['auth_token']
-  }
 
   function getOauthTokenFn() {
-    return fetch("http://localhost:8000/api/google_auth_token").then(parseJson).then(parseToken)
+    return fetch("http://localhost:8000/api/google_auth_token").then(resopnse => response.json()).then(j => j['auth_token'])
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-        /*
-        {
-        type: 'feature',
-        url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.bigWig',
-        name: 'test'
-        },
-        {
-        type: 'wig',
-        url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.bigWig',
-        name: 'test'
-        },
-        {
-        type: 'wig',
-        url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.bigWig',
-        name: 'test'
-        },
-        */
+        var bucket = 'gs://macarthurlab-rnaseq'
         var options = {
 
 
             genome: "hg38",
             //locus: "chr1:3,826,724-3,826,763",
             locus: "chr1:3,857,546-3,860,105",
-            tracks: [
-            /*
-              {
-                type: 'spliceJunc',
-                format: "bed",
-                url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.SJ.out.bed.gz',
-                indexURL: 'gs://seqr-bw/project__rnaseq/VIL_17_097.SJ.out.bed.gz.tbi',
-                displayMode: "COLLAPSED",
-              },
-            */
-                {
-                    type: 'merged',
-                    name: 'VIL_17_097 splice junctions',
-                    tracks: [
-                      {
-                        type: 'wig',
-                        format: "bigwig",
-                        url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.bigWig',
-                        oauthToken: getOauthTokenFn,
-                      },
-                      {
-                        type: 'spliceJunc',
-                        format: "bed",
-                        url: 'gs://seqr-bw/project__rnaseq/VIL_17_097.SJ.out.bed.gz',
-                        indexURL: 'gs://seqr-bw/project__rnaseq/VIL_17_097.SJ.out.bed.gz.tbi',
-                        displayMode: "COLLAPSED",
-                        oauthToken: getOauthTokenFn,
-                      },
-                    ],
+            tracks: [ 'RGP_94_3_2', 'RGP_94_4_2', 'VIL_17_120' ].map((prefix) => {
+                return {
+                      type: 'merged',
+                      name: `${prefix} splice junctions`,
+                      tracks: [
+                            {
+                              type: 'wig',
+                              format: "bigwig",
+                              url: `${bucket}/bigWig/${prefix}.bigWig`,
+                              oauthToken: getOauthTokenFn,
+                            },
+                            {
+                              type: 'spliceJunc',
+                              format: 'bed',
+                              url: `${bucket}/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz`,
+                              indexURL: `${bucket}/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz.tbi`,
+                              displayMode: 'COLLAPSED',
+                              oauthToken: getOauthTokenFn,
+                            },
+                      ],
                 }
 
-            ]
+            })
         };
 
         var igvDiv = document.getElementById("igv-div");
 
-
-        igv.oauth.google.setToken(
-            "ya29.ImCwBxYJXVyLs9nOeRuLg3zOv_6gr0Sw2WD6dgxPD6IPVX4jVBloP2pnXk_tiU-8zJduDjVHJji74V8tRxmndxeWdPwI3QyJfKsPwEh7q9yFOHup6C5GI7ucwcxUiCjs-SU")
         igv.createBrowser(igvDiv, options)
             .then(function (browser) {
                 console.log("Created IGV browser");
