@@ -29,35 +29,59 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
-        var bucket = 'gs://macarthurlab-rnaseq'
+        var tracks = [];
+
+        tracks = tracks.concat([ 'muscle', 'blood', 'fibs' ].map((prefix) => {
+          return {
+            type: 'merged',
+            name: prefix,
+            tracks: [
+              {
+                type: 'wig',
+                format: "bigwig",
+                url: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.bigWig`,
+                oauthToken: getOauthTokenFn,
+              },
+              {
+                type: 'spliceJunc',
+                format: 'bed',
+                url: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.SJ.out.tab.bed.gz`,
+                indexURL: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.SJ.out.tab.bed.gz.tbi`,
+                displayMode: 'COLLAPSED',
+                oauthToken: getOauthTokenFn,
+              },
+            ],
+          }
+        }));
+        
+        tracks = tracks.concat([ 'RGP_94_3_2', 'RGP_94_4_2', 'VIL_17_120' ].map((prefix) => {
+          return {
+            type: 'merged',
+            name: prefix,
+            tracks: [
+              {
+                type: 'wig',
+                format: "bigwig",
+                url: `gs://macarthurlab-rnaseq/bigWig/${prefix}.bigWig`,
+                oauthToken: getOauthTokenFn,
+              },
+              {
+                type: 'spliceJunc',
+                format: 'bed',
+                url: `gs://macarthurlab-rnaseq/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz`,
+                indexURL: `gs://macarthurlab-rnaseq/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz.tbi`,
+                displayMode: 'COLLAPSED',
+                oauthToken: getOauthTokenFn,
+              },
+            ],
+          }
+        }));
+
         var options = {
-            genome: "hg38",
-            //locus: "chr1:3,826,724-3,826,763",
-            locus: "chr1:3,857,546-3,860,105",
-
-            tracks: [ 'RGP_94_3_2', 'RGP_94_4_2', 'VIL_17_120' ].map((prefix) => {
-                return {
-                      type: 'merged',
-                      name: prefix,
-                      tracks: [
-                            {
-                              type: 'wig',
-                              format: "bigwig",
-                              url: `${bucket}/bigWig/${prefix}.bigWig`,
-                              oauthToken: getOauthTokenFn,
-                            },
-                            {
-                              type: 'spliceJunc',
-                              format: 'bed',
-                              url: `${bucket}/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz`,
-                              indexURL: `${bucket}/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz.tbi`,
-                              displayMode: 'COLLAPSED',
-                              oauthToken: getOauthTokenFn,
-                            },
-                      ],
-                }
-
-            })
+            genome: 'hg38',
+            //locus: 'chr1:3,826,724-3,826,763',
+            locus: 'chr1:3,857,546-3,860,105',
+            tracks: tracks,
         };
 
         var igvDiv = document.getElementById("igv-div");
