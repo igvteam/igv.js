@@ -25,21 +25,20 @@
 <script type="text/javascript">
 
   function getOauthTokenFn() {
-    return fetch("http://localhost:8000/api/google_auth_token").then(resopnse => response.json()).then(j => j['auth_token'])
+    return fetch("http://localhost:8000/api/google_auth_token").then(response => response.json()).then(j => j['auth_token'])
   }
 
   document.addEventListener("DOMContentLoaded", function () {
         var bucket = 'gs://macarthurlab-rnaseq'
         var options = {
-
-
             genome: "hg38",
             //locus: "chr1:3,826,724-3,826,763",
             locus: "chr1:3,857,546-3,860,105",
+
             tracks: [ 'RGP_94_3_2', 'RGP_94_4_2', 'VIL_17_120' ].map((prefix) => {
                 return {
                       type: 'merged',
-                      name: `${prefix} splice junctions`,
+                      name: prefix,
                       tracks: [
                             {
                               type: 'wig',
