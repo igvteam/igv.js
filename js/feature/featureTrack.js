@@ -82,8 +82,8 @@ const FeatureTrack = extend(TrackBase,
             this.render = config.render;
         } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
-        } else if ('spliceJunc' === config.type) {
-            this.render = renderSpliceJunc;
+        } else if ('junctions' === config.type) {
+            this.render = renderJunctions;
         } else if ('snp' === config.type) {
             this.render = renderSnp;
             // colors ordered based on priority least to greatest
@@ -669,7 +669,7 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param pixelHeight  pixel height of the current canvas
  * @param ctx  the canvas 2d context
  */
-function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
+function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     var py;
     var rowHeight = this.config.height;
 
