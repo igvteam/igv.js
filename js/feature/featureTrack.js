@@ -62,7 +62,7 @@ const FeatureTrack = extend(TrackBase,
 
         this.featureHeight = config.featureHeight || 14;
 
-        if ("FusionJuncSpan" === config.type || 'spliceJunc' === config.type) {
+        if ("FusionJuncSpan" === config.type) {
             this.squishedRowHeight = config.squishedRowHeight || 50;
             this.expandedRowHeight = config.expandedRowHeight || 50;
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
@@ -614,7 +614,7 @@ function getFeatureLabelY(featureY, transform) {
  */
 function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
     var py;
-    var rowHeight = (this.displayMode === "EXPANDED") ? this.squishedRowHeight : this.expandedRowHeight;
+    var rowHeight = (this.displayMode === "EXPANDED") ? this.expandedRowHeight : this.squishedRowHeight;
 
     if (this.display === "COLLAPSED") {
         py = this.margin;
@@ -671,7 +671,7 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  */
 function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
     var py;
-    var rowHeight = this.expandedRowHeight;
+    var rowHeight = this.config.height;
 
     if (this.displayMode === "COLLAPSED") {
         py = this.margin;
@@ -684,7 +684,7 @@ function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
     var cy = py + 0.5 * rowHeight;
     var top_y = cy - 0.5 * rowHeight;
     var bottom_y = cy + 0.5 * rowHeight;
-    var bezier_bottom_y = (bottom_y + cy)/2;
+    var bezier_bottom_y = bottom_y - 10;
 
     // draw the junction arc
     var junction_left_px = Math.round((feature.start - bpStart) / xScale);
@@ -710,7 +710,7 @@ function renderSpliceJunc(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.bezierCurveTo(bezier_control_left_px, top_y, bezier_control_right_px, top_y, junction_right_px, bezier_bottom_y);
 
     ctx.lineWidth = line_width;
-    ctx.strokeStyle = line_width > 1.5 ? 'red' : 'blue' ;
+    ctx.strokeStyle = uniquely_mapped_read_count > 5 ? 'red' : 'blue' ;
     ctx.stroke();
 
     var label = uniquely_mapped_read_count + (multi_mapped_read_count == 0 ? '' : '(+' + multi_mapped_read_count + ')');
