@@ -191,7 +191,7 @@ FeatureTrack.prototype.draw = function (options) {
             const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
             const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             const last = lastPxEnd[row];
-            if (!last || pxEnd > last) {
+            if (!last || pxEnd > last || self.config.type === 'junctions') {
                 self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
                 // Ensure a visible gap between features
@@ -714,7 +714,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.stroke();
 
     var label = uniquely_mapped_read_count + (multi_mapped_read_count == 0 ? '' : '(+' + multi_mapped_read_count + ')');
-    ctx.fillText(label, junction_middle_px - ctx.measureText(label).width/2, top_y)
+    ctx.fillText(label, junction_middle_px - ctx.measureText(label).width/2, (7*top_y + cy)/8 )
 }
 
 // SNP constants
