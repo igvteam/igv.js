@@ -22,6 +22,7 @@
 
 <div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
+
 <script type="text/javascript">
 
   function getOauthTokenFn() {
@@ -31,45 +32,24 @@
   document.addEventListener("DOMContentLoaded", function () {
         var tracks = [];
 
-        tracks = tracks.concat([ 'muscle', 'blood', 'fibs' ].map((prefix) => {
+        // 'sampleC', '3sample'
+        tracks = tracks.concat([ 'sampleA', 'sampleB', '2sample', ].map((prefix) => {
           return {
             type: 'merged',
             name: prefix,
+            height: 100,
             tracks: [
               {
                 type: 'wig',
                 format: "bigwig",
-                url: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.bigWig`,
+                url: `gs://macarthurlab-rnaseq/test_data/${prefix}.bigWig`,
                 oauthToken: getOauthTokenFn,
               },
               {
                 type: 'junctions',
                 format: 'bed',
-                url: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.SJ.out.tab.bed.gz`,
-                indexURL: `gs://macarthurlab-rnaseq/GTEx_ref_data/${prefix}_100_GTEx_samples.SJ.out.tab.bed.gz.tbi`,
-                displayMode: 'COLLAPSED',
-                oauthToken: getOauthTokenFn,
-              },
-            ],
-          }
-        }));
-        
-        tracks = tracks.concat([ 'RGP_94_3_2', 'RGP_94_4_2', 'VIL_17_120' ].map((prefix) => {
-          return {
-            type: 'merged',
-            name: prefix,
-            tracks: [
-              {
-                type: 'wig',
-                format: "bigwig",
-                url: `gs://macarthurlab-rnaseq/bigWig/${prefix}.bigWig`,
-                oauthToken: getOauthTokenFn,
-              },
-              {
-                type: 'junctions',
-                format: 'bed',
-                url: `gs://macarthurlab-rnaseq/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz`,
-                indexURL: `gs://macarthurlab-rnaseq/SJ_out_bed_for_igvjs/${prefix}.SJ.out.bed.gz.tbi`,
+                url: `gs://macarthurlab-rnaseq/test_data/${prefix}.SJ.out.tab.bed.gz`,
+                indexURL: `gs://macarthurlab-rnaseq/test_data/${prefix}.SJ.out.tab.bed.gz.tbi`,
                 displayMode: 'COLLAPSED',
                 oauthToken: getOauthTokenFn,
               },
@@ -80,7 +60,7 @@
         var options = {
             genome: 'hg38',
             //locus: 'chr1:3,826,724-3,826,763',
-            locus: 'chr1:3,857,546-3,860,105',
+            locus: 'chr15:92,882,678-92,884,209',
             tracks: tracks,
         };
 
