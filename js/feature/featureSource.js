@@ -224,7 +224,7 @@ FeatureSource.prototype.ingestFeatures = function (featureList, genomicInterval)
     }
 
     // Assign overlapping features to rows
-    if (this.config.format !== "wig") {
+    if (this.config.format !== "wig" && this.config.type !== "junctions") {
         const maxRows = this.config.maxRows || 500
         packFeatures(featureList, maxRows);
     }
