@@ -332,7 +332,7 @@ FeatureSource.prototype.getWGFeatures = function (allFeatures) {
                     wg.popupData = function (genomeLocation) {
                         const clonedObject = Object.assign({}, this)
                         clonedObject.chr = this.realChr
-                        clonedObject.start = this.realStart
+                        clonedObject.start = this.realStart + 1
                         clonedObject.end = this.realEnd
                         delete clonedObject.realChr
                         delete clonedObject.realStart
