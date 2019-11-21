@@ -236,7 +236,7 @@ function packAlignmentRows(alignments, start, end, showSoftClips) {
         let allocatedCount = 0;
         let lastAllocatedCount = 0;
         const packedAlignmentRows = [];
-        const alignmentSpace = 8;
+        const alignmentSpace = 2;
         try {
             while (allocatedCount < alignments.length) {
                 const alignmentRow = new BamAlignmentRow();

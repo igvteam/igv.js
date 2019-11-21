@@ -55,7 +55,9 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
     const chrToIndex = await getChrIndex.call(this)
     const queryChr = this.chrAliasTable.hasOwnProperty(chr) ? this.chrAliasTable[chr] : chr;
     const chrId = chrToIndex[queryChr];
-    const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+    const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
+        this.config.samplingWindowSize, this.config.samplingDepth,
+        this.config.pairsSupported, this.config.alleleFreqThreshold);
 
     if (chrId === undefined) {
         return alignmentContainer;
