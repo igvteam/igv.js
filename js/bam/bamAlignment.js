@@ -152,11 +152,12 @@ BamAlignment.prototype.tags = function () {
                         value += String.fromCharCode(cc);
                     }
                 }
-            } else {
+            } else if (type === 'B') {
+                value = 'Arrays not currently supported';
+            }
+            else {
                 //'Unknown type ' + type;
                 value = 'Error unknown type: ' + type;
-                tags[tag] = value;
-                break;
             }
             tags[tag] = value;
         }
