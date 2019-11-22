@@ -24,7 +24,7 @@
  */
 
 import igvxhr from "../igvxhr.js";
-import google from "./googleUtils.js"
+import google from "../google/googleUtils.js"
 
 function ga4ghGet(options) {
     var url = options.url + "/" + options.entity + "/" + options.entityId;
