@@ -31,7 +31,7 @@ import GFFHelper from "./gffHelper.js";
 import GtexReader from "../gtex/gtexReader.js";
 import ImmVarReader from "../gtex/immvarReader.js";
 import TrackBase from "../trackBase.js";
-import Ga4ghVariantReader from "../google/ga4ghVariantReader.js";
+import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js";
 import CivicReader from "../civic/civicReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
 
