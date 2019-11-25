@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+</head>
+<body>
+<h1>Splice Junctions example</h1>
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+  var rootUrl = "/test/data/junctions";
+
+  document.addEventListener("DOMContentLoaded", function () {
+
+    var tracks = ['sampleA.chr15-92835700-93031800', 'sampleB.chr15-92835700-93031800', 'samples_A_and_B.chr15-92835700-93031800'].map((prefix) => {
+      return {
+        type: 'merged',
+        name: prefix,
+        height: 100,
+        tracks: [
+          {
+            type: 'wig',
+            format: "bigwig",
+            url: `${rootUrl}/${prefix}.bigWig`,
+          },
+          {
+            type: 'junctions',
+            format: 'bed',
+            url: `${rootUrl}/${prefix}.SJ.out.bed.gz`,
+            indexURL: `${rootUrl}/${prefix}.SJ.out.bed.gz.tbi`,
+            displayMode: 'COLLAPSED',
+            minUniquelyMappedReads: 1,
+            minTotalReads: 1,
+            maxFractionMultiMappedReads: 1,
+            minSplicedAlignmentOverhang: 0,
+            thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
+            bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
+            colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand
+            labelUniqueReadCount: true,
+            labelMultiMappedReadCount: true,
+            labelTotalReadCount: false,
+            labelIsAnnotatedJunction: " [A]",
+            hideAnnotatedJunctions: false,
+            hideUnannotatedJunctions: false,
+          },
+        ],
+      }
+    });
+
+    var options = {
+
+        locus: 'chr15:92835700-93031800',
+        genome: 'hg38',
+        tracks: tracks,
+    };
+
+    var igvDiv = document.getElementById("igv-div");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+  });
+
+</script>
+</body>
+</html>
