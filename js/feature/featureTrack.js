@@ -619,6 +619,7 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.display === "COLLAPSED") {
         py = this.margin;
     }
+
     if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
         py = this.margin + rowHeight * feature.row;
     } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
@@ -626,33 +627,33 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
     }
 
     var cy = py + 0.5 * rowHeight;
-    var top_y = cy - 0.5 * rowHeight;
-    var bottom_y = cy + 0.5 * rowHeight;
+    var topY = cy - 0.5 * rowHeight;
+    var bottomY = cy + 0.5 * rowHeight;
 
     // draw the junction arc
-    var junction_left_px = Math.round((feature.junction_left - bpStart) / xScale);
-    var junction_right_px = Math.round((feature.junction_right - bpStart) / xScale);
+    var junctionLeftPx = Math.round((feature.junction_left - bpStart) / xScale);
+    var junctionRightPx = Math.round((feature.junction_right - bpStart) / xScale);
 
     ctx.beginPath();
-    ctx.moveTo(junction_left_px, cy);
-    ctx.bezierCurveTo(junction_left_px, top_y, junction_right_px, top_y, junction_right_px, cy);
+    ctx.moveTo(junctionLeftPx, cy);
+    ctx.bezierCurveTo(junctionLeftPx, topY, junctionRightPx, topY, junctionRightPx, cy);
 
     ctx.lineWidth = 1 + Math.log(feature.num_junction_reads) / Math.log(2);
     ctx.strokeStyle = 'blue';
     ctx.stroke();
 
     // draw the spanning arcs
-    var spanning_coords = feature.spanning_frag_coords;
-    for (var i = 0; i < spanning_coords.length; i++) {
-        var spanning_info = spanning_coords[i];
+    var spanningCoords = feature.spanning_frag_coords;
+    for (var i = 0; i < spanningCoords.length; i++) {
+        var spanningInfo = spanningCoords[i];
 
-        var span_left_px = Math.round((spanning_info.left - bpStart) / xScale);
-        var span_right_px = Math.round((spanning_info.right - bpStart) / xScale);
+        var spanLeftPx = Math.round((spanningInfo.left - bpStart) / xScale);
+        var spanRightPx = Math.round((spanningInfo.right - bpStart) / xScale);
 
 
         ctx.beginPath();
-        ctx.moveTo(span_left_px, cy);
-        ctx.bezierCurveTo(span_left_px, bottom_y, span_right_px, bottom_y, span_right_px, cy);
+        ctx.moveTo(spanLeftPx, cy);
+        ctx.bezierCurveTo(spanLeftPx, bottomY, spanRightPx, bottomY, spanRightPx, cy);
 
         ctx.lineWidth = 1;
         ctx.strokeStyle = 'purple';
@@ -682,22 +683,92 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
 
     var cy = py + 0.5 * rowHeight;
-    var top_y = cy - 0.5 * rowHeight;
-    var bottom_y = cy + 0.5 * rowHeight;
-    var bezier_bottom_y = bottom_y - 10;
+    var topY = py;
+    var bottomY = py + rowHeight;
+    var bezierBottomY = bottomY - 10;
 
     // draw the junction arc
-    var junction_left_px = Math.round((feature.start - bpStart) / xScale);
-    var junction_right_px = Math.round((feature.end - bpStart) / xScale);
-    var junction_middle_px = (junction_left_px + junction_right_px)/2;
-    var bezier_control_left_px = (junction_left_px + junction_middle_px)/2;
-    var bezier_control_right_px = (junction_middle_px + junction_right_px)/2;
+    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
+    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
+    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
 
-    var uniquely_mapped_read_count = feature.score;
-    var total_read_count = feature.name;
-    var multi_mapped_read_count = total_read_count - uniquely_mapped_read_count
+    if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
+        return
+    }
+    if (this.config.hideUnannotatedJunctions && feature.attributes.annotated_junction === "false") {
+        return
+    }
 
-    var line_width = 1 + Math.log(uniquely_mapped_read_count + 1)/Math.log(12);
+    var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
+    if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
+        return
+    }
+    var multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
+    var totalReadCount =  uniquelyMappedReadCount + multiMappedReadCount;
+    if (totalReadCount < this.config.minTotalReads) {
+        return
+    }
+    if (totalReadCount > 0 && multiMappedReadCount/totalReadCount > this.config.maxFractionMultiMappedReads) {
+        return
+    }
+
+    var maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
+    if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
+        return
+    }
+
+    var lineWidth;
+    if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.thicknessBasedOn === 'numUniqueReads') {
+        lineWidth = uniquelyMappedReadCount;
+    } else if (this.config.thicknessBasedOn === 'numReads') {
+        lineWidth = totalReadCount;
+    } else if (this.config.thicknessBasedOn === 'isAnnotatedJunction') {
+        lineWidth = feature.attributes.annotated_junction === "true" ? 20 : 100;
+    }
+    lineWidth = 1 + Math.log(lineWidth + 1)/Math.log(12);
+
+    var bounceHeight;
+    if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.bounceHeightBasedOn === 'random') {
+        // randomly but deterministically stagger topY coordinates to reduce overlap
+        bounceHeight = (feature.start + feature.end) % 7;
+    } else if (this.config.bounceHeightBasedOn === 'distance') {
+        bounceHeight = (feature.end - feature.start)/1000;
+    } else if (this.config.bounceHeightBasedOn === 'thickness') {
+        bounceHeight = 2*lineWidth;
+    }
+    topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
+
+    var color;
+    if (typeof this.config.colorBy === 'undefined' || this.config.colorBy === 'numUniqueReads') {
+        color = uniquelyMappedReadCount > 5 ? 'blue' : '#AAAAAA';  // color gradient?
+    } else if (this.config.colorBy === 'numReads') {
+        color = totalReadCount > 5 ? 'blue' : '#AAAAAA';
+    } else if (this.config.colorBy === 'isAnnotatedJunction') {
+        color = feature.attributes.annotated_junction === "true" ?  '#b0b0ec' : 'orange';
+    } else if (this.config.colorBy === 'strand') {
+        color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0';
+    }
+
+    var label = '';
+    if (typeof this.config.labelUniqueReadCount === 'undefined' && typeof this.config.labelMultiMappedReadCount === 'undefined' && typeof this.config.labelTotalReadCount === 'undefined') {
+        //default label
+        label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');
+    } else {
+        if (this.config.labelTotalReadCount) {
+            label += totalReadCount;
+        } else if (this.config.labelUniqueReadCount) {
+            label += uniquelyMappedReadCount;
+        }
+        if (this.config.labelMultiMappedReadCount && multiMappedReadCount > 0) {
+            label += ' (+' + multiMappedReadCount + ')';
+        }
+    }
+
+    if (this.config.labelIsAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
+        label += this.config.labelIsAnnotatedJunction;
+    }
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
     // .bed "name" field used to store unique + multi-mapped read counts, so:
@@ -706,15 +777,14 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     //example feature:  { chr: "chr17", start: 39662344, end: 39662803, name: "59", row: 0, score: 38, strand: "+"}
 
     ctx.beginPath();
-    ctx.moveTo(junction_left_px, bezier_bottom_y);
-    ctx.bezierCurveTo(bezier_control_left_px, top_y, bezier_control_right_px, top_y, junction_right_px, bezier_bottom_y);
+    ctx.moveTo(junctionLeftPx, bezierBottomY);
+    ctx.bezierCurveTo(bezierControlLeftPx, topY, bezierControlRightPx, topY, junctionRightPx, bezierBottomY);
 
-    ctx.lineWidth = line_width;
-    ctx.strokeStyle = uniquely_mapped_read_count > 5 ? 'red' : 'blue' ;
+    ctx.lineWidth = lineWidth;
+    ctx.strokeStyle = color;
     ctx.stroke();
 
-    var label = uniquely_mapped_read_count + (multi_mapped_read_count == 0 ? '' : '(+' + multi_mapped_read_count + ')');
-    ctx.fillText(label, junction_middle_px - ctx.measureText(label).width/2, (7*top_y + cy)/8 )
+    ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width/2, (7*topY + cy)/8);
 }
 
 // SNP constants
