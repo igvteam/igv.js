@@ -57,7 +57,7 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
             t.autoscale = false;     // Scaling done from merged track
             self.tracks.push(t);
         } else {
-            console.log("Could not create track " + tconf);
+            console.warn("Could not create track " + tconf);
         }
     });
 });
@@ -107,6 +107,16 @@ MergedTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
         }
     }
 }
+
+MergedTrack.prototype.popupData = function (config) {
+    var popupDataFromAllTracks = [];
+    for (var i = 0, len = this.tracks.length; i < len; i++) {
+        var popupData = this.tracks[i].popupData(config);
+        popupDataFromAllTracks.push(...popupData);
+    }
+
+    return popupDataFromAllTracks
+};
 
 function autoscale(chr, featureArrays) {
 
