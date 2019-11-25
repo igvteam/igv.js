@@ -750,7 +750,7 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
             feature.cdEnd = parseInt(tokens[4]);
         }
         if (tokens.length > 5) {
-            if (tokens[5] !== "." && tokens[5] !== "0")
+            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !=  "-1")
                 feature.color = IGVColor.createColorString(tokens[5]);
         }
         if (tokens.length > 8) {

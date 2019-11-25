@@ -29,7 +29,7 @@ import BamReader from "./bamReader.js";
 import BamWebserviceReader from "./bamWebserviceReader.js";
 import HtsgetReader from "./htsgetReader.js";
 import CramReader from "../cram/cramReader.js";
-import Ga4ghAlignmentReader from "../google/ga4ghAlignmentReader.js";
+import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js";
 import BamAlignmentRow from "./bamAlignmentRow.js";
 import PairedAlignment from "./pairedAlignment.js";
 import {isString} from "../util/stringUtils.js";
@@ -236,7 +236,7 @@ function packAlignmentRows(alignments, start, end, showSoftClips) {
         let allocatedCount = 0;
         let lastAllocatedCount = 0;
         const packedAlignmentRows = [];
-        const alignmentSpace = 8;
+        const alignmentSpace = 2;
         try {
             while (allocatedCount < alignments.length) {
                 const alignmentRow = new BamAlignmentRow();

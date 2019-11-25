@@ -45,6 +45,7 @@ import {guid, pageCoordinates} from "./util/domUtils.js";
 import {decodeDataURI} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
+import GtexUtils from "./gtex/gtexUtils.js"
 
 
 const Browser = function (options, trackContainerDiv) {
@@ -85,6 +86,9 @@ const Browser = function (options, trackContainerDiv) {
 function initialize(options) {
     var genomeId;
 
+    if(options.gtex) {
+        GtexUtils.gtexLoaded = true
+    }
     this.flanking = options.flanking;
     this.crossDomainProxy = options.crossDomainProxy;
     this.formats = options.formats;
