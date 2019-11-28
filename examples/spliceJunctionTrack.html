@@ -43,20 +43,21 @@
             minSplicedAlignmentOverhang: 0,
             thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
             bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
-            colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand
+            colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
             labelUniqueReadCount: true,
             labelMultiMappedReadCount: true,
             labelTotalReadCount: false,
+            labelMotif: false,
             labelIsAnnotatedJunction: " [A]",
             hideAnnotatedJunctions: false,
             hideUnannotatedJunctions: false,
+            hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
           },
         ],
       }
     });
 
     var options = {
-
         locus: 'chr15:92835700-93031800',
         genome: 'hg38',
         tracks: tracks,
