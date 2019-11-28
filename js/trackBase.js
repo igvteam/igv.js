@@ -176,10 +176,12 @@ TrackBase.extractPopupData = function (feature, genomeId) {
     let alleles, alleleFreqs;
     for (var property in feature) {
 
-        if (feature.hasOwnProperty(property) && !filteredProperties.has(property) &&
+        if (feature.hasOwnProperty(property) &&
+            !filteredProperties.has(property) &&
             isSimpleType(feature[property])) {
-
-            data.push({name: property, value: feature[property]});
+            let value = feature[property];
+            if("start" === property) value = value + 1;
+            data.push({name: property, value: value});
 
             if (property === "alleles") {
                 alleles = feature[property];

@@ -162,13 +162,11 @@ FeatureTrack.prototype.computePixelHeight = function (features) {
     } else {
         let maxRow = 0;
         if (features && (typeof features.forEach === "function")) {
-            features.forEach(function (feature) {
-
+            for (let feature of features) {
                 if (feature.row && feature.row > maxRow) {
                     maxRow = feature.row;
                 }
-
-            });
+            }
         }
 
         const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
@@ -180,7 +178,7 @@ FeatureTrack.prototype.computePixelHeight = function (features) {
 
 FeatureTrack.prototype.draw = function (options) {
 
-    const self = this;
+
     const featureList = options.features;
     const ctx = options.context;
     const bpPerPixel = options.bpPerPixel;
@@ -195,12 +193,27 @@ FeatureTrack.prototype.draw = function (options) {
     }
 
     if (featureList) {
+
+        const rowFeatureCount = [];
+        options.rowLastX = [];
+        for (let feature of featureList) {
+            const row = feature.row || 0;
+            if (rowFeatureCount[row] === undefined) {
+                rowFeatureCount[row] = 1;
+            } else {
+                rowFeatureCount[row]++;
+            }
+            options.rowLastX[row] = -Number.MAX_VALUE;
+        }
+
         let lastPxEnd = [];
         for (let feature of featureList) {
             if (feature.end < bpStart) continue;
             if (feature.start > bpEnd) break;
 
             const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
+            const featureDensity = pixelWidth / rowFeatureCount[row];
+            options.drawLabel = options.labelAllFeatures || featureDensity > 10;
             const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             const last = lastPxEnd[row];
             if (!last || pxEnd > last || self.config.type === 'junctions') {
@@ -423,7 +436,6 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         color = IGVColor.addAlpha(this.color, feature.alpha);
     }
 
-
     if (this.config.colorBy) {
         const colorByValue = feature[this.config.colorBy.field];
         if (colorByValue) {
@@ -542,7 +554,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
     const windowX1 = windowX + options.viewportContainerWidth / nLoci;
 
-    renderFeatureLabels.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
+    if (options.drawLabel) {
+        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
+    }
 }
 
 /**
@@ -556,13 +570,13 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  * @param genomicState  genomic state
  * @param options  options
  */
-function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
+function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
 
-    var geneColor, geneFontStyle, transform,
-        boxX, boxX1,    // label should be centered between these two x-coordinates
-        labelX, labelY,
-        textFitsInBox;
+    if (feature.name === undefined) return;
+
     // feature outside of viewable window
+    let boxX;
+    let boxX1;
     if (featureX1 < windowX || featureX > windowX1) {
         boxX = featureX;
         boxX1 = featureX1;
@@ -572,42 +586,48 @@ function renderFeatureLabels(ctx, feature, featureX, featureX1, featureY, window
         boxX1 = Math.min(featureX1, windowX1);
     }
 
-    if (genomicState.selection && GtexUtils.gtexLoaded && feature.name !== undefined) {
+    let geneColor;
+    let gtexSelection = false;
+    if (genomicState.selection && GtexUtils.gtexLoaded) {
         // TODO -- for gtex, figure out a better way to do this
+        gtexSelection = true;
         geneColor = genomicState.selection.colorForGene(feature.name);
     }
 
 
-    textFitsInBox = (boxX1 - boxX) > ctx.measureText(feature.name).width;
-
-    if (//(feature.name !== undefined && feature.name.toUpperCase() === selectedFeatureName) ||
-        ((textFitsInBox || geneColor) && this.displayMode !== "SQUISHED" && feature.name !== undefined)) {
-        geneFontStyle = {
-            // font: '10px PT Sans',
-            textAlign: 'center',
+    if (this.displayMode !== "SQUISHED") {
+        const geneFontStyle = {
+            textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
             fillStyle: geneColor || feature.color || this.color,
             strokeStyle: geneColor || feature.color || this.color
         };
 
+        let transform;
         if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
             transform = {rotate: {angle: 45}};
-            delete geneFontStyle.textAlign;
         }
 
-        labelX = boxX + ((boxX1 - boxX) / 2);
-        labelY = getFeatureLabelY(featureY, transform);
+        const labelX = boxX + ((boxX1 - boxX) / 2);
+        const labelY = getFeatureLabelY(featureY, transform);
 
-        // TODO: This is for compatibility with JuiceboxJS.
-        if (options.labelTransform) {
-            ctx.save();
-            options.labelTransform(ctx, labelX);
-            IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
-            ctx.restore();
+        const textBox = ctx.measureText(feature.name);
+        const xleft = labelX - textBox.width / 2;
+        const xright = labelX + textBox.width / 2;
+        if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
 
-        } else {
-            IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+            options.rowLastX[feature.row] = xright;
+
+            // This is for compatibility with JuiceboxJS.
+            if (options.labelTransform) {
+                ctx.save();
+                options.labelTransform(ctx, labelX);
+                IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
+                ctx.restore();
+
+            } else {
+                IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+            }
         }
-
     }
 }
 
