@@ -221,11 +221,18 @@ ViewPort.prototype.checkZoomIn = function () {
 
     if (this.$zoomInNotice) {
         if (showZoomInNotice.call(this)) {
+            // Out of visibility window
             if (this.canvas) {
                 this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
                 this.tile = undefined;
             }
             this.$zoomInNotice.show();
+
+            if(this.trackView.track.autoHeight) {
+                const minHeight = this.trackView.minHeight || 0;
+                this.setContentHeight(minHeight);
+            }
+
             return false;
         } else {
             this.$zoomInNotice.hide();
