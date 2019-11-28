@@ -31,7 +31,19 @@ import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
+import {PaletteColorTable} from "../util/colorPalletes";
 import GtexUtils from "../gtex/gtexUtils.js";
+
+
+var JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
+
+// Lock in color-to-motif mapping so it's independent of data loading order. This list may not include all possible
+// motif values as this varies depending on the RNA-seq pipeline. The current list is based on STAR v2.4 docs.
+var someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
+someMotifValues.forEach(motif => {
+    JUNCTION_MOTIF_PALETTE.getColor(motif);
+})
+
 
 const FeatureTrack = extend(TrackBase,
 
@@ -671,6 +683,17 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
+    // TODO: cache filter and pixel calculations by doing them earlier when features are initially parsed?
+    if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
+        return
+    }
+    if (this.config.hideUnannotatedJunctions && feature.attributes.annotated_junction === "false") {
+        return
+    }
+    if (this.config.hideMotifs && this.config.hideMotifs.includes(feature.attributes.motif)) {
+        return
+    }
+
     var py;
     var rowHeight = this.config.height;
 
@@ -693,13 +716,6 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
     var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
     var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
-
-    if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
-        return
-    }
-    if (this.config.hideUnannotatedJunctions && feature.attributes.annotated_junction === "false") {
-        return
-    }
 
     var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
@@ -749,6 +765,8 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         color = feature.attributes.annotated_junction === "true" ?  '#b0b0ec' : 'orange';
     } else if (this.config.colorBy === 'strand') {
         color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0';
+    } else if (this.config.colorBy === 'motif') {
+        color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
     }
 
     var label = '';
@@ -768,6 +786,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
 
     if (this.config.labelIsAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
         label += this.config.labelIsAnnotatedJunction;
+    }
+
+    if (this.config.labelMotif && feature.attributes.motif) {
+        label += ` ${feature.attributes.motif}`;
     }
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
