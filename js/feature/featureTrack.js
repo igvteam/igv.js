@@ -702,7 +702,6 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
-
     // TODO: cache filter and pixel calculations by doing them earlier when features are initially parsed?
     if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
         return
@@ -714,17 +713,9 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         return
     }
 
-    var py;
+    var py = this.margin;
     var rowHeight = this.config.height;
-
-    if (this.displayMode === "COLLAPSED") {
-        py = this.margin;
-    } else if (this.displayMode === "SQUISHED" && feature.row !== undefined) {
-        py = this.margin + rowHeight * feature.row;
-    } else if (this.displayMode === "EXPANDED" && feature.row !== undefined) {
-        py = this.margin + rowHeight * feature.row;
-    }
-
+    
     var cy = py + 0.5 * rowHeight;
     var topY = py;
     var bottomY = py + rowHeight;
@@ -766,7 +757,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     lineWidth = 1 + Math.log(lineWidth + 1)/Math.log(12);
 
     var bounceHeight;
-    if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.bounceHeightBasedOn === 'random') {
+    if (typeof this.config.bounceHeightBasedOn === 'undefined' || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
     } else if (this.config.bounceHeightBasedOn === 'distance') {
