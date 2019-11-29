@@ -31,7 +31,7 @@ import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
-import {PaletteColorTable} from "../util/colorPalletes";
+import {PaletteColorTable} from "../util/colorPalletes.js";
 import GtexUtils from "../gtex/gtexUtils.js";
 
 
@@ -178,7 +178,6 @@ FeatureTrack.prototype.computePixelHeight = function (features) {
 
 FeatureTrack.prototype.draw = function (options) {
 
-
     const featureList = options.features;
     const ctx = options.context;
     const bpPerPixel = options.bpPerPixel;
@@ -216,8 +215,8 @@ FeatureTrack.prototype.draw = function (options) {
             options.drawLabel = options.labelAllFeatures || featureDensity > 10;
             const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             const last = lastPxEnd[row];
-            if (!last || pxEnd > last || self.config.type === 'junctions') {
-                self.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+            if (!last || pxEnd > last || this.config.type === 'junctions') {
+                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
                 // Ensure a visible gap between features
                 const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
@@ -703,6 +702,7 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
+
     // TODO: cache filter and pixel calculations by doing them earlier when features are initially parsed?
     if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
         return
