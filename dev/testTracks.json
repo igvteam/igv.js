@@ -236,7 +236,7 @@
   },
   {
     "type": "annotation",
-    "format": "gtf - Tabix index",
+    "format": "gtf",
     "url": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz",
     "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/gencode.v24lift37.annotation.sorted.gtf.gz.tbi",
     "name": "Gencode v24 (gtf)",
