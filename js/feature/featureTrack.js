@@ -712,22 +712,6 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideMotifs && this.config.hideMotifs.includes(feature.attributes.motif)) {
         return
     }
-
-    var py = this.margin;
-    var rowHeight = this.config.height;
-    
-    var cy = py + 0.5 * rowHeight;
-    var topY = py;
-    var bottomY = py + rowHeight;
-    var bezierBottomY = bottomY - 10;
-
-    // draw the junction arc
-    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
-    var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
-    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
-    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
-
     var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
         return
@@ -740,11 +724,25 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (totalReadCount > 0 && multiMappedReadCount/totalReadCount > this.config.maxFractionMultiMappedReads) {
         return
     }
-
     var maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
     if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
         return
     }
+
+    var py = this.margin;
+    var rowHeight = this.config.height;
+
+    var cy = py + 0.5 * rowHeight;
+    var topY = py;
+    var bottomY = py + rowHeight;
+    var bezierBottomY = bottomY - 10;
+
+    // draw the junction arc
+    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
+    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
+    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
 
     var lineWidth;
     if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.thicknessBasedOn === 'numUniqueReads') {
