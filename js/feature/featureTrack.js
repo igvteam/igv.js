@@ -88,6 +88,9 @@ const FeatureTrack = extend(TrackBase,
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
         }
 
+        if (this.height === undefined || !this.height) {
+            this.height = 100;
+        }
 
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
@@ -187,7 +190,7 @@ FeatureTrack.prototype.draw = function (options) {
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
 
-    if ( typeof this.config.isMergedTrack === 'undefined' || !this.config.isMergedTrack ) {
+    if ( !this.config.isMergedTrack ) {
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
     }
 
@@ -730,7 +733,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
 
     var py = this.margin;
-    var rowHeight = this.config.height;
+    var rowHeight = this.height;
 
     var cy = py + 0.5 * rowHeight;
     var topY = py;
