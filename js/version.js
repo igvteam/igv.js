@@ -1,10 +1,11 @@
-const _version = "2.3.5 (c03fb6ba73138e5290511beca7c2ee0cf4ffef80)"
+const _version = "2.3.5 (ccfa0b3f9b3e4dc53d5b79e25cb340fc9ab04ca2)"
 
 function version() {
     return _version;
 }
 
 export default version
+
 
 
 
