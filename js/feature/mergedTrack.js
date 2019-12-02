@@ -60,6 +60,19 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
             console.warn("Could not create track " + tconf);
         }
     });
+
+    Object.defineProperty(this, "height", {
+        get() {
+            return this._height || 100;
+        },
+        set(h) {
+            this._height = h;
+            for (let t of this.tracks) {
+                t.height = h;
+                t.config.height = h;
+            }
+        }
+    });
 });
 
 MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
