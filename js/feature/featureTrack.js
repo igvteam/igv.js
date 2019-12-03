@@ -159,8 +159,9 @@ FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerP
  */
 FeatureTrack.prototype.computePixelHeight = function (features) {
 
-
-    if (this.displayMode === "COLLAPSED") {
+    if (this.type === "junctions") {
+        return this.height;
+    } else if (this.displayMode === "COLLAPSED") {
         return this.margin + this.expandedRowHeight;
     } else {
         let maxRow = 0;
