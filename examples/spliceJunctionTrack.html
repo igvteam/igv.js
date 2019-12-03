@@ -34,7 +34,7 @@
     labelIsAnnotatedJunction: " [A]",
     hideAnnotatedJunctions: false,
     hideUnannotatedJunctions: false,
-    hideMotifs: ['GT/AT', 'non-canonical'],
+    hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
   }
 
   document.addEventListener("DOMContentLoaded", function () {
@@ -58,7 +58,7 @@
             format: 'bed',
             url: `${rootUrl}/${prefix}.SJ.out.bed.gz`,
             indexURL: `${rootUrl}/${prefix}.SJ.out.bed.gz.tbi`,
-            ...junctionTrackOptions, //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
+            ...junctionTrackOptions,
           },
         ],
       }
