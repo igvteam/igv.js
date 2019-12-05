@@ -183,18 +183,26 @@ const IGVGraphics = {
         if (properties || transforms) ctx.restore();
     },
 
-    strokeCircle: function (ctx, x, y, radius) {
-
+    strokeCircle: function (ctx, x, y, radius, properties) {
+        if (properties) {
+            ctx.save();
+            IGVGraphics.setProperties(ctx, properties);
+        }
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.stroke();
+        if (properties) ctx.restore();
     },
 
-    fillCircle: function (ctx, x, y, radius) {
-
+    fillCircle: function (ctx, x, y, radius, properties) {
+        if (properties) {
+            ctx.save();
+            IGVGraphics.setProperties(ctx, properties);
+        }
         ctx.beginPath();
         ctx.arc(x, y, radius, 0, 2 * Math.PI);
         ctx.fill();
+        if (properties) ctx.restore();
     },
 
     drawArrowhead: function (ctx, x, y, size, lineWidth) {
