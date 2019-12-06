@@ -103,24 +103,26 @@ FeatureFileReader.prototype.readHeader = async function () {
             let index;
             if (this.config.indexURL || this.config.indexed) {
                 index = await this.getIndex()
-
-                // Load the file header (not HTTP header) for an indexed file.
-                let maxSize = "vcf" === this.config.format ? 65000 : 1000
-                if (index.tabix) {
-                    const bsizeOptions = buildOptions(this.config, {
-                        range: {
-                            start: index.firstAlignmentBlock,
-                            size: 26
-                        }
-                    });
-                    const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
-                    const bsize = bgzBlockSize(abuffer)
-                    maxSize = index.firstAlignmentBlock + bsize;
+                if (index) {
+                    // Load the file header (not HTTP header) for an indexed file.
+                    let maxSize = "vcf" === this.config.format ? 65000 : 1000
+                    if (index.tabix) {
+                        const bsizeOptions = buildOptions(this.config, {
+                            range: {
+                                start: index.firstAlignmentBlock,
+                                size: 26
+                            }
+                        });
+                        const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
+                        const bsize = bgzBlockSize(abuffer)
+                        maxSize = index.firstAlignmentBlock + bsize;
+                    }
+                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                    const data = await igvxhr.loadString(this.config.url, options)
+                    header = this.parser.parseHeader(data);
+                } else {
+                    header = this.header || {};
                 }
-                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-                const data = await igvxhr.loadString(this.config.url, options)
-                header = this.parser.parseHeader(data);
-
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const features = await this.loadFeaturesNoIndex()
