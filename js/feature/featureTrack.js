@@ -222,15 +222,16 @@ FeatureTrack.prototype.draw = function (options) {
             if (!last || pxEnd > last || this.config.type === 'junctions') {
                 this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
-                // Ensure a visible gap between features
-                const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                if (last && pxStart - last <= 0) {
-                    ctx.globalAlpha = 0.5
-                    IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                    ctx.globalAlpha = 1.0
+                if (this.config.type !== 'junctions') {
+                    // Ensure a visible gap between features
+                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                    if (last && pxStart - last <= 0) {
+                        ctx.globalAlpha = 0.5
+                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        ctx.globalAlpha = 1.0
+                    }
+                    lastPxEnd[row] = pxEnd;
                 }
-                lastPxEnd[row] = pxEnd;
-
             }
         }
 
