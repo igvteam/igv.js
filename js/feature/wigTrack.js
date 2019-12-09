@@ -34,6 +34,7 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
+import FeatureTrack from "./featureTrack";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
@@ -137,6 +138,66 @@ WigTrack.prototype.draw = function (options) {
         baselineColor = IGVColor.addAlpha(self.color, 0.1);
     }
 
+    const drawGuideLines = function (options) {
+        if (self.config.hasOwnProperty('guideLines')) {
+            for (let line of self.config.guideLines) {
+                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
+                    options.context.setLineDash([5,5]);
+                    IGVGraphics.strokeLine(
+                        options.context,
+                        0,
+                        getY(line.y),
+                        options.pixelWidth,
+                        getY(line.y), {
+                            'strokeStyle': line['color'],
+                            'strokeWidth': 2
+                        }
+                        );
+                    options.context.setLineDash([]);
+                }
+            }
+        }
+    };
+
+    const getUnitLess = function (value) {
+        const featureValueMinimum = self.dataRange.min;
+        const featureValueMaximum = self.dataRange.max;
+        const featureValueRange = featureValueMaximum - featureValueMinimum;
+        const y = (featureValueMaximum - value) / (featureValueRange);
+
+        let yb;
+        if (featureValueMinimum > 0) {
+            yb = 1;
+        } else if (featureValueMaximum < 0) {
+            yb = 0;
+        } else {
+            yb = featureValueMaximum / featureValueRange;
+        }
+        const y1 = Math.min(y, yb);
+        const y2 = Math.max(y, yb);
+        return [y1, y2];
+    };
+
+    const getY = function (value) {
+        let yU = getUnitLess(value);
+        if (yU[0] >= 1 || yU[1] <= 0) return 0;      //  Value < minimum
+        return yU[0] * pixelHeight
+    };
+
+    const getHeight = function (value) {
+        let yU = getUnitLess(value);
+        return (yU[1] - yU[0]) * pixelHeight
+    };
+
+    const getX = function (feature) {
+        return Math.floor((feature.start - bpStart) / bpPerPixel);
+    };
+
+    const getWidth  = function (feature, x) {
+        const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
+        return Math.max(1, rectEnd - x);
+    };
+
     if (features && features.length > 0) {
 
         if (self.dataRange.min === undefined) self.dataRange.min = 0;
@@ -152,7 +213,7 @@ WigTrack.prototype.draw = function (options) {
             if (renderFeature.start > bpEnd) return;
 
             for (let f of features) {
-                renderFeature(f, this.dataRange)
+                renderFeature(f, self.dataRange)
             }
 
             // If the track includes negative values draw a baseline
@@ -163,46 +224,31 @@ WigTrack.prototype.draw = function (options) {
         }
     }
 
+    drawGuideLines(options);
 
     function renderFeature(feature, dataRange) {
 
-        const featureValueMinimum = self.dataRange.min;
-        const featureValueMaximum = self.dataRange.max;
-        const featureValueRange = featureValueMaximum - featureValueMinimum;
-        const x = Math.floor((feature.start - bpStart) / bpPerPixel);
-        const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-        const width = Math.max(1, rectEnd - x);
-        const y = (featureValueMaximum - feature.value) / (featureValueRange);
+        const y = getY(feature.value);
+        const height = getHeight(feature.value);
 
-        let yb;
-        if (featureValueMinimum > 0) {
-            yb = 1;
-        } else if (featureValueMaximum < 0) {
-            yb = 0;
-        } else {
-            yb = featureValueMaximum / featureValueRange;
-        }
-        const yUnitless = Math.min(y, yb);
-        const y2 = Math.max(y, yb);
-        const heightUnitLess = y2 - yUnitless;
-        if (yUnitless >= 1 || y2 <= 0) return;      //  Value < minimum
+        const x = getX(feature);
+        const width = getWidth(feature, x);
 
         let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
         const color = (typeof c === "function") ? c(feature.value) : c;
 
         if (self.graphType === "points") {
             const pointSize = self.config.pointSize || 3;
-            const py = feature.value < 0 ? (yUnitless + heightUnitLess) * pixelHeight : yUnitless * pixelHeight;
             const px = x + width / 2;
 
             if (isNaN(x)) {
                 console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
             } else {
-                IGVGraphics.fillCircle(ctx, px, py, pointSize / 2);
+                IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
             }
 
         } else {
-            IGVGraphics.fillRect(ctx, x, yUnitless * pixelHeight, width, heightUnitLess * pixelHeight, {fillStyle: color});
+            IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
             lastXPixel = x + width;
             if (feature.value > 0) {
                 lastValue = feature.value;
@@ -211,7 +257,6 @@ WigTrack.prototype.draw = function (options) {
             }
         }
     }
-
 };
 
 WigTrack.prototype.popupData = function (clickState, features) {
