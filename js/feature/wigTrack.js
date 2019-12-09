@@ -198,7 +198,7 @@ WigTrack.prototype.draw = function (options) {
             if (isNaN(x)) {
                 console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
             } else {
-                IGVGraphics.fillCircle(ctx, px, py, pointSize / 2);
+                IGVGraphics.fillCircle(ctx, px, py, pointSize / 2, {strokeStyle: color, fillStyle: color});
             }
 
         } else {
