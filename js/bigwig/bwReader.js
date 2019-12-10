@@ -122,7 +122,7 @@ BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPix
                     start = Math.min(start, item.dataOffset);
                     end = Math.max(end, item.dataOffset + item.dataSize);
                 }
-                
+
 
                 const size = end - start;
 
@@ -750,8 +750,10 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
             feature.cdEnd = parseInt(tokens[4]);
         }
         if (tokens.length > 5) {
-            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !=  "-1")
-                feature.color = IGVColor.createColorString(tokens[5]);
+            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !==  "-1") {
+                const c = IGVColor.createColorString(tokens[5]);
+                feature.color = c.startsWith("rgb") ? c : undefined;
+            }
         }
         if (tokens.length > 8) {
             exonCount = parseInt(tokens[6]);
