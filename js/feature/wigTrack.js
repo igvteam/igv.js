@@ -116,11 +116,11 @@ WigTrack.prototype.getFileHeader = async function () {
         this.header = await this.featureSource.getFileHeader();
     }
     return this.header;
-}
+};
 
 WigTrack.prototype.draw = function (options) {
 
-    var self = this;
+    let self = this;
 
     const features = options.features;
     const ctx = options.context;
@@ -180,7 +180,7 @@ WigTrack.prototype.draw = function (options) {
 
     const getY = function (value) {
         let yU = getUnitLess(value);
-        if (yU[0] >= 1 || yU[1] <= 0) return 0;      //  Value < minimum
+        if (yU[0] >= 1 || yU[1] <= 0) return -1;      //  Value < minimum
         return yU[0] * pixelHeight
     };
 
@@ -226,12 +226,12 @@ WigTrack.prototype.draw = function (options) {
 
     drawGuideLines(options);
 
-    function renderFeature(feature, dataRange) {
+    function renderFeature(feature) {
 
         const y = getY(feature.value);
-        const height = getHeight(feature.value);
-
+        if (y < 0) return;
         const x = getX(feature);
+        const height = getHeight(feature.value);
         const width = getWidth(feature, x);
 
         let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
