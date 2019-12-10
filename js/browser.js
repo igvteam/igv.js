@@ -683,8 +683,17 @@ Browser.prototype.loadTrack = async function (config) {
 
         return newTrack;
     } catch (error) {
+        const httpMessages =
+            {
+                "401": "Access unauthorized",
+                "403": "Access forbidden",
+                "404": "Not found"
+            };
         console.error(error);
-        const msg = error.message || error.toString();
+        let msg = error.message || error.toString();
+        if (httpMessages.hasOwnProperty(msg)) {
+            msg = httpMessages[msg] + ": " + config.url;
+        }
         this.presentAlert(msg, undefined);
     } finally {
         if (!config.noSpinner) this.stopSpinner();

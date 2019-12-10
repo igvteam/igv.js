@@ -102,7 +102,11 @@ FeatureFileReader.prototype.readHeader = async function () {
         } else {
             let index;
             if (this.config.indexURL || this.config.indexed) {
-                index = await this.getIndex()
+                index = await this.getIndex();
+
+                if(!index) {
+                    throw Error("Unable to load index: " + this.config.indexURL);
+                }
 
                 // Load the file header (not HTTP header) for an indexed file.
                 let maxSize = "vcf" === this.config.format ? 65000 : 1000
