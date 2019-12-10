@@ -35,6 +35,7 @@ import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
 import FeatureTrack from "./featureTrack";
+import {visibilityChange} from "../igv-create";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
@@ -142,18 +143,13 @@ WigTrack.prototype.draw = function (options) {
         if (self.config.hasOwnProperty('guideLines')) {
             for (let line of self.config.guideLines) {
                 if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    if (line['dotted']) options.context.setLineDash([5,5]);
-                    IGVGraphics.strokeLine(
-                        options.context,
-                        0,
-                        getY(line.y),
-                        options.pixelWidth,
-                        getY(line.y), {
-                            'strokeStyle': line['color'],
-                            'strokeWidth': 2
-                        }
-                        );
-                    options.context.setLineDash([]);
+                    let y = getY(line.y);
+                    let props = {
+                        'strokeStyle': line['color'],
+                        'strokeWidth': 2
+                    };
+                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, props);
+                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
                 }
             }
         }

@@ -224,36 +224,11 @@ const IGVGraphics = {
         ctx.restore();
     },
 
-    dashedLine: function (ctx, x1, y1, x2, y2, dashLen, properties) {
-        x1 = Math.round(x1);
-        y1 = Math.round(y1);
-        x2 = Math.round(x2);
-        y2 = Math.round(y2);
-        dashLen = Math.round(dashLen);
-        log("dashedLine");
-        if (properties) {
-            ctx.save();
-            IGVGraphics.setProperties(ctx, properties);
-        }
-
+    dashedLine: function (ctx, x1, y1, x2, y2, dashLen, properties={}) {
         if (dashLen === undefined) dashLen = 2;
-        ctx.moveTo(x1, y1);
-
-        var dX = x2 - x1;
-        var dY = y2 - y1;
-        var dashes = Math.floor(Math.sqrt(dX * dX + dY * dY) / dashLen);
-        var dashX = dX / dashes;
-        var dashY = dY / dashes;
-
-        var q = 0;
-        while (q++ < dashes) {
-            x1 += dashX;
-            y1 += dashY;
-            ctx[q % 2 === 0 ? 'moveTo' : 'lineTo'](x1, y1);
-        }
-        ctx[q % 2 === 0 ? 'moveTo' : 'lineTo'](x2, y2);
-
-        if (properties) ctx.restore();
+        ctx.setLineDash([dashLen, dashLen]);
+        IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, properties);
+        ctx.setLineDash([]);
     },
 
     roundRect: function (ctx, x, y, width, height, radius, fill, stroke) {
