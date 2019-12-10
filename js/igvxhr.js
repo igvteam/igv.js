@@ -131,7 +131,7 @@ const igvxhr = {
 
             async function getLoadPromise(url, options) {
 
-                return new Promise(function (fullfill, reject) {
+                return new Promise(function (resolve, reject) {
 
                     // Various Google tansformations
                     if (google.isGoogleURL(url)) {
@@ -195,50 +195,35 @@ const igvxhr = {
                         xhr.withCredentials = true;
                     }
 
-                    xhr.onload = function (event) {
-                        // when the url points to a local file, the status is 0 but that is no error
+                    xhr.onload = async function (event) {
+                        // when the url points to a local file, the status is 0 but that is not an error
                         if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
                             if (range && xhr.status !== 206 && range.start !== 0) {
                                 // For small files a range starting at 0 can return the whole file => 200
                                 handleError("ERROR: range-byte header was ignored for url: " + url);
                             } else {
-                                fullfill(xhr.response);
+                                resolve(xhr.response);
                             }
                         } else if ((typeof gapi !== "undefined") &&
                             ((xhr.status === 404 || xhr.status === 401) &&
                                 google.isGoogleURL(url)) &&
                             !options.retries) {
 
-                            options.retries = 1;
-
-                            return getGoogleAccessToken()
-
-                                .then(function (accessToken) {
-
-                                    options.oauthToken = accessToken;
-
-                                    igvxhr.load(url, options)
-                                        .then(function (response) {
-                                            fullfill(response);
-                                        })
-                                        .catch(function (error) {
-                                            if (reject) {
-                                                reject(error);
-                                            } else {
-                                                throw(error);
-                                            }
-                                        });
-                                });
-
+                            try {
+                                options.retries = 1;
+                                const accessToken = await getGoogleAccessToken();
+                                options.oauthToken = accessToken;
+                                return igvxhr.load(url, options);
+                            } catch (e) {
+                                handleError(e);
+                            }
                         } else {
-
-                            //
                             if (xhr.status === 403) {
-                                handleError("Access forbidden")
+                                handleError("Access forbidden: url")
                             } else if (xhr.status === 416) {
                                 //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
                                 handleError("Unsatisfiable range");
-                            } else {// TODO -- better error handling
+                            } else {
                                 handleError(xhr.status);
                             }
                         }
@@ -485,10 +470,14 @@ let oauthPromise;
 
 async function getGoogleAccessToken() {
     if (oauth.google.access_token) {
-        return Promise.resolve(oauth.google.access_token);
+        return oauth.google.access_token;
     }
     if (oauthPromise) {
         return oauthPromise;
+    }
+
+    if (!(gapi && gapi.auth2)) {
+        throw new Error("The Google oAuth API is required but not loaded");
     }
 
     const authInstance = gapi.auth2.getAuthInstance();
