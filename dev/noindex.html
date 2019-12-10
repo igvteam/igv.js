@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    const options =
+        {
+            genome: "hg19",
+            flanking: 1000,
+            queryParametersSupported: true,
+            tracks: [
+                {
+                    name: "noindex",
+                    type: "annotation",
+                    format: "gff",
+                    url: "../test/data/tabix/noindex.chr1.gff.gz",
+                   // indexed: true
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+
+
+</script>
+
+</body>
+
+</html>
