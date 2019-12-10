@@ -148,7 +148,7 @@ WigTrack.prototype.draw = function (options) {
                         'strokeStyle': line['color'],
                         'strokeWidth': 2
                     };
-                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, props);
+                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
                     else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
                 }
             }
