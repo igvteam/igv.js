@@ -142,7 +142,7 @@ WigTrack.prototype.draw = function (options) {
         if (self.config.hasOwnProperty('guideLines')) {
             for (let line of self.config.guideLines) {
                 if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    options.context.setLineDash([5,5]);
+                    if (line['dotted']) options.context.setLineDash([5,5]);
                     IGVGraphics.strokeLine(
                         options.context,
                         0,
