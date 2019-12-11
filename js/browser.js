@@ -89,8 +89,10 @@ const Browser = function (options, parentDiv) {
     this.eventHandlers = {};
 
     this.$spinner = $('<div class="igv-track-container-spinner">');
-    this.$spinner.append(createIcon("spinner"));
     $trackContainer.append(this.$spinner);
+
+    this.$spinner.append(createIcon("spinner"));
+
     this.stopSpinner();
 
     addMouseHandlers.call(this);
@@ -1450,6 +1452,20 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
         trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
     });
 
+};
+
+Browser.prototype.getViewportWithGUID = function (guid) {
+
+    let result = undefined;
+    for (let trackView of this.trackViews) {
+        for (let viewport of trackView.viewports) {
+            if (guid === viewport.guid) {
+                result = viewport;
+            }
+        }
+    }
+
+    return result;
 };
 
 Browser.prototype.goto = function (chrName, start, end) {
