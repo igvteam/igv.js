@@ -48,14 +48,40 @@
                     queryParametersSupported: true,
                     showAllChromosomes: true,
                     tracks:
-                    [
-                        {
-                            name: "BED Render Bug",
-                            url: 'https://www.encodeproject.org/files/ENCFF768ZWJ/@@download/ENCFF768ZWJ.bigBed'
-                        }
-
-                    ]
-
+                        [
+                            {
+                                "Assembly": "hg19",
+                                "ExperimentID": "/experiments/ENCSR857PBV/",
+                                "Experiment": "ENCSR857PBV",
+                                "Biosample": "22Rv1",
+                                "Assay Type": "ChIP-seq",
+                                "Target": "CTCF ",
+                                "Format": "bigWig",
+                                "Output Type": "fold change over control",
+                                "Lab": "Michael Snyder, Stanford",
+                                "url": "https://www.encodeproject.org/files/ENCFF166FMF/@@download/ENCFF166FMF.bigWig",
+                                "Bio Rep": "2",
+                                "Tech Rep": "2_1",
+                                "Accession": "ENCFF166FMF",
+                                "Name": " CTCF  2:2_1 fold change over control ENCSR857PBV"
+                            },
+                            {
+                                "Assembly": "hg19",
+                                "ExperimentID": "/experiments/ENCSR857PBV/",
+                                "Experiment": "ENCSR857PBV",
+                                "Biosample": "22Rv1",
+                                "Assay Type": "ChIP-seq",
+                                "Target": "CTCF ",
+                                "Format": "bigWig",
+                                "Output Type": "signal p-value",
+                                "Lab": "Michael Snyder, Stanford",
+                                "url": "https://www.encodeproject.org/files/ENCFF567RUA/@@download/ENCFF567RUA.bigWig",
+                                "Bio Rep": "1,2",
+                                "Tech Rep": "1_1,2_1",
+                                "Accession": "ENCFF567RUA",
+                                "Name": " CTCF  1,2:1_1,2_1 signal p-value ENCSR857PBV"
+                            }
+                        ]
                 };
 
             igv.createBrowser(document.getElementById('igvDiv'), options)

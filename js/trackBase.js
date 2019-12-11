@@ -47,7 +47,7 @@ const TrackBase = function (config, browser) {
     this.type = config.type;
     this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
 
-    config.name = config.name || config.label;   // synonym for name, label is deprecated
+    config.name = config.Name || config.name || config.label;   // synonym for name, label is deprecated
     if (config.name) {
         this.name = config.name;
     } else {
