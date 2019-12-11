@@ -48,17 +48,31 @@ import google from "./google/googleUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js"
 
 
-const Browser = function (options, trackContainerDiv) {
-    let str;
+const Browser = function (options, parentDiv) {
 
     this.guid = guid();
     this.namespace = '.browser_' + this.guid;
     this.config = options;
+
+    this.parent = parentDiv;
+
     this.$root = $('<div class="igv-root-div">');
+    $(parentDiv).append(this.$root);
+
+    this.$content = $('<div class="igv-content-div">');
+    this.$root.append(this.$content);
+
+    this.$contentHeader = $('<div>', {class: 'igv-content-header'});
+    this.$content.append(this.$contentHeader);
+
+    const $trackContainer = $('<div class="igv-track-container-div">');
+    this.$content.append($trackContainer);
+
+    this.trackContainerDiv = $trackContainer.get(0);
+
 
     initialize.call(this, options);
 
-    this.trackContainerDiv = trackContainerDiv;
     this.trackViews = [];
     this.trackLabelsVisible = true;
     this.isCenterGuideVisible = false;
@@ -76,7 +90,7 @@ const Browser = function (options, trackContainerDiv) {
 
     this.$spinner = $('<div class="igv-track-container-spinner">');
     this.$spinner.append(createIcon("spinner"));
-    $(this.trackContainerDiv).append(this.$spinner);
+    $trackContainer.append(this.$spinner);
     this.stopSpinner();
 
     addMouseHandlers.call(this);
