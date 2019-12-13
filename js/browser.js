@@ -597,6 +597,19 @@ Browser.prototype.loadROI = async function (config) {
     await this.updateViews(undefined, undefined, true);
 }
 
+Browser.prototype.removeROI = function (roiToRemove) {                          
+    for (let i = 0; i < this.roi.length; i++) {                                 
+        if (this.roi[i].name === roiToRemove.name) {                            
+            this.roi.splice(i, 1);                                              
+            break;                                                              
+        }                                                                       
+    }                                                                           
+                                                                                
+    for (let tv of this.trackViews) {                                           
+        tv.updateViews(true);                                                   
+    }                                                                           
+}
+
 /**
  * Return a promise to load a track
  *
