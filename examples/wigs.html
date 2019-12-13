@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <script src="../dist/igv.js"></script>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const div = document.getElementById("myDiv");
+        const options = {
+            locus: '19:49301000-49305700',
+            genome: "hg19",
+            tracks: [
+                {
+                    name: 'All negative points',
+                    url: 'http://localhost:8080/examples/data/allNegativewig.bedgraph',
+                    indexed: false,
+                    graphType: "points"
+                },
+                {
+                    name: 'All negative bars',
+                    url: 'http://localhost:8080/examples/data/allNegativewig.bedgraph',
+                    indexed: false
+                },
+                {
+                    name: 'Mixed_pos_neg_points',
+                    url: 'http://localhost:8080/examples/data/mixedPosNeg.bedgraph',
+                    indexed: false,
+                    graphType: "points"
+                },
+                {
+                    name: 'Mixed pos neg bars',
+                    url: 'http://localhost:8080/examples/data/mixedPosNeg.bedgraph',
+                    indexed: false
+                },
+                {
+                    name: 'All pos points',
+                    url: 'http://localhost:8080/examples/data/allPositive.bedgraph',
+                    indexed: false,
+                    graphType: "points"
+                },
+                {
+                    name: 'All pos bars',
+                    url: 'http://localhost:8080/examples/data/allPositive.bedgraph',
+                    indexed: false
+                }
+            ]
+        };
+
+        igv.createBrowser(div, options).then(function (browser) {});
+    })
+
+</script>
+
+</body>
+
+</html>
+
