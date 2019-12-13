@@ -31,7 +31,12 @@
                     name: 'All negative points',
                     url: 'http://localhost:8080/examples/data/allNegativewig.bedgraph',
                     indexed: false,
-                    graphType: "points"
+                    graphType: "points",
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: -0.25, color: "blue"},
+                        {dotted: true, y: -0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'All negative bars',
@@ -42,7 +47,12 @@
                     name: 'Mixed_pos_neg_points',
                     url: 'http://localhost:8080/examples/data/mixedPosNeg.bedgraph',
                     indexed: false,
-                    graphType: "points"
+                    graphType: "points",
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: -0.5, color: "blue"},
+                        {dotted: true, y: 0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'Mixed pos neg bars',
@@ -53,7 +63,12 @@
                     name: 'All pos points',
                     url: 'http://localhost:8080/examples/data/allPositive.bedgraph',
                     indexed: false,
-                    graphType: "points"
+                    graphType: "points",
+                    guideLines: [
+                        {dotted: true, y: 0, color: "green"},
+                        {dotted: true, y: 0.25, color: "blue"},
+                        {dotted: true, y: 0.5, color: "red"}
+                    ]
                 },
                 {
                     name: 'All pos bars',
