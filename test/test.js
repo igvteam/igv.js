@@ -22,6 +22,7 @@ import runUtilTests from "./testUtils.js";
 import runIgvXhrTests from "./testIgvXhr.js";
 import runCRAMTests from "./testCRAM.js";
 import runTribbleTests from "./testTribble.js";
+import runSpliceJunctionTests from "./testSpliceJunctions.js"
 
 
 runBigwigTests();
@@ -48,3 +49,4 @@ runUtilTests();
 runIgvXhrTests();
 runCRAMTests();
 runTribbleTests();
+runSpliceJunctionTests();

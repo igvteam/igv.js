@@ -498,6 +498,7 @@ function makeBlocks(alignment, cigarArray) {
     let seqOffset = 0;
     let pos = alignment.start;
     let gapType;
+    let gaps;
 
     alignment.scStart = alignment.start;
     alignment.scLengthOnRef = alignment.lengthOnRef;
@@ -511,7 +512,6 @@ function makeBlocks(alignment, cigarArray) {
             case 'P' :
                 break; // ignore pads
             case 'S' :
-
                 scPos = pos;
                 alignment.scLengthOnRef += c.len;
                 if (blocks.length === 0) {
@@ -528,6 +528,14 @@ function makeBlocks(alignment, cigarArray) {
                 gapType = 'I';
                 break; // soft clip read bases
             case 'N' :
+                if(!gaps) {
+                    gaps = [];
+                }
+                gaps.push({
+                    start: pos,
+                    len: c.len,
+                    type: 'N'
+                })
                 pos += c.len;
                 gapType = 'N';
                 break;  // reference skip
@@ -581,6 +589,7 @@ function makeBlocks(alignment, cigarArray) {
     alignment.blocks = blocks;
     alignment.insertions = insertions;
     alignment.deletions = deletions;
+    alignment.gaps = gaps;
 
 }
 
