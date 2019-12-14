@@ -77,17 +77,16 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
 
     // pixel location of guide line
-    const guideParentMouseXY = getMouseXY($guideParent.get(0), event);
-    const left = guideParentMouseXY.x + 'px';
-    $guideLine.css({left: left});
+    const { x } = getMouseXY($guideParent.get(0), event);
+    const left = `${ x }px`;
+    $guideLine.css({ left });
 
 
     // base-pair location of guide line
     const viewportContentMouseXY = getMouseXY($viewportContent.get(0), event);
 
-    const index = $viewportContent.data('genomicStateIndex');
-
-    const referenceFrame = browser.genomicStateList[index].referenceFrame;
+    const guid = $viewportContent.data('viewportGUID');
+    const { referenceFrame } = browser.getViewportWithGUID(guid).genomicState;
 
     const _startBP = referenceFrame.start;
     const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
