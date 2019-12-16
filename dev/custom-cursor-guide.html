@@ -17,14 +17,6 @@
 
 <body>
 
-<div>
-    <button id="bmBtn">Bookmark</button>
-</div>
-
-<h3>Example tracks - click to load</h3>
-
-<div id="trackList"></div>
-
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 </body>
@@ -49,61 +41,24 @@
                 queryParametersSupported: true,
                 showAllChromosomes: true,
                 showCursorTrackingGuide: true,
-                showControls: true,
-                // tracks:
-                //     [
-                //         {
-                //             name: "BED Render Bug",
-                //             url: 'https://www.encodeproject.org/files/ENCFF768ZWJ/@@download/ENCFF768ZWJ.bigBed'
-                //         }
-                //
-                //     ]
+                tracks:
+                    [
+                        {
+                            name: 'SEG - Breast',
+                            url: 'https://www.dropbox.com/s/lka7ixgin5ne5xl/Breast.seg?dl=0'
+                        }
+
+                    ]
 
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options);
 
-        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser);
+        browser.setCustomCursorGuideMouseHandler(({bp, start, end, interpolant}) => {
+            console.log(`interpolant ${ interpolant.toFixed(3) }`);
+        });
 
     })();
-
-    async function createTrackList(div, file, browser) {
-
-        const tracks = await igv.xhr.loadJson(file);
-
-        for (let track of tracks) {
-
-            if (track.HEADING) {
-                div.insertAdjacentHTML("beforeend",
-                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                    + track.HEADING + "</div>");
-            } else {
-                let trackDiv = document.createElement('div');
-                trackDiv.innerHTML = track.name;
-                trackDiv.addEventListener('click', async () => await browser.loadTrack(JSON.stringify(track)));
-                div.appendChild(trackDiv);
-            }
-
-        }
-
-        const json = await igv.GtexUtils.getTissueInfo("gtex_v7");
-
-        div.insertAdjacentHTML("beforeend", "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
-
-        for (let obj of json['tissueInfo']) {
-            let trackDiv = document.createElement('div');
-            trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
-            trackDiv.addEventListener('click', async () => await browser.loadTrack(igv.GtexUtils.trackConfiguration(obj)));
-            div.appendChild(trackDiv)
-        }
-
-    }
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", browser.sessionURL());
-    }
-
-    document.getElementById("bmBtn").addEventListener("click", bookmark);
 
 </script>
 </html>
