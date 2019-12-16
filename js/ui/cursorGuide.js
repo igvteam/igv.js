@@ -56,8 +56,8 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
         const [ childClass, parentClass ] = [ $child.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
 
         if ($viewport) {
-            
-            console.log(`target class ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
+
+            // console.log(`target class ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
 
             const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
 
