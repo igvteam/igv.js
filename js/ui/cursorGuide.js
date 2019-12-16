@@ -40,18 +40,37 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
         e.preventDefault();
 
-        const $canvas = $(document.elementFromPoint(e.clientX, e.clientY));
-        const $viewportContent = $canvas.parent();
+        const $child = $(document.elementFromPoint(e.clientX, e.clientY));
+        const $parent = $child.parent();
 
-        if ($viewportContent.hasClass('igv-viewport-content-div')) {
+        let $viewport = undefined;
 
-            const {bp, start, end, interpolant} = mouseHandler(e, $viewportContent, this.$guide, $cursorGuideParent, browser);
+        if ($parent.hasClass('igv-viewport-content-div')) {
+            $viewport = $parent.parent();
+        } else if ($parent.hasClass('igv-viewport-div') && $child.hasClass('igv-viewport-content-div')) {
+            $viewport = $parent;
+        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport-div')) {
+            $viewport = $child;
+        }
 
-            // console.log('x ' + interpolant.toFixed(3) + ' bp ' + numberFormatter(bp) + ' start ' + numberFormatter(start) + ' end ' + numberFormatter(end));
+        const [ childClass, parentClass ] = [ $child.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
 
-            if (this.customMouseHandler) {
-                this.customMouseHandler({bp, start, end, interpolant});
+        if ($viewport) {
+            
+            console.log(`target class ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
+
+            const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
+
+            if (result) {
+
+                const { bp, start, end, interpolant } = result;
+
+                if (this.customMouseHandler) {
+                    this.customMouseHandler({ bp, start, end, interpolant });
+                }
+
             }
+
         }
 
     });
@@ -74,7 +93,7 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
 };
 
-let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) => {
+let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
 
     // pixel location of guide line
     const { x } = getMouseXY($guideParent.get(0), event);
@@ -83,19 +102,26 @@ let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) 
 
 
     // base-pair location of guide line
-    const viewportContentMouseXY = getMouseXY($viewportContent.get(0), event);
+    const viewportMouseXY = getMouseXY($viewport.get(0), event);
 
-    const guid = $viewportContent.data('viewportGUID');
-    const { referenceFrame } = browser.getViewportWithGUID(guid).genomicState;
+    const guid = $viewport.data('viewportGUID');
+    const viewport = browser.getViewportWithGUID(guid);
+
+    if (undefined === viewport) {
+        console.log('ERROR: No viewport found');
+        return undefined;
+    }
+
+    const { referenceFrame } = viewport.genomicState;
 
     const _startBP = referenceFrame.start;
-    const _endBP = 1 + referenceFrame.start + (viewportContentMouseXY.width * referenceFrame.bpPerPixel);
+    const _endBP = 1 + referenceFrame.start + (viewportMouseXY.width * referenceFrame.bpPerPixel);
 
     // bp = bp + (pixel * (bp / pixel))
-    const bp = Math.round(_startBP + viewportContentMouseXY.x * referenceFrame.bpPerPixel);
+    const bp = Math.round(_startBP + viewportMouseXY.x * referenceFrame.bpPerPixel);
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
-    const $trackContainer = $viewportContent.closest('.igv-track-container-div');
+    const $trackContainer = $viewport.closest('.igv-track-container-div');
     const trackContainerMouseXY = getMouseXY($trackContainer.get(0), event);
 
 
@@ -105,7 +131,7 @@ let mouseHandler = (event, $viewportContent, $guideLine, $guideParent, browser) 
         bp,
         start: _startBP,
         end: _endBP,
-        interpolant: viewportContentMouseXY.xNormalized
+        interpolant: viewportMouseXY.xNormalized
     };
 };
 
