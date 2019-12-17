@@ -116,6 +116,10 @@ function ViewPort(trackView, $container, genomicState, width) {
 
             if (typeof trackView.track.description === 'function') {
                 str = trackView.track.description();
+
+            } else if (trackView.track.description) {
+                str = trackView.track.description;
+
             } else {
                 str = trackView.track.name;
             }
