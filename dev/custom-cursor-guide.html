@@ -25,6 +25,7 @@
 
     import igv from "../js/api.js";
     import google from "../js/google/googleUtils.js";
+    import {numberFormatter} from "../js/util/stringUtils.js";
 
     let browser;
 
@@ -35,10 +36,8 @@
         const options =
             {
                 genome: "hg19",
-                // locus: [ 'egfr', 'myc' ],
-                locus: "myc",
-                flanking: 1000,
-                queryParametersSupported: true,
+                locus: [ 'egfr', 'myc' ],
+                // locus: "myc",
                 showAllChromosomes: true,
                 showCursorTrackingGuide: true,
                 tracks:
@@ -55,7 +54,7 @@
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options);
 
         browser.setCustomCursorGuideMouseHandler(({bp, start, end, interpolant}) => {
-            console.log(`interpolant ${ interpolant.toFixed(3) }`);
+            console.log(`startBP ${ numberFormatter(start) } bp ${ numberFormatter(bp) } interpolant ${ interpolant.toFixed(3) } `);
         });
 
     })();

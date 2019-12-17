@@ -114,6 +114,7 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
 
     const { referenceFrame } = viewport.genomicState;
 
+
     const _startBP = referenceFrame.start;
     const _endBP = 1 + referenceFrame.start + (viewportMouseXY.width * referenceFrame.bpPerPixel);
 
