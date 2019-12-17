@@ -28,12 +28,12 @@ function ViewPort(trackView, $container, genomicState, width) {
     this.$viewport = $('<div class="igv-viewport-div">');
     $container.append(this.$viewport);
 
+    // store the viewport GUID for later use
+    this.$viewport.data('viewportGUID', this.guid);
+
     // viewport-content
     const $div = $("<div>", {class: 'igv-viewport-content-div'});
     this.$viewport.append($div);
-
-    // store the viewport GUID for later use
-    $div.data('viewportGUID', this.guid);
 
     $div.height(this.$viewport.height());
     this.contentDiv = $div.get(0);
