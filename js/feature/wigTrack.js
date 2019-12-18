@@ -35,6 +35,7 @@ import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
 import FeatureTrack from "./featureTrack";
+import {visibilityChange} from "../igv-create";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
@@ -116,11 +117,11 @@ WigTrack.prototype.getFileHeader = async function () {
         this.header = await this.featureSource.getFileHeader();
     }
     return this.header;
-}
+};
 
 WigTrack.prototype.draw = function (options) {
 
-    var self = this;
+    let self = this;
 
     const features = options.features;
     const ctx = options.context;
@@ -138,59 +139,14 @@ WigTrack.prototype.draw = function (options) {
         baselineColor = IGVColor.addAlpha(self.color, 0.1);
     }
 
-    const drawGuideLines = function (options) {
-        if (self.config.hasOwnProperty('guideLines')) {
-            for (let line of self.config.guideLines) {
-                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    options.context.setLineDash([5,5]);
-                    IGVGraphics.strokeLine(
-                        options.context,
-                        0,
-                        getY(line.y),
-                        options.pixelWidth,
-                        getY(line.y), {
-                            'strokeStyle': line['color'],
-                            'strokeWidth': 2
-                        }
-                        );
-                    options.context.setLineDash([]);
-                }
-            }
-        }
-    };
-
-    const getUnitLess = function (value) {
-        const featureValueMinimum = self.dataRange.min;
-        const featureValueMaximum = self.dataRange.max;
-        const featureValueRange = featureValueMaximum - featureValueMinimum;
-        const y = (featureValueMaximum - value) / (featureValueRange);
-
-        let yb;
-        if (featureValueMinimum > 0) {
-            yb = 1;
-        } else if (featureValueMaximum < 0) {
-            yb = 0;
-        } else {
-            yb = featureValueMaximum / featureValueRange;
-        }
-        const y1 = Math.min(y, yb);
-        const y2 = Math.max(y, yb);
-        return [y1, y2];
-    };
-
-    const getY = function (value) {
-        let yU = getUnitLess(value);
-        if (yU[0] >= 1 || yU[1] <= 0) return 0;      //  Value < minimum
-        return yU[0] * pixelHeight
-    };
-
-    const getHeight = function (value) {
-        let yU = getUnitLess(value);
-        return (yU[1] - yU[0]) * pixelHeight
+    const yScale = (yValue) => {
+        return ( (self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min) ) * pixelHeight
     };
 
     const getX = function (feature) {
-        return Math.floor((feature.start - bpStart) / bpPerPixel);
+        let x = Math.floor((feature.start - bpStart) / bpPerPixel);
+        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
+        return x;
     };
 
     const getWidth  = function (feature, x) {
@@ -198,27 +154,40 @@ WigTrack.prototype.draw = function (options) {
         return Math.max(1, rectEnd - x);
     };
 
+    const drawGuideLines = function (options) {
+        if (self.config.hasOwnProperty('guideLines')) {
+            for (let line of self.config.guideLines) {
+                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
+                    let y = yScale(line.y);
+                    let props = {
+                        'strokeStyle': line['color'],
+                        'strokeWidth': 2
+                    };
+                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
+                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
+                }
+            }
+        }
+    };
+
     if (features && features.length > 0) {
 
         if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
-        const featureValueMinimum = self.dataRange.min;
-        const featureValueMaximum = self.dataRange.max;
-
         // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
         // nothing to paint.
-        if (featureValueMaximum > featureValueMinimum) {
+        if (self.dataRange.max > self.dataRange.min) {
 
             if (renderFeature.end < bpStart) return;
             if (renderFeature.start > bpEnd) return;
 
             for (let f of features) {
-                renderFeature(f, self.dataRange)
+                renderFeature(f)
             }
 
             // If the track includes negative values draw a baseline
-            if (featureValueMinimum < 0) {
-                const basepx = (featureValueMaximum / (featureValueMaximum - featureValueMinimum)) * options.pixelHeight;
+            if (self.dataRange.min < 0) {
+                const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
                 IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
             }
         }
@@ -226,12 +195,14 @@ WigTrack.prototype.draw = function (options) {
 
     drawGuideLines(options);
 
-    function renderFeature(feature, dataRange) {
-
-        const y = getY(feature.value);
-        const height = getHeight(feature.value);
-
+    function renderFeature(feature) {
+        if (feature.value < self.dataRange.min) return;
+        const y = yScale(feature.value);
         const x = getX(feature);
+
+        if (isNaN(x)) return;
+
+        const height = yScale(0) - y;
         const width = getWidth(feature, x);
 
         let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
@@ -240,12 +211,7 @@ WigTrack.prototype.draw = function (options) {
         if (self.graphType === "points") {
             const pointSize = self.config.pointSize || 3;
             const px = x + width / 2;
-
-            if (isNaN(x)) {
-                console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
-            } else {
-                IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
-            }
+            IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
 
         } else {
             IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
