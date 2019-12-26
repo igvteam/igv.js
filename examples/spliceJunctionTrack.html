@@ -26,12 +26,14 @@
     minSplicedAlignmentOverhang: 0,
     thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
     bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
-    colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+    colorBy: 'numReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+    colorByNumReadsThreshold: 5,
     labelUniqueReadCount: true,
     labelMultiMappedReadCount: true,
     labelTotalReadCount: false,
     labelMotif: false,
-    labelIsAnnotatedJunction: " [A]",
+    labelAnnotatedJunction: " [A]",
+    hideStrand: '-',
     hideAnnotatedJunctions: false,
     hideUnannotatedJunctions: false,
     hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'

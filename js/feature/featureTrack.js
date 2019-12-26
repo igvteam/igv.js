@@ -92,6 +92,11 @@ const FeatureTrack = extend(TrackBase,
             this.height = 100;
         }
 
+        //set defaults
+        if ('junctions' === config.type && config.colorByNumReadsThreshold === undefined) {
+            config.colorByNumReadsThreshold = 5;
+        }
+
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
@@ -717,6 +722,9 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideMotifs && this.config.hideMotifs.includes(feature.attributes.motif)) {
         return
     }
+    if (this.config.hideStrand === feature.strand) {
+        return
+    }
     var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
         return
@@ -750,7 +758,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
 
     var lineWidth;
-    if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.thicknessBasedOn === 'numUniqueReads') {
+    if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
         lineWidth = uniquelyMappedReadCount;
     } else if (this.config.thicknessBasedOn === 'numReads') {
         lineWidth = totalReadCount;
@@ -760,7 +768,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     lineWidth = 1 + Math.log(lineWidth + 1)/Math.log(12);
 
     var bounceHeight;
-    if (typeof this.config.bounceHeightBasedOn === 'undefined' || this.config.bounceHeightBasedOn === 'random') {
+    if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
     } else if (this.config.bounceHeightBasedOn === 'distance') {
@@ -771,10 +779,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
 
     var color;
-    if (typeof this.config.colorBy === 'undefined' || this.config.colorBy === 'numUniqueReads') {
-        color = uniquelyMappedReadCount > 5 ? 'blue' : '#AAAAAA';  // color gradient?
+    if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
+        color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
     } else if (this.config.colorBy === 'numReads') {
-        color = totalReadCount > 5 ? 'blue' : '#AAAAAA';
+        color = totalReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';
     } else if (this.config.colorBy === 'isAnnotatedJunction') {
         color = feature.attributes.annotated_junction === "true" ?  '#b0b0ec' : 'orange';
     } else if (this.config.colorBy === 'strand') {
@@ -784,7 +792,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
 
     var label = '';
-    if (typeof this.config.labelUniqueReadCount === 'undefined' && typeof this.config.labelMultiMappedReadCount === 'undefined' && typeof this.config.labelTotalReadCount === 'undefined') {
+    if (this.config.labelUniqueReadCount === undefined && this.config.labelMultiMappedReadCount === undefined && this.config.labelTotalReadCount === undefined) {
         //default label
         label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');
     } else {
@@ -798,8 +806,8 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         }
     }
 
-    if (this.config.labelIsAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
-        label += this.config.labelIsAnnotatedJunction;
+    if (this.config.labelAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
+        label += this.config.labelAnnotatedJunction;
     }
 
     if (this.config.labelMotif && feature.attributes.motif) {
