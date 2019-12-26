@@ -48,17 +48,31 @@ import google from "./google/googleUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js"
 
 
-const Browser = function (options, trackContainerDiv) {
-    let str;
+const Browser = function (options, parentDiv) {
 
     this.guid = guid();
     this.namespace = '.browser_' + this.guid;
     this.config = options;
+
+    this.parent = parentDiv;
+
     this.$root = $('<div class="igv-root-div">');
+    $(parentDiv).append(this.$root);
+
+    this.$content = $('<div class="igv-content-div">');
+    this.$root.append(this.$content);
+
+    this.$contentHeader = $('<div>', {class: 'igv-content-header'});
+    this.$content.append(this.$contentHeader);
+
+    const $trackContainer = $('<div class="igv-track-container-div">');
+    this.$content.append($trackContainer);
+
+    this.trackContainerDiv = $trackContainer.get(0);
+
 
     initialize.call(this, options);
 
-    this.trackContainerDiv = trackContainerDiv;
     this.trackViews = [];
     this.trackLabelsVisible = true;
     this.isCenterGuideVisible = false;
@@ -75,8 +89,10 @@ const Browser = function (options, trackContainerDiv) {
     this.eventHandlers = {};
 
     this.$spinner = $('<div class="igv-track-container-spinner">');
+    $trackContainer.append(this.$spinner);
+
     this.$spinner.append(createIcon("spinner"));
-    $(this.trackContainerDiv).append(this.$spinner);
+
     this.stopSpinner();
 
     addMouseHandlers.call(this);
@@ -595,6 +611,19 @@ Browser.prototype.loadROI = async function (config) {
         this.roi.push(new ROI(config, this.genome));
     }
     await this.updateViews(undefined, undefined, true);
+}
+
+Browser.prototype.removeROI = function (roiToRemove) {                          
+    for (let i = 0; i < this.roi.length; i++) {                                 
+        if (this.roi[i].name === roiToRemove.name) {                            
+            this.roi.splice(i, 1);                                              
+            break;                                                              
+        }                                                                       
+    }                                                                           
+                                                                                
+    for (let tv of this.trackViews) {                                           
+        tv.updateViews(true);                                                   
+    }                                                                           
 }
 
 /**
@@ -1436,6 +1465,20 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
         trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
     });
 
+};
+
+Browser.prototype.getViewportWithGUID = function (guid) {
+
+    let result = undefined;
+    for (let trackView of this.trackViews) {
+        for (let viewport of trackView.viewports) {
+            if (guid === viewport.guid) {
+                result = viewport;
+            }
+        }
+    }
+
+    return result;
 };
 
 Browser.prototype.goto = function (chrName, start, end) {

@@ -73,19 +73,9 @@ async function createBrowser(parentDiv, config) {
     // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
     setTrackOrder(config);
 
-    const browser = new Browser(config, $('<div class="igv-track-container-div">')[0]);
-
-    browser.parent = parentDiv;
-
-    $(parentDiv).append(browser.$root);
+    const browser = new Browser(config, parentDiv);
 
     setControls(browser, config);
-
-    browser.$content = $('<div class="igv-content-div">');
-    browser.$root.append(browser.$content);
-    browser.$contentHeader = $('<div>', {class: 'igv-content-header'});
-    browser.$content.append(browser.$contentHeader);
-    browser.$content.append(browser.trackContainerDiv);
 
     // user feedback
     browser.userFeedback = new UserFeedback(browser.$content);
@@ -219,7 +209,8 @@ function setControls(browser, conf) {
 
     // Create controls. Can be customized by passing in a creation function that returns a div containing the controls
     controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-    browser.$root.append($(controlDiv));
+
+    $(controlDiv).insertBefore(browser.$content);
 
     if (false === conf.showControls) {
         $(controlDiv).hide();
@@ -336,7 +327,8 @@ function createStandardControls(browser, config) {
     browser.$toggle_button_container = $toggle_button_container;
 
     // cursor guide
-    browser.cursorGuide = new CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    // browser.cursorGuide = new CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.cursorGuide = new CursorGuide(browser.$content, $toggle_button_container, config, browser);
 
     // center guide
     browser.centerGuide = new CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
