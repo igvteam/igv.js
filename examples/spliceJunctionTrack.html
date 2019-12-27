@@ -58,8 +58,8 @@
           {
             type: 'junctions',
             format: 'bed',
-            url: `${rootUrl}/${prefix}.SJ.out.bed.gz`,
-            indexURL: `${rootUrl}/${prefix}.SJ.out.bed.gz.tbi`,
+            url: `${rootUrl}/${prefix}.junctions.bed.gz`,
+            indexURL: `${rootUrl}/${prefix}.junctions.bed.gz.tbi`,
             ...junctionTrackOptions,
           },
         ],
@@ -73,8 +73,8 @@
         format: 'bed',
         name: `junctions from ${prefix}`,
         height: 150,
-        url: `${rootUrl}/${prefix}.SJ.out.bed.gz`,
-        indexURL: `${rootUrl}/${prefix}.SJ.out.bed.gz.tbi`,
+        url: `${rootUrl}/${prefix}.junctions.bed.gz`,
+        indexURL: `${rootUrl}/${prefix}.junctions.bed.gz.tbi`,
         ...junctionTrackOptions,
       }
     }))
