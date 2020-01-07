@@ -10,12 +10,15 @@ import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import {pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
+import {guid} from "./util/domUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
 function ViewPort(trackView, $container, genomicState, width) {
 
     const self = this;
+
+    this.guid = guid();
 
     this.trackView = trackView;
     this.genomicState = genomicState;
@@ -25,13 +28,12 @@ function ViewPort(trackView, $container, genomicState, width) {
     this.$viewport = $('<div class="igv-viewport-div">');
     $container.append(this.$viewport);
 
+    // store the viewport GUID for later use
+    this.$viewport.data('viewportGUID', this.guid);
+
     // viewport-content
     const $div = $("<div>", {class: 'igv-viewport-content-div'});
     this.$viewport.append($div);
-
-    // know the genomic state index
-    const index = this.browser.genomicStateList.indexOf(genomicState);
-    $div.data('genomicStateIndex', index);
 
     $div.height(this.$viewport.height());
     this.contentDiv = $div.get(0);

@@ -42,19 +42,22 @@
             const options =
                 {
                     genome: "hg19",
-                    //  locus: [ 'egfr', 'myc' ],
+                     // locus: [ 'egfr', 'myc' ],
                     locus: "myc",
                     flanking: 1000,
                     queryParametersSupported: true,
                     showAllChromosomes: true,
-                    tracks:
-                    [
-                        {
-                            name: "BED Render Bug",
-                            url: 'https://www.encodeproject.org/files/ENCFF768ZWJ/@@download/ENCFF768ZWJ.bigBed'
-                        }
+                    showCursorTrackingGuide: true,
+                    showControls: true,
+                    // tracks:
+                    // [
+                    //     {
+                    //         name: "BED Render Bug",
+                    //         url: 'https://www.encodeproject.org/files/ENCFF768ZWJ/@@download/ENCFF768ZWJ.bigBed'
+                    //     }
+                    //
+                    // ]
 
-                    ]
 
                 };
 
