@@ -105,7 +105,9 @@ FeatureFileReader.prototype.readHeader = async function () {
                 index = await this.getIndex();
 
                 if (!index) {
-                    throw new Error("Unable to load index: " + this.config.indexURL);
+                    // Note - it should be impossible to get here
+                    const iurl = this.config.indexURL || this.config.url;
+                    throw new Error("Unable to load index: " + iurl);
                 }
 
                 // Load the file header (not HTTP header) for an indexed file.
@@ -264,7 +266,6 @@ FeatureFileReader.prototype.getIndex = async function () {
     if (this.index !== undefined || this.indexed === false) {
         return this.index;
     }
-
     const indexOrUndefined = await this.loadIndex()
     if (indexOrUndefined) {
         this.index = indexOrUndefined;
@@ -273,7 +274,6 @@ FeatureFileReader.prototype.getIndex = async function () {
         this.indexed = false;
     }
     return this.index;
-
 };
 
 /**

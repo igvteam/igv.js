@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>1000 Genomes CRAM file</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    var options =
+        {
+            reference: {
+                fastaURL: "../drive-download-20191024T140251Z-001/subpiece_ref.fa",
+                indexURL: "../drive-download-20191024T140251Z-001/subpiece_ref.fa.fai"
+            },
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: '../drive-download-20191024T140251Z-001/subpiece.bam',
+                    index: '../drive-download-20191024T140251Z-001/subpiece.bam.bai',
+                    name: 'subpiece'
+                }
+            ],
+            samplingDepth: 5,
+            samplingWindowSize: 1000
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+   igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
