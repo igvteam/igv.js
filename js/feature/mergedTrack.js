@@ -37,10 +37,6 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
         return;
     }
 
-    if (config.height === undefined) {
-        config.height = 50;
-    }
-
     TrackBase.call(this, config, browser);
 
     this.tracks = [];
@@ -49,7 +45,6 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
         if (!tconf.type) inferTrackTypes(tconf);
 
         tconf.isMergedTrack = true;
-        tconf.height = config.height;
 
         var t = browser.createTrack(tconf);
 
@@ -63,7 +58,7 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
 
     Object.defineProperty(this, "height", {
         get() {
-            return this._height || 100;
+            return this._height;
         },
         set(h) {
             this._height = h;
@@ -73,6 +68,8 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
             }
         }
     });
+
+    this.height = config.height || 100;
 });
 
 MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {

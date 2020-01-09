@@ -219,7 +219,7 @@ const igvxhr = {
                             }
                         } else {
                             if (xhr.status === 403) {
-                                handleError("Access forbidden: url")
+                                handleError("Access forbidden: " + url)
                             } else if (xhr.status === 416) {
                                 //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
                                 handleError("Unsatisfiable range");
