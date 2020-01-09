@@ -93,7 +93,8 @@ const FeatureTrack = extend(TrackBase,
         }
 
         //set defaults
-        if ('junctions' === config.type && config.colorByNumReadsThreshold === undefined) {
+        if (('spliceJunctions' === config.type) 
+            && config.colorByNumReadsThreshold === undefined) {
             config.colorByNumReadsThreshold = 5;
         }
 
@@ -102,7 +103,7 @@ const FeatureTrack = extend(TrackBase,
             this.render = config.render;
         } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
-        } else if ('junctions' === config.type) {
+        } else if ('spliceJunctions' === config.type) {
             this.render = renderJunctions;
         } else if ('snp' === config.type) {
             this.render = renderSnp;
@@ -164,7 +165,7 @@ FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerP
  */
 FeatureTrack.prototype.computePixelHeight = function (features) {
 
-    if (this.type === "junctions") {
+    if (this.type === 'spliceJunctions') {
         return this.height;
     } else if (this.displayMode === "COLLAPSED") {
         return this.margin + this.expandedRowHeight;
@@ -224,10 +225,10 @@ FeatureTrack.prototype.draw = function (options) {
             options.drawLabel = options.labelAllFeatures || featureDensity > 10;
             const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             const last = lastPxEnd[row];
-            if (!last || pxEnd > last || this.config.type === 'junctions') {
+            if (!last || pxEnd > last || (this.config.type === 'spliceJunctions') {
                 this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
-                if (this.config.type !== 'junctions') {
+                if (this.config.type !== 'spliceJunctions') {
                     // Ensure a visible gap between features
                     const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
                     if (last && pxStart - last <= 0) {
