@@ -753,6 +753,7 @@ Browser.prototype.createTrack = function (config) {
         case "genes":
         case "fusionjuncspan":
         case "junctions":
+        case "splicejunctions":
         case "snp":
             track = TrackFactory["feature"](trackConfig, this);
             break;

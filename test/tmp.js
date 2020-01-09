@@ -1,0 +1,5 @@
+[{"chr":"chr12","start":98987518,"end":98987752,"value":55},
+     {"chr":"chr12","start":98987518,"end":98987756,"value":3},
+     {"chr":"chr12","start":98987913,"end":98989210,"value":136},
+     {"chr":"chr12","start":98987913,"end":98989504,"value":7},
+     {"chr":"chr12","start":98988207,"end":98989210,"value":3},{"chr":"chr12","start":98988227,"end":98989210,"value":7},{"chr":"chr12","start":98989335,"end":98991633,"value":254},{"chr":"chr12","start":98989626,"end":98991633,"value":74},{"chr":"chr12","start":98991813,"end":98992299,"value":162},{"chr":"chr12","start":98991970,"end":98992299,"value":2},{"chr":"chr12","start":98992481,"end":98993732,"value":83},{"chr":"chr12","start":98993905,"end":98994948,"value":102},{"chr":"chr12","start":98993905,"end":98997107,"value":1},{"chr":"chr12","start":98995059,"end":98995145,"value":135}]

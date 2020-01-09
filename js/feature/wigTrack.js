@@ -34,8 +34,8 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
-import FeatureTrack from "./featureTrack";
-import {visibilityChange} from "../igv-create";
+import FeatureTrack from "./featureTrack.js";
+import {visibilityChange} from "../igv-create.js";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 

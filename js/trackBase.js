@@ -70,7 +70,7 @@ const TrackBase = function (config, browser) {
     this.removable = config.removable === undefined ? true : config.removable;      // Defaults to true
 
     this.height = config.height || 100;
-    this.autoHeight = config.autoHeight === undefined ? (config.height === undefined) : config.autoHeight;
+    this.autoHeight = config.autoHeight;
     this.minHeight = config.minHeight || Math.min(25, this.height);
     this.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
