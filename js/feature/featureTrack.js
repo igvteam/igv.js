@@ -88,13 +88,22 @@ const FeatureTrack = extend(TrackBase,
             this.height = config.height || this.margin + 2 * this.expandedRowHeight;
         }
 
+        if (this.height === undefined || !this.height) {
+            this.height = 100;
+        }
+
+        //set defaults
+        if (('spliceJunctions' === config.type) 
+            && config.colorByNumReadsThreshold === undefined) {
+            config.colorByNumReadsThreshold = 5;
+        }
 
         // Set the render function.  This can optionally be passed in the config
         if (config.render) {
             this.render = config.render;
         } else if ("FusionJuncSpan" === config.type) {
             this.render = renderFusionJuncSpan;
-        } else if ('junctions' === config.type) {
+        } else if ('spliceJunctions' === config.type) {
             this.render = renderJunctions;
         } else if ('snp' === config.type) {
             this.render = renderSnp;
@@ -156,8 +165,9 @@ FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerP
  */
 FeatureTrack.prototype.computePixelHeight = function (features) {
 
-
-    if (this.displayMode === "COLLAPSED") {
+    if (this.type === 'spliceJunctions') {
+        return this.height;
+    } else if (this.displayMode === "COLLAPSED") {
         return this.margin + this.expandedRowHeight;
     } else {
         let maxRow = 0;
@@ -187,7 +197,7 @@ FeatureTrack.prototype.draw = function (options) {
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
 
-    if ( typeof this.config.isMergedTrack === 'undefined' || !this.config.isMergedTrack ) {
+    if ( !this.config.isMergedTrack ) {
         IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
     }
 
@@ -215,18 +225,19 @@ FeatureTrack.prototype.draw = function (options) {
             options.drawLabel = options.labelAllFeatures || featureDensity > 10;
             const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
             const last = lastPxEnd[row];
-            if (!last || pxEnd > last || this.config.type === 'junctions') {
+            if (!last || pxEnd > last || (this.config.type === 'spliceJunctions') {
                 this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
-                // Ensure a visible gap between features
-                const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                if (last && pxStart - last <= 0) {
-                    ctx.globalAlpha = 0.5
-                    IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                    ctx.globalAlpha = 1.0
+                if (this.config.type !== 'spliceJunctions') {
+                    // Ensure a visible gap between features
+                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                    if (last && pxStart - last <= 0) {
+                        ctx.globalAlpha = 0.5
+                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                        ctx.globalAlpha = 1.0
+                    }
+                    lastPxEnd[row] = pxEnd;
                 }
-                lastPxEnd[row] = pxEnd;
-
             }
         }
 
@@ -712,22 +723,9 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideMotifs && this.config.hideMotifs.includes(feature.attributes.motif)) {
         return
     }
-
-    var py = this.margin;
-    var rowHeight = this.config.height;
-    
-    var cy = py + 0.5 * rowHeight;
-    var topY = py;
-    var bottomY = py + rowHeight;
-    var bezierBottomY = bottomY - 10;
-
-    // draw the junction arc
-    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
-    var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
-    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
-    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
-
+    if (this.config.hideStrand === feature.strand) {
+        return
+    }
     var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
         return
@@ -740,14 +738,28 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (totalReadCount > 0 && multiMappedReadCount/totalReadCount > this.config.maxFractionMultiMappedReads) {
         return
     }
-
     var maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
     if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
         return
     }
 
+    var py = this.margin;
+    var rowHeight = this.height;
+
+    var cy = py + 0.5 * rowHeight;
+    var topY = py;
+    var bottomY = py + rowHeight;
+    var bezierBottomY = bottomY - 10;
+
+    // draw the junction arc
+    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    var junctionMiddlePx = (junctionLeftPx + junctionRightPx)/2;
+    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx)/2;
+    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx)/2;
+
     var lineWidth;
-    if (typeof this.config.thicknessBasedOn === 'undefined' || this.config.thicknessBasedOn === 'numUniqueReads') {
+    if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
         lineWidth = uniquelyMappedReadCount;
     } else if (this.config.thicknessBasedOn === 'numReads') {
         lineWidth = totalReadCount;
@@ -757,7 +769,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     lineWidth = 1 + Math.log(lineWidth + 1)/Math.log(12);
 
     var bounceHeight;
-    if (typeof this.config.bounceHeightBasedOn === 'undefined' || this.config.bounceHeightBasedOn === 'random') {
+    if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
     } else if (this.config.bounceHeightBasedOn === 'distance') {
@@ -768,10 +780,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
 
     var color;
-    if (typeof this.config.colorBy === 'undefined' || this.config.colorBy === 'numUniqueReads') {
-        color = uniquelyMappedReadCount > 5 ? 'blue' : '#AAAAAA';  // color gradient?
+    if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
+        color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
     } else if (this.config.colorBy === 'numReads') {
-        color = totalReadCount > 5 ? 'blue' : '#AAAAAA';
+        color = totalReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';
     } else if (this.config.colorBy === 'isAnnotatedJunction') {
         color = feature.attributes.annotated_junction === "true" ?  '#b0b0ec' : 'orange';
     } else if (this.config.colorBy === 'strand') {
@@ -781,7 +793,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
 
     var label = '';
-    if (typeof this.config.labelUniqueReadCount === 'undefined' && typeof this.config.labelMultiMappedReadCount === 'undefined' && typeof this.config.labelTotalReadCount === 'undefined') {
+    if (this.config.labelUniqueReadCount === undefined && this.config.labelMultiMappedReadCount === undefined && this.config.labelTotalReadCount === undefined) {
         //default label
         label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');
     } else {
@@ -795,8 +807,8 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         }
     }
 
-    if (this.config.labelIsAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
-        label += this.config.labelIsAnnotatedJunction;
+    if (this.config.labelAnnotatedJunction && feature.attributes.annotated_junction === "true" ) {
+        label += this.config.labelAnnotatedJunction;
     }
 
     if (this.config.labelMotif && feature.attributes.motif) {
