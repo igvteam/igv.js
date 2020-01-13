@@ -24,6 +24,7 @@
  */
 
 import IGVMath from "./igv-math.js";
+import {stripQuotes} from "./util/stringUtils.js";
 
 const IGVColor = {
 
@@ -255,11 +256,14 @@ const IGVColor = {
     },
 
 
-    createColorString: function (token) {
-        if (token.includes(",")) {
-            return token.startsWith("rgb") ? token : "rgb(" + token + ")";
+    createColorString: function (str) {
+        // Excel will quote color strings, strip all quotes
+        str = stripQuotes(str);
+
+        if (str.includes(",")) {
+            return str.startsWith("rgb") ? str : "rgb(" + str + ")";
         } else {
-            return token;
+            return str;
         }
     },
 
