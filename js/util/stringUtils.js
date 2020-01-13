@@ -27,7 +27,6 @@ const splitLines = function (string) {
     return string.split(/\n|\r\n|\r/g);
 }
 
-
 function splitStringRespectingQuotes(string, delim) {
 
     var tokens = [],
@@ -53,6 +52,16 @@ function splitStringRespectingQuotes(string, delim) {
         }
     }
     return tokens;
+}
+
+function stripQuotes(str) {
+    if(str.startsWith("'") || str.startsWith('"')) {
+        str = str.substring(1);
+    }
+    if(str.endsWith("'") || str.endsWith('"')) {
+        str = str.substring(0, str.length - 1);
+    }
+    return str;
 }
 
 function hashCode(s) {
@@ -100,4 +109,4 @@ function uncompressString(enc) {
     return str;
 }
 
-export {isString, numberFormatter, splitLines, splitStringRespectingQuotes, hashCode, compressString, uncompressString};
+export {isString, numberFormatter, splitLines, splitStringRespectingQuotes, stripQuotes, hashCode, compressString, uncompressString};
