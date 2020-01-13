@@ -186,6 +186,11 @@
     ]
   },
   {
+    "url": "../test/data/bed/quoted_color.bed",
+    "indexed": false,
+    "name": "quoted color"
+  },
+  {
     "url": "../test/data/bed/oneFeature.bed",
     "indexed": false,
     "name": "1 feature bed"
