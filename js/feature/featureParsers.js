@@ -957,16 +957,13 @@ function parseAttributeString(attributeString, keyValueDelim) {
         if (t.length === 2) {
             const key = t[0].trim();
             let value = t[1].trim();
-
             //Strip off quotes, if any
             if (value.startsWith('"') && value.endsWith('"')) {
                 value = value.substr(1, value.length - 2);
             }
-
             attributes[key] = value;
         }
     }
-
     return attributes
 }
 
@@ -1007,7 +1004,7 @@ function decodeGFF(tokens, ignore) {
         }
         else if ('gff3' === format)
             try {
-                attributes[key] = decodeURIComponent(value)
+                attributes[key] =  unescape(value);
             } catch (e) {
                 attributes[key] = value;   // Invalid
                 console.error(`Malformed gff3 attibute value: ${value}`);
