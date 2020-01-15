@@ -1002,9 +1002,16 @@ function decodeGFF(tokens, ignore) {
     var attributes = parseAttributeString(attributeString, delim);
     for (let [key, value] of Object.entries(attributes)) {
         const keyLower = key.toLowerCase()
-        if ("color" === keyLower || "colour" === keyLower)   color = IGVColor.createColorString(t[1]);
+        if ("color" === keyLower || "colour" === keyLower) {
+            color = IGVColor.createColorString(value);
+        }
         else if ('gff3' === format)
-            attributes[key] = decodeURIComponent(value)
+            try {
+                attributes[key] = decodeURIComponent(value)
+            } catch (e) {
+                attributes[key] = value;   // Invalid
+                console.error(`Malformed gff3 attibute value: ${value}`);
+            }
     }
 
     // Find name (label) property
@@ -1198,7 +1205,7 @@ function decodeAed(tokens, ignore) {
 
     var feature = new AedFeature(this.aed, tokens);
 
-    if (!feature.chr || (!feature.start && feature.start!==0) || !feature.end) {
+    if (!feature.chr || (!feature.start && feature.start !== 0) || !feature.end) {
         console.log('Cannot parse feature: ' + tokens.join(','));
         return undefined;
     }
