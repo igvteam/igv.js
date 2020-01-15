@@ -41,7 +41,8 @@ const google = {
 
         isGoogleStorageURL: function (url) {
             return url.startsWith("https://www.googleapis.com/storage") ||
-                url.startsWith("https://storage.cloud.google.com")
+                url.startsWith("https://storage.cloud.google.com")  ||
+                url.startsWith("https://storage.googleapis.com");
         },
 
         isGoogleCloudURL: function (url) {
