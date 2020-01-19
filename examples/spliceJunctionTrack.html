@@ -2,97 +2,80 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-
-    <title>igv.js</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
 
     <!-- IGV JS-->
     <script src="../dist/igv.min.js"></script>
+
 </head>
+
 <body>
-<h1>Splice Junctions example</h1>
-<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<h1>Splice junctions</h1>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="text/javascript">
-  const rootUrl = "gs://seqr-hail/splice_junction_track_test_cases"
-  const samplePrefixes = ['sampleA.chr15-92835700-93031800', 'sampleB.chr15-92835700-93031800', 'samples_A_and_B.chr15-92835700-93031800']
 
-  const junctionTrackOptions = {
-    minUniquelyMappedReads: 1,
-    minTotalReads: 1,
-    maxFractionMultiMappedReads: 1,
-    minSplicedAlignmentOverhang: 0,
-    thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
-    bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
-    colorBy: 'numReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
-    colorByNumReadsThreshold: 5,
-    labelUniqueReadCount: true,
-    labelMultiMappedReadCount: true,
-    labelTotalReadCount: false,
-    labelMotif: false,
-    labelAnnotatedJunction: " [A]",
-    hideStrand: '-',
-    hideAnnotatedJunctions: false,
-    hideUnannotatedJunctions: false,
-    hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
-  }
+    document.addEventListener("DOMContentLoaded", function () {
+        const tracks = [
+            {
+                type: 'merged',
+                name: 'Splice Junctions',
+                height: 150,
+                tracks: [
+                    {
+                        type: 'wig',
+                        format: "bigwig",
+                        url: 'https://www.dropbox.com/s/8j2uf0hsqprusnc/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.bigWig?dl=0',
+                    },
+                    {
+                        type: 'spliceJunctions',
+                        format: 'bed',
+                        url: `https://www.dropbox.com/s/nvmy55hhe24plpv/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed.gz?dl=0`,
+                        indexURL: `https://www.dropbox.com/s/iv5tcg3t8v3xu23/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed.gz.tbi?dl=0`,
+                        displayMode: 'COLLAPSED',
+                        minUniquelyMappedReads: 1,
+                        minTotalReads: 1,
+                        maxFractionMultiMappedReads: 1,
+                        minSplicedAlignmentOverhang: 0,
+                        thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
+                        bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
+                        colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+                        labelUniqueReadCount: true,
+                        labelMultiMappedReadCount: true,
+                        labelTotalReadCount: false,
+                        labelMotif: false,
+                        labelIsAnnotatedJunction: " [A]",
+                        hideAnnotatedJunctions: false,
+                        hideUnannotatedJunctions: false,
+                        hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
+                    }
+                ]
+            }
+        ]
 
-  document.addEventListener("DOMContentLoaded", function () {
+        var options = {
+            locus: 'chr15:92835700-93031800',
+            genome: 'hg38',
+            tracks: tracks,
+        };
 
-    let tracks = []
+        var igvDiv = document.getElementById("igv-div");
 
-    //add example tracks showing both coverage and junctions
-    tracks = tracks.concat(samplePrefixes.map((prefix) => {
-      return {
-        type: 'merged',
-        name: prefix,
-        height: 150,
-        tracks: [
-          {
-            type: 'wig',
-            format: "bigwig",
-            url: `${rootUrl}/${prefix}.bigWig`,
-          },
-          {
-            type: 'spliceJunctions',
-            format: 'bed',
-            url: `${rootUrl}/${prefix}.junctions.bed.gz`,
-            indexURL: `${rootUrl}/${prefix}.junctions.bed.gz.tbi`,
-            ...junctionTrackOptions,
-          },
-        ],
-      }
-    }))
-
-    //add example tracks showing junctions only
-    tracks = tracks.concat(samplePrefixes.map((prefix) => {
-      return {
-        type: 'junctions',
-        format: 'bed',
-        name: `junctions from ${prefix}`,
-        height: 150,
-        url: `${rootUrl}/${prefix}.junctions.bed.gz`,
-        indexURL: `${rootUrl}/${prefix}.junctions.bed.gz.tbi`,
-        ...junctionTrackOptions,
-      }
-    }))
-
-    let options = {
-        locus: 'chr15:92835700-93031800',
-        genome: 'hg38',
-        tracks: tracks,
-    };
-
-    let igvDiv = document.getElementById("igv-div");
-
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-        })
-  });
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    })
 
 </script>
+
 </body>
+
 </html>
