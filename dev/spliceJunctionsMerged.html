@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>Splice junctions</h1>
+
+<div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    const tracks = [
+        {
+            type: 'junctions',
+            format: 'bed',
+            url: `https://www.dropbox.com/s/nvmy55hhe24plpv/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed.gz?dl=0`,
+            indexURL: `https://www.dropbox.com/s/iv5tcg3t8v3xu23/splice_junction_track_test_cases_sampleA.chr15-92835700-93031800.SJ.out.bed.gz.tbi?dl=0`,
+            displayMode: 'COLLAPSED',
+            minUniquelyMappedReads: 1,
+            minTotalReads: 1,
+            maxFractionMultiMappedReads: 1,
+            minSplicedAlignmentOverhang: 0,
+            thicknessBasedOn: 'numUniqueReads', //options: numUniqueReads (default), numReads, isAnnotatedJunction
+            bounceHeightBasedOn: 'random', //options: random (default), distance, thickness
+            colorBy: 'isAnnotatedJunction', //options: numUniqueReads (default), numReads, isAnnotatedJunction, strand, motif
+            labelUniqueReadCount: true,
+            labelMultiMappedReadCount: true,
+            labelTotalReadCount: false,
+            labelMotif: false,
+            labelIsAnnotatedJunction: " [A]",
+            hideAnnotatedJunctions: false,
+            hideUnannotatedJunctions: false,
+            hideMotifs: ['GT/AT', 'non-canonical'], //options: 'GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'
+        }
+    ]
+
+    var options = {
+        locus: 'chr15:92835700-93031800',
+        genome: 'hg38',
+        tracks: tracks,
+    };
+
+    var igvDiv = document.getElementById("igv-div");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>
