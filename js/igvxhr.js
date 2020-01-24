@@ -200,7 +200,8 @@ const igvxhr = {
                         if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
                             if (range && xhr.status !== 206 && range.start !== 0) {
                                 // For small files a range starting at 0 can return the whole file => 200
-                                handleError("ERROR: range-byte header was ignored for url: " + url);
+                                // Provide just the slice we asked for, throw out the rest quietly
+                                resolve(xhr.response.slice(range.start, range.start + range.size));
                             } else {
                                 resolve(xhr.response);
                             }
