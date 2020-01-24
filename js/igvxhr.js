@@ -36,7 +36,7 @@ var NONE = 0;
 var GZIP = 1;
 var BGZF = 2;
 var UNKNOWN = 3;
-var loginTried = false;
+let RANGE_WARNING_GIVEN = false;
 
 class RateLimiter {
 
@@ -199,15 +199,14 @@ const igvxhr = {
                         // when the url points to a local file, the status is 0 but that is not an error
                         if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
                             if (range && xhr.status !== 206 && range.start !== 0) {
-                                if (xhr.response.length < 100000) {
-                                    // For small files a range starting at 0 can return the whole file => 200
-                                    // Provide just the slice we asked for, throw out the rest quietly
-                                    resolve(xhr.response.slice(range.start, range.start + range.size));
-                                } else {
-                                    // Error out if the file is large but the server is not supporting range requests
-                                    // If you see this error, disable indexing or make the server support range requests
-                                    handleError("ERROR: range-byte header was ignored for url: " + url);
+                                // For small files a range starting at 0 can return the whole file => 200
+                                // Provide just the slice we asked for, throw out the rest quietly
+                                // If file is large warn user
+                                if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
+                                    Alert.presentAlert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
                                 }
+                                resolve(xhr.response.slice(range.start, range.start + range.size));
+
                             } else {
                                 resolve(xhr.response);
                             }
