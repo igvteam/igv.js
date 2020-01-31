@@ -258,7 +258,7 @@ function repaintContext({ctx, width, height, genome, referenceFrame, ideogramWid
     // Total chromosome length can be > chromosome.bpLength for partial fastas.
     let chrLength = chromosome.bpLength;
     const cytobands = genome.getCytobands(referenceFrame.chrName);
-    if (cytobands) {
+    if (cytobands && cytobands.length > 0) {
         chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
     }
 
