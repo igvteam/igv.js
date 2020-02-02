@@ -1,76 +1,36 @@
-import FeatureSource from './featureSource.js';
-import TDFSource from "../tdf/tdfSource.js";
+
+import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
-import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
-import paintAxis from "../util/paintAxis.js";
-import IGVColor from "../igv-color.js";
-import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
+import {extend, isSimpleType} from "../util/igvUtils.js";
+import IGVColor from "../igv-color.js";
 import {numberFormatter} from "../util/stringUtils.js";
-import {extend} from "../util/igvUtils.js";
-import FeatureTrack from "./featureTrack.js";
-import {visibilityChange} from "../igv-create.js";
+import paintAxis from "../util/paintAxis.js";
 
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
+const GCNVTrack = extend(TrackBase,
 
-const GcnvTrack = extend(TrackBase,
+  function (config, browser) {
 
-    function (config, browser) {
+      TrackBase.call(this, config, browser);
 
-        this.type = "wig";
+      this.autoscale = config.autoscale || config.max === undefined;
+      this.dataRange = {
+          min: config.min || 0,
+          max: config.max
+      }
 
-        this.featureType = 'numeric';
+      this.windowFunction = config.windowFunction || "mean";
+      this.paintAxis = paintAxis;
+      this.graphType = config.graphType || "bar";
 
-        // Default color, might be overridden by track line
-        if (config.color === undefined) {
-            config.color = "rgb(150,150,150)";
-        }
+      this.featureSource = new FeatureSource(this.config, browser.genome);
+  });
 
-        if (config.height === undefined) {
-            config.height = 50;
-        }
+GCNVTrack.prototype.menuItemList = function () {
 
-        TrackBase.call(this, config, browser);
-
-        const format = config.format ? config.format.toLowerCase() : config.format;
-        if ("bigwig" === format) {
-            this.featureSource = new BWSource(config, browser.genome);
-        } else if ("tdf" === format) {
-            this.featureSource = new TDFSource(config, browser.genome);
-        } else {
-            this.featureSource = new FeatureSource(config, browser.genome);
-        }
-
-        this.autoscale = config.autoscale || config.max === undefined;
-        if (!this.autoscale) {
-            this.dataRange = {
-                min: config.min || 0,
-                max: config.max
-            }
-        }
-
-        this.windowFunction = config.windowFunction || "mean";
-        this.paintAxis = paintAxis;
-        this.graphType = config.graphType || "bar";
-
-    });
-
-GcnvTrack.prototype.postInit = async function () {
-    const header = await this.getFileHeader();
-    if (header) this.setTrackProperties(header)
-}
-
-GcnvTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
-
-}
-
-GcnvTrack.prototype.menuItemList = function () {
-
-    var self = this,
-        menuItems = [];
-
+    const self = this;
+    const menuItems = [];
     menuItems.push(dataRangeMenuItem(this.trackView));
 
     menuItems.push({
@@ -86,16 +46,13 @@ GcnvTrack.prototype.menuItemList = function () {
 
 };
 
-GcnvTrack.prototype.getFileHeader = async function () {
 
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
-    }
-    return this.header;
+GCNVTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
 };
 
-GcnvTrack.prototype.draw = function (options) {
 
+GCNVTrack.prototype.draw = function (options) {
     let self = this;
 
     const features = options.features;
@@ -105,9 +62,6 @@ GcnvTrack.prototype.draw = function (options) {
     const pixelWidth = options.pixelWidth;
     const pixelHeight = options.pixelHeight;
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-    let lastXPixel = -1;
-    let lastValue = -1;
-    let lastNegValue = 1;
 
     let baselineColor;
     if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
@@ -118,15 +72,10 @@ GcnvTrack.prototype.draw = function (options) {
         return ( (self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min) ) * pixelHeight
     };
 
-    const getX = function (feature) {
-        let x = Math.floor((feature.start - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
+    const getX = function (bpPosition) {
+        let x = Math.floor((bpPosition - bpStart) / bpPerPixel);
+        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(bpPosition) + ' bp start ' + numberFormatter(bpStart));
         return x;
-    };
-
-    const getWidth  = function (feature, x) {
-        const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-        return Math.max(1, rectEnd - x);
     };
 
     const drawGuideLines = function (options) {
@@ -156,8 +105,9 @@ GcnvTrack.prototype.draw = function (options) {
             if (renderFeature.end < bpStart) return;
             if (renderFeature.start > bpEnd) return;
 
+            let previousValues = { end: 0, values: {} };
             for (let f of features) {
-                renderFeature(f)
+                renderFeature(previousValues, f);
             }
 
             // If the track includes negative values draw a baseline
@@ -170,159 +120,173 @@ GcnvTrack.prototype.draw = function (options) {
 
     drawGuideLines(options);
 
-    function renderFeature(feature) {
-        if (feature.value < self.dataRange.min) return;
-        const y = yScale(feature.value);
-        const x = getX(feature);
+    function renderFeature(previousValues, feature) {
+        const previousX = getX(previousValues.end)
+        const x1 = getX(feature.start);
+        const x2 = getX(feature.end);
 
-        if (isNaN(x)) return;
+        if (isNaN(x1) || isNaN(x2)) return;
 
-        const height = yScale(0) - y;
-        const width = getWidth(feature, x);
+        //let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
+        //const color = (typeof c === "function") ? c(feature.value) : c;
 
-        let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
-        const color = (typeof c === "function") ? c(feature.value) : c;
+        //const height = yScale(0) - y;
+        //const width = getWidth(feature, x);
 
-        if (self.graphType === "points") {
-            const pointSize = self.config.pointSize || 3;
-            const px = x + width / 2;
-            IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
-
-        } else {
-            IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
-            lastXPixel = x + width;
-            if (feature.value > 0) {
-                lastValue = feature.value;
-            } else if (feature.value < 0) {
-                lastNegValue = feature.value;
+        //const pointSize = self.config.pointSize || 3;
+        for (let v of feature.values) {
+            const sampleName = v[0];
+            const value = v[1];
+            const y = yScale(value);
+            const previousValue = previousValues.values[sampleName]
+            if (!isNaN(previousValue)) {
+                IGVGraphics.dashedLine(ctx, previousX, yScale(previousValue), x1, y);
             }
+            IGVGraphics.strokeLine(ctx, x1, y, x2, y);
+
+            previousValues.values[sampleName] = value;
+
+            //IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
+            //IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
+            //lastXPixel = x + width;
+            //if (feature.value > 0) {
+            //    lastValue = feature.value;
+            //} else if (feature.value < 0) {
+            //    lastNegValue = feature.value;
+           //}
         }
+        previousValues.end = feature.end;
+
     }
+
 };
 
-GcnvTrack.prototype.popupData = function (clickState, features) {
 
-    // We use the featureCache property rather than method to avoid async load.  If the
-    // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+GCNVTrack.prototype.doAutoscale = function(features) {
 
-    if (!features) features = this.clickedFeatures(clickState);
+    var min, max;
 
-    if (features && features.length > 0) {
+    if (features.length > 0) {
+        min = Number.MAX_VALUE;
+        max = -Number.MAX_VALUE;
 
-        let genomicLocation = clickState.genomicLocation;
-        let referenceFrame = clickState.viewport.genomicState.referenceFrame;
-        let popupData = [];
-
-        // We need some tolerance around genomicLocation, start with +/- 2 pixels
-        let tolerance = 2 * referenceFrame.bpPerPixel;
-        let selectedFeature = binarySearch(features, genomicLocation, tolerance);
-
-        if (selectedFeature) {
-            let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                numberFormatter(selectedFeature.start + 1)
-                : numberFormatter(selectedFeature.start + 1) + "-" + numberFormatter(selectedFeature.end);
-            popupData.push({name: "Position:", value: posString});
-            popupData.push({
-                name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                value: numberFormatter(selectedFeature.value)
+        features.forEach(function (f) {
+            f.values.forEach(function (value) {
+                if (!Number.isNaN(value[1])) {
+                    min = Math.min(min, value[1]);
+                    max = Math.max(max, value[1]);
+                }
             });
-        }
-
-        return popupData;
-
+        });
 
     } else {
-        return [];
+        // No features -- default
+        min = 0;
+        max = 100;
+    }
+
+    return {min: min, max: max};
+}
+
+
+GCNVTrack.prototype.clickedFeatures = function (clickState) {
+
+    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
+    return filterByRow(allFeatures, clickState.y);
+
+    function filterByRow(features, y) {
+
+        return features.filter(function (feature) {
+            const rect = feature.pixelRect;
+            return rect && y >= rect.y && y <= (rect.y + rect.h);
+        });
     }
 }
 
-/**
- * Called when the track is removed.  Do any needed cleanup here
- */
-GcnvTrack.prototype.dispose = function () {
-    this.trackView = undefined;
-}
+GCNVTrack.prototype.popupData = function (clickState, featureList) {
 
+    const self = this;
 
-function signsDiffer(a, b) {
-    return (a > 0 && b < 0 || a < 0 && b > 0);
-}
+    if (!featureList) featureList = this.clickedFeatures(clickState);
 
-/**
- * Return the closest feature to the genomic position +/- the specified tolerance.  Closest is defined
- * by the minimum of the distance between position and start or end of the feature.
- *
- * @param features
- * @param position
- * @returns {*}
- */
-function binarySearch(features, position, tolerance) {
-    var startIndex = 0,
-        stopIndex = features.length - 1,
-        index = (startIndex + stopIndex) >> 1,
-        candidateFeature,
-        tmp;
+    const items = [];
 
+    for (let f of featureList) {
+    }
+    featureList.forEach(function (f) {
+        extractPopupData(f, items);
 
-    // Use binary search to get the index of at least 1 feature in the click tolerance bounds
-    while (!test(features[index], position, tolerance) && startIndex < stopIndex) {
-        if (position < features[index].start) {
-            stopIndex = index - 1;
-        } else if (position > features[index].end) {
-            startIndex = index + 1;
+    });
+
+    return items;
+
+    function extractPopupData(feature, data) {
+
+        const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
+
+        // hack for whole genome properties
+        let f
+        if (feature.hasOwnProperty('realChr')) {
+            f = Object.assign({}, feature);
+            f.chr = feature.realChr;
+            f.start = feature.realStart;
+            f.end = feature.realEnd;
+            delete f.realChr;
+            delete f.realStart;
+            delete f.realEnd;
+        } else {
+            f = feature;
         }
 
-        index = (startIndex + stopIndex) >> 1;
-    }
 
-    if (test(features[index], position, tolerance)) {
+        for (let property of Object.keys(f)) {
 
-        candidateFeature = features[index];
-        if (test(candidateFeature, position, 0)) return candidateFeature;
-
-        // Else, find closest feature to click
-        tmp = index;
-        while (tmp-- >= 0) {
-            if (!test(features[tmp]), position, tolerance) {
-                break;
-            }
-            if (test(features[tmp], position, 0)) {
-                return features[tmp];
-            }
-            if (delta(features[tmp], position) < delta(candidateFeature, position)) {
-                candidateFeature = features[tmp];
-            }
-
-            tmp = index;
-            while (tmp++ < features.length) {
-                if (!test(features[tmp]), position, tolerance) {
-                    break;
-                }
-                if (test(features[tmp], position, 0)) {
-                    return features[tmp];
-                }
-                if (delta(features[tmp], position) < delta(candidateFeature, position)) {
-                    candidateFeature = features[tmp];
-                }
+            if (!filteredProperties.has(property) && isSimpleType(f[property])) {
+                data.push({name: property, value: f[property]});
             }
         }
-        return candidateFeature;
-
-    } else {
-        console.log(position + ' not found!');
-        return undefined;
-    }
-
-    function test(feature, position, tolerance) {
-        return position >= (feature.start - tolerance) && position <= (feature.end + tolerance);
-    }
-
-    function delta(feature, position) {
-        return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
     }
 }
 
-GcnvTrack.prototype.getState = function () {
+GCNVTrack.prototype.contextMenuItemList = function (clickState) {
+
+    const self = this;
+    const referenceFrame = clickState.viewport.genomicState.referenceFrame;
+    const genomicLocation = clickState.genomicLocation;
+
+    // Define a region 5 "pixels" wide in genomic coordinates
+    const sortDirection = this.config.sort ?
+      (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
+      "DESC";
+    const bpWidth = referenceFrame.toBP(2.5);
+
+    function sortHandler(sort) {
+        self.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
+    }
+
+    return [
+        {
+            label: 'Sort by value', click: function (e) {
+
+
+                const sort = {
+                    direction: sortDirection,
+                    chr: referenceFrame.chrName,
+                    start: genomicLocation - bpWidth,
+                    end: genomicLocation + bpWidth
+
+                };
+
+                sortHandler(sort);
+
+                self.config.sort = sort;
+
+            }
+        }];
+
+};
+
+GCNVTrack.prototype.getState = function () {
 
     let config = this.config;
 
@@ -336,15 +300,10 @@ GcnvTrack.prototype.getState = function () {
 
 }
 
-GcnvTrack.prototype.supportsWholeGenome = function () {
-
-    if (typeof this.featureSource.supportsWholeGenome === 'function') {
-        return this.featureSource.supportsWholeGenome();
-    } else {
-        return false;
-    }
-
+GCNVTrack.prototype.supportsWholeGenome = function () {
+    return this.featureSource.supportsWholeGenome();
 }
 
 
-export default GcnvTrack;
+
+export default GCNVTrack;
