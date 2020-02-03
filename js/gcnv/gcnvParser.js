@@ -4,7 +4,7 @@ class GCNVParser {
   parseFeatures(data) {
     if (!data) return null;
 
-    console.warn('Parse features')
+
     const sampleNames = this.parseHeader(data);
 
     const dataWrapper = getDataWrapper(data);
@@ -31,16 +31,19 @@ class GCNVParser {
       }
     }
 
-    console.warn('Parsed', allFeatures.length, 'features from', sampleNames.length, 'samples')
-    return allFeatures
+    console.warn('Parsed', allFeatures.length, 'features from', sampleNames.length, 'samples: ', sampleNames);
+
+    return allFeatures;
   }
 
   parseHeader(data) {
-    const dataWrapper = getDataWrapper(data);
+    if (!this.sampleNames) {
+      const dataWrapper = getDataWrapper(data);
 
-    const sampleNames = dataWrapper.nextLine().split("\t").slice(3);
+      this.sampleNames = dataWrapper.nextLine().split("\t").slice(3);
+    }
 
-    return sampleNames;
+    return this.sampleNames;
   }
 }
 
