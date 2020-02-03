@@ -113,6 +113,12 @@ GCNVTrack.prototype.draw = function (options) {
 
             let highlightConnectorLines = [];
             let highlightFeatureLines = [];
+
+            // clickDetectorCache allows fast retrieval of whether a mouse click hits a rendered line segment
+            // by storing lists of rendered line segments, keyed by their right x coordinate in canvas pixel space.
+            // this cache is regenerated on every draw.
+            this.clickDetectorCache = {}
+
             for (let feature of features) {
                 const x1 = getX(feature.start);
                 const x2 = getX(feature.end);
@@ -121,6 +127,8 @@ GCNVTrack.prototype.draw = function (options) {
                 if (isNaN(x1) || isNaN(x2)) continue;
                 if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) continue;
 
+                this.clickDetectorCache[x1] = [];
+                this.clickDetectorCache[x2] = [];
                 for (let i = 0; i < feature.values.length; i++) {
                     const sampleName = self.header[i];
                     const value = feature.values[i];
@@ -134,6 +142,7 @@ GCNVTrack.prototype.draw = function (options) {
                         } else {
                             IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
                         }
+                        this.clickDetectorCache[x1].push([previousX, previousY, x1, y, sampleName, highlightColor || 'gray'])
                     }
 
                     if (x2 - x1 >= X_PIXEL_DIFF_THRESHOLD) {
@@ -143,6 +152,7 @@ GCNVTrack.prototype.draw = function (options) {
                         } else {
                             IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
                         }
+                        this.clickDetectorCache[x2].push([x1, y, x2, y, sampleName, highlightColor || 'gray'])
                     }
 
                     previousValues[sampleName] = value;
@@ -198,63 +208,87 @@ GCNVTrack.prototype.doAutoscale = function(features) {
 }
 
 
+const distanceToLine = (x, y, ax, ay, bx, by) => {
+    /*
+        Finds distance between point (x, y) and line defined by points (ax, ay) (bx, by)
+        based on http://mathworld.wolfram.com/Point-LineDistance2-Dimensional.html
+    */
+
+    const bx_minus_ax = bx - ax;
+    const by_minus_ay = by - ay;
+    const v = Math.abs(bx_minus_ax * (ay - y) - (ax - x) * by_minus_ay)
+    const r = Math.sqrt(bx_minus_ax * bx_minus_ax + by_minus_ay * by_minus_ay)
+
+    const distance = r > 0 ? v / r : 0;
+    //console.warn('Check if', x, y, 'is within', ax, ay, bx, by, '. Distance from line: ', distance);
+
+    return distance;
+}
+
+
 GCNVTrack.prototype.clickedFeatures = function (clickState) {
+    //console.warn('click', clickState.canvasX, clickState.canvasY, clickState)
 
-    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
-    return filterByRow(allFeatures, clickState.y);
+    const BOUNDING_BOX_PADDING = 10;
+    const MIN_DISTANCE_TO_SEGMENT = 5;
 
-    function filterByRow(features, y) {
+    const clickX = clickState.canvasX;
+    const clickY = clickState.canvasY;
 
-        return features.filter(function (feature) {
-            const rect = feature.pixelRect;
-            return rect && y >= rect.y && y <= (rect.y + rect.h);
-        });
+    let key = null;
+    for(key of Object.keys(this.clickDetectorCache)) {
+        key = parseInt(key)
+        console.warn(key)
+        if(key >= clickX) {
+            break
+        }
     }
+
+
+    if (key) {
+        let closestDistanceSoFar = Number.MAX_VALUE;
+        let closestResult = [];
+        const segments = this.clickDetectorCache[key]
+        for (let segment of segments) {
+            const x1 = segment[0];
+            const x2 = segment[2];
+            if (clickX < x1 || clickX > x2)  return [];
+
+            const y1 = segment[1];
+            const y2 = segment[3];
+
+            if ((clickY < Math.min(y1, y2) - BOUNDING_BOX_PADDING) || (clickY > Math.max(y1, y2) + BOUNDING_BOX_PADDING))  continue;
+
+            const distance = distanceToLine(clickX, clickY, x1, y1, x2, y2)
+            if (distance < closestDistanceSoFar) {
+                closestResult  = [{'name': segment[4], 'color': segment[5]}];
+                closestDistanceSoFar = distance;
+                //console.warn('closest:', 'name', segment[4], 'color', segment[5], distance);
+            }
+        }
+
+        if (closestDistanceSoFar < MIN_DISTANCE_TO_SEGMENT) {
+            return closestResult;
+        }
+    }
+
+    return [];
 }
 
 GCNVTrack.prototype.popupData = function (clickState, featureList) {
 
-    const self = this;
-
     if (!featureList) featureList = this.clickedFeatures(clickState);
 
     const items = [];
-
-    for (let f of featureList) {
-    }
     featureList.forEach(function (f) {
-        extractPopupData(f, items);
-
+        for (let property of Object.keys(f)) {
+            if (isSimpleType(f[property])) {
+                items.push({name: property, value: f[property]});
+            }
+        }
     });
 
     return items;
-
-    function extractPopupData(feature, data) {
-
-        const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
-
-        // hack for whole genome properties
-        let f
-        if (feature.hasOwnProperty('realChr')) {
-            f = Object.assign({}, feature);
-            f.chr = feature.realChr;
-            f.start = feature.realStart;
-            f.end = feature.realEnd;
-            delete f.realChr;
-            delete f.realStart;
-            delete f.realEnd;
-        } else {
-            f = feature;
-        }
-
-
-        for (let property of Object.keys(f)) {
-
-            if (!filteredProperties.has(property) && isSimpleType(f[property])) {
-                data.push({name: property, value: f[property]});
-            }
-        }
-    }
 }
 
 GCNVTrack.prototype.contextMenuItemList = function (clickState) {
@@ -263,36 +297,7 @@ GCNVTrack.prototype.contextMenuItemList = function (clickState) {
     const referenceFrame = clickState.viewport.genomicState.referenceFrame;
     const genomicLocation = clickState.genomicLocation;
 
-    // Define a region 5 "pixels" wide in genomic coordinates
-    const sortDirection = this.config.sort ?
-      (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
-      "DESC";
-    const bpWidth = referenceFrame.toBP(2.5);
-
-    function sortHandler(sort) {
-        self.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
-    }
-
-    return [
-        {
-            label: 'Sort by value', click: function (e) {
-
-
-                const sort = {
-                    direction: sortDirection,
-                    chr: referenceFrame.chrName,
-                    start: genomicLocation - bpWidth,
-                    end: genomicLocation + bpWidth
-
-                };
-
-                sortHandler(sort);
-
-                self.config.sort = sort;
-
-            }
-        }];
-
+    return [];
 };
 
 GCNVTrack.prototype.getState = function () {
