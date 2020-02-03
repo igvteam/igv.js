@@ -144,9 +144,9 @@ GCNVTrack.prototype.draw = function (options) {
             const y = yScale(value);
             const previousValue = previousValues.values[sampleName]
             if (!isNaN(previousValue)) {
-                IGVGraphics.strokeLine(ctx, previousX, yScale(previousValue), x1, y, {strokeStyle: 'gray'});
+                IGVGraphics.strokeLine(ctx, previousX, yScale(previousValue), x1, y, {strokeStyle: '#D9D9D9'});
             }
-            IGVGraphics.strokeLine(ctx, x1, y, x2, y);
+            IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
 
             previousValues.values[sampleName] = value;
 
