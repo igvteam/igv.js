@@ -16,10 +16,7 @@
 </head>
 
 <body>
-
-<h1>1000 Genomes CRAM file</h1>
-
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
@@ -32,10 +29,29 @@
                 {
                     type: 'gcnv',
                     format: 'gcnv',
+                    name: 'gCNV1',
                     url: './data/gcnv/cc_29_3.dcr.subset.bed.gz',
                     indexURL: './data/gcnv/cc_29_3.dcr.subset.bed.gz.tbi',
-                    indexed: true
-                }
+                    indexed: true,
+                    height: 300,
+                },
+
+                {
+                    name: 'Gencode v32 Genes',
+                    format: 'refgene',
+                    url: 'https://storage.googleapis.com/seqr-reference-data/GRCh38/gencode/gencode_v32_knownGene.sorted.txt.gz',
+                    indexUrl: 'https://storage.googleapis.com/seqr-reference-data/GRCh38/gencode/gencode_v32_knownGene.sorted.txt.gz.tbi',
+                    indexed: true,
+                    searchable: true,
+                    height: 350,
+                    visibilityWindow: -1,
+                    displayMode: 'EXPANDED',
+                    order: 1000001,
+                    color: 'rgb(76,171,225)',
+                    highlightSamples: {
+
+                    },
+                },
             ]
         };
 
