@@ -11,9 +11,7 @@ import paintAxis from "../util/paintAxis.js";
 const GCNVTrack = extend(TrackBase,
 
   function (config, browser) {
-
       TrackBase.call(this, config, browser);
-
       this.autoscale = config.autoscale || config.max === undefined;
       this.dataRange = {
           min: config.min || 0,
@@ -26,6 +24,12 @@ const GCNVTrack = extend(TrackBase,
 
       this.featureSource = new FeatureSource(this.config, browser.genome);
   });
+
+
+GCNVTrack.prototype.postInit = async function () {
+
+    this.header = await this.featureSource.getFileHeader();
+}
 
 GCNVTrack.prototype.menuItemList = function () {
 
@@ -134,13 +138,13 @@ GCNVTrack.prototype.draw = function (options) {
         //const width = getWidth(feature, x);
 
         //const pointSize = self.config.pointSize || 3;
-        for (let v of feature.values) {
-            const sampleName = v[0];
-            const value = v[1];
+        for (let i = 0; i < feature.values.length; i++) {
+            const sampleName = self.header[i];
+            const value = feature.values[i];
             const y = yScale(value);
             const previousValue = previousValues.values[sampleName]
             if (!isNaN(previousValue)) {
-                IGVGraphics.dashedLine(ctx, previousX, yScale(previousValue), x1, y);
+                IGVGraphics.strokeLine(ctx, previousX, yScale(previousValue), x1, y, {strokeStyle: 'gray'});
             }
             IGVGraphics.strokeLine(ctx, x1, y, x2, y);
 
@@ -159,6 +163,8 @@ GCNVTrack.prototype.draw = function (options) {
 
     }
 
+    console.warn('done with draw')
+
 };
 
 
@@ -166,17 +172,14 @@ GCNVTrack.prototype.doAutoscale = function(features) {
 
     var min, max;
 
+    console.warn('start autoscale')
     if (features.length > 0) {
         min = Number.MAX_VALUE;
         max = -Number.MAX_VALUE;
 
-        features.forEach(function (f) {
-            f.values.forEach(function (value) {
-                if (!Number.isNaN(value[1])) {
-                    min = Math.min(min, value[1]);
-                    max = Math.max(max, value[1]);
-                }
-            });
+        features.forEach(function(feature) {
+            min = Math.min(min, ...feature.values);
+            max = Math.max(max, ...feature.values);
         });
 
     } else {
@@ -185,6 +188,7 @@ GCNVTrack.prototype.doAutoscale = function(features) {
         max = 100;
     }
 
+    console.warn('done autoscale')
     return {min: min, max: max};
 }
 
@@ -296,12 +300,13 @@ GCNVTrack.prototype.getState = function () {
         config.min = this.dataRange.min;
         config.max = this.dataRange.max;
     }
+
     return config;
 
 }
 
 GCNVTrack.prototype.supportsWholeGenome = function () {
-    return this.featureSource.supportsWholeGenome();
+    return false;
 }
 
 
