@@ -79,7 +79,7 @@ GCNVTrack.prototype.draw = function (options) {
 
     const getX = function (bpPosition) {
         let x = Math.floor((bpPosition - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(bpPosition) + ' bp start ' + numberFormatter(bpStart));
+        if (isNaN(x)) console.warn('isNaN(x). feature start ' + numberFormatter(bpPosition) + ' bp start ' + numberFormatter(bpStart));
         return x;
     };
 
@@ -106,13 +106,58 @@ GCNVTrack.prototype.draw = function (options) {
         // Max can be less than min if config.min is set but max left to autoscale. If that's the case there is
         // nothing to paint.
         if (self.dataRange.max > self.dataRange.min) {
+            const highlightSamples = this.config.highlightSamples;
 
-            if (renderFeature.end < bpStart) return;
-            if (renderFeature.start > bpEnd) return;
+            let previousEnd = -1;
+            let previousValues = {};
 
-            let previousValues = { end: 0, values: {} };
-            for (let f of features) {
-                renderFeature(previousValues, f);
+            let highlightConnectorLines = [];
+            let highlightFeatureLines = [];
+            for (let feature of features) {
+                const x1 = getX(feature.start);
+                const x2 = getX(feature.end);
+                const previousX = previousEnd >= 0 ? getX(previousEnd) : x1;
+
+                if (isNaN(x1) || isNaN(x2)) continue;
+                if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) continue;
+
+                for (let i = 0; i < feature.values.length; i++) {
+                    const sampleName = self.header[i];
+                    const value = feature.values[i];
+                    const y = yScale(value);
+                    if (x1 - previousX >= X_PIXEL_DIFF_THRESHOLD) {
+                        const previousValue = previousValues[sampleName]
+                        const previousY = yScale(previousValue);
+                        const highlightColor = highlightSamples && highlightSamples[sampleName];
+                        if (highlightColor) {
+                            highlightConnectorLines.push([previousX, previousY, x1, y, highlightColor])
+                        } else {
+                            IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
+                        }
+                    }
+
+                    if (x2 - x1 >= X_PIXEL_DIFF_THRESHOLD) {
+                        const highlightColor = highlightSamples && highlightSamples[sampleName];
+                        if (highlightColor) {
+                            highlightFeatureLines.push([x1, y, x2, y, highlightColor])
+                        } else {
+                            IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
+                        }
+                    }
+
+                    previousValues[sampleName] = value;
+
+                    //IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
+                    //IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
+                }
+                previousEnd = feature.end;
+            }
+
+            for (let f of highlightConnectorLines) {
+                IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 1.3});
+            }
+            for (let f of highlightFeatureLines) {
+                IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 2});
             }
 
             /*
@@ -126,49 +171,6 @@ GCNVTrack.prototype.draw = function (options) {
     }
 
     drawGuideLines(options);
-
-    function renderFeature(previousValues, feature) {
-        const previousX = getX(previousValues.end)
-        const x1 = getX(feature.start);
-        const x2 = getX(feature.end);
-
-        if (isNaN(x1) || isNaN(x2)) return;
-        if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) return;
-
-        //let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
-        //const color = (typeof c === "function") ? c(feature.value) : c;
-
-        //const pointSize = self.config.pointSize || 3;
-        for (let i = 0; i < feature.values.length; i++) {
-            const sampleName = self.header[i];
-            const value = feature.values[i];
-            const y = yScale(value);
-            if (x1 - previousX >= X_PIXEL_DIFF_THRESHOLD) {
-                const previousValue = previousValues.values[sampleName]
-                if (!isNaN(previousValue)) {
-                    const previousY = yScale(previousValue);
-                    IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
-                }
-            }
-
-            if (x2 - x1 >= X_PIXEL_DIFF_THRESHOLD) {
-                IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
-            }
-
-            previousValues.values[sampleName] = value;
-
-            //IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
-            //IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
-            //lastXPixel = x + width;
-            //if (feature.value > 0) {
-            //    lastValue = feature.value;
-            //} else if (feature.value < 0) {
-            //    lastNegValue = feature.value;
-           //}
-        }
-        previousValues.end = feature.end;
-
-    }
 };
 
 
