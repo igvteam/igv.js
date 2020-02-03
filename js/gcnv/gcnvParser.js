@@ -31,7 +31,7 @@ class GCNVParser {
       }
     }
 
-    console.warn('Parsed', allFeatures.length, 'features from', sampleNames.length, 'samples: ', sampleNames);
+    console.warn('Parsed', allFeatures.length, 'features from', sampleNames.length, 'samples');
 
     return allFeatures;
   }
@@ -41,6 +41,7 @@ class GCNVParser {
       const dataWrapper = getDataWrapper(data);
 
       this.sampleNames = dataWrapper.nextLine().split("\t").slice(3);
+      console.warn('Parsed', this.sampleNames.length, 'samples from gCNV track file header:', this.sampleNames);
     }
 
     return this.sampleNames;
