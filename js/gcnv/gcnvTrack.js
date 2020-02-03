@@ -238,7 +238,6 @@ GCNVTrack.prototype.clickedFeatures = function (clickState) {
     let key = null;
     for(key of Object.keys(this.clickDetectorCache)) {
         key = parseInt(key)
-        console.warn(key)
         if(key >= clickX) {
             break
         }
