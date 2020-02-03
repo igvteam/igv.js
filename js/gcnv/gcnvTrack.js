@@ -7,6 +7,9 @@ import {extend, isSimpleType} from "../util/igvUtils.js";
 import IGVColor from "../igv-color.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import paintAxis from "../util/paintAxis.js";
+import MenuUtils from "../ui/menuUtils.js";
+
+const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const GCNVTrack = extend(TrackBase,
 
@@ -67,10 +70,10 @@ GCNVTrack.prototype.draw = function (options) {
     const pixelHeight = options.pixelHeight;
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-    let baselineColor;
-    if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
-        baselineColor = IGVColor.addAlpha(self.color, 0.1);
-    }
+    ///let baselineColor;
+    //if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
+    //    baselineColor = IGVColor.addAlpha(self.color, 0.1);
+    //}
 
     const yScale = (yValue) => {
         return ( (self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min) ) * pixelHeight
@@ -113,12 +116,14 @@ GCNVTrack.prototype.draw = function (options) {
             for (let f of features) {
                 renderFeature(previousValues, f);
             }
-
+            
+            /*
             // If the track includes negative values draw a baseline
             if (self.dataRange.min < 0) {
                 const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
                 IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
             }
+            */
         }
     }
 
@@ -133,9 +138,6 @@ GCNVTrack.prototype.draw = function (options) {
 
         //let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
         //const color = (typeof c === "function") ? c(feature.value) : c;
-
-        //const height = yScale(0) - y;
-        //const width = getWidth(feature, x);
 
         //const pointSize = self.config.pointSize || 3;
         for (let i = 0; i < feature.values.length; i++) {
@@ -162,9 +164,6 @@ GCNVTrack.prototype.draw = function (options) {
         previousValues.end = feature.end;
 
     }
-
-    console.warn('done with draw')
-
 };
 
 
@@ -172,7 +171,6 @@ GCNVTrack.prototype.doAutoscale = function(features) {
 
     var min, max;
 
-    console.warn('start autoscale')
     if (features.length > 0) {
         min = Number.MAX_VALUE;
         max = -Number.MAX_VALUE;
@@ -188,8 +186,7 @@ GCNVTrack.prototype.doAutoscale = function(features) {
         max = 100;
     }
 
-    console.warn('done autoscale')
-    return {min: min, max: max};
+    return {min: min - 0.01, max: max + 0.01};
 }
 
 
