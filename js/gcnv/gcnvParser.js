@@ -4,13 +4,10 @@ import {splitLines} from "../util/stringUtils.js";
 class GCNVParser {
   parseFeatures(data) {
     if (!data) return null;
-
-    const dataWrapper = getDataWrapper(data);
-
     // Read locus
-    const sampleNames = this.parseHeader(dataWrapper.nextLine());
+    const sampleNames = this.parseHeader(data);
     const allFeatures = [];
-
+    const dataWrapper = getDataWrapper(data);
     let i = 0
     let line;
     while (line = dataWrapper.nextLine()) {
@@ -35,9 +32,6 @@ class GCNVParser {
         values: values,
       })
 
-      if (i == 1) {
-        console.warn(values);
-      }
       /*
       for (let j = 0; j < sampleNames.length; j++) {
 
@@ -57,15 +51,15 @@ class GCNVParser {
       */
     }
 
-    console.warn('Parsed', allFeatures.length, ' gcnv rows')
-
     return allFeatures
   }
 
-  parseHeader(line) {
-    const tokens = line.split("\t");
+  parseHeader(data) {
+    const dataWrapper = getDataWrapper(data);
 
-    return tokens.slice(3)
+    const sampleNames = dataWrapper.nextLine().split("\t").slice(3);
+
+    return sampleNames;
   }
 }
 
