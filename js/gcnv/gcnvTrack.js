@@ -8,6 +8,7 @@ import {numberFormatter} from "../util/stringUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
 
+const X_PIXEL_DIFF_THRESHOLD = 1;
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const GCNVTrack = extend(TrackBase,
@@ -132,6 +133,7 @@ GCNVTrack.prototype.draw = function (options) {
         const x2 = getX(feature.end);
 
         if (isNaN(x1) || isNaN(x2)) return;
+        if ((x1 - previousX < X_PIXEL_DIFF_THRESHOLD) && (x2 - x1 < X_PIXEL_DIFF_THRESHOLD)) return;
 
         //let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
         //const color = (typeof c === "function") ? c(feature.value) : c;
@@ -141,11 +143,17 @@ GCNVTrack.prototype.draw = function (options) {
             const sampleName = self.header[i];
             const value = feature.values[i];
             const y = yScale(value);
-            const previousValue = previousValues.values[sampleName]
-            if (!isNaN(previousValue)) {
-                IGVGraphics.strokeLine(ctx, previousX, yScale(previousValue), x1, y, {strokeStyle: '#D9D9D9'});
+            if (x1 - previousX >= X_PIXEL_DIFF_THRESHOLD) {
+                const previousValue = previousValues.values[sampleName]
+                if (!isNaN(previousValue)) {
+                    const previousY = yScale(previousValue);
+                    IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
+                }
             }
-            IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
+
+            if (x2 - x1 >= X_PIXEL_DIFF_THRESHOLD) {
+                IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
+            }
 
             previousValues.values[sampleName] = value;
 
