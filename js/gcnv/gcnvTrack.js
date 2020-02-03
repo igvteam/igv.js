@@ -4,7 +4,6 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend, isSimpleType} from "../util/igvUtils.js";
-import IGVColor from "../igv-color.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
@@ -35,7 +34,6 @@ GCNVTrack.prototype.postInit = async function () {
 }
 
 GCNVTrack.prototype.menuItemList = function () {
-
     const self = this;
     const menuItems = [];
     menuItems.push(dataRangeMenuItem(this.trackView));
@@ -50,7 +48,6 @@ GCNVTrack.prototype.menuItemList = function () {
     });
 
     return menuItems;
-
 };
 
 
@@ -105,7 +102,7 @@ GCNVTrack.prototype.draw = function (options) {
 
         if (self.dataRange.min === undefined) self.dataRange.min = 0;
 
-        // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
+        // Max can be less than min if config.min is set but max left to autoscale. If that's the case there is
         // nothing to paint.
         if (self.dataRange.max > self.dataRange.min) {
 
@@ -116,7 +113,7 @@ GCNVTrack.prototype.draw = function (options) {
             for (let f of features) {
                 renderFeature(previousValues, f);
             }
-            
+
             /*
             // If the track includes negative values draw a baseline
             if (self.dataRange.min < 0) {
@@ -169,8 +166,7 @@ GCNVTrack.prototype.draw = function (options) {
 
 GCNVTrack.prototype.doAutoscale = function(features) {
 
-    var min, max;
-
+    let min, max;
     if (features.length > 0) {
         min = Number.MAX_VALUE;
         max = -Number.MAX_VALUE;
@@ -180,13 +176,15 @@ GCNVTrack.prototype.doAutoscale = function(features) {
             max = Math.max(max, ...feature.values);
         });
 
+        min -= 0.01;
+        max += 0.01;
     } else {
         // No features -- default
         min = 0;
         max = 100;
     }
 
-    return {min: min - 0.01, max: max + 0.01};
+    return {min: min, max: max};
 }
 
 
