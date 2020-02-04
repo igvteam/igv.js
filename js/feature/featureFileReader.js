@@ -239,7 +239,9 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                 const slicedFeatures = parser.parseFeatures(slicedData);
 
                 // Filter features not in requested range.
-                for (let f of slicedFeatures) {
+                let inInterval = false;
+                for (let i=0; i< slicedFeatures.length; i++) {
+                    const f = slicedFeatures[i];
                     if (genome.getChromosomeName(f.chr) !== chr) {
                         if (allFeatures.length === 0) {
                             continue;  //adjacent chr to the left
@@ -247,8 +249,19 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                             break; //adjacent chr to the right
                         }
                     }
-                    if (f.start > end) break;
+                    if (f.start > end) {
+                        allFeatures.push(f);  // First feature beyond interval
+                        break;
+                    }
                     if (f.end >= start && f.start <= end) {
+                        if(!inInterval) {
+                            inInterval = true;
+                            if(i > 0) {
+                                allFeatures.push(slicedFeatures[i - 1]);
+                            } else {
+                                // TODO -- get block before this one for first feature;
+                            }
+                        }
                         allFeatures.push(f);
                     }
                 }
