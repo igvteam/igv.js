@@ -421,7 +421,7 @@ function addOauthHeaders(headers, acToken) {
 }
 
 /**
- * Perform some well-known url mappings.  For now just handles dropbox urls
+ * Perform some well-known url mappings.
  * @param url
  */
 function mapUrl(url) {
@@ -434,7 +434,10 @@ function mapUrl(url) {
         return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
     } else if (url.includes("//igvdata.broadinstitute.org")) {
         return url.replace("//igvdata.broadinstitute.org", "https://dn7ywbm9isq8j.cloudfront.net")
-    } else {
+    } else if (url.startsWith("ftp://ftp.ncbi.nlm.nih.gov/geo")) {
+        return url.replace("ftp://", "https://")
+    }
+    else {
         return url;
     }
 }
