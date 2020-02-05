@@ -485,7 +485,7 @@ TrackView.prototype.updateViews = async function (force) {
         }
 
         if (typeof this.track.doAutoscale === 'function') {
-            this.track.doAutoscale(allFeatures);
+            this.track.dataRange = this.track.doAutoscale(allFeatures);
         } else {
             this.track.dataRange = doAutoscale(allFeatures);
         }
