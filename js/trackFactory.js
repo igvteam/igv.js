@@ -8,6 +8,7 @@ import InteractionTrack from "./feature/interactionTrack.js";
 import VariantTrack from "./variant/variantTrack.js";
 import EqtlTrack from "./gtex/eqtlTrack.js";
 import GWASTrack from "./gwas/gwasTrack.js";
+import GCNVTrack from "./gcnv/gcnvTrack.js";
 import RnaStructTrack from "./rna/rnaStruct.js";
 
 const TrackFactory = {
@@ -43,6 +44,9 @@ const TrackFactory = {
     },
     'arc': (config, browser) => {
         return new RnaStructTrack(config, browser);
+    },
+    'gcnv': (config, browser) => {
+        return new GCNVTrack(config, browser);
     }
 }
 
