@@ -52,8 +52,22 @@ GCNVTrack.prototype.menuItemList = function () {
 };
 
 
-GCNVTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
+GCNVTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
+    const chrFeatures = await this.featureSource.getFeatures(chr, 0, Number.MAX_VALUE); //bpStart, bpEnd);
+    let prevIndex = undefined;
+    let nextIndex = undefined;
+    for (let i = 1; i < chrFeatures.length - 1; i++) {
+        if (prevIndex === undefined && chrFeatures[i].end > bpStart) {
+            prevIndex = i - 1;
+        }
+        if (nextIndex === undefined && chrFeatures[i].start > bpEnd) {
+            nextIndex = i + 1;
+            break;
+        }
+    }
+    if (prevIndex === undefined) prevIndex = 0;
+    if (nextIndex === undefined) nextIndex = chrFeatures.length;
+    return chrFeatures.slice(prevIndex, nextIndex);
 };
 
 
