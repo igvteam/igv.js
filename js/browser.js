@@ -993,7 +993,7 @@ Browser.prototype.updateViews = async function (genomicState, views, force) {
     }
 
     // Don't autoscale while dragging.
-    if (self.isDragging) {
+    if (self.dragObject) {
         for (let trackView of views) {
             await trackView.updateViews();
         }
@@ -1224,14 +1224,14 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
     let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
     for (let viewport of viewports) {
 
-        const referenceFrame = viewport.genomicState.referenceFrame
+        const referenceFrame = viewport.genomicState.referenceFrame;
         const chromosome = referenceFrame.getChromosome();
+        const start = referenceFrame.start;
+        const bpPerPixel = referenceFrame.bpPerPixel;
         const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
-
         const bppThreshold = scaleFactor < 1.0 ?
             this.minimumBases() / viewport.$viewport.width() :
             chromosomeLengthBP / viewport.$viewport.width();
-
         const centerBP = undefined === centerBPOrUndefined ?
             (referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
             centerBPOrUndefined;
@@ -1247,7 +1247,11 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
         referenceFrame.start = centerBP - (viewportWidthBP / 2)
         referenceFrame.bpPerPixel = bpp;
         referenceFrame.clamp(viewport.$viewport.width())
-        this.updateViews(viewport.genomicState);
+
+        const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
+        if (viewChanged) {
+            this.updateViews(viewport.genomicState);
+        }
 
     }
 
@@ -1982,13 +1986,13 @@ Browser.prototype.mouseDownOnViewport = function (e, viewport) {
 
 Browser.prototype.cancelTrackPan = function () {
 
-    const dragEnd = this.isDragging
-    this.isDragging = false;
+    const dragObject = this.dragObject;
+    this.dragObject = undefined;
     this.isScrolling = false;
     this.vpMouseDown = undefined;
 
 
-    if (dragEnd) {
+    if (dragObject && dragObject.viewport.genomicState.referenceFrame.start !== dragObject.start) {
         this.updateViews();
         this.fireEvent('trackdragend');
     }
@@ -2102,10 +2106,13 @@ function addMouseHandlers() {
             viewportWidth = viewport.$viewport.width();
             referenceFrame = viewport.genomicState.referenceFrame;
 
-            if (!self.isDragging && !self.isScrolling) {
+            if (!self.dragObject && !self.isScrolling) {
                 if (horizontal) {
                     if (self.vpMouseDown.mouseDownX && Math.abs(coords.x - self.vpMouseDown.mouseDownX) > self.constants.dragThreshold) {
-                        self.isDragging = true;
+                        self.dragObject = {
+                            viewport: viewport,
+                            start: referenceFrame.start
+                        };
                     }
                 } else {
                     if (self.vpMouseDown.mouseDownY &&
@@ -2119,11 +2126,12 @@ function addMouseHandlers() {
                 }
             }
 
-            if (self.isDragging) {
-
-                referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
-                self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
-                self.updateViews();
+            if (self.dragObject) {
+                const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
+                if (viewChanged) {
+                    self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
+                    self.updateViews();
+                }
                 self.fireEvent('trackdrag');
             }
 
