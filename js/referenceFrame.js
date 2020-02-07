@@ -57,11 +57,16 @@ ReferenceFrame.prototype.toBP = function (pixels) {
     return this.bpPerPixel * pixels;
 };
 
+/**
+ * Shift frame by stated pixels.  Return true if view changed, false if not.
+ * @param pixels
+ * @param viewportWidth
+ */
 ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
-
+    const start = this.start;
     this.start += pixels * this.bpPerPixel;
     this.clamp(viewportWidth);
-
+    return start !== this.start;
 };
 
 ReferenceFrame.prototype.clamp = function (viewportWidth) {

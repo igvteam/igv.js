@@ -826,7 +826,7 @@ function addMouseHandlers() {
     this.$viewport.on("contextmenu", function (e) {
 
         // Ignore if we are doing a drag.  This can happen with touch events.
-        if (self.browser.isDragging) {
+        if (self.browser.dragObject) {
             return false;
         }
         const clickState = createClickState(e, self);
@@ -902,7 +902,7 @@ function addMouseHandlers() {
 
 
         // Any mouse up cancels drag and scrolling
-        if (self.browser.isDragging || self.browser.isScrolling) {
+        if (self.browser.dragObject || self.browser.isScrolling) {
             self.browser.cancelTrackPan();
             e.preventDefault();
             e.stopPropagation();
@@ -926,7 +926,7 @@ function addMouseHandlers() {
         $('.igv-popover').hide();
 
 
-        if (browser.isDragging || browser.isScrolling) {
+        if (browser.dragObject || browser.isScrolling) {
             return;
         }
 
