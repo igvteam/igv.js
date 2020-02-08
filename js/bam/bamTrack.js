@@ -753,39 +753,49 @@ AlignmentTrack.prototype.draw = function (options) {
                 // Do this after drawBlock to insure gaps are drawn
                 break;
             }
+        }
 
-            if (alignment.insertions) {
-                let lastXBlockStart = -1;
-                for (let insertionBlock of alignment.insertions) {
-                    if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
-                        continue;
-                    }
-                    if (insertionBlock.start < bpStart) {
-                        continue;
-                    }
-                    if (insertionBlock.start > bpEnd) {
-                        break;
-                    }
-                    const refOffset = insertionBlock.start - bpStart
-                    const xBlockStart = refOffset / bpPerPixel - 1
-                    if ((xBlockStart - lastXBlockStart) > 2) {
-                        const widthBlock = 3
-                        IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
-                        lastXBlockStart = xBlockStart;
-                    }
+        if (alignment.insertions) {
+            let lastXBlockStart = -1;
+            for (let insertionBlock of alignment.insertions) {
+                if (this.hideSmallIndels && insertionBlock.len <= this.indelSizeThreshold) {
+                    continue;
+                }
+                if (insertionBlock.start < bpStart) {
+                    continue;
+                }
+                if (insertionBlock.start > bpEnd) {
+                    break;
+                }
+                const refOffset = insertionBlock.start - bpStart
+                const xBlockStart = refOffset / bpPerPixel - 1
+                if ((xBlockStart - lastXBlockStart) > 2) {
+                    const widthBlock = 3
+                    IGVGraphics.fillRect(ctx, xBlockStart, yRect - 1, widthBlock, alignmentHeight + 2, {fillStyle: this.insertionColor});
+                    lastXBlockStart = xBlockStart;
                 }
             }
         }
 
-        function drawBlock(block, b) {
+        if (alignment.gaps) {
+            const yStrokedLine = yRect + alignmentHeight / 2;
+            for (let gap of alignment.gaps) {
+                const sPixel = (gap.start - bpStart) / bpPerPixel;
+                const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel;
+                const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor;
+                IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {strokeStyle: color});
 
+            }
+        }
+
+
+        function drawBlock(block, b) {
 
             const offsetBP = block.start - alignmentContainer.start;
             const blockStartPixel = (block.start - bpStart) / bpPerPixel;
             const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
             const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
             const arrowHeadWidthPixel = this.alignmentRowHeight / 2.0;
-            const yStrokedLine = yRect + alignmentHeight / 2;
             const isSoftClip = 'S' === block.type;
 
             const strokeOutline =
@@ -796,19 +806,6 @@ AlignmentTrack.prototype.draw = function (options) {
             let blockOutlineColor = outlineColor;
             if (this.highlightedAlignmentReadNamed === alignment.readName) blockOutlineColor = 'red'
             else if (isSoftClip) blockOutlineColor = 'rgb(50,50,50)'
-
-            if (block.gapType !== undefined && blockEndPixel !== undefined && lastBlockEnd !== undefined) {
-                if ("D" === block.gapType) {
-                    if (blockWidthPixel < 2 && (this.hideSmallIndels && block.len < this.indelSizeThreshold)) {
-                        return;
-                    }
-                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.deletionColor});
-
-                } else if ("N" === block.gapType) {
-                    IGVGraphics.strokeLine(ctx, lastBlockEnd, yStrokedLine, blockStartPixel, yStrokedLine, {strokeStyle: this.skippedColor});
-                }
-            }
-            lastBlockEnd = blockEndPixel;
 
             const lastBlockPositiveStrand = (true === alignment.strand && b === blocks.length - 1);
             const lastBlockReverseStrand = (false === alignment.strand && b === 0);

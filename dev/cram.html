@@ -27,29 +27,29 @@
 
     var options =
         {
-            genome: "hg19",
-            locus: "chr8:128,750,968-128,751,006",
+            genome: "hg38",
+            locus: "chr1:155,101,137-155,101,341",
             tracks: [
                 {
                     type: 'alignment',
                     format: 'cram',
-                    url: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram',
-                    indexURL: 'https://s3.amazonaws.com/1000genomes/phase3/data/HG00096/exome_alignment/HG00096.mapped.ILLUMINA.bwa.GBR.exome.20120522.bam.cram.crai',
-                    name: 'HG00096',
+                    url: 'https://s3.dualstack.us-east-1.amazonaws.com/1000genomes/data/HG00107/alignment/HG00107.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram',
+                    indexURL: 'https://s3.dualstack.us-east-1.amazonaws.com/1000genomes/data/HG00107/alignment/HG00107.alt_bwamem_GRCh38DH.20150718.GBR.low_coverage.cram.crai',
+                    name: 'HG00107',
                     //  color: 'blue',
                     //showSoftClips: true
-                    colorBy: "tag",
-                    colorByTag: "XC",
-                    autoHeight: true,
-                    minHeight: 50,
-                    maxHeight: 500,
-                    sort: {
-                        locus: "chr8:128,750,986",
-                        //option: "NUCLEOTIDE",
-                        direction: "ASC",
-                        option: "TAG",
-                        tag: "XC"
-                    },
+                    // colorBy: "tag",
+                    // colorByTag: "XC",
+                    // autoHeight: true,
+                    // minHeight: 50,
+                    // maxHeight: 500,
+                    // sort: {
+                    //     locus: "chr8:128,750,986",
+                    //     //option: "NUCLEOTIDE",
+                    //     direction: "ASC",
+                    //     option: "TAG",
+                    //     tag: "XC"
+                    // },
                 }
 
             ]
