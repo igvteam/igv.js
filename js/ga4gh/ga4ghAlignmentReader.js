@@ -287,6 +287,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
 
             var blocks = [],
+                gaps,
                 insertions,
                 seqOffset = 0,
                 pos = record.start,
@@ -307,12 +308,16 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         gapType = 'S';
                         break; // soft clip read bases
                     case 'N' :
-                        pos += c.len;
-                        gapType = 'N';
-                        break;  // reference skip
                     case 'D' :
+                        if (gaps === undefined) {
+                            gaps = [];
+                        }
+                        gaps.push({
+                            start: pos,
+                            len: c.len,
+                            type: c.ltr
+                        });
                         pos += c.len;
-                        gapType = 'D';
                         break;
                     case 'I' :
                         if (insertions === undefined) insertions = [];
@@ -344,7 +349,7 @@ Ga4ghAlignmentReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                 }
             }
 
-            return {blocks: blocks, insertions: insertions};
+            return {blocks: blocks, insertions: insertions, gaps: gaps};
         }
     }
 }

@@ -494,10 +494,9 @@ function makeBlocks(alignment, cigarArray) {
     const blocks = [];
 
     let insertions;
-    let deletions;
+    let gaps;
     let seqOffset = 0;
     let pos = alignment.start;
-    let gapType;
 
     alignment.scStart = alignment.start;
     alignment.scLengthOnRef = alignment.lengthOnRef;
@@ -525,22 +524,18 @@ function makeBlocks(alignment, cigarArray) {
                     type: 'S'
                 }));
                 seqOffset += c.len;
-                gapType = 'I';
                 break; // soft clip read bases
             case 'N' :
-                pos += c.len;
-                gapType = 'N';
-                break;  // reference skip
-            case 'D' :
-                if (deletions === undefined) {
-                    deletions = [];
+            case 'D':
+                if (gaps === undefined) {
+                    gaps = [];
                 }
-                deletions.push({
+                gaps.push({
                     start: pos,
-                    len: c.len
+                    len: c.len,
+                    type: c.ltr
                 });
                 pos += c.len;
-                gapType = 'D';
                 break;
             case 'I' :
 
@@ -554,19 +549,16 @@ function makeBlocks(alignment, cigarArray) {
                     type: 'I'
                 }));
                 seqOffset += c.len;
-                gapType = 'I';
                 break;
             case 'M' :
             case 'EQ' :
             case '=' :
             case 'X' :
-
                 blocks.push(new AlignmentBlock({
                     start: pos,
                     seqOffset: seqOffset,
                     len: c.len,
-                    type: 'M',
-                    gapType: gapType
+                    type: 'M'
                 }));
                 seqOffset += c.len;
                 pos += c.len;
@@ -580,7 +572,7 @@ function makeBlocks(alignment, cigarArray) {
 
     alignment.blocks = blocks;
     alignment.insertions = insertions;
-    alignment.deletions = deletions;
+    alignment.gaps = gaps;
 
 }
 

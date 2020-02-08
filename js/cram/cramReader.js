@@ -250,7 +250,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
                 const blocks = [];
                 let insertions;
-                let gapType;
+                let gaps;
                 let basesUsed = 0;
                 let cigarString = '';
 
@@ -266,10 +266,6 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         const readPos = feature.pos - 1;
                         const refPos = feature.refPos - 1;
 
-                        if (alignment.readName === 'SRR062635.16695874') {
-                            console.log("");
-                        }
-
                         switch (code) {
                             case 'S' :
                             case 'I':
@@ -282,24 +278,19 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                                         start: refPos - len,
                                         seqOffset: basesUsed,
                                         len: len,
-                                        type: 'M',
-                                        gapType: gapType
+                                        type: 'M'
                                     }));
                                     basesUsed += len;
-
                                     cigarString += len + 'M';
                                 }
 
-
                                 if ('S' === code) {
                                     let scPos = refPos;
-
                                     alignment.scLengthOnRef += data.length;
                                     if (readPos === 0) {
                                         alignment.scStart -= data.length;
                                         scPos -= data.length;
                                     }
-
                                     const len = data.length;
                                     blocks.push(new AlignmentBlock({
                                         start: scPos,
@@ -308,7 +299,6 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                                         type: 'S'
                                     }));
                                     basesUsed += len;
-                                    gapType = 'S';
                                     cigarString += len + code;
                                 } else if ('I' === code || 'i' === code) {
                                     if (insertions === undefined) {
@@ -322,10 +312,16 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                                         type: 'I'
                                     }));
                                     basesUsed += len;
-                                    gapType = 'I';
                                     cigarString += len + code;
                                 } else if ('D' === code || 'N' === code) {
-                                    gapType = code;
+                                    if(!gaps) {
+                                        gaps = [];
+                                    }
+                                    gaps.push({
+                                        start: refPos,
+                                        len: data,
+                                        type: code
+                                    })
                                     cigarString += data + code;
                                 }
                                 break;
@@ -347,8 +343,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
                         seqOffset: basesUsed,
                         len: len,
-                        type: 'M',
-                        gapType: gapType
+                        type: 'M'
                     }));
 
                     cigarString += len + 'M';
@@ -356,6 +351,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
 
                 alignment.blocks = blocks;
                 alignment.insertions = insertions;
+                alignment.gaps = gaps;
                 alignment.cigar = cigarString;
 
             }
