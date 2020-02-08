@@ -238,15 +238,17 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             });
         }
 
-        if(alignment.deletions) {
-            for(let del of alignment.deletions) {
-                const offset = del.start - self.bpStart;
-                for(let i = offset; i < offset + del.len; i++) {
-                    if(i < 0) continue;
-                    if (!this.coverage[i]) {
-                        this.coverage[i] = new Coverage(self.threshold);
+        if(alignment.gaps) {
+            for(let del of alignment.gaps) {
+                if(del.type === 'D') {
+                    const offset = del.start - self.bpStart;
+                    for (let i = offset; i < offset + del.len; i++) {
+                        if (i < 0) continue;
+                        if (!this.coverage[i]) {
+                            this.coverage[i] = new Coverage(self.threshold);
+                        }
+                        this.coverage[i].del++;
                     }
-                    this.coverage[i].del++;
                 }
             }
         }
