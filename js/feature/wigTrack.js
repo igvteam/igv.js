@@ -130,7 +130,7 @@ WigTrack.prototype.draw = function (options) {
     const pixelWidth = options.pixelWidth;
     const pixelHeight = options.pixelHeight;
     const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-    let lastXPixel = -1;
+    let lastPixelEnd = -1;
     let lastValue = -1;
     let lastNegValue = 1;
 
@@ -214,13 +214,14 @@ WigTrack.prototype.draw = function (options) {
             IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
 
         } else {
-            IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
-            lastXPixel = x + width;
-            if (feature.value > 0) {
-                lastValue = feature.value;
-            } else if (feature.value < 0) {
-                lastNegValue = feature.value;
+            const pixelEnd = x + width;
+            if (pixelEnd > lastPixelEnd || ((feature.value >= 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue))) {
+                IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
+            } else {
+                console.log("Skipping point")
             }
+            lastValue = feature.value;
+            lastPixelEnd = pixelEnd;
         }
     }
 };
