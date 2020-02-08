@@ -215,10 +215,8 @@ WigTrack.prototype.draw = function (options) {
 
         } else {
             const pixelEnd = x + width;
-            if (pixelEnd > lastPixelEnd || ((feature.value >= 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue))) {
+            if (pixelEnd > lastPixelEnd || (feature.value >= 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue)) {
                 IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
-            } else {
-                console.log("Skipping point")
             }
             lastValue = feature.value;
             lastPixelEnd = pixelEnd;
