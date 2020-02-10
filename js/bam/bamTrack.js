@@ -1039,9 +1039,14 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
 
     function viewReadSequence() {
         const alignment = clickedObject;
-        if (!alignment || !alignment.seq) return;
+        if (!alignment) return;
+
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-        self.browser.presentAlert(seqstring);
+        if(!seqstring|| "*" === seqstring) {
+            self.browser.presentAlert("Read sequence: *")
+        } else {
+            self.browser.presentAlert(seqstring);
+        }
     }
 
 };
