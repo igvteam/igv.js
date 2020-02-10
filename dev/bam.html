@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>Collection of indels</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/api.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr10:10,265,386-10,268,249",
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: '../test/data/bam/indel_test.bam',
+                    indexURL: '../test/data/bam/indel_test.bam.bai',
+                    name: 'HG00514'
+                }
+
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
