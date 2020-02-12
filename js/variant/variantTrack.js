@@ -271,7 +271,7 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
             popupData.push('<HR>')
         }
 
-        if ("COLLAPSED" === self.displayMode) {
+        if ("COLLAPSED" === this.displayMode) {
             Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
         } else {
             const yOffset = clickState.y
