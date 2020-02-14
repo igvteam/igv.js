@@ -27,74 +27,66 @@
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import igvxhr from "../igvxhr.js";
-import  {unbgzf, bgzBlockSize} from './bgzf.js';
+import {unbgzf} from './bgzf.js';
 
 const HtsgetReader = function (config, genome) {
-
     this.config = config;
     this.genome = genome;
     BamUtils.setReaderDefaults(this, config);
-
 };
 
-HtsgetReader.prototype.readAlignments = function (chr, start, end, retryCount) {
+HtsgetReader.prototype.readAlignments = async function (chr, start, end, retryCount) {
 
-    const self = this;
+    if (this.config.format && this.config.format.toUpperCase() !== "BAM") {
+        throw  Error(`htsget format ${this.config.format} is not supported`);
+    }
+
     const genome = this.genome;
-
     let queryChr;
-    if (self.header) {
-        queryChr = self.header.chrAliasTable.hasOwnProperty(chr) ? self.header.chrAliasTable[chr] : chr;
+    if (this.header) {
+        queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr;
     } else {
         queryChr = chr;
     }
 
-    const url = self.config.endpoint + '/reads/' + self.config.id + '?format=BAM' +
+    let endpointURL;
+    if(!this.config.url) {
+        endpointURL = this.config.endpoint + '/reads/';   // Backward compatibility
+    } else {
+        endpointURL = this.config.url + this.config.endpoint;
+    }
+
+    const url = endpointURL + this.config.id + '?format=BAM' +
         '&referenceName=' + queryChr +
         '&start=' + start +
         '&end=' + end;
 
-    return igvxhr.loadJson(url, self.config)
+    const data = await igvxhr.loadJson(url, this.config);
+    const dataArr = await loadUrls(data.htsget.urls);
+    const compressedData = concatArrays(dataArr);  // In essence a complete bam file
+    const unc = unbgzf(compressedData.buffer);
+    const ba = unc;
 
-        .then(function (data) {
+    if (!this.header) {
+        this.header = BamUtils.decodeBamHeader(ba, genome);
+    }
 
-            return loadUrls(data.htsget.urls)
+    const chrIdx = this.header.chrToIndex[chr];
+    const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+    BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end);
+    alignmentContainer.finish();
 
-        })
+    if (alignmentContainer.alignments.length === 0) {
+        if (chrIdx === undefined && this.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
+            queryChr = this.header.chrAliasTable[chr]
+            return this.readAlignments(queryChr, start, end, 1);
+        } else {
+            return alignmentContainer;
+        }
+    } else {
+        return alignmentContainer;
+    }
 
-        .then(function (dataArr) {
-
-            const compressedData = concatArrays(dataArr);  // In essence a complete bam file
-            const unc = unbgzf(compressedData.buffer);
-            const ba = unc;
-
-            if (!self.header) {
-                self.header = BamUtils.decodeBamHeader(ba, genome);
-            }
-
-            const chrIdx = self.header.chrToIndex[chr];
-
-            const alignmentContainer = new AlignmentContainer(chr, start, end, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold);
-            BamUtils.decodeBamRecords(ba, self.header.size, alignmentContainer, self.header.chrNames, chrIdx, start, end);
-            alignmentContainer.finish();
-
-            if (alignmentContainer.alignments.length === 0) {
-                return tryChrAlias(chr, start, end);
-            } else {
-                return alignmentContainer;
-            }
-
-
-            function tryChrAlias(chr, start, end) {
-                if (chrIdx === undefined && self.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
-                    queryChr = self.header.chrAliasTable[chr]
-                    return self.readAlignments(queryChr, start, end, 1);
-                } else {
-                    return alignmentContainer;
-                }
-            }
-
-        })
 }
 
 

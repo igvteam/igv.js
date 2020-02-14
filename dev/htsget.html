@@ -9,8 +9,6 @@
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
     <title>igv.js</title>
-    <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -20,33 +18,32 @@
 
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../js/api.js";
 
-        var div = document.getElementById("myDiv");
-        var options = {
-            genome: "hg19",
-            locus: "chr8:128,747,267-128,754,546",
-            tracks: [
-                {
-                    type: 'alignment',
-                    sourceType: 'htsget',
-                    endpoint: 'https://htsnexus.rnd.dnanex.us/v1',
-                    id: 'BroadHiSeqX_b37/NA12878',
-                    name: 'NA12878'
-                }
+    var div = document.getElementById("myDiv");
+    var options = {
+        genome: "hg19",
+        locus: "chr8:128,747,267-128,754,546",
+        tracks: [
+            {
+                type: 'alignment',
+                sourceType: 'htsget',
+                url: 'http://35.196.212.220',
+                endpoint: '/reads/',
+                id: 'genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
+                name: 'NA12878'
+            }
 
-            ]
-        };
+        ]
+    };
 
-        igv.createBrowser(div, options)
+    igv.createBrowser(div, options)
 
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
-
-    })
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
 
 </script>
