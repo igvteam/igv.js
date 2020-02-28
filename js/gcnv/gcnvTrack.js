@@ -121,6 +121,7 @@ GCNVTrack.prototype.draw = function (options) {
         // nothing to paint.
         if (self.dataRange.max > self.dataRange.min) {
             const highlightSamples = this.config.highlightSamples;
+            const onlyHandleClicksForHighlightedSamples = this.config.onlyHandleClicksForHighlightedSamples;
 
             let previousEnd = -1;
             let previousValues = {};
@@ -156,7 +157,9 @@ GCNVTrack.prototype.draw = function (options) {
                         } else {
                             IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
                         }
-                        this.clickDetectorCache[x1].push([previousX, previousY, x1, y, sampleName, highlightColor || 'gray'])
+                        if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
+                            this.clickDetectorCache[x1].push([previousX, previousY, x1, y, sampleName, highlightColor || 'gray'])
+                        }
                     }
 
                     if (x2 - x1 >= X_PIXEL_DIFF_THRESHOLD) {
@@ -166,7 +169,9 @@ GCNVTrack.prototype.draw = function (options) {
                         } else {
                             IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
                         }
-                        this.clickDetectorCache[x2].push([x1, y, x2, y, sampleName, highlightColor || 'gray'])
+                        if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
+                            this.clickDetectorCache[x2].push([x1, y, x2, y, sampleName, highlightColor || 'gray'])
+                        }
                     }
 
                     previousValues[sampleName] = value;
