@@ -90,7 +90,7 @@ function init(variant) {
         variant.start = variant.pos - 1;
         variant.end = Number.parseInt(variant.info["END"]);
 
-    } else {
+    } else if ("NONVARIANT" !== variant.type) {
         const altTokens = altBases.split(",").filter(token => token.length > 0);
         variant.alleles = [];
         variant.start = variant.pos;
@@ -228,7 +228,8 @@ function determineType(altAlleles) {
         return "UNKNOWN";
     } else if (altAlleles.trim().length === 0 ||
         altAlleles === "<NON_REF>" ||
-        altAlleles === "<*>") {
+        altAlleles === "<*>" ||
+        altAlleles === ".") {
         return "NONVARIANT";
     } else {
         const alleles = altAlleles.split(",");
