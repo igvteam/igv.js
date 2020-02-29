@@ -1,8 +1,13 @@
 {
+  "exclude": "node_modules/**",
   "presets": [
-    "@babel/preset-env"
-  ],
-  "plugins": [
-    "@babel/plugin-transform-regenerator"
+    [
+      "@babel/preset-env",
+      {
+        "targets": "> 1%, not dead",
+        "useBuiltIns": "usage",
+        "corejs": 3
+      }
     ]
+  ]
 }
