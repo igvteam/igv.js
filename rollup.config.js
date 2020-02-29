@@ -1,29 +1,28 @@
-//import resolve from 'rollup-plugin-node-resolve';
-//import commonjs from 'rollup-plugin-commonjs';
-import pkg from './package.json';
 import resolve from 'rollup-plugin-node-resolve';
 import babel from 'rollup-plugin-babel';
 import strip from 'rollup-plugin-strip';
+import commonjs from '@rollup/plugin-commonjs';
+import {terser} from "rollup-plugin-terser"
 
 export default [
 
     {
         input: 'js/index.js',
         output: [
-            {file: pkg.module, format: 'es'}
+            {file: 'dist/igv.esm.js', format: 'es'},
+            {file: 'dist/igv.esm.min.js', format: 'es', sourcemap: true}
         ],
         plugins: [
             strip({
-                // set this to `false` if you don't want to
-                // remove debugger statements
                 debugger: true,
-
-                // defaults to `[ 'console.*', 'assert.*' ]`
-                functions: ['console.log', 'assert.*', 'debug'],
-
-                // set this to `false` if you're not using sourcemaps –
-                // defaults to `true`
-                sourceMap: false
+                functions: ['console.log', 'assert.*', 'debug']
+            }),
+            terser({
+                include: [/^.+\.min\.js$/],
+                sourcemap: {
+                    filename: "igv.esm.min.js",
+                    url: "igv.esm.min.js.map"
+                }
             })
         ]
     },
@@ -31,25 +30,24 @@ export default [
     {
         input: 'js/index.js',
         output: [
-            {file: 'tmp/igv.js', format: 'umd', name: "igv"},
+            {file: 'dist/igv.js', format: 'umd', name: "igv"},
+            {file: 'dist/igv.min.js', format: 'umd', name: "igv", sourcemap: true},
         ],
         plugins: [
-            resolve(),
             strip({
-                // set this to `false` if you don't want to
-                // remove debugger statements
                 debugger: true,
-
-                // defaults to `[ 'console.*', 'assert.*' ]`
-                functions: ['console.log', 'assert.*', 'debug'],
-
-                // set this to `false` if you're not using sourcemaps –
-                // defaults to `true`
-                sourceMap: false
+                functions: ['console.log', 'assert.*', 'debug']
             }),
-            babel({
-                exclude: 'node_modules/**'
-            }),
+            commonjs(),
+            resolve(),
+            babel(),
+            terser({
+                include: [/^.+\.min\.js$/],
+                sourcemap: {
+                    filename: "igv.min.js",
+                    url: "igv.min.js.map"
+                }
+            })
         ]
     }
 ];
