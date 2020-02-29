@@ -120,9 +120,9 @@ VcfParser.prototype.parseHeader = function (data) {
 function extractCallFields(tokens) {
 
     const callFields = {
-            genotypeIndex: -1,
-            fields: tokens
-        };
+        genotypeIndex: -1,
+        fields: tokens
+    };
     for (let i = 0; i < tokens.length; i++) {
         if ("GT" === tokens[i]) {
             callFields.genotypeIndex = i;
@@ -139,12 +139,12 @@ function extractCallFields(tokens) {
  */
 VcfParser.prototype.parseFeatures = function (data) {
 
-        const allFeatures = [];
-        const callSets = this.header.callSets;
+    const allFeatures = [];
+    const callSets = this.header.callSets;
     const dataWrapper = getDataWrapper(data);
 
     let line;
-    while ( line = dataWrapper.nextLine()) {
+    while (line = dataWrapper.nextLine()) {
 
         if (!line.startsWith("#")) {
             const tokens = line.split("\t");
