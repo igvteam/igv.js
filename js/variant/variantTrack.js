@@ -60,6 +60,7 @@ const VariantTrack = extend(TrackBase,
 
         this.featureSource = new FeatureSource(config, browser.genome);
 
+        this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
         this.mixedColor = config.mixedColor || "rgb(200, 220, 200)";
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)";
@@ -226,12 +227,20 @@ VariantTrack.prototype.draw = function (options) {
                         const py = this.variantBandHeight + vGap + (callsDrawn + variant.row) * (callHeight + vGap)
                         let allVar = true;  // until proven otherwise
                         let allRef = true;
-                        call.genotype.forEach(function (g) {
-                            if (g !== 0) allRef = false;
-                            if (g === 0) allVar = false;
-                        });
+                        let noCall = false;
+                        for (let g of call.genotype) {
+                            if('.' === g) {
+                                noCall = true;
+                                break;
+                            } else {
+                                if (g !== 0) allRef = false;
+                                if (g === 0) allVar = false;
+                            }
+                        }
 
-                        if (allRef) {
+                        if (noCall) {
+                            ctx.fillStyle = this.noCallColor;
+                        } else if (allRef) {
                             ctx.fillStyle = this.homrefColor;
                         } else if (allVar) {
                             ctx.fillStyle = this.homvarColor;
@@ -265,7 +274,6 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
     const sampleInformation = this.browser.sampleInformation;
 
     for (let variant of featureList) {
-
 
         if (popupData.length > 0) {
             popupData.push('<HR>')
@@ -311,31 +319,25 @@ VariantTrack.prototype.popupData = function (clickState, featureList) {
  */
 function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
 
-    var gt = '', popupData, i, allele, numRepeats = '', alleleFrac = '';
-    let cravatLinks = [];
-    popupData = [];
-
+    let gt = '';
     const altArray = variant.alternateBases.split(",")
-    call.genotype.forEach(function (i) {
-        if (i === 0) {
+    for(let allele of call.genotype) {
+        if('.' === allele) {
+            gt += 'No Call';
+            break;
+        } else if (allele === 0) {
             gt += variant.referenceBases;
         } else {
-            let alt = altArray[i - 1].replace("<", "&lt;");
+            let alt = altArray[allele - 1].replace("<", "&lt;");
             gt += alt;
         }
-    });
+    }
 
-
+    let popupData = [];
     if (call.callSetName !== undefined) {
         popupData.push({name: 'Name', value: call.callSetName});
     }
     popupData.push({name: 'Genotype', value: gt});
-    if (numRepeats) {
-        popupData.push({name: 'Repeats', value: numRepeats});
-    }
-    if (alleleFrac) {
-        popupData.push({name: 'Allele Fraction', value: alleleFrac});
-    }
     if (call.phaseset !== undefined) {
         popupData.push({name: 'Phase set', value: call.phaseset});
     }
@@ -362,6 +364,7 @@ function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
         popupData.push({name: key, value: call.info[key]});
     });
 
+    let cravatLinks = [];                   // TODO -- where do these get calculated?
     if (cravatLinks.length > 0) {
         popupData.push("<HR/>");
         popupData = popupData.concat(cravatLinks);

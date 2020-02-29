@@ -229,7 +229,6 @@ TrackBase.extractPopupData = function (feature, genomeId) {
         }
     }
 
-
     return data;
 
 

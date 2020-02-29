@@ -36,21 +36,12 @@ const VcfParser = function () {
 
 VcfParser.prototype.parseHeader = function (data) {
 
-    var dataWrapper,
-        tokens,
-        line,
-        j,
-        header = {},
-        id,
-        values,
-        ltIdx,
-        gtIdx,
-        type;
 
-    dataWrapper = getDataWrapper(data);
+    const header = {};
+    const dataWrapper = getDataWrapper(data);
 
     // First line must be file format
-    line = dataWrapper.nextLine();
+    let line = dataWrapper.nextLine();
     if (line.startsWith("##fileformat")) {
         header.version = line.substr(13);
     } else {
@@ -61,31 +52,31 @@ VcfParser.prototype.parseHeader = function (data) {
 
         if (line.startsWith("#")) {
 
-            id = null;
-            values = {};
+            let id;
+            const values = {};
 
             if (line.startsWith("##")) {
 
                 if (line.startsWith("##INFO") || line.startsWith("##FILTER") || line.startsWith("##FORMAT")) {
 
-                    ltIdx = line.indexOf("<");
-                    gtIdx = line.lastIndexOf(">");
+                    const ltIdx = line.indexOf("<");
+                    const gtIdx = line.lastIndexOf(">");
 
                     if (!(ltIdx > 2 && gtIdx > 0)) {
                         console.log("Malformed VCF header line: " + line);
                         continue;
                     }
 
-                    type = line.substring(2, ltIdx - 1);
+                    const type = line.substring(2, ltIdx - 1);
                     if (!header[type]) header[type] = {};
 
                     //##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
                     // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
                     // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
 
-                    tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+                    const tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
 
-                    tokens.forEach(function (token) {
+                    for (let token of tokens) {
                         var kv = token.split("=");
                         if (kv.length > 1) {
                             if (kv[0] === "ID") {
@@ -94,7 +85,7 @@ VcfParser.prototype.parseHeader = function (data) {
                                 values[kv[0]] = kv[1];
                             }
                         }
-                    });
+                    }
 
                     if (id) {
                         header[type][id] = values;
@@ -103,13 +94,13 @@ VcfParser.prototype.parseHeader = function (data) {
                     // Ignoring other ## header lines
                 }
             } else if (line.startsWith("#CHROM")) {
-                tokens = line.split("\t");
+                const tokens = line.split("\t");
 
                 if (tokens.length > 8) {
 
                     // call set names -- use column index for id
                     header.callSets = [];
-                    for (j = 9; j < tokens.length; j++) {
+                    for (let j = 9; j < tokens.length; j++) {
                         header.callSets.push({id: j, name: tokens[j]});
                     }
                 }
@@ -128,20 +119,16 @@ VcfParser.prototype.parseHeader = function (data) {
 
 function extractCallFields(tokens) {
 
-    var callFields = {
+    const callFields = {
             genotypeIndex: -1,
             fields: tokens
-        },
-        i;
-
-    for (i = 0; i < tokens.length; i++) {
+        };
+    for (let i = 0; i < tokens.length; i++) {
         if ("GT" === tokens[i]) {
             callFields.genotypeIndex = i;
         }
     }
-
     return callFields;
-
 }
 
 /**
@@ -152,41 +139,29 @@ function extractCallFields(tokens) {
  */
 VcfParser.prototype.parseFeatures = function (data) {
 
-    var dataWrapper,
-        line,
-        allFeatures = [],
-        callSets = this.header.callSets,
-        variant,
-        tokens,
-        callFields,
-        index,
-        token;
+        const allFeatures = [];
+        const callSets = this.header.callSets;
+    const dataWrapper = getDataWrapper(data);
 
-
-    dataWrapper = getDataWrapper(data);
-
-    while (line = dataWrapper.nextLine()) {
+    let line;
+    while ( line = dataWrapper.nextLine()) {
 
         if (!line.startsWith("#")) {
-
-            tokens = line.split("\t");
-
+            const tokens = line.split("\t");
             if (tokens.length >= 8) {
-
-                variant = createVCFVariant(tokens);
+                const variant = createVCFVariant(tokens);
                 variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                 allFeatures.push(variant);
 
                 if (tokens.length > 9) {
 
                     // Format
-                    callFields = extractCallFields(tokens[8].split(":"));
+                    const callFields = extractCallFields(tokens[8].split(":"));
 
                     variant.calls = {};
+                    for (let index = 9; index < tokens.length; index++) {
 
-                    for (index = 9; index < tokens.length; index++) {
-
-                        token = tokens[index];
+                        const token = tokens[index];
 
                         var callSet = callSets[index - 9],
                             call = {
@@ -202,7 +177,7 @@ VcfParser.prototype.parseFeatures = function (data) {
                                 case callFields.genotypeIndex:
                                     call.genotype = [];
                                     callToken.split(/[\|\/]/).forEach(function (s) {
-                                        call.genotype.push(parseInt(s));
+                                        call.genotype.push('.' === s ? s : parseInt(s));
                                     });
                                     break;
 
