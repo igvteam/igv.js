@@ -8,7 +8,7 @@ import strip from 'rollup-plugin-strip';
 export default [
 
     {
-        input: 'js/api.js',
+        input: 'js/index.js',
         output: [
             {file: pkg.module, format: 'es'}
         ],
@@ -29,7 +29,7 @@ export default [
     },
 
     {
-        input: 'js/api.js',
+        input: 'js/index.js',
         output: [
             {file: 'tmp/igv.js', format: 'umd', name: "igv"},
         ],
