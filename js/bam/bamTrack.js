@@ -93,6 +93,7 @@ const BAMTrack = extend(TrackBase,
         function assignSort(currentSorts, sort) {
 
             const range = parseLocusString(sort.locus);
+            if(browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
 
             // Loop through current genomic states, assign sort to first matching state
             for (let gs of browser.genomicStateList) {
