@@ -1496,7 +1496,9 @@ Browser.prototype.search = async function (string, init) {
 
     const genome = this.genome
 
-    if (string && string.trim().toLowerCase() === "all") string = "all";
+    if (string && string.trim().toLowerCase() === "all" || string === "*") {
+        string = "all";
+    }
 
     const loci = string.split(' ')
 
