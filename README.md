@@ -143,12 +143,12 @@ Then open [http://localhost:8080/examples](http://localhost:8080/examples).
 
 # Supported Browsers
 
-igv.js require a modern web browser with support for Javascript ECMAScript 2015. We test on the latest versions of 
-Chrome, Safari, Firefox, and Edge. 
-
+igv.js require a modern web browser with support for Javascript ECMAScript 2015. 
 
 # License
 
 igv.js is [MIT](/LICENSE) licensed.
+
+# [_Release Notes_](https://github.com/igvteam/igv.js/releases)
 
 
