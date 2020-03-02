@@ -50,7 +50,7 @@ HtsgetReader.prototype.readAlignments = async function (chr, start, end, retryCo
     }
 
     let endpointURL;
-    if(!this.config.url) {
+    if (!this.config.url) {
         endpointURL = this.config.endpoint + '/reads/';   // Backward compatibility
     } else {
         endpointURL = this.config.url + this.config.endpoint;
@@ -67,10 +67,8 @@ HtsgetReader.prototype.readAlignments = async function (chr, start, end, retryCo
     const unc = unbgzf(compressedData.buffer);
     const ba = unc;
 
-    if (!this.header) {
-        this.header = BamUtils.decodeBamHeader(ba, genome);
-    }
-
+    this.header = BamUtils.decodeBamHeader(ba, genome);
+    
     const chrIdx = this.header.chrToIndex[chr];
     const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
     BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end);
