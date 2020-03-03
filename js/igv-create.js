@@ -44,6 +44,7 @@ import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
+import MenuUtils from "./ui/menuUtils.js";
 
 let allBrowsers = [];
 
@@ -291,20 +292,18 @@ function createStandardControls(browser, config) {
         try {
 
             await browser.search(str);
-
-            const $datalist = $('#locus-history');
-            const $result = $datalist.find(`option[value="${ str }"]`);
-            if (0 === $result.length) {
-                $datalist.append($(`<option value="${ str }"></option>`));
-            }
-
         } catch (e) {
             browser.presentAlert(e);
         }
 
     });
 
-    browser.$searchInput.on('click', () => browser.$searchInput.val('') );
+    // browser.$searchInput.on('click', () => {
+    //     const str = browser.$searchInput.val().trim();
+    //     MenuUtils.updateLocusSearchHistory(str);
+    //     // browser.$searchInput.val('');
+    //
+    // } );
 
     // search icon container
     $div = $('<div>');

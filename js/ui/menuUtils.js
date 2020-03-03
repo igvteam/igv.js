@@ -110,7 +110,23 @@ const MenuUtils = {
     }
 
     return list;
-}
+},
+
+    updateLocusSearchHistory: str => {
+
+        if ('' !== str) {
+
+            // console.log(`updateLocusSearchHistory: ${ str }`);
+            const $datalist = $('#locus-history');
+
+            const $result = $datalist.find(`option[value="${ str }"]`);
+            if (0 === $result.length) {
+                $datalist.append($(`<option value="${ str }"></option>`));
+            }
+
+        }
+
+    }
 
 }
 

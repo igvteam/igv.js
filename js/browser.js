@@ -46,6 +46,7 @@ import {decodeDataURI} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js"
+import MenuUtils from "./ui/menuUtils.js";
 
 
 const Browser = function (options, parentDiv) {
@@ -613,17 +614,17 @@ Browser.prototype.loadROI = async function (config) {
     await this.updateViews(undefined, undefined, true);
 }
 
-Browser.prototype.removeROI = function (roiToRemove) {                          
-    for (let i = 0; i < this.roi.length; i++) {                                 
-        if (this.roi[i].name === roiToRemove.name) {                            
-            this.roi.splice(i, 1);                                              
-            break;                                                              
-        }                                                                       
-    }                                                                           
-                                                                                
-    for (let tv of this.trackViews) {                                           
-        tv.updateViews(true);                                                   
-    }                                                                           
+Browser.prototype.removeROI = function (roiToRemove) {
+    for (let i = 0; i < this.roi.length; i++) {
+        if (this.roi[i].name === roiToRemove.name) {
+            this.roi.splice(i, 1);
+            break;
+        }
+    }
+
+    for (let tv of this.trackViews) {
+        tv.updateViews(true);
+    }
 }
 
 /**
@@ -1581,6 +1582,10 @@ Browser.prototype.search = async function (string, init) {
                 }
             }
             appendReferenceFrames(result);
+        }
+
+        for (const { locusSearchString } of result) {
+            MenuUtils.updateLocusSearchHistory(locusSearchString)
         }
 
         return result;
