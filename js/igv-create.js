@@ -280,17 +280,31 @@ function createStandardControls(browser, config) {
     $locus_size_group.append($searchContainer);
 
     // locus goto input
-    browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    browser.$searchInput = $('<input placeholder="Locus Search" type="text" value="" list="locus-history" />');
     $searchContainer.append(browser.$searchInput);
+    $searchContainer.append('<datalist id="locus-history"></datalist>');
 
-    browser.$searchInput.change(function (e) {
+    browser.$searchInput.change(async () => {
 
-        browser.search($(this).val())
+        const str = browser.$searchInput.val().trim();
 
-            .catch(function (error) {
-                browser.presentAlert(error);
-            });
+        try {
+
+            await browser.search(str);
+
+            const $datalist = $('#locus-history');
+            const $result = $datalist.find(`option[value="${ str }"]`);
+            if (0 === $result.length) {
+                $datalist.append($(`<option value="${ str }"></option>`));
+            }
+
+        } catch (e) {
+            browser.presentAlert(e);
+        }
+
     });
+
+    browser.$searchInput.on('click', () => browser.$searchInput.val('') );
 
     // search icon container
     $div = $('<div>');
