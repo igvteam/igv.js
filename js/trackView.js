@@ -89,7 +89,7 @@ const TrackView = function (browser, $container, track) {
     if (true === this.track.ignoreTrackMenu) {
         // do nothing
     } else {
-        this.appendRightHandGutter( $(this.trackDiv));
+        this.appendRightHandGutter($(this.trackDiv));
     }
 
     if (this.track instanceof RulerTrack) {
@@ -173,7 +173,7 @@ TrackView.prototype.decorateViewports = function () {
 
 };
 
-TrackView.prototype.appendLeftHandGutter = function($parent) {
+TrackView.prototype.appendLeftHandGutter = function ($parent) {
 
     var self = this,
         $leftHandGutter,
@@ -204,14 +204,14 @@ TrackView.prototype.appendLeftHandGutter = function($parent) {
 
 }
 
-TrackView.prototype.appendRightHandGutter = function($parent) {
+TrackView.prototype.appendRightHandGutter = function ($parent) {
     let $div = $('<div class="igv-right-hand-gutter">');
     $parent.append($div);
     createTrackGearPopover.call(this, $div);
 }
 
 // Free function for juicebox -- do not attach to prototype!!!
-function createTrackGearPopover ($parent) {
+function createTrackGearPopover($parent) {
 
     let $cogContainer = $("<div>", {class: 'igv-trackgear-container'});
     $parent.append($cogContainer);
@@ -318,7 +318,11 @@ TrackView.prototype.setDataRange = function (min, max, autoscale) {
     this.track.autoscale = autoscale;
     this.track.config.autoScale = autoscale;
 
-    this.repaintViews();
+    if (autoscale) {
+        this.updateViews();
+    } else {
+        this.repaintViews();
+    }
 };
 
 TrackView.prototype.setColor = function (color) {
