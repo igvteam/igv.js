@@ -253,6 +253,11 @@ RandomColorGenerator.prototype.get = function (saturation, value) {
 
 };
 
+const randomColorGenerator = new RandomColorGenerator();
+function randomColor() {
+    return randomColorGenerator.get();
+}
+
 // Returns a random number between min (inclusive) and max (exclusive)
 function random(min, max) {
     return Math.random() * (max - min) + min;
@@ -267,4 +272,4 @@ function random(min, max) {
 //     }
 // }
 
-export {appleCrayonPalette, nucleotideColorComponents, nucleotideColors, PaletteColorTable};
+export {appleCrayonPalette, nucleotideColorComponents, nucleotideColors, PaletteColorTable, randomColor};
