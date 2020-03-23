@@ -61,6 +61,16 @@ GradientColorScale.prototype.getColor = function (value) {
     return "rgb(" + r + "," + g + "," + b + ")";
 }
 
+class ConstantColorScale {
+    constructor(color) {
+        this.color = color;
+    }
+
+    getColor() {
+        return this.color;
+    }
+}
 
 
-export {BinnedColorScale, GradientColorScale}
+
+export {BinnedColorScale, GradientColorScale, ConstantColorScale}

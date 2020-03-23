@@ -35,6 +35,7 @@ import {isFilePath} from '../util/fileUtils.js'
 import {isString} from "../util/stringUtils.js";
 import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
+import GWASParser from "../gwas/gwasParser.js"
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -156,6 +157,8 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
             return new SegParser();
         case "gcnv" :
             return new GCNVParser();
+        case "gwas" :
+            return new GWASParser();
         default:
             return new FeatureParser(format, decode, this.config);
     }
