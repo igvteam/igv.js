@@ -36,10 +36,8 @@ import {getFormat} from "../util/trackUtils.js";
  *
  */
 
-var maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
-var gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
-var aedRegexpNoNamespace = new RegExp("([^:]*)\\(([^)]*)\\)"); // name(type) for AED parsing (namespace undefined)
-var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespace:name(type) for AED parsing
+const maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
+const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
 
 /**
  * Return a parser for the given file format.
@@ -111,10 +109,6 @@ const FeatureParser = function (format, decode, config) {
                 this.decode = decodeGenePredExt;
                 this.delimiter = /\s+/;
                 this.shift = 1;
-                break;
-            case "aed":
-                this.decode = decodeAed;
-                this.delimiter = "\t";
                 break;
             case "bed":
                 this.decode = decodeBed;
@@ -204,19 +198,54 @@ FeatureParser.prototype.parseFeatures = function (data) {
 
     if (!data) return null;
 
-    var dataWrapper,
-        wig,
-        feature,
-        tokens,
-        allFeatures = [],
-        line,
-        i,
-        cnt = 0,
-        j,
-        decode = this.decode,
-        format = this.format,
-        delimiter = this.delimiter || "\t",
-        nextLine;
+    const dataWrapper = getDataWrapper(data);
+    const nextLine = dataWrapper.nextLine.bind(dataWrapper);
+    const allFeatures = [];
+    let cnt = 0;
+    const decode = this.decode;
+    const format = this.format;
+    const delimiter = this.delimiter || "\t";
+    let i = 0;
+    let line;
+    let wig;
+
+    while (line = nextLine()) {
+
+        i++;
+        if (i <= this.skipRows) continue;
+
+        if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
+            continue;
+        } else if (format === "wig" && line.startsWith("fixedStep")) {
+            wig = parseFixedStep(line);
+            continue;
+        } else if (format === "wig" && line.startsWith("variableStep")) {
+            wig = parseVariableStep(line);
+            continue;
+        }
+
+        const tokens = line.split(delimiter);
+        if (tokens.length < 1) {
+            continue;
+        }
+
+        const feature = decode.call(this, tokens, wig);
+
+        if (feature) {
+            if (allFeatures.length < maxFeatureCount) {
+                allFeatures.push(feature);
+            } else {
+                // Reservoir sampling,  conditionally replace existing feature with new one.
+                const j = Math.floor(Math.random() * cnt);
+                if (j < maxFeatureCount) {
+                    allFeatures[j] = feature;
+                }
+            }
+            cnt++;
+        }
+    }
+
+    return allFeatures;
 
     // Double quoted strings can contain newlines in AED
     // "" is an escape for a ".
@@ -270,69 +299,7 @@ FeatureParser.prototype.parseFeatures = function (data) {
         tokens.push(token);
         return tokens;
     }
-
-    dataWrapper = getDataWrapper(data);
-    if (format === 'aed') {
-        nextLine = dataWrapper.nextLineNoTrim.bind(dataWrapper);
-    } else {
-        nextLine = dataWrapper.nextLine.bind(dataWrapper);
-    }
-
-    i = 0;
-
-    while (line = nextLine()) {
-
-        i++;
-
-        if (i <= this.skipRows) continue;
-
-        if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-            continue;
-        } else if (format === "wig" && line.startsWith("fixedStep")) {
-            wig = parseFixedStep(line);
-            continue;
-        } else if (format === "wig" && line.startsWith("variableStep")) {
-            wig = parseVariableStep(line);
-            continue;
-        }
-
-        if (format !== "aed" || line.indexOf("\"") === -1) {
-            tokens = line.split(delimiter);
-        } else {
-            tokens = readTokensAed();
-        }
-
-        if (tokens.length < 1) {
-            continue;
-        }
-
-        if (format === "aed") {
-            if (!this.aed) {
-                // Store information about the aed header in the parser itself
-                // This is done only once - on the first row
-                this.aed = parseAedHeaderRow(tokens);
-                continue;
-            }
-        }
-
-        feature = decode.call(this, tokens, wig);
-
-        if (feature) {
-            if (allFeatures.length < maxFeatureCount) {
-                allFeatures.push(feature);
-            } else {
-                // Reservoir sampling,  conditionally replace existing feature with new one.
-                j = Math.floor(Math.random() * cnt);
-                if (j < maxFeatureCount) {
-                    allFeatures[j] = feature;
-                }
-            }
-            cnt++;
-        }
-    }
-
-    return allFeatures;
-};
+}
 
 
 function parseFixedStep(line) {
@@ -353,75 +320,6 @@ function parseVariableStep(line) {
         cc = tokens[1].split("=")[1],
         span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
     return {format: "variableStep", chrom: cc, span: span}
-}
-
-function parseAedToken(value) {
-    // Example: refseq:accessionNumber(aed:String)
-    // refseq - namespace, will be declared later
-    // accessionNumber - name of the field
-    // aed:String - type of the field
-    // The namespace part may be missing
-    var match = aedRegexpNamespace.exec(value);
-    if (match) {
-        return {
-            namespace: match[1],
-            name: match[2],
-            type: match[3]
-        }
-    }
-
-    match = aedRegexpNoNamespace.exec(value);
-    if (match) {
-        return {
-            namespace: '?',
-            name: match[1],
-            type: match[2]
-        }
-    } else {
-        throw new Error("Error parsing the header row of AED file - column not in ns:name(ns:type) format");
-    }
-}
-
-function parseAedHeaderRow(tokens) {
-    // First row of AED file defines column names
-    // Each header item is an aed token - see parseAedToken
-    var aed,
-        k,
-        token,
-        aedToken;
-
-    // Initialize aed section to be filled in
-    aed = {
-        columns: [ // Information about the namespace, name and type of each column
-            // Example entry:
-            // { namespace: 'bio', name: 'start', type: 'aed:Integer' }
-        ],
-        metadata: { // Metadata about the entire AED file
-            // Example:
-            // {
-            //    aed: {
-            //       application: { value: "CHaS Browser 3.3.0.139 (r10838)", type: "aed:String" },
-            //       created: { value: "2018-01-02T10:20:30.123+01:00", type: "aed:DateTime" },
-            //       modified: { value: "2018-03-04T11:22:33.456+01:00", type: "aed:DateTime" },
-            //    }
-            //    affx: {
-            //       ucscGenomeVersion: { value: "hg19", type: "aed:String" }
-            //    },
-            //    namespace: {
-            //       omim: { value: "http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/omim/", type: "aed:URI" },
-            //       affx: { value: "http://affymetrix.com/ontology/", type: "aed:URI" },
-            //       refseq: { value: "http://affymetrix.com/ontology/www.ncbi.nlm.nih.gov/RefSeq/", type: "aed:URI" }
-            //    }
-            // }
-        }
-    };
-    for (k = 0; k < tokens.length; k++) {
-        token = tokens[k];
-        aedToken = parseAedToken(token);
-        aed.columns.push(aedToken);
-    }
-
-    return aed;
 }
 
 function parseTrackLine(line) {
@@ -825,7 +723,6 @@ function decodeWig(tokens, wig) {
         value;
 
     if (wig.format === "fixedStep") {
-
         ss = (wig.index * wig.step) + wig.start;
         ee = ss + wig.span;
         value = parseFloat(tokens[0]);
@@ -834,7 +731,6 @@ function decodeWig(tokens, wig) {
     } else if (wig.format === "variableStep") {
 
         if (tokens.length < 2) return null;
-
         ss = parseInt(tokens[0], 10) - 1;
         ee = ss + wig.span;
         value = parseFloat(tokens[1]);
@@ -869,7 +765,7 @@ function decodeFusionJuncSpan(tokens, ignore) {
      */
 
 
-    //console.log("decoding fusion junc spans");
+    if(tokens.length < 7) return undefined;
 
     var chr = tokens[0];
     var fusion_name = tokens[1];
@@ -1001,10 +897,9 @@ function decodeGFF(tokens, ignore) {
         const keyLower = key.toLowerCase()
         if ("color" === keyLower || "colour" === keyLower) {
             color = IGVColor.createColorString(value);
-        }
-        else if ('gff3' === format)
+        } else if ('gff3' === format)
             try {
-                attributes[key] =  unescape(value);
+                attributes[key] = unescape(value);
             } catch (e) {
                 attributes[key] = value;   // Invalid
                 console.error(`Malformed gff3 attibute value: ${value}`);
@@ -1067,147 +962,6 @@ GFFFeature.prototype.popupData = function (genomicLocation) {
         }
     }
     return pd;
-}
-
-/**
- * AED file feature.
- *
- * @param aed link to the AED file object containing file-level metadata and column descriptors
- * @param allColumns All columns as parsed from the AED
- *
- * Other values are parsed one by one
- */
-function AedFeature(aed, allColumns) {
-    var token, aedColumn, aedColumns = aed.columns;
-
-    // Link to AED file (for metadata)
-    this.aed = aed;
-
-    // Unparsed columns from AED file
-    this.allColumns = allColumns;
-
-    // Prepare space for the parsed values
-    this.chr = null;
-    this.start = null;
-    this.end = null;
-    this.score = 1000;
-    this.strand = '.';
-    this.cdStart = null;
-    this.cdEnd = null;
-    this.name = null;
-    this.color = null;
-
-    for (let i = 0; i < allColumns.length; i++) {
-        token = allColumns[i];
-        if (!token) {
-            // Skip empty fields
-            continue;
-        }
-        aedColumn = aedColumns[i];
-        if (aedColumn.type === 'aed:Integer') {
-            token = parseInt(token);
-        }
-        if (aedColumn.namespace === 'bio') {
-            if (aedColumn.name === 'sequence') {
-                this.chr = token;
-            } else if (aedColumn.name === 'start') {
-                this.start = token;
-            } else if (aedColumn.name === 'end') {
-                this.end = token;
-            } else if (aedColumn.name === 'cdsMin') {
-                this.cdStart = token;
-            } else if (aedColumn.name === 'cdsMax') {
-                this.cdEnd = token;
-            } else if (aedColumn.name === 'strand') {
-                this.strand = token;
-            }
-        } else if (aedColumn.namespace === 'aed') {
-            if (aedColumn.name === 'name') {
-                this.name = token;
-            }
-        } else if (aedColumn.namespace === 'style') {
-            if (aedColumn.name === 'color') {
-                this.color = IGVColor.createColorString(token);
-            }
-        }
-    }
-}
-
-AedFeature.prototype.popupData = function () {
-    var data = [],
-        aed = this.aed;
-    // Just dump everything we have for now
-    for (var i = 0; i < this.allColumns.length; i++) {
-        var featureValue = this.allColumns[i];
-        var name = aed.columns[i].name;
-        // Skip columns that are not interesting - you know the sequence, and you can see color
-        if (name !== 'sequence' && name !== 'color') {
-            if (featureValue) {
-                data.push({name: name, value: featureValue});
-            }
-        }
-    }
-    return data;
-};
-
-/**
- * Decode the AED file format
- * @param tokens
- * @param ignore
- * @returns decoded feature, or null if this is not a valid record
- */
-function decodeAed(tokens, ignore) {
-    var name, value, token,
-        nonEmptyTokens = 0,
-        aedColumns = this.aed.columns,
-        aedColumn,
-        aedKey,
-        i;
-
-    // Each aed row must match the exact number of columns or we skip it
-    if (tokens.length !== aedColumns.length) {
-        console.log('Corrupted AED file row: ' + tokens.join(','));
-        return undefined;
-    }
-
-    for (i = 0; i < tokens.length; i++) {
-        aedColumn = aedColumns[i];
-        token = tokens[i];
-        if (token !== '') {
-            nonEmptyTokens++;
-        }
-        if (aedColumn.name === 'name' && aedColumn.namespace === 'aed') {
-            name = token;
-        } else if (aedColumn.name === 'value' && aedColumn.namespace === 'aed') {
-            value = token;
-        }
-    }
-
-    if (nonEmptyTokens === 2 && name && value) {
-        // Special row that defines metadata for the entire file
-        aedKey = parseAedToken(name);
-        // Store in the metadata section
-        if (!this.aed.metadata[aedKey.namespace]) {
-            this.aed.metadata[aedKey.namespace] = {};
-        }
-        if (!this.aed.metadata[aedKey.namespace][aedKey.name]) {
-            this.aed.metadata[aedKey.namespace][aedKey.name] = {
-                type: aedKey.type,
-                value: value
-            };
-        }
-        // Ignore this value
-        return undefined;
-    }
-
-    var feature = new AedFeature(this.aed, tokens);
-
-    if (!feature.chr || (!feature.start && feature.start !== 0) || !feature.end) {
-        console.log('Cannot parse feature: ' + tokens.join(','));
-        return undefined;
-    }
-
-    return feature;
 }
 
 function decodeBedpe(tokens, ignore) {
@@ -1325,6 +1079,8 @@ function decodeInteract(tokens, ignore) {
  */
 function decodeBedpeDomain(tokens, ignore) {
 
+    if(tokens.length < 8) return undefined;
+
     return {
         chr: tokens[0],
         start: Number.parseInt(tokens[1]),
@@ -1336,6 +1092,8 @@ function decodeBedpeDomain(tokens, ignore) {
 
 
 function decodeSNP(tokens, ignore) {
+
+    if(tokens.length < 6) return undefined;
 
     const autoSql = [
         'bin',
@@ -1366,6 +1124,7 @@ function decodeSNP(tokens, ignore) {
         'bitfields'
     ];
 
+
     const feature = {
         chr: tokens[1],
         start: Number.parseInt(tokens[2]),
@@ -1392,13 +1151,10 @@ function decodeSNP(tokens, ignore) {
  */
 function decodeCustom(tokens, ignore) {
 
+    if(tokens.length < this.format.fields.length) return undefined;
+
     const format = this.format;         // "this" refers to FeatureParser instance
     const coords = format.coords || 0;
-
-    // Insure that chr and start fields are defined.
-    //if(!this.format.chr && this.format.start) {
-    //}
-
 
     const chr = tokens[format.chr];
     const start = parseInt(tokens[format.start]) - coords;
@@ -1407,7 +1163,6 @@ function decodeCustom(tokens, ignore) {
     const feature = {chr: chr, start: start, end: end};
 
     if (format.fields) {
-
         format.fields.forEach(function (field, index) {
 
             if (index !== format.chr &&
