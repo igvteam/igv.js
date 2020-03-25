@@ -704,35 +704,23 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
 function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
 
-    let binaryParser = new BinaryParser(data),
-        minSize = 3 * 4 + 1,   // Minimum # of bytes required for a bed record
-        chromId,
-        chromStart,
-        chromEnd,
-        rest,
-        tokens,
-        feature,
-        exonCount, exonSizes, exonStarts, exons, eStart, eEnd, chr;
-
-
+    const binaryParser = new BinaryParser(data);
+    const minSize = 3 * 4 + 1;   // Minimum # of bytes required for a bed record
     while (binaryParser.remLength() >= minSize) {
 
-        chromId = binaryParser.getInt();
-        chr = chrDict[chromId];
-        chromStart = binaryParser.getInt();
-        chromEnd = binaryParser.getInt();
-        rest = binaryParser.getString();
-
+        const chromId = binaryParser.getInt();
+        const chr = chrDict[chromId];
+        const chromStart = binaryParser.getInt();
+        const chromEnd = binaryParser.getInt();
+        const rest = binaryParser.getString();
         if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
         else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
 
-
-        feature = {chr: chr, start: chromStart, end: chromEnd};
+        const feature = {chr: chr, start: chromStart, end: chromEnd};
 
         featureArray.push(feature);
 
-        tokens = rest.split("\t");
-
+        const tokens = rest.split("\t");
         if (tokens.length > 0) {
             feature.name = tokens[0];
         }
@@ -750,28 +738,24 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
             feature.cdEnd = parseInt(tokens[4]);
         }
         if (tokens.length > 5) {
-            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !==  "-1") {
+            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !== "-1") {
                 const c = IGVColor.createColorString(tokens[5]);
                 feature.color = c.startsWith("rgb") ? c : undefined;
             }
         }
         if (tokens.length > 8) {
-            exonCount = parseInt(tokens[6]);
-            exonSizes = tokens[7].split(',');
-            exonStarts = tokens[8].split(',');
-            exons = [];
-
+            const exonCount = parseInt(tokens[6]);
+            const exonSizes = tokens[7].split(',');
+            const exonStarts = tokens[8].split(',');
+            const exons = [];
             for (let i = 0; i < exonCount; i++) {
-                eStart = chromStart + parseInt(exonStarts[i]);
-                eEnd = eStart + parseInt(exonSizes[i]);
+                const eStart = chromStart + parseInt(exonStarts[i]);
+                const eEnd = eStart + parseInt(exonSizes[i]);
                 exons.push({start: eStart, end: eEnd});
             }
-
             feature.exons = exons;
         }
-
     }
-
 }
 
 
