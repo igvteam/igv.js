@@ -36,6 +36,7 @@ import {isString} from "../util/stringUtils.js";
 import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
+import AEDParser from "../aed/AEDParser.js"
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -159,11 +160,12 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
             return new GCNVParser();
         case "gwas" :
             return new GWASParser();
+        case "aed" :
+            return new AEDParser(format, decode, config);
         default:
-            return new FeatureParser(format, decode, this.config);
+            return new FeatureParser(format, decode, config);
     }
-
-};
+}
 
 
 FeatureFileReader.prototype.loadFeaturesNoIndex = async function () {
@@ -243,7 +245,7 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
                 // Filter features not in requested range.
                 let inInterval = false;
-                for (let i=0; i< slicedFeatures.length; i++) {
+                for (let i = 0; i < slicedFeatures.length; i++) {
                     const f = slicedFeatures[i];
                     if (genome.getChromosomeName(f.chr) !== chr) {
                         if (allFeatures.length === 0) {
@@ -257,9 +259,9 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
                         break;
                     }
                     if (f.end >= start && f.start <= end) {
-                        if(!inInterval) {
+                        if (!inInterval) {
                             inInterval = true;
-                            if(i > 0) {
+                            if (i > 0) {
                                 allFeatures.push(slicedFeatures[i - 1]);
                             } else {
                                 // TODO -- get block before this one for first feature;
