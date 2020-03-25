@@ -333,8 +333,6 @@ TrackView.prototype.setColor = function (color) {
 
 TrackView.prototype.createColorPicker = function () {
 
-    let self = this;
-
     const config =
         {
             $parent: $(this.trackDiv),
@@ -343,7 +341,9 @@ TrackView.prototype.createColorPicker = function () {
 
             height: undefined,
             closeHandler: () => {
-                self.colorPicker.$container.hide();
+                this.colorPicker.$container.hide();
+                this.colorPicker.$container.get(0).style.top = 0;
+                this.colorPicker.$container.get(0).style.left = 0;
             }
         };
 
@@ -351,14 +351,13 @@ TrackView.prototype.createColorPicker = function () {
 
     createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
 
-    self.colorPicker.$container.hide();
+    this.colorPicker.$container.hide();
 
 };
 
 TrackView.prototype.presentColorPicker = function () {
-    const bbox = this.trackDiv.getBoundingClientRect();
-    this.colorPicker.origin = {x: bbox.x, y: 0};
-    this.colorPicker.$container.offset({left: this.colorPicker.origin.x, top: this.colorPicker.origin.y});
+    this.colorPicker.$container.get(0).style.top = 0;
+    this.colorPicker.$container.get(0).style.left = 0;
     this.colorPicker.$container.show();
 };
 
