@@ -142,13 +142,13 @@ VcfParser.prototype.parseFeatures = function (data) {
     const allFeatures = [];
     const callSets = this.header.callSets;
     const dataWrapper = getDataWrapper(data);
-
+    const nExpectedColumns = 8 + (callSets ? callSets.length + 1: 0);
     let line;
     while (line = dataWrapper.nextLine()) {
 
         if (!line.startsWith("#")) {
             const tokens = line.split("\t");
-            if (tokens.length >= 8) {
+            if (tokens.length === nExpectedColumns) {
                 const variant = createVCFVariant(tokens);
                 variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
                 allFeatures.push(variant);
