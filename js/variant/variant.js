@@ -46,17 +46,13 @@ function createVCFVariant(tokens) {
 }
 
 function getInfoObject(infoStr) {
-
-    if (!infoStr) {
-        return undefined;
-    }
-
     var info = {};
-    infoStr.split(';').forEach(function (elem) {
-        var element = elem.split('=');
-        info[element[0]] = element[1];
-    });
-
+    if(infoStr) {
+        infoStr.split(';').forEach(function (elem) {
+            var element = elem.split('=');
+            info[element[0]] = element[1];
+        });
+    }
     return info;
 }
 
