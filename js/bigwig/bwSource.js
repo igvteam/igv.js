@@ -24,23 +24,27 @@
  */
 
 import BWReader from "./bwReader.js";
+import pack from "../feature/featurePacker.js";
 
 const BWSource = function (config, genome) {
     this.reader = new BWReader(config, genome);
     this.genome = genome;
+    this.format = config.format || "bigwig";
     this.wgValues = {};
 };
 
 
-BWSource.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
+BWSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
 
-    let self = this;
+    const features = (chr.toLowerCase() === "all") ?
+        await this.getWGValues(windowFunction) :
+        await this.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
 
-    if (chr.toLowerCase() === "all") {
-        return self.getWGValues(windowFunction);
-    } else {
-        return self.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
+    const isBigWig = this.format.toLowerCase() === "bigwig"  || this.format.toLowerCase() === "bw";
+    if(!isBigWig) {
+        pack(features);
     }
+    return features;
 }
 
 

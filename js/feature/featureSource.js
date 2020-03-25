@@ -34,6 +34,7 @@ import TrackBase from "../trackBase.js";
 import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js";
 import CivicReader from "../civic/civicReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
+import pack from "../feature/featurePacker.js";
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -270,33 +271,7 @@ function packFeatures(features, maxRows) {
 
     chrs.forEach(function (chr) {
         pack(chrFeatureMap[chr], maxRows);
-    });
-
-
-    // Assigns a row # to each feature.  If the feature does not fit in any row and #rows == maxRows no
-    // row number is assigned.
-    function pack(featureList, maxRows) {
-
-        const rows = [];
-        featureList.sort(function (a, b) {
-            return a.start - b.start;
-        })
-        rows.push(-1000);
-
-        for(let feature of featureList) {
-            let r = 0
-            const len = Math.min(rows.length, maxRows)
-            for (r = 0; r < len; r++) {
-                if (feature.start > rows[r]) {
-                    feature.row = r;
-                    rows[r] = feature.end;
-                    break;
-                }
-            }
-            feature.row = r;
-            rows[r] = feature.end;
-        }
-    }
+    })
 }
 
 // TODO -- filter by pixel size
