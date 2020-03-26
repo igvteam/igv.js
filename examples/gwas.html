@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>GWAS Example</title>
+    <script src="../dist/igv.min.js"></script>
+</head>
+
+<body>
+<h3>GWAS Example</h3>
+
+<div id="igvDiv"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+        let options = {
+            genome: "hg38",
+            tracks: [
+                {
+                    type: "gwas",
+                    format: "gwas",
+                    name: "GWAS sample",
+                    url: "https://www.dropbox.com/s/7ex70zwt1o4n8d8/gwas_sample.tsv.gz?dl=0",
+                    indexed: false
+                }
+            ]
+        }
+        igv.createBrowser(document.getElementById('igvDiv'), options)
+            .then(function (browser) {
+                console.log("IGV Version " + igv.version());
+            })
+    });
+
+
+</script>
+
+</body>
+
+</html>
+
