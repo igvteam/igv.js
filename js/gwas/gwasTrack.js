@@ -65,7 +65,7 @@ const GWASTrack = extend(TrackBase,
         this.autoscalePercentile = config.autoscalePercentile === undefined ? 98 : config.autoscalePercentile;
         this.background = config.background;    // No default
         this.divider = config.divider || "rgb(225,225,225)";
-        this.dotSize = config.dotSize || 4;
+        this.dotSize = config.dotSize || 3;
         this.popoverWindow = (config.popoverWindow === undefined ? DEFAULT_POPOVER_WINDOW : config.popoverWindow);
         this.description = config.description;  // might be null
 

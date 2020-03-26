@@ -159,7 +159,7 @@ FeatureFileReader.prototype.getParser = function (format, decode, config) {
         case "gcnv" :
             return new GCNVParser();
         case "gwas" :
-            return new GWASParser();
+            return new GWASParser(config);
         case "aed" :
             return new AEDParser(format, decode, config);
         default:

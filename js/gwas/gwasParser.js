@@ -5,12 +5,25 @@ import getDataWrapper from "../feature/dataWrapper.js";
  */
 class GWASParser {
 
-    constructor() {
+    constructor(config) {
         // Defaults - can be overriden by header
-        this.posCol = 2;
-        this.chrCol = 1;
-        this.pvalueCol = 3;
-        this.snpCol = 0;
+        this.config = config;
+        if(config.columns) {
+            if(config.columns.chromosome === undefined ||
+                config.columns.position === undefined ||
+                config.columns.value === undefined) {
+                throw Error("columns property must define chrCol, posCol, and valueCol");
+            }
+            this.posCol = config.columns.position;
+            this.chrCol = config.columns.chromosome;
+            this.pvalueCol = config.columns.value;
+        }
+        else {
+            // Defaults -- can be overriden in header
+            this.posCol = 2;
+            this.chrCol = 1;
+            this.pvalueCol = 3;
+        }
     }
 
     parseHeader(data) {
@@ -21,37 +34,29 @@ class GWASParser {
 
     parseHeaderLine(headerLine) {
         this.columns = headerLine.split(/\t/);
-        for (let i = 0; i < this.columns.length; i++) {
-            const c = this.columns[i].toLowerCase();
-            switch (c) {
-                case 'chr':
-                case 'chromosome':
-                case 'chr_id':
-                    this.chrCol = i;
-                    break;
-                case 'bp':
-                case 'pos':
-                case 'position':
-                case 'chr_pos':
-                    this.posCol = i;
-                    break;
-                case 'snp':
-                case 'snps':
-                case 'rs':
-                case 'rsid':
-                case 'rsnum':
-                case 'id':
-                case 'marker':
-                case 'markername':
-                    this.SNPcol = i;
-                    break;
-                case 'p':
-                case 'pval':
-                case 'pvalue':
-                case 'p-value':
-                case 'p.value':
-                    this.pvalueCol = i;
-                    break;
+        if(!this.config.columns) {
+            for (let i = 0; i < this.columns.length; i++) {
+                const c = this.columns[i].toLowerCase();
+                switch (c) {
+                    case 'chr':
+                    case 'chromosome':
+                    case 'chr_id':
+                        this.chrCol = i;
+                        break;
+                    case 'bp':
+                    case 'pos':
+                    case 'position':
+                    case 'chr_pos':
+                        this.posCol = i;
+                        break;
+                    case 'p':
+                    case 'pval':
+                    case 'pvalue':
+                    case 'p-value':
+                    case 'p.value':
+                        this.pvalueCol = i;
+                        break;
+                }
             }
         }
         return this.columns;
@@ -65,7 +70,6 @@ class GWASParser {
         if (!this.columns) {
             this.parseHeaderLine(headerLine);
         }
-
         let line;
         while (line = dataWrapper.nextLine()) {
             const tokens = line.split(/\t/);
@@ -74,7 +78,6 @@ class GWASParser {
                 const start = parseInt(tokens[this.posCol]) - 1;
                 const end = start + 1;
                 const value = parseFloat(tokens[this.pvalueCol]);
-                const snpID = tokens[this.snpCol];
                 allFeatures.push(new GWASFeature({
                     chr: chr,
                     start: start,
