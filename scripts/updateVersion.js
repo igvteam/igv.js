@@ -28,7 +28,8 @@ let foundVersionLine = false;
 var fd = fs.openSync(versionJS, 'w');
 for (let line of lines) {
     if(line.startsWith("const _version")) {
-        fs.writeSync(fd, `const _version = "${version} (${githash})"\n`, null, 'utf-8')
+        //fs.writeSync(fd, `const _version = "${version} (${githash})"\n`, null, 'utf-8')
+        fs.writeSync(fd, `const _version = "${version}"\n`, null, 'utf-8')
         foundVersionLine = true;
     } else {
         fs.writeSync(fd, line + '\n', null, 'utf-8')
