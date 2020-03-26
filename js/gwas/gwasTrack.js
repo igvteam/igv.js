@@ -190,7 +190,7 @@ GWASTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
 GWASTrack.prototype.popupData = function (clickState) {
 
-    const data = [];
+    let data = [];
     const track = clickState.viewport.trackView.track;
     const features = clickState.viewport.getCachedFeatures();
 
@@ -208,15 +208,19 @@ GWASTrack.prototype.popupData = function (clickState) {
                     data.push("...");
                     break;
                 }
-                const chr = f.realChr || f.chr;
-                const pos = (f.realStart || f.start) + 1;
-                data.push({name: 'chromosome', value: chr});
-                data.push({name: 'position', value: pos});
-                data.push({name: 'name', value: f.name});
-                if (track.posteriorProbability) {
-                    data.push({name: 'posterior probability', value: value});
+                if(typeof f.popupData === 'function') {
+                    data = data.concat(f.popupData())
                 } else {
-                    data.push({name: 'pValue', value: value});
+                    const chr = f.realChr || f.chr;
+                    const pos = (f.realStart || f.start) + 1;
+                    data.push({name: 'chromosome', value: chr});
+                    data.push({name: 'position', value: pos});
+                    data.push({name: 'name', value: f.name});
+                    if (track.posteriorProbability) {
+                        data.push({name: 'posterior probability', value: value});
+                    } else {
+                        data.push({name: 'pValue', value: value});
+                    }
                 }
                 count++;
             }

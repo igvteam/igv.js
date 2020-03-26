@@ -300,19 +300,25 @@ FeatureSource.prototype.getWGFeatures = function (allFeatures) {
                     wg.chr = "all";
                     wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                     wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                    wg.originalFeature = f;
 
                     // Don't draw exons in whole genome view
                     if (wg["exons"]) delete wg["exons"]
-
                     wg.popupData = function (genomeLocation) {
-                        const clonedObject = Object.assign({}, this)
-                        clonedObject.chr = this.realChr
-                        clonedObject.start = this.realStart + 1
-                        clonedObject.end = this.realEnd
-                        delete clonedObject.realChr
-                        delete clonedObject.realStart
-                        delete clonedObject.realEnd
-                        return TrackBase.extractPopupData(clonedObject, genome.id)
+                        if (typeof this.originalFeature.popupData === 'function') {
+                            return this.originalFeature.popupData();
+                        } else {
+                            const clonedObject = Object.assign({}, this);
+                            clonedObject.chr = this.realChr;
+                            clonedObject.start = this.realStart + 1;
+                            clonedObject.end = this.realEnd;
+                            delete clonedObject.realChr;
+                            delete clonedObject.realStart;
+                            delete clonedObject.realEnd;
+                            delete clonedObject.px;
+                            delete clonedObject.py;
+                            return TrackBase.extractPopupData(clonedObject, genome.id);
+                        }
                     }
 
                     wgFeatures.push(wg);
