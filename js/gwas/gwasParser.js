@@ -26,14 +26,17 @@ class GWASParser {
             switch (c) {
                 case 'chr':
                 case 'chromosome':
+                case 'chr_id':
                     this.chrCol = i;
                     break;
                 case 'bp':
                 case 'pos':
                 case 'position':
+                case 'chr_pos':
                     this.posCol = i;
                     break;
                 case 'snp':
+                case 'snps':
                 case 'rs':
                 case 'rsid':
                 case 'rsnum':
@@ -66,21 +69,44 @@ class GWASParser {
         let line;
         while (line = dataWrapper.nextLine()) {
             const tokens = line.split(/\t/);
-            const chr = tokens[this.chrCol];
-            const start = parseInt(tokens[this.posCol]) - 1;
-            const end = start + 1;
-            const value = parseFloat(tokens[this.pvalueCol]);
-            const snpID = tokens[this.snpCol];
-            allFeatures.push({
-                chr: chr,
-                start: start,
-                end: end,
-                value: value,
-                name: snpID,
-            });
+            if (tokens.length === this.columns.length) {
+                const chr = tokens[this.chrCol];
+                const start = parseInt(tokens[this.posCol]) - 1;
+                const end = start + 1;
+                const value = parseFloat(tokens[this.pvalueCol]);
+                const snpID = tokens[this.snpCol];
+                allFeatures.push(new GWASFeature({
+                    chr: chr,
+                    start: start,
+                    end: end,
+                    value: value,
+                    line: line,
+                    columns: this.columns
+                }))
+            }
         }
         return allFeatures;
     }
+}
+
+class GWASFeature {
+
+    constructor({chr, start, end, value, line, columns}) {
+        this.chr = chr;
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.line = line;
+        this.columns = columns;
+    }
+
+    popupData() {
+        const tokens = this.line.split(/\t/);
+        return this.columns.map(function (c, index) {
+            return {name: c, value: tokens[index]}
+        })
+    }
+
 }
 
 export default GWASParser
