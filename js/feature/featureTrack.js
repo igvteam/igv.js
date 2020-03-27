@@ -282,7 +282,9 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
     const data = [];
     for (let feature of features) {
 
-        const featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) : TrackBase.extractPopupData(feature, this.getGenomeId());
+        const featureData = (typeof feature.popupData === "function") ?
+            feature.popupData(genomicLocation) :
+            TrackBase.extractPopupData(feature, this.getGenomeId());
 
         if (featureData) {
             if (data.length > 0) {

@@ -229,6 +229,12 @@ TrackBase.extractPopupData = function (feature, genomeId) {
         }
     }
 
+    if(feature.attributes) {
+        for(let key of Object.keys(feature.attributes)) {
+            data.push({name: key, value: feature.attributes[key]})
+        }
+    }
+
     return data;
 
 
