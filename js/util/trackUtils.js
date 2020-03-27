@@ -26,6 +26,14 @@
 import {isFilePath} from './fileUtils.js'
 import FileFormats from "../feature/fileFormats.js";
 
+const knownIndexableFileExtensions = new Set(["vcf", "bed", "gff", "gtf", "gff3", "bedgraph"]);
+
+const knownGenomeIndexExtensions = new Set(['fai']);
+
+const knownGenomeFileExtensions = new Set(['fna', 'fasta', 'fa']);
+
+const knownIndexExtensions = new Set(['bai', 'crai', 'tbi', 'idx']);
+
 const knownFileExtensions = new Set([
 
     "narrowpeak",
@@ -58,6 +66,71 @@ const knownFileExtensions = new Set([
     "rmsk",
     "cram"
 ]);
+
+const knownDataFileIndexFileLookup = extension => {
+
+    const fna =
+        {
+            index: 'fai',
+            isOptional: false
+        };
+
+    const fa =
+        {
+            index: 'fai',
+            isOptional: false
+        };
+
+    const fasta =
+        {
+            index: 'fai',
+            isOptional: false
+        };
+
+    const bam =
+        {
+            index: 'bai',
+            isOptional: false
+        };
+
+    const cram =
+        {
+            index: 'crai',
+            isOptional: false
+        };
+
+    const gz =
+        {
+            index: 'tbi',
+            isOptional: true
+        };
+
+    const bgz =
+        {
+            index: 'tbi',
+            isOptional: true
+        };
+
+    const lut =
+        {
+            fna,
+            fa,
+            fasta,
+            bam,
+            cram,
+            gz,
+            bgz
+        };
+
+    const any =
+        {
+            index: 'idx',
+            isOptional: true
+        };
+
+    return lut[ extension ]  || any;
+
+};
 
 /**
  * Return a custom format object with the given name.
@@ -285,4 +358,4 @@ function parseLocusString(string) {
 }
 
 
-export {knownFileExtensions, getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString};
+export { knownDataFileIndexFileLookup, knownIndexableFileExtensions, knownGenomeIndexExtensions, knownGenomeFileExtensions, knownIndexExtensions, knownFileExtensions, getFormat, inferTrackTypes, inferFileFormat, inferIndexPath, parseLocusString };

@@ -9,7 +9,7 @@ import {createIcon} from "./igv-icons.js";
 import {guid,pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
 import {attachDialogCloseHandlerWithParent, createColorSwatchSelector} from "./ui/ui-utils.js";
 import {getExtension, getFilename, isFilePath} from "./util/fileUtils.js";
-import {inferFileFormat, inferTrackTypes, knownFileExtensions} from './util/trackUtils.js';
+import { inferFileFormat, inferTrackTypes, knownDataFileIndexFileLookup, knownIndexableFileExtensions, knownGenomeIndexExtensions, knownGenomeFileExtensions, knownIndexExtensions, knownFileExtensions } from './util/trackUtils.js';
 import {isString, numberFormatter, splitLines} from "./util/stringUtils.js";
 import { doAutoscale, download } from './util/igvUtils.js';
 import IGVColor from "./igv-color.js";
@@ -65,6 +65,11 @@ export default {
     isFilePath,
     inferFileFormat,
     inferTrackTypes,
+    knownDataFileIndexFileLookup,
+    knownIndexableFileExtensions,
+    knownGenomeIndexExtensions,
+    knownGenomeFileExtensions,
+    knownIndexExtensions,
     knownFileExtensions,
     appendRightHandGutter,
     attachDialogCloseHandlerWithParent,
