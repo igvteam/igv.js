@@ -212,9 +212,6 @@ FeatureParser.prototype.parseFeatures = function (data) {
     let line;
     let wig;
 
-    if (!this.header) {
-
-    }
     while (line = nextLine()) {
 
         i++;
@@ -423,13 +420,20 @@ function decodeBed(tokens, ignore) {
         // feature.name = name ? name : tmp;
 
         //parse gffTags
-        if (gffTags) {
-            feature.attributes = parseAttributeString(tokens[3], '=');
+        if (tokens[3].indexOf(';') > 0) {
+            const attributes = parseAttributeString(tokens[3], '=');
             for (let nmField of gffNameFields) {
-                if (feature.attributes.hasOwnProperty(nmField)) {
-                    feature.name = feature.attributes[nmField];
-                    delete feature.attributes[nmField];
+                if (attributes.hasOwnProperty(nmField)) {
+                    feature.name = attributes[nmField];
+                    delete attributes[nmField];
                     break;
+                }
+            }
+            if(gffTags) {
+                feature.attributes = attributes;
+            } else {
+                if(feature.name) {
+                    feature["nameField"] = tokens[3];
                 }
             }
         }
