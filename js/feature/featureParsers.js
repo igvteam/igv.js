@@ -37,7 +37,7 @@ import {getFormat} from "../util/trackUtils.js";
  */
 
 const maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
-const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus"];
+const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus", "name"];
 
 /**
  * Return a parser for the given file format.
@@ -183,6 +183,9 @@ FeatureParser.prototype.parseHeader = function (data) {
                 this.format = "gff3";
                 if (!header) header = {};
                 header["format"] = "gff3";
+            } else if (line.startsWith("#gffTags")) {
+                if (!header) header = {};
+                header["gffTags"] = true;
             }
         } else {
             break;
@@ -209,6 +212,9 @@ FeatureParser.prototype.parseFeatures = function (data) {
     let line;
     let wig;
 
+    if (!this.header) {
+
+    }
     while (line = nextLine()) {
 
         i++;
@@ -393,10 +399,11 @@ function decodeBed(tokens, ignore) {
 
     if (tokens.length < 3) return undefined;
 
+    const gffTags = this.header && this.header.gffTags;
+
     chr = tokens[0];
     start = parseInt(tokens[1]);
     end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
-
     feature = {chr: chr, start: start, end: end, score: 1000};
 
     if (tokens.length > 3) {
@@ -414,12 +421,20 @@ function decodeBed(tokens, ignore) {
         // }
         // feature.id = id ? id : tmp;
         // feature.name = name ? name : tmp;
-        if (tokens[3].indexOf(';') == -1) {
-            feature.name = tokens[3];
-        } else {
-            //parse gffTags
+
+        //parse gffTags
+        if (gffTags) {
             feature.attributes = parseAttributeString(tokens[3], '=');
-            feature.name = feature.attributes['Name'];
+            for (let nmField of gffNameFields) {
+                if (feature.attributes.hasOwnProperty(nmField)) {
+                    feature.name = feature.attributes[nmField];
+                    delete feature.attributes[nmField];
+                    break;
+                }
+            }
+        }
+        if (!feature.name) {
+            feature.name = tokens[3];
         }
     }
 
@@ -765,7 +780,7 @@ function decodeFusionJuncSpan(tokens, ignore) {
      */
 
 
-    if(tokens.length < 7) return undefined;
+    if (tokens.length < 7) return undefined;
 
     var chr = tokens[0];
     var fusion_name = tokens[1];
@@ -1079,7 +1094,7 @@ function decodeInteract(tokens, ignore) {
  */
 function decodeBedpeDomain(tokens, ignore) {
 
-    if(tokens.length < 8) return undefined;
+    if (tokens.length < 8) return undefined;
 
     return {
         chr: tokens[0],
@@ -1093,7 +1108,7 @@ function decodeBedpeDomain(tokens, ignore) {
 
 function decodeSNP(tokens, ignore) {
 
-    if(tokens.length < 6) return undefined;
+    if (tokens.length < 6) return undefined;
 
     const autoSql = [
         'bin',
@@ -1151,7 +1166,7 @@ function decodeSNP(tokens, ignore) {
  */
 function decodeCustom(tokens, ignore) {
 
-    if(tokens.length < this.format.fields.length) return undefined;
+    if (tokens.length < this.format.fields.length) return undefined;
 
     const format = this.format;         // "this" refers to FeatureParser instance
     const coords = format.coords || 0;
