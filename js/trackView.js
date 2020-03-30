@@ -459,34 +459,33 @@ TrackView.prototype.updateViews = async function (force) {
 
     const visibleViewports = this.viewports.filter(vp => vp.isVisible())
 
+    // Shift viewports left/right to current genomic state (pans canvas)
     visibleViewports.forEach(function (viewport) {
         viewport.shift();
     });
 
-    // List of viewports that need reloading
+    // rpv: viewports whose image (canvas) does not fully cover current genomic range
     const rpV = viewportsToReload.call(this, force);
+
+    // Trigger viewport to load features needed to cover current genomic range
     for (let vp of rpV) {
         await vp.loadFeatures()
-        if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chrName) {
-            vp.checkZoomIn();
-        }
+        // if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chrName) {
+        //     vp.checkZoomIn();
+        // }
     }
 
-    const dragObject = this.browser.dragObject;
-
-    if (!dragObject && this.track.autoscale) {
+    const isDragging = this.browser.dragObject;
+    if (!isDragging && this.track.autoscale) {
         let allFeatures = [];
         for (let vp of visibleViewports) {
             const referenceFrame = vp.genomicState.referenceFrame;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-
             if (vp.tile && vp.tile.features) {
                 allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
-
             }
         }
-
         if (typeof this.track.doAutoscale === 'function') {
             this.track.dataRange = this.track.doAutoscale(allFeatures);
         } else {
@@ -496,7 +495,7 @@ TrackView.prototype.updateViews = async function (force) {
 
 
     // Must repaint all viewports if autoscaling
-    if (!dragObject && (this.track.autoscale || this.track.autoscaleGroup)) {
+    if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
         for (let vp of visibleViewports) {
             vp.repaint();
         }
@@ -542,16 +541,14 @@ TrackView.prototype.getInViewFeatures = async function (force) {
 
 function viewportsToReload(force) {
 
-
     // List of viewports that need reloading
     const rpV = this.viewports.filter(function (viewport) {
         if (!viewport.isVisible()) {
-            return false
+            return false;
         }
         if (!viewport.checkZoomIn()) {
-            return false
+            return false;
         } else {
-
             const referenceFrame = viewport.genomicState.referenceFrame;
             const chr = referenceFrame.chrName;
             const start = referenceFrame.start;
@@ -560,9 +557,7 @@ function viewportsToReload(force) {
             return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
         }
     });
-
     return rpV;
-
 }
 
 TrackView.prototype.checkContentHeight = function () {
