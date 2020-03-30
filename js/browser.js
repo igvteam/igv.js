@@ -1196,8 +1196,9 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
     if (this.loadInProgress()) {
         return;
     }
-    let self = this;
-    this.trackViews[0].viewports.forEach((viewport) => {
+
+    const viewports = this.trackViews[0].viewports;
+    for (let viewport of viewports)  {
 
         const referenceFrame = viewport.genomicState.referenceFrame;
         const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
@@ -1210,13 +1211,14 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
 
         referenceFrame.start = centerBP - (viewportWidthBP / 2);
         referenceFrame.bpPerPixel = bpp;
-        self.updateViews(viewport.genomicState);
+        referenceFrame.clamp(viewport.$viewport.width())
+        this.updateViews(viewport.genomicState);
 
         function lerp(v0, v1, t) {
             return (1 - t) * v0 + t * v1;
         }
 
-    });
+    }
 };
 
 Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
