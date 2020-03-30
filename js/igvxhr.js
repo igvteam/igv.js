@@ -121,7 +121,6 @@ const igvxhr = {
                 return getLoadPromise(url, options);
             }
 
-
             function applyOauthToken(token) {
                 if (token) {
                     options.token = token;
@@ -142,9 +141,11 @@ const igvxhr = {
                                 url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                             }
                         }
-                        url = google.addApiKey(url);
                     }
 
+                    if(google.isGoogleDrive(url) && !(options.token || options.oauthToken)) {
+                        url = google.addApiKey(url);
+                    }
 
                     const headers = options.headers || {};
                     if (options.token) {
