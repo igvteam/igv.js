@@ -46,149 +46,137 @@ var queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
  * @param config
  * @constructor
  */
-const FeatureSource = function (config, genome) {
+class FeatureSource {
 
-    this.config = config || {};
-    this.genome = genome;
+    constructor(config, genome) {
 
-    this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
+        this.config = config || {};
+        this.genome = genome;
 
-    // Default GFF filter -- these feature types will be filtered out
-    if (undefined === config.filterTypes) {
-        config.filterTypes = ['chromosome', 'gene']
-    }
+        this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
-    if (config.features && Array.isArray(config.features)) {
-        let features = config.features;
-        packFeatures(features);
-        if (config.mappings) {
-            mapProperties(features, config.mappings)
+        // Default GFF filter -- these feature types will be filtered out
+        if (undefined === config.filterTypes) {
+            config.filterTypes = ['chromosome', 'gene']
         }
-        this.featureCache = new FeatureCache(features, genome);
-        this.static = true;
-    } else if (config.sourceType === "ga4gh") {
-        this.reader = new Ga4ghVariantReader(config, genome);
-        this.queryable = true;
-    } else if (config.sourceType === "immvar") {
-        this.reader = new ImmVarReader(config);
-        this.queryable = true;
-    } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
-        this.reader = new GtexReader(config);
-        this.queryable = true;
-    } else if (config.sourceType === 'ucscservice') {
-        this.reader = new UCSCServiceReader(config.source);
-        this.queryable = true;
-    } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
-        this.reader = new CustomServiceReader(config.source);
-        this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
-    } else if ("civic-ws" === config.sourceType) {
-        this.reader = new CivicReader(config);
-        this.queryable = false;
-    } else {
-        this.reader = new FeatureFileReader(config, genome);
-        if (config.queryable !== undefined) {
-            this.queryable = config.queryable
-        } else if (queryableFormats.has(config.format)) {
-            this.queryable = queryableFormats.has(config.format) || this.reader.indexed;
-        } else {
-            // Leav undefined -- will defer until we know if reader has an index
-        }
-    }
 
-    this.supportsWG = !this.queryable;   // Can be dynamically changed
-
-};
-
-FeatureSource.prototype.supportsWholeGenome = function () {
-    return this.supportsWG;
-}
-
-FeatureSource.prototype.getFileHeader = async function () {
-
-    if (!this.header) {
-        if (this.reader && typeof this.reader.readHeader === "function") {
-
-            const header = await this.reader.readHeader()
-            if (header) {
-                this.header = header;
-                // Non-indexed readers will return features as a side effect (entire file is read).
-                const features = header.features;
-                if (features) {
-                    this.ingestFeatures(features);
-                }
-                if (header.format)
-                    this.config.format = header.format;
+        if (config.features && Array.isArray(config.features)) {
+            let features = config.features;
+            packFeatures(features);
+            if (config.mappings) {
+                mapProperties(features, config.mappings)
             }
-            this.header = header;
+            this.featureCache = new FeatureCache(features, genome);
+            this.static = true;
+        } else if (config.sourceType === "ga4gh") {
+            this.reader = new Ga4ghVariantReader(config, genome);
+            this.queryable = true;
+        } else if (config.sourceType === "immvar") {
+            this.reader = new ImmVarReader(config);
+            this.queryable = true;
+        } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
+            this.reader = new GtexReader(config);
+            this.queryable = true;
+        } else if (config.sourceType === 'ucscservice') {
+            this.reader = new UCSCServiceReader(config.source);
+            this.queryable = true;
+        } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
+            this.reader = new CustomServiceReader(config.source);
+            this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
+        } else if ("civic-ws" === config.sourceType) {
+            this.reader = new CivicReader(config);
+            this.queryable = false;
         } else {
-            this.header = {};
+            this.reader = new FeatureFileReader(config, genome);
+            if (config.queryable !== undefined) {
+                this.queryable = config.queryable
+            } else if (queryableFormats.has(config.format)) {
+                this.queryable = queryableFormats.has(config.format) || this.reader.indexed;
+            } else {
+                // Leav undefined -- will defer until we know if reader has an index
+            }
         }
+
+        this.supportsWG = !this.queryable;   // Can be dynamically changed
+
     }
-    return this.header
 
-};
+    supportsWholeGenome() {
+        return this.supportsWG;
+    }
 
-function addFeaturesToDB(featureList) {
-    let self = this;
+    async getFileHeader() {
 
-    featureList.forEach(function (feature) {
-        if (feature.name) {
-            //TODO igv.browser => igv.Globals or igv.FeatureDB
-            self.config.browser.featureDB[feature.name.toUpperCase()] = feature;
+        if (!this.header) {
+            if (this.reader && typeof this.reader.readHeader === "function") {
+
+                const header = await this.reader.readHeader()
+                if (header) {
+                    this.header = header;
+                    // Non-indexed readers will return features as a side effect (entire file is read).
+                    const features = header.features;
+                    if (features) {
+                        this.ingestFeatures(features);
+                    }
+                    if (header.format)
+                        this.config.format = header.format;
+                }
+                this.header = header;
+            } else {
+                this.header = {};
+            }
         }
-    });
+        return this.header
+    }
 
-}
+    /**
+     * Required function for all data source objects.  Fetches features for the
+     * range requested.
+     *
+     * @param chr
+     * @param bpStart
+     * @param bpEnd
+     * @param bpPerPixel
+     */
+    async getFeatures(chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
 
-/**
- * Required function for all data source objects.  Fetches features for the
- * range requested.
- *
- * @param chr
- * @param bpStart
- * @param bpEnd
- * @param bpPerPixel
- */
-FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
+        const reader = this.reader;
+        const genome = this.genome;
+        const queryChr = genome ? genome.getChromosomeName(chr) : chr;
+        const featureCache = await getFeatureCache.call(this)
+        const isQueryable = this.queryable;
 
-    const reader = this.reader;
-    const genome = this.genome;
-    const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-    const featureCache = await getFeatureCache.call(this)
-    const isQueryable = this.queryable;
-
-    if ("all" === chr.toLowerCase()) {
-        if (isQueryable) {   // queryable sources don't support whole genome view
-            return [];
-        } else {
-            if (featureCache.count > 500000) {
-                this.supportsWG = false;
+        if ("all" === chr.toLowerCase()) {
+            if (isQueryable) {   // queryable sources don't support whole genome view
                 return [];
             } else {
-                return this.getWGFeatures(featureCache.getAllFeatures());
+                if (featureCache.count > 500000) {
+                    this.supportsWG = false;
+                    return [];
+                } else {
+                    return this.getWGFeatures(featureCache.getAllFeatures());
+                }
             }
-        }
-    } else {
-        return featureCache.queryFeatures(queryChr, bpStart, bpEnd);
-    }
-
-
-    async function getFeatureCache() {
-
-        let intervalStart = bpStart;
-        let intervalEnd = bpEnd;
-        let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-        if (this.featureCache &&
-            (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-            return this.featureCache;
         } else {
+            return featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+        }
 
-            // If a visibility window is defined, potentially expand query interval.
-            // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
-            // indicating whole chromosome should be read at once.
-            if (undefined !== visibilityWindow) {
-                if (visibilityWindow <= 0) {
+
+        async function getFeatureCache() {
+
+            let intervalStart = bpStart;
+            let intervalEnd = bpEnd;
+            let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+            if (this.featureCache &&
+                (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
+                return this.featureCache;
+            } else {
+
+                // Use visibility window to potentially expand query interval.
+                // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
+                // indicating whole chromosome should be read at once.
+                if (!visibilityWindow || visibilityWindow <= 0) {
                     // Whole chromosome
                     intervalStart = 0;
                     intervalEnd = Number.MAX_VALUE;
@@ -197,48 +185,115 @@ FeatureSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPer
                     intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
                     intervalEnd = bpStart + expansionWindow;
                 }
+                genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+                let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+                if (this.queryable === undefined) {
+                    this.queryable = reader.indexed;
+                }
+
+                if (featureList) {
+                    this.ingestFeatures(featureList, genomicInterval);
+                } else {
+                    this.featureCache = new FeatureCache();     // Empty cache
+                }
+                return this.featureCache;
             }
-            genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-            let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-
-            if (this.queryable === undefined) {
-                this.queryable = reader.indexed;
-            }
-
-            if (featureList) {
-                this.ingestFeatures(featureList, genomicInterval);
-            } else {
-                this.featureCache = new FeatureCache();     // Empty cache
-            }
-
-            return this.featureCache;
-
         }
     }
-};
 
-FeatureSource.prototype.ingestFeatures = function (featureList, genomicInterval) {
+    ingestFeatures(featureList, genomicInterval) {
 
-    if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
-        featureList = (new GFFHelper(this.config)).combineFeatures(featureList);
+        if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
+            featureList = (new GFFHelper(this.config)).combineFeatures(featureList);
+        }
+
+        // Assign overlapping features to rows
+        if (this.config.format !== "wig" && this.config.type !== "junctions") {
+            const maxRows = this.config.maxRows || 500
+            packFeatures(featureList, maxRows);
+        }
+
+        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined)
+        this.featureCache = new FeatureCache(featureList, this.genome, genomicInterval);
+
+        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+        if (this.config.searchable) {
+            this.addFeaturesToDB(featureList);
+        }
     }
 
-    // Assign overlapping features to rows
-    if (this.config.format !== "wig" && this.config.type !== "junctions") {
-        const maxRows = this.config.maxRows || 500
-        packFeatures(featureList, maxRows);
+    addFeaturesToDB(featureList) {
+        let self = this;
+
+        featureList.forEach(function (feature) {
+            if (feature.name) {
+                //TODO igv.browser => igv.Globals or igv.FeatureDB
+                self.config.browser.featureDB[feature.name.toUpperCase()] = feature;
+            }
+        });
     }
 
-    // Note - replacing previous cache with new one
-    this.featureCache = this.queryable ?
-        new FeatureCache(featureList, this.genome, genomicInterval) :
-        new FeatureCache(featureList, this.genome);
 
+// TODO -- filter by pixel size
+    getWGFeatures(allFeatures) {
 
-    // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-    if (this.config.searchable) {
-        addFeaturesToDB.call(this, featureList);
+        const genome = this.genome;
+        const wgChromosomeNames = new Set(genome.wgChromosomeNames);
+        const wgFeatures = [];
+
+        for (let c of genome.wgChromosomeNames) {
+
+            const features = allFeatures[c];
+
+            if (features) {
+                for (let f of features) {
+                    let queryChr = genome.getChromosomeName(f.chr);
+                    if (wgChromosomeNames.has(queryChr)) {
+
+                        const wg = Object.create(Object.getPrototypeOf(f));
+                        Object.assign(wg, f);
+
+                        wg.realChr = f.chr;
+                        wg.realStart = f.start;
+                        wg.realEnd = f.end;
+
+                        wg.chr = "all";
+                        wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                        wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                        wg.originalFeature = f;
+
+                        // Don't draw exons in whole genome view
+                        if (wg["exons"]) delete wg["exons"]
+                        wg.popupData = function (genomeLocation) {
+                            if (typeof this.originalFeature.popupData === 'function') {
+                                return this.originalFeature.popupData();
+                            } else {
+                                const clonedObject = Object.assign({}, this);
+                                clonedObject.chr = this.realChr;
+                                clonedObject.start = this.realStart + 1;
+                                clonedObject.end = this.realEnd;
+                                delete clonedObject.realChr;
+                                delete clonedObject.realStart;
+                                delete clonedObject.realEnd;
+                                delete clonedObject.px;
+                                delete clonedObject.py;
+                                return TrackBase.extractPopupData(clonedObject, genome.id);
+                            }
+                        }
+
+                        wgFeatures.push(wg);
+                    }
+                }
+            }
+        }
+
+        wgFeatures.sort(function (a, b) {
+            return a.start - b.start;
+        });
+
+        return wgFeatures;
+
     }
 }
 
@@ -272,67 +327,6 @@ function packFeatures(features, maxRows) {
     chrs.forEach(function (chr) {
         pack(chrFeatureMap[chr], maxRows);
     })
-}
-
-// TODO -- filter by pixel size
-FeatureSource.prototype.getWGFeatures = function (allFeatures) {
-
-    const genome = this.genome;
-    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
-    const wgFeatures = [];
-
-    for (let c of genome.wgChromosomeNames) {
-
-        const features = allFeatures[c];
-
-        if (features) {
-            for (let f of features) {
-                let queryChr = genome.getChromosomeName(f.chr);
-                if (wgChromosomeNames.has(queryChr)) {
-
-                    const wg = Object.create(Object.getPrototypeOf(f));
-                    Object.assign(wg, f);
-
-                    wg.realChr = f.chr;
-                    wg.realStart = f.start;
-                    wg.realEnd = f.end;
-
-                    wg.chr = "all";
-                    wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                    wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                    wg.originalFeature = f;
-
-                    // Don't draw exons in whole genome view
-                    if (wg["exons"]) delete wg["exons"]
-                    wg.popupData = function (genomeLocation) {
-                        if (typeof this.originalFeature.popupData === 'function') {
-                            return this.originalFeature.popupData();
-                        } else {
-                            const clonedObject = Object.assign({}, this);
-                            clonedObject.chr = this.realChr;
-                            clonedObject.start = this.realStart + 1;
-                            clonedObject.end = this.realEnd;
-                            delete clonedObject.realChr;
-                            delete clonedObject.realStart;
-                            delete clonedObject.realEnd;
-                            delete clonedObject.px;
-                            delete clonedObject.py;
-                            return TrackBase.extractPopupData(clonedObject, genome.id);
-                        }
-                    }
-
-                    wgFeatures.push(wg);
-                }
-            }
-        }
-    }
-
-    wgFeatures.sort(function (a, b) {
-        return a.start - b.start;
-    });
-
-    return wgFeatures;
-
 }
 
 
