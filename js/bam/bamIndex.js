@@ -216,7 +216,7 @@ function optimizeChunks(chunks, lowest) {
                 }
             }
         } else {
-            console.log(`skipping chunk ${chunk}`)
+            console.log(`skipping chunk ${chunk.minv.block} - ${chunk.maxv.block}`)
         }
     });
 
