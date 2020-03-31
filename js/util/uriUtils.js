@@ -66,5 +66,15 @@ const options = {
     }
 };
 
-export {parseUri, decodeDataURI};
+function addExtension(url, extension) {
+
+    const idx = url.indexOf("?");
+    if(idx < 0) {
+        return url + extension;
+    } else {
+        return url.substring(0, idx) + extension + url.substring(idx);
+    }
+}
+
+export {parseUri, decodeDataURI, addExtension};
 
