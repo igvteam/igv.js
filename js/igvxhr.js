@@ -206,7 +206,8 @@ const igvxhr = {
                             options.retries = 1;
                             const accessToken = await getGoogleAccessToken();
                             options.oauthToken = accessToken;
-                            return igvxhr.load(url, options);
+                            const response = await igvxhr.load(url, options);
+                            resolve(response);
                         } catch (e) {
                             handleError(e);
                         }
