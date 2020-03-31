@@ -37,8 +37,7 @@ import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
-
-const MAX_GZIP_BLOCK_SIZE = (1 << 16);
+import {addExtension} from "../util/uriUtils.js"
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -93,7 +92,6 @@ FeatureFileReader.prototype.readHeader = async function () {
 
     if (!this.header) {
 
-
         let header
 
         if (this.dataURI) {
@@ -104,15 +102,11 @@ FeatureFileReader.prototype.readHeader = async function () {
 
         } else {
             let index;
-            if (this.config.indexURL || this.config.indexed) {
+            if (this.config.indexed !== false) {
                 index = await this.getIndex();
+            }
 
-                if (!index) {
-                    // Note - it should be impossible to get here
-                    const iurl = this.config.indexURL || this.config.url;
-                    throw new Error("Unable to load index: " + iurl);
-                }
-
+            if (index) {
                 // Load the file header (not HTTP header) for an indexed file.
                 let maxSize = "vcf" === this.config.format ? 65000 : 1000
                 if (index.tabix) {
@@ -130,6 +124,11 @@ FeatureFileReader.prototype.readHeader = async function () {
                 const data = await igvxhr.loadString(this.config.url, options)
                 header = this.parser.parseHeader(data);
 
+            } else if (this.config.indexURL || this.config.indexed) {
+                const message = this.config.indexURL ?
+                    `Unable to load index ${this.config.indexURL}` :
+                    `Unable to load index for ${this.config.url}`;
+                throw new Error(message);
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const features = await this.loadFeaturesNoIndex()
@@ -305,15 +304,16 @@ FeatureFileReader.prototype.loadIndex = async function () {
     let idxFile = this.config.indexURL;
     try {
         let index;
-        if (this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')) {
-            if (!idxFile) {
-                idxFile = this.config.url + '.tbi';
+        // Nearly all vcf files are indexed, so assume indexURL was ommitted by mistake
+        if (this.config.indexed || (this.filename.endsWith('vcf.gz') || this.filename.endsWith('vcf.bgz'))) {
+            if (!idxFile && isString(this.config.url)) {
+                idxFile =  addExtension(this.config.url, '.tbi');
             }
             index = await loadBamIndex(idxFile, this.config, true, this.genome);
 
         } else {
             if (!idxFile) {
-                idxFile = this.config.url + '.idx';
+                return undefined;
             }
             index = await loadTribbleIndex(idxFile, this.config, this.genome);
         }
