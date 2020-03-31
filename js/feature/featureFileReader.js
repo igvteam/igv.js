@@ -37,7 +37,8 @@ import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
-import {addExtension} from "../util/uriUtils.js"
+
+const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -91,22 +92,20 @@ FeatureFileReader.prototype.readFeatures = async function (chr, start, end) {
 FeatureFileReader.prototype.readHeader = async function () {
 
     if (!this.header) {
-
         let header
-
         if (this.dataURI) {
-
             const features = await this.loadFeaturesFromDataURI(this.dataURI)
             header = this.header || {};
             header.features = features;
-
         } else {
             let index;
-            if (this.config.indexed !== false) {
+            if (this.config.indexURL) {
                 index = await this.getIndex();
-            }
+                if (!index) {
+                    // Note - it should be impossible to get here
+                    throw new Error("Unable to load index: " + this.config.indexURL);
+                }
 
-            if (index) {
                 // Load the file header (not HTTP header) for an indexed file.
                 let maxSize = "vcf" === this.config.format ? 65000 : 1000
                 if (index.tabix) {
@@ -124,11 +123,6 @@ FeatureFileReader.prototype.readHeader = async function () {
                 const data = await igvxhr.loadString(this.config.url, options)
                 header = this.parser.parseHeader(data);
 
-            } else if (this.config.indexURL || this.config.indexed) {
-                const message = this.config.indexURL ?
-                    `Unable to load index ${this.config.indexURL}` :
-                    `Unable to load index for ${this.config.url}`;
-                throw new Error(message);
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const features = await this.loadFeaturesNoIndex()
@@ -282,54 +276,35 @@ FeatureFileReader.prototype.loadFeaturesWithIndex = async function (chr, start, 
 
 
 FeatureFileReader.prototype.getIndex = async function () {
-
-    if (this.index !== undefined || this.indexed === false) {
+    if (this.index || !this.config.indexURL) {
+        return this.index;
+    } else {
+        this.index = await this.loadIndex()
         return this.index;
     }
-    const indexOrUndefined = await this.loadIndex()
-    if (indexOrUndefined) {
-        this.index = indexOrUndefined;
-        this.indexed = true;
-    } else {
-        this.indexed = false;
-    }
-    return this.index;
-};
+}
 
 /**
  * Return a Promise for the async loaded index
  */
 FeatureFileReader.prototype.loadIndex = async function () {
-
-
-    try {
-        const maybeTabix = this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')
-        let index;
-        let idxFile = this.config.indexURL;
-        
-        // Guess an index under some conditions
-        if(!idxFile && isString(this.config.url) && (this.config.indexed || this.filename.endsWith('vcf.gz'))) {
-            const ext = maybeTabix ? ".tbi" : ".idx";
-            idxFile = addExtension(this.config.url, ext);
-        }
-
-        if ( idxFile ) {
-            if(maybeTabix) {
-                index = await loadBamIndex(idxFile, this.config, true, this.genome);
-            } else {
-                index = await loadTribbleIndex(idxFile, this.config, this.genome);
-            }
-        }
-        return index;
-    } catch (e) {
-        if (this.config.indexURL || this.config.indexed) {
-            throw e;
-        } else {
-            this.indexed = false;
-            console.error(e);
-        }
+    const indexURL = this.config.indexURL;
+    let indexFilename;
+    if (isFilePath(indexURL)) {
+        indexFilename = indexURL.name;
+    } else {
+        const uriParts = parseUri(indexURL);
+        indexFilename = uriParts.file;
     }
-};
+    const isTabix = indexFilename.endsWith(".tbi") || this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')
+    let index;
+    if (isTabix) {
+        index = await loadBamIndex(indexURL, this.config, true, this.genome);
+    } else {
+        index = await loadTribbleIndex(indexURL, this.config, this.genome);
+    }
+    return index;
+}
 
 
 FeatureFileReader.prototype.loadFeaturesFromDataURI = async function () {
