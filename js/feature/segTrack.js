@@ -84,6 +84,13 @@ const SegTrack = extend(TrackBase,
 
     });
 
+SegTrack.prototype.postInit = async function () {
+    if (typeof this.featureSource.getFileHeader === "function") {
+        this.header = await this.featureSource.getFileHeader();
+    }
+}
+
+
 SegTrack.prototype.menuItemList = function () {
 
     const self = this;
