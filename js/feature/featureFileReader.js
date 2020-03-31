@@ -301,21 +301,24 @@ FeatureFileReader.prototype.getIndex = async function () {
  */
 FeatureFileReader.prototype.loadIndex = async function () {
 
-    let idxFile = this.config.indexURL;
-    try {
-        let index;
-        // Nearly all vcf files are indexed, so assume indexURL was ommitted by mistake
-        if (this.config.indexed || (this.filename.endsWith('vcf.gz') || this.filename.endsWith('vcf.bgz'))) {
-            if (!idxFile && isString(this.config.url)) {
-                idxFile =  addExtension(this.config.url, '.tbi');
-            }
-            index = await loadBamIndex(idxFile, this.config, true, this.genome);
 
-        } else {
-            if (!idxFile) {
-                return undefined;
+    try {
+        const maybeTabix = this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')
+        let index;
+        let idxFile = this.config.indexURL;
+        
+        // Guess an index under some conditions
+        if(!idxFile && isString(this.config.url) && (this.config.indexed || this.filename.endsWith('vcf.gz'))) {
+            const ext = maybeTabix ? ".tbi" : ".idx";
+            idxFile = addExtension(this.config.url, ext);
+        }
+
+        if ( idxFile ) {
+            if(maybeTabix) {
+                index = await loadBamIndex(idxFile, this.config, true, this.genome);
+            } else {
+                index = await loadTribbleIndex(idxFile, this.config, this.genome);
             }
-            index = await loadTribbleIndex(idxFile, this.config, this.genome);
         }
         return index;
     } catch (e) {
