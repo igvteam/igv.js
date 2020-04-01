@@ -24,7 +24,7 @@
  */
 
 import {splitLines} from "../util/stringUtils.js";
-import getDataWrapper from "./dataWrapper"
+import getDataWrapper from "./dataWrapper.js"
 
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
