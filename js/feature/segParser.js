@@ -24,6 +24,7 @@
  */
 
 import {splitLines} from "../util/stringUtils.js";
+import getDataWrapper from "./dataWrapper"
 
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -35,72 +36,51 @@ import {splitLines} from "../util/stringUtils.js";
  */
 
 
-var sampleKeyColumn = 0,
+const sampleKeyColumn = 0,
     sampleColumn = 0,
     chrColumn = 1,
     startColumn = 2,
     endColumn = 3;
 
-
-const SegParser = function () {
-}
-
-SegParser.prototype.parseHeader = function (data) {
-
-    var lines = splitLines(data),
-        len = lines.length,
-        line,
-        i,
-        tokens;
-
-    for (i = 0; i < len; i++) {
-        line = lines[i];
-        if (line.startsWith("#")) {
-            // skip
-        } else {
-            tokens = line.split("\t");
-            this.header = {headings: tokens, lineCount: i + 1};
-            break;
+class SegParser {
+    parseHeader(data) {
+        const lines = splitLines(data);
+        for (let line of lines) {
+            if (line.startsWith("#")) {
+                // skip
+            } else {
+                const tokens = line.split("\t");
+                this.header = {headings: tokens};
+                break;
+            }
         }
+        return this.header;
     }
 
-    return this.header;
-}
-
-
-SegParser.prototype.parseFeatures = function (data) {
-
-    var lines = data ? splitLines(data) : [],
-        len = lines.length,
-        tokens, allFeatures = [], line, i, dataColumn;
-
-    if (!this.header) {
-        this.header = this.parseHeader(data);
-    }
-    dataColumn = this.header.headings.length - 1;
-
-
-    for (i = this.header.lineCount; i < len; i++) {
-
-        line = lines[i];
-
-        tokens = lines[i].split("\t");
-
-        if (tokens.length > dataColumn) {
-
-            allFeatures.push({
-                sampleKey: tokens[sampleKeyColumn],
-                sample: tokens[sampleColumn],
-                chr: tokens[chrColumn],
-                start: parseInt(tokens[startColumn]),
-                end: parseInt(tokens[endColumn]),
-                value: parseFloat(tokens[dataColumn])
-            });
+    parseFeatures(data) {
+        const dataWrapper = getDataWrapper(data);
+        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
+        const allFeatures = [];
+        if (!this.header) {
+            this.header = this.parseHeader(nextLine());  // This will only work for non-indexed files
         }
+        const dataColumn = this.header.headings.length - 1;
+        let line;
+        while (line = nextLine()) {
+            const tokens = line.split("\t");
+            if (tokens.length > dataColumn) {
+                allFeatures.push({
+                    sampleKey: tokens[sampleKeyColumn],
+                    sample: tokens[sampleColumn],
+                    chr: tokens[chrColumn],
+                    start: parseInt(tokens[startColumn]),
+                    end: parseInt(tokens[endColumn]),
+                    value: parseFloat(tokens[dataColumn])
+                });
+            }
+        }
+        return allFeatures;
     }
-
-    return allFeatures;
-
 }
 
 export default SegParser;
