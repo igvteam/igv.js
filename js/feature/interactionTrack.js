@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import igvxhr from "../igvxhr.js";
-import {extend, buildOptions} from "../util/igvUtils.js";
+import {buildOptions, extend} from "../util/igvUtils.js";
 
 const InteractionTrack = extend(TrackBase,
 
@@ -41,20 +41,17 @@ const InteractionTrack = extend(TrackBase,
         this.theta = config.theta || Math.PI / 4;
         this.sinTheta = Math.sin(this.theta);
         this.cosTheta = Math.cos(this.theta);
-
-
         this.height = config.height || 250;
-        this.autoHeight = true;
-
         this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation);       // true for up, false for down
         this.thickness = config.thickness || 2;
         this.color = config.color || "rgb(180,25,137)"
-
         this.visibilityWindow = -1;
-
         this.colorAlphaCache = {};
-
     });
+
+InteractionTrack.prototype.supportsWholeGenome = function () {
+    return true
+}
 
 /**
  * Return the current state of the track.  Used to create sessions and bookmarks.
@@ -72,35 +69,19 @@ InteractionTrack.prototype.getState = function () {
 }
 
 
-InteractionTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
 
-    const self = this;
     const genome = this.browser.genome;
-
-    if (self.featureCache) {
-        return Promise.resolve(self.featureCache.queryFeatures(chr, bpStart, bpEnd));
-    } else {
-
-        const options = buildOptions(self.config);    // Add oauth token, if any
-
-        return igvxhr.loadString(self.config.url, options)
-
-            .then(function (data) {
-
-                const parser = new FeatureParser("bedpe");
-
-                const header = parser.parseHeader(data);
-
-                const features = parser.parseFeatures(data);
-
-                self.featureCache = new FeatureCache(features, genome);
-
-                // TODO -- whole genome features here.
-
-                return self.featureCache.queryFeatures(chr, bpStart, bpEnd);
-
-            })
+    if (!this.featureCache) {
+        const options = buildOptions(this.config);    // Add oauth token, if any
+        const data = await igvxhr.loadString(this.config.url, options);
+        const parser = new FeatureParser("bedpe");
+        const header = parser.parseHeader(data);
+        const features = parser.parseFeatures(data);
+        this.wgFeatures = this.getWGFeatures(features);
+        this.featureCache = new FeatureCache(features, genome);
     }
+    return chr.toLowerCase() === "all" ? this.wgFeatures : this.featureCache.queryFeatures(chr, bpStart, bpEnd);
 };
 
 InteractionTrack.prototype.draw = function (options) {
@@ -196,7 +177,6 @@ InteractionTrack.prototype.draw = function (options) {
 InteractionTrack.prototype.menuItemList = function () {
 
     var self = this;
-
     return [
         {
             name: "Toggle arc direction",
@@ -211,10 +191,51 @@ InteractionTrack.prototype.menuItemList = function () {
                 self.trackView.presentColorPicker();
             }
         }
-
     ];
-
 };
+
+InteractionTrack.prototype.getWGFeatures = function (allFeatures) {
+
+    const genome = this.browser.genome;
+    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
+    const wgFeatures = [];
+    const genomeLength = genome.getGenomeLength();
+    const smallestFeatureVisible = genomeLength / 1000;
+
+    for (let c of genome.wgChromosomeNames) {
+
+        for (let f of allFeatures) {
+            let queryChr = genome.getChromosomeName(f.chr);
+
+            if (wgChromosomeNames.has(queryChr)) {
+
+                const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
+                const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
+                if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
+
+                const wg = Object.create(Object.getPrototypeOf(f));
+                Object.assign(wg, f);
+                wg.chr = "all";
+                wg.m1 = m1;
+                wg.m2 = m2;
+                // wg.realChr = f.chr;
+                // wg.realStart = f.start;
+                // wg.realEnd = f.end;
+
+                //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                //wg.originalFeature = f;
+                wgFeatures.push(wg);
+            }
+
+        }
+    }
+    wgFeatures.sort(function (a, b) {
+        return a.m1 - b.m2;
+    });
+    return wgFeatures;
+}
+
 //
 //
 //
@@ -253,8 +274,6 @@ InteractionTrack.prototype.menuItemList = function () {
 /**
  * Estimate theta given the ratio of track height to 1/2 the feature width (coa).  This relationship is approximately linear.
  */
-
-
 function estimateTheta(x) {
     let coa = [0.01570925532366355, 0.15838444032453644, 0.3249196962329063, 0.5095254494944288, 0.7265425280053609, 0.9999999999999999];
     let theta = [0.031415926535897934, 0.3141592653589793, 0.6283185307179586, 0.9424777960769379, 1.2566370614359172, 1.5707963267948966];
