@@ -212,7 +212,7 @@ FeatureTrack.prototype.draw = function (options) {
             } else {
                 rowFeatureCount[row]++;
             }
-            options.rowLastX[row] = -Number.MAX_VALUE;
+            options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
         }
 
         let lastPxEnd = [];

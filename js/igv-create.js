@@ -425,7 +425,7 @@ function setDefaults(config) {
     }
 
     if (config.showSequence) {
-        config.tracks.push({type: "sequence", order: -Number.MAX_VALUE});
+        config.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER});
     }
 }
 
