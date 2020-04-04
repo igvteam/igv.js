@@ -352,7 +352,7 @@ Browser.prototype.loadSessionObject = async function (session) {
         session.tracks = [];
     }
     if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-        session.tracks.push({type: "sequence", order: -Number.MAX_VALUE})
+        session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
     }
 
     await this.loadTrackList(session.tracks);
@@ -2034,7 +2034,7 @@ Browser.prototype.updateTrackDrag = function (dragDestination) {
             for (let i = indexDestination + 1; i < nTracks; i++) {
                 const track = trackViews[i].track;
                 if (track.order <= lastOrder) {
-                    track.order = Math.min(Number.MAX_VALUE, lastOrder + 1);
+                    track.order = Math.min(Number.MAX_SAFE_INTEGER, lastOrder + 1);
                     lastOrder = track.order;
                 } else {
                     break;
@@ -2045,7 +2045,7 @@ Browser.prototype.updateTrackDrag = function (dragDestination) {
             for (let i = indexDestination - 1; i > 0; i--) {
                 const track = trackViews[i].track;
                 if (track.order >= lastOrder) {
-                    track.order = Math.max(-Number.MAX_VALUE, lastOrder - 1);
+                    track.order = Math.max(-Number.MAX_SAFE_INTEGER, lastOrder - 1);
                     lastOrder = track.order;
                 } else {
                     break;

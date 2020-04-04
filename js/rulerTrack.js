@@ -38,7 +38,7 @@ const RulerTrack = function (browser) {
     this.id = "ruler";
     this.disableButtons = true;
     this.ignoreTrackMenu = true;
-    this.order = -Number.MAX_VALUE;
+    this.order = -Number.MAX_SAFE_INTEGER;
     this.removable = false;
     this.type = 'ruler';
 

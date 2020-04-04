@@ -36,7 +36,7 @@ import {getFormat} from "../util/trackUtils.js";
  *
  */
 
-const maxFeatureCount = Number.MAX_VALUE;    // For future use,  controls downsampling
+const maxFeatureCount = Number.MAX_SAFE_INTEGER;    // For future use,  controls downsampling
 const gffNameFields = ["Name", "gene_name", "gene", "gene_id", "alias", "locus", "name"];
 
 /**
