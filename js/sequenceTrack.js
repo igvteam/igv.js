@@ -40,7 +40,7 @@ const SequenceTrack = function (config, browser) {
     this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
     this.height = 25;
     this.disableButtons = false;
-    this.order = config.order || -Number.MAX_VALUE;
+    this.order = config.order || -Number.MAX_SAFE_INTEGER;
     this.ignoreTrackMenu = false;
 
     this.removable = false;

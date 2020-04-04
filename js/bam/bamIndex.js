@@ -22,7 +22,7 @@ async function loadBamIndex(indexURL, config, tabix, genome) {
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
 
     const indices = []
-    let blockMin = Number.MAX_VALUE,
+    let blockMin = Number.MAX_SAFE_INTEGER,
         blockMax = 0
 
     if (!arrayBuffer) {
