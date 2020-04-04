@@ -270,7 +270,7 @@ BWReader.prototype.loadHeader = function () {
 
                 self.zoomLevelHeaders = [];
 
-                self.firstZoomDataOffset = Number.MAX_VALUE;
+                self.firstZoomDataOffset = Number.MAX_SAFE_INTEGER;
                 for (let i = 1; i <= nZooms; i++) {
                     const zoomNumber = nZooms - i;
                     const zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
@@ -485,9 +485,9 @@ function RPTreeNode(items) {
 
     this.items = items;
 
-    let minChromId = Number.MAX_VALUE,
+    let minChromId = Number.MAX_SAFE_INTEGER,
         maxChromId = 0,
-        minStartBase = Number.MAX_VALUE,
+        minStartBase = Number.MAX_SAFE_INTEGER,
         maxEndBase = 0,
         i,
         item;

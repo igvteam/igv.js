@@ -77,15 +77,18 @@ class FeatureSource {
         } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config);
             this.queryable = true;
+            this.expandQuery = false;
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source);
             this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
+            this.expandQuery = false;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
             this.queryable = false;
+            this.expandQuery = false;
         } else {
             this.reader = new FeatureFileReader(config, genome);
             if (config.queryable !== undefined) {
@@ -176,11 +179,11 @@ class FeatureSource {
                 // Use visibility window to potentially expand query interval.
                 // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
                 // indicating whole chromosome should be read at once.
-                if (!visibilityWindow || visibilityWindow <= 0) {
+                if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
                     // Whole chromosome
                     intervalStart = 0;
-                    intervalEnd = Number.MAX_VALUE;
-                } else if (visibilityWindow > (bpEnd - bpStart)) {
+                    intervalEnd = Number.MAX_SAFE_INTEGER;
+                } else if (visibilityWindow > (bpEnd - bpStart) && this.expandQuery !== false) {
                     const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
                     intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
                     intervalEnd = bpStart + expansionWindow;
