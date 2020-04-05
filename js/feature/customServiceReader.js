@@ -26,72 +26,67 @@
 import igvxhr from "../igvxhr.js";
 import {isString} from "../util/stringUtils.js";
 
-const CustomServiceReader = function (config) {
-
-    this.config = config;
-
-}
-
-CustomServiceReader.prototype.readFeatures = function (chr, start, end) {
-
-
-    var self = this,
-        url = self.config.url,
-        body = self.config.body;
-
-    if (chr.toLowerCase() !== "all") {
-
-        url = url
-            .replace("$CHR", chr)
-            .replace("$START", start)
-            .replace("$END", end);
-
-        if (body !== undefined) {
-            self.config.body =
-                self.config.body
-                    .replace("$CHR", chr)
-                    .replace("$START", start)
-                    .replace("$END", end);
-        }
+class CustomServiceReader {
+    constructor(config) {
+        this.config = config;
     }
 
-    return igvxhr.load(url, self.config)
+    async readFeatures(chr, start, end) {
 
-        .then(function (data) {
+        let url;
+        if (typeof this.config.url === 'function') {
+            url = this.config.url({chr, start, end});
+        } else {
+            url = this.config.url
+                .replace("$CHR", chr)
+                .replace("$START", start)
+                .replace("$END", end);
+        }
 
-            if (data) {
-                if (typeof self.config.parser === "function") {
-                    return self.config.parser(data);
-                } else if (isString(data)) {
-                    // TODO -- make this explict in config (returnType="json", "xml", etc)
-                    try {
-                        return JSON.parse(data);
-                    } catch (e) {
-                        // Apparently not json, just return data
-                        return data;
-                    }
-                } else {
-                    return data;
+        let config = Object.assign({}, this.config);
+        if (this.config.body !== undefined) {
+            if (typeof this.config.body === 'function') {
+                config.body = this.config.body({chr, start, end});
+            } else {
+                config.body =
+                    this.config.body
+                        .replace("$CHR", chr)
+                        .replace("$START", start)
+                        .replace("$END", end);
+            }
+        }
+
+
+        let features;
+        const data = await igvxhr.load(url, config)
+        if (data) {
+            if (typeof this.config.parser === "function") {
+                return this.config.parser(data);
+            } else if (isString(data)) {
+                // TODO -- make this explict in config (returnType="json", "xml", etc)
+                try {
+                    features = JSON.parse(data);
+                } catch (e) {
+                    // Apparently not json, just return data
+                    features = data;
                 }
             } else {
-                return [];
+                features = data;
             }
-        })
-        .then(function (features) {
+        } else {
+            features = [];
+        }
 
-            if (self.config.mappings) {
-
-                let mappingKeys = Object.keys(self.config.mappings);
-                features.forEach(function (f) {
-                    mappingKeys.forEach(function (key) {
-                        f[key] = f[self.config.mappings[key]];
-                    });
-                });
+        if (this.config.mappings) {
+            let mappingKeys = Object.keys(this.config.mappings);
+            for (let f of features) {
+                for (let key of mappingKeys) {
+                    f[key] = f[this.config.mappings[key]];
+                }
             }
-
             return features;
-
-        })
+        }
+    }
 }
 
-export default CustomServiceReader;
+export default CustomServiceReader

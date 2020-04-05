@@ -32,23 +32,6 @@
     const options = {
         genome: "hg19",
         tracks: [
-            {
-                name: "CNA",
-                type: "seg",
-                displayMode: "FILL",
-                sourceType: "custom",
-                height: 600,
-                source: {
-                    url: "http://www.cbioportal.org/api-legacy/copynumbersegments",
-                    method: "POST",
-                    contentType: "application/x-www-form-urlencoded",
-                    body: "cancerStudyId=msk_impact_2017&chromosomes=17&sampleListId=msk_impact_2017_cnaseq",
-                    mappings: {
-                        sampleKey: "sample"
-                    },
-                    queryable: false
-                },
-            }
         ]
     }
 

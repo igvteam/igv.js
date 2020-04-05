@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>Custom Web Service</title>
+
+</head>
+
+<body>
+
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const cbioAllGenome = {
+        name: "P101MF",
+        type: "seg",
+        sourceType: "custom",
+        source: {
+            url: "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
+            method: "POST",
+            contentType: "application/json",
+            body: JSON.stringify([{
+                sampleId: "PT101MF",
+                studyId: "sarc_mskcc"
+            }]),
+            queryable: false,   // i.e queryable by genomic range -- fetches whole genome at once
+            isLog: true,
+            mappings: {
+                chr: "chromosome",
+                value: "segmentMean",
+                sampleKey: "uniqueSampleKey",
+                sample: "sampleId"
+            }
+        }
+    }
+
+    const cbioByChromosome = {
+        name: "P101MF - query by chromosome",
+        type: "seg",
+        sourceType: "custom",
+        source: {
+            url: function (options) {
+                const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
+                return `http://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+            },
+            method: "POST",
+            contentType: "application/json",
+            body: JSON.stringify([{
+                sampleId: "PT101MF",
+                studyId: "sarc_mskcc"
+            }]),
+            queryable: true,   // i.e queryable by genomic range (chromosome only in this case)
+            isLog: true,
+            mappings: {
+                chr: "chromosome",
+                value: "segmentMean",
+                sampleKey: "uniqueSampleKey",
+                sample: "sampleId"
+            }
+        }
+    }
+
+    const options = {
+        genome: "hg19",
+        tracks: [
+            cbioAllGenome,
+            cbioByChromosome
+        ]
+    }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (b) {
+        })
+
+
+</script>
+
+</body>
+
+</html>

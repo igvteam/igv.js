@@ -52,7 +52,6 @@ class FeatureSource {
 
         this.config = config || {};
         this.genome = genome;
-
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
 
         // Default GFF filter -- these feature types will be filtered out
@@ -77,18 +76,18 @@ class FeatureSource {
         } else if (config.type === "eqtl" && config.sourceType === "gtex-ws") {
             this.reader = new GtexReader(config);
             this.queryable = true;
-            this.expandQuery = false;
+            this.expandQuery = config.expandQuery ? true : false;
         } else if (config.sourceType === 'ucscservice') {
             this.reader = new UCSCServiceReader(config.source);
             this.queryable = true;
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
-            this.expandQuery = false;
+            this.expandQuery = config.expandQuery ? true : false;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
             this.queryable = false;
-            this.expandQuery = false;
+            this.expandQuery = config.expandQuery ? true : false;
         } else {
             this.reader = new FeatureFileReader(config, genome);
             if (config.queryable !== undefined) {
@@ -99,9 +98,7 @@ class FeatureSource {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
-
         this.supportsWG = !this.queryable;   // Can be dynamically changed
-
     }
 
     supportsWholeGenome() {
@@ -109,10 +106,8 @@ class FeatureSource {
     }
 
     async getFileHeader() {
-
         if (!this.header) {
             if (this.reader && typeof this.reader.readHeader === "function") {
-
                 const header = await this.reader.readHeader()
                 if (header) {
                     this.header = header;
