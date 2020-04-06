@@ -61,22 +61,13 @@ class CustomServiceReader {
         const data = await igvxhr.load(url, config)
         if (data) {
             if (typeof this.config.parser === "function") {
-                return this.config.parser(data);
+                features = this.config.parser(data);
             } else if (isString(data)) {
-                // TODO -- make this explict in config (returnType="json", "xml", etc)
-                try {
                     features = JSON.parse(data);
-                } catch (e) {
-                    // Apparently not json, just return data
-                    features = data;
-                }
             } else {
                 features = data;
             }
-        } else {
-            features = [];
         }
-
         if (this.config.mappings) {
             let mappingKeys = Object.keys(this.config.mappings);
             for (let f of features) {
@@ -84,8 +75,8 @@ class CustomServiceReader {
                     f[key] = f[this.config.mappings[key]];
                 }
             }
-            return features;
         }
+        return features;
     }
 }
 
