@@ -75,15 +75,22 @@ const igvxhr = {
 
         options = options || {};
 
-        if (url instanceof File) {
+        if (url instanceof Promise) {
+            const resolvedValue = await url;
+            return this.load(resolvedValue, options);
+        } else if (typeof url === 'function') {
+            return this.load(url(), options);
+        } else if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
             if (url.startsWith("data:")) {
                 return decodeDataURI(url)
             } else {
+                if(url.startsWith("https://drive.google.com")) {
+                    url = google.driveDownloadURL(url);
+                }
 
                 if (isGoogleDrive(url)) {
-
                     return new Promise(function (fulfill, reject) {
                         rateLimiter.limiter(async function (url, options) {
                             try {

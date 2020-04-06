@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta content="IE=edge" http-equiv="X-UA-Compatible">
+            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+            <meta content="" name="description">
+            <meta content="" name="author">
+            <link href=../img/favicon.ico rel="shortcut icon">
+            <title>Functional URL</title>
+
+            <!-- IGV CSS -->
+
+            <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+        </head>
+
+<body>
+
+<h1>Functional URLs</h1>
+
+Example of using a function or promise for a track URL.
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from '../dist/igv.esm.js'
+
+    var options =
+        {
+            genome: "hg19",
+            tracks: [
+                {
+                    name: "CTCF - string url",
+                    type: "wig",
+                    format: "bigwig",
+                    url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                },
+                {
+                    name: "CTCF - function url ",
+                    type: "wig",
+                    format: "bigwig",
+                    url: function () {
+                        return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                    }
+                },
+                {
+                    name: "CTCF - promise url",
+                    type: "wig",
+                    format: "bigwig",
+                    url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                }
+
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

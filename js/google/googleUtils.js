@@ -29,130 +29,126 @@ import {buildOptions} from "../util/igvUtils.js";
 
 const google = {
 
-        fileInfoCache: {},
+    fileInfoCache: {},
 
-        // Crude test, this is conservative, nothing bad happens for a false positive
-        isGoogleURL: function (url) {
-            return (url.includes("googleapis") && !url.includes("urlshortener")) ||
-                this.isGoogleCloudURL(url) ||
-                this.isGoogleStorageURL(url) ||
-                this.isGoogleDrive(url)
-        },
+    // Crude test, this is conservative, nothing bad happens for a false positive
+    isGoogleURL: function (url) {
+        return (url.includes("googleapis") && !url.includes("urlshortener")) ||
+            this.isGoogleCloudURL(url) ||
+            this.isGoogleStorageURL(url) ||
+            this.isGoogleDrive(url)
+    },
 
-        isGoogleStorageURL: function (url) {
-            return url.startsWith("https://www.googleapis.com/storage") ||
-                url.startsWith("https://storage.cloud.google.com")  ||
-                url.startsWith("https://storage.googleapis.com");
-        },
+    isGoogleStorageURL: function (url) {
+        return url.startsWith("https://www.googleapis.com/storage") ||
+            url.startsWith("https://storage.cloud.google.com") ||
+            url.startsWith("https://storage.googleapis.com");
+    },
 
-        isGoogleCloudURL: function (url) {
-            return url.startsWith("gs://")
-        },
+    isGoogleCloudURL: function (url) {
+        return url.startsWith("gs://")
+    },
 
-        isGoogleDrive: function (url) {
-            return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
-        },
+    isGoogleDrive: function (url) {
+        return url.indexOf("drive.google.com") >= 0 || url.indexOf("www.googleapis.com/drive") > 0
+    },
 
-        setApiKey: function (key) {
-            this.apiKey = key;
-        },
+    setApiKey: function (key) {
+        this.apiKey = key;
+    },
 
-        translateGoogleCloudURL: function (gsUrl) {
+    translateGoogleCloudURL: function (gsUrl) {
 
-            var i, bucket, object, qIdx, objectString, paramString;
+        var i, bucket, object, qIdx, objectString, paramString;
 
-            i = gsUrl.indexOf('/', 5);
-            qIdx = gsUrl.indexOf('?');
+        i = gsUrl.indexOf('/', 5);
+        qIdx = gsUrl.indexOf('?');
 
-            if (i < 0) {
-                console.log("Invalid gs url: " + gsUrl);
-                return gsUrl;
-            }
-
-            bucket = gsUrl.substring(5, i);
-
-            objectString = (qIdx < 0) ? gsUrl.substring(i + 1) : gsUrl.substring(i + 1, qIdx);
-            object = encodeURIComponent(objectString);
-
-            if (qIdx > 0) {
-                paramString = gsUrl.substring(qIdx);
-            }
-
-            return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object +
-                (paramString ? paramString + "&alt=media" : "?alt=media");
-
-        },
-
-        addApiKey: function (url) {
-            const apiKey = this.apiKey
-            if (apiKey !== undefined && !url.includes("key=")) {
-                const paramSeparator = url.includes("?") ? "&" : "?"
-                url = url + paramSeparator + "key=" + apiKey;
-            }
-            return url;
-        },
-
-        driveDownloadURL: function (link) {
-            // Return a google drive download url for the sharable link
-            //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
-            //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing
-
-            var id = getGoogleDriveFileID(link);
-
-            return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&supportsTeamDrives=true" : link;
-        },
-
-        getDriveFileInfo: function (googleDriveURL) {
-
-            var id = getGoogleDriveFileID(googleDriveURL),
-                endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
-
-            return igvxhr.loadJson(endPoint, buildOptions({}));
-        },
-
-        loadGoogleProperties: function (propertiesURL) {
-
-            const self = this;
-
-            return igvxhr.loadArrayBuffer(propertiesURL)
-
-                .then(function (arrayBuffer) {
-                    var inflate, plain, str;
-
-                    inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
-                    plain = inflate.decompress();
-                    str = String.fromCharCode.apply(null, plain);
-
-                    const properties = JSON.parse(str);
-                    self.setApiKey(properties["api_key"]);
-
-                    self.properties = properties;
-                    return properties;
-
-                })
+        if (i < 0) {
+            console.log("Invalid gs url: " + gsUrl);
+            return gsUrl;
         }
-    }
 
-    function getGoogleDriveFileID(link) {
+        bucket = gsUrl.substring(5, i);
 
+        objectString = (qIdx < 0) ? gsUrl.substring(i + 1) : gsUrl.substring(i + 1, qIdx);
+        object = encodeURIComponent(objectString);
+
+        if (qIdx > 0) {
+            paramString = gsUrl.substring(qIdx);
+        }
+
+        return "https://www.googleapis.com/storage/v1/b/" + bucket + "/o/" + object +
+            (paramString ? paramString + "&alt=media" : "?alt=media");
+
+    },
+
+    addApiKey: function (url) {
+        const apiKey = this.apiKey
+        if (apiKey !== undefined && !url.includes("key=")) {
+            const paramSeparator = url.includes("?") ? "&" : "?"
+            url = url + paramSeparator + "key=" + apiKey;
+        }
+        return url;
+    },
+
+    driveDownloadURL: function (link) {
+        // Return a google drive download url for the sharable link
+        //https://drive.google.com/open?id=0B-lleX9c2pZFbDJ4VVRxakJzVGM
         //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing
-        var i1, i2;
+        var id = getGoogleDriveFileID(link);
+        return id ? "https://www.googleapis.com/drive/v3/files/" + id + "?alt=media&supportsTeamDrives=true" : link;
+    },
 
-        if (link.includes("/open?id=")) {
-            i1 = link.indexOf("/open?id=") + 9;
-            i2 = link.indexOf("&");
-            if (i1 > 0 && i2 > i1) {
-                return link.substring(i1, i2)
-            } else if (i1 > 0) {
-                return link.substring(i1);
-            }
+    getDriveFileInfo: function (googleDriveURL) {
+        const id = getGoogleDriveFileID(googleDriveURL);
+        const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
+        return igvxhr.loadJson(endPoint, buildOptions({}));
+    },
 
-        } else if (link.includes("/file/d/")) {
-            i1 = link.indexOf("/file/d/") + 8;
-            i2 = link.lastIndexOf("/");
-            return link.substring(i1, i2);
-        }
+    loadGoogleProperties: function (propertiesURL) {
+
+        const self = this;
+
+        return igvxhr.loadArrayBuffer(propertiesURL)
+
+            .then(function (arrayBuffer) {
+                var inflate, plain, str;
+
+                inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
+                plain = inflate.decompress();
+                str = String.fromCharCode.apply(null, plain);
+
+                const properties = JSON.parse(str);
+                self.setApiKey(properties["api_key"]);
+
+                self.properties = properties;
+                return properties;
+
+            })
     }
+}
+
+function getGoogleDriveFileID(link) {
+
+    //https://drive.google.com/file/d/1_FC4kCeO8E3V4dJ1yIW7A0sn1yURKIX-/view?usp=sharing
+    var i1, i2;
+
+    if (link.includes("/open?id=")) {
+        i1 = link.indexOf("/open?id=") + 9;
+        i2 = link.indexOf("&");
+        if (i1 > 0 && i2 > i1) {
+            return link.substring(i1, i2)
+        } else if (i1 > 0) {
+            return link.substring(i1);
+        }
+
+    } else if (link.includes("/file/d/")) {
+        i1 = link.indexOf("/file/d/") + 8;
+        i2 = link.lastIndexOf("/");
+        return link.substring(i1, i2);
+    }
+}
 
 export default google;
 

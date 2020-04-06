@@ -42,10 +42,10 @@ import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {compressString, isString, numberFormatter, splitLines, uncompressString} from "./util/stringUtils.js"
 import {guid, pageCoordinates} from "./util/domUtils.js";
-import {decodeDataURI} from "./util/uriUtils.js";
+import {decodeDataURI, resolveURL} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
-import GtexUtils from "./gtex/gtexUtils.js"
+import GtexUtils from "./gtex/gtexUtils.js";
 
 
 const Browser = function (options, parentDiv) {
@@ -102,7 +102,7 @@ const Browser = function (options, parentDiv) {
 function initialize(options) {
     var genomeId;
 
-    if(options.gtex) {
+    if (options.gtex) {
         GtexUtils.gtexLoaded = true
     }
     this.flanking = options.flanking;
@@ -587,16 +587,17 @@ Browser.prototype.loadTrackList = async function (configList) {
 
 };
 
-function knowHowToLoad(config) {
-
+function knowHowToLoad(config, url) {
     // config might be json
     if (isString(config)) {
         config = JSON.parse(config);
     }
-
-    const url = config.url;
-    const features = config.features;
-    return undefined === url || isString(url) || url instanceof File;
+    if (config.format) {
+        return true;  // Explicitly set format
+    } else {
+        const features = config.features;
+        return undefined === url || isString(url) || url instanceof File;
+    }
 }
 
 Browser.prototype.loadROI = async function (config) {
@@ -613,17 +614,17 @@ Browser.prototype.loadROI = async function (config) {
     await this.updateViews(undefined, undefined, true);
 }
 
-Browser.prototype.removeROI = function (roiToRemove) {                          
-    for (let i = 0; i < this.roi.length; i++) {                                 
-        if (this.roi[i].name === roiToRemove.name) {                            
-            this.roi.splice(i, 1);                                              
-            break;                                                              
-        }                                                                       
-    }                                                                           
-                                                                                
-    for (let tv of this.trackViews) {                                           
-        tv.updateViews(true);                                                   
-    }                                                                           
+Browser.prototype.removeROI = function (roiToRemove) {
+    for (let i = 0; i < this.roi.length; i++) {
+        if (this.roi[i].name === roiToRemove.name) {
+            this.roi.splice(i, 1);
+            break;
+        }
+    }
+
+    for (let tv of this.trackViews) {
+        tv.updateViews(true);
+    }
 }
 
 /**
@@ -640,34 +641,29 @@ Browser.prototype.loadTrack = async function (config) {
         config = JSON.parse(config);
     }
 
-    if (isString(config.url)) {
-        config.url = config.url.trim();
-    }
-    if (config.indexURL && isString(config.indexURL)) {
-        config.indexURL = config.indexURL.trim();
+    // Resolve function and promise urls
+    let url = await resolveURL(config.url);
+    if (isString(url)) {
+        url = url.trim();
     }
 
-    if (!knowHowToLoad(config)) {
+    if (!knowHowToLoad(config, url)) {
         this.presentAlert("The following track could not be loaded.  Is this a local file? " + config.name);
         return;
     }
 
-    if (isString(config.url) && config.url.startsWith("https://drive.google.com")) {
-        const json = await google.getDriveFileInfo(config.url)
-        config.url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
+    if (isString(url) && url.startsWith("https://drive.google.com")) {
+        const json = await google.getDriveFileInfo(url)
+        url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
         if (!config.filename) {
             config.filename = json.originalFileName || json.name;
         }
         if (!config.format) {
             config.format = inferFileFormat(config.filename);
         }
-        if (config.indexURL && config.indexURL.startsWith("https://drive.google.com")) {
-            config.indexURL = google.driveDownloadURL(config.indexURL);
-        }
-
     } else {
-        if (config.url && !config.filename) {
-            config.filename = getFilename(config.url);
+        if (url && !config.filename) {
+            config.filename = getFilename(url);
         }
     }
 
@@ -691,7 +687,7 @@ Browser.prototype.loadTrack = async function (config) {
         const newTrack = this.createTrack(config);
 
         if (undefined === newTrack) {
-            this.presentAlert("Unknown file type: " + config.url, undefined);
+            this.presentAlert("Unknown file type: " + url, undefined);
             return newTrack;
         }
 
@@ -1198,7 +1194,7 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
     }
 
     const viewports = this.trackViews[0].viewports;
-    for (let viewport of viewports)  {
+    for (let viewport of viewports) {
 
         const referenceFrame = viewport.genomicState.referenceFrame;
         const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
