@@ -64,6 +64,8 @@ const igvxhr = {
                     url = google.driveDownloadURL(url);
                 }
                 if (isGoogleDrive(url)) {
+                    const accessToken = await getGoogleAccessToken();
+                    options.oauthToken = accessToken;
                     return promiseThrottle.add(function () {
                         return loadURL(url, options)
                         })
@@ -118,7 +120,7 @@ const igvxhr = {
 
 async function loadURL(url, options) {
 
-    //console.log(`${Date.now()}   ${url}`)
+    console.log(`${Date.now()}   ${url}`)
     url = mapUrl(url);
 
     options = options || {};
@@ -144,10 +146,6 @@ async function loadURL(url, options) {
                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                 }
             }
-        }
-
-        if (google.isGoogleDrive(url) && !(options.token || options.oauthToken)) {
-            url = google.addApiKey(url);
         }
 
         const headers = options.headers || {};
