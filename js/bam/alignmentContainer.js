@@ -41,7 +41,7 @@ const AlignmentContainer = function (chr, start, end, samplingWindowSize, sampli
         this.end = Math.ceil(end);
         this.length = (end - start);
         
-        this.alleleFreqThreshold = alleleFreqThreshold;
+        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 :  alleleFreqThreshold;
 
         this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold);
         this.alignments = [];
@@ -325,7 +325,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.del = 0;
         this.ins = 0;
 
-        this.t = alleleThreshold;
+        this.threshold = alleleThreshold;
     }
 
     const qualityWeight = true;
@@ -335,7 +335,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
         var myself = this,
             mismatchQualitySum,
-            threshold = this.t * ((qualityWeight && this.qual) ? this.qual : this.total);
+            threshold = this.threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
 
         mismatchQualitySum = 0;
         ["A", "T", "C", "G"].forEach(function (base) {
