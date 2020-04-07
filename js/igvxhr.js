@@ -434,9 +434,17 @@ function isGoogleDrive(url) {
  * There can be only 1 oAuth promise executing at a time.
  */
 let oauthPromise;
-
+let expiresAt;
+let currentUser;
 async function getGoogleAccessToken() {
     if (oauth.google.access_token) {
+        if(expiresAt && Date.now() > expiresAt && currentUser) {
+           // const authInstance = gapi.auth2.getAuthInstance();
+            const googleUser = currentUser; //authInstance.currentUser.get();
+            const authResponse = await googleUser.reloadAuthResponse();
+            oauth.google.access_token = authResponse.access_token;
+            expiresAt = authResponse["expires_at"];;
+        }
         return oauth.google.access_token;
     }
     if (oauthPromise) {
@@ -461,8 +469,10 @@ async function getGoogleAccessToken() {
         Alert.presentAlert("Google Login required", function () {
             gapi.auth2.getAuthInstance().signIn(options)
                 .then(function (user) {
+                    currentUser = user;
                     const authResponse = user.getAuthResponse();
                     oauth.google.setToken(authResponse["access_token"]);
+                    expiresAt = authResponse["expires_at"];
                     resolve(authResponse["access_token"]);
                     oauthPromise = undefined;
                 })
