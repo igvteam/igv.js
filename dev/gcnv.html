@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var options =
+        {
+            genome: "hg38",
+            locus: "chr22:37,457,253-37,489,860",
+            tracks: [
+                {
+                    type: 'gcnv',
+                    format: 'gcnv',
+                    name: 'gCNV1',
+                    url: '../cc_29_3.dcr.bed.gz',
+                    indexURL: '../cc_29_3.dcr.bed.gz.tbi',
+                    height: 300,
+                    highlightSamples: {
+                      "C2035_VCGS_FAM141_443_v1_Exome_GCP": "blue",
+                      "C2035_VCGS_FAM124_390_v1_Exome_GCP": "blue",
+                      "C2035_VCGS_FAM108_337_v1_Exome_GCP": "red",
+                    },
+                },
+
+                {
+                    name: 'Gencode v32 Genes',
+                    format: 'refgene',
+                    url: 'https://storage.googleapis.com/seqr-reference-data/GRCh38/gencode/gencode_v32_knownGene.sorted.txt.gz',
+                    indexUrl: 'https://storage.googleapis.com/seqr-reference-data/GRCh38/gencode/gencode_v32_knownGene.sorted.txt.gz.tbi',
+                    indexed: true,
+                    searchable: true,
+                    height: 350,
+                    visibilityWindow: -1,
+                    displayMode: 'EXPANDED',
+                    order: 1000001,
+                    color: 'rgb(76,171,225)',
+                },
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
