@@ -60,6 +60,9 @@ const BAMTrack = extend(TrackBase,
         if (config.coverageTrackHeight === undefined) {
             config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
         }
+        if(config.alleleFreqThreshold === undefined) {
+            config.alleleFreqThreshold = 0.2;
+        }
 
         this.featureSource = new BamSource(config, browser);
         this.coverageTrack = new CoverageTrack(config, this);
