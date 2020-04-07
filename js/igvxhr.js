@@ -30,7 +30,7 @@ import Zlib from "./vendor/zlib_and_gzip.js";
 import {getFilename} from './util/fileUtils.js'
 import {decodeDataURI, parseUri} from "./util/uriUtils.js"
 import Alert from "./ui/alert.js"
-
+import PromiseThrottle from "./util/promiseThrottle.js"
 
 var NONE = 0;
 var GZIP = 1;
@@ -38,36 +38,10 @@ var BGZF = 2;
 var UNKNOWN = 3;
 let RANGE_WARNING_GIVEN = false;
 
-class RateLimiter {
-
-    constructor(wait) {
-        this.wait = wait === undefined ? 100 : wait;
-        this.isCalled = false;
-        this.calls = [];
-    }
-
-    limiter(fn) {
-        const self = this;
-
-        let caller = function () {
-            if (self.calls.length && !self.isCalled) {
-                self.isCalled = true;
-                self.calls.shift().call();
-                setTimeout(function () {
-                    self.isCalled = false;
-                    caller();
-                }, self.wait);
-            }
-        };
-
-        return function () {
-            self.calls.push(fn.bind(this, ...arguments));
-            caller();
-        };
-    }
-}
-
-const rateLimiter = new RateLimiter(100);
+const promiseThrottle = new PromiseThrottle({
+    requestsPerSecond: 10,
+    promiseImplementation: Promise
+})
 
 const igvxhr = {
 
@@ -75,190 +49,36 @@ const igvxhr = {
 
         options = options || {};
 
-        if (url instanceof File) {
+        if (url instanceof Promise) {
+            const resolvedValue = await url;
+            return this.load(resolvedValue, options);
+        } else if (typeof url === 'function') {
+            return this.load(url(), options);
+        } else if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
             if (url.startsWith("data:")) {
                 return decodeDataURI(url)
             } else {
-
+                if (url.startsWith("https://drive.google.com")) {
+                    url = google.driveDownloadURL(url);
+                }
                 if (isGoogleDrive(url)) {
-
-                    return new Promise(function (fulfill, reject) {
-                        rateLimiter.limiter(async function (url, options) {
-                            try {
-                                const result = loadURL(url, options)
-                                fulfill(result)
-                            } catch (e) {
-                                reject(e)
-                            }
-                        })(url, options);
-                    });
+                    const accessToken = await getGoogleAccessToken();
+                    options.oauthToken = accessToken;
+                    return promiseThrottle.add(function () {
+                        return loadURL(url, options)
+                        })
                 } else {
                     return loadURL(url, options);
                 }
             }
         }
-
-        async function loadURL(url, options) {
-
-            url = mapUrl(url);
-
-            options = options || {};
-
-            let oauthToken = options.oauthToken;
-            if (typeof oauthToken === 'function') {
-                oauthToken = oauthToken();
-            } else if (oauthToken instanceof Promise) {
-                oauthToken = await oauthToken;
-            }
-            if (!oauthToken) {
-                oauthToken = getOauthToken(url);  // cached tokens per host
-            }
-
-            return new Promise(function (resolve, reject) {
-
-                // Various Google tansformations
-                if (google.isGoogleURL(url)) {
-                    if (url.startsWith("gs://")) {
-                        url = google.translateGoogleCloudURL(url);
-                    } else if (google.isGoogleStorageURL(url)) {
-                        if (!url.includes("altMedia=")) {
-                            url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
-                        }
-                    }
-                }
-
-                if (google.isGoogleDrive(url) && !(options.token || options.oauthToken)) {
-                    url = google.addApiKey(url);
-                }
-
-                const headers = options.headers || {};
-                if (oauthToken) {
-                    addOauthHeaders(headers, oauthToken);
-                }
-                const range = options.range;
-                const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
-                const isSafari = navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
-
-                if (range && isChrome && !isAmazonV4Signed(url)) {
-                    // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
-                    url += url.includes("?") ? "&" : "?";
-                    url += "someRandomSeed=" + Math.random().toString(36);
-                }
-
-                const xhr = new XMLHttpRequest();
-                const sendData = options.sendData || options.body;
-                const method = options.method || (sendData ? "POST" : "GET");
-                const responseType = options.responseType;
-                const contentType = options.contentType;
-                const mimeType = options.mimeType;
-
-                xhr.open(method, url);
-
-                if (range) {
-                    var rangeEnd = range.size ? range.start + range.size - 1 : "";
-                    xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-                    //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
-                }
-                if (contentType) {
-                    xhr.setRequestHeader("Content-Type", contentType);
-                }
-                if (mimeType) {
-                    xhr.overrideMimeType(mimeType);
-                }
-                if (responseType) {
-                    xhr.responseType = responseType;
-                }
-                if (headers) {
-                    for (let key of Object.keys(headers)) {
-                        const value = headers[key];
-                        xhr.setRequestHeader(key, value);
-                    }
-                }
-
-                // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-                if (options.withCredentials === true) {
-                    xhr.withCredentials = true;
-                }
-
-                xhr.onload = async function (event) {
-                    // when the url points to a local file, the status is 0 but that is not an error
-                    if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                        if (range && xhr.status !== 206 && range.start !== 0) {
-                            // For small files a range starting at 0 can return the whole file => 200
-                            // Provide just the slice we asked for, throw out the rest quietly
-                            // If file is large warn user
-                            if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
-                                Alert.presentAlert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
-                            }
-                            resolve(xhr.response.slice(range.start, range.start + range.size));
-
-                        } else {
-                            resolve(xhr.response);
-                        }
-                    } else if ((typeof gapi !== "undefined") &&
-                        ((xhr.status === 404 || xhr.status === 401) &&
-                            google.isGoogleURL(url)) &&
-                        !options.retries) {
-
-                        try {
-                            options.retries = 1;
-                            const accessToken = await getGoogleAccessToken();
-                            options.oauthToken = accessToken;
-                            const response = await igvxhr.load(url, options);
-                            resolve(response);
-                        } catch (e) {
-                            handleError(e);
-                        }
-                    } else {
-                        if (xhr.status === 403) {
-                            handleError("Access forbidden: " + url)
-                        } else if (xhr.status === 416) {
-                            //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                            handleError("Unsatisfiable range");
-                        } else {
-                            handleError(xhr.status);
-                        }
-                    }
-                };
-
-                xhr.onerror = function (event) {
-                    handleError("Error accessing resource: " + url + " Status: " + xhr.status);
-                }
-
-
-                xhr.ontimeout = function (event) {
-                    handleError("Timed out");
-                };
-
-                xhr.onabort = function (event) {
-                    console.log("Aborted");
-                    reject(event);
-                };
-
-                try {
-                    xhr.send(sendData);
-                } catch (e) {
-                    reject(e);
-                }
-
-
-                function handleError(message) {
-                    if (reject) {
-                        reject(new Error(message));
-                    } else {
-                        throw new Error(message);
-                    }
-                }
-            })
-
-        }
     },
 
     loadArrayBuffer: function (url, options) {
         options = options || {};
-        options.responseType = "arraybuffer";
+        if(!options.responseType) options.responseType = "arraybuffer";
 
         if (url instanceof File) {
             return loadFileSlice(url, options);
@@ -298,6 +118,157 @@ const igvxhr = {
     startup: startup
 }
 
+async function loadURL(url, options) {
+
+    console.log(`${Date.now()}   ${url}`)
+    url = mapUrl(url);
+
+    options = options || {};
+
+    let oauthToken = options.oauthToken;
+    if (typeof oauthToken === 'function') {
+        oauthToken = oauthToken();
+    } else if (oauthToken instanceof Promise) {
+        oauthToken = await oauthToken;
+    }
+    if (!oauthToken) {
+        oauthToken = getOauthToken(url);  // cached tokens per host
+    }
+
+    return new Promise(function (resolve, reject) {
+
+        // Various Google tansformations
+        if (google.isGoogleURL(url)) {
+            if (url.startsWith("gs://")) {
+                url = google.translateGoogleCloudURL(url);
+            } else if (google.isGoogleStorageURL(url)) {
+                if (!url.includes("altMedia=")) {
+                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
+                }
+            }
+        }
+
+        const headers = options.headers || {};
+        if (oauthToken) {
+            addOauthHeaders(headers, oauthToken);
+        }
+        const range = options.range;
+        const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
+        const isSafari = navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
+
+        if (range && isChrome && !isAmazonV4Signed(url)) {
+            // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
+            url += url.includes("?") ? "&" : "?";
+            url += "someRandomSeed=" + Math.random().toString(36);
+        }
+
+        const xhr = new XMLHttpRequest();
+        const sendData = options.sendData || options.body;
+        const method = options.method || (sendData ? "POST" : "GET");
+        const responseType = options.responseType;
+        const contentType = options.contentType;
+        const mimeType = options.mimeType;
+
+        xhr.open(method, url);
+
+        if (range) {
+            var rangeEnd = range.size ? range.start + range.size - 1 : "";
+            xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
+            //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
+        }
+        if (contentType) {
+            xhr.setRequestHeader("Content-Type", contentType);
+        }
+        if (mimeType) {
+            xhr.overrideMimeType(mimeType);
+        }
+        if (responseType) {
+            xhr.responseType = responseType;
+        }
+        if (headers) {
+            for (let key of Object.keys(headers)) {
+                const value = headers[key];
+                xhr.setRequestHeader(key, value);
+            }
+        }
+
+        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
+        if (options.withCredentials === true) {
+            xhr.withCredentials = true;
+        }
+
+        xhr.onload = async function (event) {
+            // when the url points to a local file, the status is 0 but that is not an error
+            if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
+                if (range && xhr.status !== 206 && range.start !== 0) {
+                    // For small files a range starting at 0 can return the whole file => 200
+                    // Provide just the slice we asked for, throw out the rest quietly
+                    // If file is large warn user
+                    if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
+                        Alert.presentAlert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
+                    }
+                    resolve(xhr.response.slice(range.start, range.start + range.size));
+
+                } else {
+                    resolve(xhr.response);
+                }
+            } else if ((typeof gapi !== "undefined") &&
+                ((xhr.status === 404 || xhr.status === 401) &&
+                    google.isGoogleURL(url)) &&
+                !options.retries) {
+
+                try {
+                    options.retries = 1;
+                    const accessToken = await getGoogleAccessToken();
+                    options.oauthToken = accessToken;
+                    const response = await igvxhr.load(url, options);
+                    resolve(response);
+                } catch (e) {
+                    handleError(e);
+                }
+            } else {
+                if (xhr.status === 403) {
+                    handleError("Access forbidden: " + url)
+                } else if (xhr.status === 416) {
+                    //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                    handleError("Unsatisfiable range");
+                } else {
+                    handleError(xhr.status);
+                }
+            }
+        };
+
+        xhr.onerror = function (event) {
+            handleError("Error accessing resource: " + url + " Status: " + xhr.status);
+        }
+
+
+        xhr.ontimeout = function (event) {
+            handleError("Timed out");
+        };
+
+        xhr.onabort = function (event) {
+            console.log("Aborted");
+            reject(event);
+        };
+
+        try {
+            xhr.send(sendData);
+        } catch (e) {
+            reject(e);
+        }
+
+
+        function handleError(message) {
+            if (reject) {
+                reject(new Error(message));
+            } else {
+                throw new Error(message);
+            }
+        }
+    })
+
+}
 
 function loadFileSlice(localfile, options) {
     return new Promise(function (resolve, reject) {
@@ -367,7 +338,7 @@ function loadStringFromFile(localfile, options) {
 
 }
 
-function loadStringFromUrl(url, options) {
+async function loadStringFromUrl(url, options) {
     options = options || {};
 
     var fn = options.filename || getFilename(url);
