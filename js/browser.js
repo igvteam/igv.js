@@ -551,24 +551,10 @@ Browser.prototype.loadTrackList = async function (configList) {
 
     const self = this;
 
-    const unloadableTracks = configList.filter(function (config) {
-        return !knowHowToLoad(config);
-    })
-
-
-    if (unloadableTracks.length > 0) {
-        let message = "The following tracks could not be loaded.  Are these local files?";
-        unloadableTracks.forEach(function (config) {
-            message += ", " + config.name;
-        })
-        self.presentAlert(message);
-    }
-
-
     try {
         this.startSpinner();
         const promises = [];
-        configList.filter(knowHowToLoad).forEach(function (config) {
+        configList.forEach(function (config) {
             config.noSpinner = true;
             promises.push(self.loadTrack(config));
         });
@@ -584,21 +570,7 @@ Browser.prototype.loadTrackList = async function (configList) {
     } finally {
         this.stopSpinner();
     }
-
 };
-
-function knowHowToLoad(config, url) {
-    // config might be json
-    if (isString(config)) {
-        config = JSON.parse(config);
-    }
-    if (config.format) {
-        return true;  // Explicitly set format
-    } else {
-        const features = config.features;
-        return undefined === url || isString(url) || url instanceof File;
-    }
-}
 
 Browser.prototype.loadROI = async function (config) {
     if (!this.roi) {
@@ -645,11 +617,6 @@ Browser.prototype.loadTrack = async function (config) {
     let url = await resolveURL(config.url);
     if (isString(url)) {
         url = url.trim();
-    }
-
-    if (!knowHowToLoad(config, url)) {
-        this.presentAlert("The following track could not be loaded.  Is this a local file? " + config.name);
-        return;
     }
 
     if (isString(url) && url.startsWith("https://drive.google.com")) {
