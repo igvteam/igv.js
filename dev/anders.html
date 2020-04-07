@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!--    <script src="https://cdn.jsdelivr.net/npm/igv@2.4.1/dist/igv.min.js"></script>-->
+    <!--
+    <script src="https://s3.amazonaws.com/static.iobio.io/dev/igv.iobio.io/igv.min.js"></script>
+    -->
+
+</head>
+
+<body>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    // const urlParams = new URLSearchParams(window.location.search)
+    //
+    // const config = JSON.parse(urlParams.get('config'))
+    //
+    // console.log(JSON.stringify(config));
+    // console.log(config)
+    //
+    // const igvDiv = document.getElementById("igv-div")
+    // igv.createBrowser(igvDiv, config)
+    //     .then(function (browser) {
+    //         console.log("Created IGV browser")
+    //     })
+
+    const config = {
+        "showIdeogram": true,
+        "reference": {"fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta"},
+        "locus": "chr21:45712947-45713007",
+        "tracks": [{
+            "name": "Variants",
+            "type": "variant",
+            "format": "vcf",
+            "url": "https://s3.amazonaws.com/iobio/samples/vcf/platinum-exome.vcf.gz",
+            "indexURL": "https://s3.amazonaws.com/iobio/samples/vcf/platinum-exome.vcf.gz.tbi"
+        }, {
+            "type": "alignment",
+            "url": "https://s3.amazonaws.com/iobio/samples/bam/NA12878.exome.bam",
+            "indexURL": "https://s3.amazonaws.com/iobio/samples/bam/NA12878.exome.bam.bai",
+            "name": "Proband"
+        }, {
+            "type": "alignment",
+            "url": "https://s3.amazonaws.com/iobio/samples/bam/NA12878.exome.bam",
+            "indexURL": "https://s3.amazonaws.com/iobio/samples/bam/NA12878.exome.bam.bai",
+            "name": "Mother"
+        }, {
+            type: "annotation",
+            format: "bed",
+            url: "https://www.dropbox.com/s/iwk0iu1a7w719hq/gencode.v18.chr22.collapsed.bed.gz?dl=0",
+            name: "Gzipped no index"
+        }]
+    }
+
+    const igvDiv = document.getElementById("igv-div")
+    igv.createBrowser(igvDiv, config)
+        .then(function (browser) {
+            console.log("Created IGV browser")
+        })
+
+
+</script>
+
+</body>
+
+</html>

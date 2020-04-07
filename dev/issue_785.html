@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!-- IGV JS-->
+    <script src="../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var igvDiv = document.getElementById("igv-div");
+    var options =
+        {
+            reference: {
+                id: "myCustomGenome",
+                fastaURL: "https://www.dropbox.com/s/345xfrgplsq35ju/GCA_008119715.1_ASM811971v1_genomic.fna?dl=0",
+                indexURL: "https://www.dropbox.com/s/n3k3ej59jmmjw4k/GCA_008119715.1_ASM811971v1_genomic.fna.fai?dl=0"
+            },
+            // locus: 'chr7',
+            tracks: [
+                {
+                    type: 'annotation',
+                    format: 'gff3',
+                    url: 'https://www.dropbox.com/s/dmy655qtb10kc2s/GCA_008119715.1_ASM811971v1_genomic.gff?dl=0',
+                    indexed: false,
+                    name: 'gff'
+                }
+
+            ]
+        };
+
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>
