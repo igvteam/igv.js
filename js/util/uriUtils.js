@@ -76,5 +76,22 @@ function addExtension(url, extension) {
     }
 }
 
-export {parseUri, decodeDataURI, addExtension};
+/**
+ * Resolve a url, which might be a string, function (that returns a string), or Promise (that resolves to a string)
+ *
+ * @param url
+ * @returns {Promise<*>}
+ */
+async function resolveURL(url) {
+    if (url instanceof Promise) {
+        const resolvedValue = await url;
+        return resolvedValue;
+    } else if (typeof url === 'function') {
+        return url();
+    } else {
+        return url;
+    }
+}
+
+export {parseUri, decodeDataURI, addExtension, resolveURL};
 
