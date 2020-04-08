@@ -1,1 +1,4 @@
-To run the examples you must first run "grunt" from the project root to build the dist directory.
+To run the examples you must first build from the project root the dist directory from the project root
+
+> npm run build
+
