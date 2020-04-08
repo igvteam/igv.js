@@ -419,7 +419,7 @@ function decodeBed(tokens, ignore) {
         // feature.id = id ? id : tmp;
         // feature.name = name ? name : tmp;
 
-        //parse gffTags
+        //parse gffTags in the name field
         if (tokens[3].indexOf(';') > 0) {
             const attributes = parseAttributeString(tokens[3], '=');
             for (let nmField of gffNameFields) {
@@ -429,16 +429,12 @@ function decodeBed(tokens, ignore) {
                     break;
                 }
             }
-            if(gffTags) {
-                feature.attributes = attributes;
-            } else {
-                if(feature.name) {
-                    feature["nameField"] = tokens[3];
-                }
-            }
+            feature.attributes = attributes;
         }
         if (!feature.name) {
             feature.name = tokens[3];
+        } else {
+            feature["nameField"] = tokens[3];
         }
     }
 
