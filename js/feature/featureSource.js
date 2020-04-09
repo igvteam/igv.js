@@ -84,6 +84,10 @@ class FeatureSource {
             this.reader = new CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
             this.expandQuery = config.expandQuery ? true : false;
+        } else if (config.reader) {
+            this.reader = config.reader;
+            this.queryable = config.queryable !== undefined ? config.queryable : true;
+            this.expandQuery = config.expandQuery ? true : false;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
             this.queryable = false;
