@@ -65,48 +65,47 @@ class GFFHelper {
 
     combineFeaturesById(features) {
         const combinedFeatures = [];
-        const idHash = {};
+        const chrIdHash = {};
         for (let f of features) {
             if (f.id === undefined) {
                 combinedFeatures.push(f);
             } else {
+                let idHash = chrIdHash[f.chr];
+                if (!idHash) {
+                    idHash = {};
+                    chrIdHash[f.chr] = idHash;
+                }
                 if (idHash.hasOwnProperty(f.id)) {
                     const sf = idHash[f.id];
-                    if(sf.hasOwnProperty("exons")) {
-                        // TODO -- check chromosome, if on different chromosome must create distinct features
-                        if(sf.chr === f.chr) {
-                            sf.start = Math.min(sf.start, f.start);
-                            sf.end = Math.max(sf.end, f.end);
-                            sf.exons.push(f);
-                        } else {
-                            combinedFeatures.push(f);
-                        }
+                    if (sf.hasOwnProperty("exons")) {
+                        sf.start = Math.min(sf.start, f.start);
+                        sf.end = Math.max(sf.end, f.end);
+                        sf.exons.push(f);
                     } else {
-                        if(sf.chr === f.chr) {
-                            const cf = {
-                                id: f.id,
-                                type: f.type,
-                                chr: f.chr,
-                                strand: f.strand,
-                                start: Math.min(f.start, sf.start),
-                                end: Math.max(f.end, sf.end),
-                                exons: [sf, f]
-                            };
-                            if (f.parent && f.parent.trim() !== "") {
-                                cf.parent = f.parent;
-                            }
-                            idHash[f.id] = cf;
-                        }  else {
-                            combinedFeatures.push(f);
+                        const cf = {
+                            id: f.id,
+                            type: f.type,
+                            chr: f.chr,
+                            strand: f.strand,
+                            start: Math.min(f.start, sf.start),
+                            end: Math.max(f.end, sf.end),
+                            exons: [sf, f]
+                        };
+                        if (f.parent && f.parent.trim() !== "") {
+                            cf.parent = f.parent;
                         }
+                        idHash[f.id] = cf;
                     }
                 } else {
                     idHash[f.id] = f;
                 }
             }
         }
-        for(let key of Object.keys(idHash)) {
-            combinedFeatures.push(idHash[key])
+        for (let key of Object.keys(chrIdHash)) {
+            const idHash = chrIdHash[key];
+            for(let id of Object.keys(idHash)) {
+                combinedFeatures.push(idHash[id])
+            }
         }
         return combinedFeatures;
     }
