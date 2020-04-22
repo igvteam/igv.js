@@ -8,8 +8,8 @@ class GWASParser {
     constructor(config) {
         // Defaults - can be overriden by header
         this.config = config;
-        if(config.columns) {
-            if(config.columns.chromosome === undefined ||
+        if (config.columns) {
+            if (config.columns.chromosome === undefined ||
                 config.columns.position === undefined ||
                 config.columns.value === undefined) {
                 throw Error("columns property must define chrCol, posCol, and valueCol");
@@ -17,8 +17,7 @@ class GWASParser {
             this.posCol = config.columns.position - 1;
             this.chrCol = config.columns.chromosome - 1;
             this.pvalueCol = config.columns.value - 1;
-        }
-        else {
+        } else {
             // Defaults -- can be overriden in header
             this.posCol = 2;
             this.chrCol = 1;
@@ -34,7 +33,7 @@ class GWASParser {
 
     parseHeaderLine(headerLine) {
         this.columns = headerLine.split(/\t/);
-        if(!this.config.columns) {
+        if (!this.config.columns) {
             for (let i = 0; i < this.columns.length; i++) {
                 const c = this.columns[i].toLowerCase();
                 switch (c) {
@@ -108,6 +107,16 @@ class GWASFeature {
         return this.columns.map(function (c, index) {
             return {name: c, value: tokens[index]}
         })
+    }
+
+    getAttribute(attrName) {
+        const tokens = this.line.split(/\t/);
+        for(let i=0; i<this.columns.length; i++) {
+            if(this.columns[i] === attrName) {
+                return tokens[i];
+            }
+        }
+        return undefined;
     }
 
 }

@@ -63,6 +63,7 @@
             console.log("Created IGV browser");
 
             browser.on('locuschange', function (referenceFrame) {
+                console.log('locuschange')
                 window.location.replace(HASH_PREFIX + referenceFrame.label);
             });
         });
