@@ -155,6 +155,9 @@ function inferTrackTypes(config) {
                 case "bp":
                     config.type = "arc"
                     break;
+                case "gwas":
+                    config.type = "gwas"
+                    break;
                 default:
                     config.type = "annotation";
 
