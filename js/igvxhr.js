@@ -56,7 +56,7 @@ const igvxhr = {
             return this.load(url(), options);
         } else if (url instanceof File) {
             return loadFileSlice(url, options);
-        } else {
+        } else if (typeof url.startsWith === 'function') {
             if (url.startsWith("data:")) {
                 return decodeDataURI(url)
             } else {
@@ -73,6 +73,8 @@ const igvxhr = {
                     return loadURL(url, options);
                 }
             }
+        } else {
+            throw Error(`url must be either a 'string', 'function', or 'Promise'.  Actual type: ${typeof url}`);
         }
     },
 
