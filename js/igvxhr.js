@@ -130,7 +130,9 @@ async function loadURL(url, options) {
     let oauthToken = options.oauthToken;
     if (typeof oauthToken === 'function') {
         oauthToken = oauthToken();
-    } else if (oauthToken instanceof Promise) {
+
+    }
+    if (oauthToken instanceof Promise) {
         oauthToken = await oauthToken;
     }
     if (!oauthToken) {
@@ -438,14 +440,16 @@ function isGoogleDrive(url) {
 let oauthPromise;
 let expiresAt;
 let currentUser;
+
 async function getGoogleAccessToken() {
     if (oauth.google.access_token) {
-        if(expiresAt && Date.now() > expiresAt && currentUser) {
-           // const authInstance = gapi.auth2.getAuthInstance();
+        if (expiresAt && Date.now() > expiresAt && currentUser) {
+            // const authInstance = gapi.auth2.getAuthInstance();
             const googleUser = currentUser; //authInstance.currentUser.get();
             const authResponse = await googleUser.reloadAuthResponse();
             oauth.google.access_token = authResponse.access_token;
-            expiresAt = authResponse["expires_at"];;
+            expiresAt = authResponse["expires_at"];
+            ;
         }
         return oauth.google.access_token;
     }

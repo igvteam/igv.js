@@ -69,7 +69,7 @@ const options = {
 function addExtension(url, extension) {
 
     const idx = url.indexOf("?");
-    if(idx < 0) {
+    if (idx < 0) {
         return url + extension;
     } else {
         return url.substring(0, idx) + extension + url.substring(idx);
@@ -77,20 +77,20 @@ function addExtension(url, extension) {
 }
 
 /**
- * Resolve a url, which might be a string, function (that returns a string), or Promise (that resolves to a string)
+ * Resolve a url, which might be a string, function (that returns a string or Promse), or Promise (that resolves to a string)
  *
  * @param url
  * @returns {Promise<*>}
  */
 async function resolveURL(url) {
-    if (url instanceof Promise) {
-        const resolvedValue = await url;
-        return resolvedValue;
-    } else if (typeof url === 'function') {
-        return url();
-    } else {
-        return url;
+    if (typeof url === 'function') {
+        url = url();
     }
+    if (url instanceof Promise) {
+        url = await url;
+    }
+    return url;
+
 }
 
 export {parseUri, decodeDataURI, addExtension, resolveURL};
