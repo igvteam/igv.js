@@ -51,6 +51,14 @@ Example of using a function or promise for a track URL.
                     type: "wig",
                     format: "bigwig",
                     url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                },
+                {
+                    name: "CTCF - function that returns promise url",
+                    type: "wig",
+                    format: "bigwig",
+                    url: function() {
+                        return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                    }
                 }
             ]
         }
