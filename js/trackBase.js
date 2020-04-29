@@ -160,7 +160,7 @@ TrackBase.prototype.setTrackProperties = function (properties) {
     }
 }
 
-TrackBase.prototype.getVisibilityWindow = function() {
+TrackBase.prototype.getVisibilityWindow = function () {
     return this.visibilityWindow;
 }
 
@@ -181,7 +181,7 @@ TrackBase.extractPopupData = function (feature, genomeId) {
             !filteredProperties.has(property) &&
             isSimpleType(feature[property])) {
             let value = feature[property];
-            if("start" === property) value = value + 1;
+            if ("start" === property) value = value + 1;
             data.push({name: property, value: value});
 
             if (property === "alleles") {
@@ -229,8 +229,8 @@ TrackBase.extractPopupData = function (feature, genomeId) {
         }
     }
 
-    if(feature.attributes) {
-        for(let key of Object.keys(feature.attributes)) {
+    if (feature.attributes) {
+        for (let key of Object.keys(feature.attributes)) {
             data.push({name: key, value: feature.attributes[key]})
         }
     }
@@ -248,11 +248,12 @@ TrackBase.getCravatLink = function (chr, position, ref, alt, genomeID) {
 
     if ("hg38" === genomeID || "GRCh38" === genomeID) {
 
-        const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr
-
-        return "<a target='_blank' " +
-            "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
-            cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
+        const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
+        return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
+            `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}">Cravat ${ref}->${alt}</a>`
+        // return "<a target='_blank' " +
+        //     "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
+        //     cravatChr + "_" + position + "_+_" + ref + "_" + alt + "'>Cravat " + ref + "->" + alt + "</a>"
     } else {
         return undefined
     }
