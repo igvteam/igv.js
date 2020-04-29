@@ -56,14 +56,25 @@ Example of using a function or promise for a track URL.
                     url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
                 },
                 {
-                    name: "CTCF - function that returns promise url",
+                    name: "CTCF - function that returns promise ",
                     type: "wig",
                     format: "bigwig",
                     url: function() {
                         return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
                     }
+                },
+                {
+                    name: "CTCF - function that returns thenable ",
+                    type: "wig",
+                    format: "bigwig",
+                    url: function() {
+                        return {
+                            then: function(resolve, reject) {
+                                resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                            }
+                        }
+                    }
                 }
-
             ]
         }
 
