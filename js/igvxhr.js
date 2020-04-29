@@ -49,12 +49,14 @@ const igvxhr = {
 
         options = options || {};
 
-        if (url instanceof Promise) {
-            const resolvedValue = await url;
-            return this.load(resolvedValue, options);
-        } else if (typeof url === 'function') {
-            return this.load(url(), options);
-        } else if (url instanceof File) {
+        if (typeof url === 'function') {
+            url = url();
+        }
+        if (typeof url.then === 'function') {
+            url = await url;
+        }
+
+        if (url instanceof File) {
             return loadFileSlice(url, options);
         } else if (typeof url.startsWith === 'function') {
             if (url.startsWith("data:")) {
@@ -68,7 +70,7 @@ const igvxhr = {
                     options.oauthToken = accessToken;
                     return promiseThrottle.add(function () {
                         return loadURL(url, options)
-                        })
+                    })
                 } else {
                     return loadURL(url, options);
                 }
@@ -80,7 +82,7 @@ const igvxhr = {
 
     loadArrayBuffer: function (url, options) {
         options = options || {};
-        if(!options.responseType) options.responseType = "arraybuffer";
+        if (!options.responseType) options.responseType = "arraybuffer";
 
         if (url instanceof File) {
             return loadFileSlice(url, options);
@@ -130,10 +132,9 @@ async function loadURL(url, options) {
     let oauthToken = options.oauthToken;
     if (typeof oauthToken === 'function') {
         oauthToken = oauthToken();
-
     }
-    if (oauthToken instanceof Promise) {
-        oauthToken = await oauthToken;
+    if (oauthToken) {
+        oauthToken = await oauthToken;  // If a promise, this will wait to resolve.  If not it will be a no-op
     }
     if (!oauthToken) {
         oauthToken = getOauthToken(url);  // cached tokens per host
