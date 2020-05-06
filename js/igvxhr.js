@@ -49,16 +49,12 @@ const igvxhr = {
 
         options = options || {};
 
-        if (typeof url === 'function') {
-            url = url();
-        }
-        if (typeof url.then === 'function') {
-            url = await url;
-        }
+        // Resolve functions, promises, and functions that return promises
+        url = await (typeof url === 'function' ? url() : url);
 
         if (url instanceof File) {
             return loadFileSlice(url, options);
-        } else if (typeof url.startsWith === 'function') {
+        } else if (typeof url.startsWith === 'function') {   // Test for string
             if (url.startsWith("data:")) {
                 return decodeDataURI(url)
             } else {
@@ -66,8 +62,6 @@ const igvxhr = {
                     url = google.driveDownloadURL(url);
                 }
                 if (isGoogleDrive(url)) {
-                    const accessToken = await getGoogleAccessToken();
-                    options.oauthToken = accessToken;
                     return promiseThrottle.add(function () {
                         return loadURL(url, options)
                     })
@@ -124,20 +118,14 @@ const igvxhr = {
 
 async function loadURL(url, options) {
 
-    console.log(`${Date.now()}   ${url}`)
+    //console.log(`${Date.now()}   ${url}`)
     url = mapUrl(url);
 
     options = options || {};
 
-    let oauthToken = options.oauthToken;
-    if (typeof oauthToken === 'function') {
-        oauthToken = oauthToken();
-    }
-    if (oauthToken) {
-        oauthToken = await oauthToken;  // If a promise, this will wait to resolve.  If not it will be a no-op
-    }
-    if (!oauthToken) {
-        oauthToken = getOauthToken(url);  // cached tokens per host
+    let oauthToken = options.oauthToken || getOauthToken(url);
+    if(oauthToken) {
+        oauthToken = await (typeof oauthToken === 'function' ?  oauthToken() : oauthToken);
     }
 
     return new Promise(function (resolve, reject) {
@@ -450,7 +438,6 @@ async function getGoogleAccessToken() {
             const authResponse = await googleUser.reloadAuthResponse();
             oauth.google.access_token = authResponse.access_token;
             expiresAt = authResponse["expires_at"];
-            ;
         }
         return oauth.google.access_token;
     }
