@@ -152,11 +152,11 @@ class FeatureSource {
             if (isQueryable) {   // queryable sources don't support whole genome view
                 return [];
             } else {
-                if (featureCache.count > 500000) {
-                    this.supportsWG = false;
-                    return [];
+                if(this.wgFeatures) {
+                    return this.wgFeatures;
                 } else {
-                    return this.getWGFeatures(featureCache.getAllFeatures());
+                    this.wgFeatures = this.getWGFeatures(featureCache.getAllFeatures());
+                    return this.wgFeatures;
                 }
             }
         } else {

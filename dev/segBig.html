@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title><!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="utf-8">
+            <meta content="IE=edge" http-equiv="X-UA-Compatible">
+            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+            <meta content="" name="description">
+            <meta content="" name="author">
+            <link href=img/favicon.ico rel="shortcut icon">
+            <title>IGV - Dev</title>
+
+            <!-- IGV CSS -->
+
+            <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+        </head>
+
+<body>
+
+<h1>Pan Cancer copy number</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var options =
+        {
+            "reference": {
+                "id": "hg19",
+                "name": "Human (CRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+            },
+            tracks: [
+                {
+                    "name": "broad.mit.edu_PANCAN_Genome_Wide_SNP_6_whitelisted.seg",
+                    "filename": "broad.mit.edu_PANCAN_Genome_Wide_SNP_6_whitelisted.seg",
+                    "format": "seg",
+                    "url": "https://www.dropbox.com/s/8q039uwcu0nw9mj/broad.mit.edu_PANCAN_Genome_Wide_SNP_6_whitelisted.seg?dl=0",
+                    "indexed": false,
+                    "sourceType": "file",
+                    "type": "seg",
+                    "height": 800,
+                    "displayMode": "FILL",
+                    "order": 3
+                }
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>
