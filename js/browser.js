@@ -593,7 +593,13 @@ Browser.prototype.removeROI = function (roiToRemove) {
             break;
         }
     }
+    for (let tv of this.trackViews) {
+        tv.updateViews(true);
+    }
+}
 
+Browser.prototype.clearROIs = function () {
+    this.roi = [];
     for (let tv of this.trackViews) {
         tv.updateViews(true);
     }
