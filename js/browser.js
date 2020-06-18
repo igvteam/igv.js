@@ -270,21 +270,19 @@ Browser.prototype.renderSVG = function (config) {
  */
 Browser.prototype.loadSession = async function (options) {
 
-    var self = this;
-
-    let session
+    this.roi = [];
+    let session;
     if (options.url || options.file) {
         session = await loadSessionFile(options)
     } else {
         session = options
     }
-    return self.loadSessionObject(session);
+    return this.loadSessionObject(session);
 
 
     async function loadSessionFile(options) {
 
         const urlOrFile = options.url || options.file
-
 
         if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
 
