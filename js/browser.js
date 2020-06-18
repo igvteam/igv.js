@@ -1594,9 +1594,15 @@ Browser.prototype.search = async function (string, init) {
                 return undefined;
             } else {
 
-                // Ingoring all but first result for now
-                // TODO -- present all and let user select if results.length > 1
-                const result = results[0];
+                let result;
+                if (Array.isArray(results)) {
+                  // Ignoring all but first result for now
+                  // TODO -- present all and let user select if results.length > 1
+                  result = results[0];
+                } else {
+                  // When processing search results from Ensembl REST API
+                  result = results;
+                }
 
                 if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
                     console.log("Search service results must include chromosome and start fields: " + result);
