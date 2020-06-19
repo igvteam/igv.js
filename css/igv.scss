@@ -52,6 +52,8 @@ $igv-trackgear-popover-border-radius: 4px;
 $igv-trackgear-font-color: #4b4b4b;
 $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
+$igv-track-components-margin: 5px;
+
 @mixin generic-input {
 
   input {
@@ -590,8 +592,6 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 .igv-track-div {
   position: relative;
   width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
 }
 
 .igv-viewport-container {
@@ -809,8 +809,9 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   right: 0;
   width: 36px;
   height: 100%;
-
   background: white;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
   //text-align: center;
 
 }
@@ -821,6 +822,8 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   left: 0;
   width: 50px;
   height: 100%;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
 
   canvas {
     position: absolute;
@@ -863,6 +866,8 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   width: 12px;
 
   margin-left: 2px;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
 
   height: 100%;
 
@@ -945,6 +950,9 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
   right: 0;
   width: 14px;
   height: 100%;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
+
   background-color: white;
 
   div {
