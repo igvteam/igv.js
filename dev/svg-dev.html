@@ -64,7 +64,7 @@
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser);
 
         $('#igv-draw-svg-button').on('click', () => {
-            browser.renderSVG({$container: $('#igv-svg-container')});
+            browser.saveSVGtoFile({$container: $('#igv-svg-container')});
         });
 
     })();
