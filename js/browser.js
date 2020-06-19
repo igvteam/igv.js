@@ -183,6 +183,7 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
     return false;
 };
 
+// Render browser display as SVG
 Browser.prototype.toSVG = function () {
 
     const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
@@ -240,7 +241,7 @@ Browser.prototype.toSVG = function () {
 
 };
 
-Browser.prototype.renderSVG = function (config) {
+Browser.prototype.saveSVGtoFile = function (config) {
 
     let svg = this.toSVG();
 
