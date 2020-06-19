@@ -848,9 +848,11 @@ $igv-track-components-margin: 5px;
   position: absolute;
   left: 0;
   top: 0;
-
   width: 100%;
   height: 100%;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
+
 
   z-index: 256;
   background-color: $igv-ruler-sweeper-color;
