@@ -400,7 +400,7 @@ class ViewPort {
         }
     }
 
-
+    // render viewport as SVG
     async toSVG(tile) {
 
         // Nothing to do if zoomInNotice is active
