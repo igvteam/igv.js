@@ -70,9 +70,10 @@ const BAMTrack = extend(TrackBase,
 
         this.visibilityWindow = config.visibilityWindow || 30000;
         this.viewAsPairs = config.viewAsPairs;
-        this.pairsSupported = (undefined === config.pairsSupported);
+        this.pairsSupported = config.pairsSupported !== false;
         this.showSoftClips = config.showSoftClips;
         this.showAllBases = config.showAllBases;
+        this.showMismatches = config.showMismatches !== false;
         this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
         this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
@@ -415,12 +416,8 @@ BAMTrack.prototype.getState = function () {
 }
 
 var CoverageTrack = function (config, parent) {
-
     this.parent = parent;
     this.featureSource = parent.featureSource;
-    this.top = 0;
-
-
     this.height = config.coverageTrackHeight;
     this.dataRange = {min: 0};   // Leav max undefined
     this.paintAxis = paintAxis;
@@ -432,13 +429,14 @@ CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
 CoverageTrack.prototype.draw = function (options) {
 
-    const ctx = options.context;
-    if (this.top) {
-        ctx.translate(0, top);
-    }
-    const yTop = options.top || 0
-    const yBottom = yTop + options.pixelHeight
+    const pixelTop = options.pixelTop;
+    const pixelBottom = pixelTop + options.pixelHeight;
 
+    if(pixelTop > this.height) {
+        return; //scrolled out of view
+    }
+
+    const ctx = options.context;
     const alignmentContainer = options.features;
     const coverageMap = alignmentContainer.coverageMap;
     this.dataRange.max = coverageMap.maximum;
@@ -634,18 +632,19 @@ AlignmentTrack.prototype.draw = function (options) {
     const packedAlignmentRows = alignmentContainer.packedAlignmentRows
     const showSoftClips = this.parent.showSoftClips;
     const showAllBases = this.parent.showAllBases;
-    const yTop = options.top || 0
-    const yBottom = yTop + options.pixelHeight
 
     let referenceSequence = alignmentContainer.sequence;
     if (referenceSequence) {
         referenceSequence = referenceSequence.toUpperCase();
     }
-
     let alignmentRowYInset = 0;
 
+    let pixelTop = options.pixelTop;
     ctx.save();
-    if (this.top) ctx.translate(0, this.top);
+    if (this.top) {
+        ctx.translate(0, this.top);
+    }
+    const pixelBottom = pixelTop + options.pixelHeight;
 
     if (alignmentContainer.hasDownsampledIntervals()) {
         alignmentRowYInset = downsampleRowHeight + alignmentStartGap;
@@ -677,6 +676,12 @@ AlignmentTrack.prototype.draw = function (options) {
             const alignmentRow = packedAlignmentRows[rowIndex];
             const alignmentY = alignmentRowYInset + (this.alignmentRowHeight * rowIndex);
             const alignmentHeight = this.alignmentRowHeight <= 4 ? this.alignmentRowHeight : this.alignmentRowHeight - 2;
+
+            if(alignmentY > pixelBottom) {
+                break;
+            } else if(alignmentY + alignmentHeight < pixelTop) {
+                continue;
+            }
 
             for (let alignment of alignmentRow.alignments) {
 
@@ -876,7 +881,7 @@ AlignmentTrack.prototype.draw = function (options) {
 
             // Mismatch coloring
 
-            if (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*")) {
+            if (this.showMismatches && (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*"))) {
 
                 const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                 const qual = alignment.qual;
