@@ -1928,6 +1928,18 @@ Browser.prototype.sessionURL = function () {
 
 }
 
+Browser.prototype.currentLoci = function () {
+    const loci = [];
+    const anyTrackView = this.trackViews[0];
+    for(let viewport of anyTrackView.viewports) {
+        const genomicState = viewport.genomicState;
+        const pixelWidth = viewport.$viewport[0].clientWidth;
+        const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+        loci.push(locusString);
+    }
+    return loci;
+}
+
 Browser.prototype.presentAlert = function (alert) {
     this.alertDialog.present(alert);
 };
