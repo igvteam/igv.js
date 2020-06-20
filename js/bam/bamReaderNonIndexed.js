@@ -91,9 +91,9 @@ BamReaderNonIndexed.prototype.readAlignments = async function (chr, bpStart, bpE
         queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
         qAlignments = this.alignmentCache.queryFeatures(queryChr, bpStart, bpEnd);
         alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, this.samplingWindowSize, this.samplingDepth, this.pairsSupported);
-        qAlignments.forEach(function (a) {
+        for(let a of qAlignments) {
             alignmentContainer.push(a);
-        });
+        }
         alignmentContainer.finish();
         return alignmentContainer;
     }
