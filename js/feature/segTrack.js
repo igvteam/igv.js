@@ -136,8 +136,10 @@ SegTrack.prototype.draw = function (options) {
     const v2 = IGVMath.log2(2);
 
     const ctx = options.context;
+    const pixelTop = options.pixelTop;
     const pixelWidth = options.pixelWidth;
     const pixelHeight = options.pixelHeight;
+    const pixelBottom = options.pixelBottom;
     IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const featureList = options.features;
@@ -188,6 +190,8 @@ SegTrack.prototype.draw = function (options) {
             const sampleKey = segment.sampleKey || segment.sample
             segment.row = samples[sampleKey];
             const y = samples[sampleKey] * sampleHeight + border;
+            const bottom = y + sampleHeight;
+            if(bottom < pixelTop || y > pixelBottom) continue;
 
             let value = segment.value;
             if (!self.isLog) {
