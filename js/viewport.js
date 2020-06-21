@@ -319,8 +319,9 @@ class ViewPort {
         const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const viewportHeight = this.$viewport.height()
-        let pixelHeight = Math.min(self.getContentHeight(), 3 * viewportHeight);
+        const viewportHeight = this.$viewport.height();
+        const minHeight = roiFeatures ? Math.max(self.getContentHeight(), viewportHeight) : self.getContentHeight();  // Need to fill viewport for ROIs.
+        let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (self.canvas) {
                 $(self.canvas).remove();
