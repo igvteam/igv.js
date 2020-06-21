@@ -793,7 +793,6 @@ AlignmentTrack.prototype.draw = function (options) {
                 const ePixel = ((gap.start + gap.len) - bpStart) / bpPerPixel;
                 const color = ("D" === gap.type) ? this.deletionColor : this.skippedColor;
                 IGVGraphics.strokeLine(ctx, sPixel, yStrokedLine, ePixel, yStrokedLine, {strokeStyle: color});
-
             }
         }
 
@@ -982,6 +981,7 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
     list.push({label: '&nbsp; base', click: () => sortByOption("NUCLEOTIDE")});
     list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")});
     list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")});
+    list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")});
     list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")});
     list.push({label: '&nbsp; mapping quality', click: () => sortByOption("MQ")});
     list.push({label: '&nbsp; tag', click: sortByTag});
