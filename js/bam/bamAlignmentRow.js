@@ -101,12 +101,14 @@ BamAlignmentRow.prototype.calculateScore = function (options, alignmentContainer
         }
         case "INSERT_SIZE":
             return -Math.abs(alignment.fragmentLength);
+        case "GAP_SIZE":
+            return -alignment.gapSizeAt(genomicLocation);
         case "MATE_CHR":
             mate = alignment.mate;
             if (!mate) {
                 return Number.MAX_VALUE;
             } else {
-                if (mate.chr ===alignment.chr) {
+                if (mate.chr === alignment.chr) {
                     return Number.MAX_VALUE - 1;
                 } else {
                     return hashCode(mate.chr);

@@ -154,8 +154,7 @@ BamAlignment.prototype.tags = function () {
                 }
             } else if (type === 'B') {
                 value = 'Arrays not currently supported';
-            }
-            else {
+            } else {
                 //'Unknown type ' + type;
                 value = 'Error unknown type: ' + type;
             }
@@ -262,9 +261,7 @@ BamAlignment.prototype.popupData = function (genomicLocation) {
 BamAlignment.prototype.readBaseAt = function (genomicLocation) {
 
     const block = blockAtGenomicLocation(this.blocks, genomicLocation);
-
     if (block) {
-
         if ("*" === this.seq) {
             return "*";
         } else {
@@ -281,14 +278,13 @@ BamAlignment.prototype.readBaseAt = function (genomicLocation) {
 BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
 
     const block = blockAtGenomicLocation(this.blocks, genomicLocation);
-
     if (block) {
         if ("*" === this.qual) {
             return 30;
         } else {
             const idx = block.seqIndexAt(genomicLocation);
             if (idx >= 0 && this.qual && idx < this.qual.length) {
-            return this.qual[idx];
+                return this.qual[idx];
             } else {
                 return 30;
             }
@@ -296,7 +292,17 @@ BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
     } else {
         return undefined;
     }
+}
 
+BamAlignment.prototype.gapSizeAt = function (genomicLocation) {
+    if (this.gaps) {
+        for (let gap of this.gaps) {
+            if (genomicLocation >= gap.start && genomicLocation < gap.start + gap.len) {
+                return gap.len;
+            }
+        }
+    }
+    return 0;
 }
 
 function blockAtGenomicLocation(blocks, genomicLocation) {
