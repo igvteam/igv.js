@@ -1391,8 +1391,10 @@ Browser.prototype.emptyViewportContainers = function () {
 
     for (let trackView of this.trackViews) {
 
-        if (trackView.$outerScroll) {
-            trackView.$outerScroll.remove();
+        if (trackView.scrollbar) {
+            trackView.scrollbar.$outerScroll.remove()
+            trackView.scrollbar = null
+            trackView.scrollbar = undefined
         }
 
         for (let viewport of trackView.viewports) {
