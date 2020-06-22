@@ -77,6 +77,8 @@ const SegTrack = extend(TrackBase,
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = new FeatureSource(this.config, browser.genome);
 
+
+        // TODO this sort doens't look right, no samples have yet been loaded
         if (config.sort) {
             const sort = config.sort;
             this.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
@@ -139,7 +141,7 @@ SegTrack.prototype.draw = function (options) {
     const pixelTop = options.pixelTop;
     const pixelWidth = options.pixelWidth;
     const pixelHeight = options.pixelHeight;
-    const pixelBottom = options.pixelBottom;
+    const pixelBottom = pixelTop + pixelHeight;
     IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
     const featureList = options.features;
@@ -182,6 +184,7 @@ SegTrack.prototype.draw = function (options) {
 
         }
 
+        const pixelBottom = options.pixelTop + options.pixelHeight;
         for (let segment of featureList) {
 
             if (segment.end < bpStart) continue;
@@ -189,23 +192,18 @@ SegTrack.prototype.draw = function (options) {
 
             const sampleKey = segment.sampleKey || segment.sample
             segment.row = samples[sampleKey];
-            const y = samples[sampleKey] * sampleHeight + border;
+            const y = pixelTop + segment.row * sampleHeight + border;
             const bottom = y + sampleHeight;
-            if(bottom < pixelTop || y > pixelBottom) continue;
+
+            if(bottom < pixelTop || y > pixelBottom) {
+                continue;
+            }
 
             let value = segment.value;
             if (!self.isLog) {
                 value = IGVMath.log2(value / 2);
             }
 
-            let color;
-            if (value < -0.1) {
-                color = self.negColorScale.getColor(value);
-            } else if (value > 0.1) {
-                color = self.posColorScale.getColor(value);
-            } else {
-                color = "white";
-            }
 
             const segmentStart = Math.max(segment.start, bpStart);
             // const segmentStart = segment.start;
@@ -220,6 +218,14 @@ SegTrack.prototype.draw = function (options) {
             // const sign = px < 0 ? '-' : '+';
             // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
 
+            let color;
+            if (value < -0.1) {
+                color = self.negColorScale.getColor(value);
+            } else if (value > 0.1) {
+                color = self.posColorScale.getColor(value);
+            } else {
+                color = "white";
+            }
             ctx.fillStyle = color;
 
             // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
@@ -419,9 +425,7 @@ SegTrack.prototype.supportsWholeGenome = function () {
 SegTrack.prototype.updateSampleKeys = function (featureList) {
 
     const samples = new Set(this.sampleKeys);
-
     for (let feature of featureList) {
-
         const sampleKey = feature.sampleKey || feature.sample;
         if (!samples.has(sampleKey)) {
             samples.add(sampleKey);
