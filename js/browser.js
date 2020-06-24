@@ -442,7 +442,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
 
             var reference = knownGenomes[genomeID];
             if (!reference) {
-                this.presentAlert("Uknown genome id: " + genomeID, undefined);
+                this.presentAlert("Unknown genome id: " + genomeID, undefined);
             }
             return reference;
         } else {
