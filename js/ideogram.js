@@ -193,7 +193,7 @@ function panelWithGenomicState($parent, genomicState, width) {
 
     panel.$ideogram.outerWidth(width);
 
-    panel.$canvas = $('<canvas>');
+    panel.$canvas = $('<canvas class ="igv-canvas">');
     panel.$ideogram.append(panel.$canvas);
 
     setupCanvasSize(panel);

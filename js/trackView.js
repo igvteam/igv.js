@@ -195,7 +195,7 @@ TrackView.prototype.appendLeftHandGutter = function ($parent) {
             $leftHandGutter.addClass('igv-clickable');
         }
 
-        $canvas = $('<canvas class ="igv-track-control-canvas">');
+        $canvas = $('<canvas class ="igv-canvas">');
         $leftHandGutter.append($canvas);
         this.controlCanvas = $canvas.get(0);
         resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
@@ -240,7 +240,7 @@ function resizeControlCanvas(width, height) {
             $(this.controlCanvas).remove();
         }
 
-        var $canvas = $('<canvas class ="igv-track-control-canvas">');
+        var $canvas = $('<canvas class ="igv-canvas">');
         this.controlCanvas = $canvas[0];
         $(this.leftHandGutter).append($canvas);
 
