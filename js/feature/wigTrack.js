@@ -34,8 +34,6 @@ import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
 import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
-import FeatureTrack from "./featureTrack.js";
-import {visibilityChange} from "../igv-create.js";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
@@ -140,7 +138,7 @@ WigTrack.prototype.draw = function (options) {
     }
 
     const yScale = (yValue) => {
-        return ( (self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min) ) * pixelHeight
+        return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
     };
 
     const getX = function (feature) {
@@ -178,11 +176,39 @@ WigTrack.prototype.draw = function (options) {
         // nothing to paint.
         if (self.dataRange.max > self.dataRange.min) {
 
-            if (renderFeature.end < bpStart) return;
-            if (renderFeature.start > bpEnd) return;
 
+            const y0 = self.dataRange.min == 0 ? pixelHeight : yScale(0);
             for (let f of features) {
-                renderFeature(f)
+
+                if (f.end < bpStart) continue;
+                if (f.start > bpEnd) break;
+
+                const x = getX(f);
+                if (isNaN(x)) continue;
+
+                let y = yScale(f.value);
+
+                const width = getWidth(f, x);
+                let c = (f.value < 0 && self.altColor) ? self.altColor : self.color;
+                const color = (typeof c === "function") ? c(f.value) : c;
+
+                if (self.graphType === "points") {
+                    const pointSize = self.config.pointSize || 3;
+                    const px = x + width / 2;
+                    IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
+
+                } else {
+                    let height = y - y0;
+                    if((Math.abs(height)) < 1) {
+                        height = height < 0 ? -1 : 1
+                    }
+                    const pixelEnd = x + width;
+                    if (pixelEnd > lastPixelEnd || (f.value >= 0 && f.value > lastValue) || (f.value < 0 && f.value < lastNegValue)) {
+                        IGVGraphics.fillRect(ctx, x, y0, width, height, {fillStyle: color});
+                    }
+                    lastValue = f.value;
+                    lastPixelEnd = pixelEnd;
+                }
             }
 
             // If the track includes negative values draw a baseline
@@ -190,39 +216,14 @@ WigTrack.prototype.draw = function (options) {
                 const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
                 IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
             }
+
+
         }
     }
 
     drawGuideLines(options);
 
-    function renderFeature(feature) {
-        if (feature.value < self.dataRange.min) return;
-        const y = yScale(feature.value);
-        const x = getX(feature);
-
-        if (isNaN(x)) return;
-
-        const height = yScale(0) - y;
-        const width = getWidth(feature, x);
-
-        let c = (feature.value < 0 && self.altColor) ? self.altColor : self.color;
-        const color = (typeof c === "function") ? c(feature.value) : c;
-
-        if (self.graphType === "points") {
-            const pointSize = self.config.pointSize || 3;
-            const px = x + width / 2;
-            IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
-
-        } else {
-            const pixelEnd = x + width;
-            if (pixelEnd > lastPixelEnd || (feature.value >= 0 && feature.value > lastValue) || (feature.value < 0 && feature.value < lastNegValue)) {
-                IGVGraphics.fillRect(ctx, x, y, width, height, {fillStyle: color});
-            }
-            lastValue = feature.value;
-            lastPixelEnd = pixelEnd;
-        }
-    }
-};
+}
 
 WigTrack.prototype.popupData = function (clickState, features) {
 
