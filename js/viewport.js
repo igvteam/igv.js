@@ -39,7 +39,7 @@ class ViewPort {
         this.contentDiv = $div.get(0);
 
         // viewport canvas
-        const $canvas = $('<canvas>');
+        const $canvas = $('<canvas class ="igv-canvas">');
         $(this.contentDiv).append($canvas);
 
         this.canvas = $canvas.get(0);
@@ -356,7 +356,7 @@ class ViewPort {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
-        const newCanvas = $('<canvas>').get(0);
+        const newCanvas = $('<canvas class="igv-canvas">').get(0);
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
         newCanvas.width = devicePixelRatio * pixelWidth;
