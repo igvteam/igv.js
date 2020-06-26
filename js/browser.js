@@ -1601,6 +1601,7 @@ Browser.prototype.search = async function (string, init) {
                   result = results[0];
                 } else {
                   // When processing search results from Ensembl REST API
+                  // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/ACE2?content-type=application/json
                   result = results;
                 }
 
