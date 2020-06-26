@@ -35,7 +35,7 @@ const SVGSaveControl = function ($parent, browser) {
 
     $button.on('click.svg-save-control', () => {
         // browser.renderSVG({ $container: $('#igv-svg-container') })
-        browser.renderSVG({});
+        browser.saveSVGtoFile({});
     });
 };
 

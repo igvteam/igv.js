@@ -28,7 +28,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js";
 
 const ChromosomeSelectWidget = function (browser, $parent) {
 
-    this.showAllChromosomes = browser.config.showAllChromosomes
+    this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
 
     this.$container = $('<div>', {class: 'igv-chromosome-select-widget-container'});
     $parent.append(this.$container);

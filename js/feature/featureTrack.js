@@ -728,39 +728,39 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideStrand === feature.strand) {
         return
     }
-    var uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
+    const uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
         return
     }
-    var multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
-    var totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
+    const multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
+    const totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
     if (totalReadCount < this.config.minTotalReads) {
         return
     }
     if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
         return
     }
-    var maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
+    const maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
     if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
         return
     }
 
-    var py = this.margin;
-    var rowHeight = this.height;
+    const py = this.margin;
+    const rowHeight = this.height;
 
-    var cy = py + 0.5 * rowHeight;
-    var topY = py;
-    var bottomY = py + rowHeight;
-    var bezierBottomY = bottomY - 10;
+    const cy = py + 0.5 * rowHeight;
+    let topY = py;
+    const bottomY = py + rowHeight;
+    const bezierBottomY = bottomY - 10;
 
     // draw the junction arc
-    var junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    var junctionRightPx = Math.round((feature.end - bpStart) / xScale);
-    var junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
-    var bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
-    var bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
+    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
+    const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
+    const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
 
-    var lineWidth;
+    let lineWidth;
     if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
         lineWidth = uniquelyMappedReadCount;
     } else if (this.config.thicknessBasedOn === 'numReads') {
@@ -770,7 +770,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
     lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
 
-    var bounceHeight;
+    let bounceHeight;
     if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
@@ -781,8 +781,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     }
     topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
 
-    var color;
-    if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
+    let color;
+    if (feature.color) {
+        color = feature.color;  // Explicit setting
+    } else if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
         color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
     } else if (this.config.colorBy === 'numReads') {
         color = totalReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';
@@ -794,7 +796,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
     }
 
-    var label = '';
+    let label = '';
     if (this.config.labelUniqueReadCount === undefined && this.config.labelMultiMappedReadCount === undefined && this.config.labelTotalReadCount === undefined) {
         //default label
         label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');

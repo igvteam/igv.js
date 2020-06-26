@@ -40,7 +40,7 @@ runTabixTests();
 runGenomeTests();
 runTDFTests();
 runSampleInformationTests();
-runHtsgetTests();
+//runHtsgetTests();
 runSessionTests();
 runVariantTests();
 runBrowserTests();
