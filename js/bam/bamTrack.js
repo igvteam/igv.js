@@ -880,7 +880,7 @@ AlignmentTrack.prototype.draw = function (options) {
 
             // Mismatch coloring
 
-            if (this.showMismatches && (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*"))) {
+            if (this.parent.showMismatches && (isSoftClip || showAllBases || (referenceSequence && alignment.seq && alignment.seq !== "*"))) {
 
                 const seq = alignment.seq ? alignment.seq.toUpperCase() : undefined;
                 const qual = alignment.qual;
