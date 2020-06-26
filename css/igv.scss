@@ -52,7 +52,7 @@ $igv-trackgear-popover-border-radius: 4px;
 $igv-trackgear-font-color: #4b4b4b;
 $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
-$igv-track-components-margin: 5px;
+$igv-track-components-margin: 0px;
 
 @mixin generic-input {
 
@@ -557,8 +557,13 @@ $igv-track-components-margin: 5px;
     font-weight: 700;
     color: #141414;
   }
-
 }
+
+.igv-canvas {
+  all: initial;
+}
+
+
 
 // root container
 .igv-root-div {
@@ -903,7 +908,7 @@ $igv-track-components-margin: 5px;
   position: absolute;
 
   left: 8px;
-  top: 4px;
+  top: 8px;
 
   width: auto;
   height:auto;
