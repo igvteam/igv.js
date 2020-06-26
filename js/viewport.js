@@ -12,6 +12,7 @@ import {guid, pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from 
 import {download} from "./util/igvUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
+const VISUAL_TRACK_MARGIN = 5;
 
 class ViewPort {
 
@@ -299,12 +300,6 @@ class ViewPort {
     }
 
 
-    /**
-     *
-     * @param tile - the tile is created whenever features are loaded.  It contains the genomic state
-     * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
-     * Should be renamed.
-     */
     async repaint() {
 
         var self = this;
@@ -324,8 +319,9 @@ class ViewPort {
         const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const viewportHeight = this.$viewport.height()
-        let pixelHeight = Math.min(self.getContentHeight(), 3 * viewportHeight);
+        const viewportHeight = this.$viewport.height();
+        const minHeight = roiFeatures ? Math.max(self.getContentHeight(), viewportHeight) : self.getContentHeight();  // Need to fill viewport for ROIs.
+        let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (self.canvas) {
                 $(self.canvas).remove();
@@ -346,8 +342,8 @@ class ViewPort {
             {
                 features: features,
                 pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight,
-                pixelTop: canvasTop,
+                pixelHeight: pixelHeight - 2*VISUAL_TRACK_MARGIN,
+                pixelTop: canvasTop + VISUAL_TRACK_MARGIN,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
@@ -396,6 +392,8 @@ class ViewPort {
             this.trackView.track.draw(drawConfiguration);
         }
         if (roiFeatures) {
+            drawConfiguration.pixelHeight += 2*VISUAL_TRACK_MARGIN;
+            drawConfiguration.pixelTop -= VISUAL_TRACK_MARGIN;
             for (let r of roiFeatures) {
                 drawConfiguration.features = r.features;
                 r.track.draw(drawConfiguration);
@@ -403,12 +401,7 @@ class ViewPort {
         }
     }
 
-    /**
-     *
-     * @param tile - the tile is created whenever features are loaded.  It contains the genomic state
-     * representing the features,as well as the features.  The object evolved, at one time it was an image tile.
-     * Should be renamed.
-     */
+    // render viewport as SVG
     async toSVG(tile) {
 
         // Nothing to do if zoomInNotice is active
@@ -446,9 +439,9 @@ class ViewPort {
                 viewport: this,
                 context: ctx,
                 top: -$(this.contentDiv).position().top,
-                pixelTop: 0,   // for compatibility with canvas draw
+                pixelTop: VISUAL_TRACK_MARGIN,   // for compatibility with canvas draw
                 pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight,
+                pixelHeight: pixelHeight - 2*VISUAL_TRACK_MARGIN,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
@@ -486,7 +479,7 @@ class ViewPort {
 
     isLoading() {
         return this.loading;
-    };
+    }
 
     saveImage() {
 
@@ -510,7 +503,7 @@ class ViewPort {
         const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
         const data = exportCanvas.toDataURL("image/png");
         download(filename, data);
-    };
+    }
 
     async renderSVGContext(context, offset) {
 
@@ -551,26 +544,18 @@ class ViewPort {
         const drawConfig =
             {
                 context: context,
-
                 viewport: this,
-
                 referenceFrame,
-
                 genomicState: this.genomicState,
-
                 pixelWidth: width,
-                pixelHeight: height,
-
+                pixelTop: VISUAL_TRACK_MARGIN,
+                pixelHeight: height - 2*VISUAL_TRACK_MARGIN,
                 viewportWidth: width,
-
                 viewportContainerX: 0,
                 viewportContainerWidth: this.browser.viewportContainerWidth(),
-
                 bpStart,
                 bpEnd: bpStart + (width * bpPerPixel),
-
                 bpPerPixel,
-
                 selection: this.selection
             };
 
@@ -584,7 +569,7 @@ class ViewPort {
 
         context.restore();
 
-    };
+    }
 
     saveSVG() {
 
@@ -612,9 +597,9 @@ class ViewPort {
                 viewport: this,
                 context,
                 top: -$(this.contentDiv).position().top,
-                pixelTop: 0,
+                pixelTop: VISUAL_TRACK_MARGIN,
                 pixelWidth: width,
-                pixelHeight: height,
+                pixelHeight: height - 2*VISUAL_TRACK_MARGIN,
                 bpStart: start,
                 bpEnd: start + (width * bpPerPixel),
                 bpPerPixel,
@@ -626,7 +611,8 @@ class ViewPort {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
-        draw.call(this, drawConfiguration, this.tile.features);
+        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
+        draw.call(this, drawConfiguration, this.tile.features, roiFeatures);
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
             renderTrackLabelSVG.call(this, context);
