@@ -65,7 +65,7 @@ ROI.prototype.draw = function (drawConfiguration) {
         }
 
         coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-        IGVGraphics.fillRect(drawConfiguration.context, coord.x, 0, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+        IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
     }
 
 
