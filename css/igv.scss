@@ -597,6 +597,8 @@ $igv-track-components-margin: 0px;
 .igv-track-div {
   position: relative;
   width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .igv-viewport-container {
@@ -827,8 +829,6 @@ $igv-track-components-margin: 0px;
   left: 0;
   width: 50px;
   height: 100%;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
 
   canvas {
     position: absolute;
@@ -873,8 +873,6 @@ $igv-track-components-margin: 0px;
   width: 12px;
 
   margin-left: 2px;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
 
   height: 100%;
 
@@ -957,9 +955,6 @@ $igv-track-components-margin: 0px;
   right: 0;
   width: 14px;
   height: 100%;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
-
   background-color: white;
 
   div {
