@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+
+<div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const config = {
+
+        genome: "hg19",
+        locus: "chr8:128,675,295-128,827,582",
+        tracks: [
+            {
+                id: "T1",
+                name: "GWAS",
+                type: "annotation",
+                format: "gwasCatalog",
+                visibilityWindow: -1,
+                url: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg19/annotations/gwasCatalog.txt.gz",
+                indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg19/annotations/gwasCatalog.txt.gz.tbi"
+            },
+            {
+                id: "T2",
+                name: "GM12878 H3K4me3 ",
+                url: "https://www.encodeproject.org/files/ENCFF000ASF/@@download/ENCFF000ASF.bigWig",
+                format: "bigwig",
+                type: "wig",
+                color: "rgb(150,0,0)"
+            },
+            {
+                id: "T3",
+                name: "GM12878 H3K27ac",
+                url: "https://www.encodeproject.org/files/ENCFF206QIK/@@download/ENCFF206QIK.bigWig",
+                format: "bigwig",
+                type: "wig",
+                color: "rgb(0,150,0)"
+            },
+            {
+                id: "T4",
+                name: "GM12878 H3K36me3 ",
+                url: "https://www.encodeproject.org/files/ENCFF906RJB/@@download/ENCFF906RJB.bigWig",
+                format: "bigwig",
+                type: "wig",
+                color: "rgb(0,0,150)"
+            }
+        ]
+    }
+
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, config)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+
+            console.log("Find tracks by ID 'T2':");
+            const tracksById = browser.findTracks("id", "T2");
+            for(let t of tracksById) {
+                console.log(`  id=${t.id}   name=${t.name}`);
+            }
+
+            console.log("Find tracks by type 'wig'");
+            const tracksByType = browser.findTracks("type", "wig");
+            for(let t of tracksByType) {
+                console.log(`  id=${t.id}   name=${t.name}`);
+            }
+
+            console.log("Find tracks by function function(track) {return track.name.startsWith('GM128')}");
+            const tracksByFunction = browser.findTracks(function(track) {
+                return track.name.startsWith('GM128');
+            });
+            for(let t of tracksByFunction) {
+                console.log(`  id=${t.id}   name=${t.name}`);
+            }
+
+        })
+
+
+</script>
+
+</body>
+</html>
