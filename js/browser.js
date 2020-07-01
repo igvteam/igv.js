@@ -852,13 +852,11 @@ Browser.prototype.removeAllTracks = function (removeSequence) {
  */
 Browser.prototype.findTracks = function (property, value) {
 
-    var tracks = [];
-    this.trackViews.forEach(function (trackView) {
-        if (value === trackView.track[property]) {
-            tracks.push(trackView.track)
-        }
-    })
-    return tracks;
+    let f = typeof property === 'function' ?
+        trackView => property(trackView.track) :
+        trackView => value === trackView.track[property]
+
+    return this.trackViews.filter(f).map(tv => tv.track);
 };
 
 Browser.prototype.setTrackHeight = function (newHeight) {
@@ -1940,7 +1938,7 @@ Browser.prototype.sessionURL = function () {
 Browser.prototype.currentLoci = function () {
     const loci = [];
     const anyTrackView = this.trackViews[0];
-    for(let viewport of anyTrackView.viewports) {
+    for (let viewport of anyTrackView.viewports) {
         const genomicState = viewport.genomicState;
         const pixelWidth = viewport.$viewport[0].clientWidth;
         const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
