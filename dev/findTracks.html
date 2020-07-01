@@ -81,6 +81,16 @@
                 console.log(`  id=${t.id}   name=${t.name}`);
             }
 
+            setTimeout(function () {
+                console.log("Remove 'H3K27' tracks");
+                const tracksToRemove = browser.findTracks(function (track) {
+                    return track.name.includes('H3K27');
+                });
+                for (let t of tracksToRemove) {
+                    browser.removeTrack(t);
+                }
+            }, 10000);
+
         })
 
 
