@@ -421,6 +421,7 @@ var CoverageTrack = function (config, parent) {
     this.height = config.coverageTrackHeight;
     this.dataRange = {min: 0};   // Leav max undefined
     this.paintAxis = paintAxis;
+    this.top = 0;
 };
 
 CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
