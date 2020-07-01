@@ -55,6 +55,7 @@ const TrackBase = function (config, browser) {
         if (isFilePath(config.url)) this.name = config.url.name;
         else this.name = config.url;
     }
+    this.id = this.config.id === undefined ? this.name : this.config.id;
 
     this.order = config.order;
 
