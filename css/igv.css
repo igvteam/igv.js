@@ -884,7 +884,9 @@
 
 .igv-track-div {
   position: relative;
-  width: 100%; }
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px; }
 
 .igv-viewport-container {
   position: absolute;
@@ -1044,9 +1046,7 @@
   position: absolute;
   left: 0;
   width: 50px;
-  height: 100%;
-  margin-top: 0px;
-  margin-bottom: 0px; }
+  height: 100%; }
   .igv-left-hand-gutter canvas {
     position: absolute; }
 
@@ -1076,8 +1076,6 @@
   right: 36px;
   width: 12px;
   margin-left: 2px;
-  margin-top: 0px;
-  margin-bottom: 0px;
   height: 100%;
   box-sizing: border-box;
   font-size: medium;
@@ -1133,8 +1131,6 @@
   right: 0;
   width: 14px;
   height: 100%;
-  margin-top: 0px;
-  margin-bottom: 0px;
   background-color: white; }
   .igv-scrollbar-outer-div div {
     position: absolute;
