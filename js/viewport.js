@@ -12,7 +12,6 @@ import {guid, pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from 
 import {download} from "./util/igvUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
-const VISUAL_TRACK_MARGIN = 5;
 
 class ViewPort {
 
@@ -342,8 +341,8 @@ class ViewPort {
             {
                 features: features,
                 pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight - 2*VISUAL_TRACK_MARGIN,
-                pixelTop: canvasTop + VISUAL_TRACK_MARGIN,
+                pixelHeight: pixelHeight,
+                pixelTop: canvasTop,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
@@ -392,8 +391,6 @@ class ViewPort {
             this.trackView.track.draw(drawConfiguration);
         }
         if (roiFeatures) {
-            drawConfiguration.pixelHeight += 2*VISUAL_TRACK_MARGIN;
-            drawConfiguration.pixelTop -= VISUAL_TRACK_MARGIN;
             for (let r of roiFeatures) {
                 drawConfiguration.features = r.features;
                 r.track.draw(drawConfiguration);
@@ -439,9 +436,9 @@ class ViewPort {
                 viewport: this,
                 context: ctx,
                 top: -$(this.contentDiv).position().top,
-                pixelTop: VISUAL_TRACK_MARGIN,   // for compatibility with canvas draw
+                pixelTop: 0,   // for compatibility with canvas draw
                 pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight - 2*VISUAL_TRACK_MARGIN,
+                pixelHeight: pixelHeight ,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
@@ -548,8 +545,8 @@ class ViewPort {
                 referenceFrame,
                 genomicState: this.genomicState,
                 pixelWidth: width,
-                pixelTop: VISUAL_TRACK_MARGIN,
-                pixelHeight: height - 2*VISUAL_TRACK_MARGIN,
+                pixelTop: 0,
+                pixelHeight: height,
                 viewportWidth: width,
                 viewportContainerX: 0,
                 viewportContainerWidth: this.browser.viewportContainerWidth(),
@@ -597,9 +594,9 @@ class ViewPort {
                 viewport: this,
                 context,
                 top: -$(this.contentDiv).position().top,
-                pixelTop: VISUAL_TRACK_MARGIN,
+                pixelTop: 0,
                 pixelWidth: width,
-                pixelHeight: height - 2*VISUAL_TRACK_MARGIN,
+                pixelHeight: height,
                 bpStart: start,
                 bpEnd: start + (width * bpPerPixel),
                 bpPerPixel,
