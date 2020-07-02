@@ -369,7 +369,8 @@ Browser.prototype.loadSessionObject = async function (session) {
     this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
 
     // Resize is called to address minor alignment problems with multi-locus view.
-    this.resize();
+    // TODO -- this needs solved by some other means, will cause all initial data to be loaded twice
+    //this.resize();
 
 }
 
@@ -593,14 +594,14 @@ Browser.prototype.removeROI = function (roiToRemove) {
         }
     }
     for (let tv of this.trackViews) {
-        tv.updateViews(true);
+        tv.updateViews(undefined, undefined, true);
     }
 }
 
 Browser.prototype.clearROIs = function () {
     this.roi = [];
     for (let tv of this.trackViews) {
-        tv.updateViews(true);
+        tv.updateViews(undefined, undefined, true);
     }
 }
 
@@ -961,7 +962,7 @@ Browser.prototype.updateViews = async function (genomicState, views, force) {
     // Don't autoscale while dragging.
     if (self.dragObject) {
         for (let trackView of views) {
-            await trackView.updateViews();
+            await trackView.updateViews(force);
         }
     } else {
         // Group autoscale
@@ -1005,7 +1006,7 @@ Browser.prototype.updateViews = async function (genomicState, views, force) {
             for (let trackView of groupTrackViews) {
                 trackView.track.dataRange = dataRange;
                 trackView.track.autoscale = false;
-                await trackView.updateViews();
+                await trackView.updateViews(force);
             }
 
         }
