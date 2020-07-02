@@ -475,6 +475,8 @@ TrackView.prototype.updateViews = async function (force) {
         // }
     }
 
+    if(this.disposed) return;   // Track was removed during load
+
     const isDragging = this.browser.dragObject;
     if (!isDragging && this.track.autoscale) {
         let allFeatures = [];
@@ -648,6 +650,7 @@ TrackView.prototype.dispose = function () {
         self[key] = undefined;
     })
 
+    this.disposed = true;
 };
 
 
