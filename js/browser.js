@@ -319,7 +319,7 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     this.removeAllTracks(true);
 
-    const genome = await this.loadGenome(session.reference || session.genome, session.locus)
+    const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
     // Restore gtex selections.
     if (session.gtexSelections) {
@@ -368,13 +368,9 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
 
-    // Resize is called to address minor alignment problems with multi-locus view.
-    // TODO -- this needs solved by some other means, will cause all initial data to be loaded twice
-    //this.resize();
-
 }
 
-Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
+Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update) {
 
     // idOrConfig might be json
     if (isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -420,7 +416,9 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus) {
         await this.loadTrackList(genomeConfig.tracks);
     }
 
-    this.resize();    // Force recomputation and repaint
+    if(update !== false) {
+        this.updateViews();
+    }
     return this.genome;
 
 
@@ -1425,7 +1423,7 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
     var width;
 
     width = this.viewportContainerWidth() / this.genomicStateList.length;
-
+console.log("build viewports width = " + width);
     this.trackViews.forEach(function (trackView) {
 
         genomicStateList.forEach(function (genomicState) {
