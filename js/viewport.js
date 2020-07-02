@@ -290,8 +290,11 @@ class ViewPort {
             this.stopSpinner();
             return this.tile;
         } catch (error) {
-            this.showMessage(NOT_LOADED_MESSAGE);
-            console.error(error)
+            // Track might have been removed during load
+            if (this.trackView && this.trackView.disposed !== true) {
+                this.showMessage(NOT_LOADED_MESSAGE);
+                console.error(error)
+            }
         } finally {
             this.loading = false;
             this.stopSpinner();
@@ -438,7 +441,7 @@ class ViewPort {
                 top: -$(this.contentDiv).position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
                 pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight ,
+                pixelHeight: pixelHeight,
                 bpStart: bpStart,
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
