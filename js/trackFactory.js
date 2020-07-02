@@ -11,7 +11,7 @@ import GWASTrack from "./gwas/gwasTrack.js";
 import GCNVTrack from "./gcnv/gcnvTrack.js";
 import RnaStructTrack from "./rna/rnaStruct.js";
 
-const TrackFactory = {
+const tracks = {
     'sequence': (config, browser) => {
         return new SequenceTrack(config, browser);
     },
@@ -50,4 +50,16 @@ const TrackFactory = {
     }
 }
 
-export default TrackFactory;
+const addTrack = function(name, track){
+    this.tracks[name] = track;
+}
+
+const getTrack = function(name){
+    return this.tracks[name];
+}
+
+export default {
+    tracks,
+    addTrack,
+    getTrack
+}

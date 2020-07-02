@@ -167,6 +167,10 @@ Browser.prototype.isMultiLocusMode = function () {
     return this.genomicStateList && this.genomicStateList.length > 1;
 };
 
+Browser.prototype.addTrackToFactory = function (name, track){
+    TrackFactory.addTrack(name, track);
+}
+
 Browser.prototype.isMultiLocusWholeGenomeView = function () {
 
     if (undefined === this.genomicStateList || 1 === this.genomicStateList.length) {
@@ -714,6 +718,7 @@ Browser.prototype.createTrack = function (config) {
     trackConfig.browser = this;
 
     let track
+
     switch (type) {
 
         case "annotation":
@@ -722,11 +727,11 @@ Browser.prototype.createTrack = function (config) {
         case "junctions":
         case "splicejunctions":
         case "snp":
-            track = TrackFactory["feature"](trackConfig, this);
+            track = TrackFactory.getTrack("feature")(trackConfig, this);
             break;
         default:
-            if (TrackFactory.hasOwnProperty(type)) {
-                track = TrackFactory[type](trackConfig, this);
+            if (TrackFactory.tracks.hasOwnProperty(type)) {
+                track = TrackFactory.getTrack(type)(trackConfig, this);
             } else {
                 track = undefined;
             }
