@@ -41,542 +41,457 @@ let RPTREE_NODE_CHILD_ITEM_SIZE = 24;  // child item size
 let BUFFER_SIZE = 512000;     //  buffer
 let BPTREE_HEADER_SIZE = 32;
 
-const BWReader = function (config, genome) {
-    this.path = config.url;
-    this.genome = genome;
-    this.rpTreeCache = {};
-    this.config = config;
-};
+class BWReader {
 
-BWReader.prototype.readWGFeatures = function (bpPerPixel, windowFunction) {
-
-    const self = this;
-    const genome = this.genome;
-
-    return self.getZoomHeaders()
-        .then(function (zoomLevelHeaders) {
-            let chrIdx1, chrIdx2, chr1, chr2;
-
-            chrIdx1 = 0;
-            chrIdx2 = self.chromTree.idToChrom.length - 1;
-            chr1 = self.chromTree.idToChrom[chrIdx1];
-            chr2 = self.chromTree.idToChrom[chrIdx2];
-
-            return self.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction);
-        });
-
-}
-
-BWReader.prototype.readFeatures = function (chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
-
-    let self = this,
-        decodeFunction,
-        chrIdx1,
-        chrIdx2;
-
-    return self.getZoomHeaders()
-
-        .then(function (zoomLevelHeaders) {
-
-            // Select a biwig "zoom level" appropriate for the current resolution
-            let zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders),
-                treeOffset;
-
-            if (zoomLevelHeader) {
-                treeOffset = zoomLevelHeader.indexOffset;
-                decodeFunction = decodeZoomData;
-            } else {
-                treeOffset = self.header.fullIndexOffset;
-                if (self.type === "BigWig") {
-                    decodeFunction = decodeWigData;
-                } else {
-                    decodeFunction = decodeBedData;
-                }
-            }
-
-            return self.loadRPTree(treeOffset);
-        })
-
-        .then(function (rpTree) {
-
-            chrIdx1 = self.chromTree.chromToID[chr1];
-            chrIdx2 = self.chromTree.chromToID[chr2];
-            if (chrIdx1 === undefined || chrIdx2 === undefined) {
-                return undefined;
-            } else {
-                return rpTree.findLeafItemsOverlapping(chrIdx1, bpStart, chrIdx2, bpEnd)
-            }
-        })
-
-        .then(function (leafItems) {
-
-
-            if (!leafItems || leafItems.length === 0) {
-                return [];
-            } else {
-
-                // Consolidate leaf items and get all data at once
-                let start = Number.MAX_VALUE;
-                let end = 0;
-                for (let item of leafItems) {
-                    start = Math.min(start, item.dataOffset);
-                    end = Math.max(end, item.dataOffset + item.dataSize);
-                }
-
-
-                const size = end - start;
-
-                return igvxhr.loadArrayBuffer(self.config.url, buildOptions(self.config, {
-                    range: {
-                        start: start,
-                        size: size
-                    }
-                }))
-
-                    .then(function (arrayBuffer) {
-
-                        const allFeatures = [];
-
-                        const buffer = new Uint8Array(arrayBuffer);
-
-                        for (let item of leafItems) {
-
-                            const uint8Array = buffer.subarray(item.dataOffset - start, item.dataOffset + item.dataSize);
-
-                            let plain;
-                            const isCompressed = self.header.uncompressBuffSize > 0;
-                            if (isCompressed) {
-                                const inflate = new Zlib.Inflate(uint8Array);
-                                plain = inflate.decompress();
-                            } else {
-                                plain = uint8Array;
-                            }
-
-                            decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, self.chromTree.idToChrom, windowFunction);
-                        }
-
-                        allFeatures.sort(function (a, b) {
-                            return a.start - b.start;
-                        })
-
-                        return allFeatures;
-
-                    })
-            }
-        })
-
-}
-
-BWReader.prototype.getZoomHeaders = function () {
-
-    let self = this;
-
-    if (self.zoomLevelHeaders) {
-        return Promise.resolve(self.zoomLevelHeaders);
-    } else {
-        return self.loadHeader()
-            .then(function () {
-                return self.zoomLevelHeaders;
-            })
+    constructor(config, genome) {
+        this.path = config.url;
+        this.genome = genome;
+        this.rpTreeCache = {};
+        this.config = config;
     }
 
-}
+    async readWGFeatures(bpPerPixel, windowFunction) {
+        await this.loadHeader();
+        const chrIdx1 = 0;
+        const chrIdx2 = this.chromTree.idToChrom.length - 1;
+        const chr1 = this.chromTree.idToChrom[chrIdx1];
+        const chr2 = this.chromTree.idToChrom[chrIdx2];
+        return this.readFeatures(chr1, 0, chr2, Number.MAX_VALUE, bpPerPixel, windowFunction);
+    }
 
-BWReader.prototype.loadHeader = function () {
+    async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
 
-    let self = this;
+        await this.loadHeader();
 
-    if (self.header) {
-        return Promise.resolve(self.header);
-    } else {
-        return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {
-            range: {
-                start: 0,
-                size: BBFILE_HEADER_SIZE
+        const chrIdx1 = this.chromTree.chromToID[chr1];
+        const chrIdx2 = this.chromTree.chromToID[chr2];
+        if (chrIdx1 === undefined || chrIdx2 === undefined) {
+            return [];
+        }
+
+        // Select a biwig "zoom level" appropriate for the current resolution.   Select decode function
+        const zoomLevelHeaders = await this.getZoomHeaders()
+        let zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders);
+        let treeOffset;
+        let decodeFunction;
+        if (zoomLevelHeader) {
+            treeOffset = zoomLevelHeader.indexOffset;
+            decodeFunction = decodeZoomData;
+        } else {
+            treeOffset = this.header.fullIndexOffset;
+            if (this.type === "BigWig") {
+                decodeFunction = decodeWigData;
+            } else {
+                decodeFunction = decodeBedData;
             }
-        }))
-            .then(function (data) {
+        }
 
-                let header;
+        // Load the R Tree and fine leaf items
+        const rpTree = await this.loadRPTree(treeOffset);
+        const leafItems = await rpTree.findLeafItemsOverlapping(chrIdx1, bpStart, chrIdx2, bpEnd)
+        if (!leafItems || leafItems.length === 0) {
+            return [];
+        } else {
 
-                // Assume low-to-high unless proven otherwise
-                self.littleEndian = true;
+            // Consolidate leaf items and get all data at once
+            let start = Number.MAX_VALUE;
+            let end = 0;
+            for (let item of leafItems) {
+                start = Math.min(start, item.dataOffset);
+                end = Math.max(end, item.dataOffset + item.dataSize);
+            }
+            const size = end - start;
+            const arrayBuffer = await igvxhr.loadArrayBuffer(this.config.url, buildOptions(this.config, {
+                range: {
+                    start: start,
+                    size: size
+                }
+            }));
 
-                let binaryParser = new BinaryParser(new DataView(data));
+            // Parse data and return features
+            const allFeatures = [];
+            const buffer = new Uint8Array(arrayBuffer);
+            for (let item of leafItems) {
+                const uint8Array = buffer.subarray(item.dataOffset - start, item.dataOffset + item.dataSize);
+                let plain;
+                const isCompressed = this.header.uncompressBuffSize > 0;
+                if (isCompressed) {
+                    const inflate = new Zlib.Inflate(uint8Array);
+                    plain = inflate.decompress();
+                } else {
+                    plain = uint8Array;
+                }
+                decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToChrom, windowFunction);
+            }
 
+            allFeatures.sort(function (a, b) {
+                return a.start - b.start;
+            })
+
+            return allFeatures;
+        }
+    }
+
+    async getZoomHeaders() {
+        if (this.zoomLevelHeaders) {
+            return this.zoomLevelHeaders;
+        } else {
+            await this.loadHeader();
+            return this.zoomLevelHeaders;
+        }
+    }
+
+    async loadHeader() {
+
+        if (this.header) {
+            return this.header;
+        } else {
+            console.log("Loading header");
+
+            let data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {
+                range: {
+                    start: 0,
+                    size: BBFILE_HEADER_SIZE
+                }
+            }))
+
+            let header;
+
+            // Assume low-to-high unless proven otherwise
+            this.littleEndian = true;
+
+            let binaryParser = new BinaryParser(new DataView(data));
+            let magic = binaryParser.getUInt();
+            if (magic === BIGWIG_MAGIC_LTH) {
+                this.type = "BigWig";
+            } else if (magic === BIGBED_MAGIC_LTH) {
+                this.type = "BigBed";
+            } else {
+                //Try big endian order
+                this.littleEndian = false;
+
+                binaryParser.littleEndian = false;
+                binaryParser.position = 0;
                 let magic = binaryParser.getUInt();
 
-                if (magic === BIGWIG_MAGIC_LTH) {
-                    self.type = "BigWig";
-                } else if (magic === BIGBED_MAGIC_LTH) {
-                    self.type = "BigBed";
+                if (magic === BIGWIG_MAGIC_HTL) {
+                    this.type = "BigWig";
+                } else if (magic === BIGBED_MAGIC_HTL) {
+                    this.type = "BigBed";
                 } else {
-                    //Try big endian order
-                    self.littleEndian = false;
-
-                    binaryParser.littleEndian = false;
-                    binaryParser.position = 0;
-                    let magic = binaryParser.getUInt();
-
-                    if (magic === BIGWIG_MAGIC_HTL) {
-                        self.type = "BigWig";
-                    } else if (magic === BIGBED_MAGIC_HTL) {
-                        self.type = "BigBed";
-                    } else {
-                        // TODO -- error, unknown file type  or BE
-                    }
+                    // TODO -- error, unknown file type  or BE
                 }
-                // Table 5  "Common header for BigWig and BigBed files"
-                header = {};
-                header.bwVersion = binaryParser.getUShort();
-                header.nZoomLevels = binaryParser.getUShort();
-                header.chromTreeOffset = binaryParser.getLong();
-                header.fullDataOffset = binaryParser.getLong();
-                header.fullIndexOffset = binaryParser.getLong();
-                header.fieldCount = binaryParser.getUShort();
-                header.definedFieldCount = binaryParser.getUShort();
-                header.autoSqlOffset = binaryParser.getLong();
-                header.totalSummaryOffset = binaryParser.getLong();
-                header.uncompressBuffSize = binaryParser.getInt();
-                header.reserved = binaryParser.getLong();
-
-                return header;
-
-            })
-
-            .then(function (header) {
-
-                self.header = header;
-
-                return loadZoomHeadersAndChrTree.call(self);
-
-            })
-    }
-
-
-    function loadZoomHeadersAndChrTree() {
-
-        const self = this;
-        const startOffset = BBFILE_HEADER_SIZE;
-
-        let range = {start: startOffset, size: (self.header.fullDataOffset - startOffset + 5)};
-
-        return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: range}))
-
-            .then(function (data) {
-
-                const nZooms = self.header.nZoomLevels;
-                const binaryParser = new BinaryParser(new DataView(data));
-
-                self.zoomLevelHeaders = [];
-
-                self.firstZoomDataOffset = Number.MAX_SAFE_INTEGER;
-                for (let i = 1; i <= nZooms; i++) {
-                    const zoomNumber = nZooms - i;
-                    const zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
-                    self.firstZoomDataOffset = Math.min(zlh.dataOffset, self.firstZoomDataOffset);
-                    self.zoomLevelHeaders[zoomNumber] = zlh;
-                }
-
-                // Autosql
-                if (self.header.autoSqlOffset > 0) {
-                    binaryParser.position = self.header.autoSqlOffset - startOffset;
-                    self.autoSql = binaryParser.getString();
-                }
-
-                // Total summary
-                if (self.header.totalSummaryOffset > 0) {
-                    binaryParser.position = self.header.totalSummaryOffset - startOffset;
-                    self.totalSummary = new BWTotalSummary(binaryParser);
-                }
-
-                // Chrom data index
-                if (self.header.chromTreeOffset > 0) {
-                    binaryParser.position = self.header.chromTreeOffset - startOffset;
-                    self.chromTree = new BPTree(binaryParser, startOffset, self.genome);
-                } else {
-                    // TODO -- this is an error, not expected
-                    throw "BigWig chromosome tree offset <= 0";
-                }
-
-                //Finally total data count
-                binaryParser.position = self.header.fullDataOffset - startOffset;
-                self.header.dataCount = binaryParser.getInt();
-
-                return self.header;
-
-            })
-    }
-
-}
-
-BWReader.prototype.loadRPTree = function (offset) {
-
-    let self = this;
-
-    let rpTree = self.rpTreeCache[offset];
-    if (rpTree) {
-        return Promise.resolve(rpTree);
-    } else {
-        rpTree = new RPTree(offset, self.config, self.littleEndian);
-        return rpTree.load()
-            .then(function () {
-                self.rpTreeCache[offset] = rpTree;
-                return rpTree;
-            })
-    }
-}
-
-function ZoomLevelHeader(index, byteBuffer) {
-    this.index = index;
-    this.reductionLevel = byteBuffer.getInt();
-    this.reserved = byteBuffer.getInt();
-    this.dataOffset = byteBuffer.getLong();
-    this.indexOffset = byteBuffer.getLong();
-
-}
-
-function RPTree(fileOffset, config, littleEndian) {
-
-    this.config = config;
-    this.fileOffset = fileOffset; // File offset to beginning of tree
-    this.path = config.url;
-    this.littleEndian = littleEndian;
-}
-
-RPTree.prototype.load = function () {
-
-    let self = this;
-
-    let rootNodeOffset = self.fileOffset + RPTREE_HEADER_SIZE,
-        bufferedReader = new BufferedReader(self.config, BUFFER_SIZE);
-
-    return self.readNode(rootNodeOffset, bufferedReader)
-
-        .then(function (node) {
-            self.rootNode = node;
-            return self;
-        })
-}
-
-RPTree.prototype.readNode = function (filePosition, bufferedReader) {
-
-    let self = this;
-
-
-    let count, isLeaf;
-
-    return bufferedReader.dataViewForRange({start: filePosition, size: 4}, false)
-
-        .then(function (dataView) {
-            let binaryParser, type, reserved;
-
-            binaryParser = new BinaryParser(dataView, self.littleEndian);
-            type = binaryParser.getByte();
-            isLeaf = (type === 1);
-            reserved = binaryParser.getByte();
-            count = binaryParser.getUShort();
-
-            filePosition += 4;
-
-            let bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
-            let range2 = {start: filePosition, size: bytesRequired};
-
-            return bufferedReader.dataViewForRange(range2, false);
-        })
-
-        .then(function (dataView) {
-
-            let i,
-                items = new Array(count),
-                binaryParser = new BinaryParser(dataView);
-
-            if (isLeaf) {
-                for (i = 0; i < count; i++) {
-                    let item = {
-                        isLeaf: true,
-                        startChrom: binaryParser.getInt(),
-                        startBase: binaryParser.getInt(),
-                        endChrom: binaryParser.getInt(),
-                        endBase: binaryParser.getInt(),
-                        dataOffset: binaryParser.getLong(),
-                        dataSize: binaryParser.getLong()
-                    };
-                    items[i] = item;
-
-                }
-                return new RPTreeNode(items);
-            } else { // non-leaf
-                for (i = 0; i < count; i++) {
-
-                    let item = {
-                        isLeaf: false,
-                        startChrom: binaryParser.getInt(),
-                        startBase: binaryParser.getInt(),
-                        endChrom: binaryParser.getInt(),
-                        endBase: binaryParser.getInt(),
-                        childOffset: binaryParser.getLong()
-                    };
-                    items[i] = item;
-
-                }
-
-                return new RPTreeNode(items);
             }
-        })
+            // Table 5  "Common header for BigWig and BigBed files"
+            header = {};
+            header.bwVersion = binaryParser.getUShort();
+            header.nZoomLevels = binaryParser.getUShort();
+            header.chromTreeOffset = binaryParser.getLong();
+            header.fullDataOffset = binaryParser.getLong();
+            header.fullIndexOffset = binaryParser.getLong();
+            header.fieldCount = binaryParser.getUShort();
+            header.definedFieldCount = binaryParser.getUShort();
+            header.autoSqlOffset = binaryParser.getLong();
+            header.totalSummaryOffset = binaryParser.getLong();
+            header.uncompressBuffSize = binaryParser.getInt();
+            header.reserved = binaryParser.getLong();
+
+            ///////////
+
+            const startOffset = BBFILE_HEADER_SIZE;
+            let range = {start: startOffset, size: (header.fullDataOffset - startOffset + 5)};
+            data = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: range}))
+
+            const nZooms = header.nZoomLevels;
+            binaryParser = new BinaryParser(new DataView(data));
+
+            this.zoomLevelHeaders = [];
+            this.firstZoomDataOffset = Number.MAX_SAFE_INTEGER;
+            for (let i = 1; i <= nZooms; i++) {
+                const zoomNumber = nZooms - i;
+                const zlh = new ZoomLevelHeader(zoomNumber, binaryParser);
+                this.firstZoomDataOffset = Math.min(zlh.dataOffset, this.firstZoomDataOffset);
+                this.zoomLevelHeaders[zoomNumber] = zlh;
+            }
+
+            // Autosql
+            if (header.autoSqlOffset > 0) {
+                binaryParser.position = header.autoSqlOffset - startOffset;
+                this.autoSql = binaryParser.getString();
+            }
+
+            // Total summary
+            if (header.totalSummaryOffset > 0) {
+                binaryParser.position = header.totalSummaryOffset - startOffset;
+                this.totalSummary = new BWTotalSummary(binaryParser);
+            }
+
+            // Chrom data index
+            if (header.chromTreeOffset > 0) {
+                binaryParser.position = header.chromTreeOffset - startOffset;
+                this.chromTree = new BPTree(binaryParser, startOffset, this.genome);
+            } else {
+                // TODO -- this is an error, not expected
+                throw "BigWig chromosome tree offset <= 0";
+            }
+
+            //Finally total data count
+            binaryParser.position = header.fullDataOffset - startOffset;
+            header.dataCount = binaryParser.getInt();
+            ///////////
+
+            this.header = header;
+            return this.header;
+
+        }
+    }
+
+    async loadRPTree(offset) {
+
+        let rpTree = this.rpTreeCache[offset];
+        if (rpTree) {
+            return rpTree;
+        } else {
+            rpTree = new RPTree(offset, this.config, this.littleEndian);
+            await rpTree.load();
+            this.rpTreeCache[offset] = rpTree;
+            return rpTree;
+        }
+    }
 }
 
-RPTree.prototype.findLeafItemsOverlapping = function (chrIdx1, startBase, chrIdx2, endBase) {
 
-    let self = this;
+class ZoomLevelHeader {
+    constructor(index, byteBuffer) {
+        this.index = index;
+        this.reductionLevel = byteBuffer.getInt();
+        this.reserved = byteBuffer.getInt();
+        this.dataOffset = byteBuffer.getLong();
+        this.indexOffset = byteBuffer.getLong();
+    }
+}
 
-    return new Promise(function (fulfill, reject) {
+class RPTree {
 
-        let leafItems = [],
-            processing = new Set(),
-            bufferedReader = new BufferedReader(self.config, BUFFER_SIZE);
+    constructor(fileOffset, config, littleEndian) {
 
-        processing.add(0);  // Zero represents the root node
-        findLeafItems(self.rootNode, 0);
+        this.config = config;
+        this.fileOffset = fileOffset; // File offset to beginning of tree
+        this.path = config.url;
+        this.littleEndian = littleEndian;
+    }
 
-        function findLeafItems(node, nodeId) {
+    async load() {
+        const rootNodeOffset = this.fileOffset + RPTREE_HEADER_SIZE;
+        const bufferedReader = new BufferedReader(this.config, BUFFER_SIZE);
+        this.rootNode = await this.readNode(rootNodeOffset, bufferedReader)
+        return this;
+    }
 
-            if (overlaps(node, chrIdx1, startBase, chrIdx2, endBase)) {
+    async readNode(filePosition, bufferedReader) {
 
-                let items = node.items;
+        let dataView = await bufferedReader.dataViewForRange({start: filePosition, size: 4}, false);
+        let binaryParser = new BinaryParser(dataView, this.littleEndian);
+        const type = binaryParser.getByte();
+        const isLeaf = (type === 1);
+        const reserved = binaryParser.getByte();
+        const count = binaryParser.getUShort();
+        filePosition += 4;
 
-                items.forEach(function (item) {
+        let bytesRequired = count * (isLeaf ? RPTREE_NODE_LEAF_ITEM_SIZE : RPTREE_NODE_CHILD_ITEM_SIZE);
+        let range2 = {start: filePosition, size: bytesRequired};
+        dataView = await bufferedReader.dataViewForRange(range2, false);
+        const items = new Array(count);
+        binaryParser = new BinaryParser(dataView);
 
-                    if (overlaps(item, chrIdx1, startBase, chrIdx2, endBase)) {
+        if (isLeaf) {
+            for (let i = 0; i < count; i++) {
+                let item = {
+                    isLeaf: true,
+                    startChrom: binaryParser.getInt(),
+                    startBase: binaryParser.getInt(),
+                    endChrom: binaryParser.getInt(),
+                    endBase: binaryParser.getInt(),
+                    dataOffset: binaryParser.getLong(),
+                    dataSize: binaryParser.getLong()
+                };
+                items[i] = item;
 
-                        if (item.isLeaf) {
-                            leafItems.push(item);
-                        } else {
-                            if (item.childNode) {
-                                findLeafItems(item.childNode);
+            }
+            return new RPTreeNode(items);
+        } else { // non-leaf
+            for (let i = 0; i < count; i++) {
+
+                let item = {
+                    isLeaf: false,
+                    startChrom: binaryParser.getInt(),
+                    startBase: binaryParser.getInt(),
+                    endChrom: binaryParser.getInt(),
+                    endBase: binaryParser.getInt(),
+                    childOffset: binaryParser.getLong()
+                };
+                items[i] = item;
+            }
+
+            return new RPTreeNode(items);
+        }
+
+    }
+
+    async findLeafItemsOverlapping(chrIdx1, startBase, chrIdx2, endBase) {
+
+        let self = this;
+
+        return new Promise(function (fulfill, reject) {
+
+            let leafItems = [],
+                processing = new Set(),
+                bufferedReader = new BufferedReader(self.config, BUFFER_SIZE);
+
+            processing.add(0);  // Zero represents the root node
+            findLeafItems(self.rootNode, 0);
+
+            function findLeafItems(node, nodeId) {
+
+                if (overlaps(node, chrIdx1, startBase, chrIdx2, endBase)) {
+
+                    let items = node.items;
+
+                    items.forEach(function (item) {
+
+                        if (overlaps(item, chrIdx1, startBase, chrIdx2, endBase)) {
+
+                            if (item.isLeaf) {
+                                leafItems.push(item);
                             } else {
-                                processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
+                                if (item.childNode) {
+                                    findLeafItems(item.childNode);
+                                } else {
+                                    processing.add(item.childOffset);  // Represent node to-be-loaded by its file position
 
-                                self.readNode(item.childOffset, bufferedReader)
-                                    .then(function (node) {
-                                        item.childNode = node;
-                                        findLeafItems(node, item.childOffset);
-                                    })
-                                    .catch(reject);
+                                    self.readNode(item.childOffset, bufferedReader)
+                                        .then(function (node) {
+                                            item.childNode = node;
+                                            findLeafItems(node, item.childOffset);
+                                        })
+                                        .catch(reject);
+                                }
                             }
                         }
-                    }
-                });
+                    });
 
+                }
+
+                if (nodeId !== undefined) processing.delete(nodeId);
+
+                // Wait until all nodes are processed
+                if (processing.size === 0) {
+                    fulfill(leafItems);
+                }
             }
-
-            if (nodeId !== undefined) processing.delete(nodeId);
-
-            // Wait until all nodes are processed
-            if (processing.size === 0) {
-                fulfill(leafItems);
-            }
-        }
-    });
-}
-
-function RPTreeNode(items) {
-
-
-    this.items = items;
-
-    let minChromId = Number.MAX_SAFE_INTEGER,
-        maxChromId = 0,
-        minStartBase = Number.MAX_SAFE_INTEGER,
-        maxEndBase = 0,
-        i,
-        item;
-
-    for (i = 0; i < items.length; i++) {
-        item = items[i];
-        minChromId = Math.min(minChromId, item.startChrom);
-        maxChromId = Math.max(maxChromId, item.endChrom);
-        minStartBase = Math.min(minStartBase, item.startBase);
-        maxEndBase = Math.max(maxEndBase, item.endBase);
+        });
     }
-
-    this.startChrom = minChromId;
-    this.endChrom = maxChromId;
-    this.startBase = minStartBase;
-    this.endBase = maxEndBase;
-
 }
 
-function BPTree(binaryParser, startOffset, genome) {
+class RPTreeNode {
 
-    const self = this;
+    constructor(items) {
 
-    let magic = binaryParser.getInt();
-    let blockSize = binaryParser.getInt();
-    let keySize = binaryParser.getInt();
-    let valSize = binaryParser.getInt();
-    let itemCount = binaryParser.getLong();
-    let reserved = binaryParser.getLong();
-    let chromToId = {};
-    let idToChrom = [];
+        this.items = items;
 
-    this.header = {
-        magic: magic,
-        blockSize: blockSize,
-        keySize: keySize,
-        valSize: valSize,
-        itemCount: itemCount,
-        reserved: reserved
-    };
-    this.chromToID = chromToId;
-    this.idToChrom = idToChrom;
-
-    // Recursively walk tree to populate dictionary
-    readTreeNode(binaryParser, -1);
-
-
-    function readTreeNode(byteBuffer, offset) {
-
-        if (offset >= 0) byteBuffer.position = offset;
-
-        let type = byteBuffer.getByte(),
-            reserved = byteBuffer.getByte(),
-            count = byteBuffer.getUShort(),
+        let minChromId = Number.MAX_SAFE_INTEGER,
+            maxChromId = 0,
+            minStartBase = Number.MAX_SAFE_INTEGER,
+            maxEndBase = 0,
             i,
-            key,
-            chromId,
-            chromSize,
-            childOffset,
-            bufferOffset,
-            currOffset;
+            item;
 
-
-        if (type === 1) {
-
-            for (i = 0; i < count; i++) {
-
-                key = byteBuffer.getFixedLengthTrimmedString(keySize);
-                chromId = byteBuffer.getInt();
-                chromSize = byteBuffer.getInt();
-
-                if (genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
-                chromToId[key] = chromId;
-                idToChrom[chromId] = key;
-
-            }
-        } else { // non-leaf
-
-            for (i = 0; i < count; i++) {
-
-                key = byteBuffer.getFixedLengthTrimmedString(keySize);
-                childOffset = byteBuffer.getLong();
-                bufferOffset = childOffset - startOffset;
-                currOffset = byteBuffer.position;
-                readTreeNode(byteBuffer, bufferOffset);
-                byteBuffer.position = currOffset;
-            }
+        for (i = 0; i < items.length; i++) {
+            item = items[i];
+            minChromId = Math.min(minChromId, item.startChrom);
+            maxChromId = Math.max(maxChromId, item.endChrom);
+            minStartBase = Math.min(minStartBase, item.startBase);
+            maxEndBase = Math.max(maxEndBase, item.endBase);
         }
 
+        this.startChrom = minChromId;
+        this.endChrom = maxChromId;
+        this.startBase = minStartBase;
+        this.endBase = maxEndBase;
+    }
+}
+
+class BPTree {
+
+    constructor(binaryParser, startOffset, genome) {
+
+        let magic = binaryParser.getInt();
+        let blockSize = binaryParser.getInt();
+        let keySize = binaryParser.getInt();
+        let valSize = binaryParser.getInt();
+        let itemCount = binaryParser.getLong();
+        let reserved = binaryParser.getLong();
+        let chromToId = {};
+        let idToChrom = [];
+
+        this.header = {
+            magic: magic,
+            blockSize: blockSize,
+            keySize: keySize,
+            valSize: valSize,
+            itemCount: itemCount,
+            reserved: reserved
+        };
+        this.chromToID = chromToId;
+        this.idToChrom = idToChrom;
+
+        // Recursively walk tree to populate dictionary
+        readTreeNode(binaryParser, -1);
+
+
+        function readTreeNode(byteBuffer, offset) {
+
+            if (offset >= 0) byteBuffer.position = offset;
+
+            let type = byteBuffer.getByte(),
+                reserved = byteBuffer.getByte(),
+                count = byteBuffer.getUShort(),
+                i,
+                key,
+                chromId,
+                chromSize,
+                childOffset,
+                bufferOffset,
+                currOffset;
+
+
+            if (type === 1) {
+
+                for (i = 0; i < count; i++) {
+
+                    key = byteBuffer.getFixedLengthTrimmedString(keySize);
+                    chromId = byteBuffer.getInt();
+                    chromSize = byteBuffer.getInt();
+
+                    if (genome) key = genome.getChromosomeName(key);  // Translate to canonical chr name
+                    chromToId[key] = chromId;
+                    idToChrom[chromId] = key;
+
+                }
+            } else { // non-leaf
+
+                for (i = 0; i < count; i++) {
+
+                    key = byteBuffer.getFixedLengthTrimmedString(keySize);
+                    childOffset = byteBuffer.getLong();
+                    bufferOffset = childOffset - startOffset;
+                    currOffset = byteBuffer.position;
+                    readTreeNode(byteBuffer, bufferOffset);
+                    byteBuffer.position = currOffset;
+                }
+            }
+
+        }
     }
 }
 
@@ -597,24 +512,25 @@ function overlaps(item, chrIdx1, startBase, chrIdx2, endBase) {
 
 }
 
-function BWTotalSummary(byteBuffer) {
+class BWTotalSummary {
 
-    if (byteBuffer) {
-
-        this.basesCovered = byteBuffer.getLong();
-        this.minVal = byteBuffer.getDouble();
-        this.maxVal = byteBuffer.getDouble();
-        this.sumData = byteBuffer.getDouble();
-        this.sumSquares = byteBuffer.getDouble();
-        computeStats.call(this);
-    } else {
-        this.basesCovered = 0;
-        this.minVal = 0;
-        this.maxVal = 0;
-        this.sumData = 0;
-        this.sumSquares = 0;
-        this.mean = 0;
-        this.stddev = 0;
+    constructor(byteBuffer) {
+        if (byteBuffer) {
+            this.basesCovered = byteBuffer.getLong();
+            this.minVal = byteBuffer.getDouble();
+            this.maxVal = byteBuffer.getDouble();
+            this.sumData = byteBuffer.getDouble();
+            this.sumSquares = byteBuffer.getDouble();
+            computeStats.call(this);
+        } else {
+            this.basesCovered = 0;
+            this.minVal = 0;
+            this.maxVal = 0;
+            this.sumData = 0;
+            this.sumSquares = 0;
+            this.mean = 0;
+            this.stddev = 0;
+        }
     }
 }
 
@@ -635,40 +551,34 @@ function computeStats() {
 }
 
 function zoomLevelForScale(bpPerPixel, zoomLevelHeaders) {
-
-    let level = null, i, zl;
-
-    for (i = 0; i < zoomLevelHeaders.length; i++) {
-
-        zl = zoomLevelHeaders[i];
-
+    let level;
+    for (let i = 0; i < zoomLevelHeaders.length; i++) {
+        const zl = zoomLevelHeaders[i];
         if (zl.reductionLevel < bpPerPixel) {
             level = zl;
             break;
         }
     }
-
     return level;
 }
 
+
 function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
 
-    let binaryParser = new BinaryParser(data),
-        chromId = binaryParser.getInt(),
-        chromStart = binaryParser.getInt(),
-        chromEnd = binaryParser.getInt(),
-        itemStep = binaryParser.getInt(),
-        itemSpan = binaryParser.getInt(),
-        type = binaryParser.getByte(),
-        reserved = binaryParser.getByte(),
-        itemCount = binaryParser.getUShort(),
-        value,
-        chr;
+    const binaryParser = new BinaryParser(data);
+    const chromId = binaryParser.getInt();
+    let chromStart = binaryParser.getInt();
+    let chromEnd = binaryParser.getInt();
+    const itemStep = binaryParser.getInt();
+    const itemSpan = binaryParser.getInt();
+    const type = binaryParser.getByte();
+    const reserved = binaryParser.getByte();
+    let itemCount = binaryParser.getUShort();
 
     if (chromId >= chrIdx1 && chromId <= chrIdx2) {
 
         while (itemCount-- > 0) {
-
+            let value;
             switch (type) {
                 case 1:
                     chromStart = binaryParser.getInt();
@@ -685,20 +595,18 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
                     chromEnd = chromStart + itemSpan;
                     chromStart += itemStep;
                     break;
-
             }
 
             if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
             else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
 
             if (Number.isFinite(value)) {
-                chr = chrDict[chromId];
+                const chr = chrDict[chromId];
                 featureArray.push({chr: chr, start: chromStart, end: chromEnd, value: value});
 
             }
         }
     }
-
 }
 
 
@@ -761,31 +669,21 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
 function decodeZoomData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict, windowFunction) {
 
-    let binaryParser = new BinaryParser(data),
-        minSize = 8 * 4,   // Minimum # of bytes required for a zoom record
-        chromId,
-        chromStart,
-        chromEnd,
-        validCount,
-        minVal,
-        maxVal,
-        sumData,
-        sumSquares,
-        value,
-        chr;
+    const binaryParser = new BinaryParser(data);
+    const minSize = 8 * 4;  // Minimum # of bytes required for a zoom record
+
 
     while (binaryParser.remLength() >= minSize) {
-
-        chromId = binaryParser.getInt();
-        chr = chrDict[chromId];
-        chromStart = binaryParser.getInt();
-        chromEnd = binaryParser.getInt();
-
-        validCount = binaryParser.getInt();
-        minVal = binaryParser.getFloat();
-        maxVal = binaryParser.getFloat();
-        sumData = binaryParser.getFloat();
-        sumSquares = binaryParser.getFloat();
+        const chromId = binaryParser.getInt();
+        const chr = chrDict[chromId];
+        const chromStart = binaryParser.getInt();
+        const chromEnd = binaryParser.getInt();
+        const validCount = binaryParser.getInt();
+        const minVal = binaryParser.getFloat();
+        const maxVal = binaryParser.getFloat();
+        const sumData = binaryParser.getFloat();
+        const sumSquares = binaryParser.getFloat();
+        let value;
         switch (windowFunction) {
             case "min":
                 value = minVal;
