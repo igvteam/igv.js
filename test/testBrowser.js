@@ -49,6 +49,29 @@ function runBrowserTests() {
             })
     });
 
+    QUnit.test("Test addTrackToFactory method", function (assert) {
+
+        var done = assert.async();
+
+        const options = {
+            genome: "hg19",
+        };
+
+        createBrowser(div, options)
+            .then(function (browser) {
+                assert.ok(browser);
+                browser.addTrackToFactory('mocktrack', (config, browser) =>  true);
+                assert.ok(browser.createTrack({type: 'mocktrack'}));
+                done();
+            })
+
+            .catch(function (error) {
+                assert.ok(false);
+                console.log(error);
+                done();
+            })
+    });
+
 
     QUnit.test("Test remove browser", function (assert) {
         var done = assert.async();
