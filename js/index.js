@@ -5,6 +5,7 @@ import getDataWrapper from "./feature/dataWrapper.js";
 import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import GtexUtils from "./gtex/gtexUtils.js";
+import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import {guid,pageCoordinates, translateMouseCoordinates} from "./util/domUtils.js";
 import {attachDialogCloseHandlerWithParent, createColorSwatchSelector} from "./ui/ui-utils.js";
@@ -73,6 +74,7 @@ export default {
     translateMouseCoordinates,
     createIcon,
     GtexUtils,
+    GenomeUtils,
     xhr,
     Color,
     splitLines,
