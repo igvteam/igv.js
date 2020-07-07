@@ -50,7 +50,7 @@ const InteractionTrack = extend(TrackBase,
             config.alpha === 0 ? undefined : config.alpha.toString();
         this.visibilityWindow = -1;
         this.colorAlphaCache = {};
-
+        this.logScale = config.logScale === true;   // i.e. undefined => false
         if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
@@ -203,16 +203,15 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
     if (featureList) {
 
-        // if (!this.dataRange) {
-        //    doAutoscale(featureList);
-        // }
+        const yScale = this.logScale ?
+            options.pixelHeight / Math.log10(this.dataRange.max) :
+            options.pixelHeight / (this.dataRange.max - this.dataRange.min);
 
-        const yScale = options.pixelHeight / (this.dataRange.max - this.dataRange.min);
         const y = this.arcOrientation ? options.pixelHeight : 0;
 
         for (let feature of featureList) {
 
-            if (feature.value === undefined || Number.isNaN(feature.value)) continue;
+            if (feature.value === undefined || Number.isNaN(feature.value) || feature.value === 0) continue;
 
             let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
             let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
@@ -224,7 +223,9 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
             if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
 
-            const radiusY = feature.value * yScale;
+            const radiusY = this.logScale ?
+                Math.log10(feature.value) * yScale :
+                feature.value * yScale;
             const counterClockwise = this.arcOrientation ? true : false;
             const color = feature.color || this.color;
             ctx.strokeStyle = color;
