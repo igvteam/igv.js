@@ -22,8 +22,9 @@ import runUtilTests from "./testUtils.js";
 import runIgvXhrTests from "./testIgvXhr.js";
 import runCRAMTests from "./testCRAM.js";
 import runTribbleTests from "./testTribble.js";
+import runBedpeTests from "./testBedpe.js";
 
-
+runBedpeTests();
 runBigwigTests();
 runBAMTests();
 runBAMIndexTests();

@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import igvxhr from "../igvxhr.js";
-import {buildOptions, extend} from "../util/igvUtils.js";
+import {buildOptions, doAutoscale, extend} from "../util/igvUtils.js";
 
 const InteractionTrack = extend(TrackBase,
 
@@ -42,11 +42,23 @@ const InteractionTrack = extend(TrackBase,
         this.sinTheta = Math.sin(this.theta);
         this.cosTheta = Math.cos(this.theta);
         this.height = config.height || 250;
-        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation);       // true for up, false for down
-        this.thickness = config.thickness || 2;
+        this.arcType = config.arcType || "nested";   // nested | proportional
+        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation === "up");       // true for up, false for down
+        this.thickness = config.thickness || 1;
         this.color = config.color || "rgb(180,25,137)"
+        this.alpha = config.alpha === undefined ? "0.05" :
+            config.alpha === 0 ? undefined : config.alpha.toString();
         this.visibilityWindow = -1;
         this.colorAlphaCache = {};
+
+        if (config.max) {
+            this.dataRange = {
+                min: config.min || 0,
+                max: config.max
+            }
+        } else {
+            this.autoscale = true;
+        }
     });
 
 InteractionTrack.prototype.supportsWholeGenome = function () {
@@ -85,8 +97,14 @@ InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
 };
 
 InteractionTrack.prototype.draw = function (options) {
+    if (this.arcType === "proportional") {
+        this.drawProportional(options);
+    } else {
+        this.drawNested(options);
+    }
+}
 
-    const self = this;
+InteractionTrack.prototype.drawNested = function (options) {
 
     const ctx = options.context;
     const pixelWidth = options.pixelWidth;
@@ -103,13 +121,12 @@ InteractionTrack.prototype.draw = function (options) {
     if (featureList) {
 
         // Autoscale theta
-        autoscale();
+        autoscaleNested.call(this);
 
-        featureList.forEach(function (feature) {
-
+        for (let feature of featureList) {
             let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
             let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
-            let direction = self.arcOrientation;
+            let direction = this.arcOrientation;
 
             let w = (pixelEnd - pixelStart);
             if (w < 3) {
@@ -118,61 +135,113 @@ InteractionTrack.prototype.draw = function (options) {
             }
 
             const a = w / 2;
-            const r = a / self.sinTheta;
-            const b = self.cosTheta * r;
+            const r = a / this.sinTheta;
+            const b = this.cosTheta * r;
             const xc = pixelStart + a;
 
             let yc, startAngle, endAngle;
             if (direction) {
                 // UP
-                var trackBaseLine = self.height;
+                var trackBaseLine = this.height;
                 yc = trackBaseLine + b;
-                startAngle = Math.PI + Math.PI / 2 - self.theta;
-                endAngle = Math.PI + Math.PI / 2 + self.theta;
+                startAngle = Math.PI + Math.PI / 2 - this.theta;
+                endAngle = Math.PI + Math.PI / 2 + this.theta;
 
             } else {
                 // DOWN
                 yc = -b;
-                startAngle = Math.PI / 2 - self.theta;
-                endAngle = Math.PI / 2 + self.theta;
+                startAngle = Math.PI / 2 - this.theta;
+                endAngle = Math.PI / 2 + this.theta;
             }
 
-            let color = feature.color || self.color;
+            let color = feature.color || this.color;
             if (color && w > viewportWidth) {
-                color = getAlphaColor.call(self, color, "0.1");
+                color = getAlphaColor.call(this, color, "0.1");
             }
 
             ctx.strokeStyle = color;
-            ctx.lineWidth = feature.thickness || self.thicknewss || 1;
+            ctx.lineWidth = feature.thickness || this.thickness || 1;
 
             ctx.beginPath();
             ctx.arc(xc, yc, r, startAngle, endAngle, false);
             ctx.stroke();
-
-
-        })
+        }
     }
 
 
-    function autoscale() {
+    function autoscaleNested() {
         let max = 0;
-        featureList.forEach(function (feature) {
+        for (let feature of featureList) {
             let pixelStart = (feature.start - bpStart) / xScale
             let pixelEnd = (feature.end - bpStart) / xScale;
             if (pixelEnd >= 0 && pixelStart <= pixelWidth) {
                 max = Math.max(max, pixelEnd - pixelStart);
             }
-        });
+        }
         let a = Math.min(viewportWidth, max) / 2;
         if (max > 0) {
             let coa = pixelHeight / a;
-            self.theta = estimateTheta(coa);
-            self.sinTheta = Math.sin(self.theta);
-            self.cosTheta = Math.cos(self.theta);
+            this.theta = estimateTheta(coa);
+            this.sinTheta = Math.sin(this.theta);
+            this.cosTheta = Math.cos(this.theta);
         }
     }
-};
+}
 
+InteractionTrack.prototype.drawProportional = function (options) {
+
+    const ctx = options.context;
+    const pixelWidth = options.pixelWidth;
+    const pixelHeight = options.pixelHeight;
+    const bpPerPixel = options.bpPerPixel;
+    const bpStart = options.bpStart;
+    const xScale = bpPerPixel;
+
+    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+    const featureList = options.features;
+
+    if (featureList) {
+
+        // if (!this.dataRange) {
+        //    doAutoscale(featureList);
+        // }
+
+        const yScale = options.pixelHeight / (this.dataRange.max - this.dataRange.min);
+        const y = this.arcOrientation ? options.pixelHeight : 0;
+
+        for (let feature of featureList) {
+
+            if (feature.value === undefined || Number.isNaN(feature.value)) continue;
+
+            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
+            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
+            let w = (pixelEnd - pixelStart);
+            if (w < 3) {
+                w = 3;
+                pixelStart--;
+            }
+
+            if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+
+            const radiusY = feature.value * yScale;
+            const counterClockwise = this.arcOrientation ? true : false;
+            const color = feature.color || this.color;
+            ctx.strokeStyle = color;
+            ctx.lineWidth = feature.thickness || this.thickness || 1;
+            ctx.beginPath();
+            ctx.ellipse(pixelStart + w / 2, y, w / 2, radiusY, 0, 0, Math.PI, counterClockwise);
+            ctx.stroke();
+
+            if (this.alpha) {
+                const alphaColor = getAlphaColor.call(this, color, this.alpha);
+                ctx.fillStyle = alphaColor;
+                ctx.fill();
+            }
+        }
+    }
+
+}
 
 InteractionTrack.prototype.menuItemList = function () {
 
@@ -234,6 +303,12 @@ InteractionTrack.prototype.getWGFeatures = function (allFeatures) {
         return a.m1 - b.m2;
     });
     return wgFeatures;
+}
+
+InteractionTrack.prototype.doAutoscale = function (features) {
+    if ("proportional" === this.arcType) {
+        return doAutoscale(features);
+    }
 }
 
 //
