@@ -206,7 +206,7 @@ async function loadURL(url, options) {
                     resolve(xhr.response);
                 }
             } else if ((typeof gapi !== "undefined") &&
-                ((xhr.status === 404 || xhr.status === 401) &&
+                ((xhr.status === 404 || xhr.status === 401 || xhr.status === 403) &&
                     google.isGoogleURL(url)) &&
                 !options.retries) {
 
