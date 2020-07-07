@@ -26,6 +26,7 @@
 import getDataWrapper from "./dataWrapper.js";
 import IGVColor from "../igv-color.js";
 import {getFormat} from "../util/trackUtils.js";
+import {isNumber} from "../util/igvUtils.js"
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -115,7 +116,7 @@ const FeatureParser = function (format, decode, config) {
                 this.delimiter = config.delimiter || /\s+/;
                 break;
             case "bedpe":
-                this.skipRows = 1;
+                this.skipRows = 0;
                 this.decode = decodeBedpe;
                 this.delimiter = /\s+/;
                 break;
@@ -156,12 +157,8 @@ const FeatureParser = function (format, decode, config) {
 
 FeatureParser.prototype.parseHeader = function (data) {
 
-    var line,
-        header,
-        dataWrapper;
-
-    dataWrapper = getDataWrapper(data);
-
+    const dataWrapper = getDataWrapper(data);
+    let line, header;
     while (line = dataWrapper.nextLine()) {
         if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
             if (line.startsWith("track") || line.startsWith("#track")) {
@@ -171,7 +168,6 @@ FeatureParser.prototype.parseHeader = function (data) {
                 } else {
                     header = h;
                 }
-
             } else if (line.startsWith("#columns")) {
                 let h = parseColumnsDirective(line);
                 if (header) {
@@ -191,11 +187,9 @@ FeatureParser.prototype.parseHeader = function (data) {
             break;
         }
     }
-
     this.header = header;    // Directives might be needed for parsing lines
-
     return header;
-};
+}
 
 FeatureParser.prototype.parseFeatures = function (data) {
 
@@ -246,6 +240,11 @@ FeatureParser.prototype.parseFeatures = function (data) {
             }
             cnt++;
         }
+    }
+
+    // Special hack for bedPE
+    if (decode === decodeBedpe) {
+        setBedPEValue(allFeatures);
     }
 
     return allFeatures;
@@ -1000,8 +999,9 @@ function decodeBedpe(tokens, ignore) {
     }
 
     if (tokens.length > 7) {
-        feature.score = tokens[7];
+        feature.score = parseFloat(tokens[7]);
     }
+
 
     feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
 
@@ -1208,6 +1208,32 @@ function expandFormat(format) {
     }
 
     return format;
+}
+
+/**
+ * Hack for bedPE formats, where "score" can be in column 7 (name) or 8 (score)
+ * @param features
+ */
+function setBedPEValue(features) {
+
+    if(features.length == 0) return;
+
+    // Assume all features have same properties
+    const firstFeature = features[0];
+    if(firstFeature.score !== undefined) {
+        for(let f of features) {
+            f.value = f.score === '.' ? Number.NaN : parseFloat(f.score);
+        }
+    } else if(firstFeature.name !== undefined) {
+        // Name field (col 7) is sometimes used for score.
+        for(let f of features) {
+            if(!isNumber(f.name)) return;
+        }
+        for(let f of features) {
+            f.value = parseFloat(f.name);
+            delete f.name;
+        }
+    }
 }
 
 export default FeatureParser;
