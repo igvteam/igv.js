@@ -17,23 +17,39 @@
 
 <body>
 
-<h1>BEDPE Nested Arcs</h1>
+<h1>BEDPE Proportional Arcs</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import igv from '../dist/igv.esm.js'
 
     var options =
         {
             genome: "hg38",
+            locus: "chr2:65,489,209-65,795,733",
             tracks: [
                 {
-                    "url": "https://s3.amazonaws.com/igv.org.test/data/gm12878_loops.bedpe.gz",
-                    "type": "interaction",
-                    "format": "bedpe",
-                    "name": "GM12878 Loops (bedpe)"
+                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    type: "interaction",
+                    format: "bedpe",
+                    name: "CTCF PET",
+                    arcType: "proportional",
+                    color: "rgb(0,200,0)",
+                    alpha: "0.05",
+                    max: 80
+                },
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    type: "interaction",
+                    format: "bedpe",
+                    name: "CTCF PET",
+                    arcType: "proportional",
+                    arcOrientation: "down",
+                    color: "blue",
+                    alpha: 0,
+                    max: 80
                 }
             ]
         };
