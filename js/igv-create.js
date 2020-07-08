@@ -23,11 +23,13 @@
  * THE SOFTWARE.
  */
 
-import { Alert, AlertDialog, InputDialog } from '../node_modules/igv-ui/src/index.js';
+import { InputDialog } from '../node_modules/igv-ui/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
 import WindowSizePanel from "./windowSizePanel.js";
+import Alert from "./ui/alert.js";
+import AlertDialog from "./ui/alertDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import UserFeedback from "./ui/userFeedback.js";

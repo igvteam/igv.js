@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { Alert } from '../node_modules/igv-ui/src/index.js';
+import Alert from './ui/alert.js'
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {unbgzf} from './bam/bgzf.js';

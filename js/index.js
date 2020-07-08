@@ -1,6 +1,8 @@
 // Defines the top-level API for the igv module
 
-import { Alert, AlertDialog, InputDialog } from '../node_modules/igv-ui/src/index.js';
+import Alert from "./ui/alert.js";
+import AlertDialog from "./ui/alertDialog.js";
+import { InputDialog } from '../node_modules/igv-ui/src/index.js';
 import {createBrowser, createTrack, getBrowser, removeBrowser, visibilityChange} from './igv-create.js';
 import getDataWrapper from "./feature/dataWrapper.js";
 import oauth from './oauth.js';
@@ -18,7 +20,6 @@ import IGVColor from "./igv-color.js";
 import IGVGraphics from "./igv-canvas.js";
 import google from "./google/googleUtils.js";
 import TrackView from "./trackView.js";
-import GenericContainer from "./ui/genericContainer.js";
 import makeDraggable from "./ui/draggable.js";
 import Popover from "./ui/popover.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
@@ -82,7 +83,6 @@ export default {
     setApiKey,
     createColorSwatchSelector,
     makeDraggable,
-    GenericContainer,
     Popover,
     AlertDialog,
     InputDialog,

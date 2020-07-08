@@ -1,12 +1,13 @@
-
-// generic dialog
-.igv-ui-generic-dialog-container {
-
+.igv-ui-dialog {
+  z-index: 2048;
   position: fixed;
-  top: 0;
-  left:0;
-  width:300px;
-  height:200px;
+  width: fit-content;
+  height: fit-content;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  background-color: white;
 
   border-color: $igv-trackgear-grey-color;
   border-radius: $igv-trackgear-popover-border-radius;
@@ -17,18 +18,8 @@
   font-size: medium;
   font-weight: 400;
 
-  z-index: 2048;
-
-  background-color: white;
-
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
-
   // header
-  .igv-ui-generic-dialog-header {
+  .igv-ui-dialog-header {
 
     display: flex;
     flex-flow: row;
@@ -64,91 +55,87 @@
   }
 
   // one-liner
-  .igv-ui-generic-dialog-one-liner {
-
-    color: $igv-dark-grey-color;
-
+  .igv-ui-dialog-one-liner {
     width: 95%;
     height: 24px;
     line-height: 24px;
-
     text-align: left;
-    margin-top: 8px;
-    padding-left: 8px;
-
+    margin: 8px;
     overflow-wrap: break-word;
-
     background-color: white;
+    font-weight: bold;
   }
 
-  // labeled input
-  .igv-ui-generic-dialog-label-input {
-    margin-top: 8px;
-
-    width: 95%;
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-    padding-left: 8px;
-
-    background-color: white;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
-    div {
-      width: 30%;
-      height: 100%;
-
-      font-size: 16px;
-      text-align: right;
-      padding-right: 8px;
-
-      background-color: white;
-    }
-
-    @include generic-input;
-    input {
-      width: 50%;
-      font-size: 16px;
-    }
-
-  }
-
-  // input
-  .igv-ui-generic-dialog-input {
-    margin-top: 8px;
-
-    width: calc(100% - 16px);
-    height: 24px;
-
-    color: $igv-dark-grey-color;
-
-    line-height: 24px;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-around;
-    align-items: center;
-
-    @include generic-input;
-    input {
-      font-size: 16px;
-    }
-
-  }
+  //// labeled input
+  //.igv-ui-dialog-label-input {
+  //  margin-top: 8px;
+  //
+  //  width: 95%;
+  //  height: 24px;
+  //
+  //  color: $igv-dark-grey-color;
+  //
+  //  line-height: 24px;
+  //  padding-left: 8px;
+  //
+  //  background-color: white;
+  //
+  //  display: flex;
+  //  flex-flow: row;
+  //  flex-wrap: nowrap;
+  //  justify-content: flex-start;
+  //  align-items: center;
+  //
+  //  div {
+  //    width: 30%;
+  //    height: 100%;
+  //
+  //    font-size: 16px;
+  //    text-align: right;
+  //    padding-right: 8px;
+  //
+  //    background-color: white;
+  //  }
+  //
+  //  @include generic-input;
+  //
+  //  input {
+  //    width: 50%;
+  //    font-size: 16px;
+  //  }
+  //
+  //}
+  //
+  //// input
+  //.igv-ui-dialog-input {
+  //  margin-top: 8px;
+  //
+  //  width: calc(100% - 16px);
+  //  height: 24px;
+  //
+  //  color: $igv-dark-grey-color;
+  //
+  //  line-height: 24px;
+  //
+  //  display: flex;
+  //  flex-flow: row;
+  //  flex-wrap: nowrap;
+  //  justify-content: space-around;
+  //  align-items: center;
+  //
+  //  @include generic-input;
+  //
+  //  input {
+  //    font-size: 16px;
+  //  }
+  //
+  //}
 
   // ok | cancel - container
-  .igv-ui-generic-dialog-ok-cancel {
+  .igv-ui-dialog-ok-cancel {
 
     width: 100%;
-    height: $igv-button-height;
+    //  height: $igv-button-height;
 
     display: flex;
     flex-flow: row;
@@ -157,8 +144,8 @@
     align-items: center;
 
     div {
+      margin: 16px;
       margin-top: 32px;
-
       color: white;
       font-family: $igv-default-font-face;
       font-size: 14px;
@@ -178,14 +165,14 @@
     }
 
     div:first-child {
-      margin-left: 32px;
-      margin-right: 0;
+      //  margin: 16px;
+      //  margin-right: 0;
       background-color: $igv-button-ok-color;
     }
 
     div:last-child {
-      margin-left: 0;
-      margin-right: 32px;
+      // margin: 16px;
+      //  margin-right: 32px;
       background-color: $igv-button-cancel-color;
     }
 
@@ -202,7 +189,7 @@
   }
 
   // ok - container
-  .igv-ui-generic-dialog-ok {
+  .igv-ui-dialog-ok {
 
     width: 100%;
     height: 36px;
@@ -239,5 +226,5 @@
     }
 
   }
-
 }
+
