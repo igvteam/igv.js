@@ -31,6 +31,7 @@ import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import igvxhr from "../igvxhr.js";
 import {buildOptions, doAutoscale, extend} from "../util/igvUtils.js";
+import {createCheckbox} from "../igv-icons.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -43,14 +44,15 @@ const InteractionTrack = extend(TrackBase,
         this.cosTheta = Math.cos(this.theta);
         this.height = config.height || 250;
         this.arcType = config.arcType || "nested";   // nested | proportional
-        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation === "up");       // true for up, false for down
+        this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation); // true for up, false for down
+        this.showBlocks = config.showBlocks === undefined ? false : config.showBlocks;
         this.thickness = config.thickness || 1;
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha === undefined ? "0.05" :
             config.alpha === 0 ? undefined : config.alpha.toString();
         this.visibilityWindow = -1;
         this.colorAlphaCache = {};
-        this.logScale = config.logScale === true;   // i.e. undefined => false
+        this.logScale = config.logScale !== false;   // i.e. defaul to true (undefined => true)
         if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
@@ -122,7 +124,7 @@ InteractionTrack.prototype.drawNested = function (options) {
 
         // Autoscale theta
         autoscaleNested.call(this);
-
+        const y = this.arcOrientation ? options.pixelHeight : 0;
         for (let feature of featureList) {
             let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
             let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
@@ -161,6 +163,17 @@ InteractionTrack.prototype.drawNested = function (options) {
 
             ctx.strokeStyle = color;
             ctx.lineWidth = feature.thickness || this.thickness || 1;
+
+            if (this.showBlocks) {
+                ctx.fillStyle = color;
+                const s1 = (feature.start1 - bpStart) / xScale;
+                const e1 = (feature.end1 - bpStart) / xScale;
+                const s2 = (feature.start2 - bpStart) / xScale;
+                const e2 = (feature.end2 - bpStart) / xScale;
+                const hb = this.arcOrientation ? -5 : 5;
+                ctx.fillRect(s1, y, e1 - s1, hb)
+                ctx.fillRect(s2, y, e2 - s2, hb);
+            }
 
             ctx.beginPath();
             ctx.arc(xc, yc, r, startAngle, endAngle, false);
@@ -204,7 +217,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
     if (featureList) {
 
         const yScale = this.logScale ?
-            options.pixelHeight / Math.log10(this.dataRange.max) :
+            options.pixelHeight / Math.log10(this.dataRange.max + 1) :
             options.pixelHeight / (this.dataRange.max - this.dataRange.min);
 
         const y = this.arcOrientation ? options.pixelHeight : 0;
@@ -213,8 +226,8 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
             if (feature.value === undefined || Number.isNaN(feature.value) || feature.value === 0) continue;
 
-            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
-            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
+            let pixelStart = (feature.m1 - bpStart) / xScale;
+            let pixelEnd = (feature.m2 - bpStart) / xScale;
             let w = (pixelEnd - pixelStart);
             if (w < 3) {
                 w = 3;
@@ -224,7 +237,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
             if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
 
             const radiusY = this.logScale ?
-                Math.log10(feature.value) * yScale :
+                Math.log10(feature.value + 1) * yScale :
                 feature.value * yScale;
             const counterClockwise = this.arcOrientation ? true : false;
             const color = feature.color || this.color;
@@ -233,6 +246,17 @@ InteractionTrack.prototype.drawProportional = function (options) {
             ctx.beginPath();
             ctx.ellipse(pixelStart + w / 2, y, w / 2, radiusY, 0, 0, Math.PI, counterClockwise);
             ctx.stroke();
+
+            if (this.showBlocks) {
+                ctx.fillStyle = color;
+                const s1 = (feature.start1 - bpStart) / xScale;
+                const e1 = (feature.end1 - bpStart) / xScale;
+                const s2 = (feature.start2 - bpStart) / xScale;
+                const e2 = (feature.end2 - bpStart) / xScale;
+                const hb = this.arcOrientation ? -5 : 5;
+                ctx.fillRect(s1, y, e1 - s1, hb)
+                ctx.fillRect(s2, y, e2 - s2, hb);
+            }
 
             if (this.alpha) {
                 const alphaColor = getAlphaColor.call(this, color, this.alpha);
@@ -247,21 +271,48 @@ InteractionTrack.prototype.drawProportional = function (options) {
 InteractionTrack.prototype.menuItemList = function () {
 
     var self = this;
-    return [
-        {
-            name: "Toggle arc direction",
-            click: function () {
-                self.arcOrientation = !self.arcOrientation;
-                self.trackView.repaintViews();
-            }
-        },
+    const items = [
+
         {
             name: "Set track color",
             click: function () {
                 self.trackView.presentColorPicker();
             }
-        }
+        },
+        '<HR/>'
     ];
+
+    const lut =
+        {
+            "nested": "Nested Arcs",
+            "proportional": "Proportional Arcs"
+        };
+    for (let arcType of ["nested", "proportional"]) {
+        items.push(
+            {
+                object: createCheckbox(lut[arcType], arcType === this.arcType),
+                click: function () {
+                    self.arcType = arcType;
+                    self.trackView.repaintViews();
+                }
+            });
+    }
+    items.push({
+        object: createCheckbox("showBlocks", this.showBlocks),
+        click: function () {
+            self.showBlocks = !self.showBlocks;
+            self.trackView.repaintViews();
+        }
+    })
+    items.push({
+        name: "Toggle arc direction",
+        click: function () {
+            self.arcOrientation = !self.arcOrientation;
+            self.trackView.repaintViews();
+        }
+    });
+
+    return items;
 };
 
 InteractionTrack.prototype.getWGFeatures = function (allFeatures) {
@@ -312,38 +363,11 @@ InteractionTrack.prototype.doAutoscale = function (features) {
     }
 }
 
-//
-//
+
 //
 // InteractionTrack.prototype.popupData = function (config) {
 //
 //     return null;
-// };
-
-// InteractionTrack.prototype.contextMenuItemList = function (config) {
-//
-//     var self = this,
-//         clickHandler;
-//
-//
-//
-//     clickHandler = function () {
-//
-//         var genomicLocation = config.genomicLocation,
-//             referenceFrame = config.viewport.genomicState.referenceFrame;
-//
-//         // Define a region 5 "pixels" wide in genomic coordinates
-//         var bpWidth = referenceFrame.toBP(2.5);
-//
-//         self.sortSamples(referenceFrame.chrName, genomicLocation - bpWidth, genomicLocation + bpWidth, sortDirection);
-//
-//         sortDirection = (sortDirection === "ASC" ? "DESC" : "ASC");
-//
-//
-//     };
-//
-//     return [{label: 'Sort by value',  click: clickHandler, init: undefined}];
-//
 // };
 
 
