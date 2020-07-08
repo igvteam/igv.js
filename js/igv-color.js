@@ -214,9 +214,13 @@ const IGVColor = {
 
     addAlpha: function (color, alpha) {
 
-        const c = this.colorNameToHex(color);
-        if(c) {
-            color = c;
+        if(color === "0" || color === ".") {
+            color = "rgb(0,0,0)"
+        } else {
+            const c = this.colorNameToHex(color);
+            if (c) {
+                color = c;
+            }
         }
 
         var isHex = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
@@ -228,7 +232,6 @@ const IGVColor = {
         if (isHex) {
             color = IGVColor.hexToRgb(color);
         }
-
         if (color.startsWith("rgb")) {
             return color.replace("rgb", "rgba").replace(")", ", " + alpha + ")");
         } else {
