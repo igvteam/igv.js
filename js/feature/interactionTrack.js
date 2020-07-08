@@ -30,8 +30,9 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
 import igvxhr from "../igvxhr.js";
-import {buildOptions, doAutoscale, extend} from "../util/igvUtils.js";
+import {buildOptions, extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
+import {scoreShade} from "../util/ucscUtils.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -89,7 +90,7 @@ InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
     if (!this.featureCache) {
         const options = buildOptions(this.config);    // Add oauth token, if any
         const data = await igvxhr.loadString(this.config.url, options);
-        const parser = new FeatureParser("bedpe");
+        const parser = new FeatureParser(this.config.format || "bedpe");
         const header = parser.parseHeader(data);
         const features = parser.parseFeatures(data);
         this.wgFeatures = this.getWGFeatures(features);
@@ -126,6 +127,9 @@ InteractionTrack.prototype.drawNested = function (options) {
         autoscaleNested.call(this);
         const y = this.arcOrientation ? options.pixelHeight : 0;
         for (let feature of featureList) {
+
+            if(feature.interchr) continue;
+
             let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
             let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
             let direction = this.arcOrientation;
@@ -157,7 +161,9 @@ InteractionTrack.prototype.drawNested = function (options) {
             }
 
             let color = feature.color || this.color;
-            if (color && w > viewportWidth) {
+            if(color && this.config.useScore) {
+                color = getAlphaColor.call(this, color, scoreShade(feature.score));
+            } else if (color && w > viewportWidth) {
                 color = getAlphaColor.call(this, color, "0.1");
             }
 
@@ -214,7 +220,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
     const featureList = options.features;
 
-    if (featureList) {
+    if (featureList && featureList.length > 0) {
 
         const yScale = this.logScale ?
             options.pixelHeight / Math.log10(this.dataRange.max + 1) :
@@ -224,7 +230,11 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
         for (let feature of featureList) {
 
-            if (feature.value === undefined || Number.isNaN(feature.value) || feature.value === 0) continue;
+
+            if (feature.value === undefined || Number.isNaN(feature.value)|| feature.interchr) continue;
+
+
+            const value = this.config.useScore ? feature.score : feature.value;
 
             let pixelStart = (feature.m1 - bpStart) / xScale;
             let pixelEnd = (feature.m2 - bpStart) / xScale;
@@ -237,8 +247,8 @@ InteractionTrack.prototype.drawProportional = function (options) {
             if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
 
             const radiusY = this.logScale ?
-                Math.log10(feature.value + 1) * yScale :
-                feature.value * yScale;
+                Math.log10(value + 1) * yScale :
+                value * yScale;
             const counterClockwise = this.arcOrientation ? true : false;
             const color = feature.color || this.color;
             ctx.strokeStyle = color;
@@ -298,7 +308,7 @@ InteractionTrack.prototype.menuItemList = function () {
             });
     }
     items.push({
-        object: createCheckbox("showBlocks", this.showBlocks),
+        object: createCheckbox("Show Blocks", this.showBlocks),
         click: function () {
             self.showBlocks = !self.showBlocks;
             self.trackView.repaintViews();
@@ -358,8 +368,18 @@ InteractionTrack.prototype.getWGFeatures = function (allFeatures) {
 }
 
 InteractionTrack.prototype.doAutoscale = function (features) {
+
     if ("proportional" === this.arcType) {
-        return doAutoscale(features);
+        let max = 0;
+        if (features) {
+            for(let f of features) {
+                const v = this.config.useScore ? f.score : f.value;
+                if (!Number.isNaN(v)) {
+                    max = Math.max(max, v);
+                }
+            }
+        }
+        return {min: 0, max: max};
     }
 }
 

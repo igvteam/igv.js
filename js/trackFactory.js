@@ -33,6 +33,9 @@ const tracks = {
     'interaction': (config, browser) => {
         return new InteractionTrack(config, browser);
     },
+    'interact': (config, browser) => {
+        return new InteractionTrack(config, browser);
+    },
     'variant': (config, browser) => {
         return new VariantTrack(config, browser);
     },
@@ -50,11 +53,11 @@ const tracks = {
     }
 }
 
-const addTrack = function(name, track){
+const addTrack = function (name, track) {
     this.tracks[name] = track;
 }
 
-const getTrack = function(name){
+const getTrack = function (name) {
     return this.tracks[name];
 }
 
