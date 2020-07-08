@@ -1,5 +1,6 @@
 // Defines the top-level API for the igv module
 
+import { Alert, AlertDialog, InputDialog } from '../node_modules/igv-ui/src/index.js';
 import {createBrowser, createTrack, getBrowser, removeBrowser, visibilityChange} from './igv-create.js';
 import getDataWrapper from "./feature/dataWrapper.js";
 import oauth from './oauth.js';
@@ -20,13 +21,10 @@ import TrackView from "./trackView.js";
 import GenericContainer from "./ui/genericContainer.js";
 import makeDraggable from "./ui/draggable.js";
 import Popover from "./ui/popover.js";
-import AlertDialog from "./ui/alertDialog.js";
-import InputDialog from "./ui/inputDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import embedCss from "./embedCss.js";
 import MenuUtils from "./ui/menuUtils.js";
-import Alert from "./ui/alert.js"
 import version from "./version.js"
 
 function setGoogleOauthToken(accessToken) {

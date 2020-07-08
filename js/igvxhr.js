@@ -23,13 +23,13 @@
  * THE SOFTWARE.
  */
 
+import { Alert } from '../node_modules/igv-ui/src/index.js';
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {unbgzf} from './bam/bgzf.js';
 import Zlib from "./vendor/zlib_and_gzip.js";
 import {getFilename} from './util/fileUtils.js'
 import {decodeDataURI, parseUri} from "./util/uriUtils.js"
-import Alert from "./ui/alert.js"
 import PromiseThrottle from "./util/promiseThrottle.js"
 
 var NONE = 0;
