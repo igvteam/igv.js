@@ -23,37 +23,30 @@
 
 <script type="module">
 
-    import igv from '../dist/igv.esm.js'
+    import igv from "../js/index.js";
 
     var options =
         {
             genome: "hg38",
-            locus: "chr2:65,489,209-65,795,733",
+            locus: "chr12:40,560,500-40,660,499",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                   url: "../test/data/bedpe/interactExample1.txt",
                     type: "interaction",
-                    format: "bedpe",
-                    name: "CTCF PET",
-                    arcType: "proportional",
+                    format: "interact",
+                    name: "UCSC Example 1",
+                    arcType: "nested",
                     color: "rgb(0,200,0)",
-                    alpha: "0.05",
-                    logScale: true,
-                    showBlocks: true,
-                    max: 80
+                    showBlocks: true
                 },
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
+                    url: "../test/data/bedpe/interactExample1.txt",
                     type: "interaction",
-                    format: "bedpe",
-                    name: "CTCF PET",
+                    format: "interact",
+                    name: "UCSC Example 1",
                     arcType: "proportional",
-                    arcOrientation: false,
-                    color: "blue",
-                    alpha: 0,
-                    logScale: true,
-                    showBlocks: true,
-                    max: 80
+                    color: "rgb(0,200,0)",
+                    showBlocks: true
                 }
             ]
         };
