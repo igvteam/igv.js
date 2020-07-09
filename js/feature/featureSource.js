@@ -53,6 +53,7 @@ class FeatureSource {
         this.config = config || {};
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
+        this.visibilityWindow = config.visibilityWindow;
 
         // Default GFF filter -- these feature types will be filtered out
         if (undefined === config.filterTypes) {
@@ -102,7 +103,7 @@ class FeatureSource {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
-        this.supportsWG = !this.queryable;   // Can be dynamically changed
+        this.supportsWG = !this.queryable  && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);   // Can be dynamically changed
     }
 
     supportsWholeGenome() {
