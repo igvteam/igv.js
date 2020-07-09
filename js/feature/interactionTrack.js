@@ -33,6 +33,7 @@ import igvxhr from "../igvxhr.js";
 import {buildOptions, extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
+import FeatureSource from "./featureSource.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -51,7 +52,6 @@ const InteractionTrack = extend(TrackBase,
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha === undefined ? "0.05" :
             config.alpha === 0 ? undefined : config.alpha.toString();
-        this.visibilityWindow = -1;
         this.colorAlphaCache = {};
         this.logScale = config.logScale !== false;   // i.e. defaul to true (undefined => true)
         if (config.max) {
@@ -62,6 +62,10 @@ const InteractionTrack = extend(TrackBase,
         } else {
             this.autoscale = true;
         }
+        this.featureSource = new FeatureSource(config, browser.genome);
+
+        // We need to override the wg feature method.
+        this.featureSource.getWGFeatures = getWGFeatures;
     });
 
 InteractionTrack.prototype.supportsWholeGenome = function () {
@@ -85,19 +89,8 @@ InteractionTrack.prototype.getState = function () {
 
 
 InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-
-    const genome = this.browser.genome;
-    if (!this.featureCache) {
-        const options = buildOptions(this.config);    // Add oauth token, if any
-        const data = await igvxhr.loadString(this.config.url, options);
-        const parser = new FeatureParser(this.config.format || "bedpe");
-        const header = parser.parseHeader(data);
-        const features = parser.parseFeatures(data);
-        this.wgFeatures = this.getWGFeatures(features);
-        this.featureCache = new FeatureCache(features, genome);
-    }
-    return chr.toLowerCase() === "all" ? this.wgFeatures : this.featureCache.queryFeatures(chr, bpStart, bpEnd);
-};
+    return this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+}
 
 InteractionTrack.prototype.draw = function (options) {
     if (this.arcType === "proportional") {
@@ -230,11 +223,10 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
         for (let feature of featureList) {
 
-
-            if (feature.value === undefined || Number.isNaN(feature.value)|| feature.interchr) continue;
-
-
             const value = this.config.useScore ? feature.score : feature.value;
+
+            if (value === undefined || Number.isNaN(value)|| feature.interchr) continue;
+
 
             let pixelStart = (feature.m1 - bpStart) / xScale;
             let pixelEnd = (feature.m2 - bpStart) / xScale;
@@ -325,47 +317,6 @@ InteractionTrack.prototype.menuItemList = function () {
     return items;
 };
 
-InteractionTrack.prototype.getWGFeatures = function (allFeatures) {
-
-    const genome = this.browser.genome;
-    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
-    const wgFeatures = [];
-    const genomeLength = genome.getGenomeLength();
-    const smallestFeatureVisible = genomeLength / 1000;
-
-    for (let c of genome.wgChromosomeNames) {
-
-        for (let f of allFeatures) {
-            let queryChr = genome.getChromosomeName(f.chr);
-
-            if (wgChromosomeNames.has(queryChr)) {
-
-                const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
-                const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
-                if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
-
-                const wg = Object.create(Object.getPrototypeOf(f));
-                Object.assign(wg, f);
-                wg.chr = "all";
-                wg.m1 = m1;
-                wg.m2 = m2;
-                // wg.realChr = f.chr;
-                // wg.realStart = f.start;
-                // wg.realEnd = f.end;
-
-                //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                //wg.originalFeature = f;
-                wgFeatures.push(wg);
-            }
-
-        }
-    }
-    wgFeatures.sort(function (a, b) {
-        return a.m1 - b.m2;
-    });
-    return wgFeatures;
-}
 
 InteractionTrack.prototype.doAutoscale = function (features) {
 
@@ -424,6 +375,49 @@ function getAlphaColor(color, alpha) {
         this.colorAlphaCache[color] = c;
     }
     return c;
+}
+
+
+function getWGFeatures  (allFeatures) {
+
+    const genome = this.genome;
+    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
+    const wgFeatures = [];
+    const genomeLength = genome.getGenomeLength();
+    const smallestFeatureVisible = genomeLength / 1000;
+
+    for (let c of genome.wgChromosomeNames) {
+        const chrFeatures = allFeatures[c];
+        if(chrFeatures)
+        for (let f of chrFeatures) {
+            let queryChr = genome.getChromosomeName(f.chr);
+
+            if (wgChromosomeNames.has(queryChr)) {
+
+                const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
+                const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
+                if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
+
+                const wg = Object.create(Object.getPrototypeOf(f));
+                Object.assign(wg, f);
+                wg.chr = "all";
+                wg.m1 = m1;
+                wg.m2 = m2;
+                // wg.realChr = f.chr;
+                // wg.realStart = f.start;
+                // wg.realEnd = f.end;
+
+                //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                //wg.originalFeature = f;
+                wgFeatures.push(wg);
+            }
+        }
+    }
+    wgFeatures.sort(function (a, b) {
+        return a.m1 - b.m2;
+    });
+    return wgFeatures;
 }
 
 export default InteractionTrack;

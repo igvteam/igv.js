@@ -34,26 +34,25 @@
                    url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
                     type: "interaction",
                     format: "bedpe",
-                    name: "CTCF PET",
+                    name: "CTCF PET - proportional",
                     arcType: "proportional",
                     color: "rgb(0,200,0)",
                     alpha: "0.05",
                     logScale: true,
                     showBlocks: true,
-                    max: 80
+                    max: 80,
+                    visibilityWindow: 10000000
                 },
                 {
                     url: "https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt",
                     type: "interaction",
                     format: "bedpe",
-                    name: "CTCF PET",
-                    arcType: "proportional",
+                    name: "CTCF PET - nested",
+                    arcType: "nested",
                     arcOrientation: false,
                     color: "blue",
-                    alpha: 0,
-                    logScale: true,
                     showBlocks: true,
-                    max: 80
+                    visibilityWindow: 10000000
                 }
             ]
         };
