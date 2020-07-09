@@ -26,6 +26,7 @@
 import FeatureUtils from "./feature/featureUtils.js";
 import {isFilePath} from './util/fileUtils.js'
 import {isSimpleType} from "./util/igvUtils.js";
+import {numberFormatter, capitalize} from "./util/stringUtils.js";
 
 /**
  * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
@@ -172,7 +173,7 @@ TrackBase.prototype.getVisibilityWindow = function () {
  */
 TrackBase.extractPopupData = function (feature, genomeId) {
 
-    const filteredProperties = new Set(['row', 'color']);
+    const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand']);
     const data = [];
 
     let alleles, alleleFreqs;
@@ -182,8 +183,7 @@ TrackBase.extractPopupData = function (feature, genomeId) {
             !filteredProperties.has(property) &&
             isSimpleType(feature[property])) {
             let value = feature[property];
-            if ("start" === property) value = value + 1;
-            data.push({name: property, value: value});
+            data.push({name: capitalize(property), value: value});
 
             if (property === "alleles") {
                 alleles = feature[property];
@@ -236,8 +236,15 @@ TrackBase.extractPopupData = function (feature, genomeId) {
         }
     }
 
-    return data;
+    // final chr position
+    let posString = `${feature.chr}:${numberFormatter(feature.start+1)}-${numberFormatter(feature.end)}`
+    if(feature.strand) {
+        posString += ` (${feature.strand})`
+    }
+    data.push('<hr\>');
+    data.push(posString);
 
+    return data;
 
 }
 
