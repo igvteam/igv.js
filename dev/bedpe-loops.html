@@ -17,7 +17,7 @@
 
 <body>
 
-<h1>BEDPE Proportional Arcs</h1>
+<h1>BEDPE Nested Arcs</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -28,25 +28,12 @@
     var options =
         {
             genome: "hg38",
-            locus: "chr12:40,560,500-40,660,499",
             tracks: [
                 {
-                   url: "../test/data/bedpe/interactExample1.txt",
-                    type: "interaction",
-                    format: "interact",
-                    name: "UCSC Example 1",
-                    arcType: "nested",
-                    color: "rgb(0,200,0)",
-                    showBlocks: true
-                },
-                {
-                    url: "../test/data/bedpe/interactExample1.txt",
-                    type: "interaction",
-                    format: "interact",
-                    name: "UCSC Example 1",
-                    arcType: "proportional",
-                    color: "rgb(0,200,0)",
-                    showBlocks: true
+                    "url": "https://s3.amazonaws.com/igv.org.test/data/gm12878_loops.bedpe.gz",
+                    "type": "interaction",
+                    "format": "bedpe",
+                    "name": "GM12878 Loops (bedpe - nested)"
                 }
             ]
         };
