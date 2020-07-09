@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import Alert from '../ui/alert.js'
+import { Alert } from '../../node_modules/igv-ui/src/index.js';
 import BamReader from "./bamReader.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
