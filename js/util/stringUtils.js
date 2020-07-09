@@ -109,4 +109,8 @@ function uncompressString(enc) {
     return str;
 }
 
-export {isString, numberFormatter, splitLines, splitStringRespectingQuotes, stripQuotes, hashCode, compressString, uncompressString};
+function capitalize(str) {
+    return str.length > 0 ? str.charAt(0).toUpperCase() + str.slice(1) : str;
+}
+
+export {isString, numberFormatter, splitLines, splitStringRespectingQuotes, stripQuotes, hashCode, compressString, uncompressString, capitalize};
