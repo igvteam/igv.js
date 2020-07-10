@@ -31,6 +31,7 @@ import {extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
+import BWSource from "../bigwig/bwSource.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -60,7 +61,12 @@ const InteractionTrack = extend(TrackBase,
         } else {
             this.autoscale = true;
         }
-        this.featureSource = new FeatureSource(config, browser.genome);
+
+        if ('bigwig' === config.format || 'bigbed' === config.format || 'bb' === config.format) {
+            this.featureSource = new BWSource(config, browser.genome);
+        } else {
+            this.featureSource = new FeatureSource(config, browser.genome);
+        }
 
         // We need to override the wg feature method.
         this.featureSource.getWGFeatures = getWGFeatures;

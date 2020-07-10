@@ -17,34 +17,26 @@
 
 <body>
 
-<h1>UCSC Interact - Example 2</h1>
+<h1>UCSC bigInteract - Example 3</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import igv from '../dist/igv.esm.min.js'
 
     var options =
         {
             genome: "hg19",
-            locus: "chr3:64,487,397-64,645,623",
+            locus: "chr3:63,681,462-64,546,551",
             tracks: [
                 {
-                   url: "../test/data/bedpe/interactExample2.txt",
+                    url: "https://s3.amazonaws.com/igv.org.demo/interactExample3.inter.bb",
                     type: "interaction",
-                    format: "interact",
-                    name: "UCSC Example 2 - nested use score",
+                    format: "bb",
+                    name: "UCSC Example 3 - bigInteract",
                     arcType: "nested",
                     useScore: true,
-                    showBlocks: true
-                },
-                {
-                    url: "../test/data/bedpe/interactExample2.txt",
-                    type: "interaction",
-                    format: "interact",
-                    name: "UCSC Example 2 - proportional use value",
-                    arcType: "proportional",
                     showBlocks: true
                 }
             ]

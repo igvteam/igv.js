@@ -83,7 +83,7 @@ class BWReader {
             if (this.type === "BigWig") {
                 decodeFunction = decodeWigData;
             } else {
-                decodeFunction = decodeBedData;
+                decodeFunction = getBedDataDecoder.call(this);
             }
         }
 
@@ -610,28 +610,28 @@ function decodeWigData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
     }
 }
 
+function getBedDataDecoder() {
 
-function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
-
-    const binaryParser = new BinaryParser(data);
     const minSize = 3 * 4 + 1;   // Minimum # of bytes required for a bed record
     const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql);
+    return function (data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chrDict) {
+        const binaryParser = new BinaryParser(data);
+        while (binaryParser.remLength() >= minSize) {
 
-    while (binaryParser.remLength() >= minSize) {
+            const chromId = binaryParser.getInt();
+            const chr = chrDict[chromId];
+            const chromStart = binaryParser.getInt();
+            const chromEnd = binaryParser.getInt();
+            const rest = binaryParser.getString();
+            if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
+            else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
 
-        const chromId = binaryParser.getInt();
-        const chr = chrDict[chromId];
-        const chromStart = binaryParser.getInt();
-        const chromEnd = binaryParser.getInt();
-        const rest = binaryParser.getString();
-        if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
-        else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
-
-        if(chromEnd > 0) {
-            const feature = {chr: chr, start: chromStart, end: chromEnd};
-            featureArray.push(feature);
-            const tokens = rest.split("\t");
-            decoder(feature, tokens);
+            if (chromEnd > 0) {
+                const feature = {chr: chr, start: chromStart, end: chromEnd};
+                featureArray.push(feature);
+                const tokens = rest.split("\t");
+                decoder(feature, tokens);
+            }
         }
     }
 }
