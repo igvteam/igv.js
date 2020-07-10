@@ -215,32 +215,6 @@ function runBigwigTests() {
         })
     });
 
-    QUnit.test("Bed features", function (assert) {
-        var done = assert.async();
-
-        //chr21:19,146,376-19,193,466
-        var url = dataURL + "bigwig/bigBedExample.bb",
-            chr = "chr21",
-            bpStart = 33031597,
-            bpEnd = 33041570,
-            bpPerPixel = 0.5;
-
-        createMockObjects(bpPerPixel);
-
-        var bWSource = new BWSource({url: url});
-
-        bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel).then(function (features) {
-
-            assert.ok(features);
-
-            assert.equal(features.length, 23);   // Verified in iPad app
-
-            done();
-        }).catch(function (error) {
-            console.log(error);
-            assert.ok(false);
-        });
-    });
 }
 
 export default runBigwigTests;
