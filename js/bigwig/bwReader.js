@@ -29,6 +29,7 @@ import IGVColor from "../igv-color.js";
 import igvxhr from "../igvxhr.js";
 import Zlib from "../vendor/zlib_and_gzip.js";
 import {buildOptions} from "../util/igvUtils.js";
+import getDecoder from "./bbDecoders.js";
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26; // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66; // BigWig Magic High to Low
@@ -71,7 +72,7 @@ class BWReader {
 
         // Select a biwig "zoom level" appropriate for the current resolution.   Select decode function
         const zoomLevelHeaders = await this.getZoomHeaders()
-        let zoomLevelHeader = zoomLevelForScale(bpPerPixel, zoomLevelHeaders);
+        let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined;
         let treeOffset;
         let decodeFunction;
         if (zoomLevelHeader) {
@@ -121,7 +122,7 @@ class BWReader {
                 } else {
                     plain = uint8Array;
                 }
-                decodeFunction(new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToChrom, windowFunction);
+                decodeFunction.call(this, new DataView(plain.buffer), chrIdx1, bpStart, chrIdx2, bpEnd, allFeatures, this.chromTree.idToChrom, windowFunction);
             }
 
             allFeatures.sort(function (a, b) {
@@ -194,7 +195,7 @@ class BWReader {
             header.autoSqlOffset = binaryParser.getLong();
             header.totalSummaryOffset = binaryParser.getLong();
             header.uncompressBuffSize = binaryParser.getInt();
-            header.reserved = binaryParser.getLong();
+            header.extensionOffset = binaryParser.getLong();
 
             ///////////
 
@@ -614,6 +615,8 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
 
     const binaryParser = new BinaryParser(data);
     const minSize = 3 * 4 + 1;   // Minimum # of bytes required for a bed record
+    const decoder = getDecoder(this.header.definedFieldCount, this.header.fieldCount, this.autoSql);
+
     while (binaryParser.remLength() >= minSize) {
 
         const chromId = binaryParser.getInt();
@@ -624,44 +627,11 @@ function decodeBedData(data, chrIdx1, bpStart, chrIdx2, bpEnd, featureArray, chr
         if (chromId < chrIdx1 || (chromId === chrIdx1 && chromEnd < bpStart)) continue;
         else if (chromId > chrIdx2 || (chromId === chrIdx2 && chromStart >= bpEnd)) break;
 
-        const feature = {chr: chr, start: chromStart, end: chromEnd};
-
-        featureArray.push(feature);
-
-        const tokens = rest.split("\t");
-        if (tokens.length > 0) {
-            feature.name = tokens[0];
-        }
-
-        if (tokens.length > 1) {
-            feature.score = parseFloat(tokens[1]);
-        }
-        if (tokens.length > 2) {
-            feature.strand = tokens[2];
-        }
-        if (tokens.length > 3) {
-            feature.cdStart = parseInt(tokens[3]);
-        }
-        if (tokens.length > 4) {
-            feature.cdEnd = parseInt(tokens[4]);
-        }
-        if (tokens.length > 5) {
-            if (tokens[5] !== "." && tokens[5] !== "0" && tokens[5] !== "-1") {
-                const c = IGVColor.createColorString(tokens[5]);
-                feature.color = c.startsWith("rgb") ? c : undefined;
-            }
-        }
-        if (tokens.length > 8) {
-            const exonCount = parseInt(tokens[6]);
-            const exonSizes = tokens[7].split(',');
-            const exonStarts = tokens[8].split(',');
-            const exons = [];
-            for (let i = 0; i < exonCount; i++) {
-                const eStart = chromStart + parseInt(exonStarts[i]);
-                const eEnd = eStart + parseInt(exonSizes[i]);
-                exons.push({start: eStart, end: eEnd});
-            }
-            feature.exons = exons;
+        if(chromEnd > 0) {
+            const feature = {chr: chr, start: chromStart, end: chromEnd};
+            featureArray.push(feature);
+            const tokens = rest.split("\t");
+            decoder(feature, tokens);
         }
     }
 }
