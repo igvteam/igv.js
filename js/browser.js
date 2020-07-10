@@ -362,10 +362,15 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     var panelWidth;
 
-    if (false !== session.showIdeogram && !this.ideoPanel) {
-        panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
-        this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+    if (false !== session.showIdeogram) {
+        if (!this.ideoPanel) {
+            panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
+            this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+        }
         this.ideoPanel.repaint();
+    }
+    if (this.rulerTrack) {
+        this.rulerTrack.trackView.updateViews();
     }
 
     this.updateLocusSearchWidget(this.genomicStateList[0]);
@@ -420,7 +425,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
         await this.loadTrackList(genomeConfig.tracks);
     }
 
-    if(update !== false) {
+    if (update !== false) {
         this.updateViews();
     }
     return this.genome;
@@ -1428,7 +1433,7 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
     var width;
 
     width = this.viewportContainerWidth() / this.genomicStateList.length;
-console.log("build viewports width = " + width);
+    console.log("build viewports width = " + width);
     this.trackViews.forEach(function (trackView) {
 
         genomicStateList.forEach(function (genomicState) {
@@ -1598,13 +1603,13 @@ Browser.prototype.search = async function (string, init) {
 
                 let result;
                 if (Array.isArray(results)) {
-                  // Ignoring all but first result for now
-                  // TODO -- present all and let user select if results.length > 1
-                  result = results[0];
+                    // Ignoring all but first result for now
+                    // TODO -- present all and let user select if results.length > 1
+                    result = results[0];
                 } else {
-                  // When processing search results from Ensembl REST API
-                  // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/BRCA2?content-type=application/json
-                  result = results;
+                    // When processing search results from Ensembl REST API
+                    // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/BRCA2?content-type=application/json
+                    result = results;
                 }
 
                 if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
