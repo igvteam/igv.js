@@ -62,7 +62,7 @@ const FeatureTrack = extend(TrackBase,
         this.labelDisplayMode = config.labelDisplayMode;
 
         const format = config.format ? config.format.toLowerCase() : undefined;
-        if ('bigwig' === format || 'bigbed' === format) {
+        if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
             this.featureSource = new BWSource(config, browser.genome);
         } else {
             this.featureSource = new FeatureSource(config, browser.genome);
@@ -127,7 +127,8 @@ FeatureTrack.prototype.postInit = async function () {
     if (header) this.setTrackProperties(header)
 
     const format = this.config.format;
-    if (format && format.toLowerCase() === 'bigbed' &&
+    if (format &&
+        (format.toLowerCase() === 'bigbed' || format && format.toLowerCase() === 'biginteract') &&
         this.visibilityWindow === undefined &&
         typeof this.featureSource.defaultVisibilityWindow === 'function') {
         this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
