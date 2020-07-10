@@ -55,6 +55,9 @@ function splitStringRespectingQuotes(string, delim) {
 }
 
 function stripQuotes(str) {
+    if(str === undefined) {
+        return str;
+    }
     if(str.startsWith("'") || str.startsWith('"')) {
         str = str.substring(1);
     }
