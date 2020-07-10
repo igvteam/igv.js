@@ -79,8 +79,6 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
 
-    // browser.popover = new Popover(browser.$content, browser);
-
     browser.alertDialog = new AlertDialog(browser.$content.get(0));
 
     browser.inputDialog = new InputDialog(browser.$root.get(0));
