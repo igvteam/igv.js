@@ -103,7 +103,7 @@ function decodeInteract(tokens, ignore) {
         name: tokens[3],
         score: Number.parseFloat(tokens[4]),
         value: Number.parseFloat(tokens[5]),
-        color: tokens[7] === '.' ? undefined : tokens[7],
+        color: tokens[7] === '.' ? undefined : tokens[7] === "0" ? "rgb(0,0,0)" : tokens[7],
 
         interchr: tokens[8] !== tokens[13]
     }

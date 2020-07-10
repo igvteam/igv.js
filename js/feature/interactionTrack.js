@@ -24,13 +24,10 @@
  * THE SOFTWARE.
  */
 
-import FeatureParser from "./featureParsers.js";
-import FeatureCache from "./featureCache.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import IGVColor from "../igv-color.js";
-import igvxhr from "../igvxhr.js";
-import {buildOptions, extend} from "../util/igvUtils.js";
+import {extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
@@ -47,7 +44,8 @@ const InteractionTrack = extend(TrackBase,
         this.height = config.height || 250;
         this.arcType = config.arcType || "nested";   // nested | proportional
         this.arcOrientation = (config.arcOrientation === undefined ? true : config.arcOrientation); // true for up, false for down
-        this.showBlocks = config.showBlocks === undefined ? false : config.showBlocks;
+        this.showBlocks = config.showBlocks === undefined ? true : config.showBlocks;
+        this.blockHeight = config.blockHeight || 3;
         this.thickness = config.thickness || 1;
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha === undefined ? "0.05" :
@@ -169,9 +167,9 @@ InteractionTrack.prototype.drawNested = function (options) {
                 const e1 = (feature.end1 - bpStart) / xScale;
                 const s2 = (feature.start2 - bpStart) / xScale;
                 const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -5 : 5;
-                ctx.fillRect(s1, y, e1 - s1, hb)
-                ctx.fillRect(s2, y, e2 - s2, hb);
+                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
             }
 
             ctx.beginPath();
@@ -213,6 +211,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
     const featureList = options.features;
 
+
     if (featureList && featureList.length > 0) {
 
         const yScale = this.logScale ?
@@ -222,11 +221,10 @@ InteractionTrack.prototype.drawProportional = function (options) {
         const y = this.arcOrientation ? options.pixelHeight : 0;
 
         for (let feature of featureList) {
-
+            ctx.save();
             const value = this.config.useScore ? feature.score : feature.value;
 
             if (value === undefined || Number.isNaN(value)|| feature.interchr) continue;
-
 
             let pixelStart = (feature.m1 - bpStart) / xScale;
             let pixelEnd = (feature.m2 - bpStart) / xScale;
@@ -255,18 +253,20 @@ InteractionTrack.prototype.drawProportional = function (options) {
                 const e1 = (feature.end1 - bpStart) / xScale;
                 const s2 = (feature.start2 - bpStart) / xScale;
                 const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -5 : 5;
-                ctx.fillRect(s1, y, e1 - s1, hb)
-                ctx.fillRect(s2, y, e2 - s2, hb);
+                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
             }
 
             if (this.alpha) {
                 const alphaColor = getAlphaColor.call(this, color, this.alpha);
-                ctx.fillStyle = alphaColor;
+               ctx.fillStyle = alphaColor;
                 ctx.fill();
             }
+            ctx.restore();
         }
     }
+
 
 }
 
