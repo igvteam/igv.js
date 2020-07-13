@@ -60,13 +60,7 @@ const FeatureTrack = extend(TrackBase,
         this.maxRows = config.maxRows;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-
-        const format = config.format ? config.format.toLowerCase() : undefined;
-        if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
-            this.featureSource = new BWSource(config, browser.genome);
-        } else {
-            this.featureSource = new FeatureSource(config, browser.genome);
-        }
+            this.featureSource =  FeatureSource(config, browser.genome);
 
         // Set default heights
         this.autoHeight = config.autoHeight;

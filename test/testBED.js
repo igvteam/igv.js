@@ -76,7 +76,7 @@ function runBedTests() {
             indexlURL: "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi"
         }
 
-        const reader = new FeatureSource(config, genome);
+        const reader = FeatureSource(config, genome);
         const features = await reader.getFeatures("8", 128746680, 128756129)
         assert.ok(features);
         assert.equal(features.length, 2);
@@ -254,7 +254,7 @@ function runBedTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd = 67684468,
-            featureSource = new FeatureSource({
+            featureSource = FeatureSource({
                     format: 'bed',
                     indexed: false,
                     url: 'data/bed/basic_feature_3_columns.bed'
@@ -280,7 +280,7 @@ function runBedTests() {
 
         var done = assert.async();
 
-        var featureSource = new FeatureSource({
+        var featureSource = FeatureSource({
                 format: 'bed',
                 indexed: false,
                 url: 'data/bed/basic_feature_3_columns.bed'
@@ -304,7 +304,7 @@ function runBedTests() {
         var chr = "chr1",
             bpStart = 67655271,
             bpEnd = 67684468,
-            featureSource = new FeatureSource({
+            featureSource = FeatureSource({
                     format: 'bed',
                     url: 'data/bed/basic_feature_3_columns.bed.gzipped'
                 },
@@ -330,7 +330,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new FeatureSource({
+        featureSource = FeatureSource({
             format: 'broadPeak',
             url: "data/peak/test.broadPeak"
         });
@@ -368,7 +368,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new FeatureSource({
+        featureSource = FeatureSource({
                 format: 'refflat',
                 url: "data/bed/myc_refFlat.txt"
             },
@@ -408,7 +408,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new FeatureSource({
+        featureSource = FeatureSource({
                 format: 'genePred',
                 url: "data/bed/genePred_myc_hg38.txt"
             },
@@ -448,7 +448,7 @@ function runBedTests() {
             bpStart,
             bpEnd;
 
-        featureSource = new FeatureSource({
+        featureSource = FeatureSource({
                 format: 'refgene',
                 url: "data/bed/myc_refGene_genePredExt.txt"
             },
