@@ -51,7 +51,7 @@ const InteractionTrack = extend(TrackBase,
         this.color = config.color || "rgb(180,25,137)"
         this.alpha = config.alpha === undefined ? "0.05" :
             config.alpha === 0 ? undefined : config.alpha.toString();
-        this.colorAlphaCache = {};
+
         this.logScale = config.logScale !== false;   // i.e. defaul to true (undefined => true)
         if (config.max) {
             this.dataRange = {
@@ -62,14 +62,11 @@ const InteractionTrack = extend(TrackBase,
             this.autoscale = true;
         }
 
-        if ('bigwig' === config.format || 'bigbed' === config.format || 'bb' === config.format) {
-            this.featureSource = new BWSource(config, browser.genome);
-        } else {
-            this.featureSource = new FeatureSource(config, browser.genome);
-        }
-
-        // We need to override the wg feature method.
+        // Create the FeatureSource and override the default whole genome method
+        this.featureSource =  FeatureSource(config, browser.genome);
         this.featureSource.getWGFeatures = getWGFeatures;
+
+        this.colorAlphaCache = {};
     });
 
 InteractionTrack.prototype.supportsWholeGenome = function () {

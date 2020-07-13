@@ -15,7 +15,7 @@ function runAedTests() {
         var chr = "chr2",
             bpStart = 0,
             bpEnd = Number.MAX_VALUE,
-            featureSource = new FeatureSource({
+            featureSource =  FeatureSource({
                 format: 'aed',
                 indexed: false,
                 url: 'data/aed/utf8-bom.aed'

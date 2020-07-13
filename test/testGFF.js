@@ -16,7 +16,7 @@ function runGFFTests() {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = 10000;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: 'data/gff/eden.gff',
                 format: 'gff3',
                 filterTypes: []
@@ -39,7 +39,7 @@ function runGFFTests() {
 
     QUnit.test("Multiline feature", async function (assert) {
         var done = assert.async();
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: 'data/gff/multi_line_feature.gff3',
                 format: 'gff3'
             },

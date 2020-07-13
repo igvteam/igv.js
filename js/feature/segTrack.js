@@ -75,7 +75,7 @@ const SegTrack = extend(TrackBase,
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = new FeatureSource(this.config, browser.genome);
+        this.featureSource =  FeatureSource(this.config, browser.genome);
 
 
         // TODO this sort doens't look right, no samples have yet been loaded

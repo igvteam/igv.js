@@ -17,7 +17,7 @@ function runBEDGraphTests() {
         var chr = "chr19",
             bpStart = 49302001,
             bpEnd = 49304701,
-            featureSource = new FeatureSource({
+            featureSource = FeatureSource({
                     format: 'bedgraph',
                     url: 'data/wig/bedgraph-example-uscs.bedgraph'
                 },

@@ -15,7 +15,7 @@ function runWigTests() {
 				var done = assert.async();
 
         var path = "data/wig/fixedStep-example.wig",
-            featureSource = new FeatureSource(
+            featureSource = FeatureSource(
                 {format: 'wig', url: path},
                 genome),
             chr = "chr19",
@@ -46,7 +46,7 @@ function runWigTests() {
 
         var url = "data/wig/variableStep-example.wig";
 
-        var wigFeatureSource = new FeatureSource(
+        var wigFeatureSource = FeatureSource(
             {format: 'wig', url: url},
             genome);
 

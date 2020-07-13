@@ -17,7 +17,7 @@ function runSegTests() {
 
         const done = assert.async();
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
-        const featureSource = new FeatureSource(
+        const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
             genome);
         const chr = "chr1";
@@ -52,7 +52,7 @@ function runSegTests() {
             .then(function (genome) {
 
                 const url = dataURL + "seg/segmented_data_080520.seg.gz";
-                const featureSource = new FeatureSource({format: 'seg', url: url, indexed: false}, genome);
+                const featureSource = FeatureSource({format: 'seg', url: url, indexed: false}, genome);
                 const chr = "all";
                 return featureSource.getFeatures(chr)
             })
