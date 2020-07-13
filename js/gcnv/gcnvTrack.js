@@ -25,7 +25,7 @@ const GCNVTrack = extend(TrackBase,
       this.paintAxis = paintAxis;
       this.graphType = config.graphType || "bar";
 
-      this.featureSource = new FeatureSource(this.config, browser.genome);
+      this.featureSource = FeatureSource(this.config, browser.genome);
   });
 
 

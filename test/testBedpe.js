@@ -16,7 +16,7 @@ function runBedpeTests() {
         const chr = "chr12";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: './data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt',
                 format: 'bedpe'
             },
@@ -35,7 +35,7 @@ function runBedpeTests() {
         const chr = "chr9";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: './data/bedpe/hiccups_loops.bedpe',
                 format: 'bedpe'
             },
@@ -54,7 +54,7 @@ function runBedpeTests() {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: './data/bedpe/inter_chr_simulated.bedpe',
                 format: 'bedpe'
             },
@@ -74,7 +74,7 @@ function runBedpeTests() {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: './data/bedpe/sv_calls.10X.bedpe',
                 format: 'bedpe'
             },
@@ -93,7 +93,7 @@ function runBedpeTests() {
         const chr = "chr12";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
-        const featureSource = new FeatureSource({
+        const featureSource = FeatureSource({
                 url: './data/bedpe/interactExample1.txt',
                 format: 'interact'
             },

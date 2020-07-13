@@ -73,7 +73,7 @@ const EqtlTrack = extend(TrackBase,
         this.visibilityWindow = config.visibilityWindow === undefined ?
             2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000;
 
-        this.featureSource = new FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, browser.genome);
 
         GtexUtils.gtexLoaded = true;
 

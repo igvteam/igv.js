@@ -31,7 +31,7 @@ var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 const ROI = function (config, genome) {
     this.config = config;
     this.name = config.name;
-    this.roiSource = new FeatureSource(config, genome);
+    this.roiSource =  FeatureSource(config, genome);
     this.color = config.color || defaultHighlightColor;
 };
 
