@@ -62,7 +62,7 @@ const WigTrack = extend(TrackBase,
         } else if ("tdf" === format) {
             this.featureSource = new TDFSource(config, browser.genome);
         } else {
-            this.featureSource = new FeatureSource(config, browser.genome);
+            this.featureSource = FeatureSource(config, browser.genome);
         }
 
         this.autoscale = config.autoscale || config.max === undefined;

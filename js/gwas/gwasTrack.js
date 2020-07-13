@@ -79,7 +79,7 @@ const GWASTrack = extend(TrackBase,
                 })
             }
 
-        this.featureSource = new FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, browser.genome);
     });
 
 GWASTrack.prototype.supportsWholeGenome = function () {

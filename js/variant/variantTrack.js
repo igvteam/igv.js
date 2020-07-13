@@ -58,7 +58,7 @@ const VariantTrack = extend(TrackBase,
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
 
-        this.featureSource = new FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, browser.genome);
 
         this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
