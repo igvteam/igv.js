@@ -1,6 +1,6 @@
 // Defines the top-level API for the igv module
 
-import { Popover, InputDialog, AlertDialog, Alert } from '../node_modules/igv-ui/src/index.js';
+import { Popover, InputDialog, AlertDialog, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import {createBrowser, createTrack, getBrowser, removeBrowser, visibilityChange} from './igv-create.js';
 import getDataWrapper from "./feature/dataWrapper.js";
 import oauth from './oauth.js';

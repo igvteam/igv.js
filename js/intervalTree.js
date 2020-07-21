@@ -32,7 +32,7 @@
  *   Search       findOverlapping
  */
 
-import { Alert } from '../node_modules/igv-ui/src/index.js';
+import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 
 var BLACK = 1;
 var RED = 2;

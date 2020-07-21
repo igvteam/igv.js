@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { ColorPicker } from '../node_modules/igv-ui/src/index.js';
+import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import ViewPort from "./viewport.js";
 import FeatureUtils from "./feature/featureUtils.js";

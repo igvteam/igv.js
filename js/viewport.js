@@ -2,7 +2,7 @@
  * Created by dat on 9/16/16.
  */
 
-import { Popover } from '../node_modules/igv-ui/src/index.js';
+import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import C2S from "./canvas2svg.js";
 import RulerSweeper from "./rulerSweeper.js";
