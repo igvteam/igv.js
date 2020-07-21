@@ -42,7 +42,9 @@ const xhr = igvxhr;
 const Color = IGVColor;
 const graphics = IGVGraphics;
 
+console.log('igvjs. calling embedCss() ...');
 embedCss();
+console.log('... done.');
 
 export default {
     createBrowser,
