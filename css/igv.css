@@ -1,3 +1,510 @@
+.igv-alert-dialog-container {
+  position: absolute;
+  z-index: 2048;
+  top: 30%;
+  left: 50%;
+  margin: -150px 0 0 -150px;
+  width: 300px;
+  height: 256px;
+  border-color: #7F7F7F;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  z-index: 2048;
+  background-color: white;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-alert-dialog-container div:first-child {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 24px;
+    cursor: move;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-color: #7F7F7F;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    background-color: #eee; }
+    .igv-alert-dialog-container div:first-child div {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: 12px;
+      width: 12px;
+      color: #7F7F7F; }
+    .igv-alert-dialog-container div:first-child div:hover {
+      cursor: pointer;
+      color: #444; }
+  .igv-alert-dialog-container #igv-alert-dialog-body {
+    color: #373737;
+    width: 100%;
+    height: calc(100% - 24px - 64px);
+    overflow-y: scroll; }
+    .igv-alert-dialog-container #igv-alert-dialog-body #igv-alert-dialog-body-copy {
+      cursor: pointer;
+      margin: 16px;
+      width: auto;
+      height: auto;
+      overflow-wrap: break-word;
+      word-break: break-word;
+      background-color: white;
+      border: unset; }
+  .igv-alert-dialog-container div:last-child {
+    width: 100%;
+    height: 64px;
+    background-color: white;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center; }
+    .igv-alert-dialog-container div:last-child div {
+      width: 98px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: medium;
+      font-weight: 400;
+      border-color: #2B81AF;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+      background-color: #2B81AF; }
+    .igv-alert-dialog-container div:last-child div:hover {
+      cursor: pointer;
+      border-color: #25597f;
+      background-color: #25597f; }
+
+.igv-color-swatch {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  width: 32px;
+  height: 32px;
+  border-style: solid;
+  border-width: 2px;
+  border-color: white;
+  border-radius: 4px; }
+
+.igv-colorpicker-menu-close-button {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 32px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  padding-right: 8px; }
+  .igv-colorpicker-menu-close-button i.fa {
+    display: block;
+    margin-left: 4px;
+    margin-right: 4px;
+    color: #5f5f5f; }
+  .igv-colorpicker-menu-close-button i.fa:hover,
+  .igv-colorpicker-menu-close-button i.fa:focus,
+  .igv-colorpicker-menu-close-button i.fa:active {
+    cursor: pointer;
+    color: #0f0f0f; }
+
+.igv-generic-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2048;
+  background-color: white;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-generic-container div:first-child {
+    cursor: move;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    height: 24px;
+    width: 100%;
+    background-color: #dddddd; }
+    .igv-generic-container div:first-child i {
+      display: block;
+      color: #5f5f5f;
+      cursor: pointer;
+      width: 14px;
+      height: 14px;
+      margin-right: 8px;
+      margin-bottom: 4px; }
+
+.igv-generic-dialog-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 300px;
+  height: 200px;
+  border-color: #7F7F7F;
+  border-radius: 4px;
+  border-style: solid;
+  border-width: thin;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  z-index: 2048;
+  background-color: white;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-generic-dialog-container .igv-generic-dialog-header {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-end;
+    align-items: center;
+    width: 100%;
+    height: 24px;
+    cursor: move;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom-color: #7F7F7F;
+    border-bottom-style: solid;
+    border-bottom-width: thin;
+    background-color: #eee; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div {
+      margin-right: 4px;
+      margin-bottom: 2px;
+      height: 12px;
+      width: 12px;
+      color: #7F7F7F; }
+    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {
+      cursor: pointer;
+      color: #444; }
+  .igv-generic-dialog-container .igv-generic-dialog-one-liner {
+    color: #373737;
+    width: 95%;
+    height: 24px;
+    line-height: 24px;
+    text-align: left;
+    margin-top: 8px;
+    padding-left: 8px;
+    overflow-wrap: break-word;
+    background-color: white; }
+  .igv-generic-dialog-container .igv-generic-dialog-label-input {
+    margin-top: 8px;
+    width: 95%;
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    padding-left: 8px;
+    background-color: white;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input div {
+      width: 30%;
+      height: 100%;
+      font-size: 16px;
+      text-align: right;
+      padding-right: 8px;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-label-input input {
+      width: 50%;
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-input {
+    margin-top: 8px;
+    width: calc(100% - 16px);
+    height: 24px;
+    color: #373737;
+    line-height: 24px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      display: block;
+      height: 100%;
+      width: 100%;
+      padding-left: 4px;
+      font-family: "Open Sans", sans-serif;
+      font-weight: 400;
+      color: #373737;
+      text-align: left;
+      outline: none;
+      border-style: solid;
+      border-width: thin;
+      border-color: #7F7F7F;
+      background-color: white; }
+    .igv-generic-dialog-container .igv-generic-dialog-input input {
+      font-size: 16px; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {
+    width: 100%;
+    height: 28px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {
+      margin-top: 32px;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: 14px;
+      font-weight: 400;
+      width: 75px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-color: transparent;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 2px; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {
+      margin-left: 32px;
+      margin-right: 0;
+      background-color: #5ea4e0; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {
+      margin-left: 0;
+      margin-right: 32px;
+      background-color: #c4c4c4; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {
+      cursor: pointer;
+      background-color: #3b5c7f; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {
+      cursor: pointer;
+      background-color: #7f7f7f; }
+  .igv-generic-dialog-container .igv-generic-dialog-ok {
+    width: 100%;
+    height: 36px;
+    margin-top: 32px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-around;
+    align-items: center; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div {
+      width: 98px;
+      height: 36px;
+      line-height: 36px;
+      text-align: center;
+      color: white;
+      font-family: "Open Sans", sans-serif;
+      font-size: medium;
+      font-weight: 400;
+      border-color: white;
+      border-style: solid;
+      border-width: thin;
+      border-radius: 4px;
+      background-color: #2B81AF; }
+    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {
+      cursor: pointer;
+      background-color: #25597f; }
+
+.igv-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 128px;
+  z-index: 4096;
+  font-family: "Open Sans", sans-serif;
+  font-size: small;
+  font-weight: 400;
+  color: #4b4b4b;
+  background-color: white;
+  border-radius: 4px;
+  border-color: #7F7F7F;
+  border-style: solid;
+  border-width: thin;
+  display: none; }
+
+.igv-popover-header {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  align-items: center;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  background-color: #eee; }
+  .igv-popover-header div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: #7F7F7F; }
+  .igv-popover-header div:hover {
+    cursor: pointer;
+    color: #444; }
+
+.igv-popover-track-popup-content {
+  position: relative;
+  top: 0;
+  left: 0;
+  max-height: 384px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: white; }
+  .igv-popover-track-popup-content div {
+    margin-left: 4px;
+    background-color: white; }
+  .igv-popover-track-popup-content div:hover {
+    cursor: pointer;
+    background-color: #efefef; }
+
+.igv-popover-name-value {
+  cursor: default;
+  text-wrap: none;
+  white-space: nowrap;
+  max-width: 384px; }
+
+.igv-popover-name {
+  font-weight: bold;
+  padding-right: 4px;
+  float: left; }
+
+.igv-popover-value {
+  padding-left: 4px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 256px;
+  display: inline-block; }
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: #7F7F7F; }
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444; }
+
+.igv-trackgear-popover {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 132px;
+  z-index: 4096;
+  cursor: pointer;
+  font-family: "Open Sans", sans-serif;
+  font-size: small;
+  font-weight: 400;
+  color: #4b4b4b;
+  background: white;
+  border-radius: 4px;
+  border-color: #7F7F7F;
+  border-style: solid;
+  border-width: thin;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+  text-align: left; }
+  .igv-trackgear-popover > div:not(:first-child) {
+    width: 100%; }
+    .igv-trackgear-popover > div:not(:first-child) > div {
+      background: white; }
+    .igv-trackgear-popover > div:not(:first-child) > div:last-child {
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+      border-bottom-color: transparent;
+      border-bottom-style: solid;
+      border-bottom-width: thin; }
+    .igv-trackgear-popover > div:not(:first-child) > div:hover {
+      background: #efefef; }
+
+.igv-trackgear-popover-shim {
+  padding-left: 8px;
+  padding-right: 8px; }
+
+.igv-trackgear-popover-header {
+  position: relative;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+  border-top-color: transparent;
+  border-top-left-radius: 4px;
+  border-top-right-radius: 4px;
+  border-bottom-color: #7F7F7F;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+  background-color: #eee;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center; }
+  .igv-trackgear-popover-header div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: #7F7F7F; }
+  .igv-trackgear-popover-header div:hover {
+    cursor: pointer;
+    color: #444; }
+
+.igv-trackgear-popover-check-container {
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 20px;
+  background-color: transparent; }
+  .igv-trackgear-popover-check-container div {
+    padding-top: 2px;
+    padding-left: 8px; }
+  .igv-trackgear-popover-check-container div:first-child {
+    position: relative;
+    width: 12px;
+    height: 12px; }
+    .igv-trackgear-popover-check-container div:first-child svg {
+      position: absolute;
+      width: 12px;
+      height: 12px; }
+
 .igv-user-feedback {
   position: fixed;
   top: 50%;
@@ -114,12 +621,13 @@
   height: 32px;
   line-height: 32px; }
   .igv-nav-bar-left-container .igv-logo {
-    all: initial;
     width: 34px;
     height: 32px;
+    margin-top: 6px;
     margin-right: 8px; }
   .igv-nav-bar-left-container .igv-current-genome {
     height: 32px;
+    width: 40px;
     margin-left: 4px;
     margin-right: 4px;
     user-select: none;
