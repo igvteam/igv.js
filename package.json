@@ -59,5 +59,7 @@
     "rollup-plugin-terser": "^5.2.0",
     "serve-static": "^1.14.1"
   },
-  "dependencies": {}
+  "dependencies": {
+    "igv-ui": "github:igvteam/igv-ui"
+  }
 }

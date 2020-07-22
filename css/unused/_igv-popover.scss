@@ -1,6 +1,6 @@
 
 // popover
-.igv-popover {
+.igv-ui-popover {
     position: absolute;
     top: 0;
     left: 0;
@@ -24,7 +24,7 @@
     display: none;
 }
 
-.igv-popover-header {
+.igv-ui-popover-header {
 
     display: flex;
     flex-direction: row;
@@ -61,7 +61,7 @@
 
 }
 
-.igv-popover-track-popup-content {
+.igv-ui-popover-track-popup-content {
     position: relative;
     top: 0;
     left: 0;
@@ -82,20 +82,20 @@
 
 }
 
-.igv-popover-name-value {
+.igv-ui-popover-name-value {
     cursor: default;
     text-wrap: none;
     white-space:nowrap;
     max-width: 384px;
 }
 
-.igv-popover-name {
+.igv-ui-popover-name {
     font-weight: bold;
     padding-right: 4px;
     float: left;
 }
 
-.igv-popover-value {
+.igv-ui-popover-value {
     padding-left: 4px;
     overflow: hidden;
     white-space:nowrap;
