@@ -1,3 +1,15 @@
+
+//* {
+//  -webkit-box-sizing: content-box !important;
+//  -moz-box-sizing: content-box !important;
+//  box-sizing: content-box !important;
+//}
+
+//svg {
+//  max-width: 100% !important;
+//  height: auto !important;
+//}
+
 $igv-default-font-face: 'Open Sans', sans-serif;
 
 $igv-navbar-font-size: 12px;
@@ -67,6 +79,12 @@ $igv-track-components-margin: 0px;
 
 }
 
+@import "igv-alert-dialog";
+@import "igv-colorpicker";
+@import "igv-generic-container";
+@import "igv-generic-dialog-container";
+@import "igv-popover";
+@import "igv-trackgear-popup";
 @import "igv-user-feedback";
 
 .igvControlDiv {
@@ -171,16 +189,16 @@ $igv-track-components-margin: 0px;
 
   // igv logo
   .igv-logo {
-    all: initial;
     width: 34px;
     height: $igv-navbar-height;
-    //margin-top:6px;
+    margin-top:6px;
     //margin-left: 8px;
     margin-right: 8px;
   }
 
   .igv-current-genome {
     height: $igv-navbar-height;
+    width: 40px;
     margin-left: 4px;
     margin-right: 4px;
     user-select: none;
