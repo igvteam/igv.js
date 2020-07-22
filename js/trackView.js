@@ -23,18 +23,16 @@
  * THE SOFTWARE.
  */
 
+import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import ViewPort from "./viewport.js";
 import FeatureUtils from "./feature/featureUtils.js";
 import RulerTrack from "./rulerTrack.js";
 import TrackGearPopover from "./ui/trackGearPopover.js";
-import GenericContainer from "./ui/genericContainer.js";
 import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates} from "./util/domUtils.js";
 import {doAutoscale} from "./util/igvUtils.js";
-import {createColorSwatchSelector} from "./ui/ui-utils.js"
-
 
 var dragged,
     dragDestination;
@@ -335,30 +333,21 @@ TrackView.prototype.createColorPicker = function () {
 
     const config =
         {
-            $parent: $(this.trackDiv),
-
-            width: 384,
-
+            parent: this.trackDiv,
+            top: undefined,
+            left: undefined,
+            width: undefined,
             height: undefined,
-            closeHandler: () => {
-                this.colorPicker.$container.hide();
-                this.colorPicker.$container.get(0).style.top = 0;
-                this.colorPicker.$container.get(0).style.left = 0;
-            }
+            defaultColor: this.track.color,
+            colorHandler: rgb => this.setColor(rgb)
         };
 
-    this.colorPicker = new GenericContainer(config);
-
-    createColorSwatchSelector(this.colorPicker.$container, rgb => this.setColor(rgb), this.track.color);
-
-    this.colorPicker.$container.hide();
+    this.colorPicker = new ColorPicker(config);
 
 };
 
 TrackView.prototype.presentColorPicker = function () {
-    this.colorPicker.$container.get(0).style.top = 0;
-    this.colorPicker.$container.get(0).style.left = 0;
-    this.colorPicker.$container.show();
+    this.colorPicker.show();
 };
 
 TrackView.prototype.setTrackHeight = function (newHeight, update, force) {

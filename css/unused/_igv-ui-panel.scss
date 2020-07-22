@@ -1,0 +1,23 @@
+
+.igv-ui-panel {
+  z-index: 2048;
+  background-color: white;
+  font-family: "Open Sans", sans-serif;
+  font-size: medium;
+  font-weight: 400;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.igv-ui-panel-column {
+  @extend .igv-ui-panel;
+  display: flex;
+  flex-direction: column;
+}
+
+.igv-ui-panel-row {
+  @extend .igv-ui-panel;
+  display: flex;
+  flex-direction: row;
+}

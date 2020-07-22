@@ -23,15 +23,13 @@
  * THE SOFTWARE.
  */
 
+import { InputDialog, Alert, AlertDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
 import WindowSizePanel from "./windowSizePanel.js";
-import InputDialog from "./ui/inputDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
-import Alert from "./ui/alert.js";
-import AlertDialog from "./ui/alertDialog.js";
 import UserFeedback from "./ui/userFeedback.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -56,7 +54,7 @@ let allBrowsers = [];
  */
 async function createBrowser(parentDiv, config) {
 
-    Alert.init($(parentDiv));
+    Alert.init(parentDiv);
 
     if (undefined === config) config = {};
 
@@ -81,11 +79,9 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
 
-    // browser.popover = new Popover(browser.$content, browser);
+    browser.alertDialog = new AlertDialog(browser.$content.get(0));
 
-    browser.alertDialog = new AlertDialog(browser.$content);
-
-    browser.inputDialog = new InputDialog(browser.$root);
+    browser.inputDialog = new InputDialog(browser.$root.get(0));
 
     browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
 
