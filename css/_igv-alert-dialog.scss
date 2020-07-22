@@ -8,11 +8,11 @@ $igv-alert-dialog-ok-container-height: 64px;
 $igv-alert-dialog-ok-button-height: 36px;
 $igv-alert-dialog-body-copy-margin: 16px;
 
-.igv-ui-alert-dialog-container {
+.igv-alert-dialog-container {
 
   position: absolute;
   z-index: 2048;
-  top:50%;
+  top:30%;
   left:50%;
   margin:$igv-alert-dialog-margin 0 0 $igv-alert-dialog-margin;
   width:$igv-alert-dialog-width;
@@ -74,7 +74,7 @@ $igv-alert-dialog-body-copy-margin: 16px;
   }
 
   // body container
-  #igv-ui-alert-dialog-body {
+  #igv-alert-dialog-body {
     color: $igv-dark-grey-color;
 
     width: 100%;
@@ -82,7 +82,7 @@ $igv-alert-dialog-body-copy-margin: 16px;
 
     overflow-y: scroll;
 
-    #igv-ui-alert-dialog-body-copy {
+    #igv-alert-dialog-body-copy {
       cursor: pointer;
       //user-select: none;
 
