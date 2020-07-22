@@ -1,5 +1,5 @@
 
-.igv-trackgear-container {
+.igv-ui-trackgear-container {
   position: relative;
   width: 20px;
   height: 20px;
@@ -7,12 +7,12 @@
   color: $igv-trackgear-grey-color;
 }
 
-.igv-trackgear-container:hover {
+.igv-ui-trackgear-container:hover {
   cursor: pointer;
   color: #444;
 }
 
-.igv-trackgear-popover {
+.igv-ui-trackgear-popover {
   position: absolute;
   top: 0;
   left: 0;
@@ -66,11 +66,11 @@
 
 }
 
-.igv-trackgear-popover-shim {
+.igv-ui-trackgear-popover-shim {
   padding-left: 8px;
   padding-right: 8px;
 }
-.igv-trackgear-popover-header {
+.igv-ui-trackgear-popover-header {
 
   position: relative;
   width: 100%;
@@ -107,7 +107,7 @@
 
 }
 
-.igv-trackgear-popover-check-container {
+.igv-ui-trackgear-popover-check-container {
 
   display: flex;
   flex-flow: row;
@@ -125,7 +125,7 @@
     padding-left: 8px;
   }
 
-  div:first-child {
+  svg:first-child {
     position: relative;
     width: 12px;
     height: 12px;
@@ -135,7 +135,5 @@
       width: 12px;
       height: 12px;
     }
-
   }
-
 }

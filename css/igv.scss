@@ -1,15 +1,3 @@
-
-//* {
-//  -webkit-box-sizing: content-box !important;
-//  -moz-box-sizing: content-box !important;
-//  box-sizing: content-box !important;
-//}
-
-//svg {
-//  max-width: 100% !important;
-//  height: auto !important;
-//}
-
 $igv-default-font-face: 'Open Sans', sans-serif;
 
 $igv-navbar-font-size: 12px;
@@ -80,12 +68,6 @@ $igv-track-components-margin: 0px;
 }
 
 @import "igv-user-feedback";
-@import "igv-colorpicker";
-@import "igv-alert-dialog";
-@import "igv-generic-container";
-@import "igv-generic-dialog-container";
-@import "igv-popover";
-@import "igv-trackgear-popup";
 
 .igvControlDiv {
   position: relative;

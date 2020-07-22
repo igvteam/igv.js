@@ -2,9 +2,9 @@
  * Created by dat on 9/16/16.
  */
 
+import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import C2S from "./canvas2svg.js";
-import Popover from "./ui/popover.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
@@ -75,10 +75,9 @@ class ViewPort {
             this.$viewport.append(this.$spinner);
             this.stopSpinner();
             if ("sequence" !== trackView.track.type) {
-                this.popover = new Popover(this.browser.$content);
+                this.popover = new Popover(this.browser.$content.get(0));
                 let str = trackView.track.name.toLowerCase().split(' ').join('_');
-                str = str + '_' + this.browser.genomicStateList.indexOf(this.genomicState);
-                this.popover.$popover.attr('id', str);
+                this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
                 this.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
             }
         }
@@ -105,8 +104,8 @@ class ViewPort {
                 } else {
                     str = trackView.track.name;
                 }
-                const page = pageCoordinates(e);
-                self.popover.presentTrackContent(page.x, page.y, str);
+                const { x, y } = pageCoordinates(e);
+                self.popover.presentContent(x, y, str);
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -636,9 +635,7 @@ class ViewPort {
         const self = this;
 
         if (this.popover) {
-            this.popover.$popover.off();
-            this.popover.$popover.empty();
-            this.popover.$popover.remove();
+            this.popover.dispose()
         }
 
         $(this.canvas).off();
@@ -867,7 +864,7 @@ function addMouseHandlers() {
                 }
             });
 
-        if (self.popover) self.popover.presentTrackContextMenu(e, menuItems);
+        if (self.popover) self.popover.presentMenu(e, menuItems);
 
     });
 
@@ -1004,8 +1001,8 @@ function addMouseHandlers() {
 
                         var content = getPopupContent(e, self);
                         if (content) {
-                            const page = pageCoordinates(e);
-                            self.popover.presentTrackContent(page.x, page.y, content);
+                            const { x, y } = pageCoordinates(e);
+                            self.popover.presentContent(x, y, content);
                         }
                         clearTimeout(popupTimerID);
                         popupTimerID = undefined;
