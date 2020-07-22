@@ -13,10 +13,10 @@ export default [
             {file: 'dist/igv.esm.min.js', format: 'es', sourcemap: true}
         ],
         plugins: [
-            // strip({
-            //     debugger: true,
-            //     functions: ['console.log', 'assert.*', 'debug']
-            // }),
+            strip({
+                debugger: true,
+                functions: ['console.log', 'assert.*', 'debug']
+            }),
             terser({
                 include: [/^.+\.min\.js$/],
                 sourcemap: {
