@@ -1411,9 +1411,7 @@ Browser.prototype.emptyViewportContainers = function () {
             }
 
             if (viewport.popover) {
-                viewport.popover.$popover.off();
-                viewport.popover.$popover.empty();
-                viewport.popover.$popover.remove();
+                viewport.popover.dispose()
             }
 
             viewport.$viewport.remove();

@@ -122,41 +122,34 @@ function doProvideColoSwatchWidget(track) {
         "wig" === track.type);
 }
 
-
 function visibilityWindowMenuItem(trackView) {
 
-    const menuClickHandler = function () {
+    const click = e => {
 
-        const dialogClickHandler = function () {
+        const callback = () => {
 
-            let value = trackView.browser.inputDialog.$input.val().trim();
+            let value = trackView.browser.inputDialog.inputDialog.input.value
+            value = '' === value || undefined === value ? -1 : value.trim()
 
-            if ('' === value || undefined === value) {
-                value = -1;
-            }
-
-            value = Number.parseInt(value);
-
-            trackView.track.visibilityWindow = value;
-            trackView.track.config.visibilityWindow = value;
+            trackView.track.visibilityWindow = Number.parseInt(value);
+            trackView.track.config.visibilityWindow = Number.parseInt(value);
 
             trackView.updateViews();
-        };
+        }
 
-        trackView.browser.inputDialog.configure({
-            label: 'Visibility Window',
-            input: (trackView.track.visibilityWindow),
-            click: dialogClickHandler
-        });
-        trackView.browser.inputDialog.present($(trackView.trackDiv));
+        const config =
+            {
+                label: 'Visibility Window',
+                value: (trackView.track.visibilityWindow),
+                callback
+            }
+        trackView.browser.inputDialog.present(config, e);
 
     };
 
-    const $e = $('<div>');
-    $e.text('Set visibility window');
-
-    return {object: $e, click: menuClickHandler};
-
+    const object = $('<div>');
+    object.text('Set visibility window');
+    return { object, click };
 
 }
 
@@ -175,7 +168,6 @@ function trackRemovalMenuItem(trackView) {
     return {object: $e, click: menuClickHandler};
 
 }
-
 
 function colorPickerMenuItem(trackView) {
     var $e,
@@ -197,57 +189,39 @@ function colorPickerMenuItem(trackView) {
 
 function trackRenameMenuItem(trackView) {
 
-    var $e,
-        menuClickHandler;
+    const click = e =>  {
 
-    $e = $('<div>');
-    $e.text('Set track name');
-
-    menuClickHandler = function () {
-
-        var dialogClickHandler;
-
-        dialogClickHandler = function () {
-            var value;
-
-            value = trackView.browser.inputDialog.$input.val().trim();
-
-            value = ('' === value || undefined === value) ? 'untitled' : value;
-
+        const callback = function () {
+            let value = trackView.browser.inputDialog.input.value;
+            value = ('' === value || undefined === value) ? 'untitled' : value.trim();
             trackView.browser.setTrackLabelName(trackView, value);
-
         };
 
-        trackView.browser.inputDialog.configure({
-            label: 'Track Name',
-            input: (getTrackLabelText(trackView.track) || 'unnamed'),
-            click: dialogClickHandler
-        });
-        trackView.browser.inputDialog.present($(trackView.trackDiv));
+        const config =
+            {
+                label: 'Track Name',
+                value: (getTrackLabelText(trackView.track) || 'unnamed'),
+                callback
+            }
+
+        trackView.browser.inputDialog.present(config, e);
 
     };
 
-    return {object: $e, click: menuClickHandler};
+    const object = $('<div>');
+    object.text('Set track name');
+    return { object, click };
 
 
 }
 
 function trackHeightMenuItem(trackView) {
 
-    var $e,
-        menuClickHandler;
+    const click =  e => {
 
-    $e = $('<div>');
-    $e.text('Set track height');
+        const callback = () => {
 
-    menuClickHandler = function () {
-        var dialogClickHandler;
-
-        dialogClickHandler = function () {
-
-            var number;
-
-            number = parseFloat(trackView.browser.inputDialog.$input.val(), 10);
+            const number = parseFloat(trackView.browser.inputDialog.input.value, 10);
 
             if (undefined !== number) {
 
@@ -266,16 +240,20 @@ function trackHeightMenuItem(trackView) {
 
         };
 
-        trackView.browser.inputDialog.configure({
-            label: 'Track Height',
-            input: trackView.trackDiv.clientHeight,
-            click: dialogClickHandler
-        });
-        trackView.browser.inputDialog.present($(trackView.trackDiv));
+        const config =
+            {
+                label: 'Track Height',
+                value: trackView.trackDiv.clientHeight,
+                callback
+            }
+
+        trackView.browser.inputDialog.present(config, e);
 
     };
 
-    return {object: $e, click: menuClickHandler};
+    const object = $('<div>');
+    object.text('Set track height');
+    return { object, click };
 
 
 }
@@ -291,61 +269,3 @@ function getTrackLabelText(track) {
 }
 
 export default MenuUtils;
-
-
-/**
- * Configure item list for contextual (right-click) track popup menu.
- * @param viewport
- * @param genomicLocation - (bp)
- * @param xOffset - (pixels) within track extent
- * @param yOffset - (pixels) within track extent
- */
-// igv.trackContextMenuItemList = function (viewport, genomicLocation, xOffset, yOffset) {
-//
-//     var config,
-//         menuItems;
-//
-//     config =
-//         {
-//             viewport: viewport,
-//             genomicState: viewport.genomicState,
-//             genomicLocation: genomicLocation,
-//             x: xOffset,
-//             y: yOffset
-//         };
-//
-//     menuItems = [];
-//     if (typeof viewport.trackView.track.contextMenuItemList === "function") {
-//         menuItems = viewport.trackView.track.contextMenuItemList(config);
-//     }
-//
-//     return menuItems;
-// };
-
-
-/**
- * Configure item for track "gear" menu.
- * @param trackView
- * @param menuItemLabel - menu item string
- * @param dialogLabelHandler - dialog label creation handler
- * @param dialogInputValue
- * @param dialogClickHandler
- */
-// function trackMenuItem(trackView, menuItemLabel, dialogLabelHandler, dialogInputValue, dialogClickHandler) {
-//
-//     var $e,
-//         clickHandler;
-//
-//     $e = $('<div>');
-//
-//     $e.text(menuItemLabel);
-//
-//     clickHandler = function () {
-//
-//         trackView.browser.inputDialog.configure(dialogLabelHandler, dialogInputValue, dialogClickHandler, undefined, undefined);
-//         trackView.browser.inputDialog.show($(trackView.trackDiv));
-//
-//     };
-//
-//     return {object: $e, click: clickHandler};
-// };
