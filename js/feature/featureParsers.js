@@ -516,7 +516,7 @@ function decodeBed(tokens, ignore) {
  */
 function decodeRepeatMasker(tokens, ignore) {
 
-    if (tokens.length < 15) return undefined;
+    if (tokens.length <= 15) return undefined;
 
     const feature = {
         swScore: Number.parseInt(tokens[1]),
@@ -551,7 +551,7 @@ function decodeGenePred(tokens, ignore) {
 
     var shift = this.shift === undefined ? 0 : 1;
 
-    if (tokens.length < 9 + shift) return undefined;
+    if (tokens.length <= 9 + shift) return undefined;
 
     const cdStart = parseInt(tokens[5 + shift])
     const cdEnd = parseInt(tokens[6 + shift])
@@ -594,7 +594,7 @@ function decodeGenePredExt(tokens, ignore) {
 
     var shift = this.shift === undefined ? 0 : 1;
 
-    if (tokens.length < 11 + shift) return undefined;
+    if (tokens.length <= 11 + shift) return undefined;
 
     const cdStart = parseInt(tokens[5 + shift])
     const cdEnd = parseInt(tokens[6 + shift])
@@ -635,7 +635,7 @@ function decodeReflat(tokens, ignore) {
 
     var shift = this.shift === undefined ? 0 : 1;
 
-    if (tokens.length < 10 + shift) return undefined;
+    if (tokens.length <= 10 + shift) return undefined;
 
     const cdStart = parseInt(tokens[6 + shift])
     const cdEnd = parseInt(tokens[7 + shift])
@@ -690,8 +690,8 @@ function decodePeak(tokens, ignore) {
     var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
     tokenCount = tokens.length;
-    if (tokenCount < 9) {
-        return null;
+    if (tokenCount <= 9) {
+        return undefined;
     }
 
     chr = tokens[0];
@@ -716,7 +716,7 @@ function decodeBedGraph(tokens, ignore) {
 
     var chr, start, end, value;
 
-    if (tokens.length < 3) return null;
+    if (tokens.length <= 3) return undefined;
 
     chr = tokens[0];
     start = parseInt(tokens[1]);
