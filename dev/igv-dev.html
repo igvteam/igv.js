@@ -8,8 +8,7 @@
     <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
-    <link href="../node_modules/igv-ui/css/igv.css" rel="stylesheet"/>
-    <link href="../node_modules/igv-ui/css/igv-ui.css" rel="stylesheet"/>
+
     <link href="css/dev.css" rel="stylesheet"/>
 </head>
 
@@ -31,7 +30,9 @@
 
     import igv from '../js/index.js'
     import google from "../js/google/googleUtils.js"
-    import { Alert } from '../node_modules/igv-ui/src/index.js'
+    import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
+
+    Alert.init(document.getElementById('igvDiv'))
 
     let browser
     (async () => {
@@ -63,8 +64,8 @@
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
-        // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
-        // Alert.presentAlert(str)
+        const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
+        Alert.presentAlert(str)
 
     })()
 
