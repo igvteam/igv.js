@@ -37,6 +37,7 @@ import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
+import loadCsiIndex from "../bam/csiIndex.js"
 
 
 /**
@@ -241,7 +242,8 @@ class FeatureFileReader {
                     let inInterval = false;
                     for (let i = 0; i < slicedFeatures.length; i++) {
                         const f = slicedFeatures[i];
-                        if (genome.getChromosomeName(f.chr) !== chr) {
+                        const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr;
+                        if (canonicalChromosome !== chr) {
                             if (allFeatures.length === 0) {
                                 continue;  //adjacent chr to the left
                             } else {
@@ -296,10 +298,15 @@ class FeatureFileReader {
             const uriParts = parseUri(indexURL);
             indexFilename = uriParts.file;
         }
-        const isTabix = indexFilename.endsWith(".tbi") || this.filename.endsWith('.gz') || this.filename.endsWith('.bgz')
+        const isTabix = indexFilename.endsWith(".tbi") || indexFilename.endsWith(".csi")
         let index;
         if (isTabix) {
-            index = await loadBamIndex(indexURL, this.config, true, this.genome);
+            if(indexFilename.endsWith(".tbi")) {
+                index = await loadBamIndex(indexURL, this.config, true, this.genome);
+            }
+            else {
+                index = await loadCsiIndex(indexURL, this.config, true, this.genome);
+            }
         } else {
             index = await loadTribbleIndex(indexURL, this.config, this.genome);
         }
