@@ -270,7 +270,6 @@ Browser.prototype.saveSVGtoFile = function (config) {
  * TODO Really should be split into at least 2 functions, load from file and load from object/json
  *
  * @param options
- * @param config
  * @returns {*}
  */
 Browser.prototype.loadSession = async function (options) {
@@ -321,61 +320,70 @@ Browser.prototype.loadSession = async function (options) {
 
 Browser.prototype.loadSessionObject = async function (session) {
 
-    this.removeAllTracks(true);
+    const { tracks } = session
+    const probablyAFile = tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
 
-    const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
+    if (probablyAFile.length > 0) {
+        throw new Error('ERROR. Session must not include local file')
+    } else {
 
-    // Restore gtex selections.
-    if (session.gtexSelections) {
+        this.removeAllTracks(true);
 
-        const genomicStates = {};
-        for (let gs of this.genomicStateList) {
-            genomicStates[gs.locusSearchString] = gs;
-        }
+        const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
-        for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
-            const gs = genomicStates[s];
-            if (gs) {
-                const gene = session.gtexSelections[s].gene;
-                const snp = session.gtexSelections[s].snp;
-                gs.selection = new GtexSelection(gene, snp);
+        // Restore gtex selections.
+        if (session.gtexSelections) {
+
+            const genomicStates = {};
+            for (let gs of this.genomicStateList) {
+                genomicStates[gs.locusSearchString] = gs;
+            }
+
+            for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
+                const gs = genomicStates[s];
+                if (gs) {
+                    const gene = session.gtexSelections[s].gene;
+                    const snp = session.gtexSelections[s].snp;
+                    gs.selection = new GtexSelection(gene, snp);
+                }
             }
         }
-    }
 
-    if (session.roi) {
-        this.roi = [];
-        for (let r of session.roi) {
-            this.roi.push(new ROI(r, genome));
+        if (session.roi) {
+            this.roi = [];
+            for (let r of session.roi) {
+                this.roi.push(new ROI(r, genome));
+            }
         }
-    }
 
-    if (!session.tracks) {
-        // eslint-disable-next-line require-atomic-updates
-        session.tracks = [];
-    }
-    if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-        session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
-    }
-
-    await this.loadTrackList(session.tracks);
-
-    var panelWidth;
-
-    if (false !== session.showIdeogram) {
-        if (!this.ideoPanel) {
-            panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
-            this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+        if (!session.tracks) {
+            // eslint-disable-next-line require-atomic-updates
+            session.tracks = [];
         }
-        this.ideoPanel.repaint();
-    }
-    if (this.rulerTrack) {
-        this.rulerTrack.trackView.updateViews();
-    }
+        if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+            session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
+        }
 
-    this.updateLocusSearchWidget(this.genomicStateList[0]);
+        await this.loadTrackList(session.tracks);
 
-    this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+        var panelWidth;
+
+        if (false !== session.showIdeogram) {
+            if (!this.ideoPanel) {
+                panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
+                this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+            }
+            this.ideoPanel.repaint();
+        }
+        if (this.rulerTrack) {
+            this.rulerTrack.trackView.updateViews();
+        }
+
+        this.updateLocusSearchWidget(this.genomicStateList[0]);
+
+        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+
+    }
 
 }
 

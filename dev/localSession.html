@@ -8,11 +8,8 @@
     <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
-
     <!-- IGV CSS -->
-
     <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
 
 </head>
 
@@ -21,44 +18,48 @@
 <div>
     <label>Session file: <input id="session" type="file"/></label>
 </div>
+
 <div>
     <button id="loadSessionBtn">Load session</button>
 </div>
 
-<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+<div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 </div>
 
-<script type="text/javascript">
-
-
-</script>
 <script type="module">
 
     import igv from "../js/index.js";
+    import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 
-    const div = document.getElementById("myDiv");
-    const options = {
-        showRuler: true,
-        showChromosomeWidget: true,
-        genome: "hg19"
-    };
+    const options =
+        {
+            showRuler: true,
+            showChromosomeWidget: true,
+            genome: "hg19"
+        };
 
-    let igvBrowser;
-    igv.createBrowser(div, options)
-        .then(function (browser) {
-            igvBrowser = browser;
-        })
+    let browser;
 
-    function loadSession() {
-        var sessionFile = document.getElementById('session').files[0];
-        igvBrowser
-            .loadSession({file: sessionFile})
-            .catch(function (error) {
-                alert("Error loading session file");
-            })
-    }
+    (async () => {
 
-    document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
+        browser = await igv.createBrowser(document.getElementById('igv-container'), options)
+
+        Alert.init(document.getElementById('igv-container'))
+
+        const loadSession = async () => {
+
+            const file = document.getElementById('session').files[0];
+
+            try {
+                await browser.loadSession( { file })
+            } catch (e) {
+                Alert.presentAlert(e.message)
+                console.error(e);
+            }
+        }
+
+        document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
+    })();
 
 
 </script>
