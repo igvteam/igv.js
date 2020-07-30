@@ -31,6 +31,7 @@ import igvxhr from "../igvxhr.js";
 import {bgzBlockSize, unbgzf} from './bgzf.js';
 import {inferIndexPath} from "../util/trackUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
+import loadCsiIndex from "./csiIndex.js"
 
 const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
 
@@ -121,7 +122,11 @@ async function getHeader() {
 async function getIndex() {
     const genome = this.genome;
     if (!this.index) {
-        this.index = await loadBamIndex(this.baiPath, this.config, false, genome)
+        if(this.config.indexURL.endsWith(".csi")) {
+            this.index = await loadCsiIndex(this.baiPath, this.config, false, genome);
+        } else {
+            this.index = await loadBamIndex(this.baiPath, this.config, false, genome);
+        }
         return this.index
     }
     return this.index;
