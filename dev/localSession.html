@@ -16,11 +16,15 @@
 <body>
 
 <div>
+    <button id="bookmark-button">Bookmark</button>
+</div>
+
+<div>
     <label>Session file: <input id="session" type="file"/></label>
 </div>
 
 <div>
-    <button id="loadSessionBtn">Load session</button>
+    <button id="load-session-button">Load session</button>
 </div>
 
 <div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto">
@@ -31,36 +35,28 @@
     import igv from "../js/index.js";
     import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 
-    const options =
-        {
-            showRuler: true,
-            showChromosomeWidget: true,
-            genome: "hg19"
-        };
-
     let browser;
+
+    const loadSession = async () => {
+
+        try {
+            const file = document.getElementById('session').files[ 0 ];
+            await browser.loadSession( { file })
+        } catch (e) {
+            Alert.presentAlert(e.message)
+            console.error(e);
+        }
+    }
 
     (async () => {
 
-        browser = await igv.createBrowser(document.getElementById('igv-container'), options)
+        browser = await igv.createBrowser(document.getElementById('igv-container'), { showChromosomeWidget: true, genome: "hg19" })
 
-        Alert.init(document.getElementById('igv-container'))
+        document.getElementById("load-session-button").addEventListener("click", loadSession)
 
-        const loadSession = async () => {
+        document.getElementById("bookmark-button").addEventListener("click", () => window.history.pushState({}, "IGV", browser.sessionURL()))
 
-            const file = document.getElementById('session').files[0];
-
-            try {
-                await browser.loadSession( { file })
-            } catch (e) {
-                Alert.presentAlert(e.message)
-                console.error(e);
-            }
-        }
-
-        document.getElementById("loadSessionBtn").addEventListener("click", loadSession);
     })();
-
 
 </script>
 
