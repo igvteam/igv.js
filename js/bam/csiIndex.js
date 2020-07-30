@@ -31,12 +31,8 @@ async function loadCsiIndex(indexURL, config, tabix, genome) {
     if (!arrayBuffer) {
         return;
     }
-
-    if (tabix) {
-        const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
-        arrayBuffer = inflate.decompress().buffer;
-    }
-
+    const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
+    arrayBuffer = inflate.decompress().buffer;
     const idx = new CSIIndex(tabix);
     idx.parse(arrayBuffer, genome);
     return idx;
@@ -54,6 +50,14 @@ class CSIIndex {
 
         const magic = parser.getInt();
 
+        if(magic !== CSI1_MAGIC) {
+            if(magic === CSI2_MAGIC) {
+                throw Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js");
+            } else {
+                throw Error("Not a CSI index");
+            }
+        }
+
         // TODO check magic number
         this.indices = []
         this.blockMin = Number.MAX_SAFE_INTEGER;
@@ -64,28 +68,29 @@ class CSIIndex {
         this.depth = parser.getInt();
         const lAux = parser.getInt();
 
-        //if (tabix) {
-        // Tabix header parameters aren't used, but they must be read to advance the pointer
-        const format = parser.getInt()
-        const col_seq = parser.getInt()
-        const col_beg = parser.getInt()
-        const col_end = parser.getInt()
-        const meta = parser.getInt()
-        const skip = parser.getInt()
-        const l_nm = parser.getInt()
-        const nameEndPos = parser.position + l_nm;
-        let i = 0;
-        while (parser.position < nameEndPos) {
-            let seq_name = parser.getString();
-            // Translate to "official" chr name.
-            if (genome) {
-                seq_name = genome.getChromosomeName(seq_name);
+        if (lAux >= 28) {
+            // Tabix header parameters aren't used, but they must be read to advance the pointer
+            const format = parser.getInt()
+            const col_seq = parser.getInt()
+            const col_beg = parser.getInt()
+            const col_end = parser.getInt()
+            const meta = parser.getInt()
+            const skip = parser.getInt()
+            const l_nm = parser.getInt()
+            const nameEndPos = parser.position + l_nm;
+            let i = 0;
+            while (parser.position < nameEndPos) {
+                let seq_name = parser.getString();
+                // Translate to "official" chr name.
+                if (genome) {
+                    seq_name = genome.getChromosomeName(seq_name);
+                }
+                this.sequenceIndexMap[seq_name] = i;
+                i++;
             }
-            this.sequenceIndexMap[seq_name] = i;
-            i++;
         }
-        // }
-        const PSEUDO_BIN = bin_limit(this.minShift, this.depth) + 1;
+
+        const MAX_BIN = bin_limit(this.minShift, this.depth) + 1;
         const nref = parser.getInt();
         for (let ref = 0; ref < nref; ref++) {
 
@@ -97,7 +102,7 @@ class CSIIndex {
                 const binNumber = parser.getInt();
                 loffset[binNumber] = parser.getVPointer();
 
-                if (binNumber === PSEUDO_BIN) {
+                if (binNumber > MAX_BIN) {
                     // This is a psuedo bin, not used but we have to consume the bytes
                     const nchnk = parser.getInt(); // # of chunks for this bin
                     const cs = parser.getVPointer();   // unmapped beg
