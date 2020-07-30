@@ -54,7 +54,7 @@ let allBrowsers = [];
  */
 async function createBrowser(parentDiv, config) {
 
-    Alert.init(parentDiv);
+    // Alert.init(parentDiv);
 
     if (undefined === config) config = {};
 
@@ -72,6 +72,8 @@ async function createBrowser(parentDiv, config) {
     setTrackOrder(config);
 
     const browser = new Browser(config, parentDiv);
+
+    Alert.init(browser.$root.get(0));
 
     setControls(browser, config);
 
@@ -95,54 +97,51 @@ async function createBrowser(parentDiv, config) {
         oauth.setToken(config.oauthToken);
     }
 
-    return loadSession(config)
+    const result = await loadSession(config)
 
-        .then(function (ignore) {
+    if (-1 === result) {
+        return undefined
+    } else {
 
-            if (false === config.showTrackLabels) {
-                browser.hideTrackLabels();
-            } else {
-                browser.showTrackLabels();
-                if (browser.trackLabelControl) {
-                    browser.trackLabelControl.setState(browser.trackLabelsVisible);
-                }
+        if (false === config.showTrackLabels) {
+            browser.hideTrackLabels();
+        } else {
+            browser.showTrackLabels();
+            if (browser.trackLabelControl) {
+                browser.trackLabelControl.setState(browser.trackLabelsVisible);
             }
+        }
 
-            if (false === config.showCursorTrackingGuide) {
-                browser.cursorGuide.doHide();
-            } else {
-                browser.cursorGuide.doShow();
-            }
+        if (false === config.showCursorTrackingGuide) {
+            browser.cursorGuide.doHide();
+        } else {
+            browser.cursorGuide.doShow();
+        }
 
-            if (false === config.showCenterGuide) {
-                browser.centerGuide.doHide();
-            } else {
-                browser.centerGuide.doShow();
-            }
+        if (false === config.showCenterGuide) {
+            browser.centerGuide.doHide();
+        } else {
+            browser.centerGuide.doShow();
+        }
 
-            const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
+        const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
 
-            // multi-locus mode or isWGV
-            if (browser.isMultiLocusMode() || isWGV) {
-                browser.centerGuide.forcedHide();
-            } else {
-                browser.centerGuide.forcedShow();
-            }
+        // multi-locus mode or isWGV
+        if (browser.isMultiLocusMode() || isWGV) {
+            browser.centerGuide.forcedHide();
+        } else {
+            browser.centerGuide.forcedShow();
+        }
 
-            igvxhr.startup();
+        igvxhr.startup();
 
-            browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
+        browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
-            return browser;
-        })
+        allBrowsers.push(browser);
 
-        .then(function (browser) {
+        return browser;
 
-            allBrowsers.push(browser);
-
-            return browser;
-        })
-
+    }
 
     function loadSession(config) {
         if (config.sessionURL) {

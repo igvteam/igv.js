@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import TrackView from "./trackView.js";
 import ViewPort from "./viewport.js";
@@ -281,8 +282,14 @@ Browser.prototype.loadSession = async function (options) {
     } else {
         session = options
     }
-    return this.loadSessionObject(session);
 
+    try {
+        await this.loadSessionObject(session)
+        return 1
+    } catch (e) {
+        Alert.presentAlert(e.message)
+        return -1
+    }
 
     async function loadSessionFile(options) {
 
