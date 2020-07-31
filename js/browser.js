@@ -327,14 +327,15 @@ Browser.prototype.loadSession = async function (options) {
 
 Browser.prototype.loadSessionObject = async function (session) {
 
-    const { tracks } = session
-    const probablyAFile = tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
-
-    if (probablyAFile.length > 0) {
-        throw new Error('ERROR. Session must not include local track file')
-    } else if (session.reference && session.reference.fastaURL && 'string' !== (typeof session.reference.fastaURL)) {
-        throw new Error('ERROR. Session must not include local genome file')
+    if (session.reference && session.reference.fastaURL && 'string' !== (typeof session.reference.fastaURL)) {
+        throw new Error('ERROR. Must not include local genome file')
     } else {
+
+        if (session.tracks) {
+            const probablyAFile = session.tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
+            const ignoreThese = new Set(probablyAFile)
+            session.tracks = session.tracks.filter(track => !ignoreThese.has(track))
+        }
 
         this.removeAllTracks(true);
 
@@ -365,10 +366,10 @@ Browser.prototype.loadSessionObject = async function (session) {
             }
         }
 
-        if (!session.tracks) {
-            // eslint-disable-next-line require-atomic-updates
+        if (undefined === session.tracks) {
             session.tracks = [];
         }
+
         if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
             session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
         }
