@@ -331,7 +331,9 @@ Browser.prototype.loadSessionObject = async function (session) {
     const probablyAFile = tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
 
     if (probablyAFile.length > 0) {
-        throw new Error('ERROR. Session must not include local file')
+        throw new Error('ERROR. Session must not include local track file')
+    } else if (session.reference && session.reference.fastaURL && 'string' !== (typeof session.reference.fastaURL)) {
+        throw new Error('ERROR. Session must not include local genome file')
     } else {
 
         this.removeAllTracks(true);
