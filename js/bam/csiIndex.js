@@ -8,11 +8,6 @@ import {buildOptions} from "../util/igvUtils.js";
 
 const CSI1_MAGIC = 21582659 // CSI\1
 const CSI2_MAGIC = 38359875 // CSI\2
-const BAI_MAGIC = 21578050;
-const TABIX_MAGIC = 21578324;
-const MAX_HEADER_SIZE = 100000000;   // IF the header is larger than this we can't read it !
-const MAX_GZIP_BLOCK_SIZE = (1 << 16);
-
 
 /**
  * @param indexURL
@@ -23,20 +18,11 @@ const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 async function loadCsiIndex(indexURL, config, tabix, genome) {
 
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
-
-    const indices = []
-    let blockMin = Number.MAX_SAFE_INTEGER,
-        blockMax = 0
-
-    if (!arrayBuffer) {
-        return;
-    }
     const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
     arrayBuffer = inflate.decompress().buffer;
     const idx = new CSIIndex(tabix);
     idx.parse(arrayBuffer, genome);
     return idx;
-
 }
 
 class CSIIndex {
@@ -58,7 +44,6 @@ class CSIIndex {
             }
         }
 
-        // TODO check magic number
         this.indices = []
         this.blockMin = Number.MAX_SAFE_INTEGER;
         this.blockMax = 0;
