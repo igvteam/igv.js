@@ -24,6 +24,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import BamSource from "./bamSource.js";
 import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
@@ -1053,9 +1054,9 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
 
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
         if(!seqstring|| "*" === seqstring) {
-            self.browser.presentAlert("Read sequence: *")
+            Alert.presentAlert("Read sequence: *")
         } else {
-            self.browser.presentAlert(seqstring);
+            Alert.presentAlert(seqstring);
         }
     }
 

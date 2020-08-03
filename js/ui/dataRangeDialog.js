@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017 The Regents of the University of California 
+ * Copyright (c) 2016-2017 The Regents of the University of California
  * Author: Jim Robinson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -25,6 +25,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js';
 import makeDraggable from "./draggable.js";
 import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
 
@@ -150,7 +151,7 @@ function processResults(config) {
     min = parseFloat(this.$minimum_input.val());
     max = parseFloat(this.$maximum_input.val());
     if (isNaN(min) || isNaN(max)) {
-        self.browser.presentAlert("Must input numeric values", undefined);
+        Alert.presentAlert("Must input numeric values", undefined);
     } else {
 
         if (true === config.trackView.track.autoscale) {

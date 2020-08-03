@@ -81,8 +81,6 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
 
-    browser.alertDialog = new AlertDialog(browser.$content.get(0));
-
     browser.inputDialog = new InputDialog(browser.$root.get(0));
 
     browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
@@ -285,7 +283,7 @@ function createStandardControls(browser, config) {
         browser.search($(this).val())
 
             .catch(function (error) {
-                browser.presentAlert(error);
+                Alert.presentAlert(error);
             });
     });
 

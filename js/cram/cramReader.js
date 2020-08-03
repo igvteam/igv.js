@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js';
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js";
 import BamUtils from "../bam/bamUtils.js";
@@ -195,7 +196,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         if (message && message.indexOf("MD5") >= 0) {
                             message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                         }
-                        browser.presentAlert(message)
+                        Alert.presentAlert(message)
                         throw error
                     })
             }
