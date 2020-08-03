@@ -397,7 +397,7 @@ Browser.prototype.loadSessionObject = async function (session) {
 
             this.updateLocusSearchWidget(this.genomicStateList[0]);
 
-            this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+            this.windowSizePanel.updateWithGenomicStateList(this.genomicStateList);
 
         }
 
@@ -513,6 +513,8 @@ Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateLis
     } else {
         this.centerGuide.forcedShow();
     }
+
+    this.windowSizePanel.updateWithGenomicStateList(genomicStateList)
 
     this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
@@ -954,7 +956,7 @@ Browser.prototype.resize = async function () {
 
     if (this.genomicStateList && this.genomicStateList.length > 0) {
         this.updateLocusSearchWidget(this.genomicStateList[0]);
-        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+        this.windowSizePanel.updateWithGenomicStateList(this.genomicStateList);
     }
 
     await this.updateViews();
@@ -978,12 +980,12 @@ Browser.prototype.updateViews = async function (genomicState, views, force) {
         views = this.trackViews;
     }
 
-    if (!genomicState && this.genomicStateList && this.genomicStateList.length == 1) {
+    if (!genomicState && this.genomicStateList && 1 === this.genomicStateList.length) {
         genomicState = this.genomicStateList[0];
     }
     if (genomicState) {
         this.updateLocusSearchWidget(genomicState);
-        this.windowSizePanel.updateWithGenomicState(genomicState);
+        this.windowSizePanel.updateWithGenomicStateList([ genomicState ]);
     }
 
     if (this.ideoPanel) {

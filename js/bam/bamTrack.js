@@ -24,7 +24,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js';
 import BamSource from "./bamSource.js";
 import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";

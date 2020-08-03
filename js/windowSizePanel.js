@@ -42,8 +42,18 @@ WindowSizePanel.prototype.hide = function () {
     this.$content.hide();
 };
 
-WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-    this.$content.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+WindowSizePanel.prototype.updateWithGenomicStateList = function (genomicStateList) {
+
+    if (genomicStateList.length > 1) {
+        this.hide()
+    } else if ('all' === genomicStateList[ 0 ].locusSearchString) {
+        this.hide()
+    } else {
+        const [ genomicState ] = genomicStateList
+        this.$content.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)))
+        this.show()
+    }
+
 };
 
 

@@ -47,7 +47,7 @@ function createResponsiveClassSchedule(navbarWidth, isWholeGenomeView) {
     if (isWholeGenomeView) {
         this.browser.windowSizePanel.hide();
     } else {
-        this.browser.windowSizePanel.show();
+        this.browser.windowSizePanel.updateWithGenomicStateList(this.browser.genomicStateList);
     }
 
     if (navbarWidth > 990) {

@@ -126,9 +126,11 @@ async function createBrowser(parentDiv, config) {
 
         // multi-locus mode or isWGV
         if (browser.isMultiLocusMode() || isWGV) {
-            browser.centerGuide.forcedHide();
+            browser.centerGuide.forcedHide()
+            browser.windowSizePanel.hide()
         } else {
-            browser.centerGuide.forcedShow();
+            browser.centerGuide.forcedShow()
+            browser.windowSizePanel.show()
         }
 
         igvxhr.startup();
