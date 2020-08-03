@@ -329,71 +329,79 @@ Browser.prototype.loadSessionObject = async function (session) {
 
     if (session.reference && session.reference.fastaURL && 'string' !== (typeof session.reference.fastaURL)) {
         throw new Error('ERROR. Must not include local genome file')
-    } else {
+    } else if (session.tracks) {
 
-        if (session.tracks) {
-            const probablyAFile = session.tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
-            const ignoreThese = new Set(probablyAFile)
-            session.tracks = session.tracks.filter(track => !ignoreThese.has(track))
-        }
+        const probablyALocalFile = session.tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
+        const ignoreThese = new Set(probablyALocalFile)
+        const validTrackFiles = session.tracks.filter(track => !ignoreThese.has(track))
 
-        this.removeAllTracks(true);
+        if (0 === validTrackFiles.length) {
+            throw new Error('ERROR. Must not include local track file')
+        } else {
 
-        const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
-
-        // Restore gtex selections.
-        if (session.gtexSelections) {
-
-            const genomicStates = {};
-            for (let gs of this.genomicStateList) {
-                genomicStates[gs.locusSearchString] = gs;
+            if (ignoreThese.size > 0) {
+                Alert.presentAlert('Warning. Must not include local track file')
             }
 
-            for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
-                const gs = genomicStates[s];
-                if (gs) {
-                    const gene = session.gtexSelections[s].gene;
-                    const snp = session.gtexSelections[s].snp;
-                    gs.selection = new GtexSelection(gene, snp);
+            session.tracks = validTrackFiles
+
+            this.removeAllTracks(true);
+
+            const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
+
+            // Restore gtex selections.
+            if (session.gtexSelections) {
+
+                const genomicStates = {};
+                for (let gs of this.genomicStateList) {
+                    genomicStates[gs.locusSearchString] = gs;
+                }
+
+                for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
+                    const gs = genomicStates[s];
+                    if (gs) {
+                        const gene = session.gtexSelections[s].gene;
+                        const snp = session.gtexSelections[s].snp;
+                        gs.selection = new GtexSelection(gene, snp);
+                    }
                 }
             }
-        }
 
-        if (session.roi) {
-            this.roi = [];
-            for (let r of session.roi) {
-                this.roi.push(new ROI(r, genome));
+            if (session.roi) {
+                this.roi = [];
+                for (let r of session.roi) {
+                    this.roi.push(new ROI(r, genome));
+                }
             }
-        }
 
-        if (undefined === session.tracks) {
-            session.tracks = [];
-        }
-
-        if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-            session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
-        }
-
-        await this.loadTrackList(session.tracks);
-
-        var panelWidth;
-
-        if (false !== session.showIdeogram) {
-            if (!this.ideoPanel) {
-                panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
-                this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+            if (undefined === session.tracks) {
+                session.tracks = [];
             }
-            this.ideoPanel.repaint();
+
+            if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+                session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
+            }
+
+            await this.loadTrackList(session.tracks);
+
+            if (false !== session.showIdeogram) {
+                if (!this.ideoPanel) {
+                    const panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
+                    this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+                }
+                this.ideoPanel.repaint();
+            }
+            if (this.rulerTrack) {
+                this.rulerTrack.trackView.updateViews();
+            }
+
+            this.updateLocusSearchWidget(this.genomicStateList[0]);
+
+            this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+
         }
-        if (this.rulerTrack) {
-            this.rulerTrack.trackView.updateViews();
-        }
 
-        this.updateLocusSearchWidget(this.genomicStateList[0]);
-
-        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
-
-    }
+    } // if (session.tracks)
 
 }
 
