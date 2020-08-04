@@ -187,6 +187,7 @@ $igv-track-components-margin: 0px;
 
   // igv logo
   .igv-logo {
+    all: initial;
     width: 34px;
     height: $igv-navbar-height;
     //margin-top:6px;
