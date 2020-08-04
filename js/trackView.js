@@ -336,9 +336,9 @@ TrackView.prototype.createColorPicker = function () {
             parent: this.trackDiv,
             top: undefined,
             left: undefined,
-            width: undefined,
+            width: 432,
             height: undefined,
-            defaultColor: this.track.color,
+            defaultColors: [ this.track.color ],
             colorHandler: rgb => this.setColor(rgb)
         };
 
