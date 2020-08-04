@@ -858,6 +858,14 @@ ctx.prototype.rect = function (x, y, width, height) {
  */
 ctx.prototype.fillRect = function (x, y, width, height) {
 
+    if(height < 0) {
+        y += height;
+        height = -height;
+    }
+    if(width < 0) {
+        x += width;
+        width = -width;
+    }
     // See if rect instersects current viewbox
     var r2 = {
         x: x,
