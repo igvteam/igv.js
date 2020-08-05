@@ -401,13 +401,6 @@ GFFTranscript.prototype.finish = function () {
             if (exon.end < cdStart || exon.start > cdEnd) exon.utr = true;
         });
     }
-
-    // Adopt the gene name, if any
-    if (!this.name) {
-        if (this.gene && this.gene.name) {
-            this.name = this.gene.name;
-        }
-    }
 }
 
 GFFTranscript.prototype.popupData = function (genomicLocation) {
