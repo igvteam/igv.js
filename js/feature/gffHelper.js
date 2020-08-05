@@ -24,6 +24,8 @@
  * THE SOFTWARE.
  */
 
+import {numberFormatter} from "../util/stringUtils.js"
+
 /**
  * Created by jrobinson on 4/7/16.
  */
@@ -414,15 +416,15 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
         }
         pd.push("<hr>");
     }
-
+    if(this.name) {
+        pd.push({name: 'name', value: this.name})
+    }
     pd.push({name: 'type', value: this.type})
-    pd.push({name: 'start', value: this.start + 1})
-    pd.push({name: 'end', value: this.end})
-
     for (let kv of kvs) {
         var t = kv.trim().split(this.delim, 2);
         if (t.length === 2 && t[1] !== undefined) {
             const key = t[0].trim();
+            if('name' === key.toLowerCase()) continue;
             let value = t[1].trim();
             //Strip off quotes, if any
             if (value.startsWith('"') && value.endsWith('"')) {
@@ -431,6 +433,8 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
             pd.push({name: key, value: value});
         }
     }
+    pd.push({name: 'position', value: `${this.chr}:${numberFormatter(this.start + 1)}-${numberFormatter(this.end)}`})
+
 
     // If clicked over an exon add its attributes
     for (let exon of this.exons) {
