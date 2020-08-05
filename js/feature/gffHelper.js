@@ -36,6 +36,7 @@ const codonTypes = new Set(['start_codon', 'stop_codon']);
 const utrTypes = new Set(['5UTR', '3UTR', 'UTR', 'five_prime_UTR', 'three_prime_UTR', "3'-UTR", "5'-UTR"]);
 const exonTypes = new Set(['exon', 'coding-exon']);
 const intronType = 'intron';
+const DEFAULT_NAME_FIELDS = ["name", "alias", "id", "gene", "locus", "gene_name"];   // lowercased, from IGV desktop
 const transcriptModelTypes = new Set();
 for (let cltn of [transcriptTypes, cdsTypes, codonTypes, utrTypes, exonTypes]) {
     for (let t of cltn) {
@@ -106,7 +107,7 @@ class GFFHelper {
         }
         for (let key of Object.keys(chrIdHash)) {
             const idHash = chrIdHash[key];
-            for(let id of Object.keys(idHash)) {
+            for (let id of Object.keys(idHash)) {
                 combinedFeatures.push(idHash[id])
             }
         }
@@ -197,7 +198,7 @@ class GFFHelper {
         // Build dictionary of genes (optional)
         const genes = features.filter(f => "gene" === f.type);
         const geneMap = Object.create(null);
-        for(let g of genes) {
+        for (let g of genes) {
             geneMap[g.id] = g;
         }
 
@@ -262,10 +263,10 @@ class GFFHelper {
 
         // Introns are ignored, but are consumed
         const introns = features.filter(f => intronType === f.type);
-        for(let i of introns) {
+        for (let i of introns) {
             const parents = getParents(i);
-            for(let id of parents) {
-                if(transcripts[id]) {
+            for (let id of parents) {
+                if (transcripts[id]) {
                     consumedFeatures.add(i);
                     break;
                 }
@@ -401,6 +402,12 @@ GFFTranscript.prototype.finish = function () {
         });
     }
 
+    // Adopt the gene name, if any
+    if (!this.name) {
+        if (this.gene && this.gene.name) {
+            this.name = this.gene.name;
+        }
+    }
 }
 
 GFFTranscript.prototype.popupData = function (genomicLocation) {
@@ -409,14 +416,14 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
     const pd = []
 
     // If feature has an associated gene list its attributes first
-    if(this.gene && typeof this.gene.popupData === 'function') {
+    if (this.gene && typeof this.gene.popupData === 'function') {
         const gd = this.gene.popupData(genomicLocation);
-        for(let e of gd) {
+        for (let e of gd) {
             pd.push(e);
         }
         pd.push("<hr>");
     }
-    if(this.name) {
+    if (this.name) {
         pd.push({name: 'name', value: this.name})
     }
     pd.push({name: 'type', value: this.type})
@@ -424,7 +431,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
         var t = kv.trim().split(this.delim, 2);
         if (t.length === 2 && t[1] !== undefined) {
             const key = t[0].trim();
-            if('name' === key.toLowerCase()) continue;
+            if ('name' === key.toLowerCase()) continue;
             let value = t[1].trim();
             //Strip off quotes, if any
             if (value.startsWith('"') && value.endsWith('"')) {

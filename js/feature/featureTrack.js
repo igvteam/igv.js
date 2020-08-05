@@ -579,7 +579,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  */
 function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
 
-    if (feature.name === undefined) return;
+    const name = feature.name || feature.id || feature.ID;
+    if (name === undefined ) return;
 
     // feature outside of viewable window
     let boxX;
@@ -598,7 +599,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     if (genomicState.selection && GtexUtils.gtexLoaded) {
         // TODO -- for gtex, figure out a better way to do this
         gtexSelection = true;
-        geneColor = genomicState.selection.colorForGene(feature.name);
+        geneColor = genomicState.selection.colorForGene(name);
     }
 
 
@@ -617,7 +618,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
         const labelX = boxX + ((boxX1 - boxX) / 2);
         const labelY = getFeatureLabelY(featureY, transform);
 
-        const textBox = ctx.measureText(feature.name);
+        const textBox = ctx.measureText(name);
         const xleft = labelX - textBox.width / 2;
         const xright = labelX + textBox.width / 2;
         if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
@@ -628,11 +629,11 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
             if (options.labelTransform) {
                 ctx.save();
                 options.labelTransform(ctx, labelX);
-                IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, undefined);
+                IGVGraphics.fillText(ctx, name, labelX, labelY, geneFontStyle, undefined);
                 ctx.restore();
 
             } else {
-                IGVGraphics.fillText(ctx, feature.name, labelX, labelY, geneFontStyle, transform);
+                IGVGraphics.fillText(ctx, name, labelX, labelY, geneFontStyle, transform);
             }
         }
     }
