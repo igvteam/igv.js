@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>Collection of indels</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var options =
+        {
+            reference:
+                {
+                    "id":  "ASM294v2",
+                    "name":  "S. pombe (ASM294v2)",
+                    "fastaURL":  "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.fa",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.fa.fai"
+                },
+            locus: "I:2770615-2773500",
+            "tracks": [
+
+                {
+                    "name": "Pombase reverse strand",
+                    "type": "annotation",
+                    "format": "gff3",
+                    "displayMode": "EXPANDED",
+                    "url": "../test/data/gff/pombase_gene.gff3",
+                    "indexed": false,
+                    "supportsWholeGenome": true,
+                    "height": 150
+
+                }
+            ]
+        }
+
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
