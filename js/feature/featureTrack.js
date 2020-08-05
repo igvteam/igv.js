@@ -584,8 +584,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  */
 function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
 
-    const name = feature.name || feature.id || feature.ID;
-    if (name === undefined ) return;
+    let name = feature.name;
+    if (name === undefined && feature.gene) name = feature.gene.name;
+    if (name === undefined) name = feature.id || feature.ID
+    if (name === undefined) return;
 
     // feature outside of viewable window
     let boxX;
