@@ -438,7 +438,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
 
     // If clicked over an exon add its attributes
     for (let exon of this.exons) {
-        if (genomicLocation >= exon.start && genomicLocation < exon.end) {
+        if (genomicLocation >= exon.start && genomicLocation < exon.end && typeof exon.popupData === 'function') {
             pd.push("<hr>")
             const exonData = exon.popupData(genomicLocation)
             for (let att of exonData) {
