@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { InputDialog, Alert, AlertDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
+import { InputDialog, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
