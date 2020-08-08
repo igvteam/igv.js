@@ -1,7 +1,7 @@
 // Defines the top-level API for the igv module
 
 import { Popover, InputDialog, AlertDialog, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
-import {createBrowser, createTrack, getBrowser, removeBrowser, visibilityChange} from './igv-create.js';
+import {createBrowser, createTrack, getBrowser, removeBrowser, removeAllBrowsers, visibilityChange} from './igv-create.js';
 import getDataWrapper from "./feature/dataWrapper.js";
 import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
@@ -42,13 +42,12 @@ const xhr = igvxhr;
 const Color = IGVColor;
 const graphics = IGVGraphics;
 
-console.log('igvjs. calling embedCss() ...');
 embedCss();
-console.log('... done.');
 
 export default {
     createBrowser,
     removeBrowser,
+    removeAllBrowsers,
     visibilityChange,
     setGoogleOauthToken,
     oauth,
