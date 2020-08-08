@@ -164,11 +164,13 @@ function removeBrowser(browser) {
     browser.dispose();
     browser.$root.remove();
     allBrowsers = allBrowsers.filter(item => item !== browser);
-
-    // backward compatibility -- this will be removed in a future release
-    if (typeof igv !== 'undefined' && browser === igv.browser) {
-        igv.browser = undefined;
+}
+function removeAllBrowsers() {
+    for(let browser of allBrowsers) {
+        browser.dispose();
+        browser.$root.remove();
     }
+    allBrowsers = [];
 }
 
 // A hack to replace the global igv.browser for the purpose of alert dialogs
@@ -509,7 +511,7 @@ function createTrack (config, browser) {
     return Browser.prototype.createTrack.call(browser, config)
 }
 
-export {createBrowser, removeBrowser, visibilityChange, getBrowser, createTrack}
+export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange, getBrowser, createTrack}
 
 
 
