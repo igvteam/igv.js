@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
@@ -33,6 +33,10 @@
     <div id="bd" style="width: 50%">
     </div>
 </div>
+
+<div><p>
+    <button  type="button" id="removeBrowsersButton" >Remove all browsers </button>
+</p></div>
 
 
 <script type="module">
@@ -84,6 +88,10 @@
         .then(function (b) {
             console.log("Created browser guid: " + b.guid);
         });
+
+    document.getElementById("removeBrowsersButton").onclick = function () {
+        igv.removeAllBrowsers();
+    }
 
 
 </script>
