@@ -35,8 +35,6 @@ import Ga4ghVariantReader from "../ga4gh/ga4ghVariantReader.js";
 import CivicReader from "../civic/civicReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
 import pack from "../feature/featurePacker.js";
-import BWSource from "../bigwig/bwSource.js"
-import TDFSource from "../tdf/tdfSource.js"
 
 const MAX_GZIP_BLOCK_SIZE = (1 << 16);
 
@@ -230,14 +228,15 @@ class TextFeatureSource {
     }
 
     addFeaturesToDB(featureList) {
-        let self = this;
-
-        featureList.forEach(function (feature) {
+        for (let feature of featureList) {
             if (feature.name) {
                 //TODO igv.browser => igv.Globals or igv.FeatureDB
-                self.config.browser.featureDB[feature.name.toUpperCase()] = feature;
+                this.config.browser.featureDB[feature.name.toUpperCase()] = feature;
             }
-        });
+            if (feature.gene && feature.gene.name) {
+                this.config.browser.featureDB[feature.gene.name.toUpperCase()] = feature;
+            }
+        }
     }
 
 
