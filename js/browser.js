@@ -1534,7 +1534,7 @@ Browser.prototype.search = async function (string, init) {
                 genomicState.locusSearchString = locus;
                 result.push(genomicState);
             } else {
-                // Try local feature cache.    This is created from feature tracks tagged "searchable"
+                // Try local feature cache.    This is created from feature tracks tagged "searcsearchablehable"
                 const feature = self.featureDB[locus.toUpperCase()];
                 if (feature) {
                     const chromosome = self.genome.getChromosome(feature.chr);
