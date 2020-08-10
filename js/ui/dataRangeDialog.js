@@ -38,12 +38,12 @@ const DataRangeDialog = function ($parent, browser) {
     this.browser = browser;
 
     // dialog container
-    this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
+    this.$container = $("<div>", {class: 'igv-dialog-container'});
     $parent.append(this.$container);
     this.$container.offset({left: 0, top: 0});
 
     // dialog header
-    $header = $("<div>", {class: 'igv-generic-dialog-header'});
+    $header = $("<div>", {class: 'igv-dialog-header'});
     this.$container.append($header);
     attachDialogCloseHandlerWithParent($header, function () {
         self.$minimum_input.val(undefined);
@@ -54,7 +54,7 @@ const DataRangeDialog = function ($parent, browser) {
 
 
     // minimun
-    this.$minimum = $("<div>", {class: 'igv-generic-dialog-label-input'});
+    this.$minimum = $("<div>", {class: 'igv-dialog-label-input'});
     this.$container.append(this.$minimum);
     //
     $div = $('<div>');
@@ -66,7 +66,7 @@ const DataRangeDialog = function ($parent, browser) {
 
 
     // maximum
-    this.$maximum = $("<div>", {class: 'igv-generic-dialog-label-input'});
+    this.$maximum = $("<div>", {class: 'igv-dialog-label-input'});
     this.$container.append(this.$maximum);
     //
     $div = $('<div>');
@@ -77,7 +77,7 @@ const DataRangeDialog = function ($parent, browser) {
     this.$maximum.append(this.$maximum_input);
 
     // ok | cancel
-    $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
+    $buttons = $("<div>", {class: 'igv-dialog-ok-cancel'});
     this.$container.append($buttons);
 
     // ok

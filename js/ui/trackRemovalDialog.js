@@ -34,12 +34,12 @@ const TrackRemovalDialog = function ($parent) {
         $buttons;
 
     // dialog container
-    this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
+    this.$container = $("<div>", {class: 'igv-dialog-container'});
     $parent.append(this.$container);
     this.$container.offset({left: 0, top: 0});
 
     // dialog header
-    $header = $("<div>", {class: 'igv-generic-dialog-header'});
+    $header = $("<div>", {class: 'igv-dialog-header'});
     this.$container.append($header);
     attachDialogCloseHandlerWithParent($header, function () {
         self.$track_name.text(undefined);
@@ -48,17 +48,17 @@ const TrackRemovalDialog = function ($parent) {
     });
 
     // dialog label
-    this.$label = $("<div>", {class: 'igv-generic-dialog-one-liner'});
+    this.$label = $("<div>", {class: 'igv-dialog-one-liner'});
     this.$container.append(this.$label);
     this.$label.text('Remove track:');
 
     // track name
-    this.$track_name = $("<div>", {class: 'igv-generic-dialog-one-liner igv-ellipsis'});
+    this.$track_name = $("<div>", {class: 'igv-dialog-one-liner igv-ellipsis'});
     this.$container.append(this.$track_name);
     // this.$track_name.text('this is a really long track name so I better make it interesting');
 
     // ok | cancel
-    $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
+    $buttons = $("<div>", {class: 'igv-dialog-ok-cancel'});
     this.$container.append($buttons);
 
     // ok

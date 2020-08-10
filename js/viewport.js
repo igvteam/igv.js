@@ -1074,23 +1074,19 @@ function addMouseHandlers() {
     /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    function formatPopoverText(nameValueArray) {
+    function formatPopoverText(nameValues) {
 
-        var markup = "<table class=\"igv-popover-table\">";
-
-        nameValueArray.forEach(function (nameValue) {
-
+        const reducer = (accumulator, nameValue) => {
             if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
+                return accumulator + `<tr><td><div class="igv-popover-name-value"><span class="igv-popover-name">${ nameValue.name }</span><span class="igv-popover-value">${ nameValue.value }</span></div></td></tr>`;
             } else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                return accumulator + `<tr><td>${ nameValue.toString() }</td></tr>`;
             }
-        });
-
-        markup += "</table>";
-        return markup;
+        }
+        
+        return nameValues.reduce(reducer, '<table>') + '</table>';
     }
+
 }
 
 
