@@ -71,7 +71,7 @@ IdeoPanel.prototype.buildPanels = function ($parent, width) {
 
     var self = this;
 
-    $parent.append($('<div class="igv-ideogram-shim"></div>'));
+    $parent.append($('<div>', { id: 'igv-ideogram-shim' }));
 
     this.panels = this.browser.genomicStateList.map(function (genomicState) {
         return panelWithGenomicState.call(self, $parent, genomicState, width)

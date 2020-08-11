@@ -60,13 +60,13 @@ const Browser = function (options, parentDiv) {
     this.$root = $('<div>', { id: 'igv-root' });
     $(parentDiv).append(this.$root);
 
-    this.$contentHeader = $('<div>', { id: 'igv-content-header' });
+    this.$contentHeader = $('<div>', { id: 'igv-ideogram-container' });
     this.$root.append(this.$contentHeader);
 
-    this.$content = $('<div class="igv-content-div">');
+    this.$content = $('<div>', { id: 'igv-content' });
     this.$root.append(this.$content);
 
-    const $trackContainer = $('<div class="igv-track-container-div">');
+    const $trackContainer = $('<div>', { id: 'igv-track-container-div' });
     this.$content.append($trackContainer);
 
     this.trackContainerDiv = $trackContainer.get(0);

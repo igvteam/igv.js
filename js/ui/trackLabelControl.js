@@ -32,7 +32,7 @@ const TrackLabelControl = function ($parent, browser) {
 
     this.browser = browser;
 
-    this.$button = $('<div class="igv-nav-bar-button">');
+    this.$button = $('<div class="igv-navbar-button">');
     $parent.append(this.$button);
     this.$button.text('track labels');
 
@@ -46,20 +46,20 @@ const TrackLabelControl = function ($parent, browser) {
 };
 
 TrackLabelControl.prototype.doHide = function () {
-    this.$button.removeClass('igv-nav-bar-button-clicked');
+    this.$button.removeClass('igv-navbar-button-clicked');
     this.browser.hideTrackLabels();
 };
 
 TrackLabelControl.prototype.doShow = function () {
-    this.$button.addClass('igv-nav-bar-button-clicked');
+    this.$button.addClass('igv-navbar-button-clicked');
     this.browser.showTrackLabels();
 };
 
 TrackLabelControl.prototype.setState = function (trackLabelsVisible) {
     if (true === trackLabelsVisible) {
-        this.$button.addClass('igv-nav-bar-button-clicked');
+        this.$button.addClass('igv-navbar-button-clicked');
     } else {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
+        this.$button.removeClass('igv-navbar-button-clicked');
     }
 };
 

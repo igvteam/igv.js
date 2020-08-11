@@ -218,11 +218,11 @@ function createStandardControls(browser, config) {
     const $navBar = $('<div>', { id: 'igv-navbar'});
     browser.$navigation = $navBar;
 
-    const $navbarLeftContainer = $('<div>', {class: 'igv-nav-bar-left-container'});
+    const $navbarLeftContainer = $('<div>', { id: 'igv-navbar-left-container' });
     $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    const $logo = $('<div>', {class: 'igv-logo'});
+    const $logo = $('<div>', { id: 'igv-logo' });
     $navbarLeftContainer.append($logo);
 
     const logoSvg = logo();
@@ -230,11 +230,11 @@ function createStandardControls(browser, config) {
     logoSvg.css("height", "32px");
     $logo.append(logoSvg);
 
-    browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
+    browser.$current_genome = $('<div>', { id: 'igv-current-genome' });
     $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    const $genomicLocation = $('<div>', {class: 'igv-nav-bar-genomic-location'});
+    const $genomicLocation = $('<div>', { id: 'igv-navbar-genomic-location' });
     $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget
@@ -277,10 +277,10 @@ function createStandardControls(browser, config) {
 
     browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 
-    const $navbarRightContainer = $('<div class="igv-nav-bar-right-container">');
+    const $navbarRightContainer = $('<div>', { id: 'igv-navbar-right-container' });
     $navBar.append($navbarRightContainer);
 
-    const $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
+    const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
     $navbarRightContainer.append($toggle_button_container);
     browser.$toggle_button_container = $toggle_button_container;
 

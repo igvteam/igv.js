@@ -547,7 +547,7 @@
     border-width: thin;
     border-color: #bfbfbf;
     background-color: #f3f3f3; }
-    #igv-root #igv-navbar .igv-nav-bar-left-container {
+    #igv-root #igv-navbar #igv-navbar-left-container {
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -555,12 +555,12 @@
       align-items: center;
       height: 32px;
       line-height: 32px; }
-      #igv-root #igv-navbar .igv-nav-bar-left-container .igv-logo {
+      #igv-root #igv-navbar #igv-navbar-left-container #igv-logo {
         all: initial;
         width: 34px;
         height: 32px;
         margin-right: 8px; }
-      #igv-root #igv-navbar .igv-nav-bar-left-container .igv-current-genome {
+      #igv-root #igv-navbar #igv-navbar-left-container #igv-current-genome {
         height: 32px;
         margin-left: 4px;
         margin-right: 4px;
@@ -568,7 +568,32 @@
         line-height: 32px;
         vertical-align: middle;
         text-align: center; }
-    #igv-root #igv-navbar .igv-nav-bar-right-container {
+      #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location {
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+        height: 100%; }
+        #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-chromosome-select-widget-container {
+          height: 100%;
+          width: 125px;
+          margin-right: 4px;
+          display: flex;
+          flex-flow: column;
+          flex-wrap: nowrap;
+          justify-content: space-around;
+          align-items: center; }
+          #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-chromosome-select-widget-container select {
+            display: block;
+            cursor: pointer;
+            width: 100px;
+            height: 75%;
+            outline: none;
+            font-size: 12px;
+            font-family: "Open Sans", sans-serif;
+            font-weight: 400; }
+    #igv-root #igv-navbar #igv-navbar-right-container {
       display: flex;
       flex-flow: row;
       flex-wrap: nowrap;
@@ -576,22 +601,22 @@
       align-items: center;
       height: 32px;
       line-height: 32px; }
-      #igv-root #igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container {
+      #igv-root #igv-navbar #igv-navbar-right-container .igv-navbar-toggle-button-container {
         display: flex;
         flex-flow: row;
         flex-wrap: nowrap;
         justify-content: space-between;
         align-items: center;
         height: 100%; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-navbar-toggle-button-container div {
           margin-left: 0;
           margin-right: 4px; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container div:last-child {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {
           margin-left: 0;
           margin-right: 0; }
-      #igv-root #igv-navbar .igv-nav-bar-right-container .igv-nav-bar-toggle-button-container-750 {
+      #igv-root #igv-navbar #igv-navbar-right-container .igv-navbar-toggle-button-container-750 {
         display: none; }
-      #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget {
+      #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget {
         color: #737373;
         font-size: 18px;
         height: 32px;
@@ -603,29 +628,29 @@
         flex-wrap: nowrap;
         justify-content: flex-end;
         align-items: center; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget div {
           cursor: pointer;
           margin-left: unset;
           margin-right: unset; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:first-child {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget div:first-child {
           height: 24px;
           width: 24px;
           margin-left: unset;
           margin-right: 8px; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:last-child {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget div:last-child {
           height: 24px;
           width: 24px;
           margin-left: 8px;
           margin-right: unset; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget div:nth-child(even) {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {
           display: block;
           height: fit-content; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget input {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget input {
           display: block;
           width: 125px; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget svg {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget svg {
           display: block; }
-      #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 {
+      #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 {
         color: #737373;
         font-size: 18px;
         height: 32px;
@@ -637,39 +662,59 @@
         flex-wrap: nowrap;
         justify-content: flex-end;
         align-items: center; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 div {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 div {
           cursor: pointer;
           margin-left: unset;
           margin-right: unset; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 div:first-child {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 div:first-child {
           height: 24px;
           width: 24px;
           margin-left: unset;
           margin-right: 8px; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 div:last-child {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 div:last-child {
           height: 24px;
           width: 24px;
           margin-left: 8px;
           margin-right: unset; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 div:nth-child(even) {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {
           width: 0;
           height: 0;
           display: none; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 input {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 input {
           width: 0;
           height: 0;
           display: none; }
-        #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-900 svg {
+        #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-900 svg {
           display: block; }
-      #igv-root #igv-navbar .igv-nav-bar-right-container .igv-zoom-widget-hidden {
+      #igv-root #igv-navbar #igv-navbar-right-container .igv-zoom-widget-hidden {
         display: none; }
+  #igv-root #igv-ideogram-container {
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: flex-start;
+    align-items: center;
+    margin-top: 10px;
+    height: 16px;
+    width: 100%; }
+    #igv-root #igv-ideogram-container #igv-ideogram-shim {
+      height: 100%;
+      width: 50px;
+      background-color: white; }
+    #igv-root #igv-ideogram-container .igv-ideogram-content {
+      height: 100%;
+      background-color: white; }
+    #igv-root #igv-ideogram-container .igv-ideogram-content-border-right {
+      border-right-color: #292929;
+      border-right-style: solid;
+      border-right-width: 1px; }
 
-.igv-content-div {
+#igv-content {
   position: relative;
   width: 100%;
   height: 100%; }
 
-.igv-track-container-div {
+#igv-track-container-div {
   user-select: none;
   position: relative;
   clear: both; }
@@ -684,33 +729,6 @@
   border-right-color: #ff0000;
   border-right-style: solid;
   border-right-width: 1px; }
-
-.igv-nav-bar-genomic-location {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-  height: 100%; }
-
-.igv-chromosome-select-widget-container {
-  height: 100%;
-  width: 125px;
-  margin-right: 4px;
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-around;
-  align-items: center; }
-  .igv-chromosome-select-widget-container select {
-    display: block;
-    cursor: pointer;
-    width: 100px;
-    height: 75%;
-    outline: none;
-    font-size: 12px;
-    font-family: "Open Sans", sans-serif;
-    font-weight: 400; }
 
 .igv-locus-size-group {
   display: flex;
@@ -754,7 +772,7 @@
     margin-left: 4px;
     user-select: none; }
 
-.igv-nav-bar-button {
+.igv-navbar-button {
   box-sizing: unset;
   padding-left: 6px;
   padding-right: 6px;
@@ -774,11 +792,11 @@
   border-width: thin;
   border-radius: 6px; }
 
-.igv-nav-bar-button-clicked {
+.igv-navbar-button-clicked {
   color: white;
   background-color: #737373; }
 
-.igv-nav-bar-button:hover {
+.igv-navbar-button:hover {
   cursor: pointer; }
 
 .igv-logo-nonav {
