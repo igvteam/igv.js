@@ -513,6 +513,41 @@
       height: auto;
       margin: 8px; }
 
+.igv-root-div {
+  position: relative;
+  left: 0;
+  right: 0;
+  height: auto;
+  margin-left: 10px;
+  margin-right: 10px;
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch; }
+  .igv-root-div .igv-navbar {
+    position: relative;
+    padding-left: 8px;
+    padding-right: 8px;
+    display: flex;
+    flex-flow: row;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    align-items: center;
+    color: #444;
+    font-size: 12px;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+    line-height: 32px;
+    margin-top: 2px;
+    margin-bottom: 4px;
+    height: 32px;
+    border-style: solid;
+    border-radius: 3px;
+    border-width: thin;
+    border-color: #bfbfbf;
+    background-color: #f3f3f3; }
+
 .igv-content-header {
   display: flex;
   flex-flow: row;
@@ -534,6 +569,16 @@
     border-right-style: solid;
     border-right-width: 1px; }
 
+.igv-content-div {
+  position: relative;
+  width: 100%;
+  height: 100%; }
+
+.igv-track-container-div {
+  user-select: none;
+  position: relative;
+  clear: both; }
+
 .igv-multi-locus-panel-border {
   position: absolute;
   top: 0;
@@ -544,29 +589,6 @@
   border-right-color: #ff0000;
   border-right-style: solid;
   border-right-width: 1px; }
-
-.igv-navbar {
-  position: relative;
-  padding-left: 8px;
-  padding-right: 8px;
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-  color: #444;
-  font-size: 12px;
-  font-family: "Open Sans", sans-serif;
-  font-weight: 400;
-  line-height: 32px;
-  margin-top: 2px;
-  margin-bottom: 4px;
-  height: 32px;
-  border-style: solid;
-  border-radius: 3px;
-  border-width: thin;
-  border-color: #bfbfbf;
-  background-color: #f3f3f3; }
 
 .igv-nav-bar-left-container {
   display: flex;
@@ -818,25 +840,6 @@
 
 .igv-canvas {
   all: initial; }
-
-.igv-root-div {
-  position: relative;
-  left: 0;
-  right: 0;
-  height: auto;
-  margin-left: 10px;
-  margin-right: 10px;
-  padding-top: 4px; }
-
-.igv-content-div {
-  position: relative;
-  width: 100%;
-  height: 100%; }
-
-.igv-track-container-div {
-  user-select: none;
-  position: relative;
-  clear: both; }
 
 .igv-track-div {
   position: relative;
