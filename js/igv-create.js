@@ -201,15 +201,12 @@ function setTrackOrder(conf) {
 
 function setControls(browser, conf) {
 
-    var controlDiv;
+    const $navBar = createStandardControls(browser, conf);
 
-    // Create controls. Can be customized by passing in a creation function that returns a div containing the controls
-    controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-
-    $(controlDiv).insertBefore(browser.$content);
+    $navBar.insertBefore(browser.$content);
 
     if (false === conf.showControls) {
-        $(controlDiv).hide();
+        $navBar.hide();
     }
 
 }
@@ -224,20 +221,16 @@ function createStandardControls(browser, config) {
         $toggle_button_container,
         logoDiv,
         logoSvg,
-        $controls,
-        $navigation,
-        $searchContainer,
-        $faSearch;
+        $searchContainer;
 
-    $controls = $('<div>', {class: 'igvControlDiv'});
 
-    $navigation = $('<div>', {class: 'igv-navbar'});
-    $controls.append($navigation);
-    browser.$navigation = $navigation;
+    const $navBar = $('<div>', {class: 'igv-navbar'});
+    browser.$navigation = $navBar;
+
     browser.navbarManager = new NavbarManager(browser);
 
     $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
-    $navigation.append($igv_nav_bar_left_container);
+    $navBar.append($igv_nav_bar_left_container);
 
     // IGV logo
     logoDiv = $('<div>', {class: 'igv-logo'});
@@ -316,7 +309,7 @@ function createStandardControls(browser, config) {
     // cursor guide | center guide | track labels
 
     $igv_nav_bar_right_container = $('<div class="igv-nav-bar-right-container">');
-    $navigation.append($igv_nav_bar_right_container);
+    $navBar.append($igv_nav_bar_right_container);
 
     $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
     $igv_nav_bar_right_container.append($toggle_button_container);
@@ -346,7 +339,7 @@ function createStandardControls(browser, config) {
         browser.$navigation.hide();
     }
 
-    return $controls.get(0);
+    return $navBar;
 }
 
 

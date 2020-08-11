@@ -513,9 +513,6 @@
       height: auto;
       margin: 8px; }
 
-.igvControlDiv {
-  position: relative; }
-
 .igv-content-header {
   display: flex;
   flex-flow: row;
