@@ -203,7 +203,7 @@ function setControls(browser, conf) {
 
     const $navBar = createStandardControls(browser, conf);
 
-    $navBar.insertBefore(browser.$content);
+    $navBar.insertBefore(browser.$contentHeader);
 
     if (false === conf.showControls) {
         $navBar.hide();
