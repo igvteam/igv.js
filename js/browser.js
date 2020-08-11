@@ -57,10 +57,10 @@ const Browser = function (options, parentDiv) {
 
     this.parent = parentDiv;
 
-    this.$root = $('<div class="igv-root-div">');
+    this.$root = $('<div>', { id: 'igv-root' });
     $(parentDiv).append(this.$root);
 
-    this.$contentHeader = $('<div>', {class: 'igv-content-header'});
+    this.$contentHeader = $('<div>', { id: 'igv-content-header' });
     this.$root.append(this.$contentHeader);
 
     this.$content = $('<div class="igv-content-div">');

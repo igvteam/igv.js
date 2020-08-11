@@ -86,7 +86,7 @@ $igv-track-components-margin: 0px;
 @import "igv-trackgear-popup";
 @import "igv-user-feedback";
 
-.igv-root-div {
+#igv-root {
 
   position: relative;
 
@@ -106,7 +106,7 @@ $igv-track-components-margin: 0px;
   justify-content: flex-start;
   align-items: stretch;
 
-  .igv-navbar {
+  #igv-navbar {
 
     position: relative;
 
@@ -137,38 +137,198 @@ $igv-track-components-margin: 0px;
 
     border-color: $igv-border-color;
     background-color: $igv-navbar-toggle-light-color;
-  }
 
-}
+    .igv-nav-bar-left-container {
 
-.igv-content-header {
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
 
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: center;
+      height: $igv-navbar-height;
+      line-height: $igv-navbar-height;
 
-  margin-top: 10px;
+      .igv-logo {
+        all: initial;
+        width: 34px;
+        height: $igv-navbar-height;
+        //margin-top:6px;
+        //margin-left: 8px;
+        margin-right: 8px;
+      }
 
-  height: 16px;
-  width: 100%;
+      .igv-current-genome {
+        height: $igv-navbar-height;
+        margin-left: 4px;
+        margin-right: 4px;
+        user-select: none;
 
-  .igv-ideogram-shim {
-    height: 100%;
-    width: 50px;
-    background-color: white;
-  }
+        line-height: $igv-navbar-height;
+        vertical-align: middle;
+        text-align: center;
+      }
 
-  .igv-ideogram-content {
-    height: 100%;
-      background-color: white;
-  }
+    }
 
-  .igv-ideogram-content-border-right {
-    border-right-color: $igv-panel-border-color;
-    border-right-style: solid;
-    border-right-width: $igv-panel-border-width;
+    .igv-nav-bar-right-container {
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: space-between;
+      align-items: center;
+
+      height: $igv-navbar-height;
+      line-height: $igv-navbar-height;
+
+      .igv-nav-bar-toggle-button-container {
+
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: space-between;
+        align-items: center;
+
+        height: 100%;
+
+        div {
+          margin-left: 0;
+          margin-right: 4px;
+        }
+
+        div:last-child {
+          margin-left: 0;
+          margin-right: 0;
+        }
+
+      }
+
+      .igv-nav-bar-toggle-button-container-750 {
+        display: none;
+      }
+
+      .igv-zoom-widget {
+
+        color: $igv-navbar-toggle-dark-dark;
+
+        font-size: 18px;
+
+        height: $igv-navbar-height;
+        line-height: $igv-navbar-height;
+
+        margin-left: 8px;
+
+        user-select: none;
+
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        align-items: center;
+
+        div {
+          cursor: pointer;
+          margin-left: unset;
+          margin-right: unset;
+        }
+
+        div:first-child {
+          height: 24px;
+          width: 24px;
+          margin-left: unset;
+          margin-right: 8px;
+        }
+
+        div:last-child {
+          height: 24px;
+          width: 24px;
+          margin-left: 8px;
+          margin-right: unset;
+        }
+
+        div:nth-child(even) {
+          display: block;
+          height: fit-content;
+        }
+
+        input {
+          display: block;
+          width: 125px;
+        }
+
+        svg {
+          display: block;
+        }
+
+      }
+
+      .igv-zoom-widget-900 {
+
+        color: $igv-navbar-toggle-dark-dark;
+
+        font-size: 18px;
+
+        height: $igv-navbar-height;
+        line-height: $igv-navbar-height;
+
+        margin-left: 8px;
+
+        user-select: none;
+
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: flex-end;
+        align-items: center;
+
+
+        div {
+          cursor: pointer;
+          margin-left: unset;
+          margin-right: unset;
+        }
+
+        // "-" zoom button
+        div:first-child {
+          height: 24px;
+          width: 24px;
+          margin-left: unset;
+          margin-right: 8px;
+        }
+
+        // "+" zoom button
+        div:last-child {
+          height: 24px;
+          width: 24px;
+          margin-left: 8px;
+          margin-right: unset;
+        }
+
+        // slider
+        div:nth-child(even) {
+          width: 0;
+          height: 0;
+          display: none;
+        }
+
+        input {
+          width: 0;
+          height: 0;
+          display: none;
+        }
+
+        svg {
+          display: block;
+        }
+
+      }
+
+      .igv-zoom-widget-hidden {
+        display: none;
+      }
+    }
+
   }
 
 }
@@ -202,41 +362,6 @@ $igv-track-components-margin: 0px;
 
 }
 
-.igv-nav-bar-left-container {
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-
-  height: $igv-navbar-height;
-  line-height: $igv-navbar-height;
-
-  // igv logo
-  .igv-logo {
-    all: initial;
-    width: 34px;
-    height: $igv-navbar-height;
-    //margin-top:6px;
-    //margin-left: 8px;
-    margin-right: 8px;
-  }
-
-  .igv-current-genome {
-    height: $igv-navbar-height;
-    margin-left: 4px;
-    margin-right: 4px;
-    user-select: none;
-
-    line-height: $igv-navbar-height;
-    vertical-align: middle;
-    text-align: center;
-  }
-
-}
-
-// chromosome select widget | chromosome select widget | locus goto | search icon | window size
 .igv-nav-bar-genomic-location {
 
   display: flex;
@@ -343,164 +468,6 @@ $igv-track-components-margin: 0px;
     user-select: none;
   }
 
-}
-
-.igv-nav-bar-right-container {
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-
-  height: $igv-navbar-height;
-  line-height: $igv-navbar-height;
-
-  .igv-nav-bar-toggle-button-container {
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: space-between;
-    align-items: center;
-
-    height: 100%;
-
-    div {
-      margin-left: 0;
-      margin-right: 4px;
-    }
-
-    div:last-child {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-  }
-
-  .igv-nav-bar-toggle-button-container-750 {
-    display: none;
-  }
-
-  .igv-zoom-widget {
-
-    color: $igv-navbar-toggle-dark-dark;
-
-    font-size: 18px;
-
-    height: $igv-navbar-height;
-    line-height: $igv-navbar-height;
-
-    margin-left: 8px;
-
-    user-select: none;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-
-    div {
-      cursor: pointer;
-      margin-left: unset;
-      margin-right: unset;
-    }
-
-    div:first-child {
-      height: 24px;
-      width: 24px;
-      margin-left: unset;
-      margin-right: 8px;
-    }
-
-    div:last-child {
-      height: 24px;
-      width: 24px;
-      margin-left: 8px;
-      margin-right: unset;
-    }
-
-    div:nth-child(even) {
-      display: block;
-      height: fit-content;
-    }
-
-    input {
-      display: block;
-      width: 125px;
-    }
-
-    svg {
-      display: block;
-    }
-
-  }
-
-  .igv-zoom-widget-900 {
-
-    color: $igv-navbar-toggle-dark-dark;
-
-    font-size: 18px;
-
-    height: $igv-navbar-height;
-    line-height: $igv-navbar-height;
-
-    margin-left: 8px;
-
-    user-select: none;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-end;
-    align-items: center;
-
-
-    div {
-      cursor: pointer;
-      margin-left: unset;
-      margin-right: unset;
-    }
-
-    // "-" zoom button
-    div:first-child {
-      height: 24px;
-      width: 24px;
-      margin-left: unset;
-      margin-right: 8px;
-    }
-
-    // "+" zoom button
-    div:last-child {
-      height: 24px;
-      width: 24px;
-      margin-left: 8px;
-      margin-right: unset;
-    }
-
-    // slider
-    div:nth-child(even) {
-      width: 0;
-      height: 0;
-      display: none;
-    }
-
-    input {
-      width: 0;
-      height: 0;
-      display: none;
-    }
-
-    svg {
-      display: block;
-    }
-
-  }
-
-  .igv-zoom-widget-hidden {
-    display: none;
-  }
 }
 
 // drag & drop file upload button
