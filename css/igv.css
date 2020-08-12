@@ -745,15 +745,8 @@
       border-right-style: solid;
       border-right-width: 1px; }
 
-#igv-content {
-  position: relative;
-  width: 100%;
-  height: 100%; }
-
 #igv-track-container {
-  user-select: none;
-  position: relative;
-  clear: both; }
+  user-select: none; }
 
 .igv-multi-locus-panel-border {
   position: absolute;

@@ -449,16 +449,8 @@ $igv-track-components-margin: 0px;
 
 }
 
-#igv-content {
-  position: relative;
-  width: 100%;
-  height:100%;
-}
-
 #igv-track-container {
   user-select: none;
-  position: relative;
-  clear: both;
 }
 
 // multi-locus panel border

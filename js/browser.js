@@ -63,11 +63,8 @@ const Browser = function (options, parentDiv) {
     this.$contentHeader = $('<div>', { id: 'igv-ideogram-container' });
     this.$root.append(this.$contentHeader);
 
-    this.$content = $('<div>', { id: 'igv-content' });
-    this.$root.append(this.$content);
-
     const $trackContainer = $('<div>', { id: 'igv-track-container' });
-    this.$content.append($trackContainer);
+    this.$root.append($trackContainer);
 
 
     this.alert = new Alert(this.$root.get(0))
