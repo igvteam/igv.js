@@ -744,9 +744,8 @@
       border-right-color: #292929;
       border-right-style: solid;
       border-right-width: 1px; }
-
-#igv-track-container {
-  user-select: none; }
+  #igv-root #igv-track-container {
+    user-select: none; }
 
 .igv-multi-locus-panel-border {
   position: absolute;

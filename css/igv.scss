@@ -447,10 +447,10 @@ $igv-track-components-margin: 0px;
 
   }
 
-}
+  #igv-track-container {
+    user-select: none;
+  }
 
-#igv-track-container {
-  user-select: none;
 }
 
 // multi-locus panel border
