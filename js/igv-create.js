@@ -248,13 +248,14 @@ function createStandardControls(browser, config) {
         browser.chromosomeSelectWidget.$container.hide();
     }
 
-    const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
+    const $locusSizeGroup = $('<div>', { id: 'igv-locus-size-group' });
     $genomicLocation.append($locusSizeGroup);
 
-    const $searchContainer = $('<div>', {class: 'igv-search-container'});
+    const $searchContainer = $('<div>', { id: 'igv-search-container' });
     $locusSizeGroup.append($searchContainer);
 
-    browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    browser.$searchInput = $('<input>', { id:'igv-search-input', type: 'text', placeholder:'Locus Search' });
     $searchContainer.append(browser.$searchInput);
 
     browser.$searchInput.change(function (e) {
@@ -266,14 +267,12 @@ function createStandardControls(browser, config) {
             });
     });
 
-    const $searchIconContainer = $('<div>');
+    const $searchIconContainer = $('<div>', { id: 'igv-search-icon-container' });
     $searchContainer.append($searchIconContainer);
 
     $searchIconContainer.append(createIcon("search"));
 
-    $searchIconContainer.click(function () {
-        browser.search(browser.$searchInput.val());
-    });
+    $searchIconContainer.on('click', () => browser.search(browser.$searchInput.val()));
 
     browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 

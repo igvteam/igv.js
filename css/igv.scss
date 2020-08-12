@@ -79,15 +79,8 @@ $igv-track-components-margin: 0px;
 
   position: relative;
 
-  left: 0;
-  right: 0;
-
-  height: auto;
-
   margin-left: 10px;
   margin-right: 10px;
-
-  //padding-top:4px;
 
   display: flex;
   flex-flow: column;
@@ -96,11 +89,6 @@ $igv-track-components-margin: 0px;
   align-items: stretch;
 
   #igv-navbar {
-
-    position: relative;
-
-    padding-left: 8px;
-    padding-right: 8px;
 
     display: flex;
     flex-flow: row;
@@ -114,16 +102,17 @@ $igv-track-components-margin: 0px;
     font-weight: 400;
     line-height: $igv-navbar-height;
 
+    padding-left: 8px;
+    padding-right: 8px;
+
     margin-top: 2px;
     margin-bottom: 4px;
 
     height: $igv-navbar-height;
-    //width: 100%;
 
     border-style: solid;
     border-radius: 3px;
     border-width: thin;
-
     border-color: $igv-border-color;
     background-color: $igv-navbar-toggle-light-color;
 
@@ -139,7 +128,6 @@ $igv-track-components-margin: 0px;
       line-height: $igv-navbar-height;
 
       #igv-logo {
-        all: initial;
         width: 34px;
         height: $igv-navbar-height;
         margin-right: 8px;
@@ -168,16 +156,16 @@ $igv-track-components-margin: 0px;
 
         #igv-chromosome-select-widget-container {
 
-          height: 100%;
-          width: 125px;
-
-          margin-right: 4px;
-
           display: flex;
           flex-flow: column;
           flex-wrap: nowrap;
           justify-content: space-around;
           align-items: center;
+
+          height: 100%;
+          width: 125px;
+
+          margin-right: 4px;
 
           select {
 
@@ -193,6 +181,72 @@ $igv-track-components-margin: 0px;
             font-size: $igv-navbar-font-size;
             font-family: $igv-default-font-face;
             font-weight: 400;
+          }
+
+        }
+
+        #igv-locus-size-group {
+          display: flex;
+          flex-flow: row;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          align-items: center;
+
+          margin-left: 8px;
+          height: $igv-locus-search-height;
+
+          // locus goto | search icon
+          #igv-search-container {
+
+            display: flex;
+            flex-flow: row;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+
+            width: 200px;
+            height: $igv-locus-search-height;
+            line-height: $igv-locus-search-height;
+
+            // locus goto
+            input#igv-search-input {
+              cursor: text;
+
+              width: 85%;
+
+              height: $igv-locus-search-height;
+              line-height: $igv-locus-search-height;
+
+              font-size: $igv-navbar-font-size;
+              font-family: $igv-default-font-face;
+              font-weight: 400;
+              text-align: left;
+
+              padding-left: 8px;
+              margin-right: 8px;
+
+              outline: none;
+
+              border-style: solid;
+              border-radius: 3px;
+              border-width: thin;
+              border-color: $igv-border-color;
+
+              background-color: white;
+            }
+
+            // search icon container
+            #igv-search-icon-container {
+              cursor: pointer;
+              height: 16px;
+              width: 16px;
+            }
+
+          }
+
+          #igv-windowsize-panel-container {
+            margin-left: 4px;
+            user-select: none;
           }
 
         }
@@ -421,71 +475,6 @@ $igv-track-components-margin: 0px;
   border-right-color: #ff0000;
   border-right-style: solid;
   border-right-width: 1px;
-
-}
-
-.igv-locus-size-group {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-
-  margin-left: 8px;
-  height: $igv-locus-search-height;
-
-  // locus goto | search icon
-  .igv-search-container {
-    width: 200px;
-    height: $igv-locus-search-height;
-    line-height: $igv-locus-search-height;
-
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-
-    // locus goto
-    input {
-      cursor: text;
-
-      width: 85%;
-
-      height: $igv-locus-search-height;
-      line-height: $igv-locus-search-height;
-
-      font-size: $igv-navbar-font-size;
-      font-family: $igv-default-font-face;
-      font-weight: 400;
-      text-align: left;
-
-      padding-left: 8px;
-      margin-right: 8px;
-
-      outline: none;
-
-      border-style: solid;
-      border-radius: 3px;
-      border-width: thin;
-      border-color: $igv-border-color;
-
-      background-color: white;
-    }
-
-    // search icon container
-    div {
-      cursor: pointer;
-      height: 16px;
-      width: 16px;
-    }
-
-  }
-
-  .igv-windowsizepanel-content-div {
-    margin-left: 4px;
-    user-select: none;
-  }
 
 }
 

@@ -28,22 +28,22 @@ import {numberFormatter} from "./util/stringUtils.js";
 
 const WindowSizePanel = function ($parent, browser) {
 
-    this.$content = $('<div class="igv-windowsizepanel-content-div">');
-    $parent.append(this.$content);
+    this.$container = $('<div>', { id: 'igv-windowsize-panel-container' });
+    $parent.append(this.$container);
     this.browser = browser;
 
 };
 
 WindowSizePanel.prototype.show = function () {
-    this.$content.show();
+    this.$container.show();
 };
 
 WindowSizePanel.prototype.hide = function () {
-    this.$content.hide();
+    this.$container.hide();
 };
 
 WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-    this.$content.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+    this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
 };
 
 

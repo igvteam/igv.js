@@ -515,9 +515,6 @@
 
 #igv-root {
   position: relative;
-  left: 0;
-  right: 0;
-  height: auto;
   margin-left: 10px;
   margin-right: 10px;
   display: flex;
@@ -526,9 +523,6 @@
   justify-content: flex-start;
   align-items: stretch; }
   #igv-root #igv-navbar {
-    position: relative;
-    padding-left: 8px;
-    padding-right: 8px;
     display: flex;
     flex-flow: row;
     flex-wrap: nowrap;
@@ -539,6 +533,8 @@
     font-family: "Open Sans", sans-serif;
     font-weight: 400;
     line-height: 32px;
+    padding-left: 8px;
+    padding-right: 8px;
     margin-top: 2px;
     margin-bottom: 4px;
     height: 32px;
@@ -556,7 +552,6 @@
       height: 32px;
       line-height: 32px; }
       #igv-root #igv-navbar #igv-navbar-left-container #igv-logo {
-        all: initial;
         width: 34px;
         height: 32px;
         margin-right: 8px; }
@@ -576,14 +571,14 @@
         align-items: center;
         height: 100%; }
         #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-chromosome-select-widget-container {
-          height: 100%;
-          width: 125px;
-          margin-right: 4px;
           display: flex;
           flex-flow: column;
           flex-wrap: nowrap;
           justify-content: space-around;
-          align-items: center; }
+          align-items: center;
+          height: 100%;
+          width: 125px;
+          margin-right: 4px; }
           #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-chromosome-select-widget-container select {
             display: block;
             cursor: pointer;
@@ -593,6 +588,47 @@
             font-size: 12px;
             font-family: "Open Sans", sans-serif;
             font-weight: 400; }
+        #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group {
+          display: flex;
+          flex-flow: row;
+          flex-wrap: nowrap;
+          justify-content: space-between;
+          align-items: center;
+          margin-left: 8px;
+          height: calc(32px - 10px); }
+          #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-search-container {
+            display: flex;
+            flex-flow: row;
+            flex-wrap: nowrap;
+            justify-content: flex-start;
+            align-items: center;
+            width: 200px;
+            height: calc(32px - 10px);
+            line-height: calc(32px - 10px); }
+            #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-search-container input#igv-search-input {
+              cursor: text;
+              width: 85%;
+              height: calc(32px - 10px);
+              line-height: calc(32px - 10px);
+              font-size: 12px;
+              font-family: "Open Sans", sans-serif;
+              font-weight: 400;
+              text-align: left;
+              padding-left: 8px;
+              margin-right: 8px;
+              outline: none;
+              border-style: solid;
+              border-radius: 3px;
+              border-width: thin;
+              border-color: #bfbfbf;
+              background-color: white; }
+            #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-search-container #igv-search-icon-container {
+              cursor: pointer;
+              height: 16px;
+              width: 16px; }
+          #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-windowsize-panel-container {
+            margin-left: 4px;
+            user-select: none; }
     #igv-root #igv-navbar #igv-navbar-right-container {
       display: flex;
       flex-flow: row;
@@ -729,48 +765,6 @@
   border-right-color: #ff0000;
   border-right-style: solid;
   border-right-width: 1px; }
-
-.igv-locus-size-group {
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center;
-  margin-left: 8px;
-  height: calc(32px - 10px); }
-  .igv-locus-size-group .igv-search-container {
-    width: 200px;
-    height: calc(32px - 10px);
-    line-height: calc(32px - 10px);
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center; }
-    .igv-locus-size-group .igv-search-container input {
-      cursor: text;
-      width: 85%;
-      height: calc(32px - 10px);
-      line-height: calc(32px - 10px);
-      font-size: 12px;
-      font-family: "Open Sans", sans-serif;
-      font-weight: 400;
-      text-align: left;
-      padding-left: 8px;
-      margin-right: 8px;
-      outline: none;
-      border-style: solid;
-      border-radius: 3px;
-      border-width: thin;
-      border-color: #bfbfbf;
-      background-color: white; }
-    .igv-locus-size-group .igv-search-container div {
-      cursor: pointer;
-      height: 16px;
-      width: 16px; }
-  .igv-locus-size-group .igv-windowsizepanel-content-div {
-    margin-left: 4px;
-    user-select: none; }
 
 .igv-navbar-button {
   box-sizing: unset;

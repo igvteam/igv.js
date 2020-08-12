@@ -1472,6 +1472,10 @@ Browser.prototype.goto = function (chrName, start, end) {
 
 Browser.prototype.search = async function (string, init) {
 
+    if (undefined === string || '' === string) {
+        return
+    }
+
     const self = this
 
     const genome = this.genome
