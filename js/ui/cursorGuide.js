@@ -123,7 +123,7 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
     const bp = Math.round(_startBP + viewportMouseXY.x * referenceFrame.bpPerPixel);
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
-    const $trackContainer = $viewport.closest('#igv-track-container-div');
+    const $trackContainer = $viewport.closest('#igv-track-container');
     const trackContainerMouseXY = getMouseXY($trackContainer.get(0), event);
 
 

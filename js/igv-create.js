@@ -76,9 +76,9 @@ async function createBrowser(parentDiv, config) {
     // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
     // browser.alert.present(str)
 
-    browser.userFeedback = new UserFeedback(browser.$content);
+    browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
-
+    
     browser.inputDialog = new InputDialog(browser.$root.get(0));
 
     browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
@@ -283,9 +283,9 @@ function createStandardControls(browser, config) {
     $navbarRightContainer.append($toggle_button_container);
     browser.$toggle_button_container = $toggle_button_container;
 
-    browser.cursorGuide = new CursorGuide(browser.$content, $toggle_button_container, config, browser);
+    browser.cursorGuide = new CursorGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
-    browser.centerGuide = new CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.centerGuide = new CenterGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
     if (true === config.showTrackLabelButton) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);

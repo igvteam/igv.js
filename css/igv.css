@@ -750,7 +750,7 @@
   width: 100%;
   height: 100%; }
 
-#igv-track-container-div {
+#igv-track-container {
   user-select: none;
   position: relative;
   clear: both; }

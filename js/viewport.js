@@ -75,7 +75,7 @@ class ViewPort {
             this.$viewport.append(this.$spinner);
             this.stopSpinner();
             if ("sequence" !== trackView.track.type) {
-                this.popover = new Popover(this.browser.$content.get(0));
+                this.popover = new Popover(this.browser.trackContainer);
                 let str = trackView.track.name.toLowerCase().split(' ').join('_');
                 this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
                 this.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
