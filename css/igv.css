@@ -758,8 +758,6 @@
   left: 0;
   width: 50px;
   height: 100%; }
-  .igv-left-hand-gutter canvas {
-    position: absolute; }
 
 .igv-right-hand-gutter {
   position: absolute;

@@ -463,25 +463,21 @@ $igv-track-components-margin: 0px;
 .igv-left-hand-gutter {
   position: absolute;
   left: 0;
+
   width: 50px;
   height: 100%;
-
-  canvas {
-    position: absolute;
-  }
-
 }
 
 .igv-right-hand-gutter {
   position: absolute;
   right: 0;
+
   width: 36px;
   height: 100%;
+
   background: white;
   margin-top: $igv-track-components-margin;
   margin-bottom: $igv-track-components-margin;
-  //text-align: center;
-
 }
 
 .igv-viewport-container {
@@ -500,7 +496,6 @@ $igv-track-components-margin: 0px;
 .igv-viewport {
   position: relative;
 
-  //float: left;
   display: inline-block;
 
   height: 100%;
