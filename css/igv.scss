@@ -43,6 +43,9 @@ $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
 $igv-track-components-margin: 0px;
 
+$igv-left-hand-gutter-width: 50px;
+$igv-right-hand-gutter-width: 36px;
+
 @mixin generic-input {
 
   input {
@@ -448,6 +451,7 @@ $igv-track-components-margin: 0px;
   }
 
   #igv-track-container {
+    position: relative;
     user-select: none;
   }
 
@@ -468,14 +472,11 @@ $igv-track-components-margin: 0px;
 }
 
 .igv-left-hand-gutter {
-  position: relative;
   width: 50px;
   height: 100%;
 }
 
 .igv-right-hand-gutter {
-  position: relative;
-
   width: 36px;
   height: 100%;
 
@@ -486,8 +487,7 @@ $igv-track-components-margin: 0px;
 }
 
 .igv-viewport-container {
-  position: relative;
-
+  width: calc(100% - (#{$igv-left-hand-gutter-width} + #{$igv-right-hand-gutter-width}));
   height: 100%;
 
   overflow-x: hidden;

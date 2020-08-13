@@ -745,6 +745,7 @@
       border-right-style: solid;
       border-right-width: 1px; }
   #igv-root #igv-track-container {
+    position: relative;
     user-select: none; }
 
 .igv-track {
@@ -759,12 +760,10 @@
   align-items: stretch; }
 
 .igv-left-hand-gutter {
-  position: relative;
   width: 50px;
   height: 100%; }
 
 .igv-right-hand-gutter {
-  position: relative;
   width: 36px;
   height: 100%;
   margin-top: 0px;
@@ -772,7 +771,7 @@
   background: white; }
 
 .igv-viewport-container {
-  position: relative;
+  width: calc(100% - (50px + 36px));
   height: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
