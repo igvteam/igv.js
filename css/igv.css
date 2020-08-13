@@ -595,7 +595,7 @@
           justify-content: space-between;
           align-items: center;
           margin-left: 8px;
-          height: calc(32px - 10px); }
+          height: 22px; }
           #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-search-container {
             display: flex;
             flex-flow: row;
@@ -603,13 +603,13 @@
             justify-content: flex-start;
             align-items: center;
             width: 200px;
-            height: calc(32px - 10px);
-            line-height: calc(32px - 10px); }
+            height: 22px;
+            line-height: 22px; }
             #igv-root #igv-navbar #igv-navbar-left-container #igv-navbar-genomic-location #igv-locus-size-group #igv-search-container input#igv-search-input {
               cursor: text;
               width: 85%;
-              height: calc(32px - 10px);
-              line-height: calc(32px - 10px);
+              height: 22px;
+              line-height: 22px;
               font-size: 12px;
               font-family: "Open Sans", sans-serif;
               font-weight: 400;
@@ -771,15 +771,15 @@
   background: white; }
 
 .igv-viewport-container {
-  width: calc(100% - (50px + 36px));
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
-  align-items: stretch; }
+  align-items: stretch;
+  width: calc(100% - 102px);
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden; }
 
 .igv-viewport-content {
   position: relative;
@@ -791,6 +791,15 @@
   overflow-x: hidden;
   overflow-y: hidden; }
 
+.igv-viewport-ruler {
+  cursor: pointer;
+  font-family: "Open Sans", sans-serif;
+  font-size: 10px;
+  font-weight: 200;
+  text-align: center; }
+  .igv-viewport-ruler > div {
+    height: 100%; }
+
 .igv-track-manipulation-handle {
   position: relative;
   cursor: pointer;
@@ -800,7 +809,7 @@
   font-size: medium;
   border-color: #c4c4c4;
   border-style: solid;
-  border-width: thin;
+  border-width: 1px;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
   z-index: 512;
@@ -964,15 +973,6 @@
 
 .igv-multi-locus-panel-label-div:hover {
   cursor: pointer; }
-
-.igv-viewport-ruler {
-  cursor: pointer;
-  font-family: "Open Sans", sans-serif;
-  font-size: 10px;
-  font-weight: 200;
-  text-align: center; }
-  .igv-viewport-ruler > div {
-    height: 100%; }
 
 .igv-viewport-sequence {
   font-family: "Open Sans", sans-serif;

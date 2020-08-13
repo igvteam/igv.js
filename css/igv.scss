@@ -34,7 +34,7 @@ $igv-light-grey-color: #bfbfbf;
 $igv-grey-color: #7F7F7F;
 $igv-dark-grey-color: #373737;
 
-$igv-locus-search-height: calc(#{$igv-navbar-height} - 10px);
+$igv-locus-search-height: $igv-navbar-height - 10px;
 
 $igv-trackgear-grey-color: #7F7F7F;
 $igv-trackgear-popover-border-radius: 4px;
@@ -45,6 +45,12 @@ $igv-track-components-margin: 0px;
 
 $igv-left-hand-gutter-width: 50px;
 $igv-right-hand-gutter-width: 36px;
+
+$igv-track-manipulation-handle-width: 12px;
+$igv-track-manipulation-handle-margin-width: 2px;
+$igv-track-manipulation-handle-border-width: 1px;
+
+$igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width + 2 * $igv-track-manipulation-handle-border-width;
 
 @mixin generic-input {
 
@@ -487,11 +493,6 @@ $igv-right-hand-gutter-width: 36px;
 }
 
 .igv-viewport-container {
-  width: calc(100% - (#{$igv-left-hand-gutter-width} + #{$igv-right-hand-gutter-width}));
-  height: 100%;
-
-  overflow-x: hidden;
-  overflow-y: hidden;
 
   display: flex;
   flex-flow: row;
@@ -499,12 +500,17 @@ $igv-right-hand-gutter-width: 36px;
   justify-content: flex-start;
   align-items: stretch;
 
+  width: calc(100% - #{$igv-viewport-container-shim-width});
+  height: 100%;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+
 }
 
 .igv-viewport-content {
   position: relative;
   width: 100%;
-
 }
 
 .igv-viewport {
@@ -516,21 +522,35 @@ $igv-right-hand-gutter-width: 36px;
   overflow-y: hidden;
 }
 
+.igv-viewport-ruler {
+
+  cursor: pointer;
+
+  font-family: $igv-default-font-face;
+  font-size: 10px;
+  font-weight: 200;
+  text-align: center;
+
+  >div {
+    height: 100%;
+  }
+}
+
 .igv-track-manipulation-handle {
   position: relative;
 
   cursor: pointer;
 
-  width: 12px;
+  width: $igv-track-manipulation-handle-width;
   height: 100%;
 
-  margin-left: 2px;
+  margin-left: $igv-track-manipulation-handle-margin-width;
 
   font-size: medium;
 
   border-color: #c4c4c4;
   border-style: solid;
-  border-width: thin;
+  border-width: $igv-track-manipulation-handle-border-width;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
 
@@ -758,22 +778,6 @@ $igv-right-hand-gutter-width: 36px;
 
 .igv-multi-locus-panel-label-div:hover {
   cursor: pointer;
-  //color: white;
-  //background-color: $igv-ruler-blue-color;
-}
-
-.igv-viewport-ruler {
-
-  cursor: pointer;
-
-  font-family: $igv-default-font-face;
-  font-size: 10px;
-  font-weight: 200;
-  text-align: center;
-
-  >div {
-    height: 100%;
-  }
 }
 
 .igv-viewport-sequence {
