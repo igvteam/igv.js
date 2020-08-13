@@ -468,18 +468,6 @@ $igv-track-components-margin: 0px;
   height: 100%;
 }
 
-.igv-right-hand-gutter {
-  position: absolute;
-  right: 0;
-
-  width: 36px;
-  height: 100%;
-
-  background: white;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
-}
-
 .igv-viewport-container {
   position: absolute;
   left:  50px;
@@ -491,12 +479,22 @@ $igv-track-components-margin: 0px;
   overflow-x: hidden;
   overflow-y: hidden;
 
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch;
+
+}
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%;
+
 }
 
 .igv-viewport {
   position: relative;
-
-  display: inline-block;
 
   height: 100%;
 
@@ -504,9 +502,16 @@ $igv-track-components-margin: 0px;
   overflow-y: hidden;
 }
 
-.igv-viewport-content {
+.igv-right-hand-gutter {
   position: absolute;
-  width: 100%;
+  right: 0;
+
+  width: 36px;
+  height: 100%;
+
+  background: white;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
 }
 
 .igv-canvas {
