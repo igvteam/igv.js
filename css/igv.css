@@ -751,20 +751,29 @@
   position: relative;
   width: 100%;
   margin-top: 5px;
-  margin-bottom: 5px; }
+  margin-bottom: 5px;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: stretch; }
 
 .igv-left-hand-gutter {
-  position: absolute;
-  left: 0;
+  position: relative;
   width: 50px;
   height: 100%; }
 
-.igv-viewport-container {
-  position: absolute;
-  left: 50px;
-  right: 50px;
+.igv-right-hand-gutter {
+  position: relative;
+  width: 36px;
   height: 100%;
-  white-space: nowrap;
+  margin-top: 0px;
+  margin-bottom: 0px;
+  background: white; }
+
+.igv-viewport-container {
+  position: relative;
+  height: 100%;
   overflow-x: hidden;
   overflow-y: hidden;
   display: flex;
@@ -783,14 +792,26 @@
   overflow-x: hidden;
   overflow-y: hidden; }
 
-.igv-right-hand-gutter {
-  position: absolute;
-  right: 0;
-  width: 36px;
+.igv-track-manipulation-handle {
+  position: relative;
+  cursor: pointer;
+  width: 12px;
   height: 100%;
-  background: white;
-  margin-top: 0px;
-  margin-bottom: 0px; }
+  margin-left: 2px;
+  font-size: medium;
+  border-color: #c4c4c4;
+  border-style: solid;
+  border-width: thin;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+  z-index: 512;
+  background-color: #c4c4c4; }
+
+.igv-track-manipulation-handle:hover,
+.igv-track-manipulation-handle:focus,
+.igv-track-manipulation-handle:active {
+  border-color: #7e7e7e;
+  background-color: #7e7e7e; }
 
 .igv-canvas {
   position: relative;
@@ -1012,29 +1033,6 @@
   margin-bottom: 0px;
   z-index: 256;
   background-color: rgba(68, 134, 247, 0.25); }
-
-.igv-track-manipulation-handle {
-  cursor: pointer;
-  position: absolute;
-  right: 36px;
-  width: 12px;
-  margin-left: 2px;
-  height: 100%;
-  box-sizing: border-box;
-  font-size: medium;
-  border-color: #c4c4c4;
-  border-style: solid;
-  border-width: thin;
-  border-top-right-radius: 6px;
-  border-bottom-right-radius: 6px;
-  z-index: 512;
-  background-color: #c4c4c4; }
-
-.igv-track-manipulation-handle:hover,
-.igv-track-manipulation-handle:focus,
-.igv-track-manipulation-handle:active {
-  border-color: #7e7e7e;
-  background-color: #7e7e7e; }
 
 .igv-track-label {
   position: absolute;
