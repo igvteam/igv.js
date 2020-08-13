@@ -794,7 +794,7 @@ Browser.prototype.reorderTracks = function () {
     });
 
     // Reattach the divs to the dom in the correct order
-    $(this.trackContainer).children("igv-track-div").detach();
+    $(this.trackContainer).children("igv-track").detach();
 
     this.trackViews.forEach(function (trackView) {
         myself.trackContainer.appendChild(trackView.trackDiv);
@@ -1106,7 +1106,7 @@ Browser.prototype.viewportContainerWidth = function () {
             $viewportContainer,
             width;
 
-        $track = $('<div class="igv-track-div">');
+        $track = $('<div class="igv-track">');
         $(this.trackContainer).append($track);
 
         $viewportContainer = $('<div class="igv-viewport-container">');

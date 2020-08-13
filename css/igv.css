@@ -747,6 +747,53 @@
   #igv-root #igv-track-container {
     user-select: none; }
 
+.igv-track {
+  position: relative;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px; }
+
+.igv-left-hand-gutter {
+  position: absolute;
+  left: 0;
+  width: 50px;
+  height: 100%; }
+  .igv-left-hand-gutter canvas {
+    position: absolute; }
+
+.igv-right-hand-gutter {
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  background: white;
+  margin-top: 0px;
+  margin-bottom: 0px; }
+
+.igv-viewport-container {
+  position: absolute;
+  left: 50px;
+  right: 50px;
+  height: 100%;
+  white-space: nowrap;
+  overflow-x: hidden;
+  overflow-y: hidden; }
+
+.igv-viewport {
+  position: relative;
+  display: inline-block;
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: hidden; }
+
+.igv-viewport-content {
+  position: absolute;
+  width: 100%; }
+
+.igv-canvas {
+  position: relative;
+  display: block; }
+
 .igv-multi-locus-panel-border {
   position: absolute;
   top: 0;
@@ -818,35 +865,6 @@
     cursor: pointer;
     font-weight: 700;
     color: #141414; }
-
-.igv-canvas {
-  all: initial; }
-
-.igv-track-div {
-  position: relative;
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px; }
-
-.igv-viewport-container {
-  position: absolute;
-  left: 50px;
-  right: 50px;
-  height: 100%;
-  white-space: nowrap;
-  overflow-x: hidden;
-  overflow-y: hidden; }
-
-.igv-viewport-div {
-  position: relative;
-  display: inline-block;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden; }
-
-.igv-viewport-content-div {
-  position: absolute;
-  width: 100%; }
 
 .igv-viewport-message {
   position: absolute;
@@ -972,23 +990,6 @@
   height: 100%;
   z-index: 99999;
   background-color: rgba(68, 134, 247, 0.25); }
-
-.igv-right-hand-gutter {
-  position: absolute;
-  right: 0;
-  width: 36px;
-  height: 100%;
-  background: white;
-  margin-top: 0px;
-  margin-bottom: 0px; }
-
-.igv-left-hand-gutter {
-  position: absolute;
-  left: 0;
-  width: 50px;
-  height: 100%; }
-  .igv-left-hand-gutter canvas {
-    position: absolute; }
 
 .igv-track-menu-border-top {
   border-top-color: #a2a2a2;

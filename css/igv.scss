@@ -453,6 +453,72 @@ $igv-track-components-margin: 0px;
 
 }
 
+.igv-track {
+  position: relative;
+  width: 100%;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.igv-left-hand-gutter {
+  position: absolute;
+  left: 0;
+  width: 50px;
+  height: 100%;
+
+  canvas {
+    position: absolute;
+  }
+
+}
+
+.igv-right-hand-gutter {
+  position: absolute;
+  right: 0;
+  width: 36px;
+  height: 100%;
+  background: white;
+  margin-top: $igv-track-components-margin;
+  margin-bottom: $igv-track-components-margin;
+  //text-align: center;
+
+}
+
+.igv-viewport-container {
+  position: absolute;
+  left:  50px;
+  right: 50px;
+  height: 100%;
+
+  white-space: nowrap;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+
+}
+
+.igv-viewport {
+  position: relative;
+
+  //float: left;
+  display: inline-block;
+
+  height: 100%;
+
+  overflow-x: hidden;
+  overflow-y: hidden;
+}
+
+.igv-viewport-content {
+  position: absolute;
+  width: 100%;
+}
+
+.igv-canvas {
+  position: relative;
+  display: block;
+}
+
 // multi-locus panel border
 .igv-multi-locus-panel-border {
   position: absolute;
@@ -550,47 +616,6 @@ $igv-track-components-margin: 0px;
     font-weight: 700;
     color: #141414;
   }
-}
-
-.igv-canvas {
-  all: initial;
-}
-
-.igv-track-div {
-  position: relative;
-  width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
-}
-
-.igv-viewport-container {
-  position: absolute;
-  left:  50px;
-  right: 50px;
-  height: 100%;
-
-  white-space: nowrap;
-
-  overflow-x: hidden;
-  overflow-y: hidden;
-
-}
-
-.igv-viewport-div {
-  position: relative;
-
-  //float: left;
-  display: inline-block;
-
-  height: 100%;
-
-  overflow-x: hidden;
-  overflow-y: hidden;
-}
-
-.igv-viewport-content-div {
-  position: absolute;
-  width: 100%;
 }
 
 .igv-viewport-message {
@@ -771,31 +796,6 @@ $igv-track-components-margin: 0px;
   z-index:99999;
 
   background-color: $igv-ruler-sweeper-color;
-}
-
-.igv-right-hand-gutter {
-  position: absolute;
-  right: 0;
-  width: 36px;
-  height: 100%;
-  background: white;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
-  //text-align: center;
-
-}
-
-// left hand gutter
-.igv-left-hand-gutter {
-  position: absolute;
-  left: 0;
-  width: 50px;
-  height: 100%;
-
-  canvas {
-    position: absolute;
-  }
-
 }
 
 .igv-track-menu-border-top {

@@ -24,14 +24,14 @@ class ViewPort {
         this.browser = trackView.browser;
 
         // viewport
-        this.$viewport = $('<div class="igv-viewport-div">');
+        this.$viewport = $('<div class="igv-viewport">');
         $container.append(this.$viewport);
 
         // store the viewport GUID for later use
         this.$viewport.data('viewportGUID', this.guid);
 
         // viewport-content
-        const $div = $("<div>", {class: 'igv-viewport-content-div'});
+        const $div = $("<div>", {class: 'igv-viewport-content'});
         this.$viewport.append($div);
 
         $div.height(this.$viewport.height());
@@ -357,25 +357,29 @@ class ViewPort {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
+        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
+        const ctx = newCanvas.getContext("2d");
+
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
+
         newCanvas.width = devicePixelRatio * pixelWidth;
         newCanvas.height = devicePixelRatio * pixelHeight;
-        const ctx = newCanvas.getContext("2d");
-        // ctx.save();
+
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
 
-        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
-        newCanvas.style.position = 'absolute';
+        // newCanvas.style.position = 'absolute';
+
         newCanvas.style.left = pixelXOffset + "px";
         newCanvas.style.top = canvasTop + "px";
-        drawConfiguration.context = ctx;
+
         ctx.translate(0, -canvasTop)
+
+        drawConfiguration.context = ctx;
         this.draw(drawConfiguration, features, roiFeatures);
-        // ctx.translate(0, canvasTop);
-        // ctx.restore();
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 

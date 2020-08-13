@@ -45,11 +45,11 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
         let $viewport = undefined;
 
-        if ($parent.hasClass('igv-viewport-content-div')) {
+        if ($parent.hasClass('igv-viewport-content')) {
             $viewport = $parent.parent();
-        } else if ($parent.hasClass('igv-viewport-div') && $child.hasClass('igv-viewport-content-div')) {
+        } else if ($parent.hasClass('igv-viewport') && $child.hasClass('igv-viewport-content')) {
             $viewport = $parent;
-        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport-div')) {
+        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport')) {
             $viewport = $child;
         }
 

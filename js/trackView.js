@@ -48,7 +48,7 @@ const TrackView = function (browser, $container, track) {
     this.track = track;
     track.trackView = this;
 
-    $track = $('<div class="igv-track-div">');
+    $track = $('<div class="igv-track">');
     this.trackDiv = $track.get(0);
     $container.append($track);
 
@@ -163,9 +163,9 @@ TrackView.prototype.decorateViewports = function () {
         }
 
         if (index < self.viewports.length && (1 + index) !== self.viewports.length) {
-            $viewport.addClass('igv-viewport-div-border-right');
+            $viewport.addClass('igv-viewport-border-right');
         } else {
-            $viewport.removeClass('igv-viewport-div-border-right');
+            $viewport.removeClass('igv-viewport-border-right');
         }
 
     });
