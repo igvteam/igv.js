@@ -748,6 +748,17 @@
     position: relative;
     user-select: none; }
 
+#igv-track-container-spinner {
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+  width: 24px;
+  height: 24px;
+  pointer-events: none;
+  color: #737373; }
+
 .igv-track {
   position: relative;
   width: 100%;
@@ -790,6 +801,11 @@
   height: 100%;
   overflow-x: hidden;
   overflow-y: hidden; }
+
+.igv-viewport-border-right {
+  border-right-color: #292929;
+  border-right-style: solid;
+  border-right-width: 1px; }
 
 .igv-viewport-ruler {
   cursor: pointer;
@@ -938,11 +954,6 @@
     cursor: pointer;
     background-color: #efefef; }
 
-.igv-viewport-div-border-right {
-  border-right-color: #292929;
-  border-right-style: solid;
-  border-right-width: 1px; }
-
 .igv-multi-locus-panel-close-container {
   position: absolute;
   top: 4px;
@@ -983,17 +994,6 @@
 .igv-viewport-spinner {
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1024;
-  width: 24px;
-  height: 24px;
-  pointer-events: none;
-  color: #737373; }
-
-.igv-track-container-spinner {
-  position: absolute;
-  top: 90%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1024;

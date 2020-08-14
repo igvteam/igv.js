@@ -463,6 +463,21 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
 }
 
+#igv-track-container-spinner {
+
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events:none;
+  color: $igv-navbar-toggle-dark-dark;
+}
+
 .igv-track {
   position: relative;
   width: 100%;
@@ -520,6 +535,12 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
   overflow-x: hidden;
   overflow-y: hidden;
+}
+
+.igv-viewport-border-right {
+  border-right-color: $igv-panel-border-color;
+  border-right-style: solid;
+  border-right-width: $igv-panel-border-width;
 }
 
 .igv-viewport-ruler {
@@ -727,13 +748,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
 }
 
-.igv-viewport-div-border-right {
-  border-right-color: $igv-panel-border-color;
-  //border-right-color: #00ff00;
-  border-right-style: solid;
-  border-right-width: $igv-panel-border-width;
-}
-
 .igv-multi-locus-panel-close-container {
   position: absolute;
   top: 4px;
@@ -791,21 +805,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
   position: absolute;
   top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1024;
-
-  width: 24px;
-  height: 24px;
-
-  pointer-events:none;
-  color: $igv-navbar-toggle-dark-dark;
-}
-
-.igv-track-container-spinner {
-
-  position: absolute;
-  top: 90%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1024;

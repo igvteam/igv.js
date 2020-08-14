@@ -88,7 +88,7 @@ const Browser = function (options, parentDiv) {
     // Map of event name -> [ handlerFn, ... ]
     this.eventHandlers = {};
 
-    this.$spinner = $('<div class="igv-track-container-spinner">');
+    this.$spinner = $('<div>', { id: 'igv-track-container-spinner' });
     $trackContainer.append(this.$spinner);
 
     this.$spinner.append(createIcon("spinner"));
