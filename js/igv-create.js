@@ -29,7 +29,6 @@ import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
-import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import UserFeedback from "./ui/userFeedback.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -80,8 +79,6 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback.hide();
     
     browser.inputDialog = new InputDialog(browser.$root.get(0));
-
-    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
 
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
