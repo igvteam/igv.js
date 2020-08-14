@@ -77,7 +77,7 @@ async function createBrowser(parentDiv, config) {
 
     browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
-    
+
     browser.inputDialog = new InputDialog(browser.$root.get(0));
 
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);

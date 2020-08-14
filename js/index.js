@@ -82,7 +82,6 @@ export default {
     makeDraggable,
     Popover,
     InputDialog,
-    TrackRemovalDialog,
     DataRangeDialog,
     MenuUtils,
     google
