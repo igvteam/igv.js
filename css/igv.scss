@@ -498,6 +498,8 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 }
 
 .igv-right-hand-gutter {
+  position: relative;
+
   width: 36px;
   height: 100%;
 
@@ -521,20 +523,22 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   overflow-x: hidden;
   overflow-y: hidden;
 
-}
+  .igv-viewport {
+    position: relative;
 
-.igv-viewport-content {
-  position: relative;
-  width: 100%;
-}
+    height: 100%;
 
-.igv-viewport {
-  position: relative;
+    overflow-x: hidden;
+    overflow-y: hidden;
+  }
 
-  height: 100%;
+  //.igv-viewport:nth-child(even) {
+  //  //border-left-color: $igv-panel-border-color;
+  //  border-left-color: hotpink;
+  //  border-left-style: solid;
+  //  border-left-width: $igv-panel-border-width;
+  //}
 
-  overflow-x: hidden;
-  overflow-y: hidden;
 }
 
 .igv-viewport-border-right {
@@ -555,6 +559,11 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   >div {
     height: 100%;
   }
+}
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%;
 }
 
 .igv-track-manipulation-handle {

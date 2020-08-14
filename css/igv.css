@@ -775,6 +775,7 @@
   height: 100%; }
 
 .igv-right-hand-gutter {
+  position: relative;
   width: 36px;
   height: 100%;
   margin-top: 0px;
@@ -791,16 +792,11 @@
   height: 100%;
   overflow-x: hidden;
   overflow-y: hidden; }
-
-.igv-viewport-content {
-  position: relative;
-  width: 100%; }
-
-.igv-viewport {
-  position: relative;
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden; }
+  .igv-viewport-container .igv-viewport {
+    position: relative;
+    height: 100%;
+    overflow-x: hidden;
+    overflow-y: hidden; }
 
 .igv-viewport-border-right {
   border-right-color: #292929;
@@ -815,6 +811,10 @@
   text-align: center; }
   .igv-viewport-ruler > div {
     height: 100%; }
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%; }
 
 .igv-track-manipulation-handle {
   position: relative;
