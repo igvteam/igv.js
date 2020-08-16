@@ -36,9 +36,6 @@ import CivicReader from "../civic/civicReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
 import pack from "../feature/featurePacker.js";
 
-const MAX_GZIP_BLOCK_SIZE = (1 << 16);
-
-var queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
 
 /**
  * feature source for "bed like" files (tab or whitespace delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -54,6 +51,8 @@ class TextFeatureSource {
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
         this.visibilityWindow = config.visibilityWindow;
+
+        const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
 
         // Default GFF filter -- these feature types will be filtered out
         if (undefined === config.filterTypes) {
