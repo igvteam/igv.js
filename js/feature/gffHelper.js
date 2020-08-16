@@ -218,10 +218,16 @@ class GFFHelper {
                     transcripts[transcriptId] = gffTranscript;
                     combinedFeatures.push(gffTranscript);
                     consumedFeatures.add(f);
-                    gffTranscript.gene = geneMap[f.parent];
+                    const g = geneMap[f.parent];
+                    if(g) {
+                        gffTranscript.gene = geneMap[f.parent];
+                        consumedFeatures.add(g);
+                    }
                 }
             }
         }
+
+        // Remove assigned genes
 
         // Add exons
         for (let f of features) {
