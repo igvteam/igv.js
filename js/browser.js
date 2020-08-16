@@ -284,11 +284,9 @@ Browser.prototype.loadSession = async function (options) {
     }
 
     try {
-        await this.loadSessionObject(session)
-        return 1
+        return this.loadSessionObject(session)
     } catch (e) {
         Alert.presentAlert(e.message)
-        return -1
     }
 
     async function loadSessionFile(options) {

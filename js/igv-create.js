@@ -97,9 +97,7 @@ async function createBrowser(parentDiv, config) {
 
     const result = await loadSession(config)
 
-    if (-1 === result) {
-        return undefined
-    } else {
+    if (result) {
 
         if (false === config.showTrackLabels) {
             browser.hideTrackLabels();
@@ -140,7 +138,6 @@ async function createBrowser(parentDiv, config) {
         allBrowsers.push(browser);
 
         return browser;
-
     }
 
     function loadSession(config) {
