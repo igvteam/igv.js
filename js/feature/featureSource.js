@@ -56,7 +56,7 @@ class FeatureSource {
 
         // Default GFF filter -- these feature types will be filtered out
         if (undefined === config.filterTypes) {
-            config.filterTypes = ['chromosome', 'gene']
+            config.filterTypes = ['chromosome']
         }
 
         if (config.features && Array.isArray(config.features)) {
