@@ -14,7 +14,7 @@
 
 <body>
 
-<h1>Collection of indels</h1>
+<h1>S. pombe genome (pombase)</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -22,58 +22,13 @@
 
     import igv from "../js/index.js";
 
-    var options =
-        {
-            reference:
-                {
-                    "id":  "ASM294v2",
-                    "name":  "S. pombe (ASM294v2)",
-                    "fastaURL":  "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.fa",
-                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.fa.fai"
-                },
-            locus: "I:2770615-2773500",
-            "tracks": [
-                {
-                    "name": "Pombase forward strand",
-                    "type": "annotation",
-                    "format": "gff3",
-                    "displayMode": "EXPANDED",
-                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.plus.gff3.gz",
-                    "indexed": false,
-                    "supportsWholeGenome": true,
-                    "labelAllFeatures": true,
-                    "height": 150,
-                    "color": "rgb(5,75,180)",
-                    "searchable": true
-                },
-                {
-                    "name": "Pombase reverse strand",
-                    "type": "annotation",
-                    "format": "gff3",
-                    "displayMode": "EXPANDED",
-                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/S.pombe_ASM294v2/Schizosaccharomyces_pombe_all_chromosomes.minus.gff3.gz",
-                    "indexed": false,
-                    "supportsWholeGenome": true,
-                    "height": 150,
-                    "color": "rgb(7,123,220)",
-                    "searchable": true
-                },
-                {
-                    "name": "Pombase reverse strand",
-                    "type": "annotation",
-                    "format": "gff3",
-                    "displayMode": "EXPANDED",
-                    "url": "../test/data/gff/pombase_gene.gff3",
-                    "indexed": false,
-                    "supportsWholeGenome": true,
-                    "height": 150
 
-                }
-            ]
-        }
+    const options = {
+        genome: "ASM294v2",
+        locus: "I:2770615-2773500"
+    }
 
-
-    var igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
