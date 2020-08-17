@@ -1,4 +1,5 @@
-import { DOMUtils, makeDraggable } from '../node_modules/igv-utils/src/index.js'
+
+import { DOMUtils, makeDraggable } from '../../node_modules/igv-utils/src/index.js'
 
 const httpMessages =
     {
@@ -12,8 +13,10 @@ class AlertDialog {
     constructor(parent) {
 
         // container
-        this.container = DOMUtils.div({class: "igv-ui-alert-dialog-container"});
+        this.container = DOMUtils.div({class: "igv-alert-dialog-container"});
         parent.appendChild(this.container);
+        this.parent = parent;
+
         this.container.setAttribute('tabIndex', '-1')
 
         // header
@@ -25,11 +28,11 @@ class AlertDialog {
         error.textContent = "ERROR";
 
         // body container
-        let bodyContainer = DOMUtils.div({id: 'igv-ui-alert-dialog-body'});
+        let bodyContainer = DOMUtils.div({id: 'igv-alert-dialog-body'});
         this.container.appendChild(bodyContainer);
 
         // body copy
-        this.body = DOMUtils.div({id: 'igv-ui-alert-dialog-body-copy'});
+        this.body = DOMUtils.div({id: 'igv-alert-dialog-body-copy'});
         bodyContainer.appendChild(this.body);
 
         // ok container
@@ -77,9 +80,22 @@ class AlertDialog {
         if (httpMessages.hasOwnProperty(string)) {
             string = httpMessages[string];
         }
-        this.body.innerHTML = string;
-        this.callback = callback;
-        DOMUtils.show(this.container, "flex");
+
+        this.body.innerHTML = string
+        this.callback = callback
+
+        DOMUtils.show(this.container)
+
+        // DOMUtils.show(this.container, "flex");
+        const { width,    height    } = this.parent.getBoundingClientRect()
+        const { width: w, height: h } = this.container.getBoundingClientRect()
+
+        const x = 0.5 * (width - w)
+        const y = -(0.5 * (height - h))
+
+        this.container.style.left = `${x}px`
+        this.container.style.top = `${y}px`
+
         this.container.focus()
     }
 }

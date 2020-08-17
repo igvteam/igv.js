@@ -23,7 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js';
+import Alert from "../ui/alert.js";
 import BamReader from "./bamReader.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
@@ -86,7 +86,7 @@ ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
 
             .catch(function (error) {
                 console.error(error);
-                Alert.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                igv.browser.alert.present("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                 self.bamReaders[queryChr] = "none";
                 return new AlignmentContainer(chr, start, end);   // Empty alignment container
             })

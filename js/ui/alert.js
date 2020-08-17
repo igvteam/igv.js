@@ -1,19 +1,14 @@
 import AlertDialog from './alertDialog.js';
 
-// The global Alert dialog
+class Alert {
+    constructor(root) {
+        this.alertDialog = new AlertDialog(root);
+    }
 
-let alertDialog
+    present(alert, callback) {
+        this.alertDialog.present(alert, callback);
+    }
 
-const Alert = {
-    init(root) {
-        if (!alertDialog) {
-            alertDialog = new AlertDialog(root);
-        }
-    },
-
-    presentAlert: function (alert, callback) {
-        alertDialog.present(alert, callback);
-    },
 }
 
 export default Alert;

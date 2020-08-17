@@ -46,6 +46,7 @@ import {decodeDataURI, resolveURL} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
 import google from "./google/googleUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
+import Alert from "./ui/alert.js";
 
 
 const Browser = function (options, parentDiv) {
@@ -70,6 +71,7 @@ const Browser = function (options, parentDiv) {
 
     this.trackContainerDiv = $trackContainer.get(0);
 
+    this.alert = new Alert(this.$root.get(0))
 
     initialize.call(this, options);
 
@@ -100,6 +102,7 @@ const Browser = function (options, parentDiv) {
 };
 
 function initialize(options) {
+
     var genomeId;
 
     if (options.gtex) {
@@ -418,7 +421,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
         }
     } else {
         const errorString = 'Unrecognized locus ' + this.config.locus;
-        this.presentAlert(errorString, undefined);
+        this.alert.present(errorString, undefined);
     }
 
     if (genomeConfig.tracks) {
@@ -450,7 +453,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 
             var reference = knownGenomes[genomeID];
             if (!reference) {
-                this.presentAlert("Unknown genome id: " + genomeID, undefined);
+                this.present("Unknown genome id: " + genomeID, undefined);
             }
             return reference;
         } else {
@@ -667,7 +670,7 @@ Browser.prototype.loadTrack = async function (config) {
         const newTrack = this.createTrack(config);
 
         if (undefined === newTrack) {
-            this.presentAlert("Unknown file type: " + url, undefined);
+            this.alert.present("Unknown file type: " + url, undefined);
             return newTrack;
         }
 
@@ -699,7 +702,7 @@ Browser.prototype.loadTrack = async function (config) {
         if (httpMessages.hasOwnProperty(msg)) {
             msg = httpMessages[msg] + ": " + config.url;
         }
-        this.presentAlert(msg, undefined);
+        this.alert.present(msg, undefined);
     } finally {
         if (!config.noSpinner) this.stopSpinner();
     }
@@ -1953,10 +1956,6 @@ Browser.prototype.currentLoci = function () {
     }
     return loci;
 }
-
-Browser.prototype.presentAlert = function (alert) {
-    this.alertDialog.present(alert);
-};
 
 /**
  * Record a mouse click on a specific viewport.   This might be the start of a drag operation.   Dragging
