@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
+import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import TrackView from "./trackView.js";
 import ViewPort from "./viewport.js";
@@ -168,7 +168,7 @@ Browser.prototype.isMultiLocusMode = function () {
     return this.genomicStateList && this.genomicStateList.length > 1;
 };
 
-Browser.prototype.addTrackToFactory = function (name, track){
+Browser.prototype.addTrackToFactory = function (name, track) {
     TrackFactory.addTrack(name, track);
 }
 
@@ -329,20 +329,6 @@ Browser.prototype.loadSessionObject = async function (session) {
         throw new Error('ERROR. Must not include local genome file')
     } else if (session.tracks) {
 
-        const probablyALocalFile = session.tracks.filter( track => 'sequence' !== track.type && 0 === Object.entries(track.url).length)
-        const ignoreThese = new Set(probablyALocalFile)
-        const validTrackFiles = session.tracks.filter(track => !ignoreThese.has(track))
-
-        if (0 === validTrackFiles.length) {
-            throw new Error('ERROR. Must not include local track file')
-        } else {
-
-            if (ignoreThese.size > 0) {
-                Alert.presentAlert('Warning. Must not include local track file')
-            }
-
-            session.tracks = validTrackFiles
-
             this.removeAllTracks(true);
 
             const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
@@ -396,8 +382,6 @@ Browser.prototype.loadSessionObject = async function (session) {
             this.updateLocusSearchWidget(this.genomicStateList[0]);
 
             this.windowSizePanel.updateWithGenomicStateList(this.genomicStateList);
-
-        }
 
     } // if (session.tracks)
 
@@ -983,7 +967,7 @@ Browser.prototype.updateViews = async function (genomicState, views, force) {
     }
     if (genomicState) {
         this.updateLocusSearchWidget(genomicState);
-        this.windowSizePanel.updateWithGenomicStateList([ genomicState ]);
+        this.windowSizePanel.updateWithGenomicStateList([genomicState]);
     }
 
     if (this.ideoPanel) {
