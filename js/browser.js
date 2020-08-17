@@ -325,66 +325,58 @@ Browser.prototype.loadSession = async function (options) {
 
 Browser.prototype.loadSessionObject = async function (session) {
 
-    if (session.reference && session.reference.fastaURL && 'string' !== (typeof session.reference.fastaURL)) {
-        throw new Error('ERROR. Must not include local genome file')
-    } else if (session.tracks) {
+    this.removeAllTracks(true);
 
-            this.removeAllTracks(true);
+    const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
-            const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
+    // Restore gtex selections.
+    if (session.gtexSelections) {
 
-            // Restore gtex selections.
-            if (session.gtexSelections) {
+        const genomicStates = {};
+        for (let gs of this.genomicStateList) {
+            genomicStates[gs.locusSearchString] = gs;
+        }
 
-                const genomicStates = {};
-                for (let gs of this.genomicStateList) {
-                    genomicStates[gs.locusSearchString] = gs;
-                }
-
-                for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
-                    const gs = genomicStates[s];
-                    if (gs) {
-                        const gene = session.gtexSelections[s].gene;
-                        const snp = session.gtexSelections[s].snp;
-                        gs.selection = new GtexSelection(gene, snp);
-                    }
-                }
+        for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
+            const gs = genomicStates[s];
+            if (gs) {
+                const gene = session.gtexSelections[s].gene;
+                const snp = session.gtexSelections[s].snp;
+                gs.selection = new GtexSelection(gene, snp);
             }
+        }
+    }
 
-            if (session.roi) {
-                this.roi = [];
-                for (let r of session.roi) {
-                    this.roi.push(new ROI(r, genome));
-                }
-            }
+    if (session.roi) {
+        this.roi = [];
+        for (let r of session.roi) {
+            this.roi.push(new ROI(r, genome));
+        }
+    }
 
-            if (undefined === session.tracks) {
-                session.tracks = [];
-            }
+    if (undefined === session.tracks) {
+        session.tracks = [];
+    }
+    if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
+        session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
+    }
 
-            if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-                session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
-            }
+    await this.loadTrackList(session.tracks);
 
-            await this.loadTrackList(session.tracks);
+    if (false !== session.showIdeogram) {
+        if (!this.ideoPanel) {
+            const panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
+            this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+        }
+        this.ideoPanel.repaint();
+    }
+    if (this.rulerTrack) {
+        this.rulerTrack.trackView.updateViews();
+    }
 
-            if (false !== session.showIdeogram) {
-                if (!this.ideoPanel) {
-                    const panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
-                    this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
-                }
-                this.ideoPanel.repaint();
-            }
-            if (this.rulerTrack) {
-                this.rulerTrack.trackView.updateViews();
-            }
+    this.updateLocusSearchWidget(this.genomicStateList[0]);
 
-            this.updateLocusSearchWidget(this.genomicStateList[0]);
-
-            this.windowSizePanel.updateWithGenomicStateList(this.genomicStateList);
-
-    } // if (session.tracks)
-
+    this.windowSizePanel.updateWithGenomicStateList(this.genomicStateList);
 }
 
 Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update) {
