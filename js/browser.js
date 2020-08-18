@@ -1846,9 +1846,9 @@ Browser.prototype.toJSON = function () {
     };
 
     if (isFilePath(json.reference.fastaURL)) {
-        throw new Error(`Error. Can not include local genome data file ${ json.reference.fastaURL.name }.`);
+        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.fastaURL.name }.`);
     } else if (isFilePath(json.reference.indexURL)) {
-        throw new Error(`Error. Can not include local genome index file ${ json.reference.indexURL.name }.`);
+        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.indexURL.name }.`);
     }
 
     // Use first available trackView.
@@ -1900,7 +1900,7 @@ Browser.prototype.toJSON = function () {
     }
     const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => isFilePath(url))
     if (locaTrackFiles.length > 0) {
-        throw new Error(`Error. Can not include local track files.`);
+        throw new Error(`Error. Sessions cannot include local file references.`);
     }
 
     json["tracks"] = trackJson;
