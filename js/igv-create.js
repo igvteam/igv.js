@@ -73,8 +73,8 @@ async function createBrowser(parentDiv, config) {
 
     setControls(browser, config);
 
-    const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
-    browser.alert.present(str)
+    // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
+    // browser.alert.present(str)
 
     browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
