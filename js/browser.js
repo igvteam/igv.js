@@ -37,7 +37,7 @@ import loadPlinkFile from "./sampleInformation.js";
 import IdeoPanel from "./ideogram.js";
 import ReferenceFrame from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
-import {getFilename} from './util/fileUtils.js'
+import {getFilename, isFilePath} from './util/fileUtils.js'
 import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {compressString, isString, numberFormatter, splitLines, uncompressString} from "./util/stringUtils.js"
@@ -1841,11 +1841,15 @@ Browser.prototype.dispose = function () {
 
 Browser.prototype.toJSON = function () {
 
-    var json, trackJson, order;
-
-    json = {
+    const json = {
         "reference": this.genome.toJSON()
     };
+
+    if (isFilePath(json.reference.fastaURL)) {
+        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.fastaURL.name }.`);
+    } else if (isFilePath(json.reference.indexURL)) {
+        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.indexURL.name }.`);
+    }
 
     // Use first available trackView.
     const locus = [];
@@ -1875,13 +1879,10 @@ Browser.prototype.toJSON = function () {
         json["gtexSelections"] = gtexSelections;
     }
 
-    trackJson = [];
-    order = 0;
-    this.trackViews.forEach(function (tv) {
+    const trackJson = [];
+    for (let { track } of this.trackViews) {
 
-        var track, config;
-
-        track = tv.track;
+        let config;
         if (typeof track.getState === "function") {
             config = track.getState();
         } else {
@@ -1896,7 +1897,11 @@ Browser.prototype.toJSON = function () {
             config.order = track.order; //order++;
             trackJson.push(config);
         }
-    });
+    }
+    const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => isFilePath(url))
+    if (locaTrackFiles.length > 0) {
+        throw new Error(`Error. Sessions cannot include local file references.`);
+    }
 
     json["tracks"] = trackJson;
 
