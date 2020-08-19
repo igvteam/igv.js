@@ -1053,9 +1053,9 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
 
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
         if(!seqstring|| "*" === seqstring) {
-            self.browser.presentAlert("Read sequence: *")
+            self.browser.alert.present("Read sequence: *")
         } else {
-            self.browser.presentAlert(seqstring);
+            self.browser.alert.present(seqstring);
         }
     }
 
