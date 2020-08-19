@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {unbgzf} from './bam/bgzf.js';
@@ -198,7 +197,7 @@ async function loadURL(url, options) {
                     // Provide just the slice we asked for, throw out the rest quietly
                     // If file is large warn user
                     if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
-                        Alert.presentAlert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
+                        igv.browser.alert.present(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
                     }
                     resolve(xhr.response.slice(range.start, range.start + range.size));
 
@@ -451,7 +450,7 @@ async function getGoogleAccessToken() {
 
     const authInstance = gapi.auth2.getAuthInstance();
     if (!authInstance) {
-        Alert.presentAlert("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
+        igv.browser.alert.present("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
         return undefined;
     }
 
@@ -460,7 +459,7 @@ async function getGoogleAccessToken() {
     options.setPrompt('select_account');
     options.setScope(scope);
     oauthPromise = new Promise(function (resolve, reject) {
-        Alert.presentAlert("Google Login required", function () {
+        igv.browser.alert.present("Google Login required", function () {
             gapi.auth2.getAuthInstance().signIn(options)
                 .then(function (user) {
                     currentUser = user;

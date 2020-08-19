@@ -79,6 +79,7 @@ $igv-track-components-margin: 0px;
 
 }
 
+@import "igv-alert-dialog";
 @import "igv-generic-container";
 @import "igv-generic-dialog-container";
 @import "igv-popover";
@@ -484,7 +485,6 @@ $igv-track-components-margin: 0px;
   padding-right: 6px;
 
   height: $igv-navbar-button-height;
-  //min-width: $igv-navbar-button-width;
   text-transform: capitalize;
 
   user-select: none;
