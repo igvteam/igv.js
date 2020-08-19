@@ -23,6 +23,7 @@
  * THE SOFTWARE.
  */
 
+import { IGVColor } from '../node_modules/igv-utils/src/index.js';
 import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import ViewPort from "./viewport.js";
@@ -336,9 +337,9 @@ TrackView.prototype.createColorPicker = function () {
             parent: this.trackDiv,
             top: undefined,
             left: undefined,
-            width: undefined,
+            width: 432,
             height: undefined,
-            defaultColor: this.track.color,
+            defaultColors: [ this.track.color ].map(rgb => IGVColor.rgbToHex(rgb)),
             colorHandler: rgb => this.setColor(rgb)
         };
 
