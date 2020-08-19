@@ -226,7 +226,8 @@ const IGVColor = {
         var isHex = /(^#[0-9A-F]{6}$)|(^#[0-9A-F]{3}$)/i.test(color);
 
         if (color.startsWith("rgba")) {
-            return color;   // TODO -- should replace current alpha with new one
+            const idx = color.lastIndexOf(",");
+            return color.substring(0, idx+1) + alpha.toString() + ")";
         }
 
         if (isHex) {
