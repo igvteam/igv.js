@@ -195,7 +195,7 @@ CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
                         if (message && message.indexOf("MD5") >= 0) {
                             message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                         }
-                        browser.presentAlert(message)
+                        browser.alert.present(message)
                         throw error
                     })
             }

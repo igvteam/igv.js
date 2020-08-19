@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { InputDialog, Alert, AlertDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
+import { InputDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
@@ -54,8 +54,6 @@ let allBrowsers = [];
  */
 async function createBrowser(parentDiv, config) {
 
-    Alert.init(parentDiv);
-
     if (undefined === config) config = {};
 
     // Path to genomes.json file.   This is globally shared among all browser objects
@@ -75,11 +73,11 @@ async function createBrowser(parentDiv, config) {
 
     setControls(browser, config);
 
-    // user feedback
+    // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
+    // browser.alert.present(str)
+
     browser.userFeedback = new UserFeedback(browser.$content);
     browser.userFeedback.hide();
-
-    browser.alertDialog = new AlertDialog(browser.$content.get(0));
 
     browser.inputDialog = new InputDialog(browser.$root.get(0));
 
@@ -286,7 +284,7 @@ function createStandardControls(browser, config) {
         browser.search($(this).val())
 
             .catch(function (error) {
-                browser.presentAlert(error);
+                browser.alert.present(error);
             });
     });
 
