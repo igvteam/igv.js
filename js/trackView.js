@@ -212,19 +212,18 @@ TrackView.prototype.appendRightHandGutter = function ($parent) {
 // Free function for juicebox -- do not attach to prototype!!!
 function createTrackGearPopover($parent) {
 
-    let $cogContainer = $("<div>", {class: 'igv-trackgear-container'});
-    $parent.append($cogContainer);
+    let $trackGearContainer = $("<div>", {class: 'igv-trackgear-container'});
+    $parent.append($trackGearContainer);
 
-    $cogContainer.append(createIcon('cog'));
+    $trackGearContainer.append(createIcon('cog'));
 
     this.trackGearPopover = new TrackGearPopover($parent);
     this.trackGearPopover.$popover.hide();
 
-    let self = this;
-    $cogContainer.click(function (e) {
+    $trackGearContainer.click(e => {
         e.preventDefault();
         e.stopPropagation();
-        self.trackGearPopover.presentMenuList(-(self.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(self));
+        this.trackGearPopover.presentMenuList(-(this.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
     });
 
 }
