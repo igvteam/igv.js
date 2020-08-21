@@ -733,13 +733,11 @@
     margin-top: 10px;
     height: 16px;
     width: 100%; }
-    #igv-root #igv-ideogram-container #igv-ideogram-shim {
-      height: 100%;
-      width: 50px;
-      background-color: white; }
     #igv-root #igv-ideogram-container .igv-ideogram-content {
       height: 100%;
       background-color: white; }
+    #igv-root #igv-ideogram-container .igv-ideogram-content:first-child {
+      margin-left: 50px; }
     #igv-root #igv-ideogram-container .igv-ideogram-content-border-right {
       border-right-color: #292929;
       border-right-style: solid;

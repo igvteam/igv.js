@@ -437,15 +437,19 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
     height: 16px;
     width: 100%;
 
-    #igv-ideogram-shim {
-      height: 100%;
-      width: 50px;
-      background-color: white;
-    }
+    //#igv-ideogram-shim {
+    //  height: 100%;
+    //  width: $igv-left-hand-gutter-width;
+    //  background-color: white;
+    //}
 
     .igv-ideogram-content {
       height: 100%;
       background-color: white;
+    }
+
+    .igv-ideogram-content:first-child {
+      margin-left: $igv-left-hand-gutter-width;
     }
 
     .igv-ideogram-content-border-right {
@@ -493,7 +497,7 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 }
 
 .igv-left-hand-gutter {
-  width: 50px;
+  width: $igv-left-hand-gutter-width;
   height: 100%;
 }
 
