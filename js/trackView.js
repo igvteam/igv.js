@@ -40,15 +40,11 @@ var dragged,
 
 const TrackView = function (browser, $container, track) {
 
-    var self = this,
-        width,
-        $track;
-
     this.browser = browser;
     this.track = track;
     track.trackView = this;
 
-    $track = $('<div class="igv-track">');
+    const $track = $('<div class="igv-track">');
     this.trackDiv = $track.get(0);
     $container.append($track);
 
@@ -62,24 +58,20 @@ const TrackView = function (browser, $container, track) {
         this.trackDiv.style.height = track.height + "px";
     }
 
-    this.appendLeftHandGutter($(this.trackDiv));
-
-    // if (typeof track.paintAxis === 'function') {
-    //     appendLeftHandGutter.call(this, $(this.trackDiv));
-    // }
+    this.appendLeftHandGutter($track);
 
     this.$viewportContainer = $('<div class="igv-viewport-container">');
-    $(this.trackDiv).append(this.$viewportContainer);
+    $track.append(this.$viewportContainer);
 
     this.viewports = [];
-    width = this.browser.viewportContainerWidth() / this.browser.genomicStateList.length;
-    browser.genomicStateList.forEach(function (genomicState) {
+    const width = browser.viewportContainerWidth() / browser.genomicStateList.length;
 
-        var viewport;
-        viewport = new ViewPort(self, self.$viewportContainer, genomicState, width);
-        self.viewports.push(viewport);
+    for (let genomicState of browser.genomicStateList) {
 
-    });
+        const viewport = new ViewPort(this, this.$viewportContainer, genomicState, width);
+        this.viewports.push(viewport);
+
+    }
 
     this.decorateViewports();
 
@@ -88,20 +80,16 @@ const TrackView = function (browser, $container, track) {
     if (true === this.track.ignoreTrackMenu) {
         // do nothing
     } else {
-        this.appendRightHandGutter($(this.trackDiv));
+        this.appendRightHandGutter($track);
     }
 
     if (this.track instanceof RulerTrack) {
-        // do nuthin
+        // do nothing
     } else {
-        attachDragWidget.call(this, $(this.trackDiv), this.$viewportContainer);
+        attachDragWidget.call(this, $track, this.$viewportContainer);
     }
 
-    if ("sequence" === this.track.type) {
-        // do nothing
-    } else if (this.track instanceof RulerTrack) {
-        // do nothing
-    } else {
+    if (!('sequence' === this.track.type || this.track instanceof RulerTrack)) {
         this.createColorPicker();
     }
 
@@ -129,13 +117,10 @@ TrackView.prototype.renderSVGContext = function (context, offset) {
 TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
 
     if ("hidden" === $viewportContainer.css("overflow-y")) {
-
-        this.scrollbar = new TrackScrollbar($viewportContainer, viewports, this.browser.$root);
-
+        this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
         $viewportContainer.append(this.scrollbar.$outerScroll);
     }
 
-    return $viewportContainer;
 };
 
 TrackView.prototype.removeViewportWithLocusIndex = function (index) {
@@ -426,19 +411,6 @@ TrackView.prototype.repaintViews = function () {
     }
 }
 
-
-/**
- * Functional code to execute a series of promises (actually promise factories) sequntially.
- * Credit: Joel Thoms  https://hackernoon.com/functional-javascript-resolving-promises-sequentially-7aac18c4431e
- *
- * @param funcs
- */
-const promiseSerial = funcs =>
-    funcs.reduce((promise, func) =>
-            promise.then(result => func().then(Array.prototype.concat.bind(result))),
-        Promise.resolve([]))
-
-
 /**
  * Update viewports to reflect current genomic state, possibly loading additional data.
  */
@@ -560,7 +532,7 @@ TrackView.prototype.checkContentHeight = function () {
 
 function adjustTrackHeight() {
 
-    var maxHeight = this.maxContentHeight();
+    var maxHeight = maxViewportContentHeight(this.viewports);
     if (this.track.autoHeight) {
         this.setTrackHeight(maxHeight, false);
     } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
@@ -579,12 +551,8 @@ function adjustTrackHeight() {
     }
 }
 
-TrackView.prototype.maxContentHeight = function () {
-    return maxContentHeight(this.viewports);
-}
-
-function maxContentHeight(viewports) {
-    const heights = viewports.map((viewport) => viewport.getContentHeight());
+function maxViewportContentHeight(viewports) {
+    const heights = viewports.map(viewport => viewport.getContentHeight());
     return Math.max(...heights);
 }
 
@@ -648,7 +616,7 @@ TrackView.prototype.scrollBy = function (delta) {
 };
 
 
-const TrackScrollbar = function ($viewportContainer, viewports, rootDiv) {
+const TrackScrollbar = function ($viewportContainer, viewports) {
 
     const self = this;
     let lastY;
@@ -724,7 +692,7 @@ TrackScrollbar.prototype.moveScrollerTo = function (y) {
 
     const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
 
-    const contentDivHeight = maxContentHeight(this.viewports);
+    const contentDivHeight = maxViewportContentHeight(this.viewports);
     const contentTop = -Math.round(newTop * (contentDivHeight / this.$viewportContainer.height()));
 
     this.$innerScroll.css("top", newTop + "px");
@@ -742,22 +710,21 @@ TrackScrollbar.prototype.dispose = function () {
 
 TrackScrollbar.prototype.update = function () {
 
-    var viewportContainerHeight,
-        contentHeight,
-        newInnerHeight;
+    const viewportContainerHeight = this.$viewportContainer.height();
 
-    viewportContainerHeight = this.$viewportContainer.height();
+    const viewportContentHeight = maxViewportContentHeight(this.viewports);
 
-    contentHeight = maxContentHeight(this.viewports);
+    const innerScrollHeight = Math.round((viewportContainerHeight / viewportContentHeight) * viewportContainerHeight);
 
-    newInnerHeight = Math.round((viewportContainerHeight / contentHeight) * viewportContainerHeight);
-
-    if (contentHeight > viewportContainerHeight) {
+    // this.$outerScroll.show();
+    // this.$innerScroll.height(innerScrollHeight);
+    if (viewportContentHeight > viewportContainerHeight) {
         this.$outerScroll.show();
-        this.$innerScroll.height(newInnerHeight);
+        this.$innerScroll.height(innerScrollHeight);
     } else {
         this.$outerScroll.hide();
     }
 };
 
+export { maxViewportContentHeight }
 export default TrackView

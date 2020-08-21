@@ -49,8 +49,8 @@ $igv-right-hand-gutter-width: 36px;
 $igv-track-manipulation-handle-width: 12px;
 $igv-track-manipulation-handle-margin-width: 2px;
 $igv-track-manipulation-handle-border-width: 1px;
-
-$igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width + 2 * $igv-track-manipulation-handle-border-width;
+$igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width + 2 * $igv-track-manipulation-handle-border-width;
+$igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim;
 
 @mixin generic-input {
 
@@ -515,6 +515,8 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
 .igv-viewport-container {
 
+  position: relative;
+
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -542,6 +544,51 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   //  border-left-style: solid;
   //  border-left-width: $igv-panel-border-width;
   //}
+
+}
+
+.igv-scrollbar-outer-div {
+
+  position: absolute;
+  top: 0;
+  right: 0;
+
+  width: 14px;
+  height: 100%;
+
+  //background-color: white;
+  background-color: deeppink;
+
+  div {
+
+    cursor: pointer;
+
+    position:absolute;
+    top: 0;
+    left: 2px;
+
+    width:8px;
+
+    border-style: solid;
+    border-width: 1px;
+    border-color: #c4c4c4;
+
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+
+    //background-color: white;
+    background-color: greenyellow;
+  }
+
+  div:hover,
+  div:focus,
+  div:active {
+    //background-color: #c4c4c4;
+    background-color: greenyellow;
+  }
 
 }
 
@@ -919,43 +966,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 .igv-track-label:focus,
 .igv-track-label:active  {
   background-color: rgba(0, 0, 0, 0.05);
-}
-
-// scrollbar
-.igv-scrollbar-outer-div {
-  position: absolute;
-  top: 0;
-  right: 0;
-  width: 14px;
-  height: 100%;
-  background-color: white;
-
-  div {
-    position:absolute;
-    top: 0;
-    left: 3px;
-    width:8px;
-
-    border-style: solid;
-    border-width: thin;
-    border-color: #c4c4c4;
-
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-
-    background-color: white;
-  }
-
-  div:hover,
-  div:focus,
-  div:active {
-    cursor: pointer;
-    background-color: #c4c4c4;
-  }
-
 }
 
 // zoom-in notice

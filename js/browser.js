@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView from "./trackView.js";
+import TrackView, { maxViewportContentHeight } from "./trackView.js";
 import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -2124,7 +2124,7 @@ function addMouseHandlers() {
                         self.isScrolling = true;
                         const trackView = viewport.trackView;
                         const viewportContainerHeight = trackView.$viewportContainer.height();
-                        const contentHeight = trackView.maxContentHeight();
+                        const contentHeight = maxViewportContentHeight(trackView.viewports);
                         self.vpMouseDown.r = viewportContainerHeight / contentHeight;
                     }
                 }
