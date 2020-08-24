@@ -104,8 +104,7 @@ class ViewPort {
                 } else {
                     str = trackView.track.name;
                 }
-                const { x, y } = pageCoordinates(e);
-                self.popover.presentContent(x, y, str);
+                self.popover.presentContentWithEvent(e, str);
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -1005,8 +1004,7 @@ function addMouseHandlers() {
 
                         var content = getPopupContent(e, self);
                         if (content) {
-                            const { x, y } = pageCoordinates(e);
-                            self.popover.presentContent(x, y, content);
+                            self.popover.presentContentWithEvent(e, content);
                         }
                         clearTimeout(popupTimerID);
                         popupTimerID = undefined;
