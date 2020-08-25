@@ -46,10 +46,6 @@ class ViewPort {
 
         this.setWidth(width);
 
-        if ("sequence" === trackView.track.type) {
-            this.$viewport.addClass('igv-viewport-sequence');
-        }
-
         if ('ruler' === trackView.track.type) {
             this.rulerSweeper = new RulerSweeper(this);
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);

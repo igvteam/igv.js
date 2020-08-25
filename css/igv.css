@@ -1010,12 +1010,6 @@
 .igv-multi-locus-panel-label-div:hover {
   cursor: pointer; }
 
-.igv-viewport-sequence {
-  font-family: "Open Sans", sans-serif;
-  font-size: 8px;
-  font-weight: 200;
-  text-align: center; }
-
 .igv-viewport-spinner {
   position: absolute;
   top: 50%;
