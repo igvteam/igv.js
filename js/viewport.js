@@ -10,6 +10,7 @@ import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
+import RulerTrack from "./rulerTrack.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -46,7 +47,7 @@ class ViewPort {
 
         this.setWidth(width);
 
-        if ('ruler' === trackView.track.type) {
+        if (trackView.track instanceof RulerTrack) {
             this.rulerSweeper = new RulerSweeper(this);
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
             this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
