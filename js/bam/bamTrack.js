@@ -65,14 +65,21 @@ const BAMTrack = extend(TrackBase,
         }
 
         this.featureSource = new BamSource(config, browser);
+
+        this.showCoverage = true
+        this.showAlignments = true
+
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
+
+        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
         this.visibilityWindow = config.visibilityWindow || 30000;
         this.viewAsPairs = config.viewAsPairs;
         this.pairsSupported = config.pairsSupported !== false;
         this.showSoftClips = config.showSoftClips;
         this.showAllBases = config.showAllBases;
+
         this.showMismatches = config.showMismatches !== false;
         this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
         this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
@@ -200,11 +207,18 @@ BAMTrack.prototype.draw = function (options) {
 
     IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-    if (this.coverageTrack.height > 0) {
+    if (true === this.showCoverage && this.coverageTrack.height > 0) {
+        this.trackView.controlCanvas.style.display = 'block'
         this.coverageTrack.draw(options);
+    } else {
+        this.trackView.controlCanvas.style.display = 'none'
     }
 
-    this.alignmentTrack.draw(options);
+    if (true === this.showAlignments) {
+        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
+        this.alignmentTrack.draw(options);
+    }
+
 };
 
 BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
@@ -254,6 +268,24 @@ BAMTrack.prototype.menuItemList = function () {
     colorByMenuItems.forEach(function (item) {
         const selected = (self.alignmentTrack.colorBy === item.key);
         menuItems.push(colorByCB(item, selected));
+    });
+
+    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+    menuItems.push({
+        object: createCheckbox("Show Coverage", this.showCoverage),
+        click: () => {
+            this.showCoverage = !this.showCoverage;
+            console.log(`${ true === this.showCoverage ? 'Show' : 'Hide' } Coverage`)
+            this.trackView.updateViews(true);
+        }
+    });
+    menuItems.push({
+        object: createCheckbox("Show Alignments", this.showAlignments),
+        click: () => {
+            this.showAlignments = !this.showAlignments;
+            console.log(`${ true === this.showCoverage ? 'Show' : 'Hide' } Alignments`)
+            this.trackView.updateViews(true);
+        }
     });
 
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
@@ -579,7 +611,7 @@ var AlignmentTrack = function (config, parent) {
     this.parent = parent;
     this.browser = parent.browser;
     this.featureSource = parent.featureSource;
-    this.top = config.coverageTrackHeight === 0 ? 0 : config.coverageTrackHeight + 5;
+    this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5;
     this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
     this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
@@ -607,6 +639,10 @@ var AlignmentTrack = function (config, parent) {
 
     this.hasPairs = false;   // Until proven otherwise
 };
+
+AlignmentTrack.prototype.setTop = function (coverageTrack, showCoverage) {
+    this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height);
+}
 
 AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
