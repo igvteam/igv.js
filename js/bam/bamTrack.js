@@ -238,7 +238,7 @@ BAMTrack.prototype.contextMenuItemList = function (config) {
 
 BAMTrack.prototype.popupData = function (config) {
 
-    if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+    if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
         return this.coverageTrack.popupData(config);
     } else {
         return this.alignmentTrack.popupData(config);
