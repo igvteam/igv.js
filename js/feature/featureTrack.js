@@ -60,7 +60,7 @@ const FeatureTrack = extend(TrackBase,
         this.maxRows = config.maxRows;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-            this.featureSource =  FeatureSource(config, browser.genome);
+        this.featureSource =  FeatureSource(config, browser.genome);
 
         // Set default heights
         this.autoHeight = config.autoHeight;
@@ -276,15 +276,40 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
 
     const data = [];
     for (let feature of features) {
-
-        const featureData = (typeof feature.popupData === "function") ?
-            feature.popupData(genomicLocation) :
-            TrackBase.extractPopupData(feature, this.getGenomeId());
-
+        let featureData
+        if (this.config.type === 'spliceJunctions') {
+            featureData = [
+                {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ')'},
+                {name: feature.attributes.uniquely_mapped, value: 'Uniquely Mapped Reads'},
+                {name: feature.attributes.multi_mapped, value: 'Multi-Mapped Reads'},
+                {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'Total Reads'},
+            ]
+            if (feature.attributes.motif) {
+                featureData.push({name: feature.attributes.motif, value: 'motif'})
+            }
+            if (feature.attributes.annotated_junction) {
+                if (feature.attributes.annotated_junction === 'true') {
+                    featureData.push({name: '', value: 'Known Junction'})
+                } else {
+                    featureData.push({name: 'Novel Junction', value: ''})
+                }
+            }
+            if (feature.attributes.num_samples_with_this_junction) {
+                featureData.push({name: feature.attributes.num_samples_with_this_junction, value: 'Samples With This Junction'})
+                if (feature.attributes.num_samples_total) {
+                    featureData.push({name: 100*feature.attributes.fraction_of_samples_with_this_junction, value: '% Samples With Junction'})
+                    featureData.push({name: feature.attributes.num_samples_total, value: 'Total Samples'})
+                }
+            }
+        } else {
+         featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) :
+                            TrackBase.extractPopupData(feature, this.getGenomeId());
+        }
         if (featureData) {
             if (data.length > 0) {
                 data.push("<HR>");
             }
+
             Array.prototype.push.apply(data, featureData);
         }
     }
@@ -726,6 +751,29 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideStrand === feature.strand) {
         return
     }
+
+    // check if junction is inside viewport
+    const vp = this.trackView.viewports[0]
+    const referenceFrame = vp.genomicState.referenceFrame;
+    const referenceFrameStart = referenceFrame.start;
+    const referenceFrameEnd = referenceFrameStart + referenceFrame.toBP($(vp.contentDiv).width());
+    if (feature.end < referenceFrameStart || feature.start > referenceFrameEnd) {
+        //skip junctions outside the viewport
+        return
+    }
+    if (this.config.minJunctionEndsVisible) {
+        let numEdgesInViewport = 0
+        if (feature.start >= referenceFrameStart && feature.start <= referenceFrameEnd) {
+            numEdgesInViewport += 1
+        }
+        if (feature.end >= referenceFrameStart && feature.end <= referenceFrameEnd) {
+            numEdgesInViewport += 1
+        }
+        if (numEdgesInViewport < this.config.minJunctionEndsVisible) {
+            return
+        }
+    }
+
     const uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
     if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
         return
@@ -738,11 +786,32 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
         return
     }
-    const maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
-    if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
+    if (feature.attributes.maximum_spliced_alignment_overhang && parseInt(feature.attributes.maximum_spliced_alignment_overhang) < this.config.minSplicedAlignmentOverhang) {
         return
     }
 
+    let numSamplesWithThisJunction
+    if (feature.attributes.num_samples_with_this_junction) {
+        numSamplesWithThisJunction = parseInt(feature.attributes.num_samples_with_this_junction)
+        if (this.config.minSamplesWithThisJunction && numSamplesWithThisJunction < this.config.minSamplesWithThisJunction) {
+            return
+        }
+        if (this.config.maxSamplesWithThisJunction && numSamplesWithThisJunction > this.config.maxSamplesWithThisJunction) {
+            return
+        }
+        if (feature.attributes.num_samples_total) {
+            feature.attributes.fraction_of_samples_with_this_junction = numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
+            if (this.config.minFractionOfSamplesWithThisJunction) {
+                if (feature.attributes.fraction_of_samples_with_this_junction < this.config.minFractionOfSamplesWithThisJunction ||
+                    feature.attributes.fraction_of_samples_with_this_junction > this.config.maxFractionOfSamplesWithThisJunction) {
+                    return
+                }
+            }
+        }
+    }
+
+    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
     const py = this.margin;
     const rowHeight = this.height;
 
@@ -752,8 +821,6 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     const bezierBottomY = bottomY - 10;
 
     // draw the junction arc
-    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
     const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
     const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
     const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
@@ -763,6 +830,8 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         lineWidth = uniquelyMappedReadCount;
     } else if (this.config.thicknessBasedOn === 'numReads') {
         lineWidth = totalReadCount;
+    } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
+        lineWidth = numSamplesWithThisJunction;
     } else if (this.config.thicknessBasedOn === 'isAnnotatedJunction') {
         lineWidth = feature.attributes.annotated_junction === "true" ? 20 : 100;
     }
@@ -803,7 +872,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
             label += totalReadCount;
         } else if (this.config.labelUniqueReadCount) {
             label += uniquelyMappedReadCount;
+        } else if (this.config.labelNumSamplesWithThisJunction) {
+            label += numSamplesWithThisJunction;
         }
+
         if (this.config.labelMultiMappedReadCount && multiMappedReadCount > 0) {
             label += ' (+' + multiMappedReadCount + ')';
         }
