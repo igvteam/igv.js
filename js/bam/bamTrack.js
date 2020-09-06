@@ -60,19 +60,26 @@ const BAMTrack = extend(TrackBase,
         if (config.coverageTrackHeight === undefined) {
             config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
         }
-        if(config.alleleFreqThreshold === undefined) {
+        if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
 
         this.featureSource = new BamSource(config, browser);
+
+        this.showCoverage = config.showCoverage === undefined ? true : config.showCoverage;
+        this.showAlignments = config.showAlignments === undefined ? true : config.showAlignments;
+
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
+
+        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
 
         this.visibilityWindow = config.visibilityWindow || 30000;
         this.viewAsPairs = config.viewAsPairs;
         this.pairsSupported = config.pairsSupported !== false;
         this.showSoftClips = config.showSoftClips;
         this.showAllBases = config.showAllBases;
+
         this.showMismatches = config.showMismatches !== false;
         this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
         this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
@@ -97,7 +104,7 @@ const BAMTrack = extend(TrackBase,
         function assignSort(currentSorts, sort) {
 
             const range = parseLocusString(sort.locus);
-            if(browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
+            if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
 
             // Loop through current genomic states, assign sort to first matching state
             for (let gs of browser.genomicStateList) {
@@ -189,10 +196,11 @@ BAMTrack.filters = {
  * @returns {number}
  */
 BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
-
-    return this.coverageTrack.computePixelHeight(alignmentContainer) +
-        this.alignmentTrack.computePixelHeight(alignmentContainer) +
+    const h =
+        (this.showCoverage ? this.coverageTrack.height : 0) +
+        (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
         15;
+    return h;
 
 };
 
@@ -200,11 +208,18 @@ BAMTrack.prototype.draw = function (options) {
 
     IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-    if (this.coverageTrack.height > 0) {
+    if (true === this.showCoverage && this.coverageTrack.height > 0) {
+        this.trackView.controlCanvas.style.display = 'block'
         this.coverageTrack.draw(options);
+    } else {
+        this.trackView.controlCanvas.style.display = 'none'
     }
 
-    this.alignmentTrack.draw(options);
+    if (true === this.showAlignments) {
+        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
+        this.alignmentTrack.draw(options);
+    }
+
 };
 
 BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
@@ -224,7 +239,7 @@ BAMTrack.prototype.contextMenuItemList = function (config) {
 
 BAMTrack.prototype.popupData = function (config) {
 
-    if (config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+    if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
         return this.coverageTrack.popupData(config);
     } else {
         return this.alignmentTrack.popupData(config);
@@ -254,6 +269,30 @@ BAMTrack.prototype.menuItemList = function () {
     colorByMenuItems.forEach(function (item) {
         const selected = (self.alignmentTrack.colorBy === item.key);
         menuItems.push(colorByCB(item, selected));
+    });
+
+    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+    menuItems.push({
+        object: createCheckbox("Show Coverage", this.showCoverage),
+        click: () => {
+            this.showCoverage = !this.showCoverage;
+            const ah = this.autoHeight;
+            this.autoHeight = true;
+            this.trackView.checkContentHeight();
+            this.autoHeight = ah;
+            this.trackView.updateViews(true);
+        }
+    });
+    menuItems.push({
+        object: createCheckbox("Show Alignments", this.showAlignments),
+        click: () => {
+            this.showAlignments = !this.showAlignments;
+            const ah = this.autoHeight;
+            this.autoHeight = true;
+            this.trackView.checkContentHeight();
+            this.autoHeight = ah;
+            this.trackView.updateViews(true);
+        }
     });
 
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
@@ -424,16 +463,12 @@ var CoverageTrack = function (config, parent) {
     this.top = 0;
 };
 
-CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
-    return this.height;
-};
-
 CoverageTrack.prototype.draw = function (options) {
 
     const pixelTop = options.pixelTop;
     const pixelBottom = pixelTop + options.pixelHeight;
 
-    if(pixelTop > this.height) {
+    if (pixelTop > this.height) {
         return; //scrolled out of view
     }
 
@@ -579,7 +614,7 @@ var AlignmentTrack = function (config, parent) {
     this.parent = parent;
     this.browser = parent.browser;
     this.featureSource = parent.featureSource;
-    this.top = config.coverageTrackHeight === 0 ? 0 : config.coverageTrackHeight + 5;
+    this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5;
     this.alignmentRowHeight = config.alignmentRowHeight || 14;
 
     this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
@@ -607,6 +642,10 @@ var AlignmentTrack = function (config, parent) {
 
     this.hasPairs = false;   // Until proven otherwise
 };
+
+AlignmentTrack.prototype.setTop = function (coverageTrack, showCoverage) {
+    this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height);
+}
 
 AlignmentTrack.prototype.computePixelHeight = function (alignmentContainer) {
 
@@ -678,9 +717,9 @@ AlignmentTrack.prototype.draw = function (options) {
             const alignmentY = alignmentRowYInset + (this.alignmentRowHeight * rowIndex);
             const alignmentHeight = this.alignmentRowHeight <= 4 ? this.alignmentRowHeight : this.alignmentRowHeight - 2;
 
-            if(alignmentY > pixelBottom) {
+            if (alignmentY > pixelBottom) {
                 break;
-            } else if(alignmentY + alignmentHeight < pixelTop) {
+            } else if (alignmentY + alignmentHeight < pixelTop) {
                 continue;
             }
 
@@ -1052,7 +1091,7 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
         if (!alignment) return;
 
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-        if(!seqstring|| "*" === seqstring) {
+        if (!seqstring || "*" === seqstring) {
             self.browser.alert.present("Read sequence: *")
         } else {
             self.browser.alert.present(seqstring);
