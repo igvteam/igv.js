@@ -60,14 +60,14 @@ const BAMTrack = extend(TrackBase,
         if (config.coverageTrackHeight === undefined) {
             config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
         }
-        if(config.alleleFreqThreshold === undefined) {
+        if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
 
         this.featureSource = new BamSource(config, browser);
 
-        this.showCoverage = true
-        this.showAlignments = true
+        this.showCoverage = config.showCoverage === undefined ? true : config.showCoverage;
+        this.showAlignments = config.showAlignments === undefined ? true : config.showAlignments;
 
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
@@ -104,7 +104,7 @@ const BAMTrack = extend(TrackBase,
         function assignSort(currentSorts, sort) {
 
             const range = parseLocusString(sort.locus);
-            if(browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
+            if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
 
             // Loop through current genomic states, assign sort to first matching state
             for (let gs of browser.genomicStateList) {
@@ -196,10 +196,11 @@ BAMTrack.filters = {
  * @returns {number}
  */
 BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
-
-    return this.coverageTrack.computePixelHeight(alignmentContainer) +
-        this.alignmentTrack.computePixelHeight(alignmentContainer) +
+    const h =
+        (this.showCoverage ? this.coverageTrack.height : 0) +
+        (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
         15;
+    return h;
 
 };
 
@@ -275,7 +276,10 @@ BAMTrack.prototype.menuItemList = function () {
         object: createCheckbox("Show Coverage", this.showCoverage),
         click: () => {
             this.showCoverage = !this.showCoverage;
-            console.log(`${ true === this.showCoverage ? 'Show' : 'Hide' } Coverage`)
+            const ah = this.autoHeight;
+            this.autoHeight = true;
+            this.trackView.checkContentHeight();
+            this.autoHeight = ah;
             this.trackView.updateViews(true);
         }
     });
@@ -283,7 +287,10 @@ BAMTrack.prototype.menuItemList = function () {
         object: createCheckbox("Show Alignments", this.showAlignments),
         click: () => {
             this.showAlignments = !this.showAlignments;
-            console.log(`${ true === this.showCoverage ? 'Show' : 'Hide' } Alignments`)
+            const ah = this.autoHeight;
+            this.autoHeight = true;
+            this.trackView.checkContentHeight();
+            this.autoHeight = ah;
             this.trackView.updateViews(true);
         }
     });
@@ -456,16 +463,12 @@ var CoverageTrack = function (config, parent) {
     this.top = 0;
 };
 
-CoverageTrack.prototype.computePixelHeight = function (alignmentContainer) {
-    return this.height;
-};
-
 CoverageTrack.prototype.draw = function (options) {
 
     const pixelTop = options.pixelTop;
     const pixelBottom = pixelTop + options.pixelHeight;
 
-    if(pixelTop > this.height) {
+    if (pixelTop > this.height) {
         return; //scrolled out of view
     }
 
@@ -714,9 +717,9 @@ AlignmentTrack.prototype.draw = function (options) {
             const alignmentY = alignmentRowYInset + (this.alignmentRowHeight * rowIndex);
             const alignmentHeight = this.alignmentRowHeight <= 4 ? this.alignmentRowHeight : this.alignmentRowHeight - 2;
 
-            if(alignmentY > pixelBottom) {
+            if (alignmentY > pixelBottom) {
                 break;
-            } else if(alignmentY + alignmentHeight < pixelTop) {
+            } else if (alignmentY + alignmentHeight < pixelTop) {
                 continue;
             }
 
@@ -1088,7 +1091,7 @@ AlignmentTrack.prototype.contextMenuItemList = function (clickState) {
         if (!alignment) return;
 
         const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-        if(!seqstring|| "*" === seqstring) {
+        if (!seqstring || "*" === seqstring) {
             self.browser.alert.present("Read sequence: *")
         } else {
             self.browser.alert.present(seqstring);
