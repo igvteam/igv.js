@@ -322,6 +322,12 @@ Browser.prototype.loadSession = async function (options) {
     }
 }
 
+
+/**
+ * Note:  public API function
+ * @param session
+ * @returns {Promise<void>}
+ */
 Browser.prototype.loadSessionObject = async function (session) {
 
     this.removeAllTracks(true);
