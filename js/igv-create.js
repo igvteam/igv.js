@@ -29,7 +29,6 @@ import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
-import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import UserFeedback from "./ui/userFeedback.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -76,12 +75,10 @@ async function createBrowser(parentDiv, config) {
     // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
     // browser.alert.present(str)
 
-    browser.userFeedback = new UserFeedback(browser.$content);
+    browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
 
     browser.inputDialog = new InputDialog(browser.$root.get(0));
-
-    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
 
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
@@ -201,63 +198,44 @@ function setTrackOrder(conf) {
 
 function setControls(browser, conf) {
 
-    var controlDiv;
+    const $navBar = createStandardControls(browser, conf);
 
-    // Create controls. Can be customized by passing in a creation function that returns a div containing the controls
-    controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-
-    $(controlDiv).insertBefore(browser.$content);
+    $navBar.insertBefore(browser.$contentHeader);
 
     if (false === conf.showControls) {
-        $(controlDiv).hide();
+        $navBar.hide();
     }
 
 }
 
 function createStandardControls(browser, config) {
 
-    var $div,
-        $igv_nav_bar_left_container,
-        $igv_nav_bar_right_container,
-        $genomic_location,
-        $locus_size_group,
-        $toggle_button_container,
-        logoDiv,
-        logoSvg,
-        $controls,
-        $navigation,
-        $searchContainer,
-        $faSearch;
-
-    $controls = $('<div>', {class: 'igvControlDiv'});
-
-    $navigation = $('<div>', {class: 'igv-navbar'});
-    $controls.append($navigation);
-    browser.$navigation = $navigation;
     browser.navbarManager = new NavbarManager(browser);
 
-    $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
-    $navigation.append($igv_nav_bar_left_container);
+    const $navBar = $('<div>', { id: 'igv-navbar'});
+    browser.$navigation = $navBar;
+
+    const $navbarLeftContainer = $('<div>', { id: 'igv-navbar-left-container' });
+    $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    logoDiv = $('<div>', {class: 'igv-logo'});
-    logoSvg = logo();
+    const $logo = $('<div>', { id: 'igv-logo' });
+    $navbarLeftContainer.append($logo);
+
+    const logoSvg = logo();
     logoSvg.css("width", "34px");
     logoSvg.css("height", "32px");
-    logoDiv.append(logoSvg);
-    $igv_nav_bar_left_container.append(logoDiv);
+    $logo.append(logoSvg);
 
-    // current genome
-    browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
-    $igv_nav_bar_left_container.append(browser.$current_genome);
+    browser.$current_genome = $('<div>', { id: 'igv-current-genome' });
+    $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    //
-    $genomic_location = $('<div>', {class: 'igv-nav-bar-genomic-location'});
-    $igv_nav_bar_left_container.append($genomic_location);
+    const $genomicLocation = $('<div>', { id: 'igv-navbar-genomic-location' });
+    $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget
-    browser.chromosomeSelectWidget = new ChromosomeSelectWidget(browser, $genomic_location);
+    browser.chromosomeSelectWidget = new ChromosomeSelectWidget(browser, $genomicLocation);
     if (undefined === config.showChromosomeWidget) {
         config.showChromosomeWidget = true;   // Default to true
     }
@@ -267,16 +245,14 @@ function createStandardControls(browser, config) {
         browser.chromosomeSelectWidget.$container.hide();
     }
 
+    const $locusSizeGroup = $('<div>', { id: 'igv-locus-size-group' });
+    $genomicLocation.append($locusSizeGroup);
 
-    $locus_size_group = $('<div>', {class: 'igv-locus-size-group'});
-    $genomic_location.append($locus_size_group);
+    const $searchContainer = $('<div>', { id: 'igv-search-container' });
+    $locusSizeGroup.append($searchContainer);
 
-    // locus goto widget container
-    $searchContainer = $('<div>', {class: 'igv-search-container'});
-    $locus_size_group.append($searchContainer);
-
-    // locus goto input
-    browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    browser.$searchInput = $('<input>', { id:'igv-search-input', type: 'text', placeholder:'Locus Search' });
     $searchContainer.append(browser.$searchInput);
 
     browser.$searchInput.change(function (e) {
@@ -288,65 +264,41 @@ function createStandardControls(browser, config) {
             });
     });
 
-    // search icon container
-    $div = $('<div>');
-    $searchContainer.append($div);
+    const $searchIconContainer = $('<div>', { id: 'igv-search-icon-container' });
+    $searchContainer.append($searchIconContainer);
 
-    // search icon svg
-    $div.append(createIcon("search"));
+    $searchIconContainer.append(createIcon("search"));
 
-    $div.click(function () {
-        browser.search(browser.$searchInput.val());
-    });
+    $searchIconContainer.on('click', () => browser.search(browser.$searchInput.val()));
 
-    // $searchContainer.append($faSearch);
+    browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 
-    // TODO: Currently not used
-    // search results presented in table
-    // browser.$searchResults = $('<div class="igv-search-results">');
-    // $searchContainer.append(browser.$searchResults.get(0));
-    // browser.$searchResultsTable = $('<table>');
-    // browser.$searchResults.append(browser.$searchResultsTable.get(0));
-    // browser.$searchResults.hide();
+    const $navbarRightContainer = $('<div>', { id: 'igv-navbar-right-container' });
+    $navBar.append($navbarRightContainer);
 
-    // window size display
-    browser.windowSizePanel = new WindowSizePanel($locus_size_group, browser);
-
-
-    // cursor guide | center guide | track labels
-
-    $igv_nav_bar_right_container = $('<div class="igv-nav-bar-right-container">');
-    $navigation.append($igv_nav_bar_right_container);
-
-    $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
-    $igv_nav_bar_right_container.append($toggle_button_container);
+    const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
+    $navbarRightContainer.append($toggle_button_container);
     browser.$toggle_button_container = $toggle_button_container;
 
-    // cursor guide
-    // browser.cursorGuide = new CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
-    browser.cursorGuide = new CursorGuide(browser.$content, $toggle_button_container, config, browser);
+    browser.cursorGuide = new CursorGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
-    // center guide
-    browser.centerGuide = new CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.centerGuide = new CenterGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
-    // toggle track labels
     if (true === config.showTrackLabelButton) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
-    // SVG save button
     if (config.showSVGButton) {
         browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
 
-    // zoom widget
-    browser.zoomWidget = new ZoomWidget(browser, $igv_nav_bar_right_container);
+    browser.zoomWidget = new ZoomWidget(browser, $navbarRightContainer);
 
     if (false === config.showNavigation) {
         browser.$navigation.hide();
     }
 
-    return $controls.get(0);
+    return $navBar;
 }
 
 
