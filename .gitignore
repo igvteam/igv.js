@@ -10,13 +10,8 @@
 /miRNA/
 *.iml
 /npm-debug.log
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv_trackgear_popup.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv-colorpicker.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv-generic-container.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/igv.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv-trackgear-popup.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv-user-feedback.scssc
-/css/.sass-cache/ab483755b4a226863a81d799c4857b21ee6820d0/_igv-generic-dialog-container.scssc
-/css/.sass-cache
+/css/.sass-cache/
+/dev/css/.sass-cache/
 /dist/
 /dev/google-oauth.html
+igv.css.map

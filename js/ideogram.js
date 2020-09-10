@@ -68,14 +68,7 @@ IdeoPanel.prototype.renderSVGContext = function (context, offset) {
 };
 
 IdeoPanel.prototype.buildPanels = function ($parent, width) {
-
-    var self = this;
-
-    $parent.append($('<div class="igv-ideogram-shim"></div>'));
-
-    this.panels = this.browser.genomicStateList.map(function (genomicState) {
-        return panelWithGenomicState.call(self, $parent, genomicState, width)
-    });
+    this.panels = this.browser.genomicStateList.map(genomicState => panelWithGenomicState.call(this, $parent, genomicState, width));
 };
 
 IdeoPanel.prototype.setWidth = function (width, doRepaint) {
