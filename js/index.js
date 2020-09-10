@@ -19,7 +19,6 @@ import IGVGraphics from "./igv-canvas.js";
 import google from "./google/googleUtils.js";
 import TrackView from "./trackView.js";
 import makeDraggable from "./ui/draggable.js";
-import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import embedCss from "./embedCss.js";
 import MenuUtils from "./ui/menuUtils.js";
@@ -83,7 +82,6 @@ export default {
     makeDraggable,
     Popover,
     InputDialog,
-    TrackRemovalDialog,
     DataRangeDialog,
     MenuUtils,
     google
