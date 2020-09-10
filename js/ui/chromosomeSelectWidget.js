@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2017 The Regents of the University of California 
+ * Copyright (c) 2016-2017 The Regents of the University of California
  * Author: Jim Robinson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -30,7 +30,7 @@ const ChromosomeSelectWidget = function (browser, $parent) {
 
     this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
 
-    this.$container = $('<div>', {class: 'igv-chromosome-select-widget-container'});
+    this.$container = $('<div>', { id: 'igv-chromosome-select-widget-container' });
     $parent.append(this.$container);
 
     this.$select = $('<select>', {'name': 'chromosome-select-widget'});

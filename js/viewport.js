@@ -10,6 +10,7 @@ import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
+import RulerTrack from "./rulerTrack.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -24,14 +25,14 @@ class ViewPort {
         this.browser = trackView.browser;
 
         // viewport
-        this.$viewport = $('<div class="igv-viewport-div">');
+        this.$viewport = $('<div class="igv-viewport">');
         $container.append(this.$viewport);
 
         // store the viewport GUID for later use
         this.$viewport.data('viewportGUID', this.guid);
 
         // viewport-content
-        const $div = $("<div>", {class: 'igv-viewport-content-div'});
+        const $div = $("<div>", {class: 'igv-viewport-content'});
         this.$viewport.append($div);
 
         $div.height(this.$viewport.height());
@@ -46,11 +47,7 @@ class ViewPort {
 
         this.setWidth(width);
 
-        if ("sequence" === trackView.track.type) {
-            this.$viewport.addClass('igv-viewport-sequence');
-        }
-
-        if ('ruler' === trackView.track.type) {
+        if (trackView.track instanceof RulerTrack) {
             this.rulerSweeper = new RulerSweeper(this);
             trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
             this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
@@ -75,7 +72,7 @@ class ViewPort {
             this.$viewport.append(this.$spinner);
             this.stopSpinner();
             if ("sequence" !== trackView.track.type) {
-                this.popover = new Popover(this.browser.$content.get(0));
+                this.popover = new Popover(this.browser.trackContainer);
                 let str = trackView.track.name.toLowerCase().split(' ').join('_');
                 this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
                 this.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
@@ -104,8 +101,7 @@ class ViewPort {
                 } else {
                     str = trackView.track.name;
                 }
-                const { x, y } = pageCoordinates(e);
-                self.popover.presentContent(x, y, str);
+                self.popover.presentContentWithEvent(e, str);
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -357,25 +353,29 @@ class ViewPort {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
+        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
+        const ctx = newCanvas.getContext("2d");
+
         newCanvas.style.width = pixelWidth + "px";
         newCanvas.style.height = pixelHeight + "px";
+
         newCanvas.width = devicePixelRatio * pixelWidth;
         newCanvas.height = devicePixelRatio * pixelHeight;
-        const ctx = newCanvas.getContext("2d");
-        // ctx.save();
+
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
 
-        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
-        newCanvas.style.position = 'absolute';
+        // newCanvas.style.position = 'absolute';
+
         newCanvas.style.left = pixelXOffset + "px";
         newCanvas.style.top = canvasTop + "px";
-        drawConfiguration.context = ctx;
+
         ctx.translate(0, -canvasTop)
+
+        drawConfiguration.context = ctx;
         this.draw(drawConfiguration, features, roiFeatures);
-        // ctx.translate(0, canvasTop);
-        // ctx.restore();
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
@@ -1001,8 +1001,7 @@ function addMouseHandlers() {
 
                         var content = getPopupContent(e, self);
                         if (content) {
-                            const { x, y } = pageCoordinates(e);
-                            self.popover.presentContent(x, y, content);
+                            self.popover.presentContentWithEvent(e, content);
                         }
                         clearTimeout(popupTimerID);
                         popupTimerID = undefined;

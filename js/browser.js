@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView from "./trackView.js";
+import TrackView, { maxViewportContentHeight } from "./trackView.js";
 import ViewPort from "./viewport.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -57,21 +57,19 @@ const Browser = function (options, parentDiv) {
 
     this.parent = parentDiv;
 
-    this.$root = $('<div class="igv-root-div">');
+    this.$root = $('<div>', { id: 'igv-root' });
     $(parentDiv).append(this.$root);
 
-    this.$content = $('<div class="igv-content-div">');
-    this.$root.append(this.$content);
+    this.$contentHeader = $('<div>', { id: 'igv-ideogram-container' });
+    this.$root.append(this.$contentHeader);
 
-    this.$contentHeader = $('<div>', {class: 'igv-content-header'});
-    this.$content.append(this.$contentHeader);
+    const $trackContainer = $('<div>', { id: 'igv-track-container' });
+    this.$root.append($trackContainer);
 
-    const $trackContainer = $('<div class="igv-track-container-div">');
-    this.$content.append($trackContainer);
-
-    this.trackContainerDiv = $trackContainer.get(0);
 
     this.alert = new Alert(this.$root.get(0))
+    this.trackContainer = $trackContainer.get(0);
+
 
     initialize.call(this, options);
 
@@ -90,7 +88,7 @@ const Browser = function (options, parentDiv) {
     // Map of event name -> [ handlerFn, ... ]
     this.eventHandlers = {};
 
-    this.$spinner = $('<div class="igv-track-container-spinner">');
+    this.$spinner = $('<div>', { id: 'igv-track-container-spinner' });
     $trackContainer.append(this.$spinner);
 
     this.$spinner.append(createIcon("spinner"));
@@ -193,7 +191,7 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
 // Render browser display as SVG
 Browser.prototype.toSVG = function () {
 
-    const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+    const trackContainerBBox = this.trackContainer.getBoundingClientRect();
     const anyViewportContainerBBox = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
     const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[0].$ideogram.get(0).getBoundingClientRect() : {
         height: 0,
@@ -254,7 +252,7 @@ Browser.prototype.saveSVGtoFile = function (config) {
 
     if (config.$container) {
 
-        const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+        const trackContainerBBox = this.trackContainer.getBoundingClientRect();
 
         config.$container.empty();
         config.$container.width(trackContainerBBox.width);
@@ -779,7 +777,7 @@ Browser.prototype.createTrack = function (config) {
 Browser.prototype.addTrack = async function (track) {
 
     var trackView;
-    trackView = new TrackView(this, $(this.trackContainerDiv), track);
+    trackView = new TrackView(this, $(this.trackContainer), track);
     this.trackViews.push(trackView);
 
     toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
@@ -802,10 +800,10 @@ Browser.prototype.reorderTracks = function () {
     });
 
     // Reattach the divs to the dom in the correct order
-    $(this.trackContainerDiv).children("igv-track-div").detach();
+    $(this.trackContainer).children("igv-track").detach();
 
     this.trackViews.forEach(function (trackView) {
-        myself.trackContainerDiv.appendChild(trackView.trackDiv);
+        myself.trackContainer.appendChild(trackView.trackDiv);
     });
 
 };
@@ -850,7 +848,7 @@ Browser.prototype.removeAllTracks = function (removeSequence) {
     for (let tv of this.trackViews) {
 
         if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
-            self.trackContainerDiv.removeChild(tv.trackDiv);
+            self.trackContainer.removeChild(tv.trackDiv);
             self.fireEvent('trackremoved', [tv.track]);
             tv.dispose();
         } else {
@@ -1114,8 +1112,8 @@ Browser.prototype.viewportContainerWidth = function () {
             $viewportContainer,
             width;
 
-        $track = $('<div class="igv-track-div">');
-        $(this.trackContainerDiv).append($track);
+        $track = $('<div class="igv-track">');
+        $(this.trackContainer).append($track);
 
         $viewportContainer = $('<div class="igv-viewport-container">');
         $track.append($viewportContainer);
@@ -1477,6 +1475,10 @@ Browser.prototype.goto = function (chrName, start, end) {
 };
 
 Browser.prototype.search = async function (string, init) {
+
+    if (undefined === string || '' === string) {
+        return
+    }
 
     const self = this
 
@@ -2082,15 +2084,15 @@ function addMouseHandlers() {
     $(this.root).on('mouseup', mouseUpOrLeave);
     $(this.root).on('mouseleave', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('mousemove', handleMouseMove);
+    $(this.trackContainer).on('mousemove', handleMouseMove);
 
-    $(this.trackContainerDiv).on('touchmove', handleMouseMove);
+    $(this.trackContainer).on('touchmove', handleMouseMove);
 
-    $(this.trackContainerDiv).on('mouseleave', mouseUpOrLeave);
+    $(this.trackContainer).on('mouseleave', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('mouseup', mouseUpOrLeave);
+    $(this.trackContainer).on('mouseup', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('touchend', mouseUpOrLeave);
+    $(this.trackContainer).on('touchend', mouseUpOrLeave);
 
     function handleMouseMove(e) {
 
@@ -2128,7 +2130,7 @@ function addMouseHandlers() {
                         self.isScrolling = true;
                         const trackView = viewport.trackView;
                         const viewportContainerHeight = trackView.$viewportContainer.height();
-                        const contentHeight = trackView.maxContentHeight();
+                        const contentHeight = maxViewportContentHeight(trackView.viewports);
                         self.vpMouseDown.r = viewportContainerHeight / contentHeight;
                     }
                 }
