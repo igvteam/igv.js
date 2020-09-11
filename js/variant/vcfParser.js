@@ -48,7 +48,7 @@ VcfParser.prototype.parseHeader = function (data) {
         throw new Error("Invalid VCF file: missing fileformat line");
     }
 
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
 
         if (line.startsWith("#")) {
 
@@ -144,9 +144,9 @@ VcfParser.prototype.parseFeatures = function (data) {
     const dataWrapper = getDataWrapper(data);
     const nExpectedColumns = 8 + (callSets ? callSets.length + 1: 0);
     let line;
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
 
-        if (!line.startsWith("#")) {
+        if (line && !line.startsWith("#")) {
             const tokens = line.split("\t");
             if (tokens.length === nExpectedColumns) {
                 const variant = createVCFVariant(tokens);
@@ -186,9 +186,7 @@ VcfParser.prototype.parseFeatures = function (data) {
                             }
                         });
                     }
-
                 }
-
             }
         }
     }

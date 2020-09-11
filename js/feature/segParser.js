@@ -66,7 +66,7 @@ class SegParser {
         }
         const dataColumn = this.header.headings.length - 1;
         let line;
-        while (line = nextLine()) {
+        while ((line = nextLine()) !== undefined) {
             const tokens = line.split("\t");
             if (tokens.length > dataColumn) {
                 allFeatures.push({
