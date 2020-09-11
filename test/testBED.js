@@ -297,6 +297,28 @@ function runBedTests() {
 
     });
 
+
+   QUnit.test("BED empty lines", function (assert) {
+
+      var done = assert.async();
+
+      var featureSource = FeatureSource({
+          format: 'bed',
+          indexed: false,
+          url: 'data/bed/basic_feature_3_columns_empty_lines.bed'
+        },
+        genome);
+
+      featureSource.getFileHeader().then(function (header) {
+
+        assert.ok(header);
+        assert.equal(header.name, "Basic Features");
+        assert.equal(header.color, "255,0,0");
+        done();
+      });
+
+    });
+
     QUnit.test("BED query gzip", function (assert) {
 
         var done = assert.async();

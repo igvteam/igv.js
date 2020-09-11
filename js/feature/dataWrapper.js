@@ -41,18 +41,25 @@ function getDataWrapper (data) {
     }
 
     StringDataWrapper.prototype.nextLine = function () {
+      while(this.ptr < this.data.length) {
         //return this.split(/\r\n|\n|\r/gm);
         var start = this.ptr,
-            idx = this.data.indexOf('\n', start);
-
-        if (idx > 0) {
+            idx = this.data.indexOf('\n', start),
+            trimmedLine = undefined;
+          if (idx > 0) {
             this.ptr = idx + 1;   // Advance pointer for next line
-            return idx === start ? undefined : this.data.substring(start, idx).trim();
-        }
-        else {
+            trimmedLine = idx === start ? undefined : this.data.substring(start, idx).trim();
+          }
+          else {
             // Last line
             this.ptr = this.data.length;
-            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
+            trimmedLine = (start >= this.data.length) ? undefined : this.data.substring(start).trim();
+          }
+
+          // Return the line, or keep going to next non-blank line if it was empty or entirely whitespace.
+          if (trimmedLine) {
+            return trimmedLine;
+          }
         }
     }
 
