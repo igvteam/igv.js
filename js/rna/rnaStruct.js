@@ -308,7 +308,7 @@ RNAFeatureSource.prototype.getFeatures = function (chr, start, end) {
         const descriptors = [];
         const features = [];
 
-        while (line = dataWrapper.nextLine()) {
+        while ((line = dataWrapper.nextLine()) !== undefined) {
 
             const tokens = line.split('\t');
 

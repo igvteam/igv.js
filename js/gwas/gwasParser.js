@@ -70,7 +70,7 @@ class GWASParser {
             this.parseHeaderLine(headerLine);
         }
         let line;
-        while (line = dataWrapper.nextLine()) {
+        while ((line = dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split(/\t/);
             if (tokens.length === this.columns.length) {
                 const chr = tokens[this.chrCol];
