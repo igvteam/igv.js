@@ -2,106 +2,64 @@
  * Created by dat on 9/16/16.
  */
 
-import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
+import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
 import C2S from "./canvas2svg.js";
-import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
-import {guid, pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
+import {pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
 import {download} from "./util/igvUtils.js";
-import RulerTrack from "./rulerTrack.js";
+import ViewportBase from "./viewportBase.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
-class ViewPort {
+class ViewPort extends ViewportBase {
 
-    constructor(trackView, $container, genomicState, width) {
+    constructor(trackView, $viewportContainer, genomicState, width) {
 
-        const self = this;
-        this.guid = guid();
-        this.trackView = trackView;
-        this.genomicState = genomicState;
-        this.browser = trackView.browser;
+        super(trackView, $viewportContainer, genomicState, width)
 
-        // viewport
-        this.$viewport = $('<div class="igv-viewport">');
-        $container.append(this.$viewport);
+    }
 
-        // store the viewport GUID for later use
-        this.$viewport.data('viewportGUID', this.guid);
+    initializationHelper() {
 
-        // viewport-content
-        const $div = $("<div>", {class: 'igv-viewport-content'});
-        this.$viewport.append($div);
+        addMouseHandlers.call(this);
+        this.$spinner = $('<div class="igv-viewport-spinner">');
+        this.$spinner.append(createIcon("spinner"));
+        this.$viewport.append(this.$spinner);
+        this.stopSpinner();
 
-        $div.height(this.$viewport.height());
-        this.contentDiv = $div.get(0);
-
-        // viewport canvas
-        const $canvas = $('<canvas class ="igv-canvas">');
-        $(this.contentDiv).append($canvas);
-
-        this.canvas = $canvas.get(0);
-        this.ctx = this.canvas.getContext("2d");
-
-        this.setWidth(width);
-
-        if (trackView.track instanceof RulerTrack) {
-            this.rulerSweeper = new RulerSweeper(this);
-            trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
-            this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
-
-
-            this.$rulerLabel.click(function (e) {
-                self.browser.selectMultiLocusPanelWithGenomicState(self.genomicState);
-            });
-
-            $(this.contentDiv).append(this.$rulerLabel);
-
-            if (true === GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame)) {
-                enableRulerTrackMouseHandlers.call(this);
-            } else {
-                disableRulerTrackMouseHandlers.call(this);
-            }
-
-        } else {
-            addMouseHandlers.call(this);
-            this.$spinner = $('<div class="igv-viewport-spinner">');
-            this.$spinner.append(createIcon("spinner"));
-            this.$viewport.append(this.$spinner);
-            this.stopSpinner();
-            if ("sequence" !== trackView.track.type) {
-                this.popover = new Popover(this.browser.trackContainer);
-                let str = trackView.track.name.toLowerCase().split(' ').join('_');
-                this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
-                this.$zoomInNotice = createZoomInNotice.call(this, $(this.contentDiv));
-            }
+        const { track } = this.trackView
+        if ('sequence' !== track.type) {
+            this.popover = new Popover(this.browser.trackContainer);
+            let str = track.name.toLowerCase().split(' ').join('_');
+            this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
+            this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
         }
 
-        if (trackView.track.name) {
+        if (track.name) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
-            this.setTrackLabel(trackView.track.name);
+            this.setTrackLabel(track.name);
 
             if (false === this.browser.trackLabelsVisible) {
                 this.$trackLabel.hide();
             }
 
-            this.$trackLabel.click(function (e) {
+            this.$trackLabel.click(e => {
                 let str;
                 e.stopPropagation();
-                if (typeof trackView.track.description === 'function') {
-                    str = trackView.track.description();
+                if (typeof track.description === 'function') {
+                    str = track.description();
 
-                } else if (trackView.track.description) {
-                    str = trackView.track.description;
+                } else if (track.description) {
+                    str = track.description;
 
                 } else {
-                    str = trackView.track.name;
+                    str = track.name;
                 }
-                self.popover.presentContentWithEvent(e, str);
+                this.popover.presentContentWithEvent(e, str);
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -118,11 +76,6 @@ class ViewPort {
 
 
         }
-
-    }
-
-    isVisible() {
-        return this.$viewport.width()
     }
 
     setTrackLabel(label) {
@@ -134,12 +87,6 @@ class ViewPort {
 
         const txt = this.$trackLabel.text();
         this.$trackLabel.attr('title', txt);
-    }
-
-    setWidth(width) {
-        this.$viewport.outerWidth(width);
-        this.canvas.style.width = (this.$viewport.width() + 'px');
-        this.canvas.setAttribute('width', this.$viewport.width());
     }
 
     startSpinner() {
@@ -295,7 +242,6 @@ class ViewPort {
             this.stopSpinner();
         }
     }
-
 
     async repaint() {
 
@@ -504,78 +450,11 @@ class ViewPort {
         download(filename, data);
     }
 
-    async renderSVGContext(context, offset) {
-
-
-        // Nothing to do if zoomInNotice is active
-        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return;
-        }
-
-        let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.replace(/\W/g, '');
-
-        const genomicStateIndex = this.browser.genomicStateList.indexOf(this.genomicState);
-        const id = str.toLowerCase() + '_genomic_state_index_' + genomicStateIndex;
-
-        // If present, paint axis canvas. Only in first multi-locus panel.
-        if (0 === genomicStateIndex && typeof this.trackView.track.paintAxis === 'function') {
-
-            const bbox = this.trackView.controlCanvas.getBoundingClientRect();
-            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
-
-            context.save();
-            this.trackView.track.paintAxis(context, bbox.width, bbox.height);
-            context.restore();
-        }
-
-        const yScrollDelta = $(this.contentDiv).position().top;
-        const dx = offset.deltaX + (genomicStateIndex * context.multiLocusGap);
-        const dy = offset.deltaY + yScrollDelta;
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
-
-        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
-
-        let {referenceFrame} = this.genomicState;
-        let {start: bpStart, bpPerPixel} = referenceFrame;
-        context.save();
-
-        const drawConfig =
-            {
-                context: context,
-                viewport: this,
-                referenceFrame,
-                genomicState: this.genomicState,
-                pixelWidth: width,
-                pixelTop: 0,
-                pixelHeight: height,
-                viewportWidth: width,
-                viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth(),
-                bpStart,
-                bpEnd: bpStart + (width * bpPerPixel),
-                bpPerPixel,
-                selection: this.selection
-            };
-
-        const features = this.tile ? this.tile.features : [];
-        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        draw.call(this, drawConfig, features, roiFeatures);
-
-        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            renderTrackLabelSVG.call(this, context);
-        }
-
-        context.restore();
-
-    }
-
     saveSVG() {
 
-        const width = this.$viewport.width();
-        const height = this.$viewport.height();
+        const { width, height } = this.$viewport.get(0).getBoundingClientRect();
 
-        const context = new C2S(
+        const config =
             {
                 width,
                 height,
@@ -587,14 +466,36 @@ class ViewPort {
                         height
                     }
 
-            });
+            }
 
-        const {start, bpPerPixel} = this.genomicState.referenceFrame;
+        const context = new C2S(config);
 
-        const drawConfiguration =
+        this.drawSVGWithContect(context, width, height)
+
+        const svg = context.getSerializedSvg(true);
+
+        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+
+        const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
+
+        download(`${ str }.svg`, data);
+
+    };
+
+    drawSVGWithContect(context, width, height) {
+
+        // console.log('Viewport draw SVG.')
+
+        let {start, bpPerPixel} = this.genomicState.referenceFrame;
+
+        context.save();
+
+        const config =
             {
+                context: context,
                 viewport: this,
-                context,
+                referenceFrame: this.genomicState.referenceFrame,
+                genomicState: this.genomicState,
                 top: -$(this.contentDiv).position().top,
                 pixelTop: 0,
                 pixelWidth: width,
@@ -602,31 +503,23 @@ class ViewPort {
                 bpStart: start,
                 bpEnd: start + (width * bpPerPixel),
                 bpPerPixel,
-                referenceFrame: this.genomicState.referenceFrame,
-                genomicState: this.genomicState,
-                selection: this.selection,
                 viewportWidth: width,
                 viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth()
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
+                selection: this.selection
             };
 
+        const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        draw.call(this, drawConfiguration, this.tile.features, roiFeatures);
+        draw.call(this, config, features, roiFeatures);
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
             renderTrackLabelSVG.call(this, context);
         }
 
-        const svg = drawConfiguration.context.getSerializedSvg(true);
+        context.restore();
 
-        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-
-        const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-        const filename = str + ".svg";
-        download(filename, data);
-
-    };
-
+    }
 
     /**
      * Called when the associated track is removed.  Do any needed cleanup here.
@@ -727,52 +620,6 @@ function viewIsReady() {
     return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
 }
 
-function enableRulerTrackMouseHandlers() {
-
-    const index = this.browser.genomicStateList.indexOf(this.genomicState);
-    const namespace = '.ruler_track_viewport_' + index;
-
-    // console.log(' enable ruler mouse handler ' + index);
-
-    let self = this;
-    this.$viewport.on('click' + namespace, (e) => {
-
-        const pixel = translateMouseCoordinates(e, self.$viewport.get(0)).x;
-        const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
-
-        let searchString;
-
-        if (1 === self.browser.genomicStateList.length) {
-            searchString = self.browser.genome.getChromosomeCoordinate(bp).chr;
-        } else {
-
-            let loci = self.browser.genomicStateList.map((genomicState) => {
-                return genomicState.locusSearchString;
-            });
-
-            loci[self.browser.genomicStateList.indexOf(self.genomicState)] = self.browser.genome.getChromosomeCoordinate(bp).chr;
-
-            searchString = loci.join(' ');
-        }
-
-        self.browser.search(searchString);
-    });
-
-
-}
-
-function disableRulerTrackMouseHandlers() {
-
-
-    const index = this.browser.genomicStateList.indexOf(this.genomicState);
-    const namespace = '.ruler_track_viewport_' + index;
-
-    // console.log('disable ruler mouse handler ' + index);
-
-    this.$viewport.off(namespace);
-}
-
-
 function renderTrackLabelSVG(context) {
 
     const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
@@ -792,7 +639,6 @@ function renderTrackLabelSVG(context) {
     context.strokeRect(x, y, width, height);
 
 }
-
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
     this.chr = chr;

@@ -1,5 +1,14 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
 
+const getMouseXY = (domElement, { clientX, clientY }) => {
+
+    // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height
+    const { left, top, width, height } = domElement.getBoundingClientRect();
+
+    return { x: clientX - left,  y: clientY - top, xNormalized: (clientX - left)/width, yNormalized: (clientY - top)/height, width, height };
+
+};
+
 const relativeDOMBBox = (parentElement, childElement) => {
     const { x: x_p, y: y_p, width: width_p, height: height_p } = parentElement.getBoundingClientRect();
     const { x: x_c, y: y_c, width: width_c, height: height_c } = childElement.getBoundingClientRect();
@@ -47,5 +56,5 @@ function guid  () {
 
 
 
-export { relativeDOMBBox, pageCoordinates, translateMouseCoordinates, guid}
+export { getMouseXY, relativeDOMBBox, pageCoordinates, translateMouseCoordinates, guid}
 

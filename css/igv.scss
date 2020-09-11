@@ -520,7 +520,7 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: stretch;
 
   width: calc(100% - #{$igv-viewport-container-shim-width});
@@ -529,6 +529,8 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   overflow-x: hidden;
   overflow-y: hidden;
 
+  //background-color: grey;
+
   .igv-viewport {
     position: relative;
 
@@ -536,15 +538,20 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
     overflow-x: hidden;
     overflow-y: hidden;
+
+    background-color: white;
   }
 
-  //.igv-viewport:nth-child(even) {
-  //  //border-left-color: $igv-panel-border-color;
-  //  border-left-color: hotpink;
-  //  border-left-style: solid;
-  //  border-left-width: $igv-panel-border-width;
-  //}
+}
 
+.igv-viewport-content {
+  position: relative;
+  width: 100%;
+}
+
+.igv-canvas {
+  position: relative;
+  display: block;
 }
 
 .igv-scrollbar-outer-div {
@@ -557,7 +564,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   height: 100%;
 
   background-color: white;
-  //background-color: deeppink;
 
   div {
 
@@ -580,14 +586,12 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
     border-bottom-right-radius: 4px;
 
     background-color: white;
-    //background-color: greenyellow;
-  }
+   }
 
   div:hover,
   div:focus,
   div:active {
     background-color: #c4c4c4;
-    //background-color: greenyellow;
   }
 
 }
@@ -610,11 +614,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   >div {
     height: 100%;
   }
-}
-
-.igv-viewport-content {
-  position: relative;
-  width: 100%;
 }
 
 .igv-track-manipulation-handle {
@@ -645,11 +644,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 .igv-track-manipulation-handle:active {
   border-color: #7e7e7e;
   background-color: #7e7e7e;
-}
-
-.igv-canvas {
-  position: relative;
-  display: block;
 }
 
 // multi-locus panel border
