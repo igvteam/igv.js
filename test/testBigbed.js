@@ -1,5 +1,5 @@
 import BWSource from "../js/bigwig/bwSource.js";
-import {parseAutoSQL} from "../js/util/ucscUtils"
+import {parseAutoSQL} from "../js/util/ucscUtils.js"
 
 function runBigbedTests() {
 

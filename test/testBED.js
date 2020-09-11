@@ -10,60 +10,46 @@ function runBedTests() {
         }
     }
 
-    //
-    // QUnit.test("Missing line feed  - gzipped", function(assert) {
-    //
-    //     var done = assert.async();
-    //
-    //     var chr = "chr1",
-    //         bpStart = 0,
-    //         bpEnd = Number.MAX_VALUE,
-    //         featureSource = new igv.FeatureSource({
-    //                 format: 'bed',
-    //                 indexed: false,
-    //                 url: 'data/bed/missing_linefeed.bed.gz'
-    //             },
-    //             genome);
-    //
-    //     // Must get file header first
-    //     featureSource.getFeatures(chr, bpStart, bpEnd)
-    //         .then(function (features) {
-    //
-    //             assert.equal(4, features.length);   // feature count. Determined by grepping file
-    //
-    //             done();
-    //         })
-    //         .catch(function (error) {
-    //             console.log(error);
-    //         });
-    // });
-    //
-    //
-    // QUnit.test("UCSC SNP format", function (assert) {
-    //
-    //     const done = assert.async();
-    //
-    //     const config = {
-    //         format: "snp",
-    //         indexed: false,
-    //         url: "data/snp/ucsc_snp.txt"
-    //     }
-    //
-    //     const reader = new igv.FeatureFileReader(config);
-    //
-    //     reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-    //         .then(features => {
-    //             assert.ok(features);
-    //             assert.equal(features.length, 3);
-    //             assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
-    //             done();
-    //         })
-    //         .catch(function (error) {
-    //             console.error(error);
-    //             assert.ok(false);
-    //             done;
-    //         })
-    // })
+    QUnit.test("Empty lines", async function (assert) {
+
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
+        const done = assert.async();
+
+        const config = {
+            format: "bed",
+            url: "data/bed/basic_feature_3_columns_empty_lines.bed",
+        }
+
+        const reader = FeatureSource(config, genome);
+        const features = await reader.getFeatures("chr1", 0, 128756129)
+        assert.ok(features);
+        assert.equal(features.length, 6);
+
+        // now query with
+        done();
+
+    })
+
+    QUnit.test("Empty lines - gzipped", async function (assert) {
+
+        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
+        const done = assert.async();
+
+        const config = {
+            format: "bed",
+            url: "data/bed/basic_feature_3_columns_empty_lines.bed.gz",
+        }
+
+        const reader = FeatureSource(config, genome);
+        const features = await reader.getFeatures("chr1", 0, 128756129)
+        assert.ok(features);
+        assert.equal(features.length, 6);
+
+        // now query with
+        done();
+
+    })
+
 
     QUnit.test("Chr aliasing", async function (assert) {
 
@@ -476,6 +462,62 @@ function runBedTests() {
 
         }, undefined);
     });
+
+
+    //
+    // QUnit.test("Missing line feed  - gzipped", function(assert) {
+    //
+    //     var done = assert.async();
+    //
+    //     var chr = "chr1",
+    //         bpStart = 0,
+    //         bpEnd = Number.MAX_VALUE,
+    //         featureSource = new igv.FeatureSource({
+    //                 format: 'bed',
+    //                 indexed: false,
+    //                 url: 'data/bed/missing_linefeed.bed.gz'
+    //             },
+    //             genome);
+    //
+    //     // Must get file header first
+    //     featureSource.getFeatures(chr, bpStart, bpEnd)
+    //         .then(function (features) {
+    //
+    //             assert.equal(4, features.length);   // feature count. Determined by grepping file
+    //
+    //             done();
+    //         })
+    //         .catch(function (error) {
+    //             console.log(error);
+    //         });
+    // });
+    //
+    //
+    // QUnit.test("UCSC SNP format", function (assert) {
+    //
+    //     const done = assert.async();
+    //
+    //     const config = {
+    //         format: "snp",
+    //         indexed: false,
+    //         url: "data/snp/ucsc_snp.txt"
+    //     }
+    //
+    //     const reader = new igv.FeatureFileReader(config);
+    //
+    //     reader.readFeatures("chr1", 0, Number.MAX_VALUE)
+    //         .then(features => {
+    //             assert.ok(features);
+    //             assert.equal(features.length, 3);
+    //             assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
+    //             done();
+    //         })
+    //         .catch(function (error) {
+    //             console.error(error);
+    //             assert.ok(false);
+    //             done;
+    //         })
+    // })
 }
 
 export default runBedTests;

@@ -165,7 +165,7 @@ FeatureParser.prototype.parseHeader = function (data) {
 
     const dataWrapper = getDataWrapper(data);
     let line, header;
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
         if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
             if (line.startsWith("track") || line.startsWith("#track")) {
                 let h = parseTrackLine(line);
@@ -209,15 +209,13 @@ FeatureParser.prototype.parseFeatures = function (data) {
     const format = this.format;
     const delimiter = this.delimiter || "\t";
     let i = 0;
-    let line;
     let wig;
-
-    while (line = nextLine()) {
-
+    let line;
+    while ((line = nextLine()) !== undefined) {
         i++;
         if (i <= this.skipRows) continue;
 
-        if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
+        if (!line || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
             continue;
         } else if (format === "wig" && line.startsWith("fixedStep")) {
             wig = parseFixedStep(line);
@@ -691,7 +689,7 @@ function decodePeak(tokens, ignore) {
     var tokenCount, chr, start, end, strand, name, score, qValue, signal, pValue;
 
     tokenCount = tokens.length;
-    if (tokenCount <= 9) {
+    if (tokenCount < 9) {
         return undefined;
     }
 
