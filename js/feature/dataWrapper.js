@@ -47,7 +47,7 @@ function getDataWrapper (data) {
 
         if (idx > 0) {
             this.ptr = idx + 1;   // Advance pointer for next line
-            return idx === start ? undefined : this.data.substring(start, idx).trim();
+            return idx === start ? "" : this.data.substring(start, idx).trim();
         }
         else {
             // Last line
