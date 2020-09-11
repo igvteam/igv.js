@@ -24,7 +24,6 @@
  */
 
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const google = {
@@ -104,28 +103,6 @@ const google = {
         const id = getGoogleDriveFileID(googleDriveURL);
         const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
         return igvxhr.loadJson(endPoint, buildOptions({}));
-    },
-
-    loadGoogleProperties: function (propertiesURL) {
-
-        const self = this;
-
-        return igvxhr.loadArrayBuffer(propertiesURL)
-
-            .then(function (arrayBuffer) {
-                var inflate, plain, str;
-
-                inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer));
-                plain = inflate.decompress();
-                str = String.fromCharCode.apply(null, plain);
-
-                const properties = JSON.parse(str);
-                self.setApiKey(properties["api_key"]);
-
-                self.properties = properties;
-                return properties;
-
-            })
     }
 }
 

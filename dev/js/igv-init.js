@@ -1,31 +1,7 @@
-import {createBrowser} from "../../js/igv-create";
 import GtexUtils from "../../js/gtex/gtexUtils";
-import google from "../../js/google/googleUtils";
 import igvxhr from "../../js/igvxhr";
 
 let browser;
-google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-
-    .then( function (google) {
-
-        const options =
-            {
-                genome: "hg19",
-                //  locus: [ 'egfr', 'myc' ],
-                locus: "myc",
-                flanking: 1000,
-                queryParametersSupported: true,
-                showAllChromosomes: true
-            };
-
-        createBrowser(document.getElementById('igvDiv'), options)
-            .then(async function (b) {
-                browser = b;
-                await createTrackList(document.getElementById('trackList'), '../test/testTracks.json', browser);
-                return browser;
-            });
-
-    });
 
 
 function createTrackList(div, file, browser) {
