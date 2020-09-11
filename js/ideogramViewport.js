@@ -281,8 +281,7 @@ function drawIdeogram({ctx, referenceFrame, genome, width, height, stainColors})
             return;
         }
 
-        chrLength = cytobands[cytobands.length - 1].end;
-
+        chrLength = referenceFrame.genome.getChromosome(referenceFrame.chrName).bpLength;
         scale = width / chrLength;
 
         // round rect clipping path
