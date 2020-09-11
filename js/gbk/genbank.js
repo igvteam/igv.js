@@ -108,12 +108,12 @@ GenbankParser.prototype.parseFeatures = function (data) {
      */
     function readOriginSequence(dataWrapper) {
 
-        let nextLine;
+        let line;
 
         sequence = [];
-        while ((nextLine = dataWrapper.nextLine()) && !nextLine.startsWith("//")) {
-            nextLine = nextLine.trim();
-            let tokens = nextLine.split(wsRegex);
+        while (((line = dataWrapper.nextLine()) !== undefined) && !line.startsWith("//")) {
+            line = line.trim();
+            let tokens = line.split(wsRegex);
             for (let i = 1; i < tokens.length; i++) {
                 let str = tokens[i];
                 for (let j = 0; j < str.length; j++) {
@@ -164,6 +164,10 @@ GenbankParser.prototype.parseFeatures = function (data) {
 
             // TODO -- first line is source (required), has total length => use to size sequence
             // TODO -- keys start at column 6,   locations and qualifiers at column 22.
+
+            if(nextLine === "") {
+                continue;  // Not sure this is legal in a gbk file
+            }
 
             if (!nextLine || nextLine.startsWith("ORIGIN")) {
                 break;

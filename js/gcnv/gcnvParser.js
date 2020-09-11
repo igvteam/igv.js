@@ -12,7 +12,7 @@ class GCNVParser {
     let line;
     let i = 0;
     const allFeatures = [];
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
       i += 1;
       let tokens = line.split("\t");
 
