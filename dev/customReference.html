@@ -8,10 +8,7 @@
     <meta name="author" content="">
     <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
 
-    <title>igv.js</title>
-
-    <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
+    <title>Custom Reference</title>
 
 </head>
 
@@ -27,13 +24,21 @@
     var igvDiv = document.getElementById("igv-div");
     var options =
         {
-            reference: {
-                id: "myCustomGenome",
-                fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-                indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-                cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
-                wholeGenomeView: false
-            },
+            reference:
+                {
+                    id: "sacCer3",
+                    name: "S. cerevisiae (sacCer3)",
+                    fastaURL: "https://s3.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa.fai",
+                    cytobandURL: './data/sacCer3.ideo.tsv'
+                },
+            // reference: {
+            //     id: "myCustomGenome",
+            //     fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            //     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+            //     cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
+            //     wholeGenomeView: false
+            // },
            // locus: 'chr7',
             tracks: [
                 {
