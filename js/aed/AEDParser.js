@@ -99,7 +99,7 @@ class AEDParser {
         let line;
         let wig;
 
-        while (line = nextLine()) {
+        while ((line = nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
