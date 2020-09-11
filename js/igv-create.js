@@ -41,6 +41,7 @@ import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
 import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
+import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
 
@@ -71,9 +72,6 @@ async function createBrowser(parentDiv, config) {
     const browser = new Browser(config, parentDiv);
 
     setControls(browser, config);
-
-    // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
-    // browser.alert.present(str)
 
     browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
@@ -200,7 +198,7 @@ function setControls(browser, conf) {
 
     const $navBar = createStandardControls(browser, conf);
 
-    $navBar.insertBefore(browser.$contentHeader);
+    $navBar.insertBefore($(browser.trackContainer));
 
     if (false === conf.showControls) {
         $navBar.hide();
@@ -373,7 +371,7 @@ function setDefaults(config) {
     }
 
     if (config.showSequence) {
-        config.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER});
+        config.tracks.push({type: "sequence", order: defaultSequenceTrackOrder });
     }
 }
 

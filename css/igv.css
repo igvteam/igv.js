@@ -785,7 +785,7 @@
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: flex-start;
+  justify-content: space-between;
   align-items: stretch;
   width: calc(100% - 102px);
   height: 100%;
@@ -795,7 +795,16 @@
     position: relative;
     height: 100%;
     overflow-x: hidden;
-    overflow-y: hidden; }
+    overflow-y: hidden;
+    background-color: white; }
+
+.igv-viewport-content {
+  position: relative;
+  width: 100%; }
+
+.igv-canvas {
+  position: relative;
+  display: block; }
 
 .igv-scrollbar-outer-div {
   position: absolute;
@@ -837,10 +846,6 @@
   .igv-viewport-ruler > div {
     height: 100%; }
 
-.igv-viewport-content {
-  position: relative;
-  width: 100%; }
-
 .igv-track-manipulation-handle {
   position: relative;
   cursor: pointer;
@@ -861,10 +866,6 @@
 .igv-track-manipulation-handle:active {
   border-color: #7e7e7e;
   background-color: #7e7e7e; }
-
-.igv-canvas {
-  position: relative;
-  display: block; }
 
 .igv-multi-locus-panel-border {
   position: absolute;
