@@ -26,7 +26,7 @@
 import { IGVColor } from '../node_modules/igv-utils/src/index.js';
 import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import ViewPort from "./viewport.js";
+import {createViewport} from "./viewportFactory.js";
 import FeatureUtils from "./feature/featureUtils.js";
 import RulerTrack from "./rulerTrack.js";
 import TrackGearPopover from "./ui/trackGearPopover.js";
@@ -64,18 +64,20 @@ const TrackView = function (browser, $container, track) {
     $track.append(this.$viewportContainer);
 
     this.viewports = [];
-    const width = browser.viewportContainerWidth() / browser.genomicStateList.length;
+    const width = browser.calculateViewportWidth(browser.genomicStateList.length);
 
     for (let genomicState of browser.genomicStateList) {
-
-        const viewport = new ViewPort(this, this.$viewportContainer, genomicState, width);
+        const viewport = createViewport(this, browser.genomicStateList, browser.genomicStateList.indexOf(genomicState), width)
         this.viewports.push(viewport);
-
     }
 
-    this.decorateViewports();
+    this.updateViewportForMultiLocus();
 
-    this.configureViewportContainer(this.$viewportContainer, this.viewports);
+    const exclude = new Set(['ruler', 'sequence', 'ideogram']);
+
+    if (false === exclude.has(this.track.type)) {
+        this.attachScrollbar(this.$viewportContainer, this.viewports);
+    }
 
     if (true === this.track.ignoreTrackMenu) {
         // do nothing
@@ -83,16 +85,15 @@ const TrackView = function (browser, $container, track) {
         this.appendRightHandGutter($track);
     }
 
-    if (this.track instanceof RulerTrack) {
+    if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
         // do nothing
     } else {
         attachDragWidget.call(this, $track, this.$viewportContainer);
     }
 
-    if (!('sequence' === this.track.type || this.track instanceof RulerTrack)) {
+    if (false === exclude.has(this.track.type)) {
         this.createColorPicker();
     }
-
 
 };
 
@@ -101,12 +102,12 @@ TrackView.prototype.renderSVGContext = function (context, offset) {
     for (let viewport of this.viewports) {
 
         const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
-        const bbox = viewport.$viewport.get(0).getBoundingClientRect();
+        const { y, width } = viewport.$viewport.get(0).getBoundingClientRect();
 
         let o =
             {
-                deltaX: offset.deltaX + index * viewport.$viewport.width(),
-                deltaY: offset.deltaY + bbox.y
+                deltaX: offset.deltaX + index * width,
+                deltaY: offset.deltaY + y
             };
 
         viewport.renderSVGContext(context, o);
@@ -114,7 +115,7 @@ TrackView.prototype.renderSVGContext = function (context, offset) {
 
 };
 
-TrackView.prototype.configureViewportContainer = function ($viewportContainer, viewports) {
+TrackView.prototype.attachScrollbar = function ($viewportContainer, viewports) {
 
     if ("hidden" === $viewportContainer.css("overflow-y")) {
         this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
@@ -128,32 +129,21 @@ TrackView.prototype.removeViewportWithLocusIndex = function (index) {
     this.viewports[index].$viewport.remove();
     this.viewports.splice(index, 1);
 
-    this.decorateViewports();
+    this.updateViewportForMultiLocus();
 };
 
-TrackView.prototype.decorateViewports = function () {
-    var self = this;
+TrackView.prototype.updateViewportForMultiLocus = function () {
 
-    this.viewports.forEach(function (viewport, index) {
-        var $viewport;
-
-        $viewport = viewport.$viewport;
-
-        if (self.viewports.length > 1) {
-            $viewport.find('.igv-multi-locus-panel-close-container').show();
-            $viewport.find('.igv-multi-locus-panel-label-div').show();
+    for (let { $viewport } of this.viewports) {
+        if (this.viewports.length > 1) {
+            $viewport.find('.igv-multi-locus-panel-close-container').show()
+            $viewport.find('.igv-multi-locus-panel-label-div').show()
         } else {
-            $viewport.find('.igv-multi-locus-panel-close-container').hide();
-            $viewport.find('.igv-multi-locus-panel-label-div').hide();
+            $viewport.find('.igv-multi-locus-panel-close-container').hide()
+            $viewport.find('.igv-multi-locus-panel-label-div').hide()
         }
 
-        if (index < self.viewports.length && (1 + index) !== self.viewports.length) {
-            $viewport.addClass('igv-viewport-border-right');
-        } else {
-            $viewport.removeClass('igv-viewport-border-right');
-        }
-
-    });
+    }
 
 };
 
@@ -382,16 +372,13 @@ TrackView.prototype.isLoading = function () {
 
 TrackView.prototype.resize = function () {
 
-    var width;
+    const viewportWidth = this.browser.calculateViewportWidth(this.browser.genomicStateList.length)
 
-    width = this.browser.viewportContainerWidth() / this.browser.genomicStateList.length;
+    for (let viewport of this.viewports) {
+        viewport.setWidth(viewportWidth);
+    }
 
-    if (width === 0) return;
-    this.viewports.forEach(function (viewport) {
-        viewport.setWidth(width);
-    });
-
-    var $leftHandGutter = $(this.leftHandGutter);
+    const $leftHandGutter = $(this.leftHandGutter);
     resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
 
     this.updateViews(true);

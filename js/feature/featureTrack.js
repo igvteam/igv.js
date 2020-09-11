@@ -558,8 +558,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 
     const windowX = Math.round(options.viewportContainerX);
-    const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
-    const windowX1 = windowX + options.viewportContainerWidth / nLoci;
+    // const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
+    // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
+    const windowX1 = windowX + browser.viewportWidth();
 
     if (options.drawLabel) {
         renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);

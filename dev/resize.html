@@ -1,60 +1,41 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
 
+<head>
+    <meta charset="UTF-8">
+    <title>Repaint Test</title>
     <link href="css/dev.css" rel="stylesheet"/>
 </head>
 
 <body>
 
+<div id='trackList'></div>
+
 <div>
-    <button id="bmBtn">Bookmark</button>
+    <button id='resize'>resize</button>
 </div>
-
-<h3>Example tracks - click to load</h3>
-
-<div id="trackList"></div>
-
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
-
+<div id='igv-container'></div>
 </body>
 
 <script type="module">
 
     import igv from '../js/index.js'
-    import google from "../js/google/googleUtils.js"
-    import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
+    import google from '../js/google/googleUtils.js';
 
-    Alert.init(document.getElementById('igvDiv'))
-
-    let browser
     (async () => {
-
         await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
-        const options =
-            {
-                genome: "hg19",
-                // locus: [ 'ace', 'kit', 'enam' ],
-                locus: [ 'egfr', 'myc' ],
-                // locus: "myc",
-                flanking: 1000,
-                queryParametersSupported: true,
-                showAllChromosomes: true,
-                showCursorTrackingGuide: false,
-                showControls: true
-            };
+        // const locus = [ 'ace', 'kit', 'enam' ]
+        const locus = [ 'ace', 'myc' ]
+        // const locus = 'myc'
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
+        const browser = await igv.createBrowser(document.getElementById('igv-container'), { genome: 'hg19', locus })
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
+
+        document.getElementById('resize').addEventListener('click', () => {
+            browser.resize()
+        })
 
     })()
 
@@ -113,11 +94,6 @@
 
     }
 
-    function bookmark() {
-        window.history.pushState({}, "IGV", browser.sessionURL());
-    }
-
-    document.getElementById("bmBtn").addEventListener("click", bookmark);
-
 </script>
+
 </html>

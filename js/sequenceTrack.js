@@ -26,6 +26,8 @@
 import IGVGraphics from "./igv-canvas.js";
 import {nucleotideColors} from "./util/colorPalletes.js";
 
+const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER * 1e-4
+
 const SequenceTrack = function (config, browser) {
 
     this.type = "sequence";
@@ -40,7 +42,7 @@ const SequenceTrack = function (config, browser) {
     this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
     this.height = 25;
     this.disableButtons = false;
-    this.order = config.order || -Number.MAX_SAFE_INTEGER;
+    this.order = config.order || defaultSequenceTrackOrder;
     this.ignoreTrackMenu = false;
 
     this.removable = false;
@@ -313,6 +315,8 @@ SequenceTrack.prototype.supportsWholeGenome = function () {
 SequenceTrack.prototype.computePixelHeight = function (ignore) {
     return this.height;
 }
+
+export { defaultSequenceTrackOrder }
 
 export default SequenceTrack;
 
