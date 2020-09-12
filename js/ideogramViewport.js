@@ -177,6 +177,10 @@ class IdeogramViewport extends ViewportBase {
         return false;
     }
 
+    dispose() {
+
+    }
+
 }
 
 function repaintContext({ ctx, width, height, genome, referenceFrame, ideogramWidth }) {
