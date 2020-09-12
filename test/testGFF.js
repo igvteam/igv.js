@@ -25,7 +25,7 @@ function runGFFTests() {
 
         featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
             assert.ok(features);
-            assert.equal(5, features.length);
+            assert.equal(4, features.length);
             assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
 
             done();
