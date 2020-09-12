@@ -23,9 +23,11 @@
 
     import igv from "../js/index.js";
 
-    igv.xhr.loadJson("https://www.dropbox.com/s/27z5ecmzmi3fgbx/igvSession.json?dl=0")
-        .then(function (json) {
-            igv.createBrowser(document.getElementById('igvDiv'), json)
+    igv.createBrowser(document.getElementById('igvDiv'), {genome: "hg19"})
+        .then(function (browser) {
+            browser.loadSession({
+                url: "../test/data/session/amazontest.json"
+            })
         })
 
 </script>
