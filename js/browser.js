@@ -367,7 +367,7 @@ Browser.prototype.loadSessionObject = async function (session) {
             this.addTrack(this.ideoPanel);
         }
 
-        this.ideoPanel.trackView.updateViews();
+        //this.ideoPanel.trackView.updateViews();
     }
 
 
