@@ -26,10 +26,12 @@
 import Cytoband from "./cytoband.js";
 import FastaSequence from "./fasta.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
-import {splitLines} from "../util/stringUtils.js";
-import {decodeDataURI} from "../util/uriUtils.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import {URIUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const splitLines = StringUtils.splitLines;
+
 
 let KNOWN_GENOMES;
 
@@ -360,7 +362,7 @@ function loadCytobands(cytobandUrl, config) {
         let plain
 
         if (dataUri.startsWith("data:application/gzip;base64")) {
-            plain = decodeDataURI(dataUri)
+            plain = URIUtils.decodeDataURI(dataUri)
         } else {
 
             let bytes,

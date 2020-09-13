@@ -24,12 +24,14 @@
  */
 
 // Indexed fasta files
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import GenomicInterval from "./genomicInterval.js";
 import Chromosome from "./chromosome.js";
 import igvxhr from "../igvxhr.js";
-import {splitLines} from "../util/stringUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const splitLines = StringUtils.splitLines;
 
 const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
 

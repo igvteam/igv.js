@@ -25,9 +25,9 @@
 
 import BufferedReader from "./bufferedReader.js";
 import BinaryParser from "../binary.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import getDecoder from "./bbDecoders.js";
 

@@ -25,7 +25,8 @@
 
 import {createVCFVariant} from "./variant.js";
 import getDataWrapper from "../feature/dataWrapper.js";
-import {splitStringRespectingQuotes} from "../util/stringUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 /**
  * Parser for VCF files.
@@ -74,7 +75,7 @@ VcfParser.prototype.parseHeader = function (data) {
                     // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
                     // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
 
-                    const tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+                    const tokens = StringUtils.splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
 
                     for (let token of tokens) {
                         var kv = token.split("=");

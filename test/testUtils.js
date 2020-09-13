@@ -1,15 +1,13 @@
-import {parseLocusString, inferTrackTypes} from "../js/util/trackUtils.js";
-import {parseUri, decodeDataURI} from "../js/util/uriUtils.js";
 import Browser from "../js/browser.js";
 import MenuUtils from "../js/ui/menuUtils.js"
-
+import {URIUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
 function runUtilTests() {
 
     QUnit.test("Test locus parsing 1", function (assert) {
         const locus = "chr1:101-200";
-        const range = parseLocusString(locus);
+        const range = StringUtils.parseLocusString(locus);
         assert.equal(range.chr, "chr1");
         assert.equal(range.start, 100);
         assert.equal(range.end, 200);
@@ -18,7 +16,7 @@ function runUtilTests() {
 
     QUnit.test("Test locus parsing 2", function (assert) {
         const locus = "chr1:101";
-        const range = parseLocusString(locus);
+        const range = StringUtils.parseLocusString(locus);
         assert.equal(range.chr, "chr1");
         assert.equal(range.start, 100);
         assert.equal(range.end, 101);
@@ -40,7 +38,7 @@ function runUtilTests() {
      */
     QUnit.test("Parse URI", function (assert) {
         const uri = "https://igv.org/app?session=foo&args=bar";
-        const result = parseUri(uri);
+        const result = URIUtils.parseUri(uri);
         assert.ok(result);
         assert.equal("igv.org", result.host);
         assert.equal("/app", result.path);
@@ -53,7 +51,7 @@ function runUtilTests() {
     QUnit.test("Test decode URI", function (assert) {
 
         const dataURI = "data:application/gzip;base64,H4sIANPMClwC/32WQW/bMAyFz/JfmVSIpCiJGHZwk6YNuqaBYwxtL8Gww7bbDvv/GJV1s2MLugSwGed9eXwi3W/6Te/caew3aCITZ5OBcjb77adx2B/24+v5/v4McP7mz9/h/BM+1m/f/Pr6+0e7eK4XDXhvPlyJe0MmkZVkEfXKAgb94Oyx6x824w6cO/R9bwBjNoyQ0pKX67zc4uUWLy95Z9oFF4hsSkoqyhskebLsU/bddr99Vt5x3JcnMxkKiWnBi1VcbNBiA3aqGZGCOsl6gyYFq3cUk4gjdk93W+XrN6cdGs7AhrQVYWlorBsaW4bGlqFxaehM+9J/sCg2x9J+rxfkI9E77Gl8uT0GA0BgAgsu4ypVWGmwSgNVrkndXPfSesiWs6WCGqh0PoQUoRuOp/h4W3APu1yaEAzmkGRpra9b61vW+pa1fpXVSdsb9Y2jZbBAYovZFtn7YDF6ZouJFF3nwbAl57bPj1yezgYJ/TIUqQqeGtypgZ1WNk+6l9iKni4ouCDCivgC0bmhv9PvJ0oGcsDlHKAqITUIqUFIK18n3XdCoZLXyJK68WHoy7ny4iOmm/IMZzEIUdNzjalnAdaY09015rJ2rtb+GzkJl8CyzqmQbAyXs1WuvKTcjc+XsL4ehnuDUdCQkIZ6kdZ6WFtZbUV12fOZbkmqKCDo2Y8WfRlYDBz0k3M5bhFDNw7HTeiPzj0Nx8+Bje6LbMgn/bEFdz0K0MoCtMIAqzTMtEsaRPNalgFm/T9rUIo6k0GIK6BQB4UWKLRAr/Mw0y6gWPbBZQ5IiLn70h9vnds/vu10tKHXujCuKOsbC1orC1o7a1b8l9pJ+zJlRTFBs8pcUJPXCYYZFPjt6fWwzc5t7o46yXTOSSwZZ15Og/pLQeudoPVKwIstO9ctwIU35r/BxSQaB8ycQvcHZwncbXMJAAA="
-        let plain = decodeDataURI(dataURI)
+        let plain = URIUtils.decodeDataURI(dataURI)
         let str = String.fromCharCode.apply(null, plain)
         assert.ok(str);
 
@@ -71,7 +69,7 @@ function runUtilTests() {
             indexURL: "http://foo/bam.cram.cri"
         }
 
-        inferTrackTypes(config);
+        TrackUtils.inferTrackTypes(config);
 
         assert.equal(config.format, "cram")
         assert.equal(config.type, "alignment")

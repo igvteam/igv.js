@@ -25,10 +25,12 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import IGVGraphics from "./igv-canvas.js";
-import IGVColor from "./igv-color.js";
+import {IGVColor} from "../node_modules/igv-utils/src/index.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
-import {numberFormatter} from "./util/stringUtils.js";
+import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+
+const numberFormatter = StringUtils.numberFormatter;
 
 const RulerTrack = function (browser) {
 

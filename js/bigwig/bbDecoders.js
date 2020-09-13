@@ -20,7 +20,7 @@
 //     string region2Name; "Identifier of upper/this region"
 //     string region2Strand; "Orientation of upper/this region: + or -.  Use . if not applicable"
 //     )
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {parseAutoSQL} from "../util/ucscUtils.js";
 
 function getDecoder(definedFieldCount, fieldCount, as) {

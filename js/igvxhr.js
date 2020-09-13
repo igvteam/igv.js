@@ -24,12 +24,11 @@
  */
 
 import oauth from "./oauth.js";
-import google from "./google/googleUtils.js";
+import {GoogleUtils} from "../node_modules/igv-utils/src/index.js";
 import {unbgzf} from './bam/bgzf.js';
-import Zlib from "./vendor/zlib_and_gzip.js";
-import {getFilename} from './util/fileUtils.js'
-import {decodeDataURI, parseUri} from "./util/uriUtils.js"
+import {Zlib, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import PromiseThrottle from "./util/promiseThrottle.js"
+import {URIUtils} from "../node_modules/igv-utils/src/index.js"
 
 var NONE = 0;
 var GZIP = 1;
@@ -55,10 +54,10 @@ const igvxhr = {
             return loadFileSlice(url, options);
         } else if (typeof url.startsWith === 'function') {   // Test for string
             if (url.startsWith("data:")) {
-                return decodeDataURI(url)
+                return URIUtils.decodeDataURI(url)
             } else {
                 if (url.startsWith("https://drive.google.com")) {
-                    url = google.driveDownloadURL(url);
+                    url = GoogleUtils.driveDownloadURL(url);
                 }
                 if (isGoogleDrive(url)) {
                     return promiseThrottle.add(function () {
@@ -130,10 +129,10 @@ async function loadURL(url, options) {
     return new Promise(function (resolve, reject) {
 
         // Various Google tansformations
-        if (google.isGoogleURL(url)) {
+        if (GoogleUtils.isGoogleURL(url)) {
             if (url.startsWith("gs://")) {
-                url = google.translateGoogleCloudURL(url);
-            } else if (google.isGoogleStorageURL(url)) {
+                url = GoogleUtils.translateGoogleCloudURL(url);
+            } else if (GoogleUtils.isGoogleStorageURL(url)) {
                 if (!url.includes("altMedia=")) {
                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                 }
@@ -206,7 +205,7 @@ async function loadURL(url, options) {
                 }
             } else if ((typeof gapi !== "undefined") &&
                 ((xhr.status === 404 || xhr.status === 401 || xhr.status === 403) &&
-                    google.isGoogleURL(url)) &&
+                    GoogleUtils.isGoogleURL(url)) &&
                 !options.retries) {
 
                 try {
@@ -333,7 +332,7 @@ function loadStringFromFile(localfile, options) {
 async function loadStringFromUrl(url, options) {
     options = options || {};
 
-    var fn = options.filename || getFilename(url);
+    var fn = options.filename || FileUtils.getFilename(url);
 
     var compression = UNKNOWN;
     if (options.bgz) {
@@ -355,9 +354,9 @@ function isAmazonV4Signed(url) {
 }
 
 function getOauthToken(url) {
-    const host = parseUri(url).host;
+    const host = URIUtils.parseUri(url).host;
     let token = oauth.getToken(host);
-    if (!token && google.isGoogleURL(url)) {
+    if (!token && GoogleUtils.isGoogleURL(url)) {
         token = oauth.google.access_token;
     }
     return token;
@@ -380,7 +379,7 @@ function mapUrl(url) {
     if (url.includes("//www.dropbox.com")) {
         return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
     } else if (url.includes("//drive.google.com")) {
-        return google.driveDownloadURL(url);
+        return GoogleUtils.driveDownloadURL(url);
     } else if (url.includes("//www.broadinstitute.org/igvdata")) {
         return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
     } else if (url.includes("//igvdata.broadinstitute.org")) {
@@ -487,7 +486,7 @@ let startupCalls = 0;
 function startup() {
 
     const href = window.document.location.href;
-    const host = parseUri(href).host;
+    const host = URIUtils.parseUri(href).host;
 
     if (startupCalls === 0 && !href.includes("localhost") && !href.includes("127.0.0.1")) {
         startupCalls++;
