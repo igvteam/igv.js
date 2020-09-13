@@ -29,10 +29,9 @@ import TrackBase from "../trackBase.js";
 import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {createCheckbox} from "../igv-icons.js";
-import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
 
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
@@ -143,7 +142,7 @@ WigTrack.prototype.draw = function (options) {
 
     const getX = function (feature) {
         let x = Math.floor((feature.start - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
+        if (isNaN(x)) console.log('isNaN(x). feature start ' + StringUtils.numberFormatter(feature.start) + ' bp start ' + StringUtils.numberFormatter(bpStart));
         return x;
     };
 
@@ -244,12 +243,12 @@ WigTrack.prototype.popupData = function (clickState, features) {
 
         if (selectedFeature) {
             let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                numberFormatter(selectedFeature.start + 1)
-                : numberFormatter(selectedFeature.start + 1) + "-" + numberFormatter(selectedFeature.end);
+                StringUtils.numberFormatter(selectedFeature.start + 1)
+                : StringUtils.numberFormatter(selectedFeature.start + 1) + "-" + StringUtils.numberFormatter(selectedFeature.end);
             popupData.push({name: "Position:", value: posString});
             popupData.push({
                 name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                value: numberFormatter(selectedFeature.value)
+                value: StringUtils.numberFormatter(selectedFeature.value)
             });
         }
 

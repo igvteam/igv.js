@@ -26,7 +26,7 @@
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import { getMouseXY } from "./util/domUtils.js";
 import IGVGraphics from "./igv-canvas.js";
-import IGVColor from "./igv-color.js";
+import {IGVColor} from "../node_modules/igv-utils/src/index.js";
 import ViewportBase from "./viewportBase.js";
 import C2S from "./canvas2svg.js";
 import {download} from "./util/igvUtils.js";

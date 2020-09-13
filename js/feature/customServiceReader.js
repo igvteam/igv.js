@@ -24,7 +24,10 @@
  * THE SOFTWARE.
  */
 import igvxhr from "../igvxhr.js";
-import {isString} from "../util/stringUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
+
 
 class CustomServiceReader {
     constructor(config) {

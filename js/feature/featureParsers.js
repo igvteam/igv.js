@@ -24,11 +24,9 @@
  */
 
 import getDataWrapper from "./dataWrapper.js";
-import IGVColor from "../igv-color.js";
-import {getFormat} from "../util/trackUtils.js";
+import {IGVColor, StringUtils, TrackUtils} from "../../node_modules/igv-utils/src/index.js";
 import {isNumber} from "../util/igvUtils.js";
 import {decodeBedpe, decodeInteract, decodeBedpeDomain} from './bedpe.js';
-import {numberFormatter} from "../util/stringUtils.js"
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -147,7 +145,7 @@ const FeatureParser = function (format, decode, config) {
                 break;
             default:
 
-                customFormat = getFormat(this.format);
+                customFormat = TrackUtils.getFormat(this.format);
                 if (customFormat !== undefined) {
                     this.decode = decodeCustom;
                     this.format = customFormat;
@@ -981,7 +979,7 @@ GFFFeature.prototype.popupData = function (genomicLocation) {
             pd.push({name: key + ":", value: value});
         }
     }
-    pd.push({name: 'position:', value: `${this.chr}:${numberFormatter(this.start + 1)}-${numberFormatter(this.end)}`})
+    pd.push({name: 'position:', value: `${this.chr}:${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`})
     return pd;
 }
 

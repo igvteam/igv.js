@@ -28,7 +28,7 @@ import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";

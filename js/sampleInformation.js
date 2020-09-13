@@ -24,8 +24,10 @@
  */
 
 import igvxhr from "./igvxhr.js";
-import {splitLines} from "./util/stringUtils.js";
 import {buildOptions} from "./util/igvUtils.js";
+import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+
+const splitLines = StringUtils.splitLines;
 
 const SampleInformation = function () {
     this.attributes = {};

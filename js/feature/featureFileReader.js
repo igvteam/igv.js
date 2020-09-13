@@ -31,14 +31,13 @@ import loadBamIndex from "../bam/bamIndex.js";
 import loadTribbleIndex from "./tribble.js"
 import igvxhr from "../igvxhr.js";
 import {bgzBlockSize, unbgzf} from '../bam/bgzf.js';
-import {isFilePath} from '../util/fileUtils.js'
-import {isString} from "../util/stringUtils.js";
-import {decodeDataURI, parseUri} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
 import loadCsiIndex from "../bam/csiIndex.js"
+import {FileUtils, URIUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
+const isString = StringUtils.isString;
 
 /**
  * Reader for "bed like" files (tab delimited files with 1 feature per line: bed, gff, vcf, etc)
@@ -56,13 +55,13 @@ class FeatureFileReader {
         this.indexURL = config.indexURL;
         this.indexed = config.indexed;
 
-        if (isFilePath(this.config.url)) {
+        if (FileUtils.isFilePath(this.config.url)) {
             this.filename = this.config.url.name;
         } else if (isString(this.config.url) && this.config.url.startsWith('data:')) {
             this.indexed = false;  // by definition
             this.dataURI = config.url;
         } else {
-            uriParts = parseUri(this.config.url);
+            uriParts = URIUtils.parseUri(this.config.url);
             this.filename = config.filename || uriParts.file;
         }
         this.format = this.config.format;
@@ -292,10 +291,10 @@ class FeatureFileReader {
     async loadIndex() {
         const indexURL = this.config.indexURL;
         let indexFilename;
-        if (isFilePath(indexURL)) {
+        if (FileUtils.isFilePath(indexURL)) {
             indexFilename = indexURL.name;
         } else {
-            const uriParts = parseUri(indexURL);
+            const uriParts = URIUtils.parseUri(indexURL);
             indexFilename = uriParts.file;
         }
         const isTabix = indexFilename.endsWith(".tbi") || indexFilename.endsWith(".csi")
@@ -315,7 +314,7 @@ class FeatureFileReader {
 
     async loadFeaturesFromDataURI() {
 
-        const plain = decodeDataURI(this.dataURI)
+        const plain = URIUtils.decodeDataURI(this.dataURI)
         this.header = this.parser.parseHeader(plain);
         if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
             this.format = 'gff3';

@@ -3,7 +3,7 @@
 
 import BinaryParser from "../binary.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const CSI1_MAGIC = 21582659 // CSI\1

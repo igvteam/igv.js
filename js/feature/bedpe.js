@@ -1,4 +1,4 @@
-import IGVColor from "../igv-color.js"
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
 
 function decodeBedpe(tokens, ignore) {
 
