@@ -22,7 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import {hashCode, isString} from "../util/stringUtils.js"
+
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
+const hashCode = StringUtils.hashCode;
 
 const BamAlignmentRow = function () {
 

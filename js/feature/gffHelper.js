@@ -24,8 +24,7 @@
  * THE SOFTWARE.
  */
 
-import {numberFormatter} from "../util/stringUtils.js"
-
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 /**
  * Created by jrobinson on 4/7/16.
  */
@@ -439,7 +438,7 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
             pd.push({name: key, value: value});
         }
     }
-    pd.push({name: 'position', value: `${this.chr}:${numberFormatter(this.start + 1)}-${numberFormatter(this.end)}`})
+    pd.push({name: 'position', value: `${this.chr}:${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`})
 
 
     // If clicked over an exon add its attributes

@@ -25,7 +25,8 @@
 
     import igv from "../js/index.js";
     import google from "../js/google/googleUtils.js";
-    import {numberFormatter} from "../js/util/stringUtils.js";
+    import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+    const numberFormatter = StringUtils.numberFormatter;
 
     let browser;
 

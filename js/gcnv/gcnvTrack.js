@@ -4,9 +4,9 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend, isSimpleType} from "../util/igvUtils.js";
-import {numberFormatter} from "../util/stringUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const X_PIXEL_DIFF_THRESHOLD = 1;
 const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
@@ -93,7 +93,8 @@ GCNVTrack.prototype.draw = function (options) {
 
     const getX = function (bpPosition) {
         let x = Math.floor((bpPosition - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.warn('isNaN(x). feature start ' + numberFormatter(bpPosition) + ' bp start ' + numberFormatter(bpStart));
+        if (isNaN(x)) console.warn('isNaN(x). feature start ' + StringUtils.numberFormatter(bpPosition) +
+            ' bp start ' + StringUtils.numberFormatter(bpStart));
         return x;
     };
 

@@ -26,7 +26,7 @@
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVMath from "../igv-math.js";
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {extend, isSimpleType} from "../util/igvUtils.js";

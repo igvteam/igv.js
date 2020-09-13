@@ -29,12 +29,11 @@ import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
-import {numberFormatter} from "../util/stringUtils.js";
 import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
 import {extend} from "../util/igvUtils.js";
-import {parseLocusString} from "../util/trackUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const type = "alignment";
 
@@ -49,6 +48,7 @@ var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
 const BAMTrack = extend(TrackBase,
     function (config, browser) {
+    
 
         this.type = type;
 
@@ -103,7 +103,7 @@ const BAMTrack = extend(TrackBase,
         // Assign sort objects to a genomic state
         function assignSort(currentSorts, sort) {
 
-            const range = parseLocusString(sort.locus);
+            const range = StringUtils.parseLocusString(sort.locus);
             if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
 
             // Loop through current genomic states, assign sort to first matching state
@@ -571,7 +571,7 @@ CoverageTrack.prototype.popupData = function (config) {
 
     if (coverage) {
 
-        nameValues.push(referenceFrame.chrName + ":" + numberFormatter(1 + genomicLocation));
+        nameValues.push(referenceFrame.chrName + ":" + StringUtils.numberFormatter(1 + genomicLocation));
 
         nameValues.push({name: 'Total Count', value: coverage.total});
 

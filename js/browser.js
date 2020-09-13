@@ -36,18 +36,16 @@ import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import ReferenceFrame from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
-import {getFilename, isFilePath} from './util/fileUtils.js'
-import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {compressString, isString, numberFormatter, splitLines, uncompressString} from "./util/stringUtils.js"
 import {guid, pageCoordinates} from "./util/domUtils.js";
-import {decodeDataURI, resolveURL} from "./util/uriUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
-import google from "./google/googleUtils.js";
+import {GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
-import { defaultSequenceTrackOrder } from './sequenceTrack.js'
+import { defaultSequenceTrackOrder } from './sequenceTrack.js';
+import {buildOptions} from "./util/igvUtils";
+import {URIUtils, StringUtils, TrackUtils} from "../node_modules/igv-utils/src/index.js";
 
 const multiLocusGapWidth = 4
 
@@ -59,6 +57,11 @@ const trackManipulationHandleMarginWidth = 2
 const trackManipulationHandleBorderWidth = 1
 
 const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth + 2 * trackManipulationHandleBorderWidth
+
+const compressString = StringUtils.compressString;
+const isString  = StringUtils.isString;
+const splitLines = StringUtils.splitLines;
+const uncompressString = StringUtils.uncompressString;
 
 const Browser = function (options, parentDiv) {
 
@@ -290,7 +293,7 @@ Browser.prototype.loadSession = async function (options) {
         } else {
             let filename = options.filename
             if (!filename) {
-                filename = (options.url ? getFilename(options.url) : options.file.name)
+                filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
             }
 
             if (filename.endsWith(".xml")) {
@@ -631,27 +634,27 @@ Browser.prototype.loadTrack = async function (config) {
     }
 
     // Resolve function and promise urls
-    let url = await resolveURL(config.url);
+    let url = await URIUtils.resolveURL(config.url);
     if (isString(url)) {
         url = url.trim();
     }
 
     if (isString(url) && url.startsWith("https://drive.google.com")) {
-        const json = await google.getDriveFileInfo(url)
+        const json = await getDriveFileInfo(url)
         url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
         if (!config.filename) {
             config.filename = json.originalFileName || json.name;
         }
         if (!config.format) {
-            config.format = inferFileFormat(config.filename);
+            config.format = TrackUtils.inferFileFormat(config.filename);
         }
     } else {
         if (url && !config.filename) {
-            config.filename = getFilename(url);
+            config.filename = FileUtils.getFilename(url);
         }
     }
 
-    inferTrackTypes(config);
+    TrackUtils.inferTrackTypes(config);
 
     // Set defaults if specified
     if (this.trackDefaults && config.type) {
@@ -1053,8 +1056,8 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
                     }
                 }
 
-                ss = numberFormatter(Math.floor(referenceFrame.start + 1));
-                ee = numberFormatter(Math.floor(end));
+                ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = StringUtils.numberFormatter(Math.floor(end));
                 str = referenceFrame.chrName + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
@@ -1779,9 +1782,9 @@ Browser.prototype.toJSON = function () {
         "reference": this.genome.toJSON()
     };
 
-    if (isFilePath(json.reference.fastaURL)) {
+    if (FileUtils.isFilePath(json.reference.fastaURL)) {
         throw new Error(`Error. Sessions cannot include local file references ${ json.reference.fastaURL.name }.`);
-    } else if (isFilePath(json.reference.indexURL)) {
+    } else if (FileUtils.isFilePath(json.reference.indexURL)) {
         throw new Error(`Error. Sessions cannot include local file references ${ json.reference.indexURL.name }.`);
     }
 
@@ -1832,7 +1835,7 @@ Browser.prototype.toJSON = function () {
             trackJson.push(config);
         }
     }
-    const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => isFilePath(url))
+    const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => FileUtils.isFilePath(url))
     if (locaTrackFiles.length > 0) {
         throw new Error(`Error. Sessions cannot include local file references.`);
     }
@@ -1856,7 +1859,7 @@ Browser.uncompressSession = function (url) {
     let bytes
     if (url.indexOf('/gzip;base64') > 0) {
         //Proper dataURI
-        bytes = decodeDataURI(url);
+        bytes = URIUtils.decodeDataURI(url);
         let json = ''
         for (let b of bytes) {
             json += String.fromCharCode(b)
@@ -2084,6 +2087,12 @@ function addMouseHandlers() {
         self.cancelTrackPan();
         self.endTrackDrag();
     }
+}
+
+async function getDriveFileInfo (googleDriveURL) {
+    const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL);
+    const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
+    return igvxhr.loadJson(endPoint, buildOptions({}));
 }
 
 export default Browser

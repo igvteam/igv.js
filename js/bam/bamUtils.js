@@ -28,8 +28,9 @@ import BamAlignment from "./bamAlignment.js";
 import AlignmentBlock from "./alignmentBlock.js";
 import igvxhr from "../igvxhr.js";
 import {unbgzf} from './bgzf.js';
-import {splitLines} from "../util/stringUtils.js";
 import BamFilter from "./bamFilter.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 /**
  * This code is based on the Biodalliance BAM reader by Thomas Down,  2011
@@ -335,7 +336,7 @@ const BamUtils = {
         var lines, i, j, len, tokens, blocks, pos, qualString, rnext, pnext, lengthOnRef,
             alignment, cigarArray, started;
 
-        lines = splitLines(sam);
+        lines = StringUtils.splitLines(sam);
         len = lines.length;
         started = false;
 

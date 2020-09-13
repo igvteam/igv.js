@@ -29,9 +29,9 @@ import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import igvxhr from "../igvxhr.js";
 import {bgzBlockSize, unbgzf} from './bgzf.js';
-import {inferIndexPath} from "../util/trackUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
-import loadCsiIndex from "./csiIndex.js"
+import loadCsiIndex from "./csiIndex.js";
+import {TrackUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const MAX_GZIP_BLOCK_SIZE = 65536; // See BGZF compression format in SAM format specification
 
@@ -47,7 +47,7 @@ const BamReader = function (config, genome) {
     this.bamPath = config.url;
 
     // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-    this.baiPath = config.indexURL || inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
+    this.baiPath = config.indexURL || TrackUtils.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
     BamUtils.setReaderDefaults(this, config);
 }
 

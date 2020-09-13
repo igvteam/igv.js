@@ -39,9 +39,10 @@ import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
-import google from "./google/googleUtils.js";
+import {GoogleUtils} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
 import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
+import {setApiKey} from "./ga4gh/ga4ghHelper.js"
 
 let allBrowsers = [];
 
@@ -81,7 +82,7 @@ async function createBrowser(parentDiv, config) {
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
     if (config.apiKey) {
-        google.setApiKey(config.apiKey);
+        setApiKey(config.apiKey);
     }
 
     if (config.oauthToken) {
@@ -451,11 +452,8 @@ function logo() {
     );
 }
 
-function createTrack (config, browser) {
-    return Browser.prototype.createTrack.call(browser, config)
-}
 
-export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange, getBrowser, createTrack}
+export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange, getBrowser}
 
 
 
