@@ -23,7 +23,8 @@
  * THE SOFTWARE.
  */
 
-import {numberFormatter} from "../util/stringUtils.js";
+
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const READ_PAIRED_FLAG = 0x1;
 const PROPER_PAIR_FLAG = 0x2;
@@ -195,7 +196,7 @@ BamAlignment.prototype.popupData = function (genomicLocation) {
     nameValues.push("<hr>");
 
     // Add 1 to genomic location to map from 0-based computer units to user-based units
-    nameValues.push({name: 'Alignment Start', value: numberFormatter(1 + this.start), borderTop: true});
+    nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true});
     nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true});
     nameValues.push({name: 'Cigar', value: this.cigar});
     nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
@@ -245,7 +246,7 @@ BamAlignment.prototype.popupData = function (genomicLocation) {
     }
 
     nameValues.push("<hr>");
-    nameValues.push({name: 'Genomic Location: ', value: numberFormatter(1 + genomicLocation)});
+    nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)});
     nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
     nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
 

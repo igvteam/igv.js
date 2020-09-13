@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {numberFormatter} from "./util/stringUtils.js";
+import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 const WindowSizePanel = function ($parent, browser) {
 
@@ -64,9 +64,9 @@ function prettyBasePairNumber  (raw) {
 
         value = raw / denom;
         floored = Math.floor(value);
-        return numberFormatter(floored) + units;
+        return StringUtils.numberFormatter(floored) + units;
     } else {
-        return numberFormatter(raw) + " bp";
+        return StringUtils.numberFormatter(raw) + " bp";
     }
 
     value = raw / denom;

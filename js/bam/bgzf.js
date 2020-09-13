@@ -1,5 +1,5 @@
 
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 
 const BLOCK_HEADER_LENGTH = 18;
 const BLOCK_LENGTH_OFFSET = 16;  // Location in the gzip block of the total block size (actually total block size - 1)

@@ -32,7 +32,9 @@ import CramReader from "../cram/cramReader.js";
 import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js";
 import BamAlignmentRow from "./bamAlignmentRow.js";
 import PairedAlignment from "./pairedAlignment.js";
-import {isString} from "../util/stringUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
 
 const BamSource = function (config, browser) {
 

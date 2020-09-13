@@ -30,7 +30,10 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
-import {isString} from "../util/stringUtils.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
+
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";

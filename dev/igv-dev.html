@@ -29,15 +29,12 @@
 <script type="module">
 
     import igv from '../js/index.js'
-    import google from "../js/google/googleUtils.js"
     import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 
     Alert.init(document.getElementById('igvDiv'))
 
     let browser
     (async () => {
-
-        await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
 
         const options =
             {

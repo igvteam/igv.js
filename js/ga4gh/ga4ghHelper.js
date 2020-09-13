@@ -24,7 +24,12 @@
  */
 
 import igvxhr from "../igvxhr.js";
-import google from "../google/googleUtils.js"
+
+let apiKey;
+
+function setApiKey(key) {
+    apiKey = key;
+}
 
 function ga4ghGet(options) {
     var url = options.url + "/" + options.entity + "/" + options.entityId;
@@ -38,7 +43,6 @@ function ga4ghSearch(options) {
             url = options.url,
             body = options.body,
             decode = options.decode,
-            apiKey = google.apiKey,
             paramSeparator = "?",
             fields = options.fields;  // Partial response
 
@@ -244,7 +248,7 @@ function ga4ghHeaders() {
 
 export  {
     ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
-    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
+    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets, setApiKey
 };
 
 
