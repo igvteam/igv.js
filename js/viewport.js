@@ -106,21 +106,6 @@ class ViewPort extends ViewportBase {
         }
     }
 
-    showMessage(message) {
-        if (!this.messageDiv) {
-            this.messageDiv = document.createElement('div');
-            this.messageDiv.className = 'igv-viewport-message';
-            this.contentDiv.append(this.messageDiv)
-        }
-        this.messageDiv.textContent = message;
-        this.messageDiv.style.display = 'inline-block'
-    }
-
-    hideMessage(message) {
-        if (this.messageDiv)
-            this.messageDiv.style.display = 'none'
-    }
-
     checkZoomIn() {
 
         if (!(viewIsReady.call(this))) {
@@ -404,7 +389,6 @@ class ViewPort extends ViewportBase {
 
     }
 
-
     setContentHeight(contentHeight) {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000);
@@ -412,14 +396,6 @@ class ViewPort extends ViewportBase {
         $(this.contentDiv).height(contentHeight);
 
         if (this.tile) this.tile.invalidate = true;
-    }
-
-    getContentHeight() {
-        return $(this.contentDiv).height();
-    }
-
-    getContentTop() {
-        return this.contentDiv.offsetTop;
     }
 
     isLoading() {
@@ -519,32 +495,6 @@ class ViewPort extends ViewportBase {
 
         context.restore();
 
-    }
-
-    /**
-     * Called when the associated track is removed.  Do any needed cleanup here.
-     */
-    dispose() {
-        const self = this;
-
-        if (this.popover) {
-            this.popover.dispose()
-        }
-
-        $(this.canvas).off();
-        $(this.canvas).empty();
-
-        $(this.contentDiv).off();
-        $(this.contentDiv).empty();
-
-        this.$viewport.off();
-        this.$viewport.empty();
-
-        // Null out all properties -- this should not be neccessary, but just in case there is a
-        // reference to self somewhere we want to free memory.
-        Object.keys(this).forEach(function (key, i, list) {
-            self[key] = undefined;
-        })
     }
 
     getCachedFeatures() {
