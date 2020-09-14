@@ -1,6 +1,6 @@
 import Browser from "../js/browser.js";
 import MenuUtils from "../js/ui/menuUtils.js"
-import {URIUtils, StringUtils} from "../node_modules/igv-utils/src/index.js"
+import {URIUtils, StringUtils, TrackUtils} from "../node_modules/igv-utils/src/index.js"
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
 function runUtilTests() {
