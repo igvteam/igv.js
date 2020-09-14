@@ -24,11 +24,9 @@
  */
 
 import oauth from "./oauth.js";
-import {GoogleUtils} from "../node_modules/igv-utils/src/index.js";
 import {unbgzf} from './bam/bgzf.js';
-import {Zlib, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import PromiseThrottle from "./util/promiseThrottle.js"
-import {URIUtils} from "../node_modules/igv-utils/src/index.js"
+import {FileUtils, GoogleUtils, GoogleAuth, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
 
 var NONE = 0;
 var GZIP = 1;
@@ -122,8 +120,8 @@ async function loadURL(url, options) {
     options = options || {};
 
     let oauthToken = options.oauthToken || getOauthToken(url);
-    if(oauthToken) {
-        oauthToken = await (typeof oauthToken === 'function' ?  oauthToken() : oauthToken);
+    if (oauthToken) {
+        oauthToken = await (typeof oauthToken === 'function' ? oauthToken() : oauthToken);
     }
 
     return new Promise(function (resolve, reject) {
@@ -196,7 +194,7 @@ async function loadURL(url, options) {
                     // Provide just the slice we asked for, throw out the rest quietly
                     // If file is large warn user
                     if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
-                        igv.browser.alert.present(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
+                        alert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
                     }
                     resolve(xhr.response.slice(range.start, range.start + range.size));
 
@@ -210,7 +208,7 @@ async function loadURL(url, options) {
 
                 try {
                     options.retries = 1;
-                    const accessToken = await getGoogleAccessToken();
+                    const accessToken = await getGoogleAccessToken(url);
                     options.oauthToken = accessToken;
                     const response = await igvxhr.load(url, options);
                     resolve(response);
@@ -354,12 +352,40 @@ function isAmazonV4Signed(url) {
 }
 
 function getOauthToken(url) {
-    const host = URIUtils.parseUri(url).host;
+
+    // Google is the default provider, don't try to parse host for google URLs
+    const host = GoogleUtils.isGoogleURL(url) ?
+        undefined :
+        URIUtils.parseUri(url).host;
     let token = oauth.getToken(host);
-    if (!token && GoogleUtils.isGoogleURL(url)) {
-        token = oauth.google.access_token;
+    if (token) {
+        return token;
+    } else if (host === undefined) {
+        if(googleToken && googleToken.expires_at > Date.now()) {
+            return googleToken.access_token;
+        }
     }
-    return token;
+}
+
+let googleToken;
+
+/**
+ * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we no
+ * a token is required, that is until we've tried the url and received a 401 or 404.
+ *
+ * @param url
+ * @returns the oauth token
+ */
+async function getGoogleAccessToken(url) {
+    if (gapi && gapi.auth2 && gapi.auth2.getAuthInstance()) {
+        const scope = GoogleAuth.getScopeForURL(url);
+        googleToken = await GoogleAuth.getAccessToken(scope);
+        return googleToken.access_token;
+    } else {
+        alert(
+            `Authorization is required, but Google oAuth has not been initalized.   Contact your site administrator for assistance.`)
+        return undefined;
+    }
 }
 
 function addOauthHeaders(headers, acToken) {
@@ -421,91 +447,17 @@ function isGoogleDrive(url) {
     return url.includes("drive.google.com") || url.includes("www.googleapis.com/drive");
 }
 
-/**
- * There can be only 1 oAuth promise executing at a time.
- */
-let oauthPromise;
-let expiresAt;
-let currentUser;
-
-async function getGoogleAccessToken() {
-    if (oauth.google.access_token) {
-        if (expiresAt && Date.now() > expiresAt && currentUser) {
-            // const authInstance = gapi.auth2.getAuthInstance();
-            const googleUser = currentUser; //authInstance.currentUser.get();
-            const authResponse = await googleUser.reloadAuthResponse();
-            oauth.google.access_token = authResponse.access_token;
-            expiresAt = authResponse["expires_at"];
-        }
-        return oauth.google.access_token;
-    }
-    if (oauthPromise) {
-        return oauthPromise;
-    }
-
-    if (!(gapi && gapi.auth2)) {
-        throw new Error("The Google oAuth API is required but not loaded");
-    }
-
-    const authInstance = gapi.auth2.getAuthInstance();
-    if (!authInstance) {
-        igv.browser.alert.present("Authorization is required, but Google oAuth has not been initalized.  Contact your site administrator for assistance.")
-        return undefined;
-    }
-
-    const scope = "https://www.googleapis.com/auth/devstorage.read_only https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/drive.readonly";
-    const options = new gapi.auth2.SigninOptionsBuilder();
-    options.setPrompt('select_account');
-    options.setScope(scope);
-    oauthPromise = new Promise(function (resolve, reject) {
-        igv.browser.alert.present("Google Login required", function () {
-            gapi.auth2.getAuthInstance().signIn(options)
-                .then(function (user) {
-                    currentUser = user;
-                    const authResponse = user.getAuthResponse();
-                    oauth.google.setToken(authResponse["access_token"]);
-                    expiresAt = authResponse["expires_at"];
-                    resolve(authResponse["access_token"]);
-                    oauthPromise = undefined;
-                })
-                .catch(function (err) {
-                    oauthPromise = undefined;
-                    reject(err);
-                });
-        });
-    });
-
-    return oauthPromise;
-}
-
 
 //Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-
 let startupCalls = 0;
-
 function startup() {
-
     const href = window.document.location.href;
-    const host = URIUtils.parseUri(href).host;
-
     if (startupCalls === 0 && !href.includes("localhost") && !href.includes("127.0.0.1")) {
         startupCalls++;
-
-        var url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
-        igvxhr.load(url).then(function (ignore) {
-            console.log(ignore);
-        }).catch(function (error) {
-            console.log(error);
-        });
-
+        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+        igvxhr.load(url).then(function (ignore) {})
     }
 }
-
-function validateIP(address) {
-    const regex = new RegExp(/\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b/);
-    return regex.test(address);
-}
-
 
 /**
  * Use when TextDecoder is not available (primarily IE).
