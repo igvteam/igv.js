@@ -64,6 +64,30 @@ class ViewportBase {
 
     }
 
+    setTrackLabel(label) {}
+
+    startSpinner() {}
+    stopSpinner(){}
+
+    checkZoomIn() {
+        return true
+    }
+
+    showMessage(message) {
+        if (!this.messageDiv) {
+            this.messageDiv = document.createElement('div');
+            this.messageDiv.className = 'igv-viewport-message';
+            this.contentDiv.append(this.messageDiv)
+        }
+        this.messageDiv.textContent = message;
+        this.messageDiv.style.display = 'inline-block'
+    }
+
+    hideMessage(message) {
+        if (this.messageDiv)
+            this.messageDiv.style.display = 'none'
+    }
+
     async renderSVGContext(context, offset) {
 
         // Nothing to do if zoomInNotice is active
@@ -118,6 +142,54 @@ class ViewportBase {
         this.canvas.style.width = (`${ width }px`);
         this.canvas.setAttribute('width', width);
     }
+
+    shift() {}
+
+    setTop(contentTop) {}
+
+    async loadFeatures () {
+        return undefined
+    }
+
+    setContentHeight(contentHeight) {}
+
+    isLoading() {
+        return false
+    }
+
+    getContentHeight() {
+        return this.$content.height();
+    }
+
+    getContentTop() {
+        return this.contentDiv.offsetTop;
+    }
+
+    /**
+     * Called when the associated track is removed.  Do any needed cleanup here.
+     */
+    dispose() {
+
+        if (this.popover) {
+            this.popover.dispose()
+        }
+
+        this.$canvas.off();
+        this.$canvas.empty();
+
+        this.$content.off();
+        this.$content.empty();
+
+        this.$viewport.off();
+        this.$viewport.empty();
+
+        // Null out all properties -- this should not be neccessary, but just in case there is a
+        // reference to self somewhere we want to free memory.
+        for (let key of Object.keys(this)) {
+            this[ key ] = undefined
+        }
+    }
+
 }
 
 export default ViewportBase
