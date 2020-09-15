@@ -58,7 +58,7 @@ IdeogramTrack.prototype.computePixelHeight = function () {
 }
 
 IdeogramTrack.prototype.dispose = function () {
-
+    this.trackView = undefined
 }
 
 export default IdeogramTrack
