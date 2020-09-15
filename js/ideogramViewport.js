@@ -93,16 +93,8 @@ class IdeogramViewport extends ViewportBase {
         return true
     }
 
-    shift() {
-
-    }
-
     setTop (contentTop) {
 
-    }
-
-    async loadFeatures () {
-        return undefined
     }
 
     // TODO: Not needed. No menus on ideogram track
@@ -162,22 +154,6 @@ class IdeogramViewport extends ViewportBase {
             };
 
         repaintContext(config);
-
-    }
-
-    getContentHeight() {
-        return $(this.contentDiv).height();
-    }
-
-    getContentTop() {
-        return this.contentDiv.offsetTop;
-    }
-
-    isLoading() {
-        return false;
-    }
-
-    dispose() {
 
     }
 
