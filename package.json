@@ -10,7 +10,6 @@
   ],
   "scripts": {
     "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config",
-    "test": "node runTests.js",
     "prepack": "npm run build",
     "http-server": "npx http-server ."
   },
@@ -61,6 +60,6 @@
   },
   "dependencies": {
     "igv-ui": "github:igvteam/igv-ui#93a464ee",
-    "igv-utils": "github:igvteam/igv-utils#531ea1a0"
+    "igv-utils": "github:igvteam/igv-utils#e69cffd2"
   }
 }
