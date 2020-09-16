@@ -26,7 +26,7 @@
 import oauth from "./oauth.js";
 import {unbgzf} from './bam/bgzf.js';
 import PromiseThrottle from "./util/promiseThrottle.js"
-import {FileUtils, GoogleUtils, GoogleAuth, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
+import {FileUtils, GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
 
 var NONE = 0;
 var GZIP = 1;
@@ -41,75 +41,79 @@ const promiseThrottle = new PromiseThrottle({
 
 const igvxhr = {
 
-    load: async function (url, options) {
+    apiKey: undefined,
 
-        options = options || {};
-
-        // Resolve functions, promises, and functions that return promises
-        url = await (typeof url === 'function' ? url() : url);
-
-        if (url instanceof File) {
-            return loadFileSlice(url, options);
-        } else if (typeof url.startsWith === 'function') {   // Test for string
-            if (url.startsWith("data:")) {
-                return URIUtils.decodeDataURI(url)
-            } else {
-                if (url.startsWith("https://drive.google.com")) {
-                    url = GoogleUtils.driveDownloadURL(url);
-                }
-                if (isGoogleDrive(url)) {
-                    return promiseThrottle.add(function () {
-                        return loadURL(url, options)
-                    })
-                } else {
-                    return loadURL(url, options);
-                }
-            }
-        } else {
-            throw Error(`url must be either a 'string', 'function', or 'Promise'.  Actual type: ${typeof url}`);
-        }
+    setApiKey: function (key) {
+        this.apiKey = key;
     },
 
-    loadArrayBuffer: function (url, options) {
-        options = options || {};
-        if (!options.responseType) options.responseType = "arraybuffer";
+    load: load,
 
+    loadArrayBuffer: async function (url, options) {
+        options = options || {};
+        if (!options.responseType) {
+            options.responseType = "arraybuffer";
+        }
         if (url instanceof File) {
             return loadFileSlice(url, options);
         } else {
-            return igvxhr.load(url, options);
+            return load(url, options);
         }
     },
 
-    loadJson: function (url, options) {
+    loadJson: async function (url, options) {
         options = options || {};
-
-        var method = options.method || (options.sendData ? "POST" : "GET");
-
-        if (method === "POST") options.contentType = "application/json";
-
-        return igvxhr.load(url, options)
-
-            .then(function (result) {
-                if (result) {
-                    return JSON.parse(result);
-                } else {
-                    return result;
-                }
-            });
+        const method = options.method || (options.sendData ? "POST" : "GET");
+        if (method === "POST") {
+            options.contentType = "application/json";
+        }
+        const result = await load(url, options)
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            return result;
+        }
     },
 
-    loadString: function (path, options) {
+    loadString: async function (path, options) {
         options = options || {};
-
         if (path instanceof File) {
             return loadStringFromFile(path, options);
         } else {
             return loadStringFromUrl(path, options);
         }
-    },
+    }
+}
 
-    startup: startup
+async function load(url, options) {
+
+    options = options || {};
+
+    const urlType = typeof url;
+
+    // Resolve functions, promises, and functions that return promises
+    url = await (typeof url === 'function' ? url() : url);
+
+    if (url instanceof File) {
+        return loadFileSlice(url, options);
+    } else if (typeof url.startsWith === 'function') {   // Test for string
+        if (url.startsWith("data:")) {
+            return URIUtils.decodeDataURI(url)
+        } else {
+            if (url.startsWith("https://drive.google.com")) {
+                url = GoogleUtils.driveDownloadURL(url);
+            }
+            if (GoogleUtils.isGoogleDriveURL(url)) {
+                return promiseThrottle.add(function () {
+                    return loadURL(url, options)
+                })
+            } else {
+                return loadURL(url, options);
+            }
+        }
+    } else {
+        throw Error(`url must be either a 'File', 'string', 'function', or 'Promise'.  Actual type: ${urlType}`);
+    }
 }
 
 async function loadURL(url, options) {
@@ -135,6 +139,7 @@ async function loadURL(url, options) {
                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                 }
             }
+            addApiKey(url);
         }
 
         const headers = options.headers || {};
@@ -207,10 +212,10 @@ async function loadURL(url, options) {
                 !options.retries) {
 
                 try {
+                    const accessToken = await fetchGoogleAccessToken(url);
                     options.retries = 1;
-                    const accessToken = await getGoogleAccessToken(url);
                     options.oauthToken = accessToken;
-                    const response = await igvxhr.load(url, options);
+                    const response = await load(url, options);
                     resolve(response);
                 } catch (e) {
                     handleError(e);
@@ -230,7 +235,6 @@ async function loadURL(url, options) {
         xhr.onerror = function (event) {
             handleError("Error accessing resource: " + url + " Status: " + xhr.status);
         }
-
 
         xhr.ontimeout = function (event) {
             handleError("Timed out");
@@ -259,9 +263,10 @@ async function loadURL(url, options) {
 
 }
 
-function loadFileSlice(localfile, options) {
+async function loadFileSlice(localfile, options) {
+
     return new Promise(function (resolve, reject) {
-        var fileReader = new FileReader();
+        const fileReader = new FileReader();
 
         fileReader.onload = function (e) {
             resolve(fileReader.result);
@@ -289,11 +294,11 @@ function loadFileSlice(localfile, options) {
     });
 }
 
-function loadStringFromFile(localfile, options) {
+async function loadStringFromFile(localfile, options) {
 
     options = options || {};
 
-    let blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
+    const blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
 
     return new Promise(function (resolve, reject) {
 
@@ -324,15 +329,14 @@ function loadStringFromFile(localfile, options) {
             fileReader.readAsArrayBuffer(blob);
         }
     });
-
 }
 
 async function loadStringFromUrl(url, options) {
+
     options = options || {};
 
-    var fn = options.filename || FileUtils.getFilename(url);
-
-    var compression = UNKNOWN;
+    const fn = options.filename || FileUtils.getFilename(url);
+    let compression = UNKNOWN;
     if (options.bgz) {
         compression = BGZF;
     } else if (fn.endsWith(".gz")) {
@@ -340,12 +344,10 @@ async function loadStringFromUrl(url, options) {
     }
 
     options.responseType = "arraybuffer";
-    return igvxhr.load(url, options)
-        .then(function (data) {
-            return arrayBufferToString(data, compression);
-        });
-
+    const data = await igvxhr.load(url, options);
+    return arrayBufferToString(data, compression);
 }
+
 
 function isAmazonV4Signed(url) {
     return url.indexOf("X-Amz-Signature") > -1;
@@ -361,30 +363,32 @@ function getOauthToken(url) {
     if (token) {
         return token;
     } else if (host === undefined) {
-        if(googleToken && googleToken.expires_at > Date.now()) {
+        if (googleToken && googleToken.expires_at > Date.now()) {
             return googleToken.access_token;
         }
     }
 }
 
+/**
+ * Cached token from user signin -- not to be confused with explicitly set token from application (oauth.google.access_token)
+ */
 let googleToken;
 
 /**
- * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we no
- * a token is required, that is until we've tried the url and received a 401 or 404.
+ * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we know
+ * a token is required, that is until we've tried the url and received a 401, 403, or 404.
  *
  * @param url
  * @returns the oauth token
  */
-async function getGoogleAccessToken(url) {
+async function fetchGoogleAccessToken(url) {
     if (gapi && gapi.auth2 && gapi.auth2.getAuthInstance()) {
         const scope = GoogleAuth.getScopeForURL(url);
         googleToken = await GoogleAuth.getAccessToken(scope);
         return googleToken.access_token;
     } else {
-        alert(
-            `Authorization is required, but Google oAuth has not been initalized.   Contact your site administrator for assistance.`)
-        return undefined;
+        throw Error(
+            `Authorization is required, but Google oAuth has not been initalized. Contact your site administrator for assistance.`)
     }
 }
 
@@ -394,6 +398,19 @@ function addOauthHeaders(headers, acToken) {
         headers["Authorization"] = "Bearer " + acToken;
     }
     return headers;
+}
+
+
+function addApiKey(url) {
+    let apiKey = igvxhr.apiKey;
+    if (!apiKey && typeof gapi !== "undefined") {
+        apiKey = gapi.apiKey;
+    }
+    if (apiKey !== undefined && !url.includes("key=")) {
+        const paramSeparator = url.includes("?") ? "&" : "?"
+        url = url + paramSeparator + "key=" + apiKey;
+    }
+    return url;
 }
 
 /**
@@ -440,22 +457,6 @@ function arrayBufferToString(arraybuffer, compression) {
         return new TextDecoder().decode(plain);
     } else {
         return decodeUTF8(plain);
-    }
-}
-
-function isGoogleDrive(url) {
-    return url.includes("drive.google.com") || url.includes("www.googleapis.com/drive");
-}
-
-
-//Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-let startupCalls = 0;
-function startup() {
-    const href = window.document.location.href;
-    if (startupCalls === 0 && !href.includes("localhost") && !href.includes("127.0.0.1")) {
-        startupCalls++;
-        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
-        igvxhr.load(url).then(function (ignore) {})
     }
 }
 
@@ -515,5 +516,15 @@ function getGlobalObject() {
         return window;
     }
 }
+
+//Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
+console.log("startup")
+const href = window.document.location.href;
+if (!href.includes("localhost") && !href.includes("127.0.0.1")) {
+    const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+    igvxhr.load(url).then(function (ignore) {
+    })
+}
+
 
 export default igvxhr

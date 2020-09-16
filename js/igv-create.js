@@ -24,6 +24,7 @@
  */
 
 import { InputDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
+import { GoogleAuth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
@@ -39,12 +40,11 @@ import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
-import {GoogleUtils} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
 import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
-import {setApiKey} from "./ga4gh/ga4ghHelper.js"
 
 let allBrowsers = [];
+let googleAuthInitialized = false;
 
 /**
  * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
@@ -82,11 +82,18 @@ async function createBrowser(parentDiv, config) {
     browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
 
     if (config.apiKey) {
-        setApiKey(config.apiKey);
+        igvxhr.setApiKey(config.apiKey);
     }
-
     if (config.oauthToken) {
         oauth.setToken(config.oauthToken);
+    }
+    if (config.clientId && !googleAuthInitialized) {
+        await GoogleAuth.init({
+            clientId: config.clientId,
+            apiKey: config.apiKey,
+            scope: 'https://www.googleapis.com/auth/userinfo.profile'
+        })
+        googleAuthInitialized = true;
     }
 
     return loadSession(config)
@@ -122,8 +129,6 @@ async function createBrowser(parentDiv, config) {
             } else {
                 browser.centerGuide.forcedShow();
             }
-
-            igvxhr.startup();
 
             browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
