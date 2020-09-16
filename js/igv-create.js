@@ -44,7 +44,6 @@ import {createIcon} from "./igv-icons.js";
 import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
-let googleAuthInitialized = false;
 
 /**
  * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
@@ -87,13 +86,12 @@ async function createBrowser(parentDiv, config) {
     if (config.oauthToken) {
         oauth.setToken(config.oauthToken);
     }
-    if (config.clientId && !googleAuthInitialized) {
+    if (config.clientId && (!GoogleAuth.isInitialized())) {
         await GoogleAuth.init({
             clientId: config.clientId,
             apiKey: config.apiKey,
             scope: 'https://www.googleapis.com/auth/userinfo.profile'
         })
-        googleAuthInitialized = true;
     }
 
     return loadSession(config)
