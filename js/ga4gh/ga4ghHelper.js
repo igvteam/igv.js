@@ -25,11 +25,7 @@
 
 import igvxhr from "../igvxhr.js";
 
-let apiKey;
-
-function setApiKey(key) {
-    apiKey = key;
-}
+const apiKey = igvxhr.apiKey;
 
 function ga4ghGet(options) {
     var url = options.url + "/" + options.entity + "/" + options.entityId;
@@ -38,6 +34,7 @@ function ga4ghGet(options) {
 }
 
 function ga4ghSearch(options) {
+
     return new Promise(function (fulfill, reject) {
         var results = options.results ? options.results : [],
             url = options.url,
@@ -248,7 +245,7 @@ function ga4ghHeaders() {
 
 export  {
     ga4ghGet, ga4ghSearch, ga4ghSearchReadGroupSets, ga4ghSearchVariantSets,
-    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets, setApiKey
+    ga4ghSearchCallSets, ga4ghSearchReadAndCallSets
 };
 
 
