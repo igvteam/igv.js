@@ -1,7 +1,10 @@
+import { assert } from 'chai';
+import ignore from "./testMockObjects.js";
+
 import FeatureSource from "../js/feature/featureSource.js";
 import GenomeUtils from "../js/genome/genome.js";
 
-function runSegTests() {
+suite('testSeg', function () {
 
     var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
@@ -11,11 +14,8 @@ function runSegTests() {
         }
     }
 
-    // eweitz 2018-09-05:  Disabling this test for now, as it consistently fails.
-    //
-    QUnit.test("SEG query", function (assert) {
+    test("SEG query", async function () {
 
-        const done = assert.async();
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
@@ -31,16 +31,12 @@ function runSegTests() {
                 // Test 1 feature, insure its on chr1
                 const c = genome.getChromosomeName(features[0].chr);
                 assert.equal(chr, c);
-                done();
             })
 
     })
 
 
-    QUnit.test("SEG whole genome", function (assert) {
-
-        var done = assert.async();
-
+    test("SEG whole genome", async function () {
 
         var reference = {
             id: "hg19",
@@ -61,9 +57,7 @@ function runSegTests() {
                 assert.equal(20076, features.length);
                 var c = features[0].realChr;
                 assert.equal("1", c);
-                done();
             })
     })
-}
+})
 
-export default runSegTests;

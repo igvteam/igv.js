@@ -43,11 +43,13 @@
     "@babel/plugin-transform-runtime": "^7.8.3",
     "@babel/preset-env": "^7.8.4",
     "@rollup/plugin-commonjs": "^11.0.2",
+    "chai": "^4.2.0",
     "core-js": "^3.6.4",
     "eslint": "^6.4.0",
     "esm": "^3.2.25",
     "finalhandler": "^1.1.2",
     "http-server": "^0.12.1",
+    "mocha": "^8.1.3",
     "node-qunit-puppeteer": "^1.0.13",
     "regenerator-runtime": "^0.13.3",
     "rollup": "^1.31.1",
@@ -56,7 +58,8 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-strip": "^1.2.2",
     "rollup-plugin-terser": "^5.2.0",
-    "serve-static": "^1.14.1"
+    "serve-static": "^1.14.1",
+    "w3c-xmlhttprequest": "^3.0.0"
   },
   "dependencies": {
     "igv-ui": "github:igvteam/igv-ui#93a464ee",

@@ -1,6 +1,8 @@
+import { assert } from 'chai';
+import ignore from "./testMockObjects.js";
 import FeatureSource from "../js/feature/featureSource.js";
 
-function runAedTests() {
+suite("testAED", function() {
 
     const genome = {
         getChromosomeName: function (chr) {
@@ -8,9 +10,7 @@ function runAedTests() {
         }
     }
 
-    QUnit.test("AED - UTF8 with BOM", function (assert) {
-
-        var done = assert.async();
+    test("AED - UTF8 with BOM", function () {
 
         var chr = "chr2",
             bpStart = 0,
@@ -39,12 +39,9 @@ function runAedTests() {
                                                   "(infinity snowman)");
                 assert.equal(features[0].strand, "+");
 
-                done();
             })
             .catch(function (error) {
                 console.log(error);
             });
     });
-}
-
-export default runAedTests;
+})

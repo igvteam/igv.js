@@ -1,8 +1,10 @@
+import { assert } from 'chai';
+import ignore from "./testMockObjects.js";
 import BamReader from "../js/bam/bamReader.js";
 
-function runBAMTests() {
+suite("testBAM", function() {
 
-    QUnit.test("BAM alignments - CSI index", async function (assert) {
+    test("BAM alignments - CSI index", async function () {
 
         const chr = 'chr1';
         const bpStart = 155140000;
@@ -18,7 +20,7 @@ function runBAMTests() {
         validate(assert, alignmentContainer)
     });
 
-    QUnit.test("BAM alignments", async function (assert) {
+    test("BAM alignments", async function () {
 
         const chr = 'chr1';
         const bpStart = 155140000;
@@ -85,7 +87,5 @@ function runBAMTests() {
         assert.equal(tags["XT"], "M");
     }
 
-}
-
-export default runBAMTests;
+})
 
