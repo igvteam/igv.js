@@ -87,11 +87,11 @@ class AlertDialog {
         DOMUtils.show(this.container)
 
         // DOMUtils.show(this.container, "flex");
-        const { width,    height    } = this.parent.getBoundingClientRect()
+        const { width   } = this.parent.getBoundingClientRect()
         const { width: w, height: h } = this.container.getBoundingClientRect()
 
         const x = 0.5 * (width - w)
-        const y = -(0.5 * (height - h))
+        const y = h/2
 
         this.container.style.left = `${x}px`
         this.container.style.top = `${y}px`
