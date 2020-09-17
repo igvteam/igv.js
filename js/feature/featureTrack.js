@@ -277,7 +277,7 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
     const data = [];
     for (let feature of features) {
         let featureData
-        if (this.config.type === 'spliceJunctions') {
+        if (this.config.type === 'spliceJunctions' && feature.attributes) {
             featureData = []
             featureData.push(
               {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ')'})
@@ -844,7 +844,9 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     } else if (this.config.thicknessBasedOn === 'numReads') {
         lineWidth = totalReadCount;
     } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
-        lineWidth = numSamplesWithThisJunction;
+        if (numSamplesWithThisJunction !== undefined) {
+            lineWidth = numSamplesWithThisJunction;
+        }
     }
     lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
 
@@ -881,13 +883,17 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     } else if(this.config.labelWith === 'totalReadCount') {
         label = totalReadCount
     } else if(this.config.labelWith === 'numSamplesWithThisJunction') {
-        label = numSamplesWithThisJunction
+        if (numSamplesWithThisJunction !== undefined) {
+            label = numSamplesWithThisJunction
+        }
     } else if(this.config.labelWith === 'percentSamplesWithThisJunction') {
-        if(feature.attributes.percent_samples_with_this_junction) {
+        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
             label = feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%'
         }
     } else if(this.config.labelWith === 'motif') {
-        label += feature.attributes.motif
+        if(feature.attributes.motif !== undefined) {
+            label += feature.attributes.motif
+        }
     }
 
     if (this.config.labelWithInParen === 'uniqueReadCount') {
@@ -899,13 +905,17 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
             label += ' (+' + multiMappedReadCount + ')'
         }
     } else if(this.config.labelWithInParen === 'numSamplesWithThisJunction') {
-        label += ' (' + numSamplesWithThisJunction + ')'
+        if(numSamplesWithThisJunction !== undefined) {
+            label += ' (' + numSamplesWithThisJunction + ')'
+        }
     } else if(this.config.labelWithInParen === 'percentSamplesWithThisJunction') {
-        if(feature.attributes.percent_samples_with_this_junction) {
+        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
             label += ' (' + feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%)'
         }
     } else if(this.config.labelWithInParen === 'motif') {
-        label += ` ${feature.attributes.motif}`
+        if(feature.attributes.motif !== undefined) {
+            label += ` ${feature.attributes.motif}`
+        }
     }
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
