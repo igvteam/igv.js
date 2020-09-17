@@ -44,7 +44,7 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
-import {buildOptions} from "./util/igvUtils";
+import {buildOptions} from "./util/igvUtils.js";
 import {URIUtils, StringUtils, TrackUtils} from "../node_modules/igv-utils/src/index.js";
 
 const multiLocusGapWidth = 4
