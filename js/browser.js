@@ -53,9 +53,8 @@ const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
 const trackManipulationHandleMarginWidth = 2
-const trackManipulationHandleBorderWidth = 1
 
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth + 2 * trackManipulationHandleBorderWidth
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
 const uncompressString = StringUtils.uncompressString;
 

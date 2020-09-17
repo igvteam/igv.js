@@ -41,15 +41,12 @@ $igv-trackgear-popover-border-radius: 4px;
 $igv-trackgear-font-color: #4b4b4b;
 $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
-$igv-track-components-margin: 0px;
-
 $igv-left-hand-gutter-width: 50px;
 $igv-right-hand-gutter-width: 36px;
 
 $igv-track-manipulation-handle-width: 12px;
 $igv-track-manipulation-handle-margin-width: 2px;
-$igv-track-manipulation-handle-border-width: 1px;
-$igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width + 2 * $igv-track-manipulation-handle-border-width;
+$igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width;
 $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim;
 
 @mixin generic-input {
@@ -507,9 +504,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   width: 36px;
   height: 100%;
 
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
-
   background: white;
 }
 
@@ -630,7 +624,7 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 
   border-color: #c4c4c4;
   border-style: solid;
-  border-width: $igv-track-manipulation-handle-border-width;
+  border-width: 0;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
 
@@ -899,9 +893,6 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   top: 0;
   width: 100%;
   height: 100%;
-  margin-top: $igv-track-components-margin;
-  margin-bottom: $igv-track-components-margin;
-
 
   z-index: 256;
   background-color: $igv-ruler-sweeper-color;
