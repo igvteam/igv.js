@@ -49,6 +49,8 @@ $igv-track-manipulation-handle-margin-width: 2px;
 $igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width;
 $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim;
 
+$igv-multi-locus-gap-width: 5px;
+
 @mixin generic-input {
 
   input {
@@ -482,8 +484,8 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
 .igv-track {
   position: relative;
   width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  //margin-top: 5px;
+  //margin-bottom: 5px;
 
   display: flex;
   flex-flow: row;
@@ -514,7 +516,8 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  //justify-content: space-between;
+  justify-content: flex-start;
   align-items: stretch;
 
   width: calc(100% - #{$igv-viewport-container-shim-width});
@@ -536,6 +539,14 @@ $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-han
     background-color: white;
   }
 
+  // width + 2 * margin = $igv-multi-locus-gap-width
+  .igv-viewport-multi-locus_gap-shim {
+    height: 100%;
+    width: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background-color: gray;
+  }
 }
 
 .igv-viewport-content {

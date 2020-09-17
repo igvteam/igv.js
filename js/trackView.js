@@ -67,8 +67,19 @@ const TrackView = function (browser, $container, track) {
     const width = browser.calculateViewportWidth(browser.genomicStateList.length);
 
     for (let genomicState of browser.genomicStateList) {
+
         const viewport = createViewport(this, browser.genomicStateList, browser.genomicStateList.indexOf(genomicState), width)
         this.viewports.push(viewport);
+
+        if (browser.genomicStateList.length > 1) {
+
+            const index = browser.genomicStateList.indexOf(genomicState)
+            if (index <= browser.genomicStateList.length - 2) {
+                const $shim = $('<div class="igv-viewport-multi-locus_gap-shim">')
+                this.$viewportContainer.append($shim)
+            }
+        }
+
     }
 
     this.updateViewportForMultiLocus();

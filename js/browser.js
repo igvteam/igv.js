@@ -46,7 +46,7 @@ import { defaultSequenceTrackOrder } from './sequenceTrack.js';
 import {buildOptions} from "./util/igvUtils.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 
-const multiLocusGapWidth = 4
+const multiLocusGapWidth = 5
 
 const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
