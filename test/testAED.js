@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import ignore from "./testMockObjects.js";
+import ignore from "./util/testMockObjects.js";
 import FeatureSource from "../js/feature/featureSource.js";
 
 suite("testAED", function() {

@@ -1,6 +1,6 @@
-import { XMLHttpRequest } from 'w3c-xmlhttprequest';
+import { XMLHttpRequestMock, XMLHttpRequestLocal } from './XMLHttpRequestMock.js';
 
-global.XMLHttpRequest = XMLHttpRequest;
+global.XMLHttpRequest = XMLHttpRequestLocal;
 
 /// Mock objects
 global.File = function () {};

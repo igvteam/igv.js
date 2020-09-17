@@ -1,4 +1,4 @@
-import ignore from "./testMockObjects.js";
+import ignore from "./util/testMockObjects.js";
 import igvxhr from "../js/igvxhr.js";
 
 igvxhr.loadString("https://example.com")

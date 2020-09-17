@@ -1,5 +1,5 @@
 import { assert } from 'chai';
-import ignore from "./testMockObjects.js";
+import ignore from "./util/testMockObjects.js";
 import BamReader from "../js/bam/bamReader.js";
 
 suite("testBAM", function() {
@@ -12,8 +12,8 @@ suite("testBAM", function() {
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.csi'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.csi')
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
@@ -28,8 +28,8 @@ suite("testBAM", function() {
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.bai'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.bai')
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
