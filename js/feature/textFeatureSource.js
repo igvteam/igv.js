@@ -212,7 +212,7 @@ class TextFeatureSource {
         }
 
         // Assign overlapping features to rows
-        if (this.config.format !== "wig" && this.config.type !== "junctions") {
+        if (this.config.format !== "wig" && this.config.type !== "spliceJunctions") {
             const maxRows = this.config.maxRows || 500
             packFeatures(featureList, maxRows);
         }

@@ -108,10 +108,16 @@ TrackBase.prototype.clickedFeatures = function (clickState) {
 
     // We use the cached features rather than method to avoid async load.  If the
     // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-    const features = clickState.viewport.getCachedFeatures();
+    let features = clickState.viewport.getCachedFeatures();
 
     if (!features || features.length === 0) {
         return [];
+    }
+
+    if (Array.isArray(features[0])) {
+        // This is necessary for making click detection work in tracks that are inside a mergedTrack
+        // because in that case clickState.viewport.getCachedFeatures() returns an array of arrays of features.
+        features = features.flat()
     }
 
     const genomicLocation = clickState.genomicLocation;

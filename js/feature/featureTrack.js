@@ -278,32 +278,45 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
     for (let feature of features) {
         let featureData
         if (this.config.type === 'spliceJunctions') {
-            featureData = [
-                {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ')'},
-                {name: feature.attributes.uniquely_mapped, value: 'Uniquely Mapped Reads'},
-                {name: feature.attributes.multi_mapped, value: 'Multi-Mapped Reads'},
-                {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'Total Reads'},
-            ]
-            if (feature.attributes.motif) {
-                featureData.push({name: feature.attributes.motif, value: 'motif'})
-            }
+            featureData = []
+            featureData.push(
+              {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ')'})
+
             if (feature.attributes.annotated_junction) {
                 if (feature.attributes.annotated_junction === 'true') {
-                    featureData.push({name: '', value: 'Known Junction'})
+                    featureData.push({name: 'Known Junction', value: ''})
                 } else {
                     featureData.push({name: 'Novel Junction', value: ''})
                 }
             }
+
+            featureData.push(
+                {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
+            featureData.push(
+                {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
+            featureData.push(
+                {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
+
+            if (feature.attributes.motif) {
+                featureData.push({name: feature.attributes.motif, value: 'motif'})
+            }
+            if (feature.attributes.maximum_spliced_alignment_overhang) {
+                featureData.push({name: feature.attributes.maximum_spliced_alignment_overhang, value: 'bp maximum overhang'})
+            }
+
             if (feature.attributes.num_samples_with_this_junction) {
-                featureData.push({name: feature.attributes.num_samples_with_this_junction, value: 'Samples With This Junction'})
-                if (feature.attributes.num_samples_total) {
-                    featureData.push({name: 100*feature.attributes.fraction_of_samples_with_this_junction, value: '% Samples With Junction'})
-                    featureData.push({name: feature.attributes.num_samples_total, value: 'Total Samples'})
+                featureData.push({name: feature.attributes.num_samples_with_this_junction, value: 'samples have this junction'})
+                if (feature.attributes.num_samples_total && feature.attributes.num_samples_total > 0) {
+                    featureData.push({name: feature.attributes.num_samples_total, value: 'out of total samples'})
+                    if (feature.attributes.percent_samples_with_this_junction) {
+                        featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
+                    }
                 }
             }
         } else {
-         featureData = (typeof feature.popupData === "function") ? feature.popupData(genomicLocation) :
-                            TrackBase.extractPopupData(feature, this.getGenomeId());
+         featureData = (typeof feature.popupData === "function") ?
+            feature.popupData(genomicLocation) :
+            TrackBase.extractPopupData(feature, this.getGenomeId());
         }
         if (featureData) {
             if (data.length > 0) {
@@ -752,8 +765,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         return
     }
 
-    // check if junction is inside viewport
-    const vp = this.trackView.viewports[0]
+    const vp = this.browser.trackViews[0].viewports[0]
     const referenceFrame = vp.genomicState.referenceFrame;
     const referenceFrameStart = referenceFrame.start;
     const referenceFrameEnd = referenceFrameStart + referenceFrame.toBP($(vp.contentDiv).width());
@@ -761,6 +773,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         //skip junctions outside the viewport
         return
     }
+    // check if splice junction is inside viewport
     if (this.config.minJunctionEndsVisible) {
         let numEdgesInViewport = 0
         if (feature.start >= referenceFrameStart && feature.start <= referenceFrameEnd) {
@@ -800,10 +813,10 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
             return
         }
         if (feature.attributes.num_samples_total) {
-            feature.attributes.fraction_of_samples_with_this_junction = numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
-            if (this.config.minFractionOfSamplesWithThisJunction) {
-                if (feature.attributes.fraction_of_samples_with_this_junction < this.config.minFractionOfSamplesWithThisJunction ||
-                    feature.attributes.fraction_of_samples_with_this_junction > this.config.maxFractionOfSamplesWithThisJunction) {
+            feature.attributes.percent_samples_with_this_junction = 100*numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
+            if (this.config.minPercentSamplesWithThisJunction) {
+                if (feature.attributes.percent_samples_with_this_junction < this.config.minPercentSamplesWithThisJunction ||
+                    feature.attributes.percent_samples_with_this_junction > this.config.maxPercentSamplesWithThisJunction) {
                     return
                 }
             }
@@ -832,8 +845,6 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         lineWidth = totalReadCount;
     } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
         lineWidth = numSamplesWithThisJunction;
-    } else if (this.config.thicknessBasedOn === 'isAnnotatedJunction') {
-        lineWidth = feature.attributes.annotated_junction === "true" ? 20 : 100;
     }
     lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
 
@@ -863,30 +874,38 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
     }
 
-    let label = '';
-    if (this.config.labelUniqueReadCount === undefined && this.config.labelMultiMappedReadCount === undefined && this.config.labelTotalReadCount === undefined) {
+    let label = ''
+    if (this.config.labelWith === undefined || this.config.labelWith === 'uniqueReadCount') {
         //default label
-        label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');
-    } else {
-        if (this.config.labelTotalReadCount) {
-            label += totalReadCount;
-        } else if (this.config.labelUniqueReadCount) {
-            label += uniquelyMappedReadCount;
-        } else if (this.config.labelNumSamplesWithThisJunction) {
-            label += numSamplesWithThisJunction;
+        label = uniquelyMappedReadCount
+    } else if(this.config.labelWith === 'totalReadCount') {
+        label = totalReadCount
+    } else if(this.config.labelWith === 'numSamplesWithThisJunction') {
+        label = numSamplesWithThisJunction
+    } else if(this.config.labelWith === 'percentSamplesWithThisJunction') {
+        if(feature.attributes.percent_samples_with_this_junction) {
+            label = feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%'
         }
-
-        if (this.config.labelMultiMappedReadCount && multiMappedReadCount > 0) {
-            label += ' (+' + multiMappedReadCount + ')';
-        }
+    } else if(this.config.labelWith === 'motif') {
+        label += feature.attributes.motif
     }
 
-    if (this.config.labelAnnotatedJunction && feature.attributes.annotated_junction === "true") {
-        label += this.config.labelAnnotatedJunction;
-    }
-
-    if (this.config.labelMotif && feature.attributes.motif) {
-        label += ` ${feature.attributes.motif}`;
+    if (this.config.labelWithInParen === 'uniqueReadCount') {
+        label += ' (' + uniquelyMappedReadCount + ')'
+    } else if(this.config.labelWithInParen === 'totalReadCount') {
+        label += ' (' + totalReadCount + ')'
+    } else if(this.config.labelWithInParen === 'multiMappedReadCount') {
+        if (multiMappedReadCount > 0) {
+            label += ' (+' + multiMappedReadCount + ')'
+        }
+    } else if(this.config.labelWithInParen === 'numSamplesWithThisJunction') {
+        label += ' (' + numSamplesWithThisJunction + ')'
+    } else if(this.config.labelWithInParen === 'percentSamplesWithThisJunction') {
+        if(feature.attributes.percent_samples_with_this_junction) {
+            label += ' (' + feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%)'
+        }
+    } else if(this.config.labelWithInParen === 'motif') {
+        label += ` ${feature.attributes.motif}`
     }
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
