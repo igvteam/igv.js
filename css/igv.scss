@@ -484,8 +484,8 @@ $igv-multi-locus-gap-width: 5px;
 .igv-track {
   position: relative;
   width: 100%;
-  //margin-top: 5px;
-  //margin-bottom: 5px;
+
+  margin-top: 4px;
 
   display: flex;
   flex-flow: row;
@@ -540,7 +540,7 @@ $igv-multi-locus-gap-width: 5px;
   }
 
   // width + 2 * margin = $igv-multi-locus-gap-width
-  .igv-viewport-multi-locus_gap-shim {
+  .igv-viewport-multi-locus-gap-shim {
     height: 100%;
     width: 1px;
     margin-left: 2px;
@@ -552,6 +552,7 @@ $igv-multi-locus-gap-width: 5px;
 .igv-viewport-content {
   position: relative;
   width: 100%;
+  //background-color: deeppink;
 }
 
 .igv-canvas {

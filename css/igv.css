@@ -760,6 +760,7 @@
 .igv-track {
   position: relative;
   width: 100%;
+  margin-top: 4px;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -793,7 +794,7 @@
     overflow-x: hidden;
     overflow-y: hidden;
     background-color: white; }
-  .igv-viewport-container .igv-viewport-multi-locus_gap-shim {
+  .igv-viewport-container .igv-viewport-multi-locus-gap-shim {
     height: 100%;
     width: 1px;
     margin-left: 2px;

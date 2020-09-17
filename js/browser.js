@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView, { maxViewportContentHeight } from "./trackView.js";
+import TrackView, { maxViewportContentHeight, updateViewportShims } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -1263,6 +1263,7 @@ Browser.prototype.selectMultiLocusPanelWithGenomicState = function (selectedGeno
 Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
 
     const index = this.genomicStateList.indexOf(genomicState);
+
     for (let trackView of this.trackViews) {
         trackView.removeViewportWithLocusIndex(index);
     }
@@ -1283,6 +1284,10 @@ Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState
 
         this.genomicStateList[i].referenceFrame = new ReferenceFrame(this.genome, chromosome.name, referenceFrame.start, ee, bpp);
 
+    }
+
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
     }
 
     this.updateUIWithGenomicStateListChange(this.genomicStateList);
@@ -1316,13 +1321,14 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
             // The viewport constructor always appends. Reorder here.
             const $detached = viewport.$viewport.detach();
             $detached.insertAfter(trackView.viewports[index - 1].$viewport);
-
             trackView.updateViewportForMultiLocus();
-
             trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
-
         }
 
+    }
+
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
     }
 
     if (this.rulerTrack) {
@@ -1379,6 +1385,10 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
         trackView.updateViewportForMultiLocus();
         trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
 
+    }
+
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
     }
 
 };

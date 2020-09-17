@@ -66,21 +66,14 @@ const TrackView = function (browser, $container, track) {
     this.viewports = [];
     const width = browser.calculateViewportWidth(browser.genomicStateList.length);
 
-    for (let genomicState of browser.genomicStateList) {
+    console.log(`TrackView ${ track.id }`);
 
+    for (let genomicState of browser.genomicStateList) {
         const viewport = createViewport(this, browser.genomicStateList, browser.genomicStateList.indexOf(genomicState), width)
         this.viewports.push(viewport);
-
-        if (browser.genomicStateList.length > 1) {
-
-            const index = browser.genomicStateList.indexOf(genomicState)
-            if (index <= browser.genomicStateList.length - 2) {
-                const $shim = $('<div class="igv-viewport-multi-locus_gap-shim">')
-                this.$viewportContainer.append($shim)
-            }
-        }
-
     }
+
+    updateViewportShims(this.viewports, this.$viewportContainer)
 
     this.updateViewportForMultiLocus();
 
@@ -499,6 +492,20 @@ TrackView.prototype.getInViewFeatures = async function (force) {
     return allFeatures;
 };
 
+const updateViewportShims = (viewports, $viewportContainer) => {
+
+    $viewportContainer.find('.igv-viewport-multi-locus-gap-shim').remove()
+
+    if (viewports.length > 1) {
+        for (let viewport of viewports) {
+            if (viewports.indexOf(viewport) <= viewports.length - 2) {
+                const { $viewport } = viewport
+                $('<div class="igv-viewport-multi-locus-gap-shim">').insertAfter( $viewport );
+            }
+        }
+    }
+
+}
 
 function viewportsToReload(force) {
 
@@ -724,5 +731,5 @@ TrackScrollbar.prototype.update = function () {
     }
 };
 
-export { maxViewportContentHeight }
+export { maxViewportContentHeight, updateViewportShims }
 export default TrackView
