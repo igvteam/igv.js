@@ -139,7 +139,7 @@ async function getIndex() {
 }
 
 function getFileName(urlOrFile) {
-    return (urlOrFile instanceof File) ? name : url;
+    return (urlOrFile instanceof File) ? name : urlOrFile;
 }
 
 
