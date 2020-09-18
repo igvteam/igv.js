@@ -1,47 +1,30 @@
-import { assert } from 'chai';
-import loadBamIndex from "../js/bam/bamIndex.js";
+import loadCsiIndex from "../js/bam/csiIndex.js";
+import loadBamIndex from "../js/bam/bamIndex.js"
 
-import ignore from "./util/setup.js";
-import {XMLHttpRequest} from 'w3c-xmlhttprequest'
-global.XMLHttpRequest = XMLHttpRequest;
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
+import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
+//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
+global.XMLHttpRequest = XMLHttpRequestLocal;
+
+
+setup();
 
 suite("testBamIndex", function () {
-    // QUnit.test("blocksForRange", function (assert) {
-    //
-    //     var refID = 14,
-    //         beg = 24375199,
-    //         end = 24378544,
-    //         url =  dataURL + 'bam/gstt1_sample.bam',
-    //         indexPath = url + ".bai",
-    //         config;
-    //
-    //     config = {
-    //         type: 'bam',
-    //         url: url
-    //
-    //     };
-    //
-    //     igv.loadBamIndex(indexPath, config).then(function (bamIndex) {
-    //
-    //         chunks = bamIndex.blocksForRange(refID, beg, end);
-    //
-    //         assert.ok(chunks, "chunks are non-null");
-    //         assert.equal(chunks.length, 1, "chunks.length is correct");
-    //
-    //         var chunk = chunks[0];
-    //         assert.equal(0, chunk.maxv.offset, "chunk.maxv.offset");
-    //         assert.equal(60872, chunk.maxv.block, "chunk.maxv.block");
-    //
-    //         done();
-    //
-    //     });
-    // });
 
-    test("loadIndex", function () {
-        var url = "https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/alignment/HG01879.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai";
-        loadBamIndex(url, {}, false).then(function (bamIndex){
-            assert.ok(bamIndex);
-        });
+
+    test("load bam index", async function () {
+        this.timeout(100000);
+        const url = require.resolve("./data/bam/na12889.bam.bai");
+        const bamIndex = await loadBamIndex(url, {}, false)
+        assert.ok(bamIndex);
+    })
+
+    test("load csi index", async function () {
+        this.timeout(100000);
+        const url = require.resolve("./data/bam/na12889.bam.csi");
+        const bamIndex = await loadCsiIndex(url, {}, false)
+        assert.ok(bamIndex);
     })
 });
 

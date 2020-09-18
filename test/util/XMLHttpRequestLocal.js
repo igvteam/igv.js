@@ -47,9 +47,15 @@ class XMLHttpRequestLocal {
             b = fs.readFileSync(this.path);
             this.status = 200;
         }
-        // Small node buffers can use shared backing buffers, thus the slice is neccessary.   See https://nodejs.org/dist/latest-v12.x/docs/api/buffer.html#buffer_buf_byteoffset
-        const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
-        this.response = arrayBuffer;
+
+        if("arraybuffer"  === this.responseType) {
+            // Small node buffers can use shared backing buffers, thus the slice is neccessary.   See https://nodejs.org/dist/latest-v12.x/docs/api/buffer.html#buffer_buf_byteoffset
+            const arrayBuffer = b.buffer.slice(b.byteOffset, b.byteOffset + b.byteLength);
+            this.response = arrayBuffer;
+        } else {
+            // Assume default (text)
+            this.response = b.toString();
+        }
         if (typeof this.onload === 'function') {
             this.onload();
         }
@@ -60,7 +66,7 @@ class XMLHttpRequestLocal {
     }
 }
 
-export {XMLHttpRequestLocal}
+export  {XMLHttpRequestLocal}
 
 
 /*

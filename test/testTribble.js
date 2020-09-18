@@ -1,36 +1,19 @@
-// Tests in this file require a server which supports range-byte requests, e.g. Apache.
-
 import loadTribbleIndex from "../js/feature/tribble.js";
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runTribbleTests() {
+suite("testTribble", function () {
 
+    setup('remote');
 
-//mock object
-    const genome = {
-        getChromosome: function (chr) {
-        },
-        getChromosomeName: function (chr) {
-            return chr
-        }
-    }
-
-
-    QUnit.test("tribble", async function (assert) {
-
-        const done = assert.async();
-
+    test("tribble", async function () {
+        this.timeout(10000);
         const index = await loadTribbleIndex('https://s3.amazonaws.com/igv.org.test/data/gencode.v18.collapsed.bed.idx', {}, genome);
         assert.ok(index);
+        // TODO -- add some assertions
+    })
+})
 
-        //var blocks = index.blocksForRange("chr1", 0, Number.MAX_VALUE);
-        //
-        //ok(blocks);
-
-        done();
-    });
-}
-
-export default runTribbleTests
 
 
 

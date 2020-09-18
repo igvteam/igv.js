@@ -1,11 +1,13 @@
 import TDFReader from "../js/tdf/tdfReader.js";
 import TDFSource from "../js/tdf/tdfSource.js";
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runTDFTests() {
+suite("testTDF", function () {
+
+    setup('remote');
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
-
-    // Mock objects
 
     // The TDF file uses chr1, chr2, ... convention.  Define genome as 1,2,3... to test chromosome aliasing
     const genome = {
@@ -13,212 +15,119 @@ function runTDFTests() {
             return {bpLength: 51304566};
         },
         getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr.substr(3) : + chr;
+            return chr.startsWith("chr") ? chr.substr(3) : +chr;
         }
     }
 
 
-    QUnit.test("TDF source get features (zoom)", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfSource,
+    test("TDF source get features (zoom)", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf",
             chr = "22",
             bpstart = 24049020,
             end = 24375399,
-            bpPerPixel = 51304566 / (Math.pow(2, 6) *700);
+            bpPerPixel = 51304566 / (Math.pow(2, 6) * 700);
+
+        const tdfSource = new TDFSource({url: url}, genome);
+        const features = await tdfSource.getFeatures(chr, bpstart, end, bpPerPixel);
+        assert.ok(features);
+    })
 
 
-        tdfSource = new TDFSource({url: url}, genome);
-
-        tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
-
-            assert.ok(features);
-
-            done();
-
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
-
-
-    QUnit.test("TDF header", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readHeader().then(function () {
-
-            assert.equal(4, tdfReader.version);
-            assert.equal(true, tdfReader.compressed);
-            assert.equal(10, Object.keys(tdfReader.datasetIndex).length);
-
-            done();
+    test("TDF header", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        await tdfReader.readHeader();
+        assert.equal(4, tdfReader.version);
+        assert.equal(true, tdfReader.compressed);
+        assert.equal(10, Object.keys(tdfReader.datasetIndex).length);
+    })
 
 
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
+    test("TDF dataset", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        const dataset = await tdfReader.readDataset("chr22", "mean", 6);
+        assert.ok(dataset);
+        assert.equal("FLOAT", dataset.dataType);
+        assert.equal(801634, dataset.tileWidth);
+        assert.equal(64, dataset.tiles.length);
+        assert.equal(1364, dataset.tiles[30].position);
+        assert.equal(43, dataset.tiles[30].size);
+
+    })
 
 
-    QUnit.test("TDF dataset", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
-
-            assert.ok(dataset);
-
-            assert.equal("FLOAT", dataset.dataType);
-            assert.equal(801634, dataset.tileWidth);
-            assert.equal(64, dataset.tiles.length);
-            assert.equal(1364, dataset.tiles[30].position);
-            assert.equal(43, dataset.tiles[30].size);
-            done();
-
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
+    test("TDF root group", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        const group = await tdfReader.readGroup("/");
+        assert.equal("321.74997", group["Mean"]);
+        assert.equal("hg19", group["genome"]);
+        assert.equal("7", group["maxZoom"]);
+    })
 
 
-    QUnit.test("TDF root group", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readGroup("/").then(function (group) {
-
-            assert.ok(group);
-            assert.equal("321.74997", group["Mean"]);
-            assert.equal("hg19", group["genome"]);
-            assert.equal("7", group["maxZoom"]);
-
-            done();
-
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
+    test("TDF variable step tile", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        const dataset = await tdfReader.readDataset("chr22", "mean", 6);
+        var tileNumber = 30;
+        var nTracks = 1;
+        const tiles = await tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks);
+        const tile = tiles[0]
+        assert.equal("variableStep", tile.type);
+        assert.equal(24049020, tile.tileStart);
+        assert.equal(24375399, tile.start[0]);
+        assert.equal(321.75, tile.data[0][0]);
+    })
 
 
-    QUnit.test("TDF variable step tile", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readDataset("chr22", "mean", 6).then(function (dataset) {
-
-            assert.ok(dataset);
-
-            var tileNumber = 30;
-            var nTracks = 1;
-
-            tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks).then(function (tiles) {
-
-                var tile = tiles[0]
-                assert.equal("variableStep", tile.type);
-                assert.equal(24049020, tile.tileStart);
-                assert.equal(24375399, tile.start[0]);
-                assert.equal(321.75, tile.data[0][0]);
-
-                done();
-
-            }).catch(function (error) {console.log(error); assert.ok(false); });
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
-
-
-    QUnit.test("TDF bed tile", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readDataset("chr22", "raw").then(function (dataset) {
-
-            assert.ok(dataset);
-
-            var tileNumber = 243;
-            var nTracks = 1;
-
-            tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks).then(function (tiles) {
-                assert.ok(tiles);
-                var tile = tiles[0];
-                assert.equal("bed", tile.type);
-                assert.equal(24376175, tile.start[0]);
-                assert.equal(24376200, tile.end[0]);
-                assert.equal(5.28000020980835, tile.data[0][0]);
-                done();
-
-            }).catch(function (error) {console.log(error); assert.ok(false); });
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
+    test("TDF bed tile", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        const dataset = await tdfReader.readDataset("chr22", "raw");
+        assert.ok(dataset);
+        var tileNumber = 243;
+        var nTracks = 1;
+        const tiles = await tdfReader.readTiles(dataset.tiles.slice(tileNumber, tileNumber + 1), nTracks);
+        const tile = tiles[0];
+        assert.equal("bed", tile.type);
+        assert.equal(24376175, tile.start[0]);
+        assert.equal(24376200, tile.end[0]);
+        assert.equal(5.28000020980835, tile.data[0][0]);
+    })
 
 
     // TODO -- NEED FIXED STEP TILE TEST
 
 
-    QUnit.test("TDF root group", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfReader;
-
-
-        tdfReader = new TDFReader({url: url}, genome);
-        assert.ok(tdfReader);
-
-        tdfReader.readRootGroup().then(function (group) {
-
-            assert.ok(group);
-            assert.ok(tdfReader.chrAliasTable);
-            assert.equal(7, tdfReader.maxZoom);
-
-            done();
-
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
+    test("TDF root group", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf";
+        const tdfReader = new TDFReader({url: url}, genome);
+        const group = await tdfReader.readRootGroup();
+        assert.ok(group);
+        assert.ok(tdfReader.chrAliasTable);
+        assert.equal(7, tdfReader.maxZoom);
+    })
 
 
-    QUnit.test("TDF source get features (raw)", function(assert) {
-        var done = assert.async();
-
-        var url = dataURL + "tdf/gstt1_sample.bam.tdf",
-            tdfSource,
+    test("TDF source get features (raw)", async function () {
+        this.timeout(10000);
+        const url = dataURL + "tdf/gstt1_sample.bam.tdf",
             chr = "22",
             bpstart = 24376175,
             end = 24376200,
             bpPerPixel = 1;
+        const tdfSource = new TDFSource({url: url}, genome);
+        const features = await tdfSource.getFeatures(chr, bpstart, end, bpPerPixel);
+        assert.ok(features);
 
-
-        tdfSource = new TDFSource({url: url}, genome);
-
-        tdfSource.getFeatures(chr, bpstart, end, bpPerPixel).then(function (features) {
-
-            assert.ok(features);
-
-            done();
-
-        }).catch(function (error) {console.log(error); assert.ok(false); });
-    });
-
-
-}
-
-export default runTDFTests;
+    })
+})
