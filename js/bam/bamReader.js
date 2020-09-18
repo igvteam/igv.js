@@ -107,12 +107,18 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
 async function getHeader() {
     if (!this.header) {
         const genome = this.genome;
-        const index = await getIndex.call(this)
-        const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
-        const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-        const bsize = bgzBlockSize(abuffer)
+        const index = await getIndex.call(this);
+        let start;
+        let len;
+        if(index.firstAlignmentBlock) {
+            const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
+            const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
+            const bsize = bgzBlockSize(abuffer)
+            len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
+        } else {
+            len = 64000;
+        }
 
-        const len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
         const options = buildOptions(this.config, {range: {start: 0, size: len}});
         this.header = await BamUtils.readHeader(this.bamPath, options, genome);
     }
@@ -122,7 +128,7 @@ async function getHeader() {
 async function getIndex() {
     const genome = this.genome;
     if (!this.index) {
-        if(this.config.indexURL.endsWith(".csi")) {
+        if(getFileName(this.config.indexURL).endsWith(".csi")) {
             this.index = await loadCsiIndex(this.baiPath, this.config, false, genome);
         } else {
             this.index = await loadBamIndex(this.baiPath, this.config, false, genome);
@@ -131,6 +137,11 @@ async function getIndex() {
     }
     return this.index;
 }
+
+function getFileName(urlOrFile) {
+    return (urlOrFile instanceof File) ? name : urlOrFile;
+}
+
 
 async function getChrIndex() {
 
