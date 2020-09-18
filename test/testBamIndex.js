@@ -1,6 +1,11 @@
+import { assert } from 'chai';
 import loadBamIndex from "../js/bam/bamIndex.js";
 
-function runBAMIndexTests() {
+import ignore from "./util/testMockObjects.js";
+import {XMLHttpRequest} from 'w3c-xmlhttprequest'
+global.XMLHttpRequest = XMLHttpRequest;
+
+suite("testBamIndex", function () {
     // QUnit.test("blocksForRange", function (assert) {
     //
     //     var refID = 14,
@@ -32,15 +37,12 @@ function runBAMIndexTests() {
     //     });
     // });
 
-    QUnit.test("loadIndex", function (assert) {
-        var done = assert.async();
+    test("loadIndex", function () {
         var url = "https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/alignment/HG01879.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai";
         loadBamIndex(url, {}, false).then(function (bamIndex){
             assert.ok(bamIndex);
-            done();
         });
     })
-}
+});
 
-export default runBAMIndexTests;
 

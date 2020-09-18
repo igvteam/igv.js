@@ -30,7 +30,7 @@ function unbgzf(data, lim) {
             const start = 12 + xlen + ptr;    // Start of CDATA
             const bytesLeft = data.byteLength - start;
             const cDataSize = bsize - xlen - 19;
-            if (bytesLeft < cDataSize) break;
+            if (bytesLeft < cDataSize || cDataSize <= 0) break;
 
             const a = new Uint8Array(data, start, cDataSize);
             const inflate = new Zlib.RawInflate(a);

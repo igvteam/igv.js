@@ -1,13 +1,17 @@
-import { XMLHttpRequestMock, XMLHttpRequestLocal } from './XMLHttpRequestMock.js';
+import {File} from "./File.js"
 
-global.XMLHttpRequest = XMLHttpRequestLocal;
 
-/// Mock objects
-global.File = function () {};
-global.navigator = {
-    userAgent: "Node",
-    vendor: "Node"
+function createMockObjects() {
+
+    global.File = File;
+
+
+    global.navigator = {
+        userAgent: "Node",
+        vendor: "Node"
+    }
+
 }
 
-export default global;
+export {createMockObjects};
 

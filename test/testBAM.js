@@ -2,6 +2,10 @@ import { assert } from 'chai';
 import ignore from "./util/testMockObjects.js";
 import BamReader from "../js/bam/bamReader.js";
 
+import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
+//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
+global.XMLHttpRequest = XMLHttpRequestLocal;
+
 suite("testBAM", function() {
 
     test("BAM alignments - CSI index", async function () {
