@@ -265,70 +265,34 @@ async function loadURL(url, options) {
 
 async function loadFileSlice(localfile, options) {
 
-    return new Promise(function (resolve, reject) {
-        const fileReader = new FileReader();
+    let blob = (options && options.range) ?
+        localfile.slice(options.range.start, options.range.start + options.range.size) :
+        localfile;
 
-        fileReader.onload = function (e) {
-            resolve(fileReader.result);
-        };
+    if ("arraybuffer" === options.responseType) {
+        return blob.arrayBuffer();
+    } else {
+        throw Error("binary string not implemented")
+    }
 
-        fileReader.onerror = function (e) {
-            console.log("reject uploading local file " + localfile.name);
-            reject(null, fileReader);
-        };
 
-        if (options.range) {
-            var blob = localfile.slice(options.range.start, options.range.start + options.range.size);
-            if ("arraybuffer" === options.responseType) {
-                fileReader.readAsArrayBuffer(blob);
-            } else {
-                fileReader.readAsBinaryString(blob);
-            }
-        } else {
-            if ("arraybuffer" === options.responseType) {
-                fileReader.readAsArrayBuffer(localfile);
-            } else {
-                fileReader.readAsBinaryString(localfile);
-            }
-        }
-    });
 }
 
 async function loadStringFromFile(localfile, options) {
 
-    options = options || {};
-
     const blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
+    let compression = NONE;
+    if (options && options.bgz || localfile.name.endsWith(".bgz")) {
+        compression = BGZF;
+    } else if (localfile.name.endsWith(".gz")) {
+        compression = GZIP;
+    }
 
-    return new Promise(function (resolve, reject) {
-
-        var fileReader = new FileReader();
-        var compression = NONE;
-        if (options.bgz || localfile.name.endsWith(".bgz")) {
-            compression = BGZF;
-        } else if (localfile.name.endsWith(".gz")) {
-            compression = GZIP;
-        }
-
-        fileReader.onload = function (e) {
-            if (compression === NONE) {
-                return resolve(fileReader.result);
-            } else {
-                return resolve(arrayBufferToString(fileReader.result, compression));
-            }
-        };
-
-        fileReader.onerror = function (e) {
-            const error = fileReader.error;
-            reject(error + " " + localfile.name, fileReader);
-        };
-
-        if (compression === NONE) {
-            fileReader.readAsText(blob);
-        } else {
-            fileReader.readAsArrayBuffer(blob);
-        }
-    });
+    if (compression === NONE) {
+        return blob.text();
+    } else {
+        return arrayBufferToString(blob.arrayBuffer(), compression);
+    }
 }
 
 async function loadStringFromUrl(url, options) {
@@ -518,7 +482,7 @@ function getGlobalObject() {
 }
 
 //Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-if(typeof window !== "undefined") {
+if (typeof window !== "undefined") {
     console.log("startup")
     const href = window.document.location.href;
     if (!href.includes("localhost") && !href.includes("127.0.0.1")) {
