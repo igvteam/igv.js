@@ -66,7 +66,7 @@ const TrackView = function (browser, $container, track) {
     this.viewports = [];
     const width = browser.calculateViewportWidth(browser.genomicStateList.length);
 
-    console.log(`TrackView ${ track.id }`);
+    // console.log(`TrackView ${ track.id }`);
 
     for (let genomicState of browser.genomicStateList) {
         const viewport = createViewport(this, browser.genomicStateList, browser.genomicStateList.indexOf(genomicState), width)
@@ -96,7 +96,19 @@ const TrackView = function (browser, $container, track) {
     }
 
     if (false === exclude.has(this.track.type)) {
-        this.createColorPicker();
+
+        const config =
+            {
+                parent: this.trackDiv,
+                top: undefined,
+                left: undefined,
+                width: 432,
+                height: undefined,
+                defaultColors: [ this.track.color ].map(rgb => IGVColor.rgbToHex(rgb)),
+                colorHandler: rgb => this.setColor(rgb)
+            };
+
+        this.colorPicker = new ColorPicker(config);
     }
 
 };
@@ -308,23 +320,6 @@ TrackView.prototype.setColor = function (color) {
     this.repaintViews(true);
 };
 
-TrackView.prototype.createColorPicker = function () {
-
-    const config =
-        {
-            parent: this.trackDiv,
-            top: undefined,
-            left: undefined,
-            width: 432,
-            height: undefined,
-            defaultColors: [ this.track.color ].map(rgb => IGVColor.rgbToHex(rgb)),
-            colorHandler: rgb => this.setColor(rgb)
-        };
-
-    this.colorPicker = new ColorPicker(config);
-
-};
-
 TrackView.prototype.presentColorPicker = function () {
     this.colorPicker.show();
 };
@@ -494,17 +489,41 @@ TrackView.prototype.getInViewFeatures = async function (force) {
 
 const updateViewportShims = (viewports, $viewportContainer) => {
 
+    const $trackContainer = $('#igv-track-container')
+    $trackContainer.find('.igv-multi-locus-separator').remove()
+
+    const { x: tx } = documentOffset($trackContainer.get(0))
+
     $viewportContainer.find('.igv-viewport-multi-locus-gap-shim').remove()
 
     if (viewports.length > 1) {
         for (let viewport of viewports) {
             if (viewports.indexOf(viewport) <= viewports.length - 2) {
                 const { $viewport } = viewport
-                $('<div class="igv-viewport-multi-locus-gap-shim">').insertAfter( $viewport );
+
+                const $shim = $('<div class="igv-viewport-multi-locus-gap-shim">')
+                $shim.insertAfter( $viewport );
+
+                const { x: sx } = documentOffset($shim.get(0))
+                // console.log(`trackContainer x ${ tx }. shim x ${ sx }`)
+
+                const $multilLocusSeparator = $('<div class="igv-multi-locus-separator">')
+                $trackContainer.append( $multilLocusSeparator )
+                $multilLocusSeparator.get(0).style.left = `${ sx - tx }px`
+
             }
         }
     }
 
+}
+
+const documentOffset = el =>  {
+
+    const { x, y } = el.getBoundingClientRect()
+    const scrollX = window.pageXOffset || document.documentElement.scrollLeft
+    const scrollY = window.pageYOffset || document.documentElement.scrollTop
+
+    return { x: x + scrollX, y: y + scrollY  }
 }
 
 function viewportsToReload(force) {

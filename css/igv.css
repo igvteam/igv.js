@@ -746,6 +746,18 @@
     position: relative;
     user-select: none; }
 
+.igv-multi-locus-separator {
+  pointer-events: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background-color: gray; }
+
 #igv-track-container-spinner {
   position: absolute;
   top: 90%;
@@ -799,7 +811,7 @@
     width: 1px;
     margin-left: 2px;
     margin-right: 2px;
-    background-color: gray; }
+    background-color: transparent; }
 
 .igv-viewport-content {
   position: relative;
@@ -1134,6 +1146,9 @@
 
 .igv-cursor-tracking-guide {
   pointer-events: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -1143,10 +1158,7 @@
   border-left-style: dotted;
   border-left-width: thin;
   border-left-color: rgba(127, 127, 127, 0.76);
-  display: none;
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none; }
+  display: none; }
 
 .igv-clickable {
   cursor: pointer;

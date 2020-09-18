@@ -923,6 +923,10 @@ Browser.prototype.resize = async function () {
 
     await this.updateViews();
 
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
+    }
+
 };
 
 const resizeWillExceedChromosomeLength = (viewportContainerWidth, genomicState) => {
@@ -1286,15 +1290,18 @@ Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState
 
     }
 
-    for (let { viewports, $viewportContainer } of this.trackViews) {
-        updateViewportShims(viewports, $viewportContainer)
-    }
-
     this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
     if (true === doResize) {
         this.resize();
+    } else {
+
+        for (let { viewports, $viewportContainer } of this.trackViews) {
+            updateViewportShims(viewports, $viewportContainer)
+        }
+
     }
+
 
 };
 
@@ -1327,10 +1334,6 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
 
     }
 
-    for (let { viewports, $viewportContainer } of this.trackViews) {
-        updateViewportShims(viewports, $viewportContainer)
-    }
-
     if (this.rulerTrack) {
         this.rulerTrack.updateLocusLabel();
     }
@@ -1338,6 +1341,7 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
     this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
     this.resize();
+
 };
 
 Browser.prototype.emptyViewportContainers = function () {

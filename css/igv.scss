@@ -466,6 +466,29 @@ $igv-multi-locus-gap-width: 5px;
 
 }
 
+.igv-multi-locus-separator {
+
+  pointer-events: none;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  position: absolute;
+  top: 0;
+  bottom: 0;
+
+  z-index: 2;
+
+  width: 1px;
+
+  //margin-left: 2px;
+  //margin-right: 2px;
+
+  background-color: gray;
+
+}
+
 #igv-track-container-spinner {
 
   position: absolute;
@@ -526,8 +549,6 @@ $igv-multi-locus-gap-width: 5px;
   overflow-x: hidden;
   overflow-y: hidden;
 
-  //background-color: grey;
-
   .igv-viewport {
     position: relative;
 
@@ -545,7 +566,7 @@ $igv-multi-locus-gap-width: 5px;
     width: 1px;
     margin-left: 2px;
     margin-right: 2px;
-    background-color: gray;
+    background-color: transparent;
   }
 }
 
@@ -1023,10 +1044,17 @@ $igv-multi-locus-gap-width: 5px;
 }
 
 .igv-cursor-tracking-guide {
+
   pointer-events: none;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
   position: absolute;
   top: 0;
   bottom: 0;
+
   left: 50%;
   width: 1px;
 
@@ -1038,9 +1066,6 @@ $igv-multi-locus-gap-width: 5px;
 
   display: none;
 
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none;
 }
 
 .igv-clickable {
