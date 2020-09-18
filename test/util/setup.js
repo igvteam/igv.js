@@ -1,7 +1,7 @@
 import {File} from "./File.js"
 
 
-function createMockObjects() {
+function setup() {
 
     global.File = File;
 
@@ -13,5 +13,5 @@ function createMockObjects() {
 
 }
 
-export {createMockObjects};
+export {setup};
 

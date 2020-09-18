@@ -1,12 +1,11 @@
 import {assert} from 'chai';
-import {createMockObjects} from "./util/testMockObjects"
+import {setup} from "./util/setup"
 import {createFile} from "./util/File.js";
 import FeatureSource from "../js/feature/featureSource.js";
 //import {XMLHttpRequest} from 'w3c-xmlhttprequest';
 
-createMockObjects();
+setup();
 import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
-//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
 global.XMLHttpRequest = XMLHttpRequestLocal;
 
 suite("testAED", function () {
@@ -25,7 +24,7 @@ suite("testAED", function () {
             featureSource = FeatureSource({
                     format: 'aed',
                     indexed: false,
-                    url: require.resolve('./data/aed/utf8-bom.aed')
+                    url: createFile(require.resolve('./data/aed/utf8-bom.aed'))
                 },
                 genome);
 

@@ -1,7 +1,7 @@
 import { assert } from 'chai';
 import loadBamIndex from "../js/bam/bamIndex.js";
 
-import ignore from "./util/testMockObjects.js";
+import ignore from "./util/setup.js";
 import {XMLHttpRequest} from 'w3c-xmlhttprequest'
 global.XMLHttpRequest = XMLHttpRequest;
 

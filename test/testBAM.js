@@ -1,10 +1,12 @@
-import { assert } from 'chai';
-import ignore from "./util/testMockObjects.js";
 import BamReader from "../js/bam/bamReader.js";
 
+import { assert } from 'chai';
+import {setup} from "./util/setup.js";
 import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
 //import {XMLHttpRequest} from 'w3c-xmlhttprequest'
 global.XMLHttpRequest = XMLHttpRequestLocal;
+
+setup();
 
 suite("testBAM", function() {
 
