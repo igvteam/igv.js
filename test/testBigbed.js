@@ -1,10 +1,14 @@
 import BWSource from "../js/bigwig/bwSource.js";
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runBigbedTests() {
+suite("testBigBed", function () {
 
-    QUnit.test("bed9+2 features", async function (assert) {
-        var url = "./data/bb/myBigBed2.bb",
+    setup();
+
+    test("bed9+2 features", async function () {
+        var url = require.resolve("./data/bb/myBigBed2.bb"),
             chr = "chr7",
             bpStart = 0,
             bpEnd = Number.MAX_SAFE_INTEGER;
@@ -20,8 +24,8 @@ function runBigbedTests() {
         assert.equal(f.spID, 'Q86Y56-3')
     });
 
-    QUnit.test("interact features", async function (assert) {
-        var url = "./data/bb/interactExample3.inter.bb",
+    test("interact features", async function () {
+        var url = require.resolve("./data/bb/interactExample3.inter.bb"),
             chr = "chr3",
             bpStart = 63702628,
             bpEnd = 63880091;
@@ -42,7 +46,7 @@ function runBigbedTests() {
     });
 
 
-    QUnit.test("Autosql", function (assert) {
+    test("Autosql", function () {
         const autosql = `
 table chromatinInteract
 "Chromatin interaction between two regions"
@@ -78,6 +82,4 @@ table chromatinInteract
         assert.equal(r2s.name, 'region2Strand');
         assert.equal(r2s.description, 'Orientation of upper/this region: + or -.  Use . if not applicable');
     })
-}
-
-export default runBigbedTests;
+})
