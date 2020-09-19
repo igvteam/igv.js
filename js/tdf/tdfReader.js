@@ -337,7 +337,6 @@ function createBed(binaryParser, nTracks, type) {
         start: start,
         end: end,
         data: data,
-        name: name,
         nTracks: nTracks,
         nPositions: nPositions
     }

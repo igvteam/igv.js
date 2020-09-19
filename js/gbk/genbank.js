@@ -64,7 +64,7 @@ GenbankParser.prototype.parseFeatures = function (data) {
 
     function readLocus(line) {
         const tokens = line.split(wsRegex);
-        if (!tokens[0].equalsIgnoreCase("LOCUS")) {
+        if (!tokens[0].toUpperCase() === "LOCUS") {
             // throw exception
         }
         locusName = tokens[1].trim();

@@ -388,7 +388,13 @@ function AedFeature(aed, allColumns) {
         if (aedColumn.type === 'aed:Integer') {
             token = parseInt(token);
         }
-        if (aedColumn.namespace === 'bio') {
+        var arr=[];
+        if(aedColumn.namespace.length > 0) {
+            for (let j = 0; j < aedColumn.namespace.length; j++) {
+                arr.push(aedColumn.namespace.charCodeAt(j))
+            }
+        }
+        if (aedColumn.namespace.trim() === 'bio') {
             if (aedColumn.name === 'sequence') {
                 this.chr = token;
             } else if (aedColumn.name === 'start') {
