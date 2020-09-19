@@ -130,13 +130,13 @@ npm run test
 
 To run the examples install [http-server](https://www.npmjs.com/package/http-server)
 
-Open http-server on the examples directory
+Start an htt-server
 
 ```bash
-npx http-server examples
+npx http-server .
 ```
 
-Then open [http://localhost:8080](http://localhost:8080) in a web browser.
+Then open [http://localhost:8080/examples](http://localhost:8080/examples) in a web browser.
 
 
 # Supported Browsers
