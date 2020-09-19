@@ -1,207 +1,97 @@
 import FastaSequence from "../js/genome/fasta.js";
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runFastaTests() {
+suite("testFasta", function () {
 
-    var dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
+    setup('remote');
 
-    QUnit.test("FastaSequence - Test fasata with no index", function (assert) {
-        var done = assert.async();
+    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
-        var sequence = new FastaSequence(
+    test("FastaSequence - Test fasata with no index", async function () {
+
+        const fasta = new FastaSequence(
             {
                 fastaURL: dataURL + "fasta/test.fasta",
                 indexed: false
             }
         );
 
-        sequence.init()
+        await fasta.init()
 
-            .then(function () {
+        // Note -- coordinates are UCSC style
+        // chr22:29565177-29565216
+        const expectedSequence = "GCTGC";
+        const seq = await fasta.getSequence("CACNG6--RPLP2", 60, 65);
+        assert.equal(seq, expectedSequence);
 
-                // Note -- coordinates are UCSC style
-                // chr22:29565177-29565216
-                var expectedSequence = "GCTGC";
-
-                sequence.getSequence("CACNG6--RPLP2", 60, 65)
-
-                    .then(function (seq) {
-
-                        assert.equal(seq, expectedSequence);
-                        done();
-                    }).catch(function (error) {
-                    console.log(error);
-
-                    assert.ok(false);
-
-                    done();
-                })
-            })
     })
 
-    QUnit.test("FastaSequence - Test getSequence", function (assert) {
-        var done = assert.async();
+    test("FastaSequence - Test getSequence", async function () {
 
-        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        await fasta.init();
 
-        sequence.init()
+        // Note -- coordinates are UCSC style
+        // chr22:29565177-29565216
+        const sequence = await fasta.getSequence("chr22", 29565176, 29565216);
+        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
+            seqString = sequence.toUpperCase();
+        assert.equal(seqString, expectedSeqString);
 
-            .then(function () {
-
-                // Note -- coordinates are UCSC style
-                // chr22:29565177-29565216
-                sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
-
-                    assert.ok(sequence, "sequence");
-
-                    var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
-                        seqString = sequence.toUpperCase();
-
-                    assert.equal(seqString, expectedSeqString);
-
-                    done();
-                })
-            })
-            .catch(function (error) {
-                console.log(error);
-
-                assert.ok(false);
-
-                done();
-            })
     })
 
-    QUnit.test("FastaSequence - Test readSequence", function (assert) {
-        var done = assert.async();
+    test("FastaSequence - Test readSequence", async function () {
 
-        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        await fasta.init()
 
-        sequence.init()
+        // Note -- coordinates are UCSC style
+        // chr22:29565177-29565216
+        const expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA";
+        const sequence = await fasta.getSequence("chr22", 29565176, 29565216);
+        const seqString = sequence.toUpperCase();
+        assert.equal(seqString, expectedSeqString);
 
-            .then(function () {
-
-                // Note -- coordinates are UCSC style
-                // chr22:29565177-29565216
-                sequence.getSequence("chr22", 29565176, 29565216).then(function (sequence) {
-
-                    assert.ok(sequence, "sequence");
-
-                    var expectedSeqString = "CTTGTAAATCAACTTGCAATAAAAGCTTTTCTTTTCTCAA",
-                        seqString = sequence.toUpperCase();
-
-                    assert.equal(seqString, expectedSeqString);
-
-                    done();
-                })
-                    .catch(function (error) {
-                        console.log(error);
-
-                        assert.ok(false);
-
-                        done();
-                    })
-            })
     })
 
-    QUnit.test("FastaSequence - Test readSequence - with unknown sequence", function (assert) {
-        var done = assert.async();
+    test("FastaSequence - Test readSequence - with unknown sequence", async function () {
 
-        var sequence = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
+        await fasta.init();
 
-        sequence.init()
-            .then(function () {
-
-                // Note -- coordinates are UCSC style
-                // chr22:29565177-29565216
-                sequence.getSequence("noSuchChromosome", 29565176, 29565216).then(function (nullSeq) {
-
-                    assert.ok(!nullSeq);
-                    done();
-                }).catch(function (error) {
-                    console.log(error);
-                })
-            })
-            .catch(function (error) {
-                console.log(error);
-
-                assert.ok(false);
-
-                done();
-            })
+        // Note -- coordinates are UCSC style
+        // chr22:29565177-29565216
+        const nullSeq = await fasta.getSequence("noSuchChromosome", 29565176, 29565216);
+        assert.ok(!nullSeq);
     })
 
 
     // >chr1:1000001-1000025
     // GGGCACAGCCTCACCCAGGAAAGCA
 
-    QUnit.test("FastaSequence - Test fasta with start offset", function (assert) {
+    test("FastaSequence - Test fasta with start offset", async function () {
 
-        var done = assert.async();
+        setup('local');
 
-        var sequence = new FastaSequence({fastaURL: "data/fasta/sliced.fasta", indexed: false});
+        const fasta = new FastaSequence({fastaURL: require.resolve("./data/fasta/sliced.fasta"), indexed: false});
+        await fasta.init();
 
-        sequence.init()
+        let expected = "GGGCACAGCCTCACCCAGGAAAGCA";
+        let seq = await fasta.getSequence("chr1", 1000000, 1000025);
+        assert.equal(seq, expected);
 
-            .then(function () {
 
-                let expected = "GGGCACAGCCTCACCCAGGAAAGCA";
+        // Off left side
+        expected = "*****GGGCA";
+        seq = await fasta.getSequence("chr1", 999995, 1000005);
+        assert.equal(seq, expected);
 
-                sequence.getSequence("chr1", 1000000, 1000025)
+        // way....   Off left side
+        expected = "**********";
 
-                    .then(function (seq) {
+        seq = await fasta.getSequence("chr1", 10, 20);
+        assert.equal(seq, expected);
 
-                        assert.equal(seq, expected);
-
-                    })
-            })
-            // .then(function () {
-            //
-            //     // Off right side
-            //     let expected = ""AAGCA*****"";
-            //     sequence.getSequence("chr1", 1000020, 1000030)
-            //
-            //         .then(function (seq) {
-            //
-            //             assert.equal(seq, expected);
-            //
-            //         })
-            //
-            // })
-            .then(function () {
-
-                // Off left side
-                let expected = "*****GGGCA";
-                sequence.getSequence("chr1", 999995, 1000005)
-
-                    .then(function (seq) {
-
-                        assert.equal(seq, expected);
-
-                    })
-
-            })
-            .then(function () {
-
-                // way....   Off left side
-                let expected = "**********";
-
-                sequence.getSequence("chr1", 10, 20)
-
-                    .then(function (seq) {
-
-                        assert.equal(seq, expected);
-
-                        done();
-                    })
-
-            })
-            .catch(function (error) {
-                console.log(error);
-
-                assert.ok(false);
-
-                done();
-            })
     })
-}
-
-export default runFastaTests;
+})

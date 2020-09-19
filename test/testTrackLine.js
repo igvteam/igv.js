@@ -1,6 +1,10 @@
-import WigTrack from "../js/feature/wigTrack.js";
+import FeatureFileReader from '../js/feature/featureFileReader.js';
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runTrackLineTests() {
+suite("testTrackLine", function () {
+
+    setup();
 
     const browser = {
         genome: {
@@ -10,31 +14,23 @@ function runTrackLineTests() {
         }
     }
 
-    QUnit.test("WigTrack trackLine", function (assert) {
+    test("WigTrack trackLine", async function () {
 
-        var done = assert.async();
 
-        const wigTrack = new WigTrack({
+        const featureReader = new FeatureFileReader({
                 format: 'bedgraph',
-                url: 'data/wig/bedgraph-example-uscs.bedgraph'
-            },
-            browser);
+                url: require.resolve('./data/wig/bedgraph-example-uscs.bedgraph')
+            });
 
         //track type=bedGraph name="BedGraph Format" description="BedGraph format" visibility=full color=200,100,0 altColor=0,100,200 priority=20
-        wigTrack.postInit()
-            .then(function (ignore) {
-                assert.ok(wigTrack);
-                assert.equal("EXPANDED", wigTrack.displayMode);
-                assert.equal("rgb(200,100,0)", wigTrack.color);
-                assert.equal("rgb(0,100,200)", wigTrack.altColor);
-                assertEqual("BedGraph Format", wigTrack.name);
-                done();
-            })
+        const header = await featureReader.readHeader();
+        assert.equal(header.description, "BedGraph format");
+        assert.equal(header.visibility, "full");
+        assert.equal(header.name, "BedGraph Format");
+        assert.equal(header.color, "200,100,0");
+        assert.equal(header.altColor, "0,100,200");
+        assert.equal(header.priority, "20");
+        
 
-            .catch(function (error) {
-                console.log(error);
-            });
-    });
-}
-
-export default runTrackLineTests;
+    })
+})

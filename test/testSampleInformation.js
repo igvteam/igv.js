@@ -1,40 +1,15 @@
 import loadPlinkFile from "../js/sampleInformation.js";
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-function runSampleInformationTests() {
+suite("testRnaStruct", function () {
 
-    // mock object
-    const browser = {
-        getFormat: function () {
-        },
-        genome: {
-            getChromosome: function (chr) {
-            },
-            getChromosomeName: function (chr) {
-                return chr
-            }
-        }
-    };
+    setup();
 
-    QUnit.test('Load Plink', function (assert) {
-        var done = assert.async();
-
-        loadPlinkFile('data/misc/pedigree.fam')
-
-            .then(function (sampleInformation) {
-
-                const attributes = sampleInformation.getAttributes('SS0012979');
-                assert.ok(attributes);
-                assert.equal(attributes.familyId, "14109");
-                done();
-            })
-
-            .catch(function (error) {
-                console.log(error);
-                assert.ok(false);
-                done();
-            });
-
+    test('Load Plink', async function () {
+        const sampleInformation = await loadPlinkFile(require.resolve('./data/misc/pedigree.fam'));
+        const attributes = sampleInformation.getAttributes('SS0012979');
+        assert.ok(attributes);
+        assert.equal(attributes.familyId, "14109");
     })
-}
-
-export default runSampleInformationTests;
+})

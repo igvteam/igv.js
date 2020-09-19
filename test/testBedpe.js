@@ -1,23 +1,17 @@
 import FeatureSource from "../js/feature/featureSource.js";
+import {assert} from 'chai';
+import {setup} from "./util/setup.js";
 
-// https://s3.amazonaws.com/igv.org.demo/GSM1872886_GM12878_CTCF_PET.bedpe.txt
+suite("testBedpe", function () {
 
-function runBedpeTests() {
+    setup();
 
-    // mock object
-
-    const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
-
-    QUnit.test("No header line -- column 7 score", async function (assert) {
+    test("No header line -- column 7 score", async function () {
         const chr = "chr12";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: './data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt',
+                url: require.resolve('./data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt'),
                 format: 'bedpe'
             },
             genome);
@@ -31,12 +25,12 @@ function runBedpeTests() {
         }
     })
 
-    QUnit.test("Header line -- no pound -- column 7 score all '.'", async function (assert) {
+    test("Header line -- no pound -- column 7 score all '.'", async function () {
         const chr = "chr9";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: './data/bedpe/hiccups_loops.bedpe',
+                url: require.resolve('./data/bedpe/hiccups_loops.bedpe'),
                 format: 'bedpe'
             },
             genome);
@@ -50,12 +44,12 @@ function runBedpeTests() {
         }
     })
 
-    QUnit.test("Multiple header lines -- column 8 score", async function (assert) {
+    test("Multiple header lines -- column 8 score", async function () {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: './data/bedpe/inter_chr_simulated.bedpe',
+                url: require.resolve('./data/bedpe/inter_chr_simulated.bedpe'),
                 format: 'bedpe'
             },
             genome);
@@ -70,12 +64,12 @@ function runBedpeTests() {
         }
     })
 
-    QUnit.test("10X SV", async function (assert) {
+    test("10X SV", async function () {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: './data/bedpe/sv_calls.10X.bedpe',
+                url: require.resolve('./data/bedpe/sv_calls.10X.bedpe'),
                 format: 'bedpe'
             },
             genome);
@@ -89,12 +83,12 @@ function runBedpeTests() {
         }
     })
 
-    QUnit.test("interact example 1", async function (assert) {
+    test("interact example 1", async function () {
         const chr = "chr12";
         const bpStart = 1;
         const bpEnd = Number.MAX_SAFE_INTEGER;
         const featureSource = FeatureSource({
-                url: './data/bedpe/interactExample1.txt',
+                url: require.resolve('./data/bedpe/interactExample1.txt'),
                 format: 'interact'
             },
             genome);
@@ -108,6 +102,4 @@ function runBedpeTests() {
             assert.ok(f.value > 0);
         }
     })
-}
-
-export default runBedpeTests;
+})
