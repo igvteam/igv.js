@@ -125,20 +125,18 @@ To run the tests from the command line
 npm run test
 ```
 
-To run the tests in a browser start an [http-server](https://www.npmjs.com/package/http-server)
-
-    npm run http-server
-
-Then open [http://localhost:8080/test/runTests.html](http://localhost:8080/test/runTests.html).
-
 
 ### Examples
 
-To run the examples start an [http-server](https://www.npmjs.com/package/http-server)
+To run the examples install [http-server](https://www.npmjs.com/package/http-server)
 
-    npm run http-server
+Open http-server on the examples directory
 
-Then open [http://localhost:8080/examples](http://localhost:8080/examples).
+```bash
+npx http-server examples
+```
+
+Then open [http://localhost:8080](http://localhost:8080) in a web browser.
 
 
 # Supported Browsers
