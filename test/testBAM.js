@@ -1,8 +1,16 @@
 import BamReader from "../js/bam/bamReader.js";
 
-function runBAMTests() {
+import { assert } from 'chai';
+import {setup} from "./util/setup.js";
+import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
+//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
+global.XMLHttpRequest = XMLHttpRequestLocal;
 
-    QUnit.test("BAM alignments - CSI index", async function (assert) {
+setup();
+
+suite("testBAM", function() {
+
+    test("BAM alignments - CSI index", async function () {
 
         const chr = 'chr1';
         const bpStart = 155140000;
@@ -10,15 +18,15 @@ function runBAMTests() {
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.csi'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.csi')
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
         validate(assert, alignmentContainer)
     });
 
-    QUnit.test("BAM alignments", async function (assert) {
+    test("BAM alignments", async function () {
 
         const chr = 'chr1';
         const bpStart = 155140000;
@@ -26,8 +34,8 @@ function runBAMTests() {
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.bai'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.bai')
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
@@ -85,7 +93,5 @@ function runBAMTests() {
         assert.equal(tags["XT"], "M");
     }
 
-}
-
-export default runBAMTests;
+})
 

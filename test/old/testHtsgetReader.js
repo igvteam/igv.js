@@ -1,4 +1,4 @@
-import HtsgetReader from "../js/bam/htsgetReader.js";
+import HtsgetReader from "../../js/bam/htsgetReader.js";
 
 function runHtsgetTests() {
     // mock object

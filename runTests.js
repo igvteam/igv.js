@@ -17,10 +17,10 @@ server.listen(8000);
 
 const qunitArgs = {
     headless: true,
-    // traceSettings: {
-    //     outputConsole: false,
-    //     outputAllAssertions: false
-    // },
+    traceSettings: {
+        outputConsole: true,
+        outputAllAssertions: true
+    },
     // Path to qunit tests suite
     targetUrl: 'http://127.0.0.1:8000/test/runTests.html',
     // (optional, 30000 by default) global timeout for the tests suite

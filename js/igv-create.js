@@ -44,6 +44,7 @@ import {createIcon} from "./igv-icons.js";
 import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
+let googleAuthInitialized = false;
 
 /**
  * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.

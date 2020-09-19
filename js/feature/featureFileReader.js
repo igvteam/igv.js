@@ -101,6 +101,7 @@ class FeatureFileReader {
                 header.features = features;
             } else {
                 let index;
+
                 if (this.config.indexURL) {
                     index = await this.getIndex();
                     if (!index) {
@@ -110,16 +111,18 @@ class FeatureFileReader {
 
                     // Load the file header (not HTTP header) for an indexed file.
                     let maxSize = "vcf" === this.config.format ? 65000 : 1000
+                    const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
+
                     if (index.tabix) {
                         const bsizeOptions = buildOptions(this.config, {
                             range: {
-                                start: index.firstAlignmentBlock,
+                                start: dataStart,
                                 size: 26
                             }
                         });
                         const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
                         const bsize = bgzBlockSize(abuffer)
-                        maxSize = index.firstAlignmentBlock + bsize;
+                        maxSize = dataStart + bsize;
                     }
                     const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
                     const data = await igvxhr.loadString(this.config.url, options)
