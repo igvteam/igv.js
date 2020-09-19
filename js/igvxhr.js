@@ -88,7 +88,6 @@ const igvxhr = {
 async function load(url, options) {
 
     options = options || {};
-
     const urlType = typeof url;
 
     // Resolve functions, promises, and functions that return promises
@@ -268,14 +267,11 @@ async function loadFileSlice(localfile, options) {
     let blob = (options && options.range) ?
         localfile.slice(options.range.start, options.range.start + options.range.size) :
         localfile;
-
     if ("arraybuffer" === options.responseType) {
         return blob.arrayBuffer();
     } else {
         throw Error("binary string not implemented")
     }
-
-
 }
 
 async function loadStringFromFile(localfile, options) {

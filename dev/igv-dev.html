@@ -29,9 +29,7 @@
 <script type="module">
 
     import igv from '../js/index.js'
-    import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
-
-    Alert.init(document.getElementById('igvDiv'))
+    import GtexUtils from "../js/gtex/gtexUtils.js";
 
     let browser
     (async () => {
@@ -40,8 +38,8 @@
             {
                 genome: "hg19",
                 // locus: [ 'ace', 'kit', 'enam' ],
-                // locus: [ 'egfr', 'myc' ],
-                locus: "myc",
+                locus: [ 'egfr', 'myc' ],
+                // locus: "myc",
                 flanking: 1000,
                 queryParametersSupported: true,
                 showAllChromosomes: true,
@@ -85,7 +83,7 @@
 
                 })
 
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
+                return GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
@@ -99,7 +97,7 @@
                     trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
                     trackDiv.addEventListener('click', function (event) {
 
-                        browser.loadTrack(igv.GtexUtils.trackConfiguration(obj));
+                        browser.loadTrack(GtexUtils.trackConfiguration(obj));
 
                     });
 
