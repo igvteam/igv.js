@@ -1,10 +1,10 @@
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testGenome", function () {
 
-    setup('remote');
+    createMockObjects();
 
     test("Genome coordinates", async function () {
 

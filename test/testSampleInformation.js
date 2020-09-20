@@ -1,10 +1,10 @@
 import loadPlinkFile from "../js/sampleInformation.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testRnaStruct", function () {
 
-    setup();
+    createMockObjects();
 
     test('Load Plink', async function () {
         const sampleInformation = await loadPlinkFile(require.resolve('./data/misc/pedigree.fam'));

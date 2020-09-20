@@ -1,11 +1,11 @@
 import FeatureSource from "../js/feature/featureSource.js";
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testRnaStruct", function () {
 
-    setup('remote');
+    createMockObjects();
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 

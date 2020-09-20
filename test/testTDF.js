@@ -1,11 +1,11 @@
 import TDFReader from "../js/tdf/tdfReader.js";
 import TDFSource from "../js/tdf/tdfSource.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testTDF", function () {
 
-    setup('remote');
+    createMockObjects();
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 

@@ -1,11 +1,10 @@
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testGFF", function () {
 
-    setup();
-
+    createMockObjects();
 
     test("GFF query", async function () {
 

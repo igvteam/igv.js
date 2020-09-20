@@ -1,10 +1,10 @@
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBedpe", function () {
 
-    setup();
+    createMockObjects();
 
     test("No header line -- column 7 score", async function () {
         const chr = "chr12";

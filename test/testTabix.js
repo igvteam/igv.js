@@ -3,11 +3,12 @@ import {unbgzf} from "../js/bam/bgzf.js";
 import igvxhr from "../js/igvxhr.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
+
 
 suite("testTabix", function () {
 
-    setup();
+    createMockObjects();
 
     test("bgzip", async function () {
         const url = require.resolve("./data/bed/missing_linefeed.bed.gz");

@@ -1,11 +1,12 @@
 import VcfParser from "../js/variant/vcfParser.js"
 import igvxhr from "../js/igvxhr.js"
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
+
 
 suite("testVariant", function () {
 
-    setup();
+    createMockObjects();
 
     test("Test gcvf non-ref variants", async function () {
         const url = require.resolve("./data/vcf/gvcf_non_ref.vcf");
