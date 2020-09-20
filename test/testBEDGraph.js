@@ -6,6 +6,12 @@ suite("testBedGraph", function () {
 
     createMockObjects();
 
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
+
     test("BEDGraphFeatureSource getFeatures", async function () {
 
 
