@@ -1,14 +1,10 @@
-import {assert} from 'chai';
-import {setup} from "./util/setup"
-import {createFile} from "./util/File.js";
 import FeatureSource from "../js/feature/featureSource.js";
-//import {XMLHttpRequest} from 'w3c-xmlhttprequest';
-
-setup();
-import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
-global.XMLHttpRequest = XMLHttpRequestLocal;
+import {assert} from 'chai';
+import {createFile, createMockObjects, XMLHttpRequestMock} from "@igvteam/test-utils/src"
 
 suite("testAED", function () {
+
+    createMockObjects();
 
     const genome = {
         getChromosomeName: function (chr) {

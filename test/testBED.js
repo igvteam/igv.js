@@ -1,13 +1,11 @@
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
-
-
-
-setup();
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBed", function () {
+
+    createMockObjects();
 
     test("Empty lines", async function () {
         const config = {

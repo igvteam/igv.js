@@ -1,10 +1,10 @@
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testWig", function () {
 
-    setup();
+    createMockObjects();
 
     test("wig fixed step", async function () {
 

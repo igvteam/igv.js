@@ -1,11 +1,11 @@
 import BWSource from "../js/bigwig/bwSource.js";
 import BWReader from "../js/bigwig/bwReader.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBigWig", function () {
 
-    setup('remote');
+    createMockObjects();
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
