@@ -1,10 +1,10 @@
 import RnaStructTrack from "../js/rna/rnaStruct.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testRnaStruct", function () {
 
-    setup();
+    createMockObjects();
 
     // mock brower object
     const browser = {

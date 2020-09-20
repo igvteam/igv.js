@@ -1,17 +1,12 @@
 import loadCsiIndex from "../js/bam/csiIndex.js";
 import loadBamIndex from "../js/bam/bamIndex.js"
-
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
-import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
-//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
-global.XMLHttpRequest = XMLHttpRequestLocal;
+import {createMockObjects} from "@igvteam/test-utils/src"
 
-
-setup();
 
 suite("testBamIndex", function () {
 
+    createMockObjects();
 
     test("load bam index", async function () {
         this.timeout(100000);

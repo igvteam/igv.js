@@ -1,10 +1,10 @@
 import BufferedReader from "../js/bigwig/bufferedReader.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBigWig", function () {
 
-    setup();
+    createMockObjects();
 
     test("read", async function() {
 

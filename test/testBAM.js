@@ -1,14 +1,11 @@
 import BamReader from "../js/bam/bamReader.js";
 
 import { assert } from 'chai';
-import {setup} from "./util/setup.js";
-import { XMLHttpRequestLocal } from './util/XMLHttpRequestLocal.js';
-//import {XMLHttpRequest} from 'w3c-xmlhttprequest'
-global.XMLHttpRequest = XMLHttpRequestLocal;
-
-setup();
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBAM", function() {
+
+    createMockObjects();
 
     test("BAM alignments - CSI index", async function () {
 

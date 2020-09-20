@@ -1,10 +1,10 @@
 import FeatureFileReader from '../js/feature/featureFileReader.js';
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testTrackLine", function () {
 
-    setup();
+    createMockObjects();
 
     const browser = {
         genome: {

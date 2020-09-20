@@ -1,10 +1,10 @@
 import FastaSequence from "../js/genome/fasta.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testFasta", function () {
 
-    setup('remote');
+    createMockObjects();
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
@@ -71,8 +71,6 @@ suite("testFasta", function () {
     // GGGCACAGCCTCACCCAGGAAAGCA
 
     test("FastaSequence - Test fasta with start offset", async function () {
-
-        setup('local');
 
         const fasta = new FastaSequence({fastaURL: require.resolve("./data/fasta/sliced.fasta"), indexed: false});
         await fasta.init();
