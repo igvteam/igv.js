@@ -1,6 +1,6 @@
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
-import {createFile, createMockObjects, XMLHttpRequestMock} from "@igvteam/test-utils/src"
+import {createFile, createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testAED", function () {
 
