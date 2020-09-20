@@ -6,6 +6,12 @@ suite("testBedpe", function () {
 
     createMockObjects();
 
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
+
     test("No header line -- column 7 score", async function () {
         const chr = "chr12";
         const bpStart = 1;

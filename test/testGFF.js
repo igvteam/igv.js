@@ -6,6 +6,12 @@ suite("testGFF", function () {
 
     createMockObjects();
 
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
+
     test("GFF query", async function () {
 
         const chr = "chr1";

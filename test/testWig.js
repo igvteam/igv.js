@@ -6,6 +6,12 @@ suite("testWig", function () {
 
     createMockObjects();
 
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
+
     test("wig fixed step", async function () {
 
         const path = require.resolve("./data/wig/fixedStep-example.wig"),

@@ -3,9 +3,15 @@ import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
 import {createMockObjects} from "@igvteam/test-utils/src"
 
-suite("testRnaStruct", function () {
+suite("testSeg", function () {
 
     createMockObjects();
+
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
