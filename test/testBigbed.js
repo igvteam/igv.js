@@ -1,11 +1,11 @@
 import BWSource from "../js/bigwig/bwSource.js";
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBigBed", function () {
 
-    setup();
+    createMockObjects();
 
     test("bed9+2 features", async function () {
         var url = require.resolve("./data/bb/myBigBed2.bb"),

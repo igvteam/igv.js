@@ -1,10 +1,10 @@
 import loadTribbleIndex from "../js/feature/tribble.js";
 import {assert} from 'chai';
-import {setup} from "./util/setup.js";
+import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testTribble", function () {
 
-    setup('remote');
+    createMockObjects();
 
     test("tribble", async function () {
         this.timeout(10000);
