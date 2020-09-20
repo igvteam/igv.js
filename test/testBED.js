@@ -7,6 +7,12 @@ suite("testBed", function () {
 
     createMockObjects();
 
+    const genome = {
+        getChromosomeName: function (chr) {
+            return chr.startsWith("chr") ? chr : "chr" + chr;
+        }
+    }
+
     test("Empty lines", async function () {
         const config = {
             format: "bed",
