@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView, { maxViewportContentHeight } from "./trackView.js";
+import TrackView, { maxViewportContentHeight, updateViewportShims } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -46,16 +46,19 @@ import { defaultSequenceTrackOrder } from './sequenceTrack.js';
 import {buildOptions} from "./util/igvUtils.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 
-const multiLocusGapWidth = 4
+// igv.scss - $igv-multi-locus-gap-width
+const multiLocusGapDivWidth = 1
+const multiLocusGapMarginWidth = 2
+
+const multiLocusGapWidth = (2 * multiLocusGapMarginWidth) + multiLocusGapDivWidth
 
 const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
 const trackManipulationHandleMarginWidth = 2
-const trackManipulationHandleBorderWidth = 1
 
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth + 2 * trackManipulationHandleBorderWidth
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
 const uncompressString = StringUtils.uncompressString;
 
@@ -924,6 +927,10 @@ Browser.prototype.resize = async function () {
 
     await this.updateViews();
 
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
+    }
+
 };
 
 const resizeWillExceedChromosomeLength = (viewportContainerWidth, genomicState) => {
@@ -1264,6 +1271,7 @@ Browser.prototype.selectMultiLocusPanelWithGenomicState = function (selectedGeno
 Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
 
     const index = this.genomicStateList.indexOf(genomicState);
+
     for (let trackView of this.trackViews) {
         trackView.removeViewportWithLocusIndex(index);
     }
@@ -1290,7 +1298,14 @@ Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState
 
     if (true === doResize) {
         this.resize();
+    } else {
+
+        for (let { viewports, $viewportContainer } of this.trackViews) {
+            updateViewportShims(viewports, $viewportContainer)
+        }
+
     }
+
 
 };
 
@@ -1317,11 +1332,8 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
             // The viewport constructor always appends. Reorder here.
             const $detached = viewport.$viewport.detach();
             $detached.insertAfter(trackView.viewports[index - 1].$viewport);
-
             trackView.updateViewportForMultiLocus();
-
             trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
-
         }
 
     }
@@ -1333,6 +1345,7 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
     this.updateUIWithGenomicStateListChange(this.genomicStateList);
 
     this.resize();
+
 };
 
 Browser.prototype.emptyViewportContainers = function () {
@@ -1380,6 +1393,10 @@ Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateLis
         trackView.updateViewportForMultiLocus();
         trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
 
+    }
+
+    for (let { viewports, $viewportContainer } of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
     }
 
 };
