@@ -47,7 +47,12 @@ const BamReader = function (config, genome) {
     this.bamPath = config.url;
 
     // Todo - deal with Picard convention.  WHY DOES THERE HAVE TO BE 2?
-    this.baiPath = config.indexURL || TrackUtils.inferIndexPath(this.bamPath, "bai"); // If there is an indexURL provided, use it!
+    this.baiPath = config.indexURL;
+    if (!this.baiPath && config.indexed !== false) {
+        this.baiPath = TrackUtils.inferIndexPath(this.bamPath, "bai");
+        console.error(`Warning: no indexURL specified for ${this.config.url}.  Guessing ${this.baiPath}`)
+    }
+
     BamUtils.setReaderDefaults(this, config);
 }
 
@@ -92,7 +97,7 @@ BamReader.prototype.readAlignments = async function (chr, bpStart, bpEnd) {
             var ba = unbgzf(compressed); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
             const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
-            if(done) {
+            if (done) {
                 console.log(`Loaded ${counter} chunks out of  ${chunks.length}`);
                 break;
             }
@@ -110,7 +115,7 @@ async function getHeader() {
         const index = await getIndex.call(this);
         let start;
         let len;
-        if(index.firstAlignmentBlock) {
+        if (index.firstAlignmentBlock) {
             const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
             const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
             const bsize = bgzBlockSize(abuffer)
@@ -128,7 +133,7 @@ async function getHeader() {
 async function getIndex() {
     const genome = this.genome;
     if (!this.index) {
-        if(getFileName(this.config.indexURL).endsWith(".csi")) {
+        if (getFileName(this.baiPath).endsWith(".csi")) {
             this.index = await loadCsiIndex(this.baiPath, this.config, false, genome);
         } else {
             this.index = await loadBamIndex(this.baiPath, this.config, false, genome);
