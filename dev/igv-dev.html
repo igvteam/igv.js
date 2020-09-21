@@ -37,14 +37,10 @@
         const options =
             {
                 genome: "hg19",
-                // locus: [ 'ace', 'kit', 'enam' ],
-                locus: [ 'egfr', 'myc' ],
+                // locus: [ 'egfr', 'ace', 'kit', 'enam' ],
+                locus: [ 'egfr', 'myc', 'ace' ],
+                // locus: [ 'ace', 'myc' ],
                 // locus: "myc",
-                flanking: 1000,
-                queryParametersSupported: true,
-                showAllChromosomes: true,
-                showCursorTrackingGuide: false,
-                showControls: true
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
