@@ -39,13 +39,12 @@ import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
 import {guid, pageCoordinates} from "./util/domUtils.js";
 import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
-import {GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
 import {buildOptions} from "./util/igvUtils.js";
-import {URIUtils, StringUtils, TrackUtils} from "../node_modules/igv-utils/src/index.js";
+import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 
 const multiLocusGapWidth = 4
 
@@ -58,9 +57,6 @@ const trackManipulationHandleBorderWidth = 1
 
 const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth + 2 * trackManipulationHandleBorderWidth
 
-const compressString = StringUtils.compressString;
-const isString  = StringUtils.isString;
-const splitLines = StringUtils.splitLines;
 const uncompressString = StringUtils.uncompressString;
 
 const Browser = function (options, parentDiv) {
@@ -387,7 +383,7 @@ Browser.prototype.loadSessionObject = async function (session) {
 Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update) {
 
     // idOrConfig might be json
-    if (isString(idOrConfig) && idOrConfig.startsWith("{")) {
+    if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
         try {
             idOrConfig = JSON.parse(idOrConfig);
         } catch (e) {
@@ -443,7 +439,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 
         var genomeID;
 
-        if (isString(conf)) {
+        if (StringUtils.isString(conf)) {
             genomeID = conf;
         } else if (conf.genome) {
             genomeID = conf.genome;
@@ -629,17 +625,17 @@ Browser.prototype.clearROIs = function () {
 Browser.prototype.loadTrack = async function (config) {
 
     // config might be json
-    if (isString(config)) {
+    if (StringUtils.isString(config)) {
         config = JSON.parse(config);
     }
 
     // Resolve function and promise urls
     let url = await URIUtils.resolveURL(config.url);
-    if (isString(url)) {
+    if (StringUtils.isString(url)) {
         url = url.trim();
     }
 
-    if (isString(url) && url.startsWith("https://drive.google.com")) {
+    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
         const json = await getDriveFileInfo(url)
         url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
         if (!config.filename) {
@@ -1589,7 +1585,7 @@ Browser.prototype.search = async function (string, init) {
 
                 const linesTrimmed = []
                 const results = []
-                const lines = splitLines(data);
+                const lines = StringUtils.splitLines(data);
 
                 lines.forEach(function (item) {
                     if ("" === item) {
@@ -1851,7 +1847,7 @@ Browser.prototype.compressedSession = function () {
     var json, bytes, deflate, compressedBytes, compressedString, enc;
 
     json = JSON.stringify(this.toJSON());
-    return compressString(json);
+    return StringUtils.compressString(json);
 }
 
 Browser.uncompressSession = function (url) {
@@ -1868,7 +1864,7 @@ Browser.uncompressSession = function (url) {
     } else {
 
         let enc = url.substring(5);
-        return uncompressString(enc);
+        return  StringUtils.uncompressString(enc);
     }
 }
 
