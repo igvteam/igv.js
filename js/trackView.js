@@ -487,7 +487,7 @@ TrackView.prototype.getInViewFeatures = async function (force) {
     return allFeatures;
 };
 
-const updateViewportShims = (viewports, $viewportContainer) => {
+function updateViewportShims  (viewports, $viewportContainer)  {
 
     const $trackContainer = $('#igv-track-container')
     $trackContainer.find('.igv-multi-locus-separator').remove()
@@ -517,7 +517,7 @@ const updateViewportShims = (viewports, $viewportContainer) => {
 
 }
 
-const documentOffset = el =>  {
+function documentOffset(el) {
 
     const { x, y } = el.getBoundingClientRect()
     const scrollX = window.pageXOffset || document.documentElement.scrollLeft
@@ -640,7 +640,7 @@ TrackView.prototype.scrollBy = function (delta) {
 };
 
 
-const TrackScrollbar = function ($viewportContainer, viewports) {
+function TrackScrollbar  ($viewportContainer, viewports) {
 
     const self = this;
     let lastY;
