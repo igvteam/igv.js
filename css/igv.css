@@ -746,6 +746,18 @@
     position: relative;
     user-select: none; }
 
+.igv-multi-locus-separator {
+  pointer-events: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 1px;
+  background-color: gray; }
+
 #igv-track-container-spinner {
   position: absolute;
   top: 90%;
@@ -760,8 +772,7 @@
 .igv-track {
   position: relative;
   width: 100%;
-  margin-top: 5px;
-  margin-bottom: 5px;
+  margin-top: 4px;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -776,8 +787,6 @@
   position: relative;
   width: 36px;
   height: 100%;
-  margin-top: 0px;
-  margin-bottom: 0px;
   background: white; }
 
 .igv-viewport-container {
@@ -785,9 +794,9 @@
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
-  justify-content: space-between;
+  justify-content: flex-start;
   align-items: stretch;
-  width: calc(100% - 102px);
+  width: calc(100% - 100px);
   height: 100%;
   overflow-x: hidden;
   overflow-y: hidden; }
@@ -797,6 +806,12 @@
     overflow-x: hidden;
     overflow-y: hidden;
     background-color: white; }
+  .igv-viewport-container .igv-viewport-multi-locus-gap-shim {
+    height: 100%;
+    width: 1px;
+    margin-left: 2px;
+    margin-right: 2px;
+    background-color: transparent; }
 
 .igv-viewport-content {
   position: relative;
@@ -855,7 +870,7 @@
   font-size: medium;
   border-color: #c4c4c4;
   border-style: solid;
-  border-width: 1px;
+  border-width: 0;
   border-top-right-radius: 6px;
   border-bottom-right-radius: 6px;
   z-index: 512;
@@ -1048,8 +1063,6 @@
   top: 0;
   width: 100%;
   height: 100%;
-  margin-top: 0px;
-  margin-bottom: 0px;
   z-index: 256;
   background-color: rgba(68, 134, 247, 0.25); }
 
@@ -1133,6 +1146,9 @@
 
 .igv-cursor-tracking-guide {
   pointer-events: none;
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
   position: absolute;
   top: 0;
   bottom: 0;
@@ -1142,10 +1158,7 @@
   border-left-style: dotted;
   border-left-width: thin;
   border-left-color: rgba(127, 127, 127, 0.76);
-  display: none;
-  user-select: none;
-  -moz-user-select: none;
-  -webkit-user-select: none; }
+  display: none; }
 
 .igv-clickable {
   cursor: pointer;
