@@ -46,7 +46,7 @@
         source: {
             url: function (options) {
                 const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `http://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
             },
             method: "POST",
             contentType: "application/json",
@@ -74,7 +74,7 @@
         source: {
             url: function (options) {
                 const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `http://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
             },
             method: "POST",
             contentType: "application/json",
