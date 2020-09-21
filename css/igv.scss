@@ -49,7 +49,11 @@ $igv-track-manipulation-handle-margin-width: 2px;
 $igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width;
 $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim;
 
-$igv-multi-locus-gap-width: 5px;
+$igv-multi-locus-gap-div-width: 1px;
+$igv-multi-locus-gap-margin-width: 2px;
+
+// browser.js - const multiLocusGapWidth
+$igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi-locus-gap-div-width;
 
 @mixin generic-input {
 
@@ -480,10 +484,8 @@ $igv-multi-locus-gap-width: 5px;
 
   z-index: 2;
 
+  //width: 2px;
   width: 1px;
-
-  //margin-left: 2px;
-  //margin-right: 2px;
 
   background-color: gray;
 
@@ -563,9 +565,9 @@ $igv-multi-locus-gap-width: 5px;
   // width + 2 * margin = $igv-multi-locus-gap-width
   .igv-viewport-multi-locus-gap-shim {
     height: 100%;
-    width: 1px;
-    margin-left: 2px;
-    margin-right: 2px;
+    width: $igv-multi-locus-gap-div-width;
+    margin-left: $igv-multi-locus-gap-margin-width;
+    margin-right: $igv-multi-locus-gap-margin-width;
     background-color: transparent;
   }
 }
