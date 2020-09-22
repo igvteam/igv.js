@@ -24,24 +24,18 @@
  * THE SOFTWARE.
  */
 import PairedAlignment from "./pairedAlignment.js";
-
-    function canBePaired(alignment) {
-        return alignment.isPaired() &&
-            alignment.mate &&
-            alignment.isMateMapped() &&
-            alignment.chr === alignment.mate.chr &&
-            (alignment.isFirstOfPair() || alignment.isSecondOfPair()) && !(alignment.isSecondary() || alignment.isSupplementary());
-    }
+import {canBePaired, packAlignmentRows, pairAlignments, unpairAlignments} from "./alignmentUtils.js";
 
 
-const AlignmentContainer = function (chr, start, end, samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold) {
+class AlignmentContainer {
+    constructor(chr, start, end, samplingWindowSize, samplingDepth, pairsSupported, alleleFreqThreshold) {
 
         this.chr = chr;
         this.start = Math.floor(start);
         this.end = Math.ceil(end);
         this.length = (end - start);
-        
-        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 :  alleleFreqThreshold;
+
+        this.alleleFreqThreshold = alleleFreqThreshold === undefined ? 0.2 : alleleFreqThreshold;
 
         this.coverageMap = new CoverageMap(chr, start, end, this.alleleFreqThreshold);
         this.alignments = [];
@@ -63,10 +57,9 @@ const AlignmentContainer = function (chr, start, end, samplingWindowSize, sampli
         }
 
         this.pairedEndStats = new PairedEndStats();
-
     }
 
-AlignmentContainer.prototype.push = function (alignment) {
+    push(alignment) {
 
         if (this.filter(alignment) === false) return;
 
@@ -81,7 +74,7 @@ AlignmentContainer.prototype.push = function (alignment) {
         }
 
         if (alignment.start >= this.currentBucket.end) {
-            finishBucket.call(this);
+            this.finishBucket();
             this.currentBucket = new DownsampleBucket(alignment.start, alignment.start + this.samplingWindowSize, this);
         }
 
@@ -89,14 +82,14 @@ AlignmentContainer.prototype.push = function (alignment) {
 
     }
 
-AlignmentContainer.prototype.forEach = function (callback) {
+    forEach(callback) {
         this.alignments.forEach(callback);
     }
 
-AlignmentContainer.prototype.finish = function () {
+    finish() {
 
         if (this.currentBucket !== undefined) {
-            finishBucket.call(this);
+            this.finishBucket();
         }
 
         this.alignments.sort(function (a, b) {
@@ -109,17 +102,17 @@ AlignmentContainer.prototype.finish = function () {
         this.pairedEndStats.compute();
     }
 
-AlignmentContainer.prototype.contains = function (chr, start, end) {
+    contains(chr, start, end) {
         return this.chr === chr &&
             this.start <= start &&
             this.end >= end;
     }
 
-AlignmentContainer.prototype.hasDownsampledIntervals = function () {
+    hasDownsampledIntervals() {
         return this.downsampledIntervals && this.downsampledIntervals.length > 0;
     }
 
-    function finishBucket() {
+    finishBucket() {
         this.alignments = this.alignments.concat(this.currentBucket.alignments);
         if (this.currentBucket.downsampledCount > 0) {
             this.downsampledIntervals.push(new DownsampledInterval(
@@ -130,7 +123,36 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.paired = this.paired || this.currentBucket.paired;
     }
 
-    function DownsampleBucket(start, end, alignmentContainer) {
+    setViewAsPairs(bool) {
+        let alignments;
+        if (bool) {
+            alignments = pairAlignments(this.packedAlignmentRows);
+        } else {
+            alignments = unpairAlignments(this.packedAlignmentRows);
+        }
+        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end);
+    }
+
+    setShowSoftClips(bool) {
+        const alignments = this.allAlignments();
+        this.packedAlignmentRows = packAlignmentRows(alignments, this.start, this.end, bool);
+    }
+
+    allAlignments() {
+        const alignments = [];
+        for (let row of this.packedAlignmentRows) {
+            for (let alignment of row.alignments) {
+                alignments.push(alignment);
+            }
+        }
+        return alignments;
+    }
+}
+
+
+class DownsampleBucket {
+
+    constructor(start, end, alignmentContainer) {
 
         this.start = start;
         this.end = end;
@@ -142,7 +164,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.pairsCache = alignmentContainer.pairsCache;
     }
 
-    DownsampleBucket.prototype.addAlignment = function (alignment) {
+    addAlignment(alignment) {
 
         var idx, replacedAlignment, pairedAlignment;
 
@@ -161,13 +183,12 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             if (this.pairsSupported && canBePaired(alignment)) {
 
                 // First alignment in a pair
-            pairedAlignment = new PairedAlignment(alignment);
+                pairedAlignment = new PairedAlignment(alignment);
                 this.paired = true;
                 this.pairsCache[alignment.readName] = pairedAlignment;
                 this.alignments.push(pairedAlignment);
 
-            }
-            else {
+            } else {
                 this.alignments.push(alignment);
             }
 
@@ -187,19 +208,17 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
                         this.pairsCache[replacedAlignment.readName] = undefined;
                     }
 
-                pairedAlignment = new PairedAlignment(alignment);
+                    pairedAlignment = new PairedAlignment(alignment);
                     this.paired = true;
                     this.pairsCache[alignment.readName] = pairedAlignment;
                     this.alignments[idx] = pairedAlignment;
 
-                }
-                else {
+                } else {
                     this.alignments[idx] = alignment;
                 }
                 this.downsampledReads.add(replacedAlignment.readName);
 
-            }
-            else {
+            } else {
                 this.downsampledReads.add(alignment.readName);
             }
 
@@ -208,10 +227,13 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
 
 
     }
+}
 
 
-    // TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
-    function CoverageMap(chr, start, end, alleleFreqThreshold) {
+// TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
+class CoverageMap {
+
+    constructor(chr, start, end, alleleFreqThreshold) {
 
         this.chr = chr;
         this.bpStart = start;
@@ -225,22 +247,21 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.qualityWeight = true;
     }
 
-    CoverageMap.prototype.incCounts = function (alignment) {
+    incCounts(alignment) {
 
         var self = this;
 
         if (alignment.blocks === undefined) {
             incBlockCount(alignment);
-        }
-        else {
+        } else {
             alignment.blocks.forEach(function (block) {
                 incBlockCount(block);
             });
         }
 
-        if(alignment.gaps) {
-            for(let del of alignment.gaps) {
-                if(del.type === 'D') {
+        if (alignment.gaps) {
+            for (let del of alignment.gaps) {
+                if (del.type === 'D') {
                     const offset = del.start - self.bpStart;
                     for (let i = offset; i < offset + del.len; i++) {
                         if (i < 0) continue;
@@ -253,20 +274,20 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             }
         }
 
-        if(alignment.insertions) {
-            for(let del of alignment.insertions) {
+        if (alignment.insertions) {
+            for (let del of alignment.insertions) {
                 const i = del.start - this.bpStart;
-                    if(i < 0) continue;
-                    if (!this.coverage[i]) {
-                        this.coverage[i] = new Coverage(self.threshold);
-                    }
-                    this.coverage[i].ins++;
+                if (i < 0) continue;
+                if (!this.coverage[i]) {
+                    this.coverage[i] = new Coverage(self.threshold);
+                }
+                this.coverage[i].ins++;
             }
         }
 
         function incBlockCount(block) {
 
-            if('S' === block.type) return;
+            if ('S' === block.type) return;
 
             const seq = alignment.seq;
             const qual = alignment.qual;
@@ -293,8 +314,15 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             }
         }
     }
+}
 
-    function Coverage(alleleThreshold) {
+
+class Coverage {
+
+    constructor(alleleThreshold) {
+
+        this.qualityWeight = true;
+
         this.posA = 0;
         this.negA = 0;
 
@@ -328,41 +356,37 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         this.threshold = alleleThreshold;
     }
 
-    const qualityWeight = true;
-
-
-    Coverage.prototype.isMismatch = function (refBase) {
-
-        var myself = this,
-            mismatchQualitySum,
-            threshold = this.threshold * ((qualityWeight && this.qual) ? this.qual : this.total);
-
-        mismatchQualitySum = 0;
-        ["A", "T", "C", "G"].forEach(function (base) {
-
+    isMismatch(refBase) {
+        const threshold = this.threshold * ((this.qualityWeight && this.qual) ? this.qual : this.total);
+        let mismatchQualitySum = 0;
+        for (let base of ["A", "T", "C", "G"]) {
             if (base !== refBase) {
-                mismatchQualitySum += ((qualityWeight && myself.qual) ? myself["qual" + base] : (myself["pos" + base] + myself["neg" + base]));
+                mismatchQualitySum += ((this.qualityWeight && this.qual) ? this["qual" + base] : (this["pos" + base] + this["neg" + base]));
             }
-        });
-
+        }
         return mismatchQualitySum >= threshold;
+    }
+}
 
-    };
+class DownsampledInterval {
 
-    function DownsampledInterval(start, end, counts) {
+    constructor(start, end, counts) {
         this.start = start;
         this.end = end;
         this.counts = counts;
     }
 
-    DownsampledInterval.prototype.popupData = function (genomicLocation) {
+    popupData(genomicLocation) {
         return [
             {name: "start", value: this.start + 1},
             {name: "end", value: this.end},
             {name: "# downsampled:", value: this.counts}]
     }
+}
 
-    function PairedEndStats(lowerPercentile, upperPercentile) {
+class PairedEndStats {
+
+    constructor(lowerPercentile, upperPercentile) {
         this.totalCount = 0;
         this.frCount = 0;
         this.rfCount = 0;
@@ -374,7 +398,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         //this.digest = new Digest();
     }
 
-    PairedEndStats.prototype.push = function (alignment) {
+    push(alignment) {
 
         if (alignment.isProperPair()) {
 
@@ -403,7 +427,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
         }
     }
 
-    PairedEndStats.prototype.compute = function () {
+    compute() {
 
         if (this.totalCount > 100) {
             if (this.ffCount / this.totalCount > 0.9) this.orienation = "ff";
@@ -420,7 +444,7 @@ AlignmentContainer.prototype.hasDownsampledIntervals = function () {
             //this.upperFragmentLength = this.digest.percentile(this.up);
             //this.digest = undefined;
         }
-
     }
+}
 
 export default AlignmentContainer;
