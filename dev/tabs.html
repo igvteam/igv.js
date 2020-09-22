@@ -97,25 +97,25 @@
 
     function initIGV() {
 
-        var igvDiv, options;
-        igvDiv = document.getElementById("igvDiv");
-        options =
+        const options =
             {
                 locus: "AQP4",
                 genome: "hg19",
-                tracks: [
-                    {
-                        type: 'alignment',
-                        format: 'bam',
-                        url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
-                        indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai',
-                        name: 'HG02450'
-                    }
+                tracks:
+                    [
+                        {
+                            type: 'alignment',
+                            format: 'bam',
+                            url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                            indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai',
+                            name: 'HG02450'
+                        }
 
-                ]
+                    ]
 
             };
-        igv.createBrowser(igvDiv, options);
+
+        igv.createBrowser(document.getElementById("igvDiv"), options)
     }
 
     function initTabs() {
@@ -153,7 +153,7 @@
             tabs[i].content.className = 'tabContent hide'
         }
 
-        function showTab() {
+        async function showTab() {
 
             var selectedId = getHash(this.getAttribute('href'));
 
@@ -168,7 +168,7 @@
                 }
             });
 
-            igv.visibilityChange();
+            await igv.visibilityChange();
 
             // Stop the browser following the link
             return false;
