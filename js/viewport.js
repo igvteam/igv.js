@@ -7,9 +7,8 @@ import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
 import C2S from "./canvas2svg.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
-import {pageCoordinates, relativeDOMBBox, translateMouseCoordinates} from "./util/domUtils.js";
-import {download} from "./util/igvUtils.js";
 import ViewportBase from "./viewportBase.js";
+import {FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -423,7 +422,7 @@ class ViewPort extends ViewportBase {
         // filename = this.trackView.track.name + ".png";
         const filename = (this.$trackLabel.text() ? this.$trackLabel.text() : "image") + ".png";
         const data = exportCanvas.toDataURL("image/png");
-        download(filename, data);
+        FileUtils.download(filename, data);
     }
 
     saveSVG() {
@@ -445,18 +444,12 @@ class ViewPort extends ViewportBase {
             }
 
         const context = new C2S(config);
-
         this.drawSVGWithContect(context, width, height)
-
         const svg = context.getSerializedSvg(true);
-
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-
-        download(`${ str }.svg`, data);
-
-    };
+        FileUtils.download(`${ str }.svg`, data);
+    }
 
     drawSVGWithContect(context, width, height) {
 
@@ -572,7 +565,7 @@ function viewIsReady() {
 
 function renderTrackLabelSVG(context) {
 
-    const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+    const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
     const {width: stringWidth} = context.measureText(this.$trackLabel.text());
     context.fillStyle = "white";
@@ -671,13 +664,13 @@ function addMouseHandlers() {
     this.$viewport.on('mousedown', function (e) {
         self.enableClick = true;
         browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = pageCoordinates(e);
+        mouseDownCoords = DOMUtils.pageCoordinates(e);
     });
 
     this.$viewport.on('touchstart', function (e) {
         self.enableClick = true;
         browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = pageCoordinates(e);
+        mouseDownCoords = DOMUtils.pageCoordinates(e);
     });
 
     /**
@@ -744,8 +737,8 @@ function addMouseHandlers() {
         e.preventDefault();
         e.stopPropagation();
 
-        const mouseX = translateMouseCoordinates(e, self.$viewport.get(0)).x;
-        const mouseXCanvas = translateMouseCoordinates(e, self.canvas).x;
+        const mouseX = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+        const mouseXCanvas = DOMUtils.translateMouseCoordinates(e, self.canvas).x;
         const referenceFrame = self.genomicState.referenceFrame;
         const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
 
@@ -812,8 +805,8 @@ function addMouseHandlers() {
     function createClickState(e, viewport) {
 
         const referenceFrame = viewport.genomicState.referenceFrame;
-        const viewportCoords = translateMouseCoordinates(e, viewport.contentDiv);
-        const canvasCoords = translateMouseCoordinates(e, viewport.canvas);
+        const viewportCoords = DOMUtils.translateMouseCoordinates(e, viewport.contentDiv);
+        const canvasCoords = DOMUtils.translateMouseCoordinates(e, viewport.canvas);
         const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
 
         if (undefined === genomicLocation || null === viewport.tile) {

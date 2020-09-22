@@ -37,14 +37,13 @@ import loadPlinkFile from "./sampleInformation.js";
 import ReferenceFrame from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
-import {guid, pageCoordinates} from "./util/domUtils.js";
-import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
+import {doAutoscale, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
 import {buildOptions} from "./util/igvUtils.js";
-import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
+import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -60,11 +59,9 @@ const trackManipulationHandleMarginWidth = 2
 
 const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
-const uncompressString = StringUtils.uncompressString;
-
 const Browser = function (options, parentDiv) {
 
-    this.guid = guid();
+    this.guid = DOMUtils.guid();
     this.namespace = '.browser_' + this.guid;
     this.config = options;
 
@@ -256,9 +253,8 @@ Browser.prototype.saveSVGtoFile = function (config) {
 
     const path = config.filename || 'igv.svg';
     const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-    download(path, data);
-
-};
+    FileUtils.download(path, data);
+}
 
 /**
  * Initialize a session from an object, json, or by loading from a file.
@@ -1449,7 +1445,7 @@ Browser.prototype.search = async function (string, init) {
 
         // assign ids to the state objects
         for (let gs of genomicStateList) {
-            gs.id = guid();
+            gs.id = DOMUtils.guid();
         }
 
     } else {
@@ -1920,7 +1916,7 @@ Browser.prototype.currentLoci = function () {
 Browser.prototype.mouseDownOnViewport = function (e, viewport) {
 
     var coords;
-    coords = pageCoordinates(e);
+    coords = DOMUtils.pageCoordinates(e);
     this.vpMouseDown = {
         viewport: viewport,
         lastMouseX: coords.x,
@@ -2044,7 +2040,7 @@ function addMouseHandlers() {
             return;
         }
 
-        coords = pageCoordinates(e);
+        coords = DOMUtils.pageCoordinates(e);
 
         if (self.vpMouseDown) {
 
