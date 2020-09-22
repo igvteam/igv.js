@@ -54,7 +54,7 @@ class IdeogramViewport extends ViewportBase {
 
     handleClick(e, canvas) {
 
-        const { xNormalized, width } = DOMUtils.getMouseXY(canvas, e);
+        const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
         //console.log(`bboxWidth ${ width }. canvas.width ${ canvas.width }`)
         let { referenceFrame } = this.genomicState;
         const { bpLength } = this.browser.genome.getChromosome(referenceFrame.chrName);

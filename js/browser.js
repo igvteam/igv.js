@@ -881,8 +881,15 @@ Browser.prototype.setTrackHeight = function (newHeight) {
 
 };
 
-Browser.prototype.visibilityChange = function () {
-    this.resize();
+Browser.prototype.visibilityChange = async function () {
+
+    const status = this.genomicStateList.find(({ referenceFrame }) => referenceFrame.bpPerPixel < 0)
+
+    if (status) {
+        this.appendReferenceFrames(this.genomicStateList)
+    }
+
+    await this.resize();
 };
 
 Browser.prototype.resize = async function () {
@@ -1504,18 +1511,10 @@ Browser.prototype.search = async function (string, init) {
                     }
                 }
             }
-            appendReferenceFrames(result);
+            self.appendReferenceFrames(result);
         }
 
         return result;
-
-        function appendReferenceFrames(genomicStateList) {
-            const viewportWidth = self.calculateViewportWidth(genomicStateList.length);
-            genomicStateList.forEach(function (gs) {
-                gs.referenceFrame = new ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
-            });
-            return genomicStateList;
-        }
 
         async function searchWebService(locus) {
             let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
@@ -1704,6 +1703,16 @@ Browser.prototype.search = async function (string, init) {
         }
     }
 };
+
+Browser.prototype.appendReferenceFrames = function(genomicStateList) {
+
+    const viewportWidth = this.calculateViewportWidth(genomicStateList.length)
+    for (let gs of genomicStateList) {
+        gs.referenceFrame = new ReferenceFrame(this.genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth)
+    }
+
+    return genomicStateList
+}
 
 Browser.prototype.loadSampleInformation = async function (url) {
     var name = url;
