@@ -25,6 +25,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
@@ -97,13 +98,12 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
 
     // pixel location of guide line
     const parent = $guideParent.get(0)
-    const { x } = getMouseXY(parent, event);
-    const left = `${ x }px`;
+    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, parent);
+    const left = `${ xParent }px`;
     $guideLine.css({ left });
 
-
     // base-pair location of guide line
-    const viewportMouseXY = getMouseXY($viewport.get(0), event);
+    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0));
 
     const guid = $viewport.data('viewportGUID');
     const viewport = browser.getViewportWithGUID(guid);
@@ -113,27 +113,21 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
         return undefined;
     }
 
-    const { referenceFrame } = viewport.genomicState;
-
-
-    const _startBP = referenceFrame.start;
-    const _endBP = 1 + referenceFrame.start + (viewportMouseXY.width * referenceFrame.bpPerPixel);
-
-    // bp = bp + (pixel * (bp / pixel))
-    const bp = Math.round(_startBP + viewportMouseXY.x * referenceFrame.bpPerPixel);
+    const { start, bpPerPixel } = viewport.genomicState.referenceFrame;
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
     const $trackContainer = $viewport.closest('#igv-track-container');
-    const trackContainerMouseXY = getMouseXY($trackContainer.get(0), event);
-
 
     return {
         $host: $trackContainer,
         host_css_left: left,
-        bp,
-        start: _startBP,
-        end: _endBP,
-        interpolant: viewportMouseXY.xNormalized
+
+        // units: bp = bp + (pixel * (bp / pixel))
+        bp: Math.round(start + x * bpPerPixel),
+
+        start,
+        end: 1 + start + (width * bpPerPixel),
+        interpolant: xNormalized
     };
 };
 
@@ -172,23 +166,5 @@ CursorGuide.prototype.enable = function () {
         this.$button.show();
     }
 };
-
-function getMouseXY(domElement, event) {
-
-    // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height
-    const dr = domElement.getBoundingClientRect();
-
-    const xy =
-        {
-            x: event.clientX - dr.left,
-            y: event.clientY - dr.top,
-            xNormalized: (event.clientX - dr.left)/dr.width,
-            yNormalized: (event.clientY - dr.top)/dr.height,
-            width: dr.width,
-            height: dr.height
-        };
-
-    return xy;
-}
 
 export default CursorGuide;

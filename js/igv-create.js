@@ -178,10 +178,10 @@ function getBrowser() {
  * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
  * made visible from a tab, accordion, or similar widget.
  */
-function visibilityChange () {
-    allBrowsers.forEach(function (browser) {
-        browser.visibilityChange();
-    })
+async function visibilityChange () {
+    for (let browser of allBrowsers) {
+        await browser.visibilityChange();
+    }
 }
 
 
