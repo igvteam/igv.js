@@ -24,12 +24,10 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { getMouseXY } from "./util/domUtils.js";
 import IGVGraphics from "./igv-canvas.js";
-import {IGVColor} from "../node_modules/igv-utils/src/index.js";
 import ViewportBase from "./viewportBase.js";
 import C2S from "./canvas2svg.js";
-import {download} from "./util/igvUtils.js";
+import {FileUtils, DOMUtils, IGVColor} from "../node_modules/igv-utils/src/index.js";
 
 class IdeogramViewport extends ViewportBase {
 
@@ -56,16 +54,11 @@ class IdeogramViewport extends ViewportBase {
 
     handleClick(e, canvas) {
 
-        const { xNormalized, width } = getMouseXY(canvas, e);
-
-        console.log(`bboxWidth ${ width }. canvas.width ${ canvas.width }`)
-
+        const { xNormalized, width } = DOMUtils.getMouseXY(canvas, e);
+        //console.log(`bboxWidth ${ width }. canvas.width ${ canvas.width }`)
         let { referenceFrame } = this.genomicState;
-
         const { bpLength } = this.browser.genome.getChromosome(referenceFrame.chrName);
-
         const locusLength = referenceFrame.bpPerPixel * width;
-
         const chrCoveragePercentage = locusLength / bpLength;
 
         let xPercentage = xNormalized;
@@ -84,7 +77,6 @@ class IdeogramViewport extends ViewportBase {
         referenceFrame.bpPerPixel = (ee - ss) / width;
 
         this.browser.updateLocusSearchWidget(this.genomicState);
-
         this.browser.updateViews()
 
     }
@@ -120,7 +112,7 @@ class IdeogramViewport extends ViewportBase {
 
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([ svg ], { type: "application/octet-stream" }));
-        download(`${ this.trackView.track.id }.svg`, data);
+        FileUtils.download(`${ this.trackView.track.id }.svg`, data);
 
     }
 
