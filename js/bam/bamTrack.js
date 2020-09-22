@@ -278,7 +278,7 @@ BAMTrack.prototype.menuItemList = function () {
             this.autoHeight = true;
             this.trackView.checkContentHeight();
             this.autoHeight = ah;
-            this.trackView.updateViews(true);
+            this.trackView.repaintViews();
         }
     });
     menuItems.push({
@@ -289,7 +289,7 @@ BAMTrack.prototype.menuItemList = function () {
             this.autoHeight = true;
             this.trackView.checkContentHeight();
             this.autoHeight = ah;
-            this.trackView.updateViews(true);
+            this.trackView.repaintViews();
         }
     });
 
@@ -299,7 +299,7 @@ BAMTrack.prototype.menuItemList = function () {
         click: function () {
             self.showAllBases = !self.showAllBases;
             self.config.showAllBases = self.showAllBases;
-            self.trackView.updateViews(true);
+            self.trackView.repaintViews();
         }
     });
 
@@ -313,7 +313,11 @@ BAMTrack.prototype.menuItemList = function () {
                 self.viewAsPairs = !self.viewAsPairs;
                 self.config.viewAsPairs = self.viewAsPairs;
                 self.featureSource.setViewAsPairs(self.viewAsPairs);
-                self.trackView.updateViews(true);
+                const alignmentContainers = self.getCachedAlignmentContainers();
+                for(let ac of alignmentContainers) {
+                    ac.setViewAsPairs(self.viewAsPairs);
+                }
+                self.trackView.repaintViews();
             }
         });
     }
@@ -324,17 +328,18 @@ BAMTrack.prototype.menuItemList = function () {
             self.showSoftClips = !self.showSoftClips;
             self.config.showSoftClips = self.showSoftClips;
             self.featureSource.setShowSoftClips(self.showSoftClips);
-            self.trackView.updateViews(true);
+            const alignmentContainers = self.getCachedAlignmentContainers();
+            for(let ac of alignmentContainers) {
+                ac.setShowSoftClips(self.showSoftClips);
+            }
+            self.trackView.repaintViews();
         }
     });
 
     return menuItems;
 
     function colorByCB(menuItem, showCheck) {
-
-
         const $e = createCheckbox(menuItem.label, showCheck);
-
         const clickHandler = function () {
 
             if (menuItem.key === self.alignmentTrack.colorBy) {
@@ -384,7 +389,6 @@ BAMTrack.prototype.menuItemList = function () {
         return {name: undefined, object: $e, click: clickHandler, init: undefined}
 
     }
-
 };
 
 function shadedBaseColor(qual, nucleotide) {
@@ -450,6 +454,10 @@ BAMTrack.prototype.getState = function () {
     }
 
     return config;
+}
+
+BAMTrack.prototype.getCachedAlignmentContainers = function () {
+    return this.trackView.viewports.map(vp => vp.getCachedFeatures())
 }
 
 var CoverageTrack = function (config, parent) {
