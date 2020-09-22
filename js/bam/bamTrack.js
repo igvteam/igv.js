@@ -29,21 +29,19 @@ import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
 import {extend} from "../util/igvUtils.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const type = "alignment";
-
-var alignmentStartGap = 5;
-var downsampleRowHeight = 5;
-var DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
-var DEFAULT_TRACK_HEIGHT = 300;
-var DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
-var DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
-var DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
+const alignmentStartGap = 5;
+const downsampleRowHeight = 5;
+const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
+const DEFAULT_TRACK_HEIGHT = 300;
+const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
+const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
+const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
 
 const BAMTrack = extend(TrackBase,
