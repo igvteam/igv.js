@@ -25,16 +25,15 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {translateMouseCoordinates} from "./util/domUtils.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
-import {guid} from "./util/domUtils.js";
+import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 
 const RulerSweeper = function (viewport) {
     this.viewport = viewport;
     this.browser = viewport.browser;
     this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
     $(viewport.contentDiv).append(this.$rulerSweeper);
-    this.namespace = '.sweeper_' + guid();
+    this.namespace = '.sweeper_' + DOMUtils.guid();
     this.addMouseHandlers();
 };
 
@@ -67,7 +66,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
         isMouseIn = true;
 
-        mouseDown = translateMouseCoordinates(e, self.viewport.$viewport).x;
+        mouseDown = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
 
         if (true === isMouseDown) {
 
@@ -87,7 +86,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
         if (isMouseDown && isMouseIn) {
 
-            mouseCurrent = translateMouseCoordinates(e, self.viewport.$viewport).x;
+            mouseCurrent = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
             mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
             mouseCurrent = Math.max(mouseCurrent, 0);
 

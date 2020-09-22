@@ -23,8 +23,7 @@
  * THE SOFTWARE.
  */
 
-import { IGVColor } from '../node_modules/igv-utils/src/index.js';
-import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
+
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import FeatureUtils from "./feature/featureUtils.js";
@@ -32,8 +31,9 @@ import RulerTrack from "./rulerTrack.js";
 import TrackGearPopover from "./ui/trackGearPopover.js";
 import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {guid, pageCoordinates} from "./util/domUtils.js";
 import {doAutoscale} from "./util/igvUtils.js";
+import { IGVColor, DOMUtils } from '../node_modules/igv-utils/src/index.js';
+import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
 
 var dragged,
     dragDestination;
@@ -48,7 +48,7 @@ const TrackView = function (browser, $container, track) {
     this.trackDiv = $track.get(0);
     $container.append($track);
 
-    this.namespace = '.trackview_' + guid();
+    this.namespace = '.trackview_' + DOMUtils.guid();
 
     if (this.track instanceof RulerTrack) {
         this.trackDiv.dataset.rulerTrack = "rulerTrack";
@@ -645,7 +645,7 @@ function TrackScrollbar  ($viewportContainer, viewports) {
     const self = this;
     let lastY;
 
-    const namespace = '.trackscrollbar' + guid();
+    const namespace = '.trackscrollbar' + DOMUtils.guid();
     this.namespace = namespace;
 
     this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
@@ -672,7 +672,7 @@ function TrackScrollbar  ($viewportContainer, viewports) {
 
         event.preventDefault();
 
-        const page = pageCoordinates(event);
+        const page = DOMUtils.pageCoordinates(event);
 
         lastY = page.y;
 
@@ -689,7 +689,7 @@ function TrackScrollbar  ($viewportContainer, viewports) {
         event.preventDefault();
         event.stopPropagation();
 
-        const page = pageCoordinates(event);
+        const page = DOMUtils.pageCoordinates(event);
         self.moveScrollerBy(page.y - lastY);
         lastY = page.y;
 

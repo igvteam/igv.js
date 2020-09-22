@@ -56,19 +56,6 @@ function buildOptions (config, options) {
     return Object.assign(defaultOptions, options);
 }
 
-
-function download  (filename, data) {
-
-    const element = document.createElement('a');
-    element.setAttribute('href', data);
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
-
-
 /**
  * isMobile test from http://detectmobilebrowsers.com
  * TODO -- improve UI design so this isn't neccessary
@@ -167,5 +154,5 @@ const isNumber = function(num) {
     return false;
 };
 
-export {extend, isSimpleType, buildOptions, download, validateLocusExtent, doAutoscale, isNumber}
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber}
 

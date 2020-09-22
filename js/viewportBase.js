@@ -24,13 +24,13 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {guid} from "./util/domUtils.js";
+import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 
 class ViewportBase {
 
     constructor(trackView, $viewportContainer, genomicState, width) {
 
-        this.guid = guid();
+        this.guid = DOMUtils.guid();
         this.trackView = trackView;
         this.genomicState = genomicState;
 

@@ -2,7 +2,7 @@ import ViewPort from "./viewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {translateMouseCoordinates} from "./util/domUtils.js";
+import {DOMUtils} from "../node_modules/igv-utils/src/index.js";
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, genomicState, width) {
@@ -38,7 +38,7 @@ function enableTrackMouseHandlers() {
     let self = this;
     this.$viewport.on('click' + namespace, (e) => {
 
-        const pixel = translateMouseCoordinates(e, self.$viewport.get(0)).x;
+        const pixel = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
         const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
 
         let searchString;
