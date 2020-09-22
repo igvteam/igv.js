@@ -44,6 +44,7 @@
     "@babel/preset-env": "^7.11.5",
     "@igvteam/test-utils": "github:igvteam/test-utils#47d134fd",
     "@rollup/plugin-commonjs": "^11.0.2",
+    "btoa": "^1.2.1",
     "chai": "^4.2.0",
     "core-js": "^3.6.4",
     "eslint": "^6.4.0",
