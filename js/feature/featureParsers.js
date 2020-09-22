@@ -433,7 +433,7 @@ function decodeBed(tokens, ignore) {
             feature.attributes = attributes;
         }
         if (!feature.name) {
-            feature.name = tokens[3];
+            feature.name = tokens[3] === '.' ? '' : tokens[3];
         } else {
             feature["nameField"] = tokens[3];
         }
