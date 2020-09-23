@@ -25,24 +25,180 @@
 
 import TrackBase from "../trackBase.js";
 
-/**
- * Parser for VCF files.
- */
+
+const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
 
 function createVCFVariant(tokens) {
+    return new Variant(tokens);
+}
 
-    var variant = new Variant();
 
-    variant.chr = tokens[0]; // TODO -- use genome aliases
-    variant.pos = parseInt(tokens[1]);
-    variant.names = tokens[2];    // id in VCF
-    variant.referenceBases = tokens[3];
-    variant.alternateBases = tokens[4];
-    variant.quality = tokens[5];
-    variant.filter = tokens[6];
-    variant.info = getInfoObject(tokens[7]);
-    init(variant);
-    return variant;
+class Variant {
+
+    constructor(tokens) {
+        this.chr = tokens[0]; // TODO -- use genome aliases
+        this.pos = parseInt(tokens[1]);
+        this.names = tokens[2];    // id in VCF
+        this.referenceBases = tokens[3];
+        this.alternateBases = tokens[4];
+        this.quality = tokens[5];
+        this.filter = tokens[6];
+        this.info = getInfoObject(tokens[7]);
+        this.init();
+    }
+
+    init() {
+
+        const ref = this.referenceBases;
+        const altBases = this.alternateBases;
+
+        if (this.info) {
+            if (this.info["VT"]) {
+                this.type = variant.info["VT"];
+            } else if (this.info["SVTYPE"]) {
+                this.type = "SV";
+            } else if (this.info["PERIOD"]) {
+                this.type = "STR";
+            }
+        }
+        if (this.type === undefined) {
+            this.type = determineType(ref, altBases);
+        }
+        if (this.type === "NONVARIANT") {
+            this.heterozygosity = 0;
+        }
+
+        // Determine start/end coordinates -- these are the coordinates representing the actual variant,
+        // not the leading or trailing reference
+        if (this.info["END"]) {
+            this.start = this.pos - 1;
+            this.end = Number.parseInt(this.info["END"]);
+        } else {
+            if (this.type === "NONVARIANT") {
+                this.start = this.pos - 1;      // convert to 0-based coordinate convention
+                this.end = this.start + ref.length;
+            } else {
+
+                const altTokens = altBases.split(",").filter(token => token.length > 0);
+                this.alleles = [];
+                this.start = undefined;
+                this.end = undefined;
+
+                for (let alt of altTokens) {
+
+                    this.alleles.push(alt);
+
+                    // We don't yet handle  SV and other special alt representations
+                    if ("SV" !== this.type && isKnownAlt(alt)) {
+
+                        let altLength = alt.length;
+                        let lengthOnRef = ref.length;
+
+                        // Trim off matching bases.  Try first match, then right -> left,  then any remaining left -> right
+                        let s = 0;
+                        if (ref.charCodeAt(0) === alt.charCodeAt(0)) {
+                            s++;
+                            altLength--;
+                            lengthOnRef--;
+                        }
+
+                        // right -> left from end
+                        while (altLength > 0 && lengthOnRef > 0) {
+                            const altIdx = s + altLength - 1;
+                            const refIdx = s + lengthOnRef - 1;
+                            if (alt.charCodeAt(altIdx) === ref.charCodeAt(refIdx)) {
+                                altLength--;
+                                lengthOnRef--;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        // if any remaining, left -> right
+                        while (altLength > 0 && lengthOnRef > 0) {
+                            const altIdx = s;
+                            const refIdx = s;
+                            if (alt.charCodeAt(altIdx) === ref.charCodeAt(refIdx)) {
+                                s++;
+                                altLength--;
+                                lengthOnRef--;
+                            } else {
+                                break;
+                            }
+                        }
+
+                        const alleleStart = this.pos + s - 1;      // -1 for zero based coordinates
+                        const alleleEnd = alleleStart + lengthOnRef;    // insertions have zero length on ref, but we give them 1
+                        this.start = this.start === undefined ? alleleStart : Math.min(this.start, alleleStart);
+                        this.end = this.end === undefined ? alleleEnd : Math.max(this.end, alleleEnd);
+                    }
+                }
+            }
+        }
+    }
+
+
+    popupData(genomicLocation, genomeId) {
+
+        var self = this,
+            fields, gt;
+
+        const posString = this.end === this.pos ? this.pos : `${this.pos}-${this.end}`;
+        fields = [
+            {name: "Chr", value: this.chr},
+            {name: "Pos", value: posString},
+            {name: "Names", value: this.names ? this.names : ""},
+            {name: "Ref", value: this.referenceBases},
+            {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},
+            {name: "Qual", value: this.quality},
+            {name: "Filter", value: this.filter}
+        ];
+
+        if ("SNP" === this.type) {
+            let ref = this.referenceBases;
+            if (ref.length === 1) {
+                let altArray = this.alternateBases.split(",");
+                for (let alt of altArray) {
+                    if (alt.length === 1) {
+                        let l = TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
+                        if (l) {
+                            fields.push("<hr/>");
+                            fields.push(l);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (this.hasOwnProperty("heterozygosity")) {
+            fields.push({name: "Heterozygosity", value: this.heterozygosity});
+        }
+
+        if (this.info) {
+            fields.push('<hr>');
+            Object.keys(this.info).forEach(function (key) {
+                fields.push({name: key, value: arrayToString(self.info[key])});
+            });
+        }
+
+
+        // Special case of VCF with a single sample
+        if (this.calls && this.calls.length === 1) {
+            fields.push('<hr>');
+            gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
+            fields.push({name: "Genotype", value: gt});
+        }
+
+
+        return fields;
+
+
+    };
+
+    isRefBlock() {
+        return "NONVARIANT" === this.type;
+    }
+
 }
 
 function getInfoObject(infoStr) {
@@ -56,92 +212,6 @@ function getInfoObject(infoStr) {
     return info;
 }
 
-function init(variant) {
-
-    const ref = variant.referenceBases;
-    const altBases = variant.alternateBases;
-
-    if (variant.info) {
-        if (variant.info["VT"]) {
-            variant.type = variant.info["VT"];
-        } else if (variant.info["SVTYPE"]) {
-            variant.type = "SV";
-        } else if (variant.info["PERIOD"]) {
-            variant.type = "STR";
-        }
-    }
-    if (variant.type === undefined) {
-        variant.type = determineType(ref, altBases);
-    }
-
-
-    // Check for reference block
-    if (variant.type === "NONVARIANT") {
-        variant.heterozygosity = 0;
-        variant.start = variant.pos - 1;      // convert to 0-based coordinate convention
-        variant.end = variant.start + ref.length  // might be overwritten by "END" attribute
-    }
-
-    if (variant.info["END"]) {
-        variant.start = variant.pos - 1;
-        variant.end = Number.parseInt(variant.info["END"]);
-
-    } else if ("NONVARIANT" !== variant.type) {
-        const altTokens = altBases.split(",").filter(token => token.length > 0);
-        variant.alleles = [];
-        variant.start = variant.pos;
-        variant.end = variant.pos;
-
-        for (let alt of altTokens) {
-
-            variant.alleles.push(alt);
-
-            // We don't yet handle  SV and other special alt representations
-            if ("SV" !== variant.type && isKnownAlt(alt)) {
-
-                let altLength = alt.length;
-                let lengthOnRef = ref.length;
-
-                // Trim off matching bases.  Try first match, then right -> left,  then any remaining left -> right
-                let s = 0;
-                if (ref.charCodeAt(0) === alt.charCodeAt(0)) {
-                    s++;
-                    altLength--;
-                    lengthOnRef--;
-                }
-
-                // right -> left from end
-                while (altLength > 0 && lengthOnRef > 0) {
-                    if (alt.charCodeAt(s + altLength - 1) === ref.charCodeAt(s + lengthOnRef - 1)) {
-                        altLength--;
-                        lengthOnRef--;
-                    } else {
-                        break;
-                    }
-                }
-
-                // if any remaining, left -> right
-                while (altLength > 0 && lengthOnRef > 0) {
-                    if (alt.charCodeAt(s + altLength - 1) === ref.charCodeAt(s + lengthOnRef - 1)) {
-                        s++;
-                        altLength--;
-                        lengthOnRef--;
-                    } else {
-                        break;
-                    }
-                }
-
-                const alleleStart = variant.pos + s - 1;      // -1 for zero based coordinates
-                const alleleEnd = alleleStart + Math.max(1, lengthOnRef)     // insertions have zero length on ref, but we give them 1
-                variant.start = Math.min(variant.start, alleleStart);
-                variant.end = Math.max(variant.end, alleleEnd);
-            }
-
-        }
-    }
-}
-
-const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
 
 function isKnownAlt(alt) {
     for (let i = 0; i < alt.length; i++) {
@@ -150,73 +220,8 @@ function isKnownAlt(alt) {
         }
     }
     return true;
-
 }
 
-const Variant = function () {
-
-}
-
-Variant.prototype.popupData = function (genomicLocation, genomeId) {
-
-    var self = this,
-        fields, gt;
-
-    const posString = this.end === this.pos ? this.pos : `${this.pos}-${this.end}`;
-    fields = [
-        {name: "Chr", value: this.chr},
-        {name: "Pos", value: posString},
-        {name: "Names", value: this.names ? this.names : ""},
-        {name: "Ref", value: this.referenceBases},
-        {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},
-        {name: "Qual", value: this.quality},
-        {name: "Filter", value: this.filter}
-    ];
-
-    if ("SNP" === this.type) {
-        let ref = this.referenceBases;
-        if (ref.length === 1) {
-            let altArray = this.alternateBases.split(",");
-            for (let alt of altArray) {
-                if (alt.length === 1) {
-                    let l = TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
-                    if (l) {
-                        fields.push("<hr/>");
-                        fields.push(l);
-                    }
-                }
-            }
-        }
-    }
-
-    if (this.hasOwnProperty("heterozygosity")) {
-        fields.push({name: "Heterozygosity", value: this.heterozygosity});
-    }
-
-    if (this.info) {
-        fields.push('<hr>');
-        Object.keys(this.info).forEach(function (key) {
-            fields.push({name: key, value: arrayToString(self.info[key])});
-        });
-    }
-
-
-    // Special case of VCF with a single sample
-    if (this.calls && this.calls.length === 1) {
-        fields.push('<hr>');
-        gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
-        fields.push({name: "Genotype", value: gt});
-    }
-
-
-    return fields;
-
-
-};
-
-Variant.prototype.isRefBlock = function () {
-    return "NONVARIANT" === this.type;
-}
 
 function determineType(ref, altAlleles) {
     const refLength = ref.length;
