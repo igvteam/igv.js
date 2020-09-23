@@ -21,7 +21,6 @@
 
 <p>
 
-
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="module">
@@ -31,13 +30,8 @@
     var options =
         {
             // Example of fully specifying a reference genome.  We could alternatively use  genome: "hg19"
-            reference:
-                {
-                    id: "hg19",
-                    fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/1kg_v37/human_g1k_v37_decoy.fasta",
-                    cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/b37/b37_cytoband.txt"
-                },
-            locus: "20:1,230,210-1,230,289",
+            genome: "hg18",
+            locus: ["20:14370", "20:1110696", "20:1230237",  "20:1234567"],
             tracks:
                 [
                     {
