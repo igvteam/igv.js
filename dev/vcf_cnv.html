@@ -30,15 +30,15 @@
     var options =
         {
             // Example of fully specifying a reference genome.  We could alternatively use  genome: "hg19"
-            genome: "hg18",
-            locus: ["20:14370", "20:1110696", "20:1230237",  "20:1234567"],
+            genome: "hg19",
+            locus: ["1:69000-70010", "1:12939300-12943300"],
             tracks:
                 [
                     {
                         name: "VCF",
                         type: "variant",
                         format: "vcf",
-                        url: "../test/data/vcf/example.vcf",
+                        url: "../test/data/vcf/cnv.vcf",
                         indexed: false,
                         displayMode: "EXPANDED"
                     }
