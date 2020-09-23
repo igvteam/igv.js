@@ -18,7 +18,9 @@ class RulerViewport extends ViewPort {
 
         this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
         this.$content.append(this.$rulerLabel);
-        this.$rulerLabel.click(e => this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState))
+        this.$rulerLabel.click(e => {
+            this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState)
+        })
 
         if (true === GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame)) {
             enableTrackMouseHandlers.call(this);
