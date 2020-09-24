@@ -152,15 +152,13 @@ TrackView.prototype.updateViewportForMultiLocus = function () {
 
     if ('ruler' === this.track.type) {
 
-        for (let { $viewport } of this.viewports) {
-            if (this.viewports.length > 1) {
-                $viewport.find('.igv-multi-locus-panel-close-container').show()
-                $viewport.find('.igv-multi-locus-panel-label-div').show()
-            } else {
-                $viewport.find('.igv-multi-locus-panel-close-container').hide()
-                $viewport.find('.igv-multi-locus-panel-label-div').hide()
-            }
-
+        if (this.viewports.length > 1) {
+            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').show()
+            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').show()
+            this.track.updateLocusLabel()
+        } else {
+            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').hide()
+            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').hide()
         }
 
     }

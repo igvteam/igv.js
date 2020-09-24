@@ -3,6 +3,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import {createIcon} from "./igv-icons";
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, genomicState, width) {
@@ -14,7 +15,8 @@ class RulerViewport extends ViewPort {
     initializationHelper() {
 
         this.rulerSweeper = new RulerSweeper(this);
-        this.trackView.track.appendMultiPanelCloseButton(this.$viewport, this.genomicState);
+
+        appendMultiPanelCloseButton(this.browser, this.$viewport, this.genomicState);
 
         this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
         this.$content.append(this.$rulerLabel);
@@ -29,8 +31,26 @@ class RulerViewport extends ViewPort {
         }
 
     }
+
+    updateLocusLabel() {
+        const str = this.genomicState.referenceFrame.showLocus(this.$viewport.width())
+        this.$rulerLabel.text(str)
+    }
+
 }
 
+function appendMultiPanelCloseButton(browser, $viewport, genomicState) {
+
+    $viewport.addClass('igv-viewport-ruler');
+
+    const $close = $('<div class="igv-multi-locus-panel-close-container">');
+    $viewport.append($close);
+
+    $close.append(createIcon("times-circle"));
+
+    $close.click(() => browser.removeMultiLocusPanelWithGenomicState(genomicState, true));
+
+}
 
 function enableTrackMouseHandlers() {
 
