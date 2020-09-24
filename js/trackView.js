@@ -150,13 +150,15 @@ TrackView.prototype.removeViewportWithLocusIndex = function (index) {
 
 TrackView.prototype.updateViewportForMultiLocus = function () {
 
-    for (let { $viewport } of this.viewports) {
+    if ('ruler' === this.track.type) {
+
         if (this.viewports.length > 1) {
-            $viewport.find('.igv-multi-locus-panel-close-container').show()
-            $viewport.find('.igv-multi-locus-panel-label-div').show()
+            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').show()
+            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').show()
+            this.track.updateLocusLabel()
         } else {
-            $viewport.find('.igv-multi-locus-panel-close-container').hide()
-            $viewport.find('.igv-multi-locus-panel-label-div').hide()
+            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').hide()
+            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').hide()
         }
 
     }

@@ -47,35 +47,10 @@ const RulerTrack = function (browser) {
 };
 
 RulerTrack.prototype.updateLocusLabel = function () {
-    var self = this;
 
-    this.trackView.viewports.forEach(function (viewport) {
-        var str;
-        str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
-
-        // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
-        viewport.$rulerLabel.text(str);
-    });
-
-};
-
-RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
-
-    const browser = this.browser;
-
-    var $close,
-        $closeButton;
-
-    $viewport.addClass('igv-viewport-ruler');
-
-    $close = $('<div class="igv-multi-locus-panel-close-container">');
-    $viewport.append($close);
-
-    $close.append(createIcon("times-circle"));
-
-    $close.click(function (e) {
-        browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
-    });
+    for (let viewport of this.trackView.viewports) {
+         viewport.updateLocusLabel()
+    }
 
 };
 
