@@ -1211,46 +1211,33 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
 
 };
 
-Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
-
-    const genome = this.genome;
-
-    var referenceFrame,
-        viewportWidth,
-        leftMatePairGenomicState,
-        rightMatePairGenomicState;
+Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, leftMatePairGenomicState) {
 
     // account for reduced viewport width as a result of adding right mate pair panel
-    viewportWidth = this.calculateViewportWidth(1 + this.genomicStateList.length);
+    const viewportWidth = this.calculateViewportWidth(1 + this.genomicStateList.length);
 
-    // adjust left mate pair reference frame
-    leftMatePairGenomicState = genomicState;
-    referenceFrame = leftMatePairGenomicState.referenceFrame;
-
-    const chrName = genome.getChromosomeName(alignment.chr);
-    leftMatePairGenomicState.referenceFrame = createReferenceFrame(chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+    leftMatePairGenomicState.referenceFrame = createReferenceFrame(this.genome, alignment.chr, leftMatePairGenomicState.referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
 
     // create right mate pair reference frame
-    const mateChrName = genome.getChromosomeName(alignment.mate.chr);
-    rightMatePairGenomicState = {};
-    rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-    rightMatePairGenomicState.referenceFrame = createReferenceFrame(mateChrName, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+    const mateChrName = this.genome.getChromosomeName(alignment.mate.chr);
+
+    const rightMatePairGenomicState = {};
+
+    // rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
+    rightMatePairGenomicState.chromosome = this.genome.getChromosome( alignment.mate.chr );
+
+    rightMatePairGenomicState.referenceFrame = createReferenceFrame(this.genome, mateChrName, leftMatePairGenomicState.referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
 
     // add right mate panel beside left mate panel
     this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
 
-    function createReferenceFrame(chromosomeName, bpp, pixels, alignmentStart, alignmentLength) {
+    function createReferenceFrame(genome, chromosomeName, bpp, pixels, alignmentStart, alignmentLength) {
 
-        var ss,
-            ee,
-            alignmentEE,
-            alignmentCC;
+        const alignmentEE = alignmentStart + alignmentLength;
+        const alignmentCC = (alignmentStart + alignmentEE) / 2;
 
-        alignmentEE = alignmentStart + alignmentLength;
-        alignmentCC = (alignmentStart + alignmentEE) / 2;
-
-        ss = alignmentCC - (bpp * (pixels / 2));
-        ee = ss + (bpp * pixels);
+        const ss = alignmentCC - (bpp * (pixels / 2));
+        const ee = ss + (bpp * pixels);
 
         return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp);
     }
@@ -1336,10 +1323,14 @@ Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicS
             // The viewport constructor always appends. Reorder here.
             const $detached = viewport.$viewport.detach();
             $detached.insertAfter(trackView.viewports[index - 1].$viewport);
-            trackView.updateViewportForMultiLocus();
-            trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
+
         }
 
+    }
+
+    for (let trackView of this.trackViews) {
+        trackView.updateViewportForMultiLocus();
+        trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
     }
 
     if (this.rulerTrack) {
