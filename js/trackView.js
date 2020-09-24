@@ -407,9 +407,6 @@ TrackView.prototype.updateViews = async function (force) {
     // Trigger viewport to load features needed to cover current genomic range
     for (let vp of rpV) {
         await vp.loadFeatures()
-        // if (vp.tile && vp.tile.features && vp.tile.features.length === 0 && 'all' === vp.genomicState.referenceFrame.chrName) {
-        //     vp.checkZoomIn();
-        // }
     }
 
     if (this.disposed) return;   // Track was removed during load
@@ -527,7 +524,7 @@ function viewportsToReload(force) {
             return false;
         } else {
             const referenceFrame = viewport.genomicState.referenceFrame;
-            const chr = referenceFrame.chrName;
+            const chr = viewport.genomicState.chromosome.name;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
             const bpPerPixel = referenceFrame.bpPerPixel;

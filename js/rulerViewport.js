@@ -24,7 +24,7 @@ class RulerViewport extends ViewPort {
             this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState)
         })
 
-        if (true === GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame)) {
+        if (true === GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name)) {
             enableTrackMouseHandlers.call(this);
         } else {
             disableTrackMouseHandlers.call(this);

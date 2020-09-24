@@ -137,7 +137,7 @@ class ViewPort extends ViewportBase {
 
         function showZoomInNotice() {
             const referenceFrame = this.genomicState.referenceFrame;
-            if (referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+            if (this.genomicState.chromosome.name.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             } else {
                 const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
@@ -156,7 +156,7 @@ class ViewPort extends ViewportBase {
 
         if (self.canvas &&
             self.tile &&
-            self.tile.chr === referenceFrame.chrName &&
+            self.tile.chr === self.genomicState.chromosome.name &&
             self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
 
             const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
@@ -182,7 +182,7 @@ class ViewPort extends ViewportBase {
 
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-        const chr = referenceFrame.chrName;
+        const chr = genomicState.chromosome.name;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
@@ -199,18 +199,18 @@ class ViewPort extends ViewportBase {
 
         // console.log('get features');
         try {
-            const features = await this.getFeatures(this.trackView.track, referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
+            const features = await this.getFeatures(this.trackView.track, chr, bpStart, bpEnd, referenceFrame.bpPerPixel);
             let roiFeatures = [];
             const roi = mergeArrays(this.browser.roi, this.trackView.track.roi)
             if (roi) {
                 for (let r of roi) {
                     const f = await
-                        r.getFeatures(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel);
+                        r.getFeatures(chr, bpStart, bpEnd, referenceFrame.bpPerPixel);
                     roiFeatures.push({track: r, features: f})
                 }
             }
 
-            this.tile = new Tile(referenceFrame.chrName, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures);
+            this.tile = new Tile(chr, bpStart, bpEnd, referenceFrame.bpPerPixel, features, roiFeatures);
             this.loading = false;
             this.hideMessage();
             this.stopSpinner();
@@ -235,7 +235,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.genomicState.referenceFrame);
+        const isWGV = GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name);
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
         const genomicState = this.genomicState;
@@ -756,7 +756,7 @@ function addMouseHandlers() {
 
             let string;
 
-            if ('all' === referenceFrame.chrName.toLowerCase()) {
+            if ('all' === self.genomicState.chromosome.name.toLowerCase()) {
 
                 const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
 

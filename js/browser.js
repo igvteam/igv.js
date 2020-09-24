@@ -185,8 +185,8 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
         return false;
     }
 
-    for (let genomicState of this.genomicStateList) {
-        const chromosomeName = genomicState.referenceFrame.chrName.toLowerCase();
+    for (let { chromosome } of this.genomicStateList) {
+        const chromosomeName = chromosome.name.toLowerCase();
         if ('all' === chromosomeName) {
             return true;
         }
@@ -484,7 +484,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 //
 Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].referenceFrame));
+    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].chromosome.name));
 
     if (isWGV || this.isMultiLocusMode()) {
         this.centerGuide.forcedHide();
@@ -910,7 +910,7 @@ Browser.prototype.resize = async function () {
 
     if (this.genomicStateList) {
 
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].referenceFrame);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].chromosome.name);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -1064,14 +1064,14 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
         } else {
 
             referenceFrame = genomicState.referenceFrame;
-            this.chromosomeSelectWidget.$select.val(referenceFrame.chrName);
+            this.chromosomeSelectWidget.$select.val(genomicState.chromosome.name);
 
             if (this.$searchInput) {
 
                 end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
 
                 if (this.genome) {
-                    chromosome = this.genome.getChromosome(referenceFrame.chrName);
+                    chromosome = this.genome.getChromosome(genomicState.chromosome.name);
                     if (chromosome) {
                         end = Math.min(end, chromosome.bpLength);
                     }
@@ -1079,11 +1079,11 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
 
                 ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
                 ee = StringUtils.numberFormatter(Math.floor(end));
-                str = referenceFrame.chrName + ":" + ss + "-" + ee;
+                str = genomicState.chromosome.name + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
 
-            this.fireEvent('locuschange', [{chr: referenceFrame.chrName, start: ss, end: ee, label: str}]);
+            this.fireEvent('locuschange', [{chr: genomicState.chromosome.name, start: ss, end: ee, label: str}]);
         }
 
     } else {
