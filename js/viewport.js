@@ -235,7 +235,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name);
+        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].chromosome.name);
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
         const genomicState = this.genomicState;

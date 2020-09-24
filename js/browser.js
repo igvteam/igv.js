@@ -46,6 +46,7 @@ import {buildOptions, inferTrackType} from "./util/igvUtils.js";
 import deepCopy from "./util/deepCopy.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
+import GenomicState from "./genomicState.js";
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -910,7 +911,7 @@ Browser.prototype.resize = async function () {
 
     if (this.genomicStateList) {
 
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].chromosome.name);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -1235,12 +1236,12 @@ Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, leftM
     // create right mate pair reference frame
     const mateChrName = this.genome.getChromosomeName(alignment.mate.chr);
 
-    const rightMatePairGenomicState = {};
-
     // rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-    rightMatePairGenomicState.chromosome = this.genome.getChromosome( alignment.mate.chr );
+    const chromosome = this.genome.getChromosome( alignment.mate.chr );
 
-    rightMatePairGenomicState.referenceFrame = createReferenceFrame(this.genome, mateChrName, leftMatePairGenomicState.referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+    const referenceFrame = createReferenceFrame(this.genome, mateChrName, leftMatePairGenomicState.referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+
+    const rightMatePairGenomicState = new GenomicState({ chromosome, referenceFrame, viewportWidth });
 
     // add right mate panel beside left mate panel
     this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
@@ -1436,8 +1437,6 @@ Browser.prototype.search = async function (string, init) {
 
     const self = this
 
-    const genome = this.genome
-
     if (string && string.trim().toLowerCase() === "all" || string === "*") {
         string = "all";
     }
@@ -1483,231 +1482,99 @@ Browser.prototype.search = async function (string, init) {
      */
     async function createGenomicStateList(loci) {
 
+        const viewportWidth = self.calculateViewportWidth(loci.length)
         let searchConfig = self.searchConfig;
-        let result = [];
+        let list = [];
 
         // Try locus string first  (e.g.  chr1:100-200)
         for (let locus of loci) {
-            let genomicState = isLocusChrNameStartEnd(locus, self.genome);
-            if (genomicState) {
-                genomicState.locusSearchString = locus;
-                result.push(genomicState);
+
+            const candidate = isLocusString(self, locus)
+            if (candidate) {
+                candidate.viewportWidth = viewportWidth
+                const genomicState = new GenomicState(candidate)
+                list.push(genomicState)
             } else {
-                // Try local feature cache.    This is created from feature tracks tagged "searcsearchablehable"
-                const feature = self.featureDB[locus.toUpperCase()];
+                const feature = self.featureDB[ locus.toUpperCase() ]
                 if (feature) {
-                    const chromosome = self.genome.getChromosome(feature.chr);
-                    if (chromosome) {
-                        genomicState = {
-                            chromosome: chromosome,
-                            start: feature.start,
-                            end: feature.end,
-                            locusSearchString: locus
-                        }
-                        validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
-                        result.push(genomicState);
-                    }
+                    const genomicState = new GenomicState({ browser: self, feature, locus, viewportWidth })
+                    list.push(genomicState)
                 } else {
                     // Try webservice
-                    let response = await searchWebService(locus)
-                    const genomicState = processSearchResult(response.result, response.locusSearchString);
-                    if (genomicState) {
-                        result.push(genomicState);
-                    }
+                    let searchServiceResponse = await searchWebService(self, locus, searchConfig)
+                    const genomicState = new GenomicState({ browser: self, searchServiceResponse, searchConfig, viewportWidth })
+                    list.push(genomicState)
                 }
-            }
-            self.appendReferenceFrames(result);
-        }
-
-        return result;
-
-        async function searchWebService(locus) {
-            let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
-            if (path.indexOf("$GENOME$") > -1) {
-                path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
-            }
-            const result = await igvxhr.loadString(path)
-            return {
-                result: result,
-                locusSearchString: locus
-            }
-        }
-
-        function processSearchResult(searchServiceResponse, locusSearchString) {
-
-            let results
-            if ('plain' === searchConfig.type) {
-                results = parseSearchResults(searchServiceResponse);
-            } else {
-                results = JSON.parse(searchServiceResponse);
-            }
-
-            if (searchConfig.resultsField) {
-                results = results[searchConfig.resultsField];
-            }
-
-            if (!results || 0 === results.length) {
-                return undefined;
-            } else {
-
-                let result;
-                if (Array.isArray(results)) {
-                    // Ignoring all but first result for now
-                    // TODO -- present all and let user select if results.length > 1
-                    result = results[0];
-                } else {
-                    // When processing search results from Ensembl REST API
-                    // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/BRCA2?content-type=application/json
-                    result = results;
-                }
-
-                if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
-                    console.log("Search service results must include chromosome and start fields: " + result);
-                    return undefined;
-                }
-
-                const chr = result[searchConfig.chromosomeField];
-                let start = result[searchConfig.startField] - searchConfig.coords;
-                let end = result[searchConfig.endField];
-
-                if (undefined === end) {
-                    end = start + 1;
-                }
-
-                if (self.flanking) {
-                    start = Math.max(0, start - self.flanking);
-                    end += self.flanking;
-                }
-
-                const geneNameLocusObject = Object.assign({}, result);
-                geneNameLocusObject.chromosome = self.genome.getChromosome(chr);
-                geneNameLocusObject.start = start;
-                geneNameLocusObject.end = end;
-                geneNameLocusObject.locusSearchString = locusSearchString;
-                geneNameLocusObject.selection = new GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
-
-                return geneNameLocusObject;
-
-
-            }
-
-
-            /**
-             * Parse the igv line-oriented (non json) search results.
-             * Example
-             *    EGFR    chr7:55,086,724-55,275,031    refseq
-             *
-             * @param data
-             */
-            function parseSearchResults(data) {
-
-                const linesTrimmed = []
-                const results = []
-                const lines = StringUtils.splitLines(data);
-
-                lines.forEach(function (item) {
-                    if ("" === item) {
-                        // do nothing
-                    } else {
-                        linesTrimmed.push(item);
-                    }
-                });
-
-                linesTrimmed.forEach(function (line) {
-
-                    var tokens = line.split("\t"),
-                        source,
-                        locusTokens,
-                        rangeTokens,
-                        obj;
-
-                    if (tokens.length >= 3) {
-
-                        locusTokens = tokens[1].split(":");
-                        rangeTokens = locusTokens[1].split("-");
-                        source = tokens[2].trim();
-
-                        obj =
-                            {
-                                gene: tokens[0],
-                                chromosome: self.genome.getChromosomeName(locusTokens[0].trim()),
-                                start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                                end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                                type: ("gtex" === source ? "snp" : "gene")
-                            };
-
-                        results.push(obj);
-
-                    }
-
-                });
-
-                return results;
-
-            }
-        }
-
-        function isLocusChrNameStartEnd(locus, genome) {
-
-            var a, b, numeric, chr, chromosome, locusObject;
-
-            locusObject = {};
-            a = locus.split(':');
-
-            chr = a[0];
-            chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
-            if (!chromosome) {
-                return undefined;          // Unknown chromosome
-            }
-            locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
-            locusObject.start = 0;
-            locusObject.end = chromosome.bpLength;
-
-            // if just a chromosome name we are done
-            if (1 === a.length) {
-                return locusObject;
-            } else {
-
-                b = a[1].split('-');
-
-                if (b.length > 2) {
-                    return undefined;                 // Not a locus string
-                } else {
-
-                    locusObject.start = locusObject.end = undefined;
-
-                    numeric = b[0].replace(/,/g, '');
-                    if (isNaN(numeric)) {
-                        return undefined;
-                    }
-
-                    locusObject.start = parseInt(numeric, 10) - 1;
-
-                    if (isNaN(locusObject.start)) {
-                        return undefined;
-                    }
-
-                    if (2 === b.length) {
-
-                        numeric = b[1].replace(/,/g, '');
-                        if (isNaN(numeric)) {
-                            return false;
-                        }
-
-                        locusObject.end = parseInt(numeric, 10);
-                    }
-
-                }
-
-                validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
-
-                return locusObject;
-
             }
 
         }
+
+        return list;
+
     }
 };
+
+function isLocusString(browser, locus) {
+
+    const a = locus.split(':')
+    const chr = a[0]
+
+    if (undefined === browser.genome.getChromosome(chr)) {
+
+        return undefined
+
+    } else {
+
+        const extent = {}
+        extent.start = 0;
+        extent.end = browser.genome.getChromosome(chr).bpLength;
+
+        if (a.length > 1) {
+
+            const b = a[ 1 ].split('-')
+
+            if (b.length > 2) {
+                return undefined
+            } else {
+
+                let numeric
+                numeric = b[ 0 ].replace(/,/g, '')
+
+                if (isNaN(numeric)) {
+                    return undefined
+                } else {
+                    extent.start = parseInt(numeric, 10) - 1
+                }
+
+                if (2 === b.length) {
+
+                    numeric = b[ 1 ].replace(/,/g, '')
+
+                    if (isNaN(numeric)) {
+                        return undefined;
+                    } else {
+                        extent.end = parseInt(numeric, 10)
+                    }
+                }
+            }
+        }
+
+        validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases())
+
+        return { browser, chr, start: extent.start, end: extent.end, locus }
+
+    }
+}
+
+async function searchWebService(browser, locus, searchConfig) {
+
+    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
+    if (path.indexOf("$GENOME$") > -1) {
+        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
+    }
+    const result = await igvxhr.loadString(path)
+    return { result: result, locusSearchString: locus }
+}
 
 Browser.prototype.appendReferenceFrames = function(genomicStateList) {
 
@@ -1820,7 +1687,7 @@ Browser.prototype.toJSON = function () {
 
         const genomicState = viewport.genomicState;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+        const locusString = genomicState.presentLocus(pixelWidth);
         locus.push(locusString);
 
         if (genomicState.selection) {
@@ -1914,7 +1781,7 @@ Browser.prototype.currentLoci = function () {
     for (let viewport of anyTrackView.viewports) {
         const genomicState = viewport.genomicState;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+        const locusString = genomicState.presentLocus(pixelWidth);
         loci.push(locusString);
     }
     return loci;

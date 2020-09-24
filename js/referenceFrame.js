@@ -91,20 +91,4 @@ ReferenceFrame.prototype.getChromosome = function () {
     return this.genome.getChromosome(this.chrName)
 }
 
-ReferenceFrame.prototype.showLocus = function (pixels) {
-
-    if ('all' === this.chrName.toLowerCase()) {
-        return this.chrName.toLowerCase();
-    } else {
-        const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
-        const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
-        return this.chrName + ':' + ss + '-' + ee;
-    }
-};
-
-ReferenceFrame.prototype.description = function () {
-    return "ReferenceFrame " + this.chrName + " " + StringUtils.numberFormatter(Math.floor(this.start)) + " bpp " + this.bpPerPixel;
-};
-
-
 export default ReferenceFrame;

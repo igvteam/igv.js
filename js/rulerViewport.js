@@ -24,7 +24,7 @@ class RulerViewport extends ViewPort {
             this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState)
         })
 
-        if (true === GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name)) {
+        if (true === GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].chromosome.name)) {
             enableTrackMouseHandlers.call(this);
         } else {
             disableTrackMouseHandlers.call(this);
@@ -33,7 +33,7 @@ class RulerViewport extends ViewPort {
     }
 
     updateLocusLabel() {
-        const str = this.genomicState.referenceFrame.showLocus(this.$viewport.width())
+        const str = this.genomicState.presentLocus(this.$viewport.width())
         this.$rulerLabel.text(str)
     }
 
