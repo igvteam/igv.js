@@ -7,7 +7,6 @@ class GenomicState {
 
     constructor(params) {
 
-        let status
         if (params.browser && params.chr) {
             this.initializeWithLocus(params)
         } else if (params.browser && params.feature && params.locus) {
@@ -27,6 +26,8 @@ class GenomicState {
             this.referenceFrame = params.referenceFrame
             this.locusSearchString = this.presentLocus(params.viewportWidth)
         }
+
+        console.log(`Genomic State. locusSearch String ${ this.locusSearchString }. presentLocus ${ this.presentLocus(params.viewportWidth) }.`)
     }
 
     initializeWithLocus(params) {

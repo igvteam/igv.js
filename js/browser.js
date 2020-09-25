@@ -1519,7 +1519,9 @@ function isLocusString(browser, locus) {
     const a = locus.split(':')
     const chr = a[0]
 
-    if (undefined === browser.genome.getChromosome(chr)) {
+    if ('all' === chr && browser.genome.getChromosome(chr)) {
+        return { browser, chr, start: 0, end: browser.genome.getChromosome(chr).bpLength, locus }
+    } else if (undefined === browser.genome.getChromosome(chr)) {
 
         return undefined
 

@@ -7,27 +7,25 @@ import {createIcon} from "./igv-icons.js";
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, genomicState, width) {
-
         super(trackView, $viewportContainer, genomicState, width);
-
     }
 
     initializationHelper() {
 
-        this.rulerSweeper = new RulerSweeper(this);
+        this.rulerSweeper = new RulerSweeper(this)
 
-        appendMultiPanelCloseButton(this.browser, this.$viewport, this.genomicState);
+        appendMultiPanelCloseButton(this.browser, this.$viewport, this.genomicState)
 
-        this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">');
-        this.$content.append(this.$rulerLabel);
-        this.$rulerLabel.click(e => {
-            this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState)
-        })
+        this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">')
+        this.$content.append(this.$rulerLabel)
+        this.$rulerLabel.click(() => this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState))
+
+        this.namespace = `.ruler_track_viewport_${ this.browser.genomicStateList.indexOf(this.genomicState) }`
 
         if (true === GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].chromosome.name)) {
-            enableTrackMouseHandlers.call(this);
+            enableTrackMouseHandlers.call(this)
         } else {
-            disableTrackMouseHandlers.call(this);
+            this.$viewport.off(this.namespace)
         }
 
     }
@@ -54,42 +52,33 @@ function appendMultiPanelCloseButton(browser, $viewport, genomicState) {
 
 function enableTrackMouseHandlers() {
 
-    const index = this.browser.genomicStateList.indexOf(this.genomicState);
-    const namespace = '.ruler_track_viewport_' + index;
+    const index = this.browser.genomicStateList.indexOf(this.genomicState)
+    const click = `click${ this.namespace }`
 
-    let self = this;
-    this.$viewport.on('click' + namespace, (e) => {
+    this.$viewport.on(click, (e) => {
 
-        const pixel = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-        const bp = Math.round(self.genomicState.referenceFrame.start + self.genomicState.referenceFrame.toBP(pixel));
+        const { x:pixel } = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0));
+        const bp = Math.round(this.genomicState.referenceFrame.start + this.genomicState.referenceFrame.toBP(pixel));
 
         let searchString;
 
-        if (1 === self.browser.genomicStateList.length) {
-            searchString = self.browser.genome.getChromosomeCoordinate(bp).chr;
+        const { chr } = this.browser.genome.getChromosomeCoordinate(bp)
+
+        if (1 === this.browser.genomicStateList.length) {
+            searchString = chr
         } else {
 
-            let loci = self.browser.genomicStateList.map((genomicState) => {
-                return genomicState.locusSearchString;
-            });
+            let loci = this.browser.genomicStateList.map(({ locusSearchString }) => locusSearchString);
 
-            loci[self.browser.genomicStateList.indexOf(self.genomicState)] = self.browser.genome.getChromosomeCoordinate(bp).chr;
+            loci[ index ] = chr;
 
             searchString = loci.join(' ');
         }
 
-        self.browser.search(searchString);
+        this.browser.search(searchString);
     });
 
 
-}
-
-function disableTrackMouseHandlers() {
-
-    const index = this.browser.genomicStateList.indexOf(this.genomicState);
-    const namespace = '.ruler_track_viewport_' + index;
-
-    this.$viewport.off(namespace);
 }
 
 export default RulerViewport
