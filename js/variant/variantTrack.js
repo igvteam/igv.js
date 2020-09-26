@@ -60,16 +60,13 @@ const VariantTrack = extend(TrackBase,
         this.squishedGroupGap = config.squishedGroupGap || 5;
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
-
         this.featureSource = FeatureSource(config, browser.genome);
-
         this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
         this.mixedColor = config.mixedColor || "rgb(200, 220, 200)";
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)";
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
-
         this.sortDirection = "ASC";
 
         this.nRows = 1;  // Computed dynamically
@@ -79,7 +76,7 @@ const VariantTrack = extend(TrackBase,
 VariantTrack.prototype.postInit = async function () {
 
     const header = await this.getFileHeader();   // cricital, don't remove'
-    if (undefined === this.visibilityWindow) {
+    if (undefined === this.visibilityWindow && this.config.indexed !== false) {
         const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
         if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
             this.visibilityWindow = 1000;  // these are known to be very dense
@@ -93,6 +90,10 @@ VariantTrack.prototype.postInit = async function () {
     return this;
 
 }
+
+VariantTrack.prototype.supportsWholeGenome = function () {
+    return this.config.indexed === false && this.config.supportsWholeGenome !== false
+};
 
 VariantTrack.prototype.getFileHeader = async function () {
 
