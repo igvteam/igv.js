@@ -104,5 +104,21 @@ suite("testVariant", function () {
     })
 
 
+    //SKBR3_Sniffles_variants_tra.vcf
+    test("Sniffles <TRA> records", async function () {
+
+        const url = require.resolve("./data/vcf/SKBR3_Sniffles_variants_tra.vcf");
+        const data = await igvxhr.loadString(url, {});
+        const parser = new VcfParser();
+        parser.parseHeader(data);
+        const featureList = parser.parseFeatures(data);
+
+        // 1	564466	26582	N	<TRA>	.	PASS	PRECISE;SVMETHOD=Snifflesv1.0.2;CHR2=MT;END=3916;STD_quant_start=198.695999;STD_quant_stop=234.736235;Kurtosis_quant_start=0.913054;Kurtosis_quant_stop=-0.183504;SVTYPE=TRA;SUPTYPE=SR;SVLEN=-1199826434;STRANDS=-+;STRANDS2=2,9,2,9;RE=11	GT:DR:DV	./.:.:11
+        const tra = featureList[0];
+        assert.equal(tra.pos, 564466);
+        assert.equal(tra.start, 564465);
+        assert.equal(tra.end, 564466);
+    })
+
 })
 
