@@ -137,7 +137,7 @@ class ViewPort extends ViewportBase {
 
         function showZoomInNotice() {
             const referenceFrame = this.genomicState.referenceFrame;
-            if (this.genomicState.chromosome.name.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+            if (this.genomicState.referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             } else {
                 const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
@@ -156,7 +156,7 @@ class ViewPort extends ViewportBase {
 
         if (self.canvas &&
             self.tile &&
-            self.tile.chr === self.genomicState.chromosome.name &&
+            self.tile.chr === self.genomicState.referenceFrame.chrName &&
             self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
 
             const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
@@ -182,7 +182,7 @@ class ViewPort extends ViewportBase {
 
         const genomicState = this.genomicState;
         const referenceFrame = genomicState.referenceFrame;
-        const chr = genomicState.chromosome.name;
+        const chr = genomicState.referenceFrame.chrName;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
@@ -235,7 +235,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].chromosome.name);
+        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].referenceFrame.chrName);
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
         const genomicState = this.genomicState;
@@ -756,7 +756,7 @@ function addMouseHandlers() {
 
             let string;
 
-            if ('all' === self.genomicState.chromosome.name.toLowerCase()) {
+            if ('all' === self.genomicState.referenceFrame.chrName.toLowerCase()) {
 
                 const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
 

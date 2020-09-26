@@ -524,7 +524,7 @@ function viewportsToReload(force) {
             return false;
         } else {
             const referenceFrame = viewport.genomicState.referenceFrame;
-            const chr = viewport.genomicState.chromosome.name;
+            const chr = viewport.genomicState.referenceFrame.chrName;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
             const bpPerPixel = referenceFrame.bpPerPixel;

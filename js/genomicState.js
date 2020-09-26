@@ -13,27 +13,29 @@ class GenomicState {
 
             const { chr, start, end } = params.feature
 
-            this.chromosome = params.browser.genome.getChromosome(chr)
+            const chromosome = params.browser.genome.getChromosome(chr)
+            validateLocusExtent(chromosome.bpLength, { start, end }, params.browser.minimumBases())
+
+            this.referenceFrame = new ReferenceFrame(params.browser.genome, chr, start, end, (end - start) / params.viewportWidth)
+
             this.locusSearchString = params.locus
 
-            validateLocusExtent(this.chromosome.bpLength, { start, end }, params.browser.minimumBases())
-
-            this.referenceFrame = new ReferenceFrame(params.browser.genome, this.chromosome.name, start, end, (end - start) / params.viewportWidth)
         } else if (params.browser && params.searchServiceResponse && params.searchConfig) {
+
             this.processSearchResult(params.browser, params.searchServiceResponse, params.searchConfig, params.viewportWidth)
-        } else if (params.chromosome && params.referenceFrame) {
-            this.chromosome = params.chromosome
+        } else if (params.referenceFrame) {
             this.referenceFrame = params.referenceFrame
             this.locusSearchString = this.presentLocus(params.viewportWidth)
         }
 
-        console.log(`Genomic State. locusSearch String ${ this.locusSearchString }. presentLocus ${ this.presentLocus(params.viewportWidth) }.`)
     }
 
     initializeWithLocus(params) {
+        const chromosome = params.browser.genome.getChromosome(params.chr)
+        validateLocusExtent(chromosome.bpLength, { start: params.start, end: params.end }, params.browser.minimumBases())
+
+        this.referenceFrame = new ReferenceFrame(params.browser.genome, params.chr, params.start, params.end, (params.end - params.start) / params.viewportWidth)
         this.locusSearchString = params.locus
-        this.chromosome = params.browser.genome.getChromosome(params.chr)
-        this.referenceFrame = new ReferenceFrame(params.browser.genome, this.chromosome.name, params.start, params.end, (params.end - params.start) / params.viewportWidth)
     }
 
     processSearchResult(browser, searchServiceResponse, searchConfig, viewportWidth) {
@@ -69,7 +71,7 @@ class GenomicState {
             }
 
             this.gene = result.gene
-            this.chromosome = browser.genome.getChromosome(result[ searchConfig.chromosomeField ]);
+            const chromosome = browser.genome.getChromosome(result[ searchConfig.chromosomeField ]);
             this.locusSearchString = searchServiceResponse.locusSearchString;
             this.selection = new GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
 
@@ -85,18 +87,18 @@ class GenomicState {
                 end += browser.flanking;
             }
 
-            this.referenceFrame = new ReferenceFrame(browser.genome, this.chromosome.name, start, end, (end - start) / viewportWidth)
+            this.referenceFrame = new ReferenceFrame(browser.genome, chromosome.name, start, end, (end - start) / viewportWidth)
 
         }
     }
 
     presentLocus(pixels) {
-        if ('all' === this.chromosome.name.toLowerCase()) {
-            return this.chromosome.name.toLowerCase();
+        if ('all' === this.referenceFrame.chrName) {
+            return this.referenceFrame.chrName
         } else {
             const ss = StringUtils.numberFormatter(Math.floor(this.referenceFrame.start) + 1);
             const ee = StringUtils.numberFormatter(Math.round(this.referenceFrame.start + this.referenceFrame.bpPerPixel * pixels));
-            return `${ this.chromosome.name }:${ ss }-${ ee }`
+            return `${ this.referenceFrame.chrName }:${ ss }-${ ee }`
         }
 
     }

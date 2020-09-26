@@ -186,8 +186,8 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
         return false;
     }
 
-    for (let { chromosome } of this.genomicStateList) {
-        const chromosomeName = chromosome.name.toLowerCase();
+    for (let { referenceFrame } of this.genomicStateList) {
+        const chromosomeName = referenceFrame.chrName.toLowerCase();
         if ('all' === chromosomeName) {
             return true;
         }
@@ -485,7 +485,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 //
 Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
 
-    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].chromosome.name));
+    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].referenceFrame.chrName));
 
     if (isWGV || this.isMultiLocusMode()) {
         this.centerGuide.forcedHide();
@@ -911,7 +911,7 @@ Browser.prototype.resize = async function () {
 
     if (this.genomicStateList) {
 
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].chromosome.name);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].referenceFrame.chrName);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -929,8 +929,8 @@ Browser.prototype.resize = async function () {
 
     }
 
-    if (this.genomicStateList && 1 === this.genomicStateList.length && resizeWillExceedChromosomeLength(this.viewportContainerWidth(), this.genomicStateList[0])) {
-        this.search(this.genomicStateList[0].chromosome.name);
+    if (this.genomicStateList && 1 === this.genomicStateList.length && resizeWillExceedChromosomeLength(this, this.viewportContainerWidth(), this.genomicStateList[0])) {
+        this.search(this.genomicStateList[0].referenceFrame.chrName);
     } else {
 
         if (this.centerGuide) this.centerGuide.resize();
@@ -952,9 +952,10 @@ Browser.prototype.resize = async function () {
 
 };
 
-const resizeWillExceedChromosomeLength = (viewportContainerWidth, genomicState) => {
-    const bp = viewportContainerWidth * genomicState.referenceFrame.bpPerPixel;
-    return (bp > genomicState.chromosome.bpLength);
+const resizeWillExceedChromosomeLength = (browser, viewportContainerWidth, genomicState) => {
+    const bp = viewportContainerWidth * genomicState.referenceFrame.bpPerPixel
+    const { bpLength } = browser.genome.getChromosome(genomicState.referenceFrame.chrName)
+    return (bp > bpLength);
 }
 
 Browser.prototype.updateViews = async function (genomicState, views, force) {
@@ -1065,14 +1066,14 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
         } else {
 
             referenceFrame = genomicState.referenceFrame;
-            this.chromosomeSelectWidget.$select.val(genomicState.chromosome.name);
+            this.chromosomeSelectWidget.$select.val(genomicState.referenceFrame.chrName);
 
             if (this.$searchInput) {
 
                 end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
 
                 if (this.genome) {
-                    chromosome = this.genome.getChromosome(genomicState.chromosome.name);
+                    chromosome = this.genome.getChromosome(genomicState.referenceFrame.chrName);
                     if (chromosome) {
                         end = Math.min(end, chromosome.bpLength);
                     }
@@ -1080,11 +1081,11 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
 
                 ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
                 ee = StringUtils.numberFormatter(Math.floor(end));
-                str = genomicState.chromosome.name + ":" + ss + "-" + ee;
+                str = genomicState.referenceFrame.chrName + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
 
-            this.fireEvent('locuschange', [{chr: genomicState.chromosome.name, start: ss, end: ee, label: str}]);
+            this.fireEvent('locuschange', [{chr: genomicState.referenceFrame.chrName, start: ss, end: ee, label: str}]);
         }
 
     } else {
@@ -1290,13 +1291,13 @@ Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState
 
     for (let i = 0; i < this.genomicStateList.length; i++) {
 
-        const { referenceFrame, chromosome } = this.genomicStateList[ i ];
+        const { referenceFrame } = this.genomicStateList[ i ];
 
         const ee = referenceFrame.calculateEnd(previousViewportWidth);
 
         const bpp = referenceFrame.calculateBPP(ee, viewportWidth);
 
-        this.genomicStateList[i].referenceFrame = new ReferenceFrame(this.genome, chromosome.name, referenceFrame.start, ee, bpp);
+        this.genomicStateList[i].referenceFrame = new ReferenceFrame(this.genome, referenceFrame.chrName, referenceFrame.start, ee, bpp);
 
     }
 
@@ -1582,7 +1583,7 @@ Browser.prototype.appendReferenceFrames = function(genomicStateList) {
 
     const viewportWidth = this.calculateViewportWidth(genomicStateList.length)
     for (let gs of genomicStateList) {
-        gs.referenceFrame = new ReferenceFrame(this.genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth)
+        gs.referenceFrame = new ReferenceFrame(this.genome, gs.referenceFrame.chrName, gs.start, gs.end, (gs.end - gs.start) / viewportWidth)
     }
 
     return genomicStateList

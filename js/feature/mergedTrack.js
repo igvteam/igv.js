@@ -86,7 +86,7 @@ MergedTrack.prototype.draw = function (options) {
 
     mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
 
-    dataRange = autoscale(options.genomicState.chromosome.name, mergedFeatures);
+    dataRange = autoscale(options.genomicState.referenceFrame.chrName, mergedFeatures);
 
     //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
