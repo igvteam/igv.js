@@ -31,7 +31,7 @@ class RulerViewport extends ViewPort {
     }
 
     updateLocusLabel() {
-        const str = this.genomicState.presentLocus(this.$viewport.width())
+        const str = this.genomicState.referenceFrame.presentLocus(this.$viewport.width())
         this.$rulerLabel.text(str)
     }
 

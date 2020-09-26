@@ -25,7 +25,7 @@ class GenomicState {
             this.processSearchResult(params.browser, params.searchServiceResponse, params.searchConfig, params.viewportWidth)
         } else if (params.referenceFrame) {
             this.referenceFrame = params.referenceFrame
-            this.locusSearchString = this.presentLocus(params.viewportWidth)
+            this.locusSearchString = this.referenceFrame.presentLocus(params.viewportWidth)
         }
 
     }
@@ -90,17 +90,6 @@ class GenomicState {
             this.referenceFrame = new ReferenceFrame(browser.genome, chromosome.name, start, end, (end - start) / viewportWidth)
 
         }
-    }
-
-    presentLocus(pixels) {
-        if ('all' === this.referenceFrame.chrName) {
-            return this.referenceFrame.chrName
-        } else {
-            const ss = StringUtils.numberFormatter(Math.floor(this.referenceFrame.start) + 1);
-            const ee = StringUtils.numberFormatter(Math.round(this.referenceFrame.start + this.referenceFrame.bpPerPixel * pixels));
-            return `${ this.referenceFrame.chrName }:${ ss }-${ ee }`
-        }
-
     }
 }
 

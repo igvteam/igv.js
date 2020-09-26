@@ -1690,7 +1690,7 @@ Browser.prototype.toJSON = function () {
 
         const genomicState = viewport.genomicState;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.presentLocus(pixelWidth);
+        const locusString = genomicState.referenceFrame.presentLocus(pixelWidth);
         locus.push(locusString);
 
         if (genomicState.selection) {
@@ -1784,7 +1784,7 @@ Browser.prototype.currentLoci = function () {
     for (let viewport of anyTrackView.viewports) {
         const genomicState = viewport.genomicState;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.presentLocus(pixelWidth);
+        const locusString = genomicState.referenceFrame.presentLocus(pixelWidth);
         loci.push(locusString);
     }
     return loci;

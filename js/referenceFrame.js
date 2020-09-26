@@ -91,4 +91,16 @@ ReferenceFrame.prototype.getChromosome = function () {
     return this.genome.getChromosome(this.chrName)
 }
 
+ReferenceFrame.prototype.presentLocus = function(pixels) {
+
+    if ('all' === this.chrName) {
+        return this.chrName
+    } else {
+        const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
+        const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+        return `${ this.chrName }:${ ss }-${ ee }`
+    }
+
+}
+
 export default ReferenceFrame;
