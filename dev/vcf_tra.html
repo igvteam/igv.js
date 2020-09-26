@@ -30,17 +30,26 @@
     var options =
         {
             // Example of fully specifying a reference genome.  We could alternatively use  genome: "hg19"
-            genome: "hg18",
-            locus: ["1:564466", "20:1110696", "20:1230237",  "20:1234567"],
+            genome: "hg19",
+            locus: ["chr8:79,164,179-79,166,446", "CHR14:52,222,702-52,223,690"],
             tracks:
                 [
                     {
-                        name: "VCF",
+                        name: "Variants",
                         type: "variant",
                         format: "vcf",
-                        url: "../test/data/vcf/example.vcf",
+                        url: "../test/data/vcf/SKBR3_Sniffles_variants_tra.vcf",
                         indexed: false,
-                        displayMode: "EXPANDED"
+                        displayMode: "EXPANDED",
+                        height: 50
+                    },
+                    {
+                        name: "Alignments",
+                        type: "alignments",
+                        format: "bam",
+                        url: "https://drive.google.com/file/d/1DXYQqd-e53SXzw04uMlglm_ZIFkRzE1L/view?usp=sharing",
+                        indexURL: "https://drive.google.com/file/d/1OzaEocFK8KADgkBCVLnocF4McbOvUEpw/view?usp=sharing",
+                        height: 600
                     }
                 ]
 
