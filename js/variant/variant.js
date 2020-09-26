@@ -72,7 +72,11 @@ class Variant {
         // not the leading or trailing reference
         if (this.info["END"]) {
             this.start = this.pos - 1;
-            this.end = Number.parseInt(this.info["END"]);
+            if(this.info["CHR2"] && this.info["CHR2"] !== this.chr) {
+                this.end = this.start + 1;
+            } else {
+                this.end = Number.parseInt(this.info["END"]);
+            }
         } else {
             if (this.type === "NONVARIANT") {
                 this.start = this.pos - 1;      // convert to 0-based coordinate convention
