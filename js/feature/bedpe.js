@@ -26,17 +26,13 @@ function decodeBedpe(tokens, ignore) {
 
 
     feature.chr = feature.chr1 === feature.chr2 ? feature.chr1 : "MIXED";
-    feature.interchr = feature.chr1 !== feature.chr2;
 
     // Start and end for the feature as a whole.  This needs revisited for interchr features
     feature.start = Math.min(feature.start1, feature.start2);
     feature.end = Math.max(feature.end1, feature.end2);
 
     // Midpoints
-    let m1 = (feature.start1 + feature.end1) / 2;
-    let m2 = (feature.start2 + feature.end2) / 2;
-    feature.m1 = (m1 < m2) ? m1 : m2;
-    feature.m2 = (m1 < m2) ? m2 : m1;
+
 
     // Optional extra columns
     if (this.header) {
@@ -52,6 +48,7 @@ function decodeBedpe(tokens, ignore) {
 
     return feature;
 }
+
 
 
 /**
