@@ -26,12 +26,11 @@
 
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import {extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
-import BWSource from "../bigwig/bwSource.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -63,7 +62,7 @@ const InteractionTrack = extend(TrackBase,
         }
 
         // Create the FeatureSource and override the default whole genome method
-        this.featureSource =  FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, browser.genome);
         this.featureSource.getWGFeatures = getWGFeatures;
 
         this.colorAlphaCache = {};
@@ -122,10 +121,18 @@ InteractionTrack.prototype.drawNested = function (options) {
         const y = this.arcOrientation ? options.pixelHeight : 0;
         for (let feature of featureList) {
 
-            if(feature.interchr) continue;
+            if (feature.chr1 !== feature.chr2) continue;
 
-            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
-            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
+            let m1 = (feature.start1 + feature.end1) / 2;
+            let m2 = (feature.start2 + feature.end2) / 2;
+            if (m1 > m2) {
+                const tmp = m1;
+                m1 = m2;
+                m2 = m1;
+            }
+
+            let pixelStart = Math.round((m1 - bpStart) / xScale);
+            let pixelEnd = Math.round((m2 - bpStart) / xScale);
             let direction = this.arcOrientation;
 
             let w = (pixelEnd - pixelStart);
@@ -153,9 +160,8 @@ InteractionTrack.prototype.drawNested = function (options) {
                 startAngle = Math.PI / 2 - this.theta;
                 endAngle = Math.PI / 2 + this.theta;
             }
-
             let color = feature.color || this.color;
-            if(color && this.config.useScore) {
+            if (color && this.config.useScore) {
                 color = getAlphaColor.call(this, color, scoreShade(feature.score));
             } else if (color && w > viewportWidth) {
                 color = getAlphaColor.call(this, color, "0.1");
@@ -171,13 +177,15 @@ InteractionTrack.prototype.drawNested = function (options) {
                 const s2 = (feature.start2 - bpStart) / xScale;
                 const e2 = (feature.end2 - bpStart) / xScale;
                 const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
+                if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
             }
 
             ctx.beginPath();
             ctx.arc(xc, yc, r, startAngle, endAngle, false);
             ctx.stroke();
+
+            feature.drawState = {xc, yc, r};
         }
     }
 
@@ -225,12 +233,21 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
         for (let feature of featureList) {
             ctx.save();
+
             const value = this.config.useScore ? feature.score : feature.value;
 
-            if (value === undefined || Number.isNaN(value)|| feature.interchr) continue;
+            if (value === undefined || Number.isNaN(value) || (feature.chr1 !== feature.chr2)) continue;
 
-            let pixelStart = (feature.m1 - bpStart) / xScale;
-            let pixelEnd = (feature.m2 - bpStart) / xScale;
+            let m1 = (feature.start1 + feature.end1) / 2;
+            let m2 = (feature.start2 + feature.end2) / 2;
+            if (m1 > m2) {
+                const tmp = m1;
+                m1 = m2;
+                m2 = m1;
+            }
+
+            let pixelStart = (m1 - bpStart) / xScale;
+            let pixelEnd = (m2 - bpStart) / xScale;
             let w = (pixelEnd - pixelStart);
             if (w < 3) {
                 w = 3;
@@ -242,12 +259,14 @@ InteractionTrack.prototype.drawProportional = function (options) {
             const radiusY = this.logScale ?
                 Math.log10(value + 1) * yScale :
                 value * yScale;
+            const radiusX = w / 2;
+            const xc = pixelStart + w / 2;
             const counterClockwise = this.arcOrientation ? true : false;
             const color = feature.color || this.color;
             ctx.strokeStyle = color;
             ctx.lineWidth = feature.thickness || this.thickness || 1;
             ctx.beginPath();
-            ctx.ellipse(pixelStart + w / 2, y, w / 2, radiusY, 0, 0, Math.PI, counterClockwise);
+            ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise);
             ctx.stroke();
 
             if (this.showBlocks) {
@@ -257,16 +276,19 @@ InteractionTrack.prototype.drawProportional = function (options) {
                 const s2 = (feature.start2 - bpStart) / xScale;
                 const e2 = (feature.end2 - bpStart) / xScale;
                 const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
+                if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
             }
 
             if (this.alpha) {
                 const alphaColor = getAlphaColor.call(this, color, this.alpha);
-               ctx.fillStyle = alphaColor;
+                ctx.fillStyle = alphaColor;
                 ctx.fill();
             }
             ctx.restore();
+
+            feature.drawState = {xc, yc: y, radiusX, radiusY};
+
         }
     }
 
@@ -320,30 +342,100 @@ InteractionTrack.prototype.menuItemList = function () {
     return items;
 };
 
-
 InteractionTrack.prototype.doAutoscale = function (features) {
 
-    if ("proportional" === this.arcType) {
-        let max = 0;
-        if (features) {
-            for(let f of features) {
-                const v = this.config.useScore ? f.score : f.value;
-                if (!Number.isNaN(v)) {
-                    max = Math.max(max, v);
-                }
+    // if ("proportional" === this.arcType) {
+    let max = 0;
+    if (features) {
+        for (let f of features) {
+            const v = this.config.useScore ? f.score : f.value;
+            if (!Number.isNaN(v)) {
+                max = Math.max(max, v);
             }
         }
-        return {min: 0, max: max};
     }
+    return {min: 0, max: max};
+    // }
 }
 
 
-//
-// InteractionTrack.prototype.popupData = function (config) {
-//
-//     return null;
-// };
+InteractionTrack.prototype.popupData = function (clickState, features) {
 
+    if (!features) features = this.clickedFeatures(clickState);
+    const genomicLocation = clickState.genomicLocation;
+
+    const data = [];
+    for (let feature of features) {
+        const featureData = popupData(feature);
+        //if (data.length > 0) {
+       //     data.push("<HR>");
+       // }
+        Array.prototype.push.apply(data, featureData);
+        // For now just return the top hit
+        break;
+    }
+    return data;
+};
+
+
+InteractionTrack.prototype.clickedFeatures = function (clickState) {
+
+    // We use the cached features rather than method to avoid async load.  If the
+    // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+    const featureList = clickState.viewport.getCachedFeatures();
+    const candidates = [];
+    if (featureList) {
+        const proportional = this.arcType === "proportional";
+
+        for (let feature of featureList) {
+            if ((feature.chr1 !== feature.chr2) || !feature.drawState) continue;
+            if (proportional) {
+                //(x-xc)^2/radiusX^2 + (y-yc)^2/radiusY^2 <= 1
+                const {xc, yc, radiusX, radiusY} = feature.drawState;
+                const dx = clickState.canvasX - xc;
+                const dy = clickState.canvasY - yc;
+                const score = (dx / radiusX) * (dx / radiusX) + (dy / radiusY) * (dy / radiusY);
+                if (score <= 1.2 && score >= 0.8) {
+                    candidates.push({score, feature});
+                }
+
+            } else {
+                const {xc, yc, r} = feature.drawState;
+                const dx = clickState.canvasX - xc;
+                const dy = clickState.canvasY - yc;
+                const score = Math.abs(Math.sqrt(dx * dx + dy * dy) - r);
+                if (score < 5) {
+                    candidates.push({score, feature})
+                }
+            }
+        }
+    }
+    if (candidates.length > 1) {
+        candidates.sort((a, b) => a.score - b.score);
+    }
+    return candidates.map((c) => c.feature);
+}
+
+function popupData(feature) {
+    const data = [
+        {name: "Region 1", value: positionString(feature.chr1, feature.start1, feature.end1)},
+        {name: "Region 2", value: positionString(feature.chr2, feature.start2, feature.end2)},
+    ]
+    if (feature.name) {
+        data.push({name: "Name", value: feature.name});
+    }
+    if (feature.value !== undefined) {
+        data.push({name: "Value", value: feature.value})
+        if (feature.score !== undefined) {
+            data.push({name: "Score", value: feature.score})
+        }
+    }
+    return data;
+}
+
+function positionString(chr, start, end) {
+    return `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)}`
+}
 
 /**
  * Estimate theta given the ratio of track height to 1/2 the feature width (coa).  This relationship is approximately linear.
@@ -381,7 +473,7 @@ function getAlphaColor(color, alpha) {
 }
 
 
-function getWGFeatures  (allFeatures) {
+function getWGFeatures(allFeatures) {
 
     const genome = this.genome;
     const wgChromosomeNames = new Set(genome.wgChromosomeNames);
@@ -391,31 +483,31 @@ function getWGFeatures  (allFeatures) {
 
     for (let c of genome.wgChromosomeNames) {
         const chrFeatures = allFeatures[c];
-        if(chrFeatures)
-        for (let f of chrFeatures) {
-            let queryChr = genome.getChromosomeName(f.chr);
+        if (chrFeatures)
+            for (let f of chrFeatures) {
+                let queryChr = genome.getChromosomeName(f.chr);
 
-            if (wgChromosomeNames.has(queryChr)) {
+                if (wgChromosomeNames.has(queryChr)) {
 
-                const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
-                const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
-                if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
+                    const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
+                    const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
+                    if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
 
-                const wg = Object.create(Object.getPrototypeOf(f));
-                Object.assign(wg, f);
-                wg.chr = "all";
-                wg.m1 = m1;
-                wg.m2 = m2;
-                // wg.realChr = f.chr;
-                // wg.realStart = f.start;
-                // wg.realEnd = f.end;
+                    const wg = Object.create(Object.getPrototypeOf(f));
+                    Object.assign(wg, f);
+                    wg.chr = "all";
+                    wg.m1 = m1;
+                    wg.m2 = m2;
+                    // wg.realChr = f.chr;
+                    // wg.realStart = f.start;
+                    // wg.realEnd = f.end;
 
-                //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                //wg.originalFeature = f;
-                wgFeatures.push(wg);
+                    //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
+                    // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
+                    //wg.originalFeature = f;
+                    wgFeatures.push(wg);
+                }
             }
-        }
     }
     wgFeatures.sort(function (a, b) {
         return a.m1 - b.m2;
