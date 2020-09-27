@@ -3,7 +3,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js";
-import {createIcon} from "./igv-icons";
+import {createIcon} from "./igv-icons.js";
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, genomicState, width) {
