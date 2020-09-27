@@ -140,33 +140,6 @@ WigTrack.prototype.draw = function (options) {
         return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
     };
 
-    const getX = function (feature) {
-        let x = Math.floor((feature.start - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.log('isNaN(x). feature start ' + StringUtils.numberFormatter(feature.start) + ' bp start ' + StringUtils.numberFormatter(bpStart));
-        return x;
-    };
-
-    const getWidth  = function (feature, x) {
-        const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-        return Math.max(1, rectEnd - x);
-    };
-
-    const drawGuideLines = function (options) {
-        if (self.config.hasOwnProperty('guideLines')) {
-            for (let line of self.config.guideLines) {
-                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    let y = yScale(line.y);
-                    let props = {
-                        'strokeStyle': line['color'],
-                        'strokeWidth': 2
-                    };
-                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
-                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
-                }
-            }
-        }
-    };
-
     if (features && features.length > 0) {
 
         if (self.dataRange.min === undefined) self.dataRange.min = 0;
@@ -182,12 +155,14 @@ WigTrack.prototype.draw = function (options) {
                 if (f.end < bpStart) continue;
                 if (f.start > bpEnd) break;
 
-                const x = getX(f);
+                const x = Math.floor((f.start - bpStart) / bpPerPixel)
                 if (isNaN(x)) continue;
 
                 let y = yScale(f.value);
 
-                const width = getWidth(f, x);
+                const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel);
+                const width = Math.max(1, rectEnd - x);
+
                 let c = (f.value < 0 && self.altColor) ? self.altColor : self.color;
                 const color = (typeof c === "function") ? c(f.value) : c;
 
@@ -198,7 +173,7 @@ WigTrack.prototype.draw = function (options) {
 
                 } else {
                     let height = y - y0;
-                    if((Math.abs(height)) < 1) {
+                    if ((Math.abs(height)) < 1) {
                         height = height < 0 ? -1 : 1
                     }
                     const pixelEnd = x + width;
@@ -220,8 +195,20 @@ WigTrack.prototype.draw = function (options) {
         }
     }
 
-    drawGuideLines(options);
-
+    // Draw guidelines
+    if (self.config.hasOwnProperty('guideLines')) {
+        for (let line of self.config.guideLines) {
+            if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
+                let y = yScale(line.y);
+                let props = {
+                    'strokeStyle': line['color'],
+                    'strokeWidth': 2
+                };
+                if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
+                else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
+            }
+        }
+    }
 }
 
 WigTrack.prototype.popupData = function (clickState, features) {
