@@ -131,16 +131,8 @@ InteractionTrack.prototype.drawNested = function (options) {
 
             if (feature.chr1 !== feature.chr2) continue;
 
-            let m1 = (feature.start1 + feature.end1) / 2;
-            let m2 = (feature.start2 + feature.end2) / 2;
-            if (m1 > m2) {
-                const tmp = m1;
-                m1 = m2;
-                m2 = m1;
-            }
-
-            let pixelStart = Math.round((m1 - bpStart) / xScale);
-            let pixelEnd = Math.round((m2 - bpStart) / xScale);
+            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
+            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
             let direction = this.arcOrientation;
 
             let w = (pixelEnd - pixelStart);
@@ -246,16 +238,8 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
             if (value === undefined || Number.isNaN(value) || (feature.chr1 !== feature.chr2)) continue;
 
-            let m1 = (feature.start1 + feature.end1) / 2;
-            let m2 = (feature.start2 + feature.end2) / 2;
-            if (m1 > m2) {
-                const tmp = m1;
-                m1 = m2;
-                m2 = m1;
-            }
-
-            let pixelStart = (m1 - bpStart) / xScale;
-            let pixelEnd = (m2 - bpStart) / xScale;
+            let pixelStart = (feature.m1 - bpStart) / xScale;
+            let pixelEnd = (feature.m2 - bpStart) / xScale;
             let w = (pixelEnd - pixelStart);
             if (w < 3) {
                 w = 3;
