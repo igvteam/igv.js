@@ -31,9 +31,6 @@ function decodeBedpe(tokens, ignore) {
     feature.start = Math.min(feature.start1, feature.start2);
     feature.end = Math.max(feature.end1, feature.end2);
 
-    // Midpoints
-
-
     // Optional extra columns
     if (this.header) {
         let thicknessColumn = this.header.thicknessColumn;
@@ -104,12 +101,6 @@ function decodeInteract(tokens, ignore) {
 
         interchr: tokens[8] !== tokens[13]
     }
-
-    // Midpoints
-    let m1 = (feature.start1 + feature.end1) / 2;
-    let m2 = (feature.start2 + feature.end2) / 2;
-    feature.m1 = (m1 < m2) ? m1 : m2;
-    feature.m2 = (m1 < m2) ? m2 : m1;
 
     return feature;
 }
