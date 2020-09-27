@@ -89,7 +89,15 @@ InteractionTrack.prototype.getState = function () {
 
 
 InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+
+    const features = await this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+
+    // Check for score or value
+    if(this.hasValue === undefined && features && features.length > 0) {
+            this.hasValue = this.config.useScore ? features[0].score !== undefined : features[0].value !== undefined;
+    }
+
+    return features;
 }
 
 InteractionTrack.prototype.draw = function (options) {
@@ -222,7 +230,6 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
     const featureList = options.features;
 
-
     if (featureList && featureList.length > 0) {
 
         const yScale = this.logScale ?
@@ -232,6 +239,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
         const y = this.arcOrientation ? options.pixelHeight : 0;
 
         for (let feature of featureList) {
+
             ctx.save();
 
             const value = this.config.useScore ? feature.score : feature.value;
@@ -309,21 +317,24 @@ InteractionTrack.prototype.menuItemList = function () {
         '<HR/>'
     ];
 
-    const lut =
-        {
-            "nested": "Nested Arcs",
-            "proportional": "Proportional Arcs"
-        };
-    for (let arcType of ["nested", "proportional"]) {
-        items.push(
+    if(this.hasValue) {
+        const lut =
             {
-                object: createCheckbox(lut[arcType], arcType === this.arcType),
-                click: function () {
-                    self.arcType = arcType;
-                    self.trackView.repaintViews();
-                }
-            });
+                "nested": "Nested Arcs",
+                "proportional": "Proportional Arcs"
+            };
+        for (let arcType of ["nested", "proportional"]) {
+            items.push(
+                {
+                    object: createCheckbox(lut[arcType], arcType === this.arcType),
+                    click: function () {
+                        self.arcType = arcType;
+                        self.trackView.repaintViews();
+                    }
+                });
+        }
     }
+
     items.push({
         object: createCheckbox("Show Blocks", this.showBlocks),
         click: function () {
