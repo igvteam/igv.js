@@ -43,6 +43,11 @@ function decodeBedpe(tokens, ignore) {
         }
     }
 
+    const m1 = (feature.start1 + feature.end1) / 2;
+    const m2 = (feature.start2 + feature.end2) / 2;
+    feature.m1 = m1 < m2 ? m1 : m2;
+    feature.m2 = m1 < m2 ? m2 : m1;
+
     return feature;
 }
 
@@ -99,8 +104,12 @@ function decodeInteract(tokens, ignore) {
         value: Number.parseFloat(tokens[5]),
         color: tokens[7] === '.' ? undefined : tokens[7] === "0" ? "rgb(0,0,0)" : tokens[7],
 
-        interchr: tokens[8] !== tokens[13]
     }
+
+    const m1 = (feature.start1 + feature.end1) / 2;
+    const m2 = (feature.start2 + feature.end2) / 2;
+    feature.m1 = m1 < m2 ? m1 : m2;
+    feature.m2 = m1 < m2 ? m2 : m1;
 
     return feature;
 }
