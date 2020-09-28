@@ -25,8 +25,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import makeDraggable from "./draggable.js";
-import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
+import {UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
 
 const DataRangeDialog = function ($parent, browser) {
     var self = this,
@@ -44,7 +43,7 @@ const DataRangeDialog = function ($parent, browser) {
     // dialog header
     $header = $("<div>", {class: 'igv-generic-dialog-header'});
     this.$container.append($header);
-    attachDialogCloseHandlerWithParent($header, function () {
+    UIUtils.attachDialogCloseHandlerWithParent($header[0], function () {
         self.$minimum_input.val(undefined);
         self.$maximum_input.val(undefined);
         self.$container.offset({left: 0, top: 0});

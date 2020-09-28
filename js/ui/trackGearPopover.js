@@ -24,9 +24,9 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import makeDraggable from "./draggable.js";
-import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
 import MenuUtils from "./menuUtils.js"
+import {UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
+
 
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
@@ -40,7 +40,7 @@ const TrackGearPopover = function ($parent) {
     let $popoverHeader = $('<div>', {class: 'igv-trackgear-popover-header'});
     this.$popover.append($popoverHeader);
 
-    attachDialogCloseHandlerWithParent($popoverHeader, () => this.$popover.hide());
+    UIUtils.attachDialogCloseHandlerWithParent($popoverHeader[0], () => this.$popover.hide());
 
     this.$popoverContent = $('<div>');
     this.$popover.append(this.$popoverContent);
