@@ -79,7 +79,7 @@ async function createBrowser(parentDiv, config) {
 
     browser.inputDialog = new InputDialog(browser.$root.get(0));
 
-    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
+    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser.alert);
 
     if (config.apiKey) {
         igvxhr.setApiKey(config.apiKey);
