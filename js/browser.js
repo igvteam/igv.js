@@ -559,22 +559,20 @@ Browser.prototype.showCenterGuide = function () {
 
 Browser.prototype.loadTrackList = async function (configList) {
 
-    const self = this;
-
     try {
         this.startSpinner();
         const promises = [];
-        configList.forEach(function (config) {
+        for(let config of configList) {
             config.noSpinner = true;
-            promises.push(self.loadTrack(config));
-        });
+            promises.push(this.loadTrack(config));
+        }
 
         const loadedTracks = await Promise.all(promises)
-        const groupAutoscaleViews = self.trackViews.filter(function (trackView) {
+        const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
             return trackView.track.autoscaleGroup
         })
         if (groupAutoscaleViews.length > 0) {
-            self.updateViews(self.genomicStateList[0], groupAutoscaleViews);
+            this.updateViews(this.genomicStateList[0], groupAutoscaleViews);
         }
         return loadedTracks;
     } finally {
@@ -624,9 +622,13 @@ Browser.prototype.clearROIs = function () {
 
 Browser.prototype.loadTrack = async function (config) {
 
+
     // config might be json
     if (StringUtils.isString(config)) {
         config = JSON.parse(config);
+    } else {
+        // Copy the config object as modifications will be made
+        config = clone(config);
     }
 
     // Resolve function and promise urls
@@ -650,19 +652,7 @@ Browser.prototype.loadTrack = async function (config) {
         }
     }
 
-    TrackUtils.inferTrackTypes(config);
 
-    // Set defaults if specified
-    if (this.trackDefaults && config.type) {
-        const settings = this.trackDefaults[config.type];
-        if (settings) {
-            for (let property in settings) {
-                if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                    config[property] = settings[property];
-                }
-            }
-        }
-    }
 
     try {
         if (!config.noSpinner) this.startSpinner();
@@ -710,36 +700,46 @@ Browser.prototype.loadTrack = async function (config) {
 
 Browser.prototype.createTrack = function (config) {
 
+    if(!config.type) {
+        TrackUtils.inferTrackTypes(config);
+    }
+
+    // Set defaults if specified
+    if (this.trackDefaults && config.type) {
+        const settings = this.trackDefaults[config.type];
+        if (settings) {
+            for (let property in settings) {
+                if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                    config[property] = settings[property];
+                }
+            }
+        }
+    }
+
     // Lowercase format
     if (config.format) {
         config.format = config.format.toLowerCase();
     }
-
-
     let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
+    if ("data" === type) type = "wig";   // data is deprecated
 
-    if ("data" === type) type = "wig";   // deprecated
 
     // add browser to track config
-    let trackConfig = Object.assign({}, config);
-
-    trackConfig.browser = this;
+    config.browser = this;
 
     let track
-
     switch (type) {
-
         case "annotation":
         case "genes":
         case "fusionjuncspan":
         case "junctions":
         case "splicejunctions":
         case "snp":
-            track = TrackFactory.getTrack("feature")(trackConfig, this);
+            track = TrackFactory.getTrack("feature")(config, this);
             break;
         default:
             if (TrackFactory.tracks.hasOwnProperty(type)) {
-                track = TrackFactory.getTrack(type)(trackConfig, this);
+                track = TrackFactory.getTrack(type)(config, this);
             } else {
                 track = undefined;
             }
