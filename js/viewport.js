@@ -237,10 +237,9 @@ class ViewPort extends ViewportBase {
         const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chrName)
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
-        const referenceFrame = this.referenceFrame;
-        const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
+        const bpPerPixel = isWGV ? this.referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
         const bpStart = isWGV ? 0 : tile.startBP;
-        const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
+        const bpEnd = isWGV ? this.referenceFrame.initialEnd : tile.endBP;
         const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
@@ -263,24 +262,7 @@ class ViewPort extends ViewportBase {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         }
 
-        const drawConfiguration =
-            {
-                features: features,
-                pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight,
-                pixelTop: canvasTop,
-                bpStart: bpStart,
-                bpEnd: bpEnd,
-                bpPerPixel: bpPerPixel,
-                referenceFrame: referenceFrame,
-                selection: self.selection,
-                viewport: self,
-                viewportWidth: self.$viewport.width(),
-                viewportContainerX: referenceFrame.toPixels(referenceFrame.start - bpStart),
-                viewportContainerWidth: this.browser.viewportContainerWidth()
-            };
-
-        const pixelXOffset = Math.round((bpStart - referenceFrame.start) / referenceFrame.bpPerPixel);
+        const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
         const ctx = newCanvas.getContext("2d");
@@ -293,15 +275,29 @@ class ViewPort extends ViewportBase {
 
         ctx.scale(devicePixelRatio, devicePixelRatio);
 
-
-        // newCanvas.style.position = 'absolute';
-
         newCanvas.style.left = pixelXOffset + "px";
         newCanvas.style.top = canvasTop + "px";
 
         ctx.translate(0, -canvasTop)
 
-        drawConfiguration.context = ctx;
+        const drawConfiguration =
+            {
+                context: ctx,
+                features,
+                pixelWidth,
+                pixelHeight,
+                pixelTop: canvasTop,
+                bpStart,
+                bpEnd,
+                bpPerPixel,
+                referenceFrame: this.referenceFrame,
+                selection: self.selection,
+                viewport: self,
+                viewportWidth: self.$viewport.width(),
+                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - bpStart),
+                viewportContainerWidth: this.browser.viewportContainerWidth()
+            };
+
         this.draw(drawConfiguration, features, roiFeatures);
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}

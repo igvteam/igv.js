@@ -1254,6 +1254,8 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
 
     const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
     referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
+
+    return referenceFrame
 }
 
 Browser.prototype.selectMultiLocusPanelWithReferenceFrame = function (referenceFrame) {
@@ -1320,11 +1322,11 @@ Browser.prototype.addMultiLocusPanelWithReferenceFrameIndex = function (referenc
         for (let trackView of this.trackViews) {
 
             const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
-            trackView.viewports.splice(index, 0, viewport);
+            trackView.viewports.splice(index, 0, viewport)
 
             // The viewport constructor always appends. Reorder here.
-            const $detached = viewport.$viewport.detach();
-            $detached.insertAfter(trackView.viewports[index - 1].$viewport);
+            const $detached = viewport.$viewport.detach()
+            $detached.insertAfter(trackView.viewports[index - 1].$viewport)
 
         }
 
