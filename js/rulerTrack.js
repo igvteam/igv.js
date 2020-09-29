@@ -66,7 +66,7 @@ RulerTrack.prototype.computePixelHeight = function (ignore) {
 
 RulerTrack.prototype.draw = function (options) {
 
-    if (GenomeUtils.isWholeGenomeView(options.genomicState.referenceFrame.chrName)) {
+    if (GenomeUtils.isWholeGenomeView(options.referenceFrame.chrName)) {
 
         options.viewport.rulerSweeper.disableMouseHandlers();
 

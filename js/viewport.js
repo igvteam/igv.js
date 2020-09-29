@@ -14,9 +14,9 @@ const NOT_LOADED_MESSAGE = 'Error loading track data';
 
 class ViewPort extends ViewportBase {
 
-    constructor(trackView, $viewportContainer, genomicState, width) {
+    constructor(trackView, $viewportContainer, referenceFrame, width) {
 
-        super(trackView, $viewportContainer, genomicState, width)
+        super(trackView, $viewportContainer, referenceFrame, width)
 
     }
 
@@ -32,7 +32,7 @@ class ViewPort extends ViewportBase {
         if ('sequence' !== track.type) {
             this.popover = new Popover(this.browser.trackContainer);
             let str = track.name.toLowerCase().split(' ').join('_');
-            this.popover.id = `${ str }_${ this.browser.genomicStateList.indexOf(this.genomicState) }`;
+            this.popover.id = `${ str }_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`;
             this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
         }
 
@@ -136,8 +136,8 @@ class ViewPort extends ViewportBase {
 
 
         function showZoomInNotice() {
-            const referenceFrame = this.genomicState.referenceFrame;
-            if (this.genomicState.referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+            const referenceFrame = this.referenceFrame;
+            if (this.referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             } else {
                 const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
@@ -152,11 +152,11 @@ class ViewPort extends ViewportBase {
 
     shift() {
         const self = this;
-        const referenceFrame = self.genomicState.referenceFrame;
+        const referenceFrame = self.referenceFrame;
 
         if (self.canvas &&
             self.tile &&
-            self.tile.chr === self.genomicState.referenceFrame.chrName &&
+            self.tile.chr === self.referenceFrame.chrName &&
             self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
 
             const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
@@ -180,9 +180,8 @@ class ViewPort extends ViewportBase {
 
     async loadFeatures() {
 
-        const genomicState = this.genomicState;
-        const referenceFrame = genomicState.referenceFrame;
-        const chr = genomicState.referenceFrame.chrName;
+        const referenceFrame = this.referenceFrame;
+        const chr = referenceFrame.chrName;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
@@ -235,11 +234,10 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].referenceFrame.chrName);
+        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chrName)
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
-        const genomicState = this.genomicState;
-        const referenceFrame = genomicState.referenceFrame;
+        const referenceFrame = this.referenceFrame;
         const bpPerPixel = isWGV ? referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
         const bpStart = isWGV ? 0 : tile.startBP;
         const bpEnd = isWGV ? referenceFrame.initialEnd : tile.endBP;
@@ -275,7 +273,6 @@ class ViewPort extends ViewportBase {
                 bpEnd: bpEnd,
                 bpPerPixel: bpPerPixel,
                 referenceFrame: referenceFrame,
-                genomicState: genomicState,
                 selection: self.selection,
                 viewport: self,
                 viewportWidth: self.$viewport.width(),
@@ -338,8 +335,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const genomicState = this.genomicState;
-        const referenceFrame = genomicState.referenceFrame;
+        const referenceFrame = this.referenceFrame;
         const bpPerPixel = tile.bpPerPixel;
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
@@ -369,13 +365,12 @@ class ViewPort extends ViewportBase {
                 context: ctx,
                 top: -$(this.contentDiv).position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
-                pixelWidth: pixelWidth,
-                pixelHeight: pixelHeight,
-                bpStart: bpStart,
-                bpEnd: bpEnd,
-                bpPerPixel: bpPerPixel,
-                referenceFrame: referenceFrame,
-                genomicState: this.genomicState,
+                pixelWidth,
+                pixelHeight,
+                bpStart,
+                bpEnd,
+                bpPerPixel,
+                referenceFrame: this.referenceFrame,
                 selection: this.selection,
                 viewportWidth: pixelWidth,
                 viewportContainerX: 0,
@@ -455,7 +450,7 @@ class ViewPort extends ViewportBase {
 
         // console.log('Viewport draw SVG.')
 
-        let {start, bpPerPixel} = this.genomicState.referenceFrame;
+        let {start, bpPerPixel} = this.referenceFrame;
 
         context.save();
 
@@ -463,8 +458,7 @@ class ViewPort extends ViewportBase {
             {
                 context: context,
                 viewport: this,
-                referenceFrame: this.genomicState.referenceFrame,
-                genomicState: this.genomicState,
+                referenceFrame: this.referenceFrame,
                 top: -$(this.contentDiv).position().top,
                 pixelTop: 0,
                 pixelWidth: width,
@@ -560,7 +554,7 @@ function draw(drawConfiguration, features, roiFeatures) {
 
 
 function viewIsReady() {
-    return this.browser && this.browser.genomicStateList && this.genomicState.referenceFrame;
+    return this.browser && this.browser.referenceFrameList && this.referenceFrame;
 }
 
 function renderTrackLabelSVG(context) {
@@ -739,7 +733,7 @@ function addMouseHandlers() {
 
         const mouseX = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
         const mouseXCanvas = DOMUtils.translateMouseCoordinates(e, self.canvas).x;
-        const referenceFrame = self.genomicState.referenceFrame;
+        const referenceFrame = self.referenceFrame;
         const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
 
         const time = Date.now();
@@ -756,17 +750,17 @@ function addMouseHandlers() {
 
             let string;
 
-            if ('all' === self.genomicState.referenceFrame.chrName.toLowerCase()) {
+            if ('all' === self.referenceFrame.chrName.toLowerCase()) {
 
                 const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
 
-                if (1 === browser.genomicStateList.length) {
+                if (1 === browser.referenceFrameList.length) {
                     string = chr;
                 } else {
-                    let loci = browser.genomicStateList.map(function (g) {
+                    let loci = browser.referenceFrameList.map(function (g) {
                         return g.locusSearchString;
                     });
-                    loci[browser.genomicStateList.indexOf(self.genomicState)] = chr;
+                    loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
                     string = loci.join(' ');
                 }
 
@@ -804,7 +798,7 @@ function addMouseHandlers() {
 
     function createClickState(e, viewport) {
 
-        const referenceFrame = viewport.genomicState.referenceFrame;
+        const referenceFrame = viewport.referenceFrame;
         const viewportCoords = DOMUtils.translateMouseCoordinates(e, viewport.contentDiv);
         const canvasCoords = DOMUtils.translateMouseCoordinates(e, viewport.canvas);
         const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));

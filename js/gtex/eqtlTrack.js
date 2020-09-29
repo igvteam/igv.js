@@ -145,7 +145,7 @@ EqtlTrack.prototype.draw = function (options) {
         pixelHeight = options.pixelHeight,
         bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
         yScale = (self.dataRange.max - self.dataRange.min) / pixelHeight,
-        selection = options.genomicState.selection;
+        selection = options.referenceFrame.selection;
 
     // Background
     if (this.background) IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
@@ -244,7 +244,7 @@ EqtlTrack.prototype.popupData = function (config) {
     let genomicLocation = config.genomicLocation,
         xOffset = config.x,
         yOffset = config.y,
-        referenceFrame = config.viewport.genomicState.referenceFrame,
+        referenceFrame = config.viewport.referenceFrame,
         tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
         dotSize = this.dotSize,
         tissue = this.name,

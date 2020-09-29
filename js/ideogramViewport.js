@@ -31,9 +31,9 @@ import {FileUtils, DOMUtils, IGVColor} from "../node_modules/igv-utils/src/index
 
 class IdeogramViewport extends ViewportBase {
 
-    constructor(trackView, $viewportContainer, genomicState, width) {
+    constructor(trackView, $viewportContainer, referenceFrame, width) {
 
-        super(trackView, $viewportContainer, genomicState, width)
+        super(trackView, $viewportContainer, referenceFrame, width)
 
         this.$canvas.on('click', e => this.handleClick(e, this.canvas));
 
@@ -55,10 +55,8 @@ class IdeogramViewport extends ViewportBase {
     handleClick(e, canvas) {
 
         const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-        //console.log(`bboxWidth ${ width }. canvas.width ${ canvas.width }`)
-        let { referenceFrame } = this.genomicState;
-        const { bpLength } = this.browser.genome.getChromosome(this.genomicState.referenceFrame.chrName);
-        const locusLength = referenceFrame.bpPerPixel * width;
+        const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chrName);
+        const locusLength = this.referenceFrame.bpPerPixel * width;
         const chrCoveragePercentage = locusLength / bpLength;
 
         let xPercentage = xNormalized;
@@ -73,10 +71,10 @@ class IdeogramViewport extends ViewportBase {
         const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
         const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
-        referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
-        referenceFrame.bpPerPixel = (ee - ss) / width;
+        this.referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
+        this.referenceFrame.bpPerPixel = (ee - ss) / width;
 
-        this.browser.updateLocusSearchWidget(this.genomicState);
+        this.browser.updateLocusSearchWidget(this.referenceFrame);
         this.browser.updateViews()
 
     }
@@ -124,7 +122,7 @@ class IdeogramViewport extends ViewportBase {
             width,
             height,
             genome: this.browser.genome,
-            referenceFrame: this.genomicState.referenceFrame,
+            referenceFrame: this.referenceFrame,
             ideogramWidth: this.$content.width()
         }
 
@@ -141,8 +139,8 @@ class IdeogramViewport extends ViewportBase {
                 width: this.$canvas.width(),
                 height: this.$canvas.height(),
                 genome: this.browser.genome,
-                chr: this.genomicState.referenceFrame.chrName,
-                referenceFrame: this.genomicState.referenceFrame,
+                chr: this.referenceFrame.chrName,
+                referenceFrame: this.referenceFrame,
                 ideogramWidth: this.$content.width()
             };
 

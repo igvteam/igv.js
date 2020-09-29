@@ -204,7 +204,7 @@ WigTrack.prototype.popupData = function (clickState, features) {
     if (features && features.length > 0) {
 
         let genomicLocation = clickState.genomicLocation;
-        let referenceFrame = clickState.viewport.genomicState.referenceFrame;
+        let referenceFrame = clickState.viewport.referenceFrame;
         let popupData = [];
 
         // We need some tolerance around genomicLocation, start with +/- 2 pixels

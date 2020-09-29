@@ -120,9 +120,9 @@ CenterGuide.prototype.repaint = function () {
         center,
         referenceFrame;
 
-    if (this.browser.genomicStateList) {
+    if (this.browser.referenceFrameList) {
 
-        referenceFrame = this.browser.genomicStateList[0].referenceFrame;
+        referenceFrame = this.browser.referenceFrameList[0]
         ppb = 1.0 / referenceFrame.bpPerPixel;
 
         if (ppb > 1) {

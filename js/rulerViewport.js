@@ -6,23 +6,23 @@ import {DOMUtils} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
 
 class RulerViewport extends ViewPort {
-    constructor(trackView, $viewportContainer, genomicState, width) {
-        super(trackView, $viewportContainer, genomicState, width);
+    constructor(trackView, $viewportContainer, referenceFrame, width) {
+        super(trackView, $viewportContainer, referenceFrame, width);
     }
 
     initializationHelper() {
 
         this.rulerSweeper = new RulerSweeper(this)
 
-        appendMultiPanelCloseButton(this.browser, this.$viewport, this.genomicState)
+        appendMultiPanelCloseButton(this.browser, this.$viewport, this.referenceFrame)
 
         this.$rulerLabel = $('<div class = "igv-multi-locus-panel-label-div">')
         this.$content.append(this.$rulerLabel)
-        this.$rulerLabel.click(() => this.browser.selectMultiLocusPanelWithGenomicState(this.genomicState))
+        this.$rulerLabel.click(() => this.browser.selectMultiLocusPanelWithReferenceFrame(this.referenceFrame))
 
-        this.namespace = `.ruler_track_viewport_${ this.browser.genomicStateList.indexOf(this.genomicState) }`
+        this.namespace = `.ruler_track_viewport_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`
 
-        if (true === GenomeUtils.isWholeGenomeView(this.browser.genomicStateList[0].referenceFrame.chrName)) {
+        if (true === GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chrName)) {
             enableTrackMouseHandlers.call(this)
         } else {
             this.$viewport.off(this.namespace)
@@ -31,13 +31,13 @@ class RulerViewport extends ViewPort {
     }
 
     updateLocusLabel() {
-        const str = this.genomicState.referenceFrame.presentLocus(this.$viewport.width())
+        const str = this.referenceFrame.presentLocus(this.$viewport.width())
         this.$rulerLabel.text(str)
     }
 
 }
 
-function appendMultiPanelCloseButton(browser, $viewport, genomicState) {
+function appendMultiPanelCloseButton(browser, $viewport, referenceFrame) {
 
     $viewport.addClass('igv-viewport-ruler');
 
@@ -46,29 +46,29 @@ function appendMultiPanelCloseButton(browser, $viewport, genomicState) {
 
     $close.append(createIcon("times-circle"));
 
-    $close.click(() => browser.removeMultiLocusPanelWithGenomicState(genomicState, true));
+    $close.click(() => browser.removeMultiLocusPanelWithReferenceFrame(referenceFrame, true));
 
 }
 
 function enableTrackMouseHandlers() {
 
-    const index = this.browser.genomicStateList.indexOf(this.genomicState)
+    const index = this.browser.referenceFrameList.indexOf(this.referenceFrame)
     const click = `click${ this.namespace }`
 
     this.$viewport.on(click, (e) => {
 
         const { x:pixel } = DOMUtils.translateMouseCoordinates(e, this.$viewport.get(0));
-        const bp = Math.round(this.genomicState.referenceFrame.start + this.genomicState.referenceFrame.toBP(pixel));
+        const bp = Math.round(this.referenceFrame.start + this.referenceFrame.toBP(pixel));
 
         let searchString;
 
         const { chr } = this.browser.genome.getChromosomeCoordinate(bp)
 
-        if (1 === this.browser.genomicStateList.length) {
+        if (1 === this.browser.referenceFrameList.length) {
             searchString = chr
         } else {
 
-            let loci = this.browser.genomicStateList.map(({ locusSearchString }) => locusSearchString);
+            let loci = this.browser.referenceFrameList.map(({ locusSearchString }) => locusSearchString);
 
             loci[ index ] = chr;
 

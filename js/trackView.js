@@ -64,12 +64,12 @@ const TrackView = function (browser, $container, track) {
     $track.append(this.$viewportContainer);
 
     this.viewports = [];
-    const width = browser.calculateViewportWidth(browser.genomicStateList.length);
+    const width = browser.calculateViewportWidth(browser.referenceFrameList.length);
 
     // console.log(`TrackView ${ track.id }`);
 
-    for (let genomicState of browser.genomicStateList) {
-        const viewport = createViewport(this, browser.genomicStateList, browser.genomicStateList.indexOf(genomicState), width)
+    for (let referenceFrame of browser.referenceFrameList) {
+        const viewport = createViewport(this, browser.referenceFrameList, browser.referenceFrameList.indexOf(referenceFrame), width)
         this.viewports.push(viewport);
     }
 
@@ -117,7 +117,7 @@ TrackView.prototype.renderSVGContext = function (context, offset) {
 
     for (let viewport of this.viewports) {
 
-        const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
+        const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
         const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
 
         let o =
@@ -361,7 +361,7 @@ TrackView.prototype.isLoading = function () {
 
 TrackView.prototype.resize = function () {
 
-    const viewportWidth = this.browser.calculateViewportWidth(this.browser.genomicStateList.length)
+    const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
 
     for (let viewport of this.viewports) {
         viewport.setWidth(viewportWidth);
@@ -392,7 +392,7 @@ TrackView.prototype.repaintViews = function () {
  */
 TrackView.prototype.updateViews = async function (force) {
 
-    if (!(this.browser && this.browser.genomicStateList)) return;
+    if (!(this.browser && this.browser.referenceFrameList)) return;
 
     const visibleViewports = this.viewports.filter(vp => vp.isVisible())
 
@@ -415,7 +415,7 @@ TrackView.prototype.updateViews = async function (force) {
     if (!isDragging && this.track.autoscale) {
         let allFeatures = [];
         for (let vp of visibleViewports) {
-            const referenceFrame = vp.genomicState.referenceFrame;
+            const referenceFrame = vp.referenceFrame;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(vp.contentDiv).width());
             if (vp.tile && vp.tile.features) {
@@ -450,7 +450,7 @@ TrackView.prototype.updateViews = async function (force) {
  */
 TrackView.prototype.getInViewFeatures = async function (force) {
 
-    if (!(this.browser && this.browser.genomicStateList)) {
+    if (!(this.browser && this.browser.referenceFrameList)) {
         return [];
     }
 
@@ -465,7 +465,7 @@ TrackView.prototype.getInViewFeatures = async function (force) {
     let allFeatures = [];
     for (let vp of this.viewports) {
         if (vp.tile && vp.tile.features) {
-            const referenceFrame = vp.genomicState.referenceFrame;
+            const referenceFrame = vp.referenceFrame;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(vp.contentDiv).width());
             allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
@@ -523,8 +523,8 @@ function viewportsToReload(force) {
         if (!viewport.checkZoomIn()) {
             return false;
         } else {
-            const referenceFrame = viewport.genomicState.referenceFrame;
-            const chr = viewport.genomicState.referenceFrame.chrName;
+            const referenceFrame = viewport.referenceFrame;
+            const chr = viewport.referenceFrame.chrName;
             const start = referenceFrame.start;
             const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
             const bpPerPixel = referenceFrame.bpPerPixel;
