@@ -7,9 +7,9 @@ import {extend, isSimpleType} from "../util/igvUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import deepCopy from "../util/deepCopy.js"
 
 const X_PIXEL_DIFF_THRESHOLD = 1;
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const GCNVTrack = extend(TrackBase,
 
@@ -35,21 +35,8 @@ GCNVTrack.prototype.postInit = async function () {
 }
 
 GCNVTrack.prototype.menuItemList = function () {
-    const self = this;
-    const menuItems = [];
-    menuItems.push(dataRangeMenuItem(this.trackView));
-
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-
-    return menuItems;
-};
+    return MenuUtils.numericDataMenuItems(this.trackView)
+}
 
 
 GCNVTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
@@ -310,28 +297,14 @@ GCNVTrack.prototype.popupData = function (clickState, featureList) {
     return items;
 }
 
-GCNVTrack.prototype.contextMenuItemList = function (clickState) {
-
-    const self = this;
-    const referenceFrame = clickState.viewport.genomicState.referenceFrame;
-    const genomicLocation = clickState.genomicLocation;
-
-    return [];
-};
-
 GCNVTrack.prototype.getState = function () {
-
-    let config = this.config;
-
-    config.autoscale = this.autoscale;
-
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
     if (!this.autoscale && this.dataRange) {
-        config.min = this.dataRange.min;
-        config.max = this.dataRange.max;
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
     }
-
-    return config;
-
+    return state;
 }
 
 GCNVTrack.prototype.supportsWholeGenome = function () {
