@@ -28,11 +28,9 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
 import GtexUtils from "./gtexUtils.js";
-
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
+import deepCopy from "../util/deepCopy.js"
 
 const EqtlTrack = extend(TrackBase,
 
@@ -280,24 +278,8 @@ EqtlTrack.prototype.popupData = function (config) {
 
 
 EqtlTrack.prototype.menuItemList = function () {
-
-    var self = this,
-        menuItems = [];
-
-    menuItems.push(dataRangeMenuItem(this.trackView));
-
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-
-    return menuItems;
-
-};
+    return MenuUtils.numericDataMenuItems(this.trackView)
+}
 
 EqtlTrack.prototype.doAutoscale = function (featureList) {
 
@@ -316,6 +298,16 @@ EqtlTrack.prototype.doAutoscale = function (featureList) {
     }
 
     return this.dataRange;
+}
+
+EqtlTrack.prototype.getState = function () {
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
+    if (!this.autoscale && this.dataRange) {
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
+    }
+    return state;
 }
 
 export default EqtlTrack;

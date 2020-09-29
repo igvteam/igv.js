@@ -32,8 +32,8 @@ import TrackGearPopover from "./ui/trackGearPopover.js";
 import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
-import { IGVColor, DOMUtils } from '../node_modules/igv-utils/src/index.js';
-import { ColorPicker } from '../node_modules/igv-ui/dist/igv-ui.js';
+import {DOMUtils, IGVColor} from '../node_modules/igv-utils/src/index.js';
+import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 
 var dragged,
     dragDestination;
@@ -104,7 +104,7 @@ const TrackView = function (browser, $container, track) {
                 left: undefined,
                 width: 432,
                 height: undefined,
-                defaultColors: [ this.track.color ].map(rgb => IGVColor.rgbToHex(rgb)),
+                defaultColors: [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)),
                 colorHandler: rgb => this.setColor(rgb)
             };
 
@@ -118,7 +118,7 @@ TrackView.prototype.renderSVGContext = function (context, offset) {
     for (let viewport of this.viewports) {
 
         const index = viewport.browser.genomicStateList.indexOf(viewport.genomicState);
-        const { y, width } = viewport.$viewport.get(0).getBoundingClientRect();
+        const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
 
         let o =
             {
@@ -294,27 +294,15 @@ TrackView.prototype.dataRange = function () {
     return this.track.dataRange ? this.track.dataRange : undefined;
 };
 
-TrackView.prototype.setDataRange = function (min, max, autoscale) {
-
+TrackView.prototype.setDataRange = function (min, max) {
     if (min !== undefined) {
         this.track.dataRange.min = min;
-        this.track.config.min = min;
     }
-
     if (max !== undefined) {
         this.track.dataRange.max = max;
-        this.track.config.max = max;
     }
-
-    this.track.autoscale = autoscale;
-    this.track.config.autoScale = autoscale;
-
-    if (autoscale) {
-        this.updateViews();
-    } else {
-        this.repaintViews();
-    }
-};
+    this.repaintViews();
+}
 
 TrackView.prototype.setColor = function (color) {
     this.track.color = color;
@@ -424,7 +412,7 @@ TrackView.prototype.updateViews = async function (force) {
         // }
     }
 
-    if(this.disposed) return;   // Track was removed during load
+    if (this.disposed) return;   // Track was removed during load
 
     const isDragging = this.browser.dragObject;
     if (!isDragging && this.track.autoscale) {
@@ -489,29 +477,29 @@ TrackView.prototype.getInViewFeatures = async function (force) {
     return allFeatures;
 };
 
-function updateViewportShims  (viewports, $viewportContainer)  {
+function updateViewportShims(viewports, $viewportContainer) {
 
     const $trackContainer = $('#igv-track-container')
     $trackContainer.find('.igv-multi-locus-separator').remove()
 
-    const { x: tx } = documentOffset($trackContainer.get(0))
+    const {x: tx} = documentOffset($trackContainer.get(0))
 
     $viewportContainer.find('.igv-viewport-multi-locus-gap-shim').remove()
 
     if (viewports.length > 1) {
         for (let viewport of viewports) {
             if (viewports.indexOf(viewport) <= viewports.length - 2) {
-                const { $viewport } = viewport
+                const {$viewport} = viewport
 
                 const $shim = $('<div class="igv-viewport-multi-locus-gap-shim">')
-                $shim.insertAfter( $viewport );
+                $shim.insertAfter($viewport);
 
-                const { x: sx } = documentOffset($shim.get(0))
+                const {x: sx} = documentOffset($shim.get(0))
                 // console.log(`trackContainer x ${ tx }. shim x ${ sx }`)
 
                 const $multilLocusSeparator = $('<div class="igv-multi-locus-separator">')
-                $trackContainer.append( $multilLocusSeparator )
-                $multilLocusSeparator.get(0).style.left = `${ sx - tx }px`
+                $trackContainer.append($multilLocusSeparator)
+                $multilLocusSeparator.get(0).style.left = `${sx - tx}px`
 
             }
         }
@@ -521,11 +509,11 @@ function updateViewportShims  (viewports, $viewportContainer)  {
 
 function documentOffset(el) {
 
-    const { x, y } = el.getBoundingClientRect()
+    const {x, y} = el.getBoundingClientRect()
     const scrollX = window.pageXOffset || document.documentElement.scrollLeft
     const scrollY = window.pageYOffset || document.documentElement.scrollTop
 
-    return { x: x + scrollX, y: y + scrollY  }
+    return {x: x + scrollX, y: y + scrollY}
 }
 
 function viewportsToReload(force) {
@@ -642,7 +630,7 @@ TrackView.prototype.scrollBy = function (delta) {
 };
 
 
-function TrackScrollbar  ($viewportContainer, viewports) {
+function TrackScrollbar($viewportContainer, viewports) {
 
     const self = this;
     let lastY;
@@ -752,5 +740,5 @@ TrackScrollbar.prototype.update = function () {
     }
 };
 
-export { maxViewportContentHeight, updateViewportShims }
+export {maxViewportContentHeight, updateViewportShims}
 export default TrackView

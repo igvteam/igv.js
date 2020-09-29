@@ -31,10 +31,9 @@ import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
+import deepCopy from "../util/deepCopy.js";
 
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const WigTrack = extend(TrackBase,
 
@@ -89,24 +88,8 @@ WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel
 }
 
 WigTrack.prototype.menuItemList = function () {
-
-    var self = this,
-        menuItems = [];
-
-    menuItems.push(dataRangeMenuItem(this.trackView));
-
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-
-    return menuItems;
-
-};
+    return MenuUtils.numericDataMenuItems(this.trackView)
+}
 
 WigTrack.prototype.getFileHeader = async function () {
 
@@ -334,17 +317,14 @@ function binarySearch(features, position, tolerance) {
 }
 
 WigTrack.prototype.getState = function () {
-
-    let config = this.config;
-
-    config.autoscale = this.autoscale;
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
 
     if (!this.autoscale && this.dataRange) {
-        config.min = this.dataRange.min;
-        config.max = this.dataRange.max;
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
     }
-    return config;
-
+    return state;
 }
 
 WigTrack.prototype.supportsWholeGenome = function () {
