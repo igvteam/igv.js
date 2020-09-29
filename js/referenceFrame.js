@@ -288,5 +288,31 @@ function parseSearchResults(browser, data) {
 
 }
 
-export { createReferenceFrameList, createReferenceFrame }
+
+function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
+
+    const alignmentEE = alignmentStart + alignmentLength
+    const alignmentCC = (alignmentStart + alignmentEE) / 2
+
+    referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
+    referenceFrame.initialEnd = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
+    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
+
+}
+
+function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
+
+    const alignmentEE = alignmentStart + alignmentLength;
+    const alignmentCC = (alignmentStart + alignmentEE) / 2;
+
+    const ss = alignmentCC - (bpp * (viewportWidth / 2));
+    const ee = ss + (bpp * viewportWidth);
+
+    const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
+    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
+
+    return referenceFrame
+}
+
+export { createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment }
 export default ReferenceFrame;

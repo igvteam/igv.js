@@ -34,7 +34,7 @@ import XMLSession from "./session/igvXmlSession.js";
 import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
-import ReferenceFrame, { createReferenceFrameList } from "./referenceFrame.js";
+import ReferenceFrame, { createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment } from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
 import {doAutoscale, validateLocusExtent} from "./util/igvUtils.js";
@@ -1232,7 +1232,7 @@ Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, leftM
     // account for reduced viewport width as a result of adding right mate pair panel
     const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length);
 
-    leftMatePairReferenceFrame = createReferenceFrameWithAlignment(this.genome, alignment.chr, leftMatePairReferenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+    adjustReferenceFrame(leftMatePairReferenceFrame, viewportWidth, alignment.start, alignment.lengthOnRef)
 
     // create right mate pair reference frame
     const mateChrName = this.genome.getChromosomeName(alignment.mate.chr);
@@ -1243,20 +1243,6 @@ Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, leftM
     this.addMultiLocusPanelWithReferenceFrameIndex(rightMatePairReferenceFrame, 1 + (this.referenceFrameList.indexOf(leftMatePairReferenceFrame)), viewportWidth);
 
 };
-
-function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
-
-    const alignmentEE = alignmentStart + alignmentLength;
-    const alignmentCC = (alignmentStart + alignmentEE) / 2;
-
-    const ss = alignmentCC - (bpp * (viewportWidth / 2));
-    const ee = ss + (bpp * viewportWidth);
-
-    const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
-    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
-
-    return referenceFrame
-}
 
 Browser.prototype.selectMultiLocusPanelWithReferenceFrame = function (referenceFrame) {
 
