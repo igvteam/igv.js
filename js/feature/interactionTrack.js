@@ -27,6 +27,7 @@
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import MenuUtils from "../ui/menuUtils.js";
 import {extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
@@ -57,6 +58,7 @@ const InteractionTrack = extend(TrackBase,
                 min: config.min || 0,
                 max: config.max
             }
+            this.autoscale = false;
         } else {
             this.autoscale = true;
         }
@@ -289,13 +291,12 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
 InteractionTrack.prototype.menuItemList = function () {
 
-    var self = this;
-    const items = [
+    let items = [
 
         {
             name: "Set track color",
-            click: function () {
-                self.trackView.presentColorPicker();
+            click: () => {
+                this.trackView.presentColorPicker();
             }
         },
         '<HR/>'
@@ -311,9 +312,9 @@ InteractionTrack.prototype.menuItemList = function () {
             items.push(
                 {
                     object: createCheckbox(lut[arcType], arcType === this.arcType),
-                    click: function () {
-                        self.arcType = arcType;
-                        self.trackView.repaintViews();
+                    click:  ()  =>{
+                        this.arcType = arcType;
+                        this.trackView.repaintViews();
                     }
                 });
         }
@@ -321,18 +322,23 @@ InteractionTrack.prototype.menuItemList = function () {
 
     items.push({
         object: createCheckbox("Show Blocks", this.showBlocks),
-        click: function () {
-            self.showBlocks = !self.showBlocks;
-            self.trackView.repaintViews();
+        click:  () => {
+            this.showBlocks = !this.showBlocks;
+            this.trackView.repaintViews();
         }
     })
     items.push({
         name: "Toggle arc direction",
-        click: function () {
-            self.arcOrientation = !self.arcOrientation;
-            self.trackView.repaintViews();
+        click: () => {
+            this.arcOrientation = !this.arcOrientation;
+            this.trackView.repaintViews();
         }
     });
+
+    if(this.arcType === "proportional") {
+        items.push("<HR>");
+        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView));
+    }
 
     return items;
 };
