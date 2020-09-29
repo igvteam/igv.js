@@ -1,4 +1,5 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {createCheckbox} from "../igv-icons.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -39,20 +40,26 @@ const MenuUtils = {
         return menuItems;
     },
 
-    dataRangeMenuItem: function (trackView) {
+    numericDataMenuItems: function (trackView) {
 
-        var $e,
-            clickHandler;
-
-        $e = $('<div>');
+        // Data range
+        const $e = $('<div>');
         $e.text('Set data range');
-
-        clickHandler = function () {
+        const clickHandler = function () {
             trackView.browser.dataRangeDialog.configure({trackView: trackView});
             trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
         };
+        const dataRamgeItem = {object: $e, click: clickHandler}
 
-        return {object: $e, click: clickHandler};
+        return [
+            dataRamgeItem,
+            {
+                object: createCheckbox("Autoscale", trackView.track.autoscale),
+                click: () => {
+                    trackView.track.autoscale = !trackView.track.autoscale;
+                }
+            }
+        ]
     },
 
     trackMenuItemListHelper: function(itemList, $popover) {
