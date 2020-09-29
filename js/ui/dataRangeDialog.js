@@ -139,12 +139,7 @@ class DataRangeDialog {
         if (isNaN(min) || isNaN(max)) {
             this.alert.present("Must input numeric values", undefined);
         } else {
-
-            if (true === config.trackView.track.autoscale) {
-                $('#datarange-autoscale').trigger('click');
-            }
-
-            config.trackView.setDataRange(min, max, false);
+            config.trackView.setDataRange(min, max);
         }
 
         this.$minimum_input.val(undefined);

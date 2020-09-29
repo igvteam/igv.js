@@ -43,7 +43,7 @@ import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
 import {buildOptions} from "./util/igvUtils.js";
-import clone from "./vendor/deepCopy.js";
+import deepCopy from "./util/deepCopy.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 
 // igv.scss - $igv-multi-locus-gap-width
@@ -272,7 +272,7 @@ Browser.prototype.loadSession = async function (options) {
     if (options.url || options.file) {
         session = await loadSessionFile(options)
     } else {
-        session = clone(options);
+        session = deepCopy(options);
     }
     return this.loadSessionObject(session);
 
@@ -628,7 +628,7 @@ Browser.prototype.loadTrack = async function (config) {
         config = JSON.parse(config);
     } else {
         // Copy the config object as modifications will be made
-        config = clone(config);
+        config = deepCopy(config);
     }
 
     // Resolve function and promise urls

@@ -21,10 +21,10 @@ function cloneArray(a, fn) {
     return a2
 }
 
-function clone(o) {
+function deepCopy(o) {
     if (typeof o !== 'object' || o === null) return o
     if (o instanceof Date) return new Date(o)
-    if (Array.isArray(o)) return cloneArray(o, clone)
+    if (Array.isArray(o)) return cloneArray(o, deepCopy)
     if (typeof o.then === "function") return o
     const o2 = {}
     for (let k in o) {
@@ -35,11 +35,11 @@ function clone(o) {
         } else if (cur instanceof Date) {
             o2[k] = new Date(cur)
         } else {
-            o2[k] = clone(cur)
+            o2[k] = deepCopy(cur)
         }
     }
     return o2
 }
 
 
-export default clone;
+export default deepCopy;

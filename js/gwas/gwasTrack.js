@@ -29,9 +29,9 @@ import IGVGraphics from "../igv-canvas.js";
 import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js";
 import {doAutoscale, extend} from "../util/igvUtils.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
 import gwasColors from "./gwasColors.js"
 import {randomColor} from "../util/colorPalletes.js"
+import deepCopy from "../util/deepCopy.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000;
 //const type = "gwas";
@@ -231,19 +231,7 @@ GWASTrack.prototype.popupData = function (clickState) {
 }
 
 GWASTrack.prototype.menuItemList = function () {
-    const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
-    const self = this;
-    const menuItems = [];
-    menuItems.push(dataRangeMenuItem(this.trackView));
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-    return menuItems;
+    return MenuUtils.numericDataMenuItems(this.trackView);
 }
 
 
@@ -274,6 +262,16 @@ GWASTrack.prototype.doAutoscale = function (featureList) {
     }
 
     return this.dataRange;
+}
+
+GWASTrack.prototype.getState = function () {
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
+    if (!this.autoscale && this.dataRange) {
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
+    }
+    return state;
 }
 
 
