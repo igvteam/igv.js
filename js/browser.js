@@ -186,8 +186,7 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
     }
 
     for (let referenceFrame of this.referenceFrameList) {
-        const chromosomeName = referenceFrame.chrName.toLowerCase();
-        if ('all' === chromosomeName) {
+        if ('all' === referenceFrame.chrName.toLowerCase()) {
             return true;
         }
     }

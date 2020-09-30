@@ -124,7 +124,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
                 self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
                 self.viewport.referenceFrame.start = Math.round(extent.start);
-
+                self.viewport.referenceFrame.initialEnd = Math.round(extent.end);
                 browser.updateViews(self.viewport.referenceFrame);
             }
 

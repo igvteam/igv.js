@@ -71,7 +71,8 @@ class IdeogramViewport extends ViewportBase {
         const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
         const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
-        this.referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
+        this.referenceFrame.start = ss;
+        this.referenceFrame.initialEnd = ee;
         this.referenceFrame.bpPerPixel = (ee - ss) / width;
 
         this.browser.updateLocusSearchWidget(this.referenceFrame);
