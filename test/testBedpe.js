@@ -63,7 +63,7 @@ suite("testBedpe", function () {
 
         const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
         assert.ok(features);
-        assert.equal(features.length, 5)
+        assert.equal(features.length, 11)
 
         for(let f of features) {
             assert.ok(f.name);
