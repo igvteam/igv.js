@@ -134,7 +134,7 @@ FeatureTrack.prototype.postInit = async function () {
 }
 
 FeatureTrack.prototype.supportsWholeGenome = function () {
-    return this.config.indexed === false && this.config.supportsWholeGenome !== false
+    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
 FeatureTrack.prototype.readFileHeader = async function () {
