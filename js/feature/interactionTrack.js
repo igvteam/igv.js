@@ -52,6 +52,14 @@ const InteractionTrack = extend(TrackBase,
         this.alpha = config.alpha === undefined ? "0.05" :
             config.alpha === 0 ? undefined : config.alpha.toString();
 
+        if (config.valueColumn) {
+            this.valueColumn = config.valueColumn;
+            this.hasValue = true;
+        } else if (config.useScore) {
+            this.hasValue = true;
+            this.valueColumn = "score";
+        }
+
         this.logScale = config.logScale !== false;   // i.e. defaul to true (undefined => true)
         if (config.max) {
             this.dataRange = {
@@ -95,8 +103,8 @@ InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
     const features = await this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
 
     // Check for score or value
-    if(this.hasValue === undefined && features && features.length > 0) {
-            this.hasValue = this.config.useScore ? features[0].score !== undefined : features[0].value !== undefined;
+    if (this.hasValue === undefined && features && features.length > 0) {
+        this.hasValue = this.config.useScore ? features[0].score !== undefined : features[0].value !== undefined;
     }
 
     return features;
@@ -131,63 +139,88 @@ InteractionTrack.prototype.drawNested = function (options) {
         const y = this.arcOrientation ? options.pixelHeight : 0;
         for (let feature of featureList) {
 
-            if (feature.chr1 !== feature.chr2) continue;
+            const direction = this.arcOrientation;
 
-            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
-            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
-            let direction = this.arcOrientation;
+            if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
 
-            let w = (pixelEnd - pixelStart);
-            if (w < 3) {
-                w = 3;
-                pixelStart--;
-            }
+                let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth) continue;
 
-            const a = w / 2;
-            const r = a / this.sinTheta;
-            const b = this.cosTheta * r;
-            const xc = pixelStart + a;
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
 
-            let yc, startAngle, endAngle;
-            if (direction) {
-                // UP
-                var trackBaseLine = this.height;
-                yc = trackBaseLine + b;
-                startAngle = Math.PI + Math.PI / 2 - this.theta;
-                endAngle = Math.PI + Math.PI / 2 + this.theta;
+                const a = w / 2;
+                const r = a / this.sinTheta;
+                const b = this.cosTheta * r;
+                const xc = pixelStart + a;
 
+                let yc, startAngle, endAngle;
+                if (direction) {
+                    // UP
+                    yc = this.height + b;
+                    startAngle = Math.PI + Math.PI / 2 - this.theta;
+                    endAngle = Math.PI + Math.PI / 2 + this.theta;
+
+                } else {
+                    // DOWN
+                    yc = -b;
+                    startAngle = Math.PI / 2 - this.theta;
+                    endAngle = Math.PI / 2 + this.theta;
+                }
+                let color = feature.color || this.color;
+                if (color && this.config.useScore) {
+                    color = getAlphaColor.call(this, color, scoreShade(feature.score));
+                } else if (color && w > viewportWidth) {
+                    color = getAlphaColor.call(this, color, "0.1");
+                }
+
+                ctx.strokeStyle = color;
+                ctx.lineWidth = feature.thickness || this.thickness || 1;
+
+                if (this.showBlocks) {
+                    ctx.fillStyle = color;
+                    const s1 = (feature.start1 - bpStart) / xScale;
+                    const e1 = (feature.end1 - bpStart) / xScale;
+                    const s2 = (feature.start2 - bpStart) / xScale;
+                    const e2 = (feature.end2 - bpStart) / xScale;
+                    const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                    if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                    if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
+                }
+
+                ctx.beginPath();
+                ctx.arc(xc, yc, r, startAngle, endAngle, false);
+                ctx.stroke();
+
+                feature.drawState = {xc, yc, r};
             } else {
-                // DOWN
-                yc = -b;
-                startAngle = Math.PI / 2 - this.theta;
-                endAngle = Math.PI / 2 + this.theta;
+                let pixelStart = Math.round((feature.start - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.end - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth) continue;
+
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+                const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
+                ctx.font = "8px";
+                ctx.textAlign = "center";
+                if (direction) {
+                    // UP
+                    ctx.fillRect(pixelStart, this.height / 2, w, this.height / 2);
+                    ctx.fillText(otherChr, pixelStart + w / 2, this.height / 2 - 5);
+                    feature.drawState = {x: pixelStart, y: this.height / 2, w: w, h: this.height / 2};
+                } else {
+                    ctx.fillRect(pixelStart, 0, w, this.height / 2);
+                    ctx.fillText(otherChr, pixelStart + w / 2, this.height / 2 + 13);
+                    feature.drawState = {x: pixelStart, y: 0, w: w, h: this.height / 2};
+                }
             }
-            let color = feature.color || this.color;
-            if (color && this.config.useScore) {
-                color = getAlphaColor.call(this, color, scoreShade(feature.score));
-            } else if (color && w > viewportWidth) {
-                color = getAlphaColor.call(this, color, "0.1");
-            }
-
-            ctx.strokeStyle = color;
-            ctx.lineWidth = feature.thickness || this.thickness || 1;
-
-            if (this.showBlocks) {
-                ctx.fillStyle = color;
-                const s1 = (feature.start1 - bpStart) / xScale;
-                const e1 = (feature.end1 - bpStart) / xScale;
-                const s2 = (feature.start2 - bpStart) / xScale;
-                const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
-            }
-
-            ctx.beginPath();
-            ctx.arc(xc, yc, r, startAngle, endAngle, false);
-            ctx.stroke();
-
-            feature.drawState = {xc, yc, r};
         }
     }
 
@@ -203,7 +236,7 @@ InteractionTrack.prototype.drawNested = function (options) {
         }
         let a = Math.min(viewportWidth, max) / 2;
         if (max > 0) {
-            let coa = pixelHeight / a;
+            let coa = (pixelHeight - 10) / a;
             this.theta = estimateTheta(coa);
             this.sinTheta = Math.sin(this.theta);
             this.cosTheta = Math.cos(this.theta);
@@ -236,57 +269,82 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
             ctx.save();
 
-            const value = this.config.useScore ? feature.score : feature.value;
-
-            if (value === undefined || Number.isNaN(value) || (feature.chr1 !== feature.chr2)) continue;
-
-            let pixelStart = (feature.m1 - bpStart) / xScale;
-            let pixelEnd = (feature.m2 - bpStart) / xScale;
-            let w = (pixelEnd - pixelStart);
-            if (w < 3) {
-                w = 3;
-                pixelStart--;
-            }
-
-            if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+            const value = this.valueColumn ? feature[this.valueColumn] : feature.value;
+            if (value === undefined || Number.isNaN(value)) continue;
 
             const radiusY = this.logScale ?
                 Math.log10(value + 1) * yScale :
                 value * yScale;
-            const radiusX = w / 2;
-            const xc = pixelStart + w / 2;
-            const counterClockwise = this.arcOrientation ? true : false;
-            const color = feature.color || this.color;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = feature.thickness || this.thickness || 1;
-            ctx.beginPath();
-            ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise);
-            ctx.stroke();
 
-            if (this.showBlocks) {
-                ctx.fillStyle = color;
-                const s1 = (feature.start1 - bpStart) / xScale;
-                const e1 = (feature.end1 - bpStart) / xScale;
-                const s2 = (feature.start2 - bpStart) / xScale;
-                const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
+            if (feature.chr1 === feature.chr2) {
+
+                let pixelStart = (feature.m1 - bpStart) / xScale;
+                let pixelEnd = (feature.m2 - bpStart) / xScale;
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+
+                if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+
+                const radiusX = w / 2;
+                const xc = pixelStart + w / 2;
+                const counterClockwise = this.arcOrientation ? true : false;
+                const color = feature.color || this.color;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = feature.thickness || this.thickness || 1;
+                ctx.beginPath();
+                ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise);
+                ctx.stroke();
+
+                if (this.showBlocks) {
+                    ctx.fillStyle = color;
+                    const s1 = (feature.start1 - bpStart) / xScale;
+                    const e1 = (feature.end1 - bpStart) / xScale;
+                    const s2 = (feature.start2 - bpStart) / xScale;
+                    const e2 = (feature.end2 - bpStart) / xScale;
+                    const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                    if (e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
+                    if (e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
+                }
+
+                if (this.alpha) {
+                    const alphaColor = getAlphaColor.call(this, color, this.alpha);
+                    ctx.fillStyle = alphaColor;
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                feature.drawState = {xc, yc: y, radiusX, radiusY};
+            } else {
+                let pixelStart = Math.round((feature.start - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.end - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+
+                const h = Math.min(radiusY, this.height - 13);   // Leave room for text
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+                const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
+                ctx.font = "8px";
+                ctx.textAlign = "center";
+                if (this.arcOrientation) {
+                    // UP
+                    const y = this.height - h;
+                    ctx.fillRect(pixelStart, y, w, h);
+                    ctx.fillText(otherChr, pixelStart + w / 2, y - 5);
+                    feature.drawState = {x: pixelStart, y, w, h};
+                } else {
+                    ctx.fillRect(pixelStart, 0, w, h);
+                    ctx.fillText(otherChr, pixelStart + w / 2, h + 13);
+                    feature.drawState = {x: pixelStart, y: 0, w, h};
+                }
             }
-
-            if (this.alpha) {
-                const alphaColor = getAlphaColor.call(this, color, this.alpha);
-                ctx.fillStyle = alphaColor;
-                ctx.fill();
-            }
-            ctx.restore();
-
-            feature.drawState = {xc, yc: y, radiusX, radiusY};
-
         }
     }
-
-
 }
 
 InteractionTrack.prototype.menuItemList = function () {
@@ -302,7 +360,7 @@ InteractionTrack.prototype.menuItemList = function () {
         '<HR/>'
     ];
 
-    if(this.hasValue) {
+    if (this.hasValue) {
         const lut =
             {
                 "nested": "Nested Arcs",
@@ -312,7 +370,7 @@ InteractionTrack.prototype.menuItemList = function () {
             items.push(
                 {
                     object: createCheckbox(lut[arcType], arcType === this.arcType),
-                    click:  ()  =>{
+                    click: () => {
                         this.arcType = arcType;
                         this.trackView.repaintViews();
                     }
@@ -322,7 +380,7 @@ InteractionTrack.prototype.menuItemList = function () {
 
     items.push({
         object: createCheckbox("Show Blocks", this.showBlocks),
-        click:  () => {
+        click: () => {
             this.showBlocks = !this.showBlocks;
             this.trackView.repaintViews();
         }
@@ -335,7 +393,7 @@ InteractionTrack.prototype.menuItemList = function () {
         }
     });
 
-    if(this.arcType === "proportional") {
+    if (this.arcType === "proportional") {
         items.push("<HR>");
         items = items.concat(MenuUtils.numericDataMenuItems(this.trackView));
     }
@@ -349,7 +407,7 @@ InteractionTrack.prototype.doAutoscale = function (features) {
     let max = 0;
     if (features) {
         for (let f of features) {
-            const v = this.config.useScore ? f.score : f.value;
+            const v = this.valueColumn ? f[this.valueColumn] : f.value;
             if (!Number.isNaN(v)) {
                 max = Math.max(max, v);
             }
@@ -358,7 +416,6 @@ InteractionTrack.prototype.doAutoscale = function (features) {
     return {min: 0, max: max};
     // }
 }
-
 
 InteractionTrack.prototype.popupData = function (clickState, features) {
 
@@ -369,15 +426,14 @@ InteractionTrack.prototype.popupData = function (clickState, features) {
     for (let feature of features) {
         const featureData = popupData(feature);
         //if (data.length > 0) {
-       //     data.push("<HR>");
-       // }
+        //     data.push("<HR>");
+        // }
         Array.prototype.push.apply(data, featureData);
         // For now just return the top hit
         break;
     }
     return data;
 };
-
 
 InteractionTrack.prototype.clickedFeatures = function (clickState) {
 
@@ -389,28 +445,39 @@ InteractionTrack.prototype.clickedFeatures = function (clickState) {
         const proportional = this.arcType === "proportional";
 
         for (let feature of featureList) {
-            if ((feature.chr1 !== feature.chr2) || !feature.drawState) continue;
-            if (proportional) {
-                //(x-xc)^2/radiusX^2 + (y-yc)^2/radiusY^2 <= 1
-                const {xc, yc, radiusX, radiusY} = feature.drawState;
-                const dx = clickState.canvasX - xc;
-                const dy = clickState.canvasY - yc;
-                const score = (dx / radiusX) * (dx / radiusX) + (dy / radiusY) * (dy / radiusY);
-                if (score <= 1.2 && score >= 0.8) {
-                    candidates.push({score, feature});
+            if (!feature.drawState) continue;
+            if (feature.chr1 === feature.chr2) {
+                if (proportional) {
+                    //(x-xc)^2/radiusX^2 + (y-yc)^2/radiusY^2 <= 1
+                    const {xc, yc, radiusX, radiusY} = feature.drawState;
+                    const dx = clickState.canvasX - xc;
+                    const dy = clickState.canvasY - yc;
+                    const score = (dx / radiusX) * (dx / radiusX) + (dy / radiusY) * (dy / radiusY);
+                    if (score <= 1 ) {
+                        candidates.push({score: 1 / score, feature});
+                    }
+                } else {
+                    const {xc, yc, r} = feature.drawState;
+                    const dx = clickState.canvasX - xc;
+                    const dy = clickState.canvasY - yc;
+                    const score = Math.abs(Math.sqrt(dx * dx + dy * dy) - r);
+                    if (score < 5) {
+                        candidates.push({score, feature})
+                    }
                 }
-
             } else {
-                const {xc, yc, r} = feature.drawState;
-                const dx = clickState.canvasX - xc;
-                const dy = clickState.canvasY - yc;
-                const score = Math.abs(Math.sqrt(dx * dx + dy * dy) - r);
-                if (score < 5) {
-                    candidates.push({score, feature})
+                const {x, y, w, h} = feature.drawState;
+                const tolerance = 5;
+                if (clickState.canvasX >= x - tolerance && clickState.canvasX <= x + w + tolerance &&
+                    clickState.canvasY >= y && clickState.canvasY <= y + h) {
+                    const score = -Math.abs(clickState.canvasX - (x + w / 2));
+                    candidates.push({score, feature});
+                    break;
                 }
             }
         }
     }
+
     if (candidates.length > 1) {
         candidates.sort((a, b) => a.score - b.score);
     }
@@ -486,6 +553,8 @@ function getWGFeatures(allFeatures) {
         const chrFeatures = allFeatures[c];
         if (chrFeatures)
             for (let f of chrFeatures) {
+                if (f.dup) continue;
+
                 let queryChr = genome.getChromosomeName(f.chr);
 
                 if (wgChromosomeNames.has(queryChr)) {
@@ -497,6 +566,8 @@ function getWGFeatures(allFeatures) {
                     const wg = Object.create(Object.getPrototypeOf(f));
                     Object.assign(wg, f);
                     wg.chr = "all";
+                    wg.start = genome.getGenomeCoordinate(f.chr1, f.start1);
+                    wg.end = genome.getGenomeCoordinate(f.chr2, f.end2);
                     wg.m1 = m1;
                     wg.m2 = m2;
                     // wg.realChr = f.chr;

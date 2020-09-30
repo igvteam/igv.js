@@ -25,8 +25,7 @@
 
 import getDataWrapper from "./dataWrapper.js";
 import {IGVColor, StringUtils, TrackUtils} from "../../node_modules/igv-utils/src/index.js";
-import {isNumber} from "../util/igvUtils.js";
-import {decodeBedpe, decodeInteract, decodeBedpeDomain} from './bedpe.js';
+import {decodeBedpe, decodeInteract, decodeBedpeDomain, fixBedPE} from './bedpe.js';
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -246,63 +245,11 @@ FeatureParser.prototype.parseFeatures = function (data) {
 
     // Special hack for bedPE
     if (decode === decodeBedpe) {
-        setBedPEValue(allFeatures);
+        fixBedPE(allFeatures);
     }
 
     return allFeatures;
 
-    // Double quoted strings can contain newlines in AED
-    // "" is an escape for a ".
-    // Parse all this, clean it up, split into tokens in a custom way
-    function readTokensAed() {
-        var tokens = [],
-            token = "",
-            quotedString = false,
-            n,
-            c;
-
-        while (line || line === '') {
-            for (n = 0; n < line.length; n++) {
-                c = line.charAt(n);
-                if (c === delimiter) {
-                    if (!quotedString) {
-                        tokens.push(token);
-                        token = "";
-                    } else {
-                        token += c;
-                    }
-                } else if (c === "\"") {
-                    // Look ahead to the next character
-                    if (n + 1 < line.length && line.charAt(n + 1) === "\"") {
-                        if (quotedString) {
-                            // Turn "" into a single " in the output string
-                            token += "\"";
-                        } else {
-                            // "" on its own means empty string, ignore
-                        }
-                        // Skip the next double quote
-                        n++;
-                    } else {
-                        // We know the next character is NOT a double quote, flip our state
-                        quotedString = !quotedString;
-                    }
-                } else {
-                    token += c;
-                }
-            }
-            // We are at the end of the line
-            if (quotedString) {
-                token += '\n'; // Add newline to the token
-                line = nextLine(); // Keep going
-            } else {
-                // We can end the loop
-                break;
-            }
-        }
-        // Push the last token
-        tokens.push(token);
-        return tokens;
-    }
 }
 
 
@@ -1087,30 +1034,6 @@ function expandFormat(format) {
     return format;
 }
 
-/**
- * Hack for bedPE formats, where "score" can be in column 7 (name) or 8 (score)
- * @param features
- */
-function setBedPEValue(features) {
 
-    if(features.length == 0) return;
-
-    // Assume all features have same properties
-    const firstFeature = features[0];
-    if(firstFeature.score !== undefined) {
-        for(let f of features) {
-            f.value = f.score === '.' ? Number.NaN : parseFloat(f.score);
-        }
-    } else if(firstFeature.name !== undefined) {
-        // Name field (col 7) is sometimes used for score.
-        for(let f of features) {
-            if(!isNumber(f.name)) return;
-        }
-        for(let f of features) {
-            f.value = parseFloat(f.name);
-            delete f.name;
-        }
-    }
-}
 
 export default FeatureParser;

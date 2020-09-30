@@ -1,4 +1,5 @@
 import FeatureSource from "../js/feature/featureSource.js";
+import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 import {createMockObjects} from "@igvteam/test-utils/src"
 
@@ -87,6 +88,27 @@ suite("testBedpe", function () {
             assert.ok(f.name);
             assert.ok(f.value > 0);
         }
+    })
+
+    test("Inter chr", async function() {
+
+        const reader = new FeatureFileReader({
+            format: 'bedpe',
+            url: require.resolve('./data/bedpe/inter_chr_simulated.bedpe')
+        });
+
+        const allFeatures = await reader.loadFeaturesNoIndex();
+        assert.equal(allFeatures.length, 17);   // 5 intra + 6 (x2) inter
+
+        // Test complementary trvotfd
+        const chr1Y = allFeatures.filter(f => f.chr1 === "chr1" && f.chr2 === "chrY");
+        assert.equal(chr1Y.length, 2);
+        if(chr1Y[0].chr === "chr1") {
+            assert.equal(chr1Y[1].chr, "chrY")
+        } else {
+            assert.equal(chr1Y[0].chr, "chrY")
+        }
+
     })
 
     test("interact example 1", async function () {
