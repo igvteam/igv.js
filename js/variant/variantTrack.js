@@ -93,7 +93,7 @@ VariantTrack.prototype.postInit = async function () {
 
 VariantTrack.prototype.supportsWholeGenome = function () {
     return this.config.indexed === false && this.config.supportsWholeGenome !== false
-};
+}
 
 VariantTrack.prototype.getFileHeader = async function () {
 

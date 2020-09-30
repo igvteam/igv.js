@@ -17,7 +17,7 @@
 
 <body>
 
-<h1>BEDPE Proportional Arcs</h1>
+<h1>Chromosomes</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -27,16 +27,14 @@
 
     var options =
         {
-            genome: "hg38",
-            locus: "chr1",
+            genome: "hg19",
             tracks: [
                 {
-                   url: "../test/data/bedpe/inter_chr_simulated.bedpe",
-                    type: "interaction",
-                    format: "bedpe",
-                    name: "Inter  chr simulated",
-                    arcType: "nested",
-                    showBlocks: true
+                   url: "../test/data/bed/chromosomes_hg19.bed",
+                    type: "annotation",
+                    format: "bed",
+                    name: "Chromosomes",
+                    supportsWholeGenome: true
                 }
             ]
         };
