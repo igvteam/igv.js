@@ -1,56 +1,4 @@
-import {IGVColor} from "../../node_modules/igv-utils/src/index.js"
-import {isNumber} from "../util/igvUtils.js"
-
-function decodeBedpe(tokens, ignore) {
-
-    if (tokens.length < 6) {
-        console.log("Skipping line: " + tokens.join(' '));
-        return undefined;
-    }
-
-    var feature = {
-        chr1: tokens[0],
-        start1: Number.parseInt(tokens[1]),
-        end1: Number.parseInt(tokens[2]),
-        chr2: tokens[3],
-        start2: Number.parseInt(tokens[4]),
-        end2: Number.parseInt(tokens[5])
-    }
-
-    if (tokens.length > 6) {
-        feature.name = tokens[6];
-    }
-
-    if (tokens.length > 7) {
-        feature.score = parseFloat(tokens[7]);
-    }
-
-    // Optional extra columns
-    if (this.header) {
-        let thicknessColumn = this.header.thicknessColumn;
-        let colorColumn = this.header.colorColumn;
-        if (colorColumn && colorColumn < tokens.length) {
-            feature.color = IGVColor.createColorString(tokens[colorColumn])
-        }
-        if (thicknessColumn && thicknessColumn < tokens.length) {
-            feature.thickness = tokens[thicknessColumn];
-        }
-    }
-
-    const m1 = (feature.start1 + feature.end1) / 2;
-    const m2 = (feature.start2 + feature.end2) / 2;
-    feature.m1 = m1 < m2 ? m1 : m2;
-    feature.m2 = m1 < m2 ? m2 : m1;
-    if(feature.chr1 === feature.chr2) {
-        feature.chr = feature.chr1;
-        feature.start = Math.min(feature.start1, feature.start2);
-        feature.end = Math.max(feature.end1, feature.end2);
-
-    }
-    return feature;
-}
-
-
+import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
 
 /**
  * Decode UCSC "interact" files.  See https://genome.ucsc.edu/goldenpath/help/interact.html
@@ -78,7 +26,7 @@ function decodeBedpe(tokens, ignore) {
  * @param ignore
  * @returns {*}
  */
-function decodeInteract(tokens, ignore) {
+function decodeInteract(tokens, header) {
 
     if (tokens.length < 6) {
         console.log("Skipping line: " + tokens.join(' '));
@@ -134,47 +82,7 @@ function decodeBedpeDomain(tokens, ignore) {
     };
 }
 
-/**
- * Hack for bedPE formats, where "score" can be in column 7 (name) or 8 (score)
- * @param features
- */
-function fixBedPE(features) {
-
-    if(features.length == 0) return;
-
-    // Assume all features have same properties
-    const firstFeature = features[0];
-    if(firstFeature.score !== undefined) {
-        for(let f of features) {
-            f.value = f.score === '.' ? Number.NaN : parseFloat(f.score);
-        }
-    } else if(firstFeature.name !== undefined) {
-        // Name field (col 7) is sometimes used for score.
-        for(let f of features) {
-            if(!isNumber(f.name)) return;
-        }
-        for(let f of features) {
-            f.value = parseFloat(f.name);
-            delete f.name;
-        }
-    }
-
-    // Make copies of inter-chr features, one for each chromosome
-    const interChrFeatures = features.filter(f => f.chr1 !== f.chr2);
-    for(let f1 of interChrFeatures) {
-        const f2 = Object.assign({}, f1);
-        f2.dup = true;
-        features.push(f2);
-
-        f1.chr = f1.chr1;
-        f1.start = f1.start1;
-        f1.end = f1.end1;
-
-        f2.chr = f2.chr2;
-        f2.start = f2.start2;
-        f2.end = f2.end2;
-    }
-}
 
 
-export {decodeBedpe, decodeInteract, decodeBedpeDomain, fixBedPE}
+
+export {decodeInteract}

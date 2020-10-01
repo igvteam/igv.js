@@ -28,7 +28,7 @@ suite("testBedpe", function () {
         assert.equal(features.length, 3);
 
         for(let f of features) {
-            assert.ok(!isNaN(f.value));
+            assert.ok(!isNaN(f.score));
         }
     })
 
@@ -67,7 +67,7 @@ suite("testBedpe", function () {
 
         for(let f of features) {
             assert.ok(f.name);
-            assert.ok(!isNaN(f.value));
+            assert.ok(!isNaN(f.score));
         }
     })
 
@@ -86,7 +86,7 @@ suite("testBedpe", function () {
         assert.equal(features.length,6)
         for(let f of features) {
             assert.ok(f.name);
-            assert.ok(f.value > 0);
+            assert.ok(f.score > 0);
         }
     })
 

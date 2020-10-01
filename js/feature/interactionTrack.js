@@ -104,7 +104,7 @@ InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
 
     // Check for score or value
     if (this.hasValue === undefined && features && features.length > 0) {
-        this.hasValue = this.config.useScore ? features[0].score !== undefined : features[0].value !== undefined;
+        this.hasValue =  features[0].score !== undefined;
     }
 
     return features;
@@ -269,7 +269,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
             ctx.save();
 
-            const value = this.valueColumn ? feature[this.valueColumn] : feature.value;
+            const value = this.valueColumn ? feature[this.valueColumn] : feature.score;
             if (value === undefined || Number.isNaN(value)) continue;
 
             const radiusY = this.logScale ?
@@ -286,7 +286,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
                     pixelStart--;
                 }
 
-                if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+                if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
 
                 const radiusX = w / 2;
                 const xc = pixelStart + w / 2;
@@ -320,7 +320,7 @@ InteractionTrack.prototype.drawProportional = function (options) {
             } else {
                 let pixelStart = Math.round((feature.start - bpStart) / xScale);
                 let pixelEnd = Math.round((feature.end - bpStart) / xScale);
-                if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+                if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
 
                 const h = Math.min(radiusY, this.height - 13);   // Leave room for text
                 let w = (pixelEnd - pixelStart);
@@ -407,7 +407,7 @@ InteractionTrack.prototype.doAutoscale = function (features) {
     let max = 0;
     if (features) {
         for (let f of features) {
-            const v = this.valueColumn ? f[this.valueColumn] : f.value;
+            const v = this.valueColumn ? f[this.valueColumn] : f.score;
             if (!Number.isNaN(v)) {
                 max = Math.max(max, v);
             }
