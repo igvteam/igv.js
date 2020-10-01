@@ -1,5 +1,5 @@
 # igv.js
-[![Build Status](https://travis-ci.org/igvteam/igv.js.svg?branch=master)](https://travis-ci.org/igvteam/igv.js)
+[![Build Status](https://travis-ci.com/igvteam/igv.js.svg?branch=master)](https://travis-ci.com/igvteam/igv.js)
 ![](https://img.shields.io/npm/dw/igv.svg)
 ![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)
 ![](https://img.shields.io/npm/l/igv.svg)
