@@ -1,6 +1,6 @@
 // Defines the top-level API for the igv module
 
-import {createBrowser, getBrowser, removeBrowser, removeAllBrowsers, visibilityChange} from './igv-create.js';
+import {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange} from './igv-create.js';
 import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import embedCss from "./embedCss.js";
@@ -22,7 +22,6 @@ export default {
     setGoogleOauthToken,
     oauth,
     version,
-    getBrowser,
     xhr,
     setApiKey,
 }
