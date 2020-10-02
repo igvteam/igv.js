@@ -22,6 +22,7 @@ function cloneArray(a, fn) {
 }
 
 function deepCopy(o) {
+    if (o instanceof File) return o
     if (typeof o !== 'object' || o === null) return o
     if (o instanceof Date) return new Date(o)
     if (Array.isArray(o)) return cloneArray(o, deepCopy)
