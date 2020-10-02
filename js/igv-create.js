@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
-import { InputDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
-import { GoogleAuth} from '../node_modules/igv-utils/src/index.js';
+import {InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
@@ -44,7 +44,6 @@ import {createIcon} from "./igv-icons.js";
 import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
-let googleAuthInitialized = false;
 
 /**
  * Create an igv.browser instance.  This object defines the public API for interacting with the genome browser.
@@ -57,30 +56,15 @@ async function createBrowser(parentDiv, config) {
 
     if (undefined === config) config = {};
 
-    // Path to genomes.json file.   This is globally shared among all browser objects
+    // Explicit list, or path to genomes.json file which defines the list, of pre-defined genomes.
+    // The list is shared among all browser instances
     GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
 
     setDefaults(config);
 
-    // Explicit parameters have priority
     if (config.queryParametersSupported !== false) {
         extractQuery(config);
     }
-
-    // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
-    setTrackOrder(config);
-
-    const browser = new Browser(config, parentDiv);
-
-    setControls(browser, config);
-
-    browser.userFeedback = new UserFeedback($(browser.trackContainer));
-    browser.userFeedback.hide();
-
-    browser.inputDialog = new InputDialog(browser.$root.get(0));
-
-    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser.alert);
-
     if (config.apiKey) {
         igvxhr.setApiKey(config.apiKey);
     }
@@ -95,62 +79,57 @@ async function createBrowser(parentDiv, config) {
         })
     }
 
-    return loadSession(config)
+    // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
+    setTrackOrder(config);
 
-        .then(function (ignore) {
-
-            if (false === config.showTrackLabels) {
-                browser.hideTrackLabels();
-            } else {
-                browser.showTrackLabels();
-                if (browser.trackLabelControl) {
-                    browser.trackLabelControl.setState(browser.trackLabelsVisible);
-                }
-            }
-
-            if (false === config.showCursorTrackingGuide) {
-                browser.cursorGuide.doHide();
-            } else {
-                browser.cursorGuide.doShow();
-            }
-
-            if (false === config.showCenterGuide) {
-                browser.centerGuide.doHide();
-            } else {
-                browser.centerGuide.doShow();
-            }
-
-            const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
-
-            // multi-locus mode or isWGV
-            if (browser.isMultiLocusMode() || isWGV) {
-                browser.centerGuide.forcedHide();
-            } else {
-                browser.centerGuide.forcedShow();
-            }
-
-            browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
-
-            return browser;
-        })
-
-        .then(function (browser) {
-
-            allBrowsers.push(browser);
-
-            return browser;
-        })
-
-
-    function loadSession(config) {
-        if (config.sessionURL) {
-            return browser.loadSession({
-                url: config.sessionURL
-            })
-        } else {
-            return browser.loadSessionObject(config)
+    // Initial browser configuration -- settings that are independent of session
+    const browser = new Browser(config, parentDiv);
+    allBrowsers.push(browser);
+    setControls(browser, config);
+    browser.userFeedback = new UserFeedback($(browser.trackContainer));
+    browser.userFeedback.hide();
+    browser.inputDialog = new InputDialog(browser.$root.get(0));
+    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser.alert);
+    if (false === config.showTrackLabels) {
+        browser.hideTrackLabels();
+    } else {
+        browser.showTrackLabels();
+        if (browser.trackLabelControl) {
+            browser.trackLabelControl.setState(browser.trackLabelsVisible);
         }
     }
+    if (false === config.showCursorTrackingGuide) {
+        browser.cursorGuide.doHide();
+    } else {
+        browser.cursorGuide.doShow();
+    }
+    if (false === config.showCenterGuide) {
+        browser.centerGuide.doHide();
+    } else {
+        browser.centerGuide.doShow();
+    }
+
+
+    // Load initial session
+    if (config.sessionURL) {
+        await browser.loadSession({
+            url: config.sessionURL
+        })
+    } else {
+        await browser.loadSessionObject(config)
+    }
+
+    // Session dependent settings
+    const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
+    if (browser.isMultiLocusMode() || isWGV) {
+        browser.centerGuide.forcedHide();
+    } else {
+        browser.centerGuide.forcedShow();
+    }
+    browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
+
+
+    return browser;
 
 }
 
@@ -159,35 +138,28 @@ function removeBrowser(browser) {
     browser.$root.remove();
     allBrowsers = allBrowsers.filter(item => item !== browser);
 }
+
 function removeAllBrowsers() {
-    for(let browser of allBrowsers) {
+    for (let browser of allBrowsers) {
         browser.dispose();
         browser.$root.remove();
     }
     allBrowsers = [];
 }
 
-// A hack to replace the global igv.browser for the purpose of alert dialogs
-// TODO fixme
-function getBrowser() {
-    return allBrowsers[0];
-}
-
-
 /**
  * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
  * made visible from a tab, accordion, or similar widget.
  */
-async function visibilityChange () {
+async function visibilityChange() {
     for (let browser of allBrowsers) {
         await browser.visibilityChange();
     }
 }
 
-
 function setTrackOrder(conf) {
 
-    var trackOrder = 1;
+    let trackOrder = 1;
 
     if (conf.tracks) {
         conf.tracks.forEach(function (track) {
@@ -196,7 +168,6 @@ function setTrackOrder(conf) {
             }
         });
     }
-
 }
 
 function setControls(browser, conf) {
@@ -208,21 +179,20 @@ function setControls(browser, conf) {
     if (false === conf.showControls) {
         $navBar.hide();
     }
-
 }
 
 function createStandardControls(browser, config) {
 
     browser.navbarManager = new NavbarManager(browser);
 
-    const $navBar = $('<div>', { id: 'igv-navbar'});
+    const $navBar = $('<div>', {id: 'igv-navbar'});
     browser.$navigation = $navBar;
 
-    const $navbarLeftContainer = $('<div>', { id: 'igv-navbar-left-container' });
+    const $navbarLeftContainer = $('<div>', {id: 'igv-navbar-left-container'});
     $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    const $logo = $('<div>', { id: 'igv-logo' });
+    const $logo = $('<div>', {id: 'igv-logo'});
     $navbarLeftContainer.append($logo);
 
     const logoSvg = logo();
@@ -230,11 +200,11 @@ function createStandardControls(browser, config) {
     logoSvg.css("height", "32px");
     $logo.append(logoSvg);
 
-    browser.$current_genome = $('<div>', { id: 'igv-current-genome' });
+    browser.$current_genome = $('<div>', {id: 'igv-current-genome'});
     $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    const $genomicLocation = $('<div>', { id: 'igv-navbar-genomic-location' });
+    const $genomicLocation = $('<div>', {id: 'igv-navbar-genomic-location'});
     $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget
@@ -248,14 +218,14 @@ function createStandardControls(browser, config) {
         browser.chromosomeSelectWidget.$container.hide();
     }
 
-    const $locusSizeGroup = $('<div>', { id: 'igv-locus-size-group' });
+    const $locusSizeGroup = $('<div>', {id: 'igv-locus-size-group'});
     $genomicLocation.append($locusSizeGroup);
 
-    const $searchContainer = $('<div>', { id: 'igv-search-container' });
+    const $searchContainer = $('<div>', {id: 'igv-search-container'});
     $locusSizeGroup.append($searchContainer);
 
     // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-    browser.$searchInput = $('<input>', { id:'igv-search-input', type: 'text', placeholder:'Locus Search' });
+    browser.$searchInput = $('<input>', {id: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
     $searchContainer.append(browser.$searchInput);
 
     browser.$searchInput.change(function (e) {
@@ -267,7 +237,7 @@ function createStandardControls(browser, config) {
             });
     });
 
-    const $searchIconContainer = $('<div>', { id: 'igv-search-icon-container' });
+    const $searchIconContainer = $('<div>', {id: 'igv-search-icon-container'});
     $searchContainer.append($searchIconContainer);
 
     $searchIconContainer.append(createIcon("search"));
@@ -276,7 +246,7 @@ function createStandardControls(browser, config) {
 
     browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 
-    const $navbarRightContainer = $('<div>', { id: 'igv-navbar-right-container' });
+    const $navbarRightContainer = $('<div>', {id: 'igv-navbar-right-container'});
     $navBar.append($navbarRightContainer);
 
     const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
@@ -376,7 +346,7 @@ function setDefaults(config) {
     }
 
     if (config.showSequence) {
-        config.tracks.push({type: "sequence", order: defaultSequenceTrackOrder });
+        config.tracks.push({type: "sequence", order: defaultSequenceTrackOrder});
     }
 }
 
@@ -457,7 +427,7 @@ function logo() {
 }
 
 
-export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange, getBrowser}
+export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
 
 
 
