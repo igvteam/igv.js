@@ -67,7 +67,7 @@ const igvxhr = {
         if (method === "POST") {
             options.contentType = "application/json";
         }
-        const result = await load(url, options)
+        const result = await this.loadString(url, options)
         if (result) {
             return JSON.parse(result);
         } else {
@@ -267,10 +267,22 @@ async function loadFileSlice(localfile, options) {
     let blob = (options && options.range) ?
         localfile.slice(options.range.start, options.range.start + options.range.size) :
         localfile;
+
     if ("arraybuffer" === options.responseType) {
         return blob.arrayBuffer();
     } else {
-        throw Error("binary string not implemented")
+        return new Promise(function (resolve, reject) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                resolve(fileReader.result);
+            };
+            fileReader.onerror = function (e) {
+                console.error("reject uploading local file " + localfile.name);
+                reject(null, fileReader);
+            };
+            fileReader.readAsBinaryString(blob)
+            console.warn("Deprecated method used: readAsBinaryString")
+        })
     }
 }
 
