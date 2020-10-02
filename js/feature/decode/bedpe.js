@@ -62,10 +62,6 @@ function decodeBedpe(tokens, header) {
         }
     }
 
-    const m1 = (feature.start1 + feature.end1) / 2;
-    const m2 = (feature.start2 + feature.end2) / 2;
-    feature.m1 = m1 < m2 ? m1 : m2;
-    feature.m2 = m1 < m2 ? m2 : m1;
     if(feature.chr1 === feature.chr2) {
         feature.chr = feature.chr1;
         feature.start = Math.min(feature.start1, feature.start2);
