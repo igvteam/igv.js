@@ -25,7 +25,7 @@ suite("testSeg", function () {
         const bpStart = 0;
         const bpEnd = 747751863;
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd)
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd})
         assert.ok(features);
         assert.equal(features.length, 1438);
         // Test 1 feature, insure its on chr1
@@ -46,7 +46,7 @@ suite("testSeg", function () {
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
         const featureSource = FeatureSource({format: 'seg', url: url, indexed: false}, genome);
         const chr = "all";
-        const features = await featureSource.getFeatures(chr)
+        const features = await featureSource.getFeatures({chr})
 
         assert.ok(features);
         assert.equal(20076, features.length);

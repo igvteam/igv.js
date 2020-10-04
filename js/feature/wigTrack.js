@@ -78,12 +78,12 @@ const WigTrack = extend(TrackBase,
     });
 
 WigTrack.prototype.postInit = async function () {
-    const header = await this.getFileHeader();
+    const header = await this.getHeader();
     if (header) this.setTrackProperties(header)
 }
 
 WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, windowFunction: this.windowFunction});
 
 }
 
@@ -91,10 +91,10 @@ WigTrack.prototype.menuItemList = function () {
     return MenuUtils.numericDataMenuItems(this.trackView)
 }
 
-WigTrack.prototype.getFileHeader = async function () {
+WigTrack.prototype.getHeader = async function () {
 
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
     }
     return this.header;
 };

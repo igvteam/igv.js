@@ -23,7 +23,7 @@ suite("testBedpe", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length, 3);
 
@@ -42,7 +42,7 @@ suite("testBedpe", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length, 5)
 
@@ -61,7 +61,7 @@ suite("testBedpe", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length, 11)
 
@@ -81,7 +81,7 @@ suite("testBedpe", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length,6)
         for(let f of features) {
@@ -121,7 +121,7 @@ suite("testBedpe", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length,4)
         for(let f of features) {

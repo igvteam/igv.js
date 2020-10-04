@@ -34,7 +34,7 @@ const TDFSource = function (config, genome) {
     this.reader = new TDFReader(config, genome);
 };
 
-TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+TDFSource.prototype.getFeatures = async function ({chr, bpStart, bpEnd, bpPerPixel}) {
 
     await getRootGroup.call(this);
 
