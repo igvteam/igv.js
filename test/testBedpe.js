@@ -90,6 +90,25 @@ suite("testBedpe", function () {
         }
     })
 
+
+    test("10X Large SVs", async function () {
+        const chr = "chr1";
+        const bpStart = 1;
+        const bpEnd = Number.MAX_SAFE_INTEGER;
+        const featureSource = FeatureSource({
+                url: require.resolve('./data/bedpe/large_sv_calls.10X.bedpe'),
+                format: 'bedpe'
+            },
+            genome);
+
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        assert.ok(features);
+        assert.equal(features.length,2)
+
+        const extras = features[0].extras;
+        assert.equal(extras.length, 2);
+    })
+
     test("Inter chr", async function() {
 
         const reader = new FeatureFileReader({
@@ -128,6 +147,26 @@ suite("testBedpe", function () {
             assert.ok(f.name);
             assert.equal(f.score, 0);
             assert.ok(f.value > 0);
+        }
+    })
+
+
+    test("hiccups (old format)", async function () {
+        const chr = "chr1";
+        const bpStart = 1;
+        const bpEnd = Number.MAX_SAFE_INTEGER;
+        const featureSource = FeatureSource({
+                url: require.resolve('./data/bedpe/sv_calls.10X.bedpe'),
+                format: 'bedpe'
+            },
+            genome);
+
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        assert.ok(features);
+        assert.equal(features.length,6)
+        for(let f of features) {
+            assert.ok(f.name);
+            assert.ok(f.score > 0);
         }
     })
 })
