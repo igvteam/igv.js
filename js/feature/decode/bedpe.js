@@ -52,16 +52,23 @@ function decodeBedpe(tokens, header) {
 
     // Optional extra columns
     if (header) {
-        let thicknessColumn = header.thicknessColumn;
-        let colorColumn = header.colorColumn;
+        const colorColumn = header.colorColumn;
         if (colorColumn && colorColumn < tokens.length) {
             feature.color = IGVColor.createColorString(tokens[colorColumn])
         }
+        const thicknessColumn = header.thicknessColumn;
         if (thicknessColumn && thicknessColumn < tokens.length) {
             feature.thickness = tokens[thicknessColumn];
         }
+
+        if(tokens.length > 10 && header.columnNames && header.columnNames.length === tokens.length) {
+            feature.extraValues = tokens.slice(10);
+        }
     }
 
+
+
+    // Set total extent of feature
     if(feature.chr1 === feature.chr2) {
         feature.chr = feature.chr1;
         feature.start = Math.min(feature.start1, feature.start2);
