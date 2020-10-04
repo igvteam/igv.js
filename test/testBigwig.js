@@ -15,7 +15,7 @@ suite("testBigWig", function () {
         const bw = new BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
-        const features = await bw.getFeatures('NoSuchChromosome', 0, 100)
+        const features = await bw.getFeatures({chr: 'NoSuchChromosome', bpStart: 0, bpEnd: 100});
         assert.equal(0, features.length);
 
     });
@@ -27,7 +27,7 @@ suite("testBigWig", function () {
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
 
-        const features = await bw.getFeatures('AluJb', 0, 100);
+        const features = await bw.getFeatures({chr: 'AluJb', bpStart: 0, bpEnd: 100});
         assert.equal(99, features.length);
         features.forEach(function (f) {
             assert.equal("AluJb", f.chr);
@@ -102,7 +102,7 @@ suite("testBigWig", function () {
             bpEnd = 19170640;
 
         const bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await bWSource.getFeatures({chr: chr, bpStart: bpStart, bpEnd: bpEnd});
         assert.ok(features);
         assert.equal(features.length, 337);   // Verified in iPad app
     });
@@ -135,7 +135,7 @@ suite("testBigWig", function () {
             bpEnd = 26996291,
             bpPerPixel = 10765.6611328125;    // To match iOS unit test
         const bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
+        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel});
         assert.ok(features);
         assert.equal(features.length, 1293);   // Verified in iPad app
 

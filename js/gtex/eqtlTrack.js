@@ -124,18 +124,15 @@ EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
 };
 
-EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+EqtlTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
 
     const pValueField = this.pValueField;
-
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd)
-        .then(function (features) {
-            features.forEach(function (f) {
-                f.value = f[pValueField];
-            })
-            return features;
-        })
-};
+    const features = await this.featureSource.getFeatures({chr, bpStart, bpEnd});
+    features.forEach(function (f) {
+        f.value = f[pValueField];
+    })
+    return features;
+}
 
 EqtlTrack.prototype.draw = function (options) {
 
