@@ -99,16 +99,6 @@ function getDecoder(definedFieldCount, fieldCount, as) {
         feature.value = Number.parseFloat(tokens[2]);
         feature.color = tokens[4] === '.' ? undefined : tokens[4] === "0" ? "rgb(0,0,0)" : tokens[4];
 
-        feature.interchr = feature.chr1 !== feature.chr2;
-
-        // Midpoints
-        if(feature.chr1 === feature.chr2) {
-            let m1 = (feature.start1 + feature.end1) / 2;
-            let m2 = (feature.start2 + feature.end2) / 2;
-            feature.m1 = (m1 < m2) ? m1 : m2;
-            feature.m2 = (m1 < m2) ? m2 : m1;
-        }
-
         return feature;
     }
 }
