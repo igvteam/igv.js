@@ -169,9 +169,12 @@ class FeatureParser {
     }
 
     /**
-     * Parse header line(s) from the file.  A variety of conventions are used for header lines
+     * Parse header line(s) from the file.   A variety of conventions are in use to supply meta data through header
+     * lines, defined as lines preceding actual data.  This method attempts to read through all lines gleaning useful
+     * metadata from recognized keywords and directives.
+     *
      * @param data
-     * @returns {{}|{colorColumn: number}}
+     * @returns {{}}
      */
     parseHeader(data) {
 
@@ -194,8 +197,6 @@ class FeatureParser {
                 header["format"] = "gff3";
             } else if (line.startsWith("#gffTags")) {
                 header["gffTags"] = true;
-            } else if (line.startsWith("#")) {
-                // Comment, ignore
             } else if (line.startsWith("fixedStep") || line.startsWith("variableStep")) {
                 // Wig directives -- we are in the data section
                 break;
@@ -203,7 +204,7 @@ class FeatureParser {
                 // If the line can be parsed as a feature assume we are beyond the header, if any
                 const tokens = line.split(this.delimiter || "\t");
                 try {
-                    const feature = this.decode(tokens, header);
+                    const feature = line.startsWith("#") ? undefined : this.decode(tokens, header);
                     if (feature) {
                         if (columnNames && columnNames.length === tokens.length) {
                             header.columnNames = columnNames;
