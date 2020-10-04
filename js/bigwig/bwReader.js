@@ -69,6 +69,7 @@ class BWReader {
             return [];
         }
 
+
         // Select a biwig "zoom level" appropriate for the current resolution.   Select decode function
         const zoomLevelHeaders = await this.getZoomHeaders()
         let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined;

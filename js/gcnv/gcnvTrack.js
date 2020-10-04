@@ -31,7 +31,14 @@ const GCNVTrack = extend(TrackBase,
 
 GCNVTrack.prototype.postInit = async function () {
 
-    this.header = await this.featureSource.getFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
+    }
+
+    // Set properties from track line
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
 }
 
 GCNVTrack.prototype.menuItemList = function () {
@@ -40,7 +47,7 @@ GCNVTrack.prototype.menuItemList = function () {
 
 
 GCNVTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-    const chrFeatures = await this.featureSource.getFeatures(chr, 0, Number.MAX_VALUE); //bpStart, bpEnd);
+    const chrFeatures = await this.featureSource.getFeatures({chr, bpStart: 0, bpEnd: Number.MAX_VALUE});
     let prevIndex = undefined;
     let nextIndex = undefined;
     for (let i = 1; i < chrFeatures.length - 1; i++) {

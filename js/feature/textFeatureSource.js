@@ -109,7 +109,7 @@ class TextFeatureSource {
         return this.supportsWG;
     }
 
-    async getFileHeader() {
+    async getHeader() {
         if (!this.header) {
             if (this.reader && typeof this.reader.readHeader === "function") {
                 const header = await this.reader.readHeader()
@@ -140,7 +140,7 @@ class TextFeatureSource {
      * @param bpEnd
      * @param bpPerPixel
      */
-    async getFeatures(chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
+    async getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow}) {
 
         const reader = this.reader;
         const genome = this.genome;

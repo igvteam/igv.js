@@ -87,8 +87,8 @@ GWASTrack.prototype.supportsWholeGenome = function () {
 }
 
 GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
-};
+    return this.featureSource.getFeatures({chr, bpStart, bpEnd});
+}
 
 GWASTrack.prototype.draw = function (options) {
 

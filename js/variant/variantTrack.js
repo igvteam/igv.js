@@ -75,7 +75,7 @@ const VariantTrack = extend(TrackBase,
 
 VariantTrack.prototype.postInit = async function () {
 
-    const header = await this.getFileHeader();   // cricital, don't remove'
+    const header = await this.getHeader();   // cricital, don't remove'
     if (undefined === this.visibilityWindow && this.config.indexed !== false) {
         const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
         if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
@@ -95,22 +95,13 @@ VariantTrack.prototype.supportsWholeGenome = function () {
     return this.config.indexed === false && this.config.supportsWholeGenome !== false
 }
 
-VariantTrack.prototype.getFileHeader = async function () {
+VariantTrack.prototype.getHeader = async function () {
 
     if (this.header) {
         return this.header;
-    } else if (typeof this.featureSource.getFileHeader === "function") {
-
-        const header = await this.featureSource.getFileHeader()
+    } else if (typeof this.featureSource.getHeader === "function") {
+        const header = await this.featureSource.getHeader()
         if (header) {
-
-            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-            if (header.name && !this.config.name) {
-                this.name = header.name;
-            }
-            if (header.color && !this.config.color) {
-                this.color = "rgb(" + header.color + ")";
-            }
             this.callSets = header.callSets || [];
         }
         this.header = header;
@@ -129,9 +120,9 @@ VariantTrack.prototype.getCallsetsLength = function () {
 VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
 
     if (this.header === undefined) {
-        this.header = await this.getFileHeader();
+        this.header = await this.getHeader();
     }
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
+    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow: this.visibilityWindow});
 
 }
 

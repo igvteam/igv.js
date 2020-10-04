@@ -24,7 +24,7 @@ suite("testGFF", function () {
             },
             genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(4, features.length);
         assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
@@ -39,12 +39,12 @@ suite("testGFF", function () {
             },
             genome);
 
-        const chr1Features = await featureSource.getFeatures("chr1", 500000, 600000);
+        const chr1Features = await featureSource.getFeatures({chr: "chr1", bpStart: 500000, bpEnd: 600000});
         assert.ok(chr1Features);
         assert.equal(1, chr1Features.length);
         assert.equal(5, chr1Features[0].exons.length); // ensure features chromosome is specified chromosome
 
-        const chr2Features = await featureSource.getFeatures("chr1", 500000, 600000);
+        const chr2Features = await featureSource.getFeatures({chr: "chr1", bpStart: 500000, bpEnd: 600000});
         assert.ok(chr2Features);
         assert.equal(1, chr2Features.length);
         assert.equal(5, chr2Features[0].exons.length); // ensure features chromosome is specified chromosome

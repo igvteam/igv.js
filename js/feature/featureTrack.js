@@ -115,39 +115,30 @@ const FeatureTrack = extend(TrackBase,
 
 FeatureTrack.prototype.postInit = async function () {
 
-    const header = await this.readFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
+    }
 
     // Set properties from track line
-    if (header) this.setTrackProperties(header)
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
 
-    const format = this.config.format;
-    if (format &&
-        (format.toLowerCase() === 'bigbed' || format && format.toLowerCase() === 'biginteract') &&
-        this.visibilityWindow === undefined &&
-        typeof this.featureSource.defaultVisibilityWindow === 'function') {
-        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
-        this.featureSource.visibilityWindow = this.visibilityWindow;
+    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+        this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
     }
 
     return this;
-
 }
 
 FeatureTrack.prototype.supportsWholeGenome = function () {
     return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
-FeatureTrack.prototype.readFileHeader = async function () {
-
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
-    }
-
-    return this.header;
-}
-
 FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
+    const visibilityWindow = this.visibilityWindow;
+    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow});
 };
 
 

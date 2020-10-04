@@ -25,7 +25,7 @@ suite("testAED", function () {
                 genome);
 
         // Must get file header first
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
 
         assert.equal(features.length, 1);
 
