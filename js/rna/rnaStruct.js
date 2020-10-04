@@ -54,7 +54,7 @@ const RnaStructTrack = extend(TrackBase,
 
 RnaStructTrack.prototype.getFeatures = function (chr, start, end) {
 
-    return this.featureSource.getFeatures(chr, start, end);
+    return this.featureSource.getFeatures({chr, start, end});
 
 }
 
@@ -272,7 +272,7 @@ function RNAFeatureSource(config, genome) {
     this.genome = genome;
 }
 
-RNAFeatureSource.prototype.getFeatures = function (chr, start, end) {
+RNAFeatureSource.prototype.getFeatures = function ({chr, start, end}) {
 
     const self = this;
     const genome = this.genome;

@@ -24,7 +24,7 @@ suite("testBedGraph", function () {
                 },
                 genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length, 9);
 

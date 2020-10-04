@@ -34,7 +34,7 @@ const BWSource = function (config, genome) {
 };
 
 
-BWSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, windowFunction) {
+BWSource.prototype.getFeatures = async function ({chr, bpStart, bpEnd, bpPerPixel, windowFunction}) {
 
     const features = (chr.toLowerCase() === "all") ?
         await this.getWGValues(windowFunction) :

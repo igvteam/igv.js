@@ -78,6 +78,25 @@ const InteractionTrack = extend(TrackBase,
         this.colorAlphaCache = {};
     });
 
+InteractionTrack.prototype.postInit = async function () {
+
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
+    }
+
+    // Set properties from track line
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
+
+    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+        this.featureSource.visibilityWindow = this.visibilityWindow;  // <- this looks odd
+    }
+
+    return this;
+}
+
 InteractionTrack.prototype.supportsWholeGenome = function () {
     return true
 }
@@ -99,8 +118,8 @@ InteractionTrack.prototype.getState = function () {
 
 
 InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-
-    const features = await this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+    const visibilityWindow = this.visibilityWindow;
+    const features = await this.featureSource.getFeatures({chr, bpStart, bpEnd, visibilityWindow});
 
     // Check for score or value
     if (this.hasValue === undefined && features && features.length > 0) {
@@ -209,7 +228,7 @@ InteractionTrack.prototype.drawNested = function (options) {
                 }
 
                 // Alpha shade (de-emphasize) arcs that extend beyond viewport, unless alpha shading is used for score.
-                if (color && !this.config.useScore  && w > viewportWidth) {
+                if (color && !this.config.useScore && w > viewportWidth) {
                     color = getAlphaColor.call(this, color, "0.1");
                 }
 
@@ -440,13 +459,29 @@ InteractionTrack.prototype.doAutoscale = function (features) {
 InteractionTrack.prototype.popupData = function (clickState, features) {
 
     if (!features) features = this.clickedFeatures(clickState);
-    const genomicLocation = clickState.genomicLocation;
 
     const data = [];
     for (let feature of features) {
-        const f = feature._ || feature;
-        const featureData = popupData(f);
-        Array.prototype.push.apply(data, featureData);
+
+        const f = feature._ || feature;   // For "whole genome" features, which keeps a pointer to the original
+
+        data.push({name: "Region 1", value: positionString(f.chr1, feature.start1, f.end1)});
+        data.push({name: "Region 2", value: positionString(f.chr2, f.start2, f.end2)});
+        if (f.name) {
+            data.push({name: "Name", value: f.name});
+        }
+        if (f.value !== undefined) {
+            data.push({name: "Value", value: f.value})
+            if (f.score !== undefined) {
+                data.push({name: "Score", value: f.score})
+            }
+        }
+
+        if (f.extraValues && this.header && this.header.columnNames) {
+            for (let i = 10; i < this.header.columnNames.length; i++) {
+                data.push({name: this.header.columnNames[i], value: f.extraValues[i - 10]});
+            }
+        }
         // For now just return the top hit
         break;
 
@@ -506,25 +541,11 @@ InteractionTrack.prototype.clickedFeatures = function (clickState) {
     return candidates.map((c) => c.feature);
 }
 
-function popupData(feature) {
-    const data = [
-        {name: "Region 1", value: positionString(feature.chr1, feature.start1, feature.end1)},
-        {name: "Region 2", value: positionString(feature.chr2, feature.start2, feature.end2)},
-    ]
-    if (feature.name) {
-        data.push({name: "Name", value: feature.name});
-    }
-    if (feature.value !== undefined) {
-        data.push({name: "Value", value: feature.value})
-        if (feature.score !== undefined) {
-            data.push({name: "Score", value: feature.score})
-        }
-    }
-    return data;
-}
+function positionString(chr, start, end, strand) {
 
-function positionString(chr, start, end) {
-    return `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)}`
+    return strand && strand !== '.' ?
+        `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)} (${strand})` :
+        `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)}`
 }
 
 /**

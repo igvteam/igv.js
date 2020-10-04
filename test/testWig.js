@@ -22,7 +22,7 @@ suite("testWig", function () {
             bpStart = 49300000,
             bpEnd = 49400000;
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.equal(features.length, 10);
         //fixedStep chrom=chr19 start=49307401 step=300 span=200
         // fixedStep uses 1-based coordinate, igv.js uses 0-based
@@ -46,7 +46,7 @@ suite("testWig", function () {
         const bpStart = 49304200;
         const bpEnd = 49310700;
 
-        const features = await wigFeatureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await wigFeatureSource.getFeatures({chr, bpStart, bpEnd});
         assert.equal(features.length, 9);
         //fixedStep chrom=chr19 start=49307401 step=300 span=200
         features.forEach(function (feature, index) {

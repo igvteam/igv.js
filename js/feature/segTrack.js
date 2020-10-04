@@ -87,9 +87,14 @@ const SegTrack = extend(TrackBase,
     });
 
 SegTrack.prototype.postInit = async function () {
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
     }
+    // Set properties from track line
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
+
 }
 
 
@@ -127,7 +132,7 @@ SegTrack.prototype.menuItemList = function () {
 
 
 SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
+    return this.featureSource.getFeatures({chr, bpStart, bpEnd});
 };
 
 

@@ -13,7 +13,7 @@ suite("testBigBed", function () {
             bpStart = 0,
             bpEnd = Number.MAX_SAFE_INTEGER;
         var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd, 1);
+        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 3339);   // Verified in iPad app
 
@@ -31,18 +31,16 @@ suite("testBigBed", function () {
             bpEnd = 63880091;
 
         var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd, 1);
+        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 18);
 
-        //chr3	63702628	63705638	.	584	10	.	0	chr17	58878552	58880897	.	.	chr3	63702628	63705638	.	.
-        const firstFeature = features[0];
-        assert.ok(firstFeature.interchr);
-
         //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
         const secondFeature = features[1];
-        assert.equal(secondFeature.m1, (63741418 + 63743120) / 2);
-        assert.equal(secondFeature.m2, (63976338 + 63978511) / 2);
+        assert.equal(secondFeature.start1,63741418 );
+        assert.equal(secondFeature.end1,63743120);
+        assert.equal(secondFeature.start2, 63976338);
+        assert.equal(secondFeature.end2, 63978511);
     });
 
 

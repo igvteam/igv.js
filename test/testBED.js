@@ -19,7 +19,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed"),
         }
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures("chr1", 0, 128756129)
+        const features = await reader.getFeatures({chr: "chr1", bpStart: 0, bpEnd: 128756129})
         assert.ok(features);
         assert.equal(features.length, 6);
     })
@@ -30,7 +30,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed.gz"),
         }
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures("chr1", 0, 128756129)
+        const features = await reader.getFeatures({chr: "chr1", bpStart: 0, bpEnd: 128756129});
         assert.ok(features);
         assert.equal(features.length, 6);
     })
@@ -145,8 +145,8 @@ suite("testBed", function () {
                 genome);
 
         // Must get file header first
-        await featureSource.getFileHeader();
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        await featureSource.getHeader();
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(128, features.length);   // feature count. Determined by grepping file
     });
@@ -160,7 +160,7 @@ suite("testBed", function () {
             },
             genome);
 
-        const header = await featureSource.getFileHeader();
+        const header = await featureSource.getHeader();
         assert.ok(header);
         assert.equal(header.name, "Basic Features");
         assert.equal(header.color, "255,0,0");
@@ -177,7 +177,7 @@ suite("testBed", function () {
                 },
                 genome);
 
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(128, features.length);   // feature count. Determined by grepping file
         assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
@@ -192,7 +192,7 @@ suite("testBed", function () {
         const chr = "chr22";
         const bpStart = 16847690;
         const bpEnd = 20009819;
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(features.length, 100);   // # of features over this region
         const feature = features[0];
@@ -214,7 +214,7 @@ suite("testBed", function () {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(10, features.length);   // # of features over this region
         const feature = features[0];
@@ -237,7 +237,7 @@ suite("testBed", function () {
         const chr = "chr8";
         const bpStart = 1;
         const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(7, features.length);   // # of features over this region
         const feature = features[0];
@@ -260,7 +260,7 @@ suite("testBed", function () {
         const chr = "chr1";
         const bpStart = 1;
         const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures(chr, bpStart, bpEnd);
+        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
         assert.ok(features);
         assert.equal(10, features.length);   // # of features over this region
         const feature = features[0];
@@ -280,7 +280,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns.bed"),
         }
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures("1", 67658429, 67659549)
+        const features = await reader.getFeatures({chr: "1", bpStart: 67658429, bpEnd: 67659549});
         assert.ok(features);
         assert.equal(features.length, 4);
 

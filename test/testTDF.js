@@ -29,7 +29,7 @@ suite("testTDF", function () {
             bpPerPixel = 51304566 / (Math.pow(2, 6) * 700);
 
         const tdfSource = new TDFSource({url: url}, genome);
-        const features = await tdfSource.getFeatures(chr, bpstart, end, bpPerPixel);
+        const features = await tdfSource.getFeatures({chr, bpstart, end, bpPerPixel});
         assert.ok(features);
     })
 
@@ -126,7 +126,7 @@ suite("testTDF", function () {
             end = 24376200,
             bpPerPixel = 1;
         const tdfSource = new TDFSource({url: url}, genome);
-        const features = await tdfSource.getFeatures(chr, bpstart, end, bpPerPixel);
+        const features = await tdfSource.getFeatures({chr, bpstart, end, bpPerPixel});
         assert.ok(features);
 
     })
