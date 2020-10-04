@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import FeatureParser from "./featureParsers.js";
+import FeatureParser from "./featureParser.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
 import GCNVParser from "../gcnv/gcnvParser.js";
