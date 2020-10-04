@@ -153,7 +153,7 @@ TrackBase.prototype.setTrackProperties = function (properties) {
                 break;
             case "color":
             case "altColor":
-                this[key] = "rgb(" + properties[key] + ")";
+                this[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
                 break;
             case "featureVisiblityWindow":
                 this.visibilityWindow = Number.parseInt(properties[key]);
