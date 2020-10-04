@@ -34,6 +34,11 @@ function decodeBedpe(tokens, header) {
         end2: Number.parseInt(tokens[5])
     }
 
+    if(isNaN(feature.start1) || isNaN(feature.end1) || isNaN(feature.start2) || isNaN(feature.end2)) {
+        //throw Error(`Error parsing line: ${tokens.join('\t')}`);
+        return undefined;
+    }
+
     if (tokens.length > 6) {
         feature.name = tokens[6];
     }
@@ -62,7 +67,7 @@ function decodeBedpe(tokens, header) {
         }
 
         if(tokens.length > 10 && header.columnNames && header.columnNames.length === tokens.length) {
-            feature.extraValues = tokens.slice(10);
+            feature.extras = tokens.slice(10);
         }
     }
 

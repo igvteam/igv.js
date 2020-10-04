@@ -465,21 +465,27 @@ InteractionTrack.prototype.popupData = function (clickState, features) {
 
         const f = feature._ || feature;   // For "whole genome" features, which keeps a pointer to the original
 
-        data.push({name: "Region 1", value: positionString(f.chr1, feature.start1, f.end1)});
-        data.push({name: "Region 2", value: positionString(f.chr2, f.start2, f.end2)});
+        data.push({name: "Region 1", value: positionString(f.chr1, f.start1, f.end1, f.strand1)});
+        data.push({name: "Region 2", value: positionString(f.chr2, f.start2, f.end2, f.strand2)});
         if (f.name) {
             data.push({name: "Name", value: f.name});
         }
         if (f.value !== undefined) {
             data.push({name: "Value", value: f.value})
-            if (f.score !== undefined) {
-                data.push({name: "Score", value: f.score})
-            }
+        }
+        if (f.score !== undefined) {
+            data.push({name: "Score", value: f.score})
         }
 
-        if (f.extraValues && this.header && this.header.columnNames) {
-            for (let i = 10; i < this.header.columnNames.length; i++) {
-                data.push({name: this.header.columnNames[i], value: f.extraValues[i - 10]});
+
+        if (f.extras && this.header && this.header.columnNames) {
+            const columnNames = this.header.columnNames;
+            for (let i = 10; i < columnNames.length; i++) {
+                if (columnNames[i] === 'info') {
+                    extractInfoColumn(data, f.extras[i - 10]);
+                } else {
+                    data.push({name: columnNames[i], value: f.extras[i - 10]});
+                }
             }
         }
         // For now just return the top hit
@@ -592,34 +598,40 @@ function getAlphaColor(color, alpha) {
 function getWGFeatures(allFeatures) {
 
     const genome = this.genome;
-    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
     const wgFeatures = [];
-    const genomeLength = genome.getGenomeLength();
-    const smallestFeatureVisible = genomeLength / 2000;
-
     for (let c of genome.wgChromosomeNames) {
         const chrFeatures = allFeatures[c];
         if (chrFeatures) {
             for (let f of chrFeatures) {
-                if (f.dup) continue;
-                let queryChr = genome.getChromosomeName(f.chr);
-
-                if (wgChromosomeNames.has(queryChr)) {
-                    const m1 = genome.getGenomeCoordinate(f.chr1, (f.start1 + f.end1) / 2);
-                    const m2 = genome.getGenomeCoordinate(f.chr2, (f.start2 + f.end2) / 2);
-                    if (Math.abs(m2 - m1) > smallestFeatureVisible) {
-                        const wg = Object.assign({}, f);
-                        wg.chr = "all";
-                        wg.start = genome.getGenomeCoordinate(f.chr1, f.start1);
-                        wg.end = genome.getGenomeCoordinate(f.chr2, f.end2);
-                        wgFeatures.push(wg);
-                    }
+                if (!f.dup) {
+                    const wg = Object.assign({}, f);
+                    wg.chr = "all";
+                    wg.start = genome.getGenomeCoordinate(f.chr1, f.start1);
+                    wg.end = genome.getGenomeCoordinate(f.chr2, f.end2);
+                    wgFeatures.push(wg);
                 }
             }
         }
     }
 
     return wgFeatures;
+}
+
+/**
+ * Extract a gff style info column for popup text.  This convention used by 10X for bedpe files
+ *     ALLELIC_FRAC=0.0375670840787;BLACK1=.;BLACK2=.;...
+ * @param data
+ * @param str
+ */
+function extractInfoColumn(data, str) {
+    const kvs = str.split(';')
+    for (let t of kvs) {
+        const kv = t.split('=');
+        if (kv.length === 2) {
+            data.push({name: kv[0], value: kv[1]})
+        }
+    }
+
 }
 
 export default InteractionTrack;
