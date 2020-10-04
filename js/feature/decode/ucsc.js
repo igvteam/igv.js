@@ -356,13 +356,13 @@ function decodeWig(tokens, header) {
 
     const wig = header.wig;
 
-    if (wig.format === "fixedStep") {
+    if (wig && wig.format === "fixedStep") {
         const ss = (wig.index * wig.step) + wig.start;
         const ee = ss + wig.span;
         const value = parseFloat(tokens[0]);
         ++(wig.index);
         return isNaN(value) ? null : {chr: wig.chrom, start: ss, end: ee, value: value};
-    } else if (wig.format === "variableStep") {
+    } else if (wig && wig.format === "variableStep") {
 
         if (tokens.length < 2) return null;
         const ss = parseInt(tokens[0], 10) - 1;
