@@ -76,7 +76,7 @@ suite("testBigWig", function () {
         assert.equal(6857, bwReader.header.dataCount);
 
         var type = bwReader.type;
-        assert.equal("BigWig", type);
+        assert.equal("bigwig", type);
 
     });
 
