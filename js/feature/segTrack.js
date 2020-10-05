@@ -423,7 +423,7 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 };
 
 SegTrack.prototype.supportsWholeGenome = function () {
-    return this.featureSource.supportsWholeGenome();
+    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
 
