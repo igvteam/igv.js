@@ -299,7 +299,8 @@ async function loadStringFromFile(localfile, options) {
     if (compression === NONE) {
         return blob.text();
     } else {
-        return arrayBufferToString(blob.arrayBuffer(), compression);
+        const arrayBuffer = await blob.arrayBuffer();
+        return arrayBufferToString(arrayBuffer, compression);
     }
 }
 
@@ -408,6 +409,7 @@ function mapUrl(url) {
 
 
 function arrayBufferToString(arraybuffer, compression) {
+
     if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
         const m = new Uint8Array(arraybuffer, 0, 2);
         if (m[0] === 31 && m[1] === 139) {
@@ -415,9 +417,9 @@ function arrayBufferToString(arraybuffer, compression) {
         }
     }
 
-    var plain;
+    let plain;
     if (compression === GZIP) {
-        var inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
+        const inflate = new Zlib.Gunzip(new Uint8Array(arraybuffer));
         plain = inflate.decompress();
     } else if (compression === BGZF) {
         plain = unbgzf(arraybuffer);
