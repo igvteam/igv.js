@@ -42,7 +42,7 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
-import {buildOptions} from "./util/igvUtils.js";
+import {buildOptions, inferTrackTypes} from "./util/igvUtils.js";
 import deepCopy from "./util/deepCopy.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 
@@ -701,7 +701,7 @@ Browser.prototype.loadTrack = async function (config) {
 Browser.prototype.createTrack = function (config) {
 
     if(!config.type) {
-        TrackUtils.inferTrackTypes(config);
+        inferTrackTypes(config);
     }
 
     // Set defaults if specified
