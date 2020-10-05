@@ -102,11 +102,10 @@ class TextFeatureSource {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
-        this.supportsWG = !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);   // Can be dynamically changed
     }
 
     supportsWholeGenome() {
-        return this.supportsWG;
+        return !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);
     }
 
     async getHeader() {

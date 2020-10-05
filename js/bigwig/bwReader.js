@@ -62,30 +62,30 @@ class BWReader {
     async readFeatures(chr1, bpStart, chr2, bpEnd, bpPerPixel, windowFunction) {
 
         await this.loadHeader();
-
         const chrIdx1 = this.chromTree.chromToID[chr1];
         const chrIdx2 = this.chromTree.chromToID[chr2];
         if (chrIdx1 === undefined || chrIdx2 === undefined) {
             return [];
         }
 
-
-        // Select a biwig "zoom level" appropriate for the current resolution.   Select decode function
-        const zoomLevelHeaders = await this.getZoomHeaders()
-        let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined;
         let treeOffset;
         let decodeFunction;
-        if (zoomLevelHeader) {
-            treeOffset = zoomLevelHeader.indexOffset;
-            decodeFunction = decodeZoomData;
-        } else {
-            treeOffset = this.header.fullIndexOffset;
-            if (this.type === "BigWig") {
-                decodeFunction = decodeWigData;
+        if (this.type === "bigwig") {
+            // Select a biwig "zoom level" appropriate for the current resolution.
+            let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined;
+            if (zoomLevelHeader) {
+                treeOffset = zoomLevelHeader.indexOffset;
+                decodeFunction = decodeZoomData;
             } else {
-                decodeFunction = getBedDataDecoder.call(this);
+                treeOffset = this.header.fullIndexOffset;
+                decodeFunction = decodeWigData;
             }
+        } else {
+            // bigbed, zoom data is not currently used in igv for bed type features
+            treeOffset = this.header.fullIndexOffset;
+            decodeFunction = getBedDataDecoder.call(this);
         }
+
 
         // Load the R Tree and fine leaf items
         const rpTree = await this.loadRPTree(treeOffset);
@@ -162,9 +162,9 @@ class BWReader {
             let binaryParser = new BinaryParser(new DataView(data));
             let magic = binaryParser.getUInt();
             if (magic === BIGWIG_MAGIC_LTH) {
-                this.type = "BigWig";
+                this.type = "bigwig";
             } else if (magic === BIGBED_MAGIC_LTH) {
-                this.type = "BigBed";
+                this.type = "bigbed";
             } else {
                 //Try big endian order
                 this.littleEndian = false;
@@ -174,14 +174,14 @@ class BWReader {
                 let magic = binaryParser.getUInt();
 
                 if (magic === BIGWIG_MAGIC_HTL) {
-                    this.type = "BigWig";
+                    this.type = "bigwig";
                 } else if (magic === BIGBED_MAGIC_HTL) {
-                    this.type = "BigBed";
+                    this.type = "bigbed";
                 } else {
                     // TODO -- error, unknown file type  or BE
                 }
             }
-            // Table 5  "Common header for BigWig and BigBed files"
+            // Table 5  "Common header for bigwig and bigbed files"
             header = {};
             header.bwVersion = binaryParser.getUShort();
             header.nZoomLevels = binaryParser.getUShort();
@@ -256,6 +256,11 @@ class BWReader {
             this.rpTreeCache[offset] = rpTree;
             return rpTree;
         }
+    }
+
+    async getType() {
+        await loadHeader();
+        return this.type;
     }
 }
 
