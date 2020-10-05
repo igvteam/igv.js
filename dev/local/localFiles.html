@@ -49,15 +49,24 @@
         const files = fileWidget.files;
 
         // Search for index files  (.bai, .csi, .tbi, .idx)
-        const indexExtensions = new Set(["bai", "csi", "tbi", "idx"]);
+        const indexExtensions = new Set(["bai", "csi", "tbi", "idx", "crai"]);
         const indexLUT = new Map();
         const dataFiles = [];
         for(let f of files) {
                 const ext = FileUtils.getExtension(f.name);
                 if (indexExtensions.has(ext)) {
                     const fn = f.name;
-                    const key = fn.substring(0, fn.length - (ext.length + 1));
+                    let key = fn.substring(0, fn.length - (ext.length + 1));
+
+                    // bam and cram files (.bai, .crai) have 2 convension <data>.bam.bai and <data.bai>, account for second
+                    if(ext === "bai" && !key.endsWith("bam")) {
+                        key = key + ".bam"
+                    } else if(ext === "crai" && !key.endsWith("cram")) {
+                        key = key + ".cram";
+                    }
+
                     indexLUT.set(key, f);
+
                 } else {
                     dataFiles.push(f);
                 }
