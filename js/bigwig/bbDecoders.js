@@ -23,12 +23,7 @@
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {parseAutoSQL} from "../util/ucscUtils.js";
 
-function getDecoder(definedFieldCount, fieldCount, as) {
-
-    let autoSql;
-    if (as) {
-        autoSql = parseAutoSQL(as);
-    }
+function getDecoder(definedFieldCount, fieldCount, autoSql) {
 
     if (autoSql && 'chromatinInteract' === autoSql.table) {
         return decodeInteract;

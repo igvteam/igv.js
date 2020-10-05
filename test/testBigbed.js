@@ -8,12 +8,16 @@ suite("testBigBed", function () {
     createMockObjects();
 
     test("bed9+2 features", async function () {
-        var url = require.resolve("./data/bb/myBigBed2.bb"),
-            chr = "chr7",
-            bpStart = 0,
-            bpEnd = Number.MAX_SAFE_INTEGER;
-        var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
+        const url = require.resolve("./data/bb/myBigBed2.bb");
+        const chr = "chr7";
+        const bpStart = 0;
+        const bpEnd = Number.MAX_SAFE_INTEGER;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType, "annotation");
+
+        const features = await bwSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 3339);   // Verified in iPad app
 
@@ -25,22 +29,27 @@ suite("testBigBed", function () {
     });
 
     test("interact features", async function () {
-        var url = require.resolve("./data/bb/interactExample3.inter.bb"),
-            chr = "chr3",
-            bpStart = 63702628,
-            bpEnd = 63880091;
 
-        var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
+        const url = require.resolve("./data/bb/interactExample3.inter.bb");
+        const chr = "chr3";
+        const bpStart = 63702628;
+        const bpEnd = 63880091;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType,  "interact");
+
+        const features = await bwSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 18);
 
         //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
         const secondFeature = features[1];
-        assert.equal(secondFeature.start1,63741418 );
-        assert.equal(secondFeature.end1,63743120);
+        assert.equal(secondFeature.start1, 63741418);
+        assert.equal(secondFeature.end1, 63743120);
         assert.equal(secondFeature.start2, 63976338);
         assert.equal(secondFeature.end2, 63978511);
+
     });
 
 
