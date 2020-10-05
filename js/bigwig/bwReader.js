@@ -29,6 +29,7 @@ import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
 import getDecoder from "./bbDecoders.js";
+import {parseAutoSQL} from "../util/ucscUtils.js"
 
 let BIGWIG_MAGIC_LTH = 0x888FFC26; // BigWig Magic Low to High
 let BIGWIG_MAGIC_HTL = 0x26FC8F66; // BigWig Magic High to Low
@@ -72,6 +73,7 @@ class BWReader {
         let decodeFunction;
         if (this.type === "bigwig") {
             // Select a biwig "zoom level" appropriate for the current resolution.
+            const zoomLevelHeaders = await this.getZoomHeaders();
             let zoomLevelHeader = bpPerPixel ? zoomLevelForScale(bpPerPixel, zoomLevelHeaders) : undefined;
             if (zoomLevelHeader) {
                 treeOffset = zoomLevelHeader.indexOffset;
@@ -182,18 +184,19 @@ class BWReader {
                 }
             }
             // Table 5  "Common header for bigwig and bigbed files"
-            header = {};
-            header.bwVersion = binaryParser.getUShort();
-            header.nZoomLevels = binaryParser.getUShort();
-            header.chromTreeOffset = binaryParser.getLong();
-            header.fullDataOffset = binaryParser.getLong();
-            header.fullIndexOffset = binaryParser.getLong();
-            header.fieldCount = binaryParser.getUShort();
-            header.definedFieldCount = binaryParser.getUShort();
-            header.autoSqlOffset = binaryParser.getLong();
-            header.totalSummaryOffset = binaryParser.getLong();
-            header.uncompressBuffSize = binaryParser.getInt();
-            header.extensionOffset = binaryParser.getLong();
+            header = {
+                bwVersion: binaryParser.getUShort(),
+                nZoomLevels: binaryParser.getUShort(),
+                chromTreeOffset: binaryParser.getLong(),
+                fullDataOffset: binaryParser.getLong(),
+                fullIndexOffset: binaryParser.getLong(),
+                fieldCount: binaryParser.getUShort(),
+                definedFieldCount: binaryParser.getUShort(),
+                autoSqlOffset: binaryParser.getLong(),
+                totalSummaryOffset: binaryParser.getLong(),
+                uncompressBuffSize: binaryParser.getInt(),
+                extensionOffset: binaryParser.getLong()
+            }
 
             ///////////
 
@@ -216,7 +219,10 @@ class BWReader {
             // Autosql
             if (header.autoSqlOffset > 0) {
                 binaryParser.position = header.autoSqlOffset - startOffset;
-                this.autoSql = binaryParser.getString();
+                const autoSqlString = binaryParser.getString();
+                if(autoSqlString) {
+                    this.autoSql = parseAutoSQL(autoSqlString);
+                }
             }
 
             // Total summary
@@ -259,8 +265,17 @@ class BWReader {
     }
 
     async getType() {
-        await loadHeader();
+        await this.loadHeader();
         return this.type;
+    }
+
+    async getTrackType() {
+        await this.loadHeader();
+        if (this.type === "bigwig") {
+            return "wig";
+        } else {
+            return this.autoSql && this.autoSql.table === "chromatinInteract" ? "interact" : "annotation";
+        }
     }
 }
 
