@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- IGV CSS -->
+
+    <link href="../css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<h1>UCSC Interact - Example 2</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr3:64,487,397-64,645,623",
+            tracks: [
+                {
+                   url: "../../test/data/bedpe/interactExample2.txt",
+                    type: "interaction",
+                    format: "interact",
+                    name: "UCSC Example 2 - nested use score",
+                    arcType: "nested",
+                    useScore: true,
+                    showBlocks: true
+                },
+                {
+                    url: "../../test/data/bedpe/interactExample2.txt",
+                    type: "interaction",
+                    format: "interact",
+                    name: "UCSC Example 2 - proportional use value",
+                    arcType: "proportional",
+                    showBlocks: true
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>

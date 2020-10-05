@@ -6,38 +6,35 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta content="" name="description">
     <meta content="" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
+    <link href=../img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
     <!-- IGV CSS -->
 
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+    <link href="../css/dev.css" rel="stylesheet" type="text/css"/>
 
 </head>
 
 <body>
 
-<h1>UCSC bigInteract - Example 3</h1>
+<h1>BEDPE Nested Arcs</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
-    import igv from "../js/index.js";
+    import igv from "../../js";
 
     var options =
         {
             genome: "hg19",
-            locus: "chr3:63702628-63880091",
+            locus: "chr1:45,195,144-54,124,600",
             tracks: [
                 {
-                    url: "https://s3.amazonaws.com/igv.org.demo/interactExample3.inter.bb",
-                    type: "interaction",
-                    format: "bb",
-                    name: "UCSC Example 3 - bigInteract",
-                    arcType: "nested",
-                    useScore: true,
-                    showBlocks: true
+                    "url": "https://www.dropbox.com/s/34jz69xn0yz68bi/hiccups_loops.bedpe?dl=0",
+                    "type": "interaction",
+                    "format": "bedpe",
+                    "name": "hiccups loops"
                 }
             ]
         };
