@@ -26,7 +26,6 @@
 import FeatureParser from "./featureParser.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
-import GCNVParser from "../gcnv/gcnvParser.js";
 import loadBamIndex from "../bam/bamIndex.js";
 import loadTribbleIndex from "./tribble.js"
 import igvxhr from "../igvxhr.js";
@@ -141,8 +140,6 @@ class FeatureFileReader {
                 return new VcfParser(config);
             case "seg" :
                 return new SegParser();
-            case "gcnv" :
-                return new GCNVParser();
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :
