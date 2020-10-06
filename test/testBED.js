@@ -273,6 +273,7 @@ suite("testBed", function () {
     })
 
     test("ucsc interact", async function () {
+
         const featureSource = FeatureSource({
             url: require.resolve("./data/bed/ucsc_interact_1.bed")
         });
@@ -284,6 +285,24 @@ suite("testBed", function () {
         assert.equal(trackType, "interact");
     })
 
+    test("gcnv", async function() {
+
+        const featureSource = FeatureSource({
+            url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")
+        });
+
+        const trackType = await featureSource.trackType();
+        const header = await featureSource.getHeader();
+
+        assert.equal(header.format, "gcnv");
+        assert.equal(trackType, "gcnv");
+        assert.equal(header.columnNames.length, 172);
+        assert.equal(header.highlight.length, 2);
+
+        const features = await featureSource.getFeatures({chr: "chr22", bpStart: 0, bpEnd: Number.MAX_SAFE_INTEGER});
+        assert.equal(features.length, 10);
+
+    })
 
     test("Chr aliasing", async function () {
 
@@ -291,8 +310,8 @@ suite("testBed", function () {
             format: "bed",
             url: require.resolve("./data/bed/basic_feature_3_columns.bed"),
         }
-        const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures({chr: "1", bpStart: 67658429, bpEnd: 67659549});
+        const featureSource = FeatureSource(config, genome);
+        const features = await featureSource.getFeatures({chr: "1", bpStart: 67658429, bpEnd: 67659549});
         assert.ok(features);
         assert.equal(features.length, 4);
 
