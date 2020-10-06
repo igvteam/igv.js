@@ -42,6 +42,7 @@ import {decodeGFF} from "./decode/gff.js";
 import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js";
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js";
 import {decodeCustom} from "./decode/custom.js";
+import {decodeGcnv} from "../gcnv/gcnvDecoder.js";
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -107,8 +108,7 @@ class FeatureParser {
                 try {
                     // All directives that could change the format, and thus decoder, should have been read by now.
                     const decoder = this.getDecoder();
-                    const feature = line.startsWith("#") ? undefined : decoder(tokens, header);
-                    if (feature) {
+                    if (!line.startsWith("#") && decoder(tokens,header)) {
                         if (columnNames && columnNames.length === tokens.length) {
                             header.columnNames = columnNames;
                             for (let n = 0; n < columnNames.length; n++) {
@@ -122,17 +122,18 @@ class FeatureParser {
                         break;
                     } else {
                         if (tokens.length > 1) {
-                            columnNames = tokens;  // Possible column names
+                            header.columnNames = tokens;  // Possible column names
                         }
                     }
                 } catch (e) {
                     if (tokens.length > 1) {
-                        columnNames = tokens;  // Possible column names
+                        header.columnNames = tokens;  // Possible column names
                     }
                 }
             }
             skipRows++;
         }
+
         this.skipRows = skipRows;
         this.header = header;    // Directives might be needed for parsing lines
         return header;
@@ -271,6 +272,10 @@ class FeatureParser {
                     this.decode = decodeRepeatMasker;
                     this.delimiter = "\t";
                     break;
+                case "gcnv":
+                    this.decode = decodeGcnv;
+                    this.delimiter = "\t";
+                    break;
                 default:
                     const customFormat = TrackUtils.getFormat(this.header.format);
                     if (customFormat !== undefined) {
@@ -308,17 +313,29 @@ function parseTrackLine(line) {
             tmp.push(tk);
         }
     }
+
     for (let str of tmp) {
         if (!str) return;
         var kv = str.split('=', 2);
         if (kv.length === 2) {
             const key = kv[0].trim();
             const value = kv[1].trim();
-            properties[key] = value;
+            if(properties.hasOwnProperty(key)) {
+                let currentValue = properties[key];
+                if(Array.isArray(currentValue)) {
+                    currentValue.push(value);
+                } else {
+                    properties[key] = [currentValue, value];
+                }
+            } else {
+                properties[key] = value;
+            }
         }
     }
     if("interact" == properties["type"]) {
         properties["format"] = "interact";
+    } else if("gcnv" === properties["type"]) {
+        properties["format"] = "gcnv";
     }
     return properties;
 }

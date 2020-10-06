@@ -1,8 +1,6 @@
-
 import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import {createCheckbox} from "../igv-icons.js";
 import {extend, isSimpleType} from "../util/igvUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
@@ -13,31 +11,44 @@ const X_PIXEL_DIFF_THRESHOLD = 1;
 
 const GCNVTrack = extend(TrackBase,
 
-  function (config, browser) {
-      TrackBase.call(this, config, browser);
-      this.autoscale = config.autoscale || config.max === undefined;
-      this.dataRange = {
-          min: config.min || 0,
-          max: config.max
-      }
+    function (config, browser) {
+        TrackBase.call(this, config, browser);
+        this.autoscale = config.autoscale || config.max === undefined;
+        this.dataRange = {
+            min: config.min || 0,
+            max: config.max
+        }
 
-      this.windowFunction = config.windowFunction || "mean";
-      this.paintAxis = paintAxis;
-      this.graphType = config.graphType || "bar";
+        this.windowFunction = config.windowFunction || "mean";
+        this.paintAxis = paintAxis;
+        this.graphType = config.graphType || "bar";
 
-      this.featureSource = FeatureSource(this.config, browser.genome);
-  });
+        this.featureSource = FeatureSource(this.config, browser.genome);
+    });
 
 
 GCNVTrack.prototype.postInit = async function () {
 
     if (typeof this.featureSource.getHeader === "function") {
         this.header = await this.featureSource.getHeader();
-    }
+        this.sampleNames = this.header.columnNames.slice(3);
 
-    // Set properties from track line
-    if (this.header) {
-        this.setTrackProperties(this.header)
+        // Set generic properties from track line
+        this.setTrackProperties(this.header);   // setTrackProperties defined in TrackBase
+
+        // Special track line properties
+        if (this.header.hasOwnProperty("highlight")) {
+            this.config.highlightSamples = {};
+            let v = this.header["highlight"];
+            if (!Array.isArray(v)) v = [v];
+            for (let h of v) {
+                const tokens = h.split(";");
+                if (tokens.length === 2) {
+                    this.config.highlightSamples[tokens[0]] = tokens[1];
+                }
+
+            }
+        }
     }
 }
 
@@ -82,7 +93,7 @@ GCNVTrack.prototype.draw = function (options) {
     //}
 
     const yScale = (yValue) => {
-        return ( (self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min) ) * pixelHeight
+        return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
     };
 
     const getX = function (bpPosition) {
@@ -129,6 +140,7 @@ GCNVTrack.prototype.draw = function (options) {
             // this cache is regenerated on every draw.
             this.clickDetectorCache = {}
 
+
             for (let feature of features) {
                 const x1 = getX(feature.start);
                 const x2 = getX(feature.end);
@@ -140,7 +152,7 @@ GCNVTrack.prototype.draw = function (options) {
                 this.clickDetectorCache[x1] = [];
                 this.clickDetectorCache[x2] = [];
                 for (let i = 0; i < feature.values.length; i++) {
-                    const sampleName = self.header[i];
+                    const sampleName = this.sampleNames[i];
                     const value = feature.values[i];
                     const y = yScale(value);
                     if (x1 - previousX >= X_PIXEL_DIFF_THRESHOLD) {
@@ -198,14 +210,14 @@ GCNVTrack.prototype.draw = function (options) {
 };
 
 
-GCNVTrack.prototype.doAutoscale = function(features) {
+GCNVTrack.prototype.doAutoscale = function (features) {
 
     let min, max;
     if (features.length > 0) {
         min = Number.MAX_VALUE;
         max = -Number.MAX_VALUE;
 
-        features.forEach(function(feature) {
+        features.forEach(function (feature) {
             min = Math.min(min, ...feature.values);
             max = Math.max(max, ...feature.values);
         });
@@ -250,9 +262,9 @@ GCNVTrack.prototype.clickedFeatures = function (clickState) {
     const clickY = clickState.canvasY;
 
     let key = null;
-    for(key of Object.keys(this.clickDetectorCache)) {
+    for (key of Object.keys(this.clickDetectorCache)) {
         key = parseInt(key)
-        if(key >= clickX) {
+        if (key >= clickX) {
             break
         }
     }
@@ -265,16 +277,16 @@ GCNVTrack.prototype.clickedFeatures = function (clickState) {
         for (let segment of segments) {
             const x1 = segment[0];
             const x2 = segment[2];
-            if (clickX < x1 || clickX > x2)  return [];
+            if (clickX < x1 || clickX > x2) return [];
 
             const y1 = segment[1];
             const y2 = segment[3];
 
-            if ((clickY < Math.min(y1, y2) - BOUNDING_BOX_PADDING) || (clickY > Math.max(y1, y2) + BOUNDING_BOX_PADDING))  continue;
+            if ((clickY < Math.min(y1, y2) - BOUNDING_BOX_PADDING) || (clickY > Math.max(y1, y2) + BOUNDING_BOX_PADDING)) continue;
 
             const distance = distanceToLine(clickX, clickY, x1, y1, x2, y2)
             if (distance < closestDistanceSoFar) {
-                closestResult  = [{'name': segment[4], 'color': segment[5]}];
+                closestResult = [{'name': segment[4], 'color': segment[5]}];
                 closestDistanceSoFar = distance;
                 //console.warn('closest:', 'name', segment[4], 'color', segment[5], distance);
             }
@@ -317,7 +329,6 @@ GCNVTrack.prototype.getState = function () {
 GCNVTrack.prototype.supportsWholeGenome = function () {
     return false;
 }
-
 
 
 export default GCNVTrack;
