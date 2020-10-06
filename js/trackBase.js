@@ -128,9 +128,9 @@ TrackBase.prototype.clickedFeatures = function (clickState) {
  */
 TrackBase.prototype.setTrackProperties = function (properties) {
     for (let key of Object.keys(properties)) {
-        switch (key) {
+        switch (key.toLowerCase()) {
             case "name":
-            case "useScore":
+            case "usescore":
                 this[key] = properties[key]
                 break;
             case "visibility":
@@ -152,11 +152,24 @@ TrackBase.prototype.setTrackProperties = function (properties) {
                 }
                 break;
             case "color":
-            case "altColor":
+            case "altcolor":
                 this[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
                 break;
-            case "featureVisiblityWindow":
+            case "featurevisiblitywindow":
                 this.visibilityWindow = Number.parseInt(properties[key]);
+                break;
+            case "viewlimits":
+                const tokens = properties[key].split(":");
+                let min = 0;
+                let max;
+                if(tokens.length == 1) {
+                    max = Number.parseFloat(tokens[0]);
+                } else if(tokens.length == 2) {
+                    min = Number.parseFloat(tokens[0]);
+                    max = Number.parseFloat(tokens[1]);
+                }
+                this.autoscale = false;
+                this.dataRange = {min, max};
         }
     }
 }
