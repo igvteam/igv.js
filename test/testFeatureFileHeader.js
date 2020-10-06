@@ -22,7 +22,7 @@ suite("testTrackLine", function () {
         });
 
         //track type=bedGraph name="BedGraph Format" description="BedGraph format" visibility=full color=200,100,0 altColor=0,100,200 priority=20
-        const header = await featureReader.readHeader();
+        const {header} = await featureReader.readHeader();
         assert.equal(header.description, "BedGraph format");
         assert.equal(header.visibility, "full");
         assert.equal(header.name, "BedGraph Format");
@@ -39,7 +39,7 @@ suite("testTrackLine", function () {
         });
 
         //chr1	x1	x2	chr2	y1	y2	name	score	strand1	strand2	color	observed	expectedBL	expectedDonut	expectedH	expectedV	fdrBL	fdrDonut	fdrH	fdrV	numCollapsed	centroid1	centroid2	radius
-        const header = await featureReader.readHeader();
+        const {header} = await featureReader.readHeader();
         assert.ok(header.columnNames);
         assert.equal(header.columnNames.length, 24);
         assert.equal(header.columnNames[3], "chr2");
