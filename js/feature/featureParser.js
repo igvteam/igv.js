@@ -58,6 +58,8 @@ class FeatureParser {
     constructor(format, decode, config) {
 
         this.header = {};
+        this.decode = decode;
+        this.config = config;
 
         if (format !== undefined) {
             this.header.format = format.toLowerCase();
@@ -65,9 +67,126 @@ class FeatureParser {
         this.header.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
-        if (decode) {
-            this.decode = decode;
-        } else {
+    }
+
+    /**
+     * Parse metadata from the file.   A variety of conventions are in use to supply metadata about file contents
+     * through header lines (e.g. 'track') and # directives. This method unifies metadata as properties of a
+     * 'header' object.
+     *
+     * @param data
+     * @returns {{}}
+     */
+    parseHeader(data) {
+
+        const dataWrapper = getDataWrapper(data);
+        let header = this.header;
+        let columnNames;
+        let line;
+        let skipRows = 0;
+        while ((line = dataWrapper.nextLine()) !== undefined) {
+            if (line.startsWith("track") || line.startsWith("#track")) {
+                let h = parseTrackLine(line);
+                Object.assign(header, h);
+            } else if (line.startsWith("browser")) {
+                // UCSC line, currently ignored
+            } else if (line.startsWith("#columns")) {
+                let h = parseColumnsDirective(line);
+                Object.assign(header, h);
+            } else if (line.startsWith("##gff-version 3")) {
+                header.format = "gff3";
+                header["format"] = "gff3";
+            } else if (line.startsWith("#gffTags")) {
+                header["gffTags"] = true;
+            } else if (line.startsWith("fixedStep") || line.startsWith("variableStep")) {
+                // Wig directives -- we are in the data section
+                break;
+            } else {
+                // If the line can be parsed as a feature assume we are beyond the header, if any
+                const tokens = line.split(this.delimiter || "\t");
+                try {
+                    // All directives that could change the format, and thus decoder, should have been read by now.
+                    const decoder = this.getDecoder();
+                    const feature = line.startsWith("#") ? undefined : decoder(tokens, header);
+                    if (feature) {
+                        if (columnNames && columnNames.length === tokens.length) {
+                            header.columnNames = columnNames;
+                            for (let n = 0; n < columnNames.length; n++) {
+                                if (columnNames[n] === "color" || columnNames[n] === "colour") {
+                                    header.colorColumn = n;
+                                } else if (columnNames[n] === "thickness") {
+                                    header.thicknessColumn = n;
+                                }
+                            }
+                        }
+                        break;
+                    } else {
+                        if (tokens.length > 1) {
+                            columnNames = tokens;  // Possible column names
+                        }
+                    }
+                } catch (e) {
+                    if (tokens.length > 1) {
+                        columnNames = tokens;  // Possible column names
+                    }
+                }
+            }
+            skipRows++;
+        }
+        this.skipRows = skipRows;
+        this.header = header;    // Directives might be needed for parsing lines
+        return header;
+    }
+
+    parseFeatures(data) {
+
+        if (!data) return null;
+
+        const dataWrapper = getDataWrapper(data);
+        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
+        const allFeatures = [];
+        const decode = this.getDecoder();
+        const format = this.header.format;
+        const delimiter = this.delimiter || "\t";
+        let i = 0;
+        let line;
+        while ((line = nextLine()) !== undefined) {
+            i++;
+            if (i <= this.skipRows) continue;
+
+            if (!line || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
+                continue;
+            } else if (format === "wig" && line.startsWith("fixedStep")) {
+                this.header.wig = parseFixedStep(line);
+                continue;
+            } else if (format === "wig" && line.startsWith("variableStep")) {
+                this.header.wig = parseVariableStep(line);
+                continue;
+            }
+
+            const tokens = line.split(delimiter);
+            if (tokens.length < 1) {
+                continue;
+            }
+
+            const feature = decode(tokens, this.header);
+            if (feature) {
+                allFeatures.push(feature);
+            }
+        }
+
+        // Special hack for bedPE
+        if (decode === decodeBedpe) {
+            fixBedPE(allFeatures);
+        }
+
+        return allFeatures;
+
+    }
+
+    getDecoder(header) {
+
+        if (!this.decode) {
             switch (this.header.format) {
                 case "narrowpeak":
                 case "broadpeak":
@@ -124,10 +243,9 @@ class FeatureParser {
                     break;
                 case "bed":
                     this.decode = decodeBed;
-                    this.delimiter = config.delimiter || /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "bedpe":
-                    this.skipRows = 0;
                     this.decode = decodeBedpe;
                     this.delimiter = /\s+/;
                     break;
@@ -139,7 +257,6 @@ class FeatureParser {
                 case "bedpe-loop":
                     this.decode = decodeBedpe;
                     this.delimiter = /\s+/;
-                    this.skipRows = 1;
                     this.header = {colorColumn: 7};
                     break;
                 case "interact":
@@ -166,121 +283,9 @@ class FeatureParser {
                     }
             }
         }
+
+        return this.decode;
     }
-
-    /**
-     * Parse header line(s) from the file.   A variety of conventions are in use to supply meta data through header
-     * lines, defined as lines preceding actual data.  This method attempts to read through all lines gleaning useful
-     * metadata from recognized keywords and directives.
-     *
-     * @param data
-     * @returns {{}}
-     */
-    parseHeader(data) {
-
-        const dataWrapper = getDataWrapper(data);
-        let header = this.header || {};
-        let columnNames;
-        let line;
-        let skipRows = 0;
-        while ((line = dataWrapper.nextLine()) !== undefined) {
-            if (line.startsWith("track") || line.startsWith("#track")) {
-                let h = parseTrackLine(line);
-                Object.assign(header, h);
-            } else if (line.startsWith("browser")) {
-                // UCSC line, currently ignored
-            } else if (line.startsWith("#columns")) {
-                let h = parseColumnsDirective(line);
-                Object.assign(header, h);
-            } else if (line.startsWith("##gff-version 3")) {
-                header.format = "gff3";
-                header["format"] = "gff3";
-            } else if (line.startsWith("#gffTags")) {
-                header["gffTags"] = true;
-            } else if (line.startsWith("fixedStep") || line.startsWith("variableStep")) {
-                // Wig directives -- we are in the data section
-                break;
-            } else {
-                // If the line can be parsed as a feature assume we are beyond the header, if any
-                const tokens = line.split(this.delimiter || "\t");
-                try {
-                    const feature = line.startsWith("#") ? undefined : this.decode(tokens, header);
-                    if (feature) {
-                        if (columnNames && columnNames.length === tokens.length) {
-                            header.columnNames = columnNames;
-                            for (let n = 0; n < columnNames.length; n++) {
-                                if (columnNames[n] === "color" || columnNames[n] === "colour") {
-                                    header.colorColumn = n;
-                                } else if (columnNames[n] === "thickness") {
-                                    header.thicknessColumn = n;
-                                }
-                            }
-                        }
-                        break;
-                    } else {
-                        if (tokens.length > 1) {
-                            columnNames = tokens;  // Possible column names
-                        }
-                    }
-                } catch (e) {
-                    if (tokens.length > 1) {
-                        columnNames = tokens;  // Possible column names
-                    }
-                }
-            }
-            skipRows++;
-        }
-        this.skipRows = skipRows;
-        this.header = header;    // Directives might be needed for parsing lines
-        return header;
-    }
-
-    parseFeatures(data) {
-
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
-        const allFeatures = [];
-        const decode = this.decode;
-        const format = this.header.format;
-        const delimiter = this.delimiter || "\t";
-        let i = 0;
-        let line;
-        while ((line = nextLine()) !== undefined) {
-            i++;
-            if (i <= this.skipRows) continue;
-
-            if (!line || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
-                continue;
-            } else if (format === "wig" && line.startsWith("fixedStep")) {
-                this.header.wig = parseFixedStep(line);
-                continue;
-            } else if (format === "wig" && line.startsWith("variableStep")) {
-                this.header.wig = parseVariableStep(line);
-                continue;
-            }
-
-            const tokens = line.split(delimiter);
-            if (tokens.length < 1) {
-                continue;
-            }
-
-            const feature = decode(tokens, this.header);
-            if (feature) {
-                allFeatures.push(feature);
-            }
-        }
-
-        // Special hack for bedPE
-        if (decode === decodeBedpe) {
-            fixBedPE(allFeatures);
-        }
-
-        return allFeatures;
-
-    }
-
 
 }
 
@@ -294,7 +299,7 @@ function parseTrackLine(line) {
     const tmp = [];
     for (let tk of tokens) {
         if (!tk || tk.trim().length === 0) continue;
-        if (tk.endsWith("=") > 0) {
+        if (tk.endsWith("=")) {
             curr = tk;
         } else if (curr) {
             tmp.push(curr + tk);
@@ -311,6 +316,9 @@ function parseTrackLine(line) {
             const value = kv[1].trim();
             properties[key] = value;
         }
+    }
+    if("interact" == properties["type"]) {
+        properties["format"] = "interact";
     }
     return properties;
 }

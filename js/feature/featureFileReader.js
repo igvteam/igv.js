@@ -35,7 +35,7 @@ import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
 import loadCsiIndex from "../bam/csiIndex.js"
-import {FileUtils, URIUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
@@ -46,6 +46,7 @@ const isString = StringUtils.isString;
  * @constructor
  */
 class FeatureFileReader {
+
     constructor(config, genome) {
 
         var uriParts;
@@ -84,7 +85,7 @@ class FeatureFileReader {
         if (index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
-            return this.loadFeaturesFromDataURI();
+            this.loadFeaturesFromDataURI();
         } else {
             return this.loadFeaturesNoIndex()
         }
@@ -93,62 +94,48 @@ class FeatureFileReader {
 
     async readHeader() {
 
-        if (!this.header) {
-            let header
-            if (this.dataURI) {
-                const features = await this.loadFeaturesFromDataURI(this.dataURI)
-                header = this.header || {};
-                header.features = features;
+        if (this.dataURI) {
+            return this.loadFeaturesFromDataURI(this.dataURI)
+        } else {
+
+            let index;
+
+            if (this.config.indexURL) {
+                index = await this.getIndex();
+                if (!index) {
+                    // Note - it should be impossible to get here
+                    throw new Error("Unable to load index: " + this.config.indexURL);
+                }
+
+                // Load the file header (not HTTP header) for an indexed file.
+                let maxSize = "vcf" === this.config.format ? 65000 : 1000
+                const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
+
+                if (index.tabix) {
+                    const bsizeOptions = buildOptions(this.config, {
+                        range: {
+                            start: dataStart,
+                            size: 26
+                        }
+                    });
+                    const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
+                    const bsize = bgzBlockSize(abuffer)
+                    maxSize = dataStart + bsize;
+                }
+                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                const data = await igvxhr.loadString(this.config.url, options)
+                const header = this.parser.parseHeader(data);
+                return {header};
+
             } else {
-                let index;
-
-                if (this.config.indexURL) {
-                    index = await this.getIndex();
-                    if (!index) {
-                        // Note - it should be impossible to get here
-                        throw new Error("Unable to load index: " + this.config.indexURL);
-                    }
-
-                    // Load the file header (not HTTP header) for an indexed file.
-                    let maxSize = "vcf" === this.config.format ? 65000 : 1000
-                    const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
-
-                    if (index.tabix) {
-                        const bsizeOptions = buildOptions(this.config, {
-                            range: {
-                                start: dataStart,
-                                size: 26
-                            }
-                        });
-                        const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
-                        const bsize = bgzBlockSize(abuffer)
-                        maxSize = dataStart + bsize;
-                    }
-                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-                    const data = await igvxhr.loadString(this.config.url, options)
-                    header = this.parser.parseHeader(data);
-
-                } else {
-                    // If this is a non-indexed file we will load all features in advance
-                    const features = await this.loadFeaturesNoIndex()
-                    header = this.header || {};
-                    header.features = features;
-                }
-
-                if (header && this.parser) {
-                    this.parser.header = header;
-                }
-
-                this.header = header;
-                return header;
+                // If this is a non-indexed file we will load all features in advance
+                return this.loadFeaturesNoIndex()
             }
         }
-        return this.header;
-
     }
 
-    getParser(format, decode, config) {
 
+    getParser(format, decode, config) {
         switch (format) {
             case "vcf":
                 return new VcfParser(config);
@@ -169,14 +156,9 @@ class FeatureFileReader {
 
         const options = buildOptions(this.config);    // Add oauth token, if any
         const data = await igvxhr.loadString(this.config.url, options)
-
-        this.header = this.parser.parseHeader(data);
-        if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
-            this.format = 'gff3';
-        }
-        return this.parser.parseFeatures(data);   // <= PARSING DONE HERE
-
-
+        const header = this.parser.parseHeader(data);
+        const features = this.parser.parseFeatures(data);   // <= PARSING DONE HERE
+        return {features, header};
     }
 
     async loadFeaturesWithIndex(chr, start, end) {
@@ -276,7 +258,7 @@ class FeatureFileReader {
             return a.start - b.start;
         });
 
-        return allFeatures;
+        return {features: allFeatures};
     }
 
     async getIndex() {
@@ -303,10 +285,9 @@ class FeatureFileReader {
         const isTabix = indexFilename.endsWith(".tbi") || indexFilename.endsWith(".csi")
         let index;
         if (isTabix) {
-            if(indexFilename.endsWith(".tbi")) {
+            if (indexFilename.endsWith(".tbi")) {
                 index = await loadBamIndex(indexURL, this.config, true, this.genome);
-            }
-            else {
+            } else {
                 index = await loadCsiIndex(indexURL, this.config, true, this.genome);
             }
         } else {
@@ -318,13 +299,14 @@ class FeatureFileReader {
     async loadFeaturesFromDataURI() {
 
         const plain = URIUtils.decodeDataURI(this.dataURI)
-        this.header = this.parser.parseHeader(plain);
+        const header = this.parser.parseHeader(plain);
         if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
             this.format = 'gff3';
         }
         const features = this.parser.parseFeatures(plain);
-        return features;
+        return {features, header};
     }
+
 }
 
 export default FeatureFileReader;

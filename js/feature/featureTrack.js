@@ -26,7 +26,6 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
-import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
@@ -49,7 +48,7 @@ const FeatureTrack = extend(TrackBase,
 
     function (config, browser) {
 
-        this.type = "feature";
+       // this.type = "feature";
 
         TrackBase.call(this, config, browser);
 
@@ -60,7 +59,10 @@ const FeatureTrack = extend(TrackBase,
         this.maxRows = config.maxRows;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-            this.featureSource =  FeatureSource(config, browser.genome);
+
+        this.featureSource = config.featureSource ?
+            config.featureSource :
+            FeatureSource(config, browser.genome);
 
         // Set default heights
         this.autoHeight = config.autoHeight;

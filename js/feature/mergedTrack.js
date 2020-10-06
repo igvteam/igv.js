@@ -25,7 +25,7 @@
  */
 
 import TrackBase from "../trackBase.js";
-import {extend, inferTrackTypes} from "../util/igvUtils.js";
+import {extend, inferTrackType} from "../util/igvUtils.js";
 
 const MergedTrack = extend(TrackBase, function (config, browser) {
 
@@ -41,7 +41,7 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
     this.tracks = [];
     config.tracks.forEach(function (tconf) {
 
-        if (!tconf.type) inferTrackTypes(tconf);
+        if (!tconf.type) inferTrackType(tconf);
 
         tconf.isMergedTrack = true;
 
