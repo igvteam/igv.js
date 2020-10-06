@@ -34,7 +34,7 @@ import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js"
 import AEDParser from "../aed/AEDParser.js"
 import loadCsiIndex from "../bam/csiIndex.js"
-import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, StringUtils, URIUtils, GoogleUtils, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
@@ -272,12 +272,9 @@ class FeatureFileReader {
      */
     async loadIndex() {
         const indexURL = this.config.indexURL;
-        let indexFilename;
-        if (FileUtils.isFilePath(indexURL)) {
-            indexFilename = indexURL.name;
-        } else {
-            const uriParts = URIUtils.parseUri(indexURL);
-            indexFilename = uriParts.file;
+        let indexFilename = this.config.indexFileName;
+        if(!indexFilename) {
+                indexFilename = await this.getFileName(indexURL);
         }
         const isTabix = indexFilename.endsWith(".tbi") || indexFilename.endsWith(".csi")
         let index;
@@ -302,6 +299,21 @@ class FeatureFileReader {
         }
         const features = this.parser.parseFeatures(plain);
         return {features, header};
+    }
+
+    async getFileName(urlOrFile) {
+        if (FileUtils.isFilePath(urlOrFile)) {
+            return urlOrFile.name;
+        } else {
+            if(GoogleUtils.isGoogleDriveURL(urlOrFile)) {
+                // TODO -- check if Google is initialized
+                const fileInfo = await GoogleDrive.getDriveFileInfo(urlOrFile);
+                return fileInfo.name || fileInfo.originalFileName
+            } else {
+                const uriParts = URIUtils.parseUri(urlOrFile);
+                return uriParts.file;
+            }
+        }
     }
 
 }

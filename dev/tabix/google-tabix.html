@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+
+</head>
+
+<body>
+<button id="loadButton">Google Drive</button>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+    import {GoogleAuth} from '../../node_modules/igv-utils/src/index.js';
+
+    import oauthConfig from '../oauthConfig-private.js';
+
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "slc25a3",
+            tracks: [],
+            clientId: oauthConfig.client_id,
+            apiKey: oauthConfig.apiKey
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(async function (browser) {
+            document.getElementById("loadButton").onclick = () => {
+                browser.loadTrack({
+                    format: "gtf",
+                    url: "https://drive.google.com/file/d/10Ngursz8WoOKDak-5dZ5M_mdiWN9LixJ/view?usp=drive_web",
+                    indexURL: "https://drive.google.com/file/d/1dHy-DoAEHIs2evfP2vc4-iPJ7v4vuG_a/view?usp=drive_web",
+                    name: "genes.gtf.gz"
+                })
+            }
+        })
+
+</script>
+
+</body>
+
+</html>
