@@ -138,7 +138,7 @@ async function loadURL(url, options) {
                     url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
                 }
             }
-            addApiKey(url);
+            url = addApiKey(url);
         }
 
         const headers = options.headers || {};
