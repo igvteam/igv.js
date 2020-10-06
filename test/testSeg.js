@@ -50,7 +50,7 @@ suite("testSeg", function () {
 
         assert.ok(features);
         assert.equal(20076, features.length);
-        var c = features[0].realChr;
+        var c = features[0]._f.chr;
         assert.equal("1", c);
     })
 })

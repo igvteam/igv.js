@@ -116,11 +116,11 @@ suite("testBedpe", function () {
             url: require.resolve('./data/bedpe/inter_chr_simulated.bedpe')
         });
 
-        const allFeatures = await reader.loadFeaturesNoIndex();
-        assert.equal(allFeatures.length, 17);   // 5 intra + 6 (x2) inter
+        const {features} = await reader.loadFeaturesNoIndex();
+        assert.equal(features.length, 17);   // 5 intra + 6 (x2) inter
 
         // Test complementary trvotfd
-        const chr1Y = allFeatures.filter(f => f.chr1 === "chr1" && f.chr2 === "chrY");
+        const chr1Y = features.filter(f => f.chr1 === "chr1" && f.chr2 === "chrY");
         assert.equal(chr1Y.length, 2);
         if(chr1Y[0].chr === "chr1") {
             assert.equal(chr1Y[1].chr, "chrY")
