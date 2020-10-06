@@ -42,9 +42,10 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import { defaultSequenceTrackOrder } from './sequenceTrack.js';
-import {buildOptions, inferTrackTypes} from "./util/igvUtils.js";
+import {buildOptions, inferTrackType} from "./util/igvUtils.js";
 import deepCopy from "./util/deepCopy.js";
 import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import FeatureSource from "./feature/featureSource.js"
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -657,7 +658,7 @@ Browser.prototype.loadTrack = async function (config) {
     try {
         if (!config.noSpinner) this.startSpinner();
 
-        const newTrack = this.createTrack(config);
+        const newTrack = await this.createTrack(config);
 
         if (undefined === newTrack) {
             this.alert.present("Unknown file type: " + url, undefined);
@@ -698,15 +699,35 @@ Browser.prototype.loadTrack = async function (config) {
     }
 }
 
-Browser.prototype.createTrack = function (config) {
+Browser.prototype.createTrack = async function (config) {
 
-    if(!config.type) {
-        inferTrackTypes(config);
+    // Lowercase format
+    if (config.format) {
+        config.format = config.format.toLowerCase();
+    }
+
+    let type = config.type;
+
+    if(type) {
+        type = type.toLowerCase();
+    } else {
+        type = inferTrackType(config);
+        if("bedtype" === config.type) {
+            // Bed files must be read to determine track type
+            const featureSource = FeatureSource(config, this.genome);
+            config.featureSource = featureSource;
+            const trackType = await featureSource.trackType();
+            if(trackType) {
+                type = trackType;
+            } else {
+                type = "annotation";
+            }
+        }
     }
 
     // Set defaults if specified
-    if (this.trackDefaults && config.type) {
-        const settings = this.trackDefaults[config.type];
+    if (this.trackDefaults && type) {
+        const settings = this.trackDefaults[type];
         if (settings) {
             for (let property in settings) {
                 if (settings.hasOwnProperty(property) && config[property] === undefined) {
@@ -715,13 +736,6 @@ Browser.prototype.createTrack = function (config) {
             }
         }
     }
-
-    // Lowercase format
-    if (config.format) {
-        config.format = config.format.toLowerCase();
-    }
-    let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
-    if ("data" === type) type = "wig";   // data is deprecated
 
 
     // add browser to track config

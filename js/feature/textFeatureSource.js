@@ -108,21 +108,32 @@ class TextFeatureSource {
         return !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);
     }
 
+    async trackType() {
+        const header =  await this.getHeader();
+        if(header) {
+            return header.type;
+        } else {
+            return undefined;    // Convention for unknown or unspecified
+        }
+    }
+
     async getHeader() {
+
         if (!this.header) {
             if (this.reader && typeof this.reader.readHeader === "function") {
-                const header = await this.reader.readHeader()
+                const {header, features} = await this.reader.readHeader()
                 if (header) {
                     this.header = header;
-                    // Non-indexed readers will return features as a side effect (entire file is read).
-                    const features = header.features;
-                    if (features) {
-                        this.ingestFeatures(features);
-                    }
-                    if (header.format)
+                    if (header.format) {
                         this.config.format = header.format;
+                    }
+                } else {
+                    this.header = {};
                 }
-                this.header = header;
+                // Non-indexed readers will return features as a side effect (entire file is read).
+                if (features) {
+                    this.ingestFeatures(features);
+                }
             } else {
                 this.header = {};
             }
@@ -189,13 +200,13 @@ class TextFeatureSource {
                 }
                 genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
-                let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+                let {features} = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
                 if (this.queryable === undefined) {
                     this.queryable = reader.indexed;
                 }
 
-                if (featureList) {
-                    this.ingestFeatures(featureList, genomicInterval);
+                if (features) {
+                    this.ingestFeatures(features, genomicInterval);
                 } else {
                     this.featureCache = new FeatureCache();     // Empty cache
                 }
@@ -216,7 +227,7 @@ class TextFeatureSource {
             packFeatures(featureList, maxRows);
         }
 
-        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined)
+        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
         this.featureCache = new FeatureCache(featureList, this.genome, genomicInterval);
 
         // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
@@ -254,34 +265,20 @@ class TextFeatureSource {
                     let queryChr = genome.getChromosomeName(f.chr);
                     if (wgChromosomeNames.has(queryChr)) {
 
-                        const wg = Object.create(Object.getPrototypeOf(f));
-                        Object.assign(wg, f);
-
-                        wg.realChr = f.chr;
-                        wg.realStart = f.start;
-                        wg.realEnd = f.end;
+                        const wg = Object.assign({}, f);
 
                         wg.chr = "all";
                         wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                         wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                        wg.originalFeature = f;
+                        wg._f = f;
 
                         // Don't draw exons in whole genome view
                         if (wg["exons"]) delete wg["exons"]
                         wg.popupData = function (genomeLocation) {
-                            if (typeof this.originalFeature.popupData === 'function') {
-                                return this.originalFeature.popupData();
+                            if (typeof this._f.popupData === 'function') {
+                                return this._f.popupData();
                             } else {
-                                const clonedObject = Object.assign({}, this);
-                                clonedObject.chr = this.realChr;
-                                clonedObject.start = this.realStart + 1;
-                                clonedObject.end = this.realEnd;
-                                delete clonedObject.realChr;
-                                delete clonedObject.realStart;
-                                delete clonedObject.realEnd;
-                                delete clonedObject.px;
-                                delete clonedObject.py;
-                                return TrackBase.extractPopupData(clonedObject, genome.id);
+                                return TrackBase.extractPopupData(this._f, genome.id);
                             }
                         }
 
