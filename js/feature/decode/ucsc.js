@@ -1,107 +1,137 @@
-
 import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
 
-import {parseAttributeString, gffNameFields} from "./gff.js";
+import {gffNameFields, parseAttributeString} from "./gff.js";
 
 
 /**
- * Decode the "standard" UCSC bed format
+ * Decode the UCSC bed format.  Only the first 3 columns (chr, start, end) are required.   The remaining columns
+ * must follow standard bed order, but we will tolerate deviations after column 3.
+ *
  * @param tokens
  * @param ignore
  * @returns decoded feature, or null if this is not a valid record
  */
 function decodeBed(tokens, header) {
 
-    var chr, start, end, id, name, tmp, idName, exonCount, exonSizes, exonStarts, exons, exon, feature,
-        eStart, eEnd;
 
     if (tokens.length < 3) return undefined;
 
     const gffTags = header && header.gffTags;
 
-    chr = tokens[0];
-    start = parseInt(tokens[1]);
-    end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
-    feature = {chr: chr, start: start, end: end, score: 1000};
+    const chr = tokens[0];
+    const start = parseInt(tokens[1]);
+    const end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
+    if (isNaN(start) || isNaN(end)) {
+        throw Error(`Unparsable bed record: ${tokens.join('\t')}`);
+    }
+    const feature = {chr: chr, start: start, end: end, score: 1000};
 
-    if (tokens.length > 3) {
-        // Note: these are very special rules for the gencode gene files.
-        // tmp = tokens[3].replace(/"/g, '');
-        // idName = tmp.split(';');
-        // for (var i = 0; i < idName.length; i++) {
-        //     var kv = idName[i].split('=');
-        //     if (kv[0] == "gene_id") {
-        //         id = kv[1];
-        //     }
-        //     if (kv[0] == "gene_name") {
-        //         name = kv[1];
-        //     }
-        // }
-        // feature.id = id ? id : tmp;
-        // feature.name = name ? name : tmp;
+    try {
+        if (tokens.length > 3) {
 
-        //parse gffTags in the name field
-        if (tokens[3].indexOf(';') > 0) {
-            const attributes = parseAttributeString(tokens[3], '=');
-            for (let nmField of gffNameFields) {
-                if (attributes.hasOwnProperty(nmField)) {
-                    feature.name = attributes[nmField];
-                    delete attributes[nmField];
-                    break;
+            // Note: these are very special rules for the gencode gene files.
+            // tmp = tokens[3].replace(/"/g, '');
+            // idName = tmp.split(';');
+            // for (var i = 0; i < idName.length; i++) {
+            //     var kv = idName[i].split('=');
+            //     if (kv[0] == "gene_id") {
+            //         id = kv[1];
+            //     }
+            //     if (kv[0] == "gene_name") {
+            //         name = kv[1];
+            //     }
+            // }
+            // feature.id = id ? id : tmp;
+            // feature.name = name ? name : tmp;
+
+            //parse gffTags in the name field
+            if (gffTags && tokens[3].indexOf(';') > 0) {
+                const attributes = parseAttributeString(tokens[3], '=');
+                for (let nmField of gffNameFields) {
+                    if (attributes.hasOwnProperty(nmField)) {
+                        feature.name = attributes[nmField];
+                        delete attributes[nmField];
+                        break;
+                    }
                 }
+                feature.attributes = attributes;
             }
-            feature.attributes = attributes;
-        }
-        if (!feature.name) {
-            feature.name = tokens[3] === '.' ? '' : tokens[3];
-        } else {
-            feature["nameField"] = tokens[3];
-        }
-    }
-
-    if (tokens.length > 4) {
-        feature.score = parseFloat(tokens[4]);
-    }
-    if (tokens.length > 5) {
-        feature.strand = tokens[5];
-    }
-    if (tokens.length > 6) {
-        feature.cdStart = parseInt(tokens[6]);
-    }
-    if (tokens.length > 7) {
-        feature.cdEnd = parseInt(tokens[7]);
-    }
-    if (tokens.length > 8) {
-        if (tokens[8] !== "." && tokens[8] !== "0")
-            feature.color = IGVColor.createColorString(tokens[8]);
-    }
-    if (tokens.length > 11) {
-        exonCount = parseInt(tokens[9]);
-        exonSizes = tokens[10].split(',');
-        exonStarts = tokens[11].split(',');
-        exons = [];
-
-        for (let i = 0; i < exonCount; i++) {
-            eStart = start + parseInt(exonStarts[i]);
-            eEnd = eStart + parseInt(exonSizes[i]);
-            exons.push({start: eStart, end: eEnd});
+            if (!feature.name) {
+                feature.name = tokens[3] === '.' ? '' : tokens[3];
+            }
         }
 
-        findUTRs(exons, feature.cdStart, feature.cdEnd)
-
-        feature.exons = exons;
-    }
-
-    // Optional extra columns
-    if (header) {
-        let thicknessColumn = header.thicknessColumn;
-        let colorColumn = header.colorColumn;
-        if (colorColumn && colorColumn < tokens.length) {
-            feature.color = IGVColor.createColorString(tokens[colorColumn])
+        if (tokens.length > 4) {
+            feature.score = tokens[4] === '.' ? 0 : parseFloat(tokens[4]);
+            if (isNaN(feature.score)) {
+                return feature;
+            }
         }
-        if (thicknessColumn && thicknessColumn < tokens.length) {
-            feature.thickness = tokens[thicknessColumn];
+
+        if (tokens.length > 5) {
+            feature.strand = tokens[5];
+            if (!(feature.strand === '.' || feature.strand === '+' || feature.strand === '-')) {
+                return feature;
+            }
         }
+
+        if (tokens.length > 6) {
+            feature.cdStart = parseInt(tokens[6]);
+            if (isNaN(feature.cdStart)) {
+                return feature;
+            }
+        }
+
+        if (tokens.length > 7) {
+            feature.cdEnd = parseInt(tokens[7]);
+            if (isNaN(feature.cdEnd)) {
+                return feature;
+            }
+        }
+
+        if (tokens.length > 8) {
+            if (tokens[8] !== "." && tokens[8] !== "0")
+                feature.color = IGVColor.createColorString(tokens[8]);
+        }
+
+        if (tokens.length > 11) {
+            const exonCount = parseInt(tokens[9]);
+            // Some basic validation
+            if (exonCount > 1000) {
+                // unlikely
+                return feature;
+            }
+
+            const exonSizes = tokens[10].split(',');
+            const exonStarts = tokens[11].split(',');
+            if (!(exonSizes.length === exonStarts.length && exonCount === exonSizes.length)) {
+                return feature;
+            }
+
+            const exons = [];
+            for (let i = 0; i < exonCount; i++) {
+                const eStart = start + parseInt(exonStarts[i]);
+                const eEnd = eStart + parseInt(exonSizes[i]);
+                exons.push({start: eStart, end: eEnd});
+            }
+            findUTRs(exons, feature.cdStart, feature.cdEnd)
+            feature.exons = exons;
+        }
+
+        // Optional extra columns
+        if (header) {
+            let thicknessColumn = header.thicknessColumn;
+            let colorColumn = header.colorColumn;
+            if (colorColumn && colorColumn < tokens.length) {
+                feature.color = IGVColor.createColorString(tokens[colorColumn])
+            }
+            if (thicknessColumn && thicknessColumn < tokens.length) {
+                feature.thickness = tokens[thicknessColumn];
+            }
+        }
+    } catch
+        (e) {
+
     }
 
     return feature;
@@ -426,8 +456,8 @@ function decodeSNP(tokens, header) {
 }
 
 
-
-
-export {decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
-    decodeSNP, decodeWig}
+export {
+    decodeBed, decodeBedGraph, decodeGenePred, decodeGenePredExt, decodePeak, decodeReflat, decodeRepeatMasker,
+    decodeSNP, decodeWig
+}
 
