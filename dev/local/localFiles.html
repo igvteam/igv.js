@@ -64,13 +64,11 @@
                     } else if(ext === "crai" && !key.endsWith("cram")) {
                         key = key + ".cram";
                     }
-
                     indexLUT.set(key, f);
 
                 } else {
                     dataFiles.push(f);
                 }
-
         }
 
         // Loop through data files building "configs"

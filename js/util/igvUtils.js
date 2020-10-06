@@ -44,7 +44,7 @@ function isSimpleType(value) {
     return (value !== undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
 }
 
-function buildOptions (config, options) {
+function buildOptions(config, options) {
 
     var defaultOptions = {
         oauthToken: config.oauthToken,
@@ -136,7 +136,6 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 };
 
 
-
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -144,7 +143,7 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
  * Released under the MIT License.
  */
 
-const isNumber = function(num) {
+const isNumber = function (num) {
     if (typeof num === 'number') {
         return num - num === 0;
     }
@@ -155,22 +154,7 @@ const isNumber = function(num) {
 };
 
 
-function inferTrackTypes(config) {
-
-    // function inferFileFormat(config) {
-    //
-    //     var path;
-    //
-    //     if (config.format) {
-    //         config.format = config.format.toLowerCase();
-    //         return;
-    //     }
-    //
-    //     path = isFilePath(config.url) ? config.url.name : config.url;
-    //
-    //     config.format = inferFileFormat(path);
-    // }
-
+function inferTrackType(config) {
 
     translateDeprecatedTypes(config);
 
@@ -232,6 +216,7 @@ function inferTrackTypes(config) {
         }
 
     }
+    return config.type;
 }
 
 
@@ -267,5 +252,5 @@ function translateDeprecatedTypes(config) {
 }
 
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackTypes}
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType}
 

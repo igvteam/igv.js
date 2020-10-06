@@ -272,6 +272,18 @@ suite("testBed", function () {
 
     })
 
+    test("ucsc interact", async function () {
+        const featureSource = FeatureSource({
+            url: require.resolve("./data/bed/ucsc_interact_1.bed")
+        });
+
+        const trackType = await featureSource.trackType();
+        const header = await featureSource.getHeader();
+
+        assert.equal(header.format, "interact");
+        assert.equal(trackType, "interact");
+    })
+
 
     test("Chr aliasing", async function () {
 

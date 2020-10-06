@@ -28,7 +28,7 @@ import BWSource from "../bigwig/bwSource.js"
 import TDFSource from "../tdf/tdfSource.js"
 
 
-export default function (config, genome) {
+function FeatureSource(config, genome) {
     const format = config.format ? config.format.toLowerCase() : undefined;
     if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
         return new BWSource(config, genome);
@@ -38,3 +38,5 @@ export default function (config, genome) {
         return new TextFeatureSource(config, genome);
     }
 }
+
+export default FeatureSource;
