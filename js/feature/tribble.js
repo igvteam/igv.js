@@ -37,25 +37,27 @@ const SEQUENCE_DICTIONARY_FLAG = 0x8000;  // if we have a sequence dictionary in
 async function loadTribbleIndex(indexFile, config, genome) {
 
     const arrayBuffer = await igvxhr.loadArrayBuffer(indexFile, buildOptions(config));
-
     if (arrayBuffer) {
-
-        const index = {};
-        const parser = new BinaryParser(new DataView(arrayBuffer));
-        readHeader(parser);
-
-        let nChrs = parser.getInt();
-        while (nChrs-- > 0) {
-            // todo -- support interval tree index, we're assuming its a linear index
-            const chrIdx = readLinear(parser);
-            index[chrIdx.chr] = chrIdx;
-        }
-
-        return new TribbleIndex(index);
+       return parseTribbleIndex(arrayBuffer, genome);
     } else {
         return undefined;
     }
+}
 
+async function parseTribbleIndex(arrayBuffer, genome) {
+
+    const index = {};
+    const parser = new BinaryParser(new DataView(arrayBuffer));
+    readHeader(parser);
+
+    let nChrs = parser.getInt();
+    while (nChrs-- > 0) {
+        // todo -- support interval tree index, we're assuming its a linear index
+        const chrIdx = readLinear(parser);
+        index[chrIdx.chr] = chrIdx;
+    }
+
+    return new TribbleIndex(index);
 
     /**
      * Read the header file.   Data here is not used in igv.js but we need to read it to advance the pointer.
@@ -161,4 +163,4 @@ class TribbleIndex {
     }
 }
 
-export default loadTribbleIndex;
+export {parseTribbleIndex, loadTribbleIndex};
