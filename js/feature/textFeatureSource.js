@@ -60,7 +60,7 @@ class TextFeatureSource {
         }
 
         if (config.features && Array.isArray(config.features)) {
-            let features = config.features;
+            let features = fixFeatures(config.features);
             packFeatures(features);
             if (config.mappings) {
                 mapProperties(features, config.mappings)
@@ -109,8 +109,8 @@ class TextFeatureSource {
     }
 
     async trackType() {
-        const header =  await this.getHeader();
-        if(header) {
+        const header = await this.getHeader();
+        if (header) {
             return header.type;
         } else {
             return undefined;    // Convention for unknown or unspecified
@@ -299,34 +299,68 @@ class TextFeatureSource {
 
 function packFeatures(features, maxRows) {
 
-
     maxRows = maxRows || 1000;
     if (features == null || features.length === 0) {
         return;
     }
-
     // Segregate by chromosome
-    var chrFeatureMap = {},
-        chrs = [];
-    features.forEach(function (feature) {
-
-        var chr = feature.chr,
-            flist = chrFeatureMap[chr];
-
+    const chrFeatureMap = {};
+    const chrs = [];
+    for (let feature of features) {
+        const chr = feature.chr;
+        let flist = chrFeatureMap[chr];
         if (!flist) {
             flist = [];
             chrFeatureMap[chr] = flist;
             chrs.push(chr);
         }
-
         flist.push(feature);
-    });
+    }
 
     // Loop through chrosomosomes and pack features;
-
-    chrs.forEach(function (chr) {
+    for (let chr of chrs) {
         pack(chrFeatureMap[chr], maxRows);
-    })
+    }
+}
+
+/**
+ * This function is used to apply properties normally added during parsing to  features supplied directly in the
+ * config as an array of objects.   At the moment the only application is bedpe type features.
+ * @param features
+ */
+function fixFeatures(features) {
+
+    if (!features || features.length === 0) return;
+
+    const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined;
+    if (isBedPE) {
+        const interChrFeatures = [];
+        for (let feature of features) {
+            // Set total extent of feature
+            if (feature.chr1 === feature.chr2) {
+                feature.chr = feature.chr1;
+                feature.start = Math.min(feature.start1, feature.start2);
+                feature.end = Math.max(feature.end1, feature.end2);
+            } else {
+                interChrFeatures.push(feature);
+            }
+        }
+        // Make copies of inter-chr features, one for each chromosome
+        for (let f1 of interChrFeatures) {
+            const f2 = Object.assign({dup: true}, f1);
+            features.push(f2);
+
+            f1.chr = f1.chr1;
+            f1.start = f1.start1;
+            f1.end = f1.end1;
+
+            f2.chr = f2.chr2;
+            f2.start = f2.start2;
+            f2.end = f2.end2;
+        }
+    }
+
+    return features;
 }
 
 
