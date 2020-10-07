@@ -20,7 +20,14 @@ async function loadCsiIndex(indexURL, config, tabix, genome) {
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
     const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
     arrayBuffer = inflate.decompress().buffer;
-    const idx = new CSIIndex(tabix);
+    const idx = new CSIIndex();
+    idx.parse(arrayBuffer, genome);
+    return idx;
+}
+
+async function parseCsiIndex(arrayBuffer, genome) {
+
+    const idx = new CSIIndex();
     idx.parse(arrayBuffer, genome);
     return idx;
 }
@@ -28,7 +35,7 @@ async function loadCsiIndex(indexURL, config, tabix, genome) {
 class CSIIndex {
 
     constructor(tabix) {
-        this.tabix = tabix;
+        this.tabix = true;   // Means whatever is indexed is bgzipped
     }
 
     parse(arrayBuffer, genome) {
@@ -233,4 +240,4 @@ function canMerge(chunk1, chunk2) {
 }
 
 
-export default loadCsiIndex;
+export {loadCsiIndex, parseCsiIndex};
