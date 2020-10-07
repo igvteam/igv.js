@@ -40,7 +40,7 @@ suite("testVariant", function () {
             indexURL: require.resolve("./data/vcf/NoVariantsVCF/novariants.vcf.gz.tbi")
         })
 
-        const features = await reader.readFeatures("chr1", 1, 1000);
+        const {features} = await reader.readFeatures("chr1", 1, 1000);
         assert.equal(features.length, 0);
     })
 
