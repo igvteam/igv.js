@@ -39,10 +39,10 @@ async function loadIndex(indexURL, config, genome) {
             return parseTabixIndex(arrayBuffer, genome);
         case CSI1_MAGIC:
             return parseCsiIndex(arrayBuffer, genome);
-        case CSI2_MAGIC:
-            throw Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js");
         case TRIBBLE_MAGIC:
             return parseTribbleIndex(arrayBuffer, genome);
+        case CSI2_MAGIC:
+            throw Error("CSI version 2 is not supported.");
         default:
             throw Error(`Unrecognized index type: ${indexURL}`);
     }

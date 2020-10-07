@@ -16,54 +16,34 @@
 </head>
 
 <body>
-<button id="google-storage">Google Storage</button>
-<button id="google-drive">Google Drive</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 
 <script type="module">
 
-    import igv from "../js/index.js";
-    import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
-
-    import oauthConfig from './oauthConfig-private.js';
-
+    import igv from "../../js/index.js";
 
     const options =
         {
             genome: "hg19",
-            locus: "slc25a3",
-            tracks: [],
-            clientId: oauthConfig.client_id,
-            apiKey: oauthConfig.apiKey
+            locus: "chr1:859,205-896,143",
+            tracks: [{
+                format: "vcf",
+                url: "https://www.dropbox.com/s/94gq1yien9eqrer/TSVC.vcf.gz?dl=0",
+                indexURL: "https://www.dropbox.com/s/37e81vtudz6u2uo/TSVC.vcf.gz.tbi?dl=0",
+                name: "TSVC vcf indexed"
+            },
+                {
+                    format: "vcf",
+                    url: "https://www.dropbox.com/s/94gq1yien9eqrer/TSVC.vcf.gz?dl=0",
+                    indexed: false,
+                    name: "TSVC vcf not indexed"
+                }]
         };
 
     igv.createBrowser(document.getElementById('igvDiv'), options)
-
         .then(async function (browser) {
-
-            document.getElementById("google-storage").onclick = () => {
-                browser.loadTrack({
-                    name: "Bam",
-                    type: "alignment",
-                    format: "bam",
-                    url: "gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.bam",
-                    indexURL: "gs://fc-0d14d0d0-242d-40c8-bc98-055c6639e05d/heart_slc25a3.bam.bai",
-
-                })
-            }
-
-            document.getElementById("google-drive").onclick = () => {
-                browser.loadTrack({
-                    name: "Bam",
-                    type: "alignment",
-                    format: "cram",
-                    url: "https://drive.google.com/file/d/1b7tAs4GjyRz_Ix6Wjr5AxNQY_NXZd1Mo/view?usp=sharing",
-                    indexURL: "https://drive.google.com/file/d/1FTzrjG9xw4sm0sMDN6wo1B1ljBKVB4D2/view?usp=sharing",
-                })
-            }
-
         })
 
 </script>

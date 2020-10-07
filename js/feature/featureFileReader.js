@@ -158,20 +158,21 @@ class FeatureFileReader {
 
     async loadFeaturesWithIndex(chr, start, end) {
 
-        //console.log("Using index");
+        //console.log("Using index"
         const config = this.config
         const parser = this.parser
         const tabix = this.index.tabix
         const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
-        const allFeatures = [];
+        if (refId === undefined) {
+            return {features: []};
+        }
+
         const genome = this.genome;
-
         const blocks = this.index.blocksForRange(refId, start, end);
-
         if (!blocks || blocks.length === 0) {
-            return [];
+            return {features: []};
         } else {
-
+            const allFeatures = [];
             for (let block of blocks) {
 
                 const startPos = block.minv.block
@@ -203,57 +204,53 @@ class FeatureFileReader {
                     }
                 });
 
+                let inflated;
                 if (tabix) {
                     const data = await igvxhr.loadArrayBuffer(config.url, options);
-                    const inflated = unbgzf(data);
-                    parse(inflated);
-
+                    inflated = unbgzf(data);
                 } else {
-                    const inflated = await igvxhr.loadString(config.url, options);
-                    parse(inflated);
+                    inflated = await igvxhr.loadString(config.url, options);
                 }
 
-                function parse(inflated) {
-                    const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                    const slicedFeatures = parser.parseFeatures(slicedData);
+                const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
+                const slicedFeatures = parser.parseFeatures(slicedData);
 
-                    // Filter features not in requested range.
-                    let inInterval = false;
-                    for (let i = 0; i < slicedFeatures.length; i++) {
-                        const f = slicedFeatures[i];
-                        const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr;
-                        if (canonicalChromosome !== chr) {
-                            if (allFeatures.length === 0) {
-                                continue;  //adjacent chr to the left
-                            } else {
-                                break; //adjacent chr to the right
-                            }
-                        }
-                        if (f.start > end) {
-                            allFeatures.push(f);  // First feature beyond interval
-                            break;
-                        }
-                        if (f.end >= start && f.start <= end) {
-                            if (!inInterval) {
-                                inInterval = true;
-                                if (i > 0) {
-                                    allFeatures.push(slicedFeatures[i - 1]);
-                                } else {
-                                    // TODO -- get block before this one for first feature;
-                                }
-                            }
-                            allFeatures.push(f);
+                // Filter features not in requested range.
+                let inInterval = false;
+                for (let i = 0; i < slicedFeatures.length; i++) {
+                    const f = slicedFeatures[i];
+                    const canonicalChromosome = genome ? genome.getChromosomeName(f.chr) : f.chr;
+                    if (canonicalChromosome !== chr) {
+                        if (allFeatures.length === 0) {
+                            continue;  //adjacent chr to the left
+                        } else {
+                            break; //adjacent chr to the right
                         }
                     }
+                    if (f.start > end) {
+                        allFeatures.push(f);  // First feature beyond interval
+                        break;
+                    }
+                    if (f.end >= start && f.start <= end) {
+                        if (!inInterval) {
+                            inInterval = true;
+                            if (i > 0) {
+                                allFeatures.push(slicedFeatures[i - 1]);
+                            } else {
+                                // TODO -- get block before this one for first feature;
+                            }
+                        }
+                        allFeatures.push(f);
+                    }
                 }
+
             }
+            allFeatures.sort(function (a, b) {
+                return a.start - b.start;
+            });
+
+            return {features: allFeatures};
         }
-
-        allFeatures.sort(function (a, b) {
-            return a.start - b.start;
-        });
-
-        return {features: allFeatures};
     }
 
     async getIndex() {
