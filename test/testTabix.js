@@ -1,4 +1,4 @@
-import loadCsiIndex from "../js/bam/csiIndex.js";
+import {loadIndex} from "../js/bam/indexFactory.js";
 import {unbgzf} from "../js/bam/bgzf.js";
 import igvxhr from "../js/igvxhr.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
@@ -28,7 +28,7 @@ suite("testTabix", function () {
             indexPath = require.resolve("./data/tabix/csi-test.vcf.gz.csi"),
             config = {};
 
-        const csiIndex = await loadCsiIndex(indexPath, config, true);
+        const csiIndex = await loadIndex(indexPath, config);
         assert.ok(csiIndex);
 
         const blocks = csiIndex.blocksForRange(refID, beg, end);

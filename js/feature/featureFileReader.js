@@ -26,15 +26,13 @@
 import FeatureParser from "./featureParser.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
-import loadBamIndex from "../bam/bamIndex.js";
-import loadTribbleIndex from "./tribble.js"
 import igvxhr from "../igvxhr.js";
 import {bgzBlockSize, unbgzf} from '../bam/bgzf.js';
 import {buildOptions} from "../util/igvUtils.js";
-import GWASParser from "../gwas/gwasParser.js"
-import AEDParser from "../aed/AEDParser.js"
-import loadCsiIndex from "../bam/csiIndex.js"
-import {FileUtils, StringUtils, URIUtils, GoogleUtils, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
+import GWASParser from "../gwas/gwasParser.js";
+import AEDParser from "../aed/AEDParser.js";
+import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
+import {loadIndex} from "../bam/indexFactory.js";
 
 const isString = StringUtils.isString;
 
@@ -272,22 +270,7 @@ class FeatureFileReader {
      */
     async loadIndex() {
         const indexURL = this.config.indexURL;
-        let indexFilename = this.config.indexFileName;
-        if(!indexFilename) {
-                indexFilename = await this.getFileName(indexURL);
-        }
-        const isTabix = indexFilename.endsWith(".tbi") || indexFilename.endsWith(".csi")
-        let index;
-        if (isTabix) {
-            if (indexFilename.endsWith(".tbi")) {
-                index = await loadBamIndex(indexURL, this.config, true, this.genome);
-            } else {
-                index = await loadCsiIndex(indexURL, this.config, true, this.genome);
-            }
-        } else {
-            index = await loadTribbleIndex(indexURL, this.config, this.genome);
-        }
-        return index;
+        return loadIndex(indexURL, this.config, this.genome);
     }
 
     async loadFeaturesFromDataURI() {
@@ -299,21 +282,6 @@ class FeatureFileReader {
         }
         const features = this.parser.parseFeatures(plain);
         return {features, header};
-    }
-
-    async getFileName(urlOrFile) {
-        if (FileUtils.isFilePath(urlOrFile)) {
-            return urlOrFile.name;
-        } else {
-            if(GoogleUtils.isGoogleDriveURL(urlOrFile)) {
-                // TODO -- check if Google is initialized
-                const fileInfo = await GoogleDrive.getDriveFileInfo(urlOrFile);
-                return fileInfo.name || fileInfo.originalFileName
-            } else {
-                const uriParts = URIUtils.parseUri(urlOrFile);
-                return uriParts.file;
-            }
-        }
     }
 
 }
