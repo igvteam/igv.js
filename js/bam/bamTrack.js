@@ -359,7 +359,7 @@ BAMTrack.prototype.menuItemList = function () {
  */
 function colorByCB(menuItem, showCheck) {
     const $e = createCheckbox(menuItem.label, showCheck);
-    const clickHandler = () => {
+    const clickHandler = (ev) => {
 
         if (menuItem.key === this.alignmentTrack.colorBy) {
             this.alignmentTrack.colorBy = 'none';
@@ -368,15 +368,13 @@ function colorByCB(menuItem, showCheck) {
 
         } else if ('tag' === menuItem.key) {
 
-            this.browser.inputDialog.configure({
+            this.browser.inputDialog.present({
                 label: 'Tag Name',
-                input: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
-                click: () => {
-
+                value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
+                callback:  (tag) => {
                     this.alignmentTrack.colorBy = 'tag';
                     this.config.colorBy = 'tag';
 
-                    const tag = this.browser.inputDialog.$input.val().trim();
                     if (tag !== this.alignmentTrack.colorByTag) {
                         this.alignmentTrack.colorByTag = tag;
                         this.config.colorByTag = tag;
@@ -386,8 +384,7 @@ function colorByCB(menuItem, showCheck) {
 
                     this.trackView.repaintViews();
                 }
-            });
-            this.browser.inputDialog.present($(this.trackView.trackDiv));
+            }, ev)
 
         } else {
 
