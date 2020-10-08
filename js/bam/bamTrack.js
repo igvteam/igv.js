@@ -237,6 +237,7 @@ BAMTrack.prototype.menuItemList = function () {
 
     const menuItems = [];
 
+    // Color by items
     const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
     $e.text('Color by');
     menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
@@ -249,11 +250,12 @@ BAMTrack.prototype.menuItemList = function () {
     }
     const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '');
     colorByMenuItems.push({key: 'tag', label: tagLabel});
-    for(let item of colorByMenuItems) {
+    for (let item of colorByMenuItems) {
         const selected = (this.alignmentTrack.colorBy === item.key);
         menuItems.push(colorByCB.call(this, item, selected));
     }
 
+    // Show / hide alignments and coverage
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
     menuItems.push({
         object: createCheckbox("Show Coverage", this.showCoverage),
@@ -278,10 +280,11 @@ BAMTrack.prototype.menuItemList = function () {
         }
     });
 
+    // Show all bases
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
     menuItems.push({
         object: createCheckbox("Show all bases", this.showAllBases),
-        click:  () => {
+        click: () => {
             this.showAllBases = !this.showAllBases;
             this.config.showAllBases = this.showAllBases;
             this.trackView.repaintViews();
@@ -290,11 +293,11 @@ BAMTrack.prototype.menuItemList = function () {
 
     menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
+    // View as pairs
     if (this.pairsSupported && this.alignmentTrack.hasPairs) {
-
         menuItems.push({
             object: createCheckbox("View as pairs", this.viewAsPairs),
-            click:  () => {
+            click: () => {
                 this.viewAsPairs = !this.viewAsPairs;
                 this.config.viewAsPairs = this.viewAsPairs;
                 this.featureSource.setViewAsPairs(this.viewAsPairs);
@@ -307,9 +310,10 @@ BAMTrack.prototype.menuItemList = function () {
         });
     }
 
+    // Soft clips
     menuItems.push({
         object: createCheckbox("Show soft clips", this.showSoftClips),
-        click:  () => {
+        click: () => {
             this.showSoftClips = !this.showSoftClips;
             this.config.showSoftClips = this.showSoftClips;
             this.featureSource.setShowSoftClips(this.showSoftClips);
@@ -321,54 +325,81 @@ BAMTrack.prototype.menuItemList = function () {
         }
     });
 
+    // Display mode
+    const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+    $displayModeLabel.text('Display mode');
+    menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+
+    menuItems.push({
+        object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
+        click: () => {
+            this.alignmentTrack.displayMode = "EXPANDED";
+            this.config.displayMode = "EXPANDED";
+            this.trackView.repaintViews();
+        }
+    });
+
+    menuItems.push({
+        object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
+        click: () => {
+            this.alignmentTrack.displayMode = "SQUISHED";
+            this.config.displayMode = "SQUISHED";
+            this.trackView.repaintViews();
+        }
+    });
+
     return menuItems;
+}
 
-    function colorByCB(menuItem, showCheck) {
-        const $e = createCheckbox(menuItem.label, showCheck);
-        const clickHandler = () => {
+/**
+ * Create a "color by" checkbox menu item, optionally initially checked
+ * @param menuItem
+ * @param showCheck
+ * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+ */
+function colorByCB(menuItem, showCheck) {
+    const $e = createCheckbox(menuItem.label, showCheck);
+    const clickHandler = () => {
 
-            if (menuItem.key === this.alignmentTrack.colorBy) {
-                this.alignmentTrack.colorBy = 'none';
-                this.config.colorBy = 'none';
-                this.trackView.repaintViews();
+        if (menuItem.key === this.alignmentTrack.colorBy) {
+            this.alignmentTrack.colorBy = 'none';
+            this.config.colorBy = 'none';
+            this.trackView.repaintViews();
 
-            } else if ('tag' === menuItem.key) {
+        } else if ('tag' === menuItem.key) {
 
-                this.browser.inputDialog.configure(                    {
-                    label: 'Tag Name',
-                    input: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
-                    click: () => {
+            this.browser.inputDialog.configure({
+                label: 'Tag Name',
+                input: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
+                click: () => {
 
-                        this.alignmentTrack.colorBy = 'tag';
-                        this.config.colorBy = 'tag';
+                    this.alignmentTrack.colorBy = 'tag';
+                    this.config.colorBy = 'tag';
 
-                        const tag = this.browser.inputDialog.$input.val().trim();
-                        if (tag !== this.alignmentTrack.colorByTag) {
-                            this.alignmentTrack.colorByTag = tag;
-                            this.config.colorByTag = tag;
-                            this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
-                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                        }
-
-                        this.trackView.repaintViews();
+                    const tag = this.browser.inputDialog.$input.val().trim();
+                    if (tag !== this.alignmentTrack.colorByTag) {
+                        this.alignmentTrack.colorByTag = tag;
+                        this.config.colorByTag = tag;
+                        this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
+                        $('#color-by-tag').text(self.alignmentTrack.colorByTag);
                     }
-                });
-                this.browser.inputDialog.present($(this.trackView.trackDiv));
 
-            } else {
+                    this.trackView.repaintViews();
+                }
+            });
+            this.browser.inputDialog.present($(this.trackView.trackDiv));
 
-                this.alignmentTrack.colorBy = menuItem.key;
-                this.config.colorBy = menuItem.key;
-                this.trackView.repaintViews();
-            }
+        } else {
 
-        };
+            this.alignmentTrack.colorBy = menuItem.key;
+            this.config.colorBy = menuItem.key;
+            this.trackView.repaintViews();
+        }
 
-        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    };
 
-    }
-};
-
+    return {name: undefined, object: $e, click: clickHandler, init: undefined}
+}
 
 /**
  * Called when the track is removed.  Do any needed cleanup here
@@ -576,8 +607,9 @@ class AlignmentTrack {
         this.browser = parent.browser;
         this.featureSource = parent.featureSource;
         this.top = 0 === config.coverageTrackHeight ? 0 : config.coverageTrackHeight + 5;
+        this.displayMode = config.displayMode || "EXPANDED";
         this.alignmentRowHeight = config.alignmentRowHeight || 14;
-        this.squishedRowHeight = config.squishedRowHeight || 1;
+        this.squishedRowHeight = config.squishedRowHeight || 3;
 
         this.negStrandColor = config.negStrandColor || "rgba(150, 150, 230, 0.75)";
         this.posStrandColor = config.posStrandColor || "rgba(230, 150, 150, 0.75)";
@@ -612,11 +644,11 @@ class AlignmentTrack {
     computePixelHeight(alignmentContainer) {
 
         if (alignmentContainer.packedAlignmentRows) {
-            var h = 0;
-            if (alignmentContainer.hasDownsampledIntervals()) {
-                h += downsampleRowHeight + alignmentStartGap;
-            }
-            return h + (this.alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
+            const h =  alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0;
+            const alignmentRowHeight = this.displayMode === "SQUISHED" ?
+                this.squishedRowHeight :
+                this.alignmentRowHeight;
+            return h + (alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
         } else {
             return this.height;
         }
@@ -668,6 +700,9 @@ class AlignmentTrack {
 
         // Transient variable -- rewritten on every draw, used for click object selection
         this.alignmentsYOffset = alignmentRowYInset;
+        const alignmentRowHeight = this.displayMode === "SQUISHED" ?
+            this.squishedRowHeight :
+            this.alignmentRowHeight;
 
         if (packedAlignmentRows) {
 
@@ -676,8 +711,8 @@ class AlignmentTrack {
             for (let rowIndex = 0; rowIndex < nRows; rowIndex++) {
 
                 const alignmentRow = packedAlignmentRows[rowIndex];
-                const alignmentY = alignmentRowYInset + (this.alignmentRowHeight * rowIndex);
-                const alignmentHeight = this.alignmentRowHeight <= 4 ? this.alignmentRowHeight : this.alignmentRowHeight - 2;
+                const alignmentY = alignmentRowYInset + (alignmentRowHeight * rowIndex);
+                const alignmentHeight = alignmentRowHeight <= 4 ? alignmentRowHeight : alignmentRowHeight - 2;
 
                 if (alignmentY > pixelBottom) {
                     break;
@@ -805,7 +840,7 @@ class AlignmentTrack {
                 const blockStartPixel = (block.start - bpStart) / bpPerPixel;
                 const blockEndPixel = ((block.start + block.len) - bpStart) / bpPerPixel;
                 const blockWidthPixel = Math.max(1, blockEndPixel - blockStartPixel);
-                const arrowHeadWidthPixel = this.alignmentRowHeight / 2.0;
+                const arrowHeadWidthPixel = alignmentRowHeight / 2.0;
                 const isSoftClip = 'S' === block.type;
 
                 const strokeOutline =
@@ -1070,7 +1105,11 @@ class AlignmentTrack {
 
         let packedAlignmentRows = features.packedAlignmentRows;
         let downsampledIntervals = features.downsampledIntervals;
-        let packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / this.alignmentRowHeight);
+        const alignmentRowHeight = this.displayMode === "SQUISHED" ?
+            this.squishedRowHeight :
+            this.alignmentRowHeight;
+
+        let packedAlignmentsIndex = Math.floor((y - this.top - this.alignmentsYOffset) / alignmentRowHeight);
 
         if (packedAlignmentsIndex < 0) {
             for (let i = 0; i < downsampledIntervals.length; i++) {
