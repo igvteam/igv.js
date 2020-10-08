@@ -416,18 +416,13 @@ BAMTrack.prototype.getState = function () {
 
     config.sort = undefined;
 
-    for (let gs of this.browser.genomicStateList) {
+    for (let referenceFrame of this.browser.referenceFrameList) {
 
-        const s = this.sortObjects[gs.id];
+        const s = this.sortObjects[ referenceFrame.id ];
 
         if (s) {
             config.sort = config.sort || [];
-            config.sort.push({
-                locus: s.chr + ":" + (s.position + 1),
-                option: s.sortOption,
-                direction: s.direction ? "ASC" : "DESC",
-                tag: s.tag
-            });
+            config.sort.push({ locus: s.chr + ":" + (s.position + 1), option: s.sortOption, direction: s.direction ? "ASC" : "DESC", tag: s.tag });
         }
     }
 
