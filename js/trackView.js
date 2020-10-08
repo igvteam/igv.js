@@ -97,6 +97,8 @@ const TrackView = function (browser, $container, track) {
 
     if (false === exclude.has(this.track.type)) {
 
+        const defaultColors = this.track.color ? [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) : undefined
+
         const config =
             {
                 parent: this.trackDiv,
@@ -104,7 +106,7 @@ const TrackView = function (browser, $container, track) {
                 left: undefined,
                 width: 432,
                 height: undefined,
-                defaultColors: [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)),
+                defaultColors,
                 colorHandler: rgb => this.setColor(rgb)
             };
 

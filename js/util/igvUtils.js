@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {FileUtils,TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+
 const extend = function (parent, child) {
 
     child.prototype = Object.create(parent.prototype);
@@ -164,15 +166,14 @@ function inferTrackType(config) {
 
     if ("file" === config.sourceType) {
         if (undefined === config.format) {
-            const path = isFilePath(config.url) ? config.url.name : config.url;
-            config.format = inferFileFormat(path);
+            const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
+            config.format = TrackUtils.inferFileFormat(path);
         } else {
             config.format = config.format.toLowerCase();
         }
     }
 
     if (undefined === config.type) {
-        if (config.type) return;
 
         if (config.format) {
 
