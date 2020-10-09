@@ -31,9 +31,9 @@ import {FileUtils, DOMUtils, IGVColor} from "../node_modules/igv-utils/src/index
 
 class IdeogramViewport extends ViewportBase {
 
-    constructor(trackView, $viewportContainer, genomicState, width) {
+    constructor(trackView, $viewportContainer, referenceFrame, width) {
 
-        super(trackView, $viewportContainer, genomicState, width)
+        super(trackView, $viewportContainer, referenceFrame, width)
 
         this.$canvas.on('click', e => this.handleClick(e, this.canvas));
 
@@ -55,10 +55,8 @@ class IdeogramViewport extends ViewportBase {
     handleClick(e, canvas) {
 
         const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-        //console.log(`bboxWidth ${ width }. canvas.width ${ canvas.width }`)
-        let { referenceFrame } = this.genomicState;
-        const { bpLength } = this.browser.genome.getChromosome(referenceFrame.chrName);
-        const locusLength = referenceFrame.bpPerPixel * width;
+        const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chrName);
+        const locusLength = this.referenceFrame.bpPerPixel * width;
         const chrCoveragePercentage = locusLength / bpLength;
 
         let xPercentage = xNormalized;
@@ -73,10 +71,11 @@ class IdeogramViewport extends ViewportBase {
         const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
         const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
-        referenceFrame.start = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
-        referenceFrame.bpPerPixel = (ee - ss) / width;
+        this.referenceFrame.start = ss;
+        this.referenceFrame.initialEnd = ee;
+        this.referenceFrame.bpPerPixel = (ee - ss) / width;
 
-        this.browser.updateLocusSearchWidget(this.genomicState);
+        this.browser.updateLocusSearchWidget(this.referenceFrame);
         this.browser.updateViews()
 
     }
@@ -124,7 +123,7 @@ class IdeogramViewport extends ViewportBase {
             width,
             height,
             genome: this.browser.genome,
-            referenceFrame: this.genomicState.referenceFrame,
+            referenceFrame: this.referenceFrame,
             ideogramWidth: this.$content.width()
         }
 
@@ -141,7 +140,8 @@ class IdeogramViewport extends ViewportBase {
                 width: this.$canvas.width(),
                 height: this.$canvas.height(),
                 genome: this.browser.genome,
-                referenceFrame: this.genomicState.referenceFrame,
+                chr: this.referenceFrame.chrName,
+                referenceFrame: this.referenceFrame,
                 ideogramWidth: this.$content.width()
             };
 
@@ -151,33 +151,33 @@ class IdeogramViewport extends ViewportBase {
 
 }
 
-function repaintContext({ ctx, width, height, genome, referenceFrame, ideogramWidth }) {
+function repaintContext({ ctx, width, height, genome, chr, referenceFrame, ideogramWidth }) {
 
     if (!(width > 0 && height > 0)) {
         return;
     }
 
-    if (!(genome && referenceFrame && genome.getChromosome(referenceFrame.chrName) && height > 0)) {
+    if (!(genome && referenceFrame && genome.getChromosome(chr) && height > 0)) {
         return;
     }
 
     const stainColors = [];
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
 
-    if (referenceFrame.chrName.toLowerCase() === "all") {
+    if (chr.toLowerCase() === "all") {
         return;
     }
 
-    drawIdeogram({ctx, referenceFrame, genome, width, height, stainColors});
+    drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors});
 
-    const chromosome = genome.getChromosome(referenceFrame.chrName);
+    const chromosome = genome.getChromosome(chr);
 
     const widthBP = Math.round(referenceFrame.bpPerPixel * ideogramWidth);
     const xBP = referenceFrame.start;
 
     // Total chromosome length can be > chromosome.bpLength for partial fastas.
     let chrLength = chromosome.bpLength;
-    const cytobands = genome.getCytobands(referenceFrame.chrName);
+    const cytobands = genome.getCytobands(chr);
     if (cytobands && cytobands.length > 0) {
         chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
     }
@@ -215,7 +215,7 @@ function repaintContext({ ctx, width, height, genome, referenceFrame, ideogramWi
 
 }
 
-function drawIdeogram({ctx, referenceFrame, genome, width, height, stainColors}) {
+function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors}) {
 
     var shim,
         shim2,
@@ -241,7 +241,7 @@ function drawIdeogram({ctx, referenceFrame, genome, width, height, stainColors})
 
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
 
-    cytobands = genome.getCytobands(referenceFrame.chrName);
+    cytobands = genome.getCytobands(chr);
     if (cytobands) {
 
         center = (ideogramTop + height / 2);
@@ -253,7 +253,7 @@ function drawIdeogram({ctx, referenceFrame, genome, width, height, stainColors})
             return;
         }
 
-        chrLength = referenceFrame.genome.getChromosome(referenceFrame.chrName).bpLength;
+        chrLength = referenceFrame.genome.getChromosome(chr).bpLength;
         scale = width / chrLength;
 
         // round rect clipping path

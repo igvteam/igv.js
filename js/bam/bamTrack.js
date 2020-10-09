@@ -136,13 +136,13 @@ BAMTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel
         }
     }
 
-    const sort = this.sortObjects[viewport.genomicState.id];
+    const sort = this.sortObjects[viewport.referenceFrame.id];
     if (sort) {
         if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
             this.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
             this.trackView.repaintViews();
         } else {
-            delete this.sortObjects[viewport.genomicState.id];
+            delete this.sortObjects[viewport.referenceFrame.id];
         }
     }
 
@@ -416,18 +416,13 @@ BAMTrack.prototype.getState = function () {
 
     config.sort = undefined;
 
-    for (let gs of this.browser.genomicStateList) {
+    for (let referenceFrame of this.browser.referenceFrameList) {
 
-        const s = this.sortObjects[gs.id];
+        const s = this.sortObjects[ referenceFrame.id ];
 
         if (s) {
             config.sort = config.sort || [];
-            config.sort.push({
-                locus: s.chr + ":" + (s.position + 1),
-                option: s.sortOption,
-                direction: s.direction ? "ASC" : "DESC",
-                tag: s.tag
-            });
+            config.sort.push({ locus: s.chr + ":" + (s.position + 1), option: s.sortOption, direction: s.direction ? "ASC" : "DESC", tag: s.tag });
         }
     }
 
@@ -549,7 +544,7 @@ class CoverageTrack {
         if (!features || features.length === 0) return;
 
         let genomicLocation = Math.floor(config.genomicLocation),
-            referenceFrame = config.viewport.genomicState.referenceFrame,
+            referenceFrame = config.viewport.referenceFrame,
             coverageMap = features.coverageMap,
             nameValues = [],
             coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart),
@@ -1005,8 +1000,7 @@ class AlignmentTrack {
 
         const self = this;
         const viewport = clickState.viewport;
-        const genomicState = clickState.viewport.genomicState;
-        const clickedObject = this.getClickedObject(clickState.viewport, clickState.y, clickState.genomicLocation);
+        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
         const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
@@ -1030,7 +1024,7 @@ class AlignmentTrack {
 
         function sortByOption(option) {
             sortRows({
-                chr: genomicState.referenceFrame.chrName,
+                chr: viewport.referenceFrame.chrName,
                 position: Math.floor(clickState.genomicLocation),
                 sortOption: option
             })
@@ -1045,7 +1039,7 @@ class AlignmentTrack {
                         const tag = self.browser.inputDialog.$input.val().trim();
                         self.sortByTag = tag;
                         sortRows({
-                            chr: genomicState.referenceFrame.chrName,
+                            chr: viewport.referenceFrame.chrName,
                             position: Math.floor(clickState.genomicLocation),
                             sortOption: "TAG",
                             tag: tag
@@ -1063,19 +1057,19 @@ class AlignmentTrack {
             }
 
             const currentSorts = self.parent.sortObjects;
-            const cs = currentSorts[viewport.genomicState.id];
+            const cs = currentSorts[viewport.referenceFrame.id];
             options.direction = cs ? !cs.direction : true;
 
             self.sortAlignmentRows(options, clickState.viewport.getCachedFeatures());
             self.parent.trackView.repaintViews();
 
-            currentSorts[viewport.genomicState.id] = options;
+            currentSorts[viewport.referenceFrame.id] = options;
         }
 
         function viewMateInSplitScreen() {
             if (clickedObject.mate) {
                 self.highlightedAlignmentReadNamed = clickedObject.readName;
-                self.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.genomicState);
+                self.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
             }
         }
 

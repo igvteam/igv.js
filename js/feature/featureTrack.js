@@ -551,12 +551,12 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 
     const windowX = Math.round(options.viewportContainerX);
-    // const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
+    // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
     // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
     const windowX1 = windowX + browser.viewportWidth();
 
     if (options.drawLabel) {
-        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
+        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
     }
 }
 
@@ -568,10 +568,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  * @param featureY  feature y-coordinate
  * @param windowX   visible window start x-coordinate
  * @param windowX1  visible window end x-coordinate
- * @param genomicState  genomic state
+ * @param referenceFrame  genomic state
  * @param options  options
  */
-function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
+function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, referenceFrame, options) {
 
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
@@ -592,10 +592,10 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
 
     let geneColor;
     let gtexSelection = false;
-    if (genomicState.selection && GtexUtils.gtexLoaded) {
+    if (referenceFrame.selection && GtexUtils.gtexLoaded) {
         // TODO -- for gtex, figure out a better way to do this
         gtexSelection = true;
-        geneColor = genomicState.selection.colorForGene(name);
+        geneColor = referenceFrame.selection.colorForGene(name);
     }
 
 

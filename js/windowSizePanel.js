@@ -42,8 +42,8 @@ WindowSizePanel.prototype.hide = function () {
     this.$container.hide();
 };
 
-WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-    this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+WindowSizePanel.prototype.updateWithReferenceFrame = function (referenceFrame) {
+    this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
 };
 
 
