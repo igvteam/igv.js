@@ -120,7 +120,7 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
             if (width > threshold) {
 
-                validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+                validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chr).bpLength, extent, browser.minimumBases());
 
                 self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
                 self.viewport.referenceFrame.start = Math.round(extent.start);

@@ -55,7 +55,7 @@ class IdeogramViewport extends ViewportBase {
     handleClick(e, canvas) {
 
         const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-        const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chrName);
+        const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chr);
         const locusLength = this.referenceFrame.bpPerPixel * width;
         const chrCoveragePercentage = locusLength / bpLength;
 
@@ -140,7 +140,7 @@ class IdeogramViewport extends ViewportBase {
                 width: this.$canvas.width(),
                 height: this.$canvas.height(),
                 genome: this.browser.genome,
-                chr: this.referenceFrame.chrName,
+                chr: this.referenceFrame.chr,
                 referenceFrame: this.referenceFrame,
                 ideogramWidth: this.$content.width()
             };

@@ -139,14 +139,14 @@ GWASTrack.prototype.draw = function (options) {
     }
 }
 
-GWASTrack.prototype.getColorScale = function (chrName) {
+GWASTrack.prototype.getColorScale = function (chr) {
 
     if (this.useChrColors) {
-        let cs = this.colorScales[chrName];
+        let cs = this.colorScales[chr];
         if (!cs) {
-            const color = gwasColors[chrName] || randomColor();
+            const color = gwasColors[chr] || randomColor();
             cs = new ConstantColorScale(color);
-            this.colorScales[chrName] = cs;
+            this.colorScales[chr] = cs;
         }
         return cs;
     } else {
