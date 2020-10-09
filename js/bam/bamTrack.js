@@ -107,7 +107,7 @@ const BAMTrack = extend(TrackBase,
             for (let rf of browser.referenceFrameList) {
                 // We would like to use actual viewport width to calculate ref frame end, but viewport is not assigned at this point.
                 const rfEnd = rf.start + (rf.initialEnd - rf.initialStart);
-                if (rf.chrName === range.chr && range.start >= rf.start && range.start <= rfEnd) {
+                if (rf.chr === range.chr && range.start >= rf.start && range.start <= rfEnd) {
 
                     currentSorts[rf.id] = {
                         chr: range.chr,
@@ -553,7 +553,7 @@ class CoverageTrack {
 
         if (coverage) {
 
-            nameValues.push(referenceFrame.chrName + ":" + StringUtils.numberFormatter(1 + genomicLocation));
+            nameValues.push(referenceFrame.chr + ":" + StringUtils.numberFormatter(1 + genomicLocation));
 
             nameValues.push({name: 'Total Count', value: coverage.total});
 
@@ -1025,7 +1025,7 @@ class AlignmentTrack {
 
         function sortByOption(option) {
             sortRows({
-                chr: viewport.referenceFrame.chrName,
+                chr: viewport.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
                 sortOption: option
             })
@@ -1040,7 +1040,7 @@ class AlignmentTrack {
                         const tag = self.browser.inputDialog.$input.val().trim();
                         self.sortByTag = tag;
                         sortRows({
-                            chr: viewport.referenceFrame.chrName,
+                            chr: viewport.referenceFrame.chr,
                             position: Math.floor(clickState.genomicLocation),
                             sortOption: "TAG",
                             tag: tag

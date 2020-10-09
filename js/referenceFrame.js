@@ -30,9 +30,9 @@ import GtexSelection from "./gtex/gtexSelection.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
-const ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
+const ReferenceFrame = function (genome, chr, start, end, bpPerPixel) {
     this.genome = genome;
-    this.chrName = chrName;
+    this.chr = chr;
     this.start = start;
     this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
     this.initialStart = start;
@@ -50,7 +50,7 @@ ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
 };
 
 ReferenceFrame.prototype.set = function (json) {
-    this.chrName = json.chrName;
+    this.chr = json.chr;
     this.start = json.start;
     this.bpPerPixel = json.bpPerPixel;
 };
@@ -77,13 +77,13 @@ ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
 
 ReferenceFrame.prototype.clamp = function (viewportWidth) {
     // clamp left
-    const min = this.genome.getChromosome(this.chrName).bpStart || 0
+    const min = this.genome.getChromosome(this.chr).bpStart || 0
     this.start = Math.max(min, this.start);
 
     // clamp right
     if (viewportWidth) {
 
-        var chromosome = this.genome.getChromosome(this.chrName);
+        var chromosome = this.genome.getChromosome(this.chr);
         var maxEnd = chromosome.bpLength;
         var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
 
@@ -94,17 +94,17 @@ ReferenceFrame.prototype.clamp = function (viewportWidth) {
 }
 
 ReferenceFrame.prototype.getChromosome = function () {
-    return this.genome.getChromosome(this.chrName)
+    return this.genome.getChromosome(this.chr)
 }
 
 ReferenceFrame.prototype.presentLocus = function(pixels) {
 
-    if ('all' === this.chrName) {
-        return this.chrName
+    if ('all' === this.chr) {
+        return this.chr
     } else {
         const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
         const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
-        return `${ this.chrName }:${ ss }-${ ee }`
+        return `${ this.chr }:${ ss }-${ ee }`
     }
 
 }

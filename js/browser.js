@@ -186,7 +186,7 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
     }
 
     for (let referenceFrame of this.referenceFrameList) {
-        if ('all' === referenceFrame.chrName.toLowerCase()) {
+        if ('all' === referenceFrame.chr.toLowerCase()) {
             return true;
         }
     }
@@ -483,7 +483,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 //
 Browser.prototype.updateUIWithReferenceFrameListChange = function (referenceFrameList) {
 
-    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chrName));
+    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
     if (isWGV || this.isMultiLocusMode()) {
         this.centerGuide.forcedHide();
@@ -912,7 +912,7 @@ Browser.prototype.resize = async function () {
 
     if (this.referenceFrameList) {
 
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chrName);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -931,7 +931,7 @@ Browser.prototype.resize = async function () {
     }
 
     if (this.referenceFrameList && 1 === this.referenceFrameList.length && resizeWillExceedChromosomeLength(this, this.viewportContainerWidth(), this.referenceFrameList[0])) {
-        this.search(this.referenceFrameList[0].chrName);
+        this.search(this.referenceFrameList[0].chr);
     } else {
 
         if (this.centerGuide) this.centerGuide.resize();
@@ -955,7 +955,7 @@ Browser.prototype.resize = async function () {
 
 const resizeWillExceedChromosomeLength = (browser, viewportContainerWidth, referenceFrame) => {
     const bp = viewportContainerWidth * referenceFrame.bpPerPixel
-    const { bpLength } = browser.genome.getChromosome(referenceFrame.chrName)
+    const { bpLength } = browser.genome.getChromosome(referenceFrame.chr)
     return (bp > bpLength);
 }
 
@@ -1065,14 +1065,14 @@ Browser.prototype.updateLocusSearchWidget = function (referenceFrame) {
             this.chromosomeSelectWidget.$select.val('all');
         } else {
 
-            this.chromosomeSelectWidget.$select.val(referenceFrame.chrName);
+            this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
 
             if (this.$searchInput) {
 
                 end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
 
                 if (this.genome) {
-                    chromosome = this.genome.getChromosome(referenceFrame.chrName);
+                    chromosome = this.genome.getChromosome(referenceFrame.chr);
                     if (chromosome) {
                         end = Math.min(end, chromosome.bpLength);
                     }
@@ -1080,11 +1080,11 @@ Browser.prototype.updateLocusSearchWidget = function (referenceFrame) {
 
                 ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
                 ee = StringUtils.numberFormatter(Math.floor(end));
-                str = referenceFrame.chrName + ":" + ss + "-" + ee;
+                str = referenceFrame.chr + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
 
-            this.fireEvent('locuschange', [{chr: referenceFrame.chrName, start: ss, end: ee, label: str}]);
+            this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
         }
 
     } else {
@@ -1270,8 +1270,8 @@ Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceF
         const ee = this.referenceFrameList[ i ].calculateEnd(previousViewportWidth);
         const bpp = this.referenceFrameList[ i ].calculateBPP(ee, viewportWidth);
 
-        const { chrName, start } = this.referenceFrameList[ i ]
-        this.referenceFrameList[ i ].referenceFrame = new ReferenceFrame(this.genome, chrName, start, ee, bpp);
+        const { chr, start } = this.referenceFrameList[ i ]
+        this.referenceFrameList[ i ].referenceFrame = new ReferenceFrame(this.genome, chr, start, ee, bpp);
     }
 
     this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
@@ -1399,8 +1399,8 @@ Browser.prototype.getViewportWithGUID = function (guid) {
     return result;
 };
 
-Browser.prototype.goto = function (chrName, start, end) {
-    return this.search(chrName + ":" + start + "-" + end);
+Browser.prototype.goto = function (chr, start, end) {
+    return this.search(chr + ":" + start + "-" + end);
 };
 
 Browser.prototype.search = async function (string, init) {

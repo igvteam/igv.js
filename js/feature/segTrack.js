@@ -407,7 +407,7 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 
                 const sort = {
                     direction: sortDirection,
-                    chr: clickState.viewport.referenceFrame.chrName,
+                    chr: clickState.viewport.referenceFrame.chr,
                     start: genomicLocation - bpWidth,
                     end: genomicLocation + bpWidth
 
