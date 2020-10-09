@@ -38,443 +38,542 @@ import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 var dragged,
     dragDestination;
 
-const TrackView = function (browser, $container, track) {
+class TrackView {
 
-    this.browser = browser;
-    this.track = track;
-    track.trackView = this;
+    constructor(browser, $container, track) {
 
-    const $track = $('<div class="igv-track">');
-    this.trackDiv = $track.get(0);
-    $container.append($track);
+        this.browser = browser;
+        this.track = track;
+        track.trackView = this;
 
-    this.namespace = '.trackview_' + DOMUtils.guid();
+        const $track = $('<div class="igv-track">');
+        this.trackDiv = $track.get(0);
+        $container.append($track);
 
-    if (this.track instanceof RulerTrack) {
-        this.trackDiv.dataset.rulerTrack = "rulerTrack";
-    }
+        this.namespace = '.trackview_' + DOMUtils.guid();
 
-    if (track.height) {
-        this.trackDiv.style.height = track.height + "px";
-    }
+        if (this.track instanceof RulerTrack) {
+            this.trackDiv.dataset.rulerTrack = "rulerTrack";
+        }
 
-    this.appendLeftHandGutter($track);
+        if (track.height) {
+            this.trackDiv.style.height = track.height + "px";
+        }
 
-    this.$viewportContainer = $('<div class="igv-viewport-container">');
-    $track.append(this.$viewportContainer);
+        this.appendLeftHandGutter($track);
 
-    this.viewports = [];
-    const width = browser.calculateViewportWidth(browser.referenceFrameList.length);
+        this.$viewportContainer = $('<div class="igv-viewport-container">');
+        $track.append(this.$viewportContainer);
 
-    // console.log(`TrackView ${ track.id }`);
+        this.viewports = [];
+        const width = browser.calculateViewportWidth(browser.referenceFrameList.length);
 
-    for (let referenceFrame of browser.referenceFrameList) {
-        const viewport = createViewport(this, browser.referenceFrameList, browser.referenceFrameList.indexOf(referenceFrame), width)
-        this.viewports.push(viewport);
-    }
+        // console.log(`TrackView ${ track.id }`);
 
-    updateViewportShims(this.viewports, this.$viewportContainer)
+        for (let referenceFrame of browser.referenceFrameList) {
+            const viewport = createViewport(this, browser.referenceFrameList, browser.referenceFrameList.indexOf(referenceFrame), width)
+            this.viewports.push(viewport);
+        }
 
-    this.updateViewportForMultiLocus();
+        updateViewportShims(this.viewports, this.$viewportContainer)
 
-    const exclude = new Set(['ruler', 'sequence', 'ideogram']);
+        this.updateViewportForMultiLocus();
 
-    if (false === exclude.has(this.track.type)) {
-        this.attachScrollbar(this.$viewportContainer, this.viewports);
-    }
+        const exclude = new Set(['ruler', 'sequence', 'ideogram']);
 
-    if (true === this.track.ignoreTrackMenu) {
-        // do nothing
-    } else {
-        this.appendRightHandGutter($track);
-    }
+        if (false === exclude.has(this.track.type)) {
+            this.attachScrollbar(this.$viewportContainer, this.viewports);
+        }
 
-    if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
-        // do nothing
-    } else {
-        attachDragWidget.call(this, $track, this.$viewportContainer);
-    }
-
-    if (false === exclude.has(this.track.type)) {
-
-        const defaultColors = this.track.color ? [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) : undefined
-
-        const config =
-            {
-                parent: this.trackDiv,
-                top: undefined,
-                left: undefined,
-                width: 432,
-                height: undefined,
-                defaultColors,
-                colorHandler: rgb => this.setColor(rgb)
-            };
-
-        this.colorPicker = new ColorPicker(config);
-    }
-
-};
-
-TrackView.prototype.renderSVGContext = function (context, offset) {
-
-    for (let viewport of this.viewports) {
-
-        const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
-        const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
-
-        let o =
-            {
-                deltaX: offset.deltaX + index * width,
-                deltaY: offset.deltaY + y
-            };
-
-        viewport.renderSVGContext(context, o);
-    }
-
-};
-
-TrackView.prototype.attachScrollbar = function ($viewportContainer, viewports) {
-
-    if ("hidden" === $viewportContainer.css("overflow-y")) {
-        this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
-        $viewportContainer.append(this.scrollbar.$outerScroll);
-    }
-
-};
-
-TrackView.prototype.removeViewportWithLocusIndex = function (index) {
-
-    this.viewports[index].$viewport.remove();
-    this.viewports.splice(index, 1);
-
-    this.updateViewportForMultiLocus();
-};
-
-TrackView.prototype.updateViewportForMultiLocus = function () {
-
-    if ('ruler' === this.track.type) {
-
-        if (this.viewports.length > 1) {
-            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').show()
-            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').show()
-            this.track.updateLocusLabel()
+        if (true === this.track.ignoreTrackMenu) {
+            // do nothing
         } else {
-            this.$viewportContainer.find('.igv-multi-locus-panel-close-container').hide()
-            this.$viewportContainer.find('.igv-multi-locus-panel-label-div').hide()
+            this.appendRightHandGutter($track);
+        }
+
+        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
+            // do nothing
+        } else {
+            this.attachDragWidget($track, this.$viewportContainer);
+        }
+
+        if (false === exclude.has(this.track.type)) {
+
+            const defaultColors = this.track.color ? [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) : undefined
+
+            const config =
+                {
+                    parent: this.trackDiv,
+                    top: undefined,
+                    left: undefined,
+                    width: 432,
+                    height: undefined,
+                    defaultColors,
+                    colorHandler: rgb => this.setColor(rgb)
+                };
+
+            this.colorPicker = new ColorPicker(config);
         }
 
     }
 
-};
+    renderSVGContext(context, offset) {
 
-TrackView.prototype.appendLeftHandGutter = function ($parent) {
+        for (let viewport of this.viewports) {
 
-    var self = this,
-        $leftHandGutter,
-        $canvas;
+            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
+            const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
 
-    $leftHandGutter = $('<div class="igv-left-hand-gutter">');
-    this.leftHandGutter = $leftHandGutter[0];
-    $parent.append($leftHandGutter);
+            let o =
+                {
+                    deltaX: offset.deltaX + index * width,
+                    deltaY: offset.deltaY + y
+                };
 
-    if (typeof this.track.paintAxis === 'function') {
-
-        if (this.track.dataRange) {
-
-            $leftHandGutter.click(function (e) {
-                self.browser.dataRangeDialog.configure({trackView: self});
-                self.browser.dataRangeDialog.present($(self.trackDiv));
-            });
-
-            $leftHandGutter.addClass('igv-clickable');
+            viewport.renderSVGContext(context, o);
         }
-
-        $canvas = $('<canvas class ="igv-canvas">');
-        $leftHandGutter.append($canvas);
-        this.controlCanvas = $canvas.get(0);
-        resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
 
     }
 
-}
+    attachScrollbar($viewportContainer, viewports) {
 
-TrackView.prototype.appendRightHandGutter = function ($parent) {
-    let $div = $('<div class="igv-right-hand-gutter">');
-    $parent.append($div);
-    createTrackGearPopover.call(this, $div);
-}
-
-// Free function for juicebox -- do not attach to prototype!!!
-function createTrackGearPopover($parent) {
-
-    let $trackGearContainer = $("<div>", {class: 'igv-trackgear-container'});
-    $parent.append($trackGearContainer);
-
-    $trackGearContainer.append(createIcon('cog'));
-
-    this.trackGearPopover = new TrackGearPopover($parent);
-    this.trackGearPopover.$popover.hide();
-
-    $trackGearContainer.click(e => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.trackGearPopover.presentMenuList(-(this.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
-    });
-
-}
-
-function resizeControlCanvas(width, height) {
-
-    var devicePixelRatio = window.devicePixelRatio;
-
-    if (this.leftHandGutter) {
-
-        if (this.controlCanvas) {
-            $(this.controlCanvas).remove();
+        if ("hidden" === $viewportContainer.css("overflow-y")) {
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
+            $viewportContainer.append(this.scrollbar.$outerScroll);
         }
 
-        var $canvas = $('<canvas class ="igv-canvas">');
-        this.controlCanvas = $canvas[0];
-        $(this.leftHandGutter).append($canvas);
-
-        this.controlCanvas.height = devicePixelRatio * height;
-        this.controlCanvas.width = devicePixelRatio * width;
-        this.controlCanvas.style.height = height + "px";
-        this.controlCanvas.style.width = width + "px";
-        this.controlCtx = this.controlCanvas.getContext("2d");
-        this.controlCtx.scale(devicePixelRatio, devicePixelRatio);
     }
-}
 
-function attachDragWidget($track, $viewportContainer) {
+    removeViewportWithLocusIndex(index) {
 
-    const self = this;
-    const browser = this.browser;
+        this.viewports[index].$viewport.remove();
+        this.viewports.splice(index, 1);
 
-    this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
-    $viewportContainer.append(this.$trackDragScrim);
-    this.$trackDragScrim.hide();
-
-    self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
-    $track.append(self.$trackManipulationHandle);
-
-    self.$trackManipulationHandle.on('mousedown', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        self.$trackDragScrim.show();
-        browser.startTrackDrag(self);
-    });
-
-    self.$trackManipulationHandle.on('mouseup', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        browser.endTrackDrag();
-        self.$trackDragScrim.hide();
-    });
-
-    $track.on('mouseenter', function (e) {
-
-        if (browser.dragTrack) {
-            e.preventDefault();
-            e.stopPropagation();
-            browser.updateTrackDrag(self);
-        }
-
-    });
-
-    self.$trackManipulationHandle.on('mouseleave', function (e) {
-
-        if (!browser.dragTrack) {
-            e.preventDefault();
-            e.stopPropagation();
-            self.$trackDragScrim.hide();
-        }
-    });
-}
-
-TrackView.prototype.dataRange = function () {
-    return this.track.dataRange ? this.track.dataRange : undefined;
-};
-
-TrackView.prototype.setDataRange = function (min, max) {
-    if (min !== undefined) {
-        this.track.dataRange.min = min;
+        this.updateViewportForMultiLocus();
     }
-    if (max !== undefined) {
-        this.track.dataRange.max = max;
-    }
-    this.repaintViews();
-}
 
-TrackView.prototype.setColor = function (color) {
-    this.track.color = color;
-    this.track.config.color = color;
-    this.repaintViews(true);
-};
+    updateViewportForMultiLocus() {
 
-TrackView.prototype.presentColorPicker = function () {
-    this.colorPicker.show();
-};
+        if ('ruler' === this.track.type) {
 
-TrackView.prototype.setTrackHeight = function (newHeight, update, force) {
+            if (this.viewports.length > 1) {
+                this.$viewportContainer.find('.igv-multi-locus-panel-close-container').show()
+                this.$viewportContainer.find('.igv-multi-locus-panel-label-div').show()
+                this.track.updateLocusLabel()
+            } else {
+                this.$viewportContainer.find('.igv-multi-locus-panel-close-container').hide()
+                this.$viewportContainer.find('.igv-multi-locus-panel-label-div').hide()
+            }
 
-    if (!force) {
-        if (this.track.minHeight) {
-            newHeight = Math.max(this.track.minHeight, newHeight);
         }
 
-        if (this.track.maxHeight) {
-            newHeight = Math.min(this.track.maxHeight, newHeight);
+    }
+
+    appendLeftHandGutter($parent) {
+
+        const $leftHandGutter = $('<div class="igv-left-hand-gutter">');
+        this.leftHandGutter = $leftHandGutter[0];
+        $parent.append($leftHandGutter);
+
+        if (typeof this.track.paintAxis === 'function') {
+
+            if (this.track.dataRange) {
+
+                $leftHandGutter.click((e) => {
+                    this.browser.dataRangeDialog.configure({trackView: self});
+                    this.browser.dataRangeDialog.present($(self.trackDiv));
+                });
+
+                $leftHandGutter.addClass('igv-clickable');
+            }
+
+            const $canvas = $('<canvas class ="igv-canvas">');
+            $leftHandGutter.append($canvas);
+            this.controlCanvas = $canvas.get(0);
+            this.resizeControlCanvas($leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
         }
     }
 
-    this.track.height = newHeight;
-    this.track.config.height = newHeight;
+    appendRightHandGutter($parent) {
+        let $div = $('<div class="igv-right-hand-gutter">');
+        $parent.append($div);
+        this.createTrackGearPopover($div);
+    }
 
-    $(this.trackDiv).height(newHeight);
+    dataRange() {
+        return this.track.dataRange ? this.track.dataRange : undefined;
+    }
 
-    // If the track does not manage its own content height set it here
-    if (typeof this.track.computePixelHeight !== "function") {
-        this.viewports.forEach(function (vp) {
-            vp.setContentHeight(newHeight);
-            if (vp.tile) vp.tile.invalidate = true;
-        });
+    setDataRange(min, max) {
+        if (min !== undefined) {
+            this.track.dataRange.min = min;
+        }
+        if (max !== undefined) {
+            this.track.dataRange.max = max;
+        }
         this.repaintViews();
     }
 
-
-    resizeControlCanvas.call(this, $(this.leftHandGutter).outerWidth(), newHeight);
-
-
-    if (this.track.paintAxis) {
-        this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+    setColor(color) {
+        this.track.color = color;
+        this.track.config.color = color;
+        this.repaintViews(true);
     }
 
-    if (this.scrollbar) {
-        this.scrollbar.update();
-    }
-}
-
-TrackView.prototype.isLoading = function () {
-    for (let i = 0; i < this.viewports.length; i++) {
-        if (this.viewports[i].isLoading()) return true;
-    }
-};
-
-TrackView.prototype.resize = function () {
-
-    const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
-
-    for (let viewport of this.viewports) {
-        viewport.setWidth(viewportWidth);
+    presentColorPicker() {
+        this.colorPicker.show();
     }
 
-    const $leftHandGutter = $(this.leftHandGutter);
-    resizeControlCanvas.call(this, $leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
+    setTrackHeight(newHeight, update, force) {
 
-    this.updateViews(true);
+        if (!force) {
+            if (this.track.minHeight) {
+                newHeight = Math.max(this.track.minHeight, newHeight);
+            }
 
-};
+            if (this.track.maxHeight) {
+                newHeight = Math.min(this.track.maxHeight, newHeight);
+            }
+        }
 
-/**
- * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
- * e.g. color, sort order, etc, but do not change the genomic state.
- */
-TrackView.prototype.repaintViews = function () {
-    this.viewports.forEach(function (viewport) {
-        viewport.repaint();
-    });
-    if (this.track.paintAxis) {
-        this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
-    }
-}
+        this.track.height = newHeight;
+        this.track.config.height = newHeight;
 
-/**
- * Update viewports to reflect current genomic state, possibly loading additional data.
- */
-TrackView.prototype.updateViews = async function (force) {
+        $(this.trackDiv).height(newHeight);
 
-    if (!(this.browser && this.browser.referenceFrameList)) return;
+        // If the track does not manage its own content height set it here
+        if (typeof this.track.computePixelHeight !== "function") {
+            this.viewports.forEach(function (vp) {
+                vp.setContentHeight(newHeight);
+                if (vp.tile) vp.tile.invalidate = true;
+            });
+            this.repaintViews();
+        }
 
-    const visibleViewports = this.viewports.filter(vp => vp.isVisible())
+        this.resizeControlCanvas($(this.leftHandGutter).outerWidth(), newHeight);
 
-    // Shift viewports left/right to current genomic state (pans canvas)
-    visibleViewports.forEach(function (viewport) {
-        viewport.shift();
-    });
+        if (this.track.paintAxis) {
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+        }
 
-    // rpv: viewports whose image (canvas) does not fully cover current genomic range
-    const rpV = viewportsToReload.call(this, force);
-
-    // Trigger viewport to load features needed to cover current genomic range
-    for (let vp of rpV) {
-        await vp.loadFeatures()
+        if (this.scrollbar) {
+            this.scrollbar.update();
+        }
     }
 
-    if (this.disposed) return;   // Track was removed during load
+    isLoading() {
+        for (let i = 0; i < this.viewports.length; i++) {
+            if (this.viewports[i].isLoading()) return true;
+        }
+    }
 
-    const isDragging = this.browser.dragObject;
-    if (!isDragging && this.track.autoscale) {
+    resize() {
+
+        const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
+
+        for (let viewport of this.viewports) {
+            viewport.setWidth(viewportWidth);
+        }
+
+        const $leftHandGutter = $(this.leftHandGutter);
+        this.resizeControlCanvas($leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
+
+        this.updateViews(true);
+    }
+
+    /**
+     * Repaint all viewports without loading any new data.   Use this for events that change visual aspect of data,
+     * e.g. color, sort order, etc, but do not change the genomic state.
+     */
+    repaintViews() {
+
+        for (let viewport of this.viewports) {
+            viewport.repaint();
+        }
+
+        if (this.track.paintAxis) {
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+        }
+    }
+
+    /**
+     * Update viewports to reflect current genomic state, possibly loading additional data.
+     */
+    async updateViews(force) {
+
+        if (!(this.browser && this.browser.referenceFrameList)) return;
+
+        const visibleViewports = this.viewports.filter(vp => vp.isVisible())
+
+        // Shift viewports left/right to current genomic state (pans canvas)
+        visibleViewports.forEach(function (viewport) {
+            viewport.shift();
+        });
+
+        // rpv: viewports whose image (canvas) does not fully cover current genomic range
+        const rpV = this.viewportsToReload(force);
+
+        // Trigger viewport to load features needed to cover current genomic range
+        for (let vp of rpV) {
+            await vp.loadFeatures()
+        }
+
+        if (this.disposed) return;   // Track was removed during load
+
+        const isDragging = this.browser.dragObject;
+        if (!isDragging && this.track.autoscale) {
+            let allFeatures = [];
+            for (let vp of visibleViewports) {
+                const referenceFrame = vp.referenceFrame;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(vp.contentDiv).width());
+                if (vp.tile && vp.tile.features) {
+                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                }
+            }
+            if (typeof this.track.doAutoscale === 'function') {
+                this.track.dataRange = this.track.doAutoscale(allFeatures);
+            } else {
+                this.track.dataRange = doAutoscale(allFeatures);
+            }
+        }
+
+
+        // Must repaint all viewports if autoscaling
+        if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
+            for (let vp of visibleViewports) {
+                vp.repaint();
+            }
+        } else {
+            for (let vp of rpV) {
+                vp.repaint();
+            }
+        }
+
+        this.adjustTrackHeight();
+    }
+
+    /**
+     * Return a promise to get all in-view features.  Used for group autoscaling.
+     */
+    async getInViewFeatures(force) {
+
+        if (!(this.browser && this.browser.referenceFrameList)) {
+            return [];
+        }
+
+        // List of viewports that need reloading
+        const rpV = this.viewportsToReload(force);
+        const promises = rpV.map(function (vp) {
+            return vp.loadFeatures();
+        });
+
+        await Promise.all(promises)
+
         let allFeatures = [];
-        for (let vp of visibleViewports) {
-            const referenceFrame = vp.referenceFrame;
-            const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($(vp.contentDiv).width());
+        for (let vp of this.viewports) {
             if (vp.tile && vp.tile.features) {
+                const referenceFrame = vp.referenceFrame;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(vp.contentDiv).width());
                 allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
             }
         }
-        if (typeof this.track.doAutoscale === 'function') {
-            this.track.dataRange = this.track.doAutoscale(allFeatures);
-        } else {
-            this.track.dataRange = doAutoscale(allFeatures);
-        }
+        return allFeatures;
     }
 
 
-    // Must repaint all viewports if autoscaling
-    if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
-        for (let vp of visibleViewports) {
-            vp.repaint();
+    checkContentHeight() {
+        this.viewports.forEach(function (vp) {
+            vp.checkContentHeight();
+        })
+        this.adjustTrackHeight();
+    }
+
+    adjustTrackHeight() {
+
+        var maxHeight = maxViewportContentHeight(this.viewports);
+        if (this.track.autoHeight) {
+            this.setTrackHeight(maxHeight, false);
+        } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
+            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
         }
-    } else {
-        for (let vp of rpV) {
-            vp.repaint();
+
+        if (this.scrollbar) {
+            const currentTop = this.viewports[0].getContentTop();
+            const heights = this.viewports.map((viewport) => viewport.getContentHeight());
+            const minContentHeight = Math.min(...heights);
+            const newTop = Math.min(0, this.$viewportContainer.height() - minContentHeight);
+            if (currentTop < newTop) {
+                this.viewports.forEach(function (viewport) {
+                    $(viewport.contentDiv).css("top", newTop + "px");
+                });
+            }
+            this.scrollbar.update();
         }
     }
 
-    adjustTrackHeight.call(this);
+    resizeControlCanvas(width, height) {
 
+        var devicePixelRatio = window.devicePixelRatio;
+
+        if (this.leftHandGutter) {
+
+            if (this.controlCanvas) {
+                $(this.controlCanvas).remove();
+            }
+
+            var $canvas = $('<canvas class ="igv-canvas">');
+            this.controlCanvas = $canvas[0];
+            $(this.leftHandGutter).append($canvas);
+
+            this.controlCanvas.height = devicePixelRatio * height;
+            this.controlCanvas.width = devicePixelRatio * width;
+            this.controlCanvas.style.height = height + "px";
+            this.controlCanvas.style.width = width + "px";
+            this.controlCtx = this.controlCanvas.getContext("2d");
+            this.controlCtx.scale(devicePixelRatio, devicePixelRatio);
+        }
+    }
+
+    attachDragWidget($track, $viewportContainer) {
+
+        const self = this;
+        const browser = this.browser;
+
+        this.$trackDragScrim = $('<div class="igv-track-drag-scrim">');
+        $viewportContainer.append(this.$trackDragScrim);
+        this.$trackDragScrim.hide();
+
+        self.$trackManipulationHandle = $('<div class="igv-track-manipulation-handle">');
+        $track.append(self.$trackManipulationHandle);
+
+        self.$trackManipulationHandle.on('mousedown', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            self.$trackDragScrim.show();
+            browser.startTrackDrag(self);
+        });
+
+        self.$trackManipulationHandle.on('mouseup', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            browser.endTrackDrag();
+            self.$trackDragScrim.hide();
+        });
+
+        $track.on('mouseenter', function (e) {
+
+            if (browser.dragTrack) {
+                e.preventDefault();
+                e.stopPropagation();
+                browser.updateTrackDrag(self);
+            }
+
+        });
+
+        self.$trackManipulationHandle.on('mouseleave', function (e) {
+
+            if (!browser.dragTrack) {
+                e.preventDefault();
+                e.stopPropagation();
+                self.$trackDragScrim.hide();
+            }
+        });
+    }
+
+    viewportsToReload(force) {
+
+        // List of viewports that need reloading
+        const rpV = this.viewports.filter(function (viewport) {
+            if (!viewport.isVisible()) {
+                return false;
+            }
+            if (!viewport.checkZoomIn()) {
+                return false;
+            } else {
+                const referenceFrame = viewport.referenceFrame;
+                const chr = viewport.referenceFrame.chrName;
+                const start = referenceFrame.start;
+                const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
+                const bpPerPixel = referenceFrame.bpPerPixel;
+                return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
+            }
+        });
+        return rpV;
+    }
+
+    createTrackGearPopover($parent) {
+
+        let $trackGearContainer = $("<div>", {class: 'igv-trackgear-container'});
+        $parent.append($trackGearContainer);
+
+        $trackGearContainer.append(createIcon('cog'));
+
+        this.trackGearPopover = new TrackGearPopover($parent);
+        this.trackGearPopover.$popover.hide();
+
+        $trackGearContainer.click(e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.trackGearPopover.presentMenuList(-(this.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+        });
+    }
+
+    /**
+     * Do any cleanup here
+     */
+    dispose() {
+
+        const self = this;
+
+        if (this.$trackManipulationHandle) {
+            this.$trackManipulationHandle.off();
+        }
+
+        if (this.scrollbar) {
+            this.scrollbar.dispose();
+        }
+
+        $(document).off(this.namespace);
+
+        if (typeof this.track.dispose === "function") {
+            this.track.dispose();
+        }
+
+        var track = this.track;
+        if (typeof track.dispose === 'function') {
+            track.dispose();
+        }
+        Object.keys(track).forEach(function (key) {
+            track[key] = undefined;
+        })
+
+        this.viewports.forEach(function (viewport) {
+            viewport.dispose();
+        })
+
+
+        if (dragged === this) {
+            dragged = undefined;
+        }
+
+        if (dragDestination === this) {
+            dragDestination = undefined;
+        }
+
+        Object.keys(this).forEach(function (key) {
+            self[key] = undefined;
+        })
+
+        this.disposed = true;
+    }
+
+    scrollBy(delta) {
+        this.scrollbar.moveScrollerBy(delta);
+    }
 }
 
-/**
- * Return a promise to get all in-view features.  Used for group autoscaling.
- */
-TrackView.prototype.getInViewFeatures = async function (force) {
-
-    if (!(this.browser && this.browser.referenceFrameList)) {
-        return [];
-    }
-
-    // List of viewports that need reloading
-    const rpV = viewportsToReload.call(this, force);
-    const promises = rpV.map(function (vp) {
-        return vp.loadFeatures();
-    });
-
-    await Promise.all(promises)
-
-    let allFeatures = [];
-    for (let vp of this.viewports) {
-        if (vp.tile && vp.tile.features) {
-            const referenceFrame = vp.referenceFrame;
-            const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-            allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
-        }
-    }
-    return allFeatures;
-};
 
 function updateViewportShims(viewports, $viewportContainer) {
 
@@ -507,61 +606,10 @@ function updateViewportShims(viewports, $viewportContainer) {
 }
 
 function documentOffset(el) {
-
     const {x, y} = el.getBoundingClientRect()
     const scrollX = window.pageXOffset || document.documentElement.scrollLeft
     const scrollY = window.pageYOffset || document.documentElement.scrollTop
-
     return {x: x + scrollX, y: y + scrollY}
-}
-
-function viewportsToReload(force) {
-
-    // List of viewports that need reloading
-    const rpV = this.viewports.filter(function (viewport) {
-        if (!viewport.isVisible()) {
-            return false;
-        }
-        if (!viewport.checkZoomIn()) {
-            return false;
-        } else {
-            const referenceFrame = viewport.referenceFrame;
-            const chr = viewport.referenceFrame.chrName;
-            const start = referenceFrame.start;
-            const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
-            const bpPerPixel = referenceFrame.bpPerPixel;
-            return force || (!viewport.tile || viewport.tile.invalidate || !viewport.tile.containsRange(chr, start, end, bpPerPixel));
-        }
-    });
-    return rpV;
-}
-
-TrackView.prototype.checkContentHeight = function () {
-    this.viewports.forEach(function (vp) {
-        vp.checkContentHeight();
-    })
-    adjustTrackHeight.call(this);
-}
-
-function adjustTrackHeight() {
-
-    var maxHeight = maxViewportContentHeight(this.viewports);
-    if (this.track.autoHeight) {
-        this.setTrackHeight(maxHeight, false);
-    } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
-        this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
-    }
-
-    if (this.scrollbar) {
-        const currentTop = this.viewports[0].getContentTop();
-        const newTop = Math.min(0, this.$viewportContainer.height() - minContentHeight(this.viewports));
-        if (currentTop < newTop) {
-            this.viewports.forEach(function (viewport) {
-                $(viewport.contentDiv).css("top", newTop + "px");
-            });
-        }
-        this.scrollbar.update();
-    }
 }
 
 function maxViewportContentHeight(viewports) {
@@ -569,175 +617,109 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights);
 }
 
-function minContentHeight(viewports) {
-    const heights = viewports.map((viewport) => viewport.getContentHeight());
-    return Math.min(...heights);
+class TrackScrollbar {
+
+    constructor($viewportContainer, viewports) {
+
+        let lastY;
+
+        // Define mouse events first, use arrow function so "this" is in scope
+
+        const mouseMove = (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const page = DOMUtils.pageCoordinates(event);
+            this.moveScrollerBy(page.y - lastY);
+            lastY = page.y;
+        }
+
+        const mouseUp = (event) => {
+            $(document).off(this.namespace);
+        }
+
+        const mouseDown = (event) => {
+            event.preventDefault();
+            const page = DOMUtils.pageCoordinates(event);
+            lastY = page.y;
+            $(document).on('mousemove' + namespace, mouseMove);
+            $(document).on('mouseup' + namespace, mouseUp);
+            $(document).on('mouseleave' + namespace, mouseUp);
+
+            // prevents start of horizontal track panning)
+            event.stopPropagation();
+        }
+
+
+        const namespace = '.trackscrollbar' + DOMUtils.guid();
+        this.namespace = namespace;
+
+        this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
+        this.$innerScroll = $('<div>');
+
+        this.$outerScroll.append(this.$innerScroll);
+
+        this.$viewportContainer = $viewportContainer;
+        this.viewports = viewports;
+
+        this.$innerScroll.on("mousedown", mouseDown);
+
+        this.$innerScroll.on("click",  (event) => {
+            event.stopPropagation();
+        });
+
+        this.$outerScroll.on("click",  (event) => {
+            this.moveScrollerBy(event.offsetY - this.$innerScroll.height() / 2);
+            event.stopPropagation();
+
+        });
+    }
+
+    moveScrollerBy  (delta) {
+        const y = this.$innerScroll.position().top + delta;
+        this.moveScrollerTo(y);
+    }
+
+    moveScrollerTo  (y) {
+
+        const outerScrollHeight = this.$outerScroll.height();
+        const innerScrollHeight = this.$innerScroll.height();
+
+        const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
+
+        const contentDivHeight = maxViewportContentHeight(this.viewports);
+        const contentTop = -Math.round(newTop * (contentDivHeight / this.$viewportContainer.height()));
+
+        this.$innerScroll.css("top", newTop + "px");
+
+        for(let viewport of this.viewports) {
+            viewport.setTop(contentTop)
+        }
+
+    }
+
+    dispose  () {
+        $(window).off(this.namespace);
+        this.$innerScroll.off();
+    }
+
+    update  () {
+
+        const viewportContainerHeight = this.$viewportContainer.height();
+
+        const viewportContentHeight = maxViewportContentHeight(this.viewports);
+
+        const innerScrollHeight = Math.round((viewportContainerHeight / viewportContentHeight) * viewportContainerHeight);
+
+        // this.$outerScroll.show();
+        // this.$innerScroll.height(innerScrollHeight);
+        if (viewportContentHeight > viewportContainerHeight) {
+            this.$outerScroll.show();
+            this.$innerScroll.height(innerScrollHeight);
+        } else {
+            this.$outerScroll.hide();
+        }
+    }
 }
-
-/**
- * Do any cleanup here
- */
-TrackView.prototype.dispose = function () {
-
-    const self = this;
-
-    if (this.$trackManipulationHandle) {
-        this.$trackManipulationHandle.off();
-    }
-
-    if (this.scrollbar) {
-        this.scrollbar.dispose();
-    }
-
-    $(document).off(this.namespace);
-
-    if (typeof this.track.dispose === "function") {
-        this.track.dispose();
-    }
-
-    var track = this.track;
-    if (typeof track.dispose === 'function') {
-        track.dispose();
-    }
-    Object.keys(track).forEach(function (key) {
-        track[key] = undefined;
-    })
-
-    this.viewports.forEach(function (viewport) {
-        viewport.dispose();
-    })
-
-
-    if (dragged === this) {
-        dragged = undefined;
-    }
-
-    if (dragDestination === this) {
-        dragDestination = undefined;
-    }
-
-    Object.keys(this).forEach(function (key) {
-        self[key] = undefined;
-    })
-
-    this.disposed = true;
-};
-
-
-TrackView.prototype.scrollBy = function (delta) {
-    this.scrollbar.moveScrollerBy(delta);
-};
-
-
-function TrackScrollbar($viewportContainer, viewports) {
-
-    const self = this;
-    let lastY;
-
-    const namespace = '.trackscrollbar' + DOMUtils.guid();
-    this.namespace = namespace;
-
-    this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
-    this.$innerScroll = $('<div>');
-
-    this.$outerScroll.append(this.$innerScroll);
-
-    this.$viewportContainer = $viewportContainer;
-    this.viewports = viewports;
-
-    this.$innerScroll.on("mousedown", mouseDown);
-
-    this.$innerScroll.on("click", function (event) {
-        event.stopPropagation();
-    });
-
-    this.$outerScroll.on("click", function (event) {
-        self.moveScrollerBy(event.offsetY - self.$innerScroll.height() / 2);
-        event.stopPropagation();
-
-    });
-
-    function mouseDown(event) {
-
-        event.preventDefault();
-
-        const page = DOMUtils.pageCoordinates(event);
-
-        lastY = page.y;
-
-        $(document).on('mousemove' + namespace, mouseMove);
-        $(document).on('mouseup' + namespace, mouseUp);
-        $(document).on('mouseleave' + namespace, mouseUp);
-
-        // prevents start of horizontal track panning)
-        event.stopPropagation();
-    }
-
-    function mouseMove(event) {
-
-        event.preventDefault();
-        event.stopPropagation();
-
-        const page = DOMUtils.pageCoordinates(event);
-        self.moveScrollerBy(page.y - lastY);
-        lastY = page.y;
-
-    }
-
-    function mouseUp(event) {
-        $(document).off(self.namespace);
-    }
-
-};
-
-TrackScrollbar.prototype.moveScrollerBy = function (delta) {
-
-    const y = this.$innerScroll.position().top + delta;
-    this.moveScrollerTo(y);
-
-}
-
-TrackScrollbar.prototype.moveScrollerTo = function (y) {
-
-
-    const outerScrollHeight = this.$outerScroll.height();
-    const innerScrollHeight = this.$innerScroll.height();
-
-    const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
-
-    const contentDivHeight = maxViewportContentHeight(this.viewports);
-    const contentTop = -Math.round(newTop * (contentDivHeight / this.$viewportContainer.height()));
-
-    this.$innerScroll.css("top", newTop + "px");
-
-    this.viewports.forEach(function (viewport) {
-        viewport.setTop(contentTop)
-    });
-
-}
-
-TrackScrollbar.prototype.dispose = function () {
-    $(window).off(this.namespace);
-    this.$innerScroll.off();
-};
-
-TrackScrollbar.prototype.update = function () {
-
-    const viewportContainerHeight = this.$viewportContainer.height();
-
-    const viewportContentHeight = maxViewportContentHeight(this.viewports);
-
-    const innerScrollHeight = Math.round((viewportContainerHeight / viewportContentHeight) * viewportContainerHeight);
-
-    // this.$outerScroll.show();
-    // this.$innerScroll.height(innerScrollHeight);
-    if (viewportContentHeight > viewportContainerHeight) {
-        this.$outerScroll.show();
-        this.$innerScroll.height(innerScrollHeight);
-    } else {
-        this.$outerScroll.hide();
-    }
-};
 
 export {maxViewportContentHeight, updateViewportShims}
 export default TrackView
