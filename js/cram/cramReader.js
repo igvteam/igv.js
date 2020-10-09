@@ -79,8 +79,8 @@ function seqFetch(seqID, start, end) {
 
     return this.getHeader()
         .then(function (header) {
-            const chrName = genome.getChromosomeName(header.chrNames[seqID])
-            return sequence.getSequence(chrName, start - 1, end);
+            const chr = genome.getChromosomeName(header.chrNames[seqID])
+            return sequence.getSequence(chr, start - 1, end);
         });
 }
 

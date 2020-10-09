@@ -22,7 +22,7 @@ class RulerViewport extends ViewPort {
 
         this.namespace = `.ruler_track_viewport_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`
 
-        if (true === GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chrName)) {
+        if (true === GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)) {
             enableTrackMouseHandlers.call(this)
         } else {
             this.$viewport.off(this.namespace)
