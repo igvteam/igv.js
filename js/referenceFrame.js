@@ -35,6 +35,7 @@ const ReferenceFrame = function (genome, chrName, start, end, bpPerPixel) {
     this.chrName = chrName;
     this.start = start;
     this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+    this.initialStart = start;
     this.bpPerPixel = bpPerPixel;
     this.id = DOMUtils.guid()
 

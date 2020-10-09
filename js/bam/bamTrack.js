@@ -104,11 +104,12 @@ const BAMTrack = extend(TrackBase,
             if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
 
             // Loop through current genomic states, assign sort to first matching state
-            for (let gs of browser.genomicStateList) {
+            for (let rf of browser.referenceFrameList) {
+                // We would like to use actual viewport width to calculate ref frame end, but viewport is not assigned at this point.
+                const rfEnd = rf.start + (rf.initialEnd - rf.initialStart);
+                if (rf.chrName === range.chr && range.start >= rf.start && range.start <= rfEnd) {
 
-                if (gs.chromosome.name === range.chr && range.start >= gs.start && range.start <= gs.end) {
-
-                    currentSorts[gs.id] = {
+                    currentSorts[rf.id] = {
                         chr: range.chr,
                         position: range.start,
                         sortOption: sort.option || "NUCLEOTIDE",
