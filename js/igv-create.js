@@ -120,7 +120,7 @@ async function createBrowser(parentDiv, config) {
     }
 
     // Session dependent settings
-    const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
+    const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chrName);
     if (browser.isMultiLocusMode() || isWGV) {
         browser.centerGuide.forcedHide();
     } else {

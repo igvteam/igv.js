@@ -90,8 +90,8 @@ const GenomeUtils = {
         }
     },
 
-    isWholeGenomeView: function (referenceFrame) {
-        let chromosomeName = referenceFrame.chrName.toLowerCase();
+    isWholeGenomeView: function (chrName) {
+        let chromosomeName = chrName.toLowerCase();
         return 'all' === chromosomeName;
     }
 };

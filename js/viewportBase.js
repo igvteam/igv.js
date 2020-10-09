@@ -28,11 +28,11 @@ import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 
 class ViewportBase {
 
-    constructor(trackView, $viewportContainer, genomicState, width) {
+    constructor(trackView, $viewportContainer, referenceFrame, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
-        this.genomicState = genomicState;
+        this.referenceFrame = referenceFrame;
 
         this.browser = trackView.browser;
 
@@ -98,11 +98,11 @@ class ViewportBase {
         let str = this.trackView.track.name || this.trackView.track.id;
         str = str.replace(/\W/g, '');
 
-        const genomicStateIndex = this.browser.genomicStateList.indexOf(this.genomicState);
-        const id = str.toLowerCase() + '_genomic_state_index_' + genomicStateIndex;
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const id = str.toLowerCase() + '_genomic_state_index_' + index;
 
         // If present, paint axis canvas. Only in first multi-locus panel.
-        if (0 === genomicStateIndex && typeof this.trackView.track.paintAxis === 'function') {
+        if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
 
             const bbox = this.trackView.controlCanvas.getBoundingClientRect();
             context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
@@ -113,7 +113,7 @@ class ViewportBase {
         }
 
         const yScrollDelta = $(this.contentDiv).position().top;
-        const dx = offset.deltaX + (genomicStateIndex * context.multiLocusGap);
+        const dx = offset.deltaX + (index * context.multiLocusGap);
         const dy = offset.deltaY + yScrollDelta;
         const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
