@@ -120,12 +120,12 @@ RulerSweeper.prototype.addMouseHandlers = function () {
 
             if (width > threshold) {
 
-                validateLocusExtent(browser.genome.getChromosome(self.viewport.genomicState.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
+                validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chrName).bpLength, extent, browser.minimumBases());
 
-                self.viewport.genomicState.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
-                self.viewport.genomicState.referenceFrame.start = Math.round(extent.start);
-
-                browser.updateViews(self.viewport.genomicState);
+                self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
+                self.viewport.referenceFrame.start = Math.round(extent.start);
+                self.viewport.referenceFrame.initialEnd = Math.round(extent.end);
+                browser.updateViews(self.viewport.referenceFrame);
             }
 
         }
@@ -145,7 +145,7 @@ RulerSweeper.prototype.dispose = function () {
 
 
 function bp(pixel) {
-    return this.viewport.genomicState.referenceFrame.start + (pixel * this.viewport.genomicState.referenceFrame.bpPerPixel);
+    return this.viewport.referenceFrame.start + (pixel * this.viewport.referenceFrame.bpPerPixel);
 }
 
 

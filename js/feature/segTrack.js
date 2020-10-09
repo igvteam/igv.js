@@ -387,7 +387,7 @@ SegTrack.prototype.popupData = function (clickState, featureList) {
 SegTrack.prototype.contextMenuItemList = function (clickState) {
 
     const self = this;
-    const referenceFrame = clickState.viewport.genomicState.referenceFrame;
+    const referenceFrame = clickState.viewport.referenceFrame;
     const genomicLocation = clickState.genomicLocation;
 
     // Define a region 5 "pixels" wide in genomic coordinates
@@ -407,7 +407,7 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 
                 const sort = {
                     direction: sortDirection,
-                    chr: referenceFrame.chrName,
+                    chr: clickState.viewport.referenceFrame.chrName,
                     start: genomicLocation - bpWidth,
                     end: genomicLocation + bpWidth
 

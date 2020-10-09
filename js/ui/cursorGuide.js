@@ -113,7 +113,7 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
         return undefined;
     }
 
-    const { start, bpPerPixel } = viewport.genomicState.referenceFrame;
+    const { start, bpPerPixel } = viewport.referenceFrame;
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
     const $trackContainer = $viewport.closest('#igv-track-container');
