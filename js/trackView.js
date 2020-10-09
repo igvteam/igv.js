@@ -493,7 +493,7 @@ class TrackView {
                 return false;
             } else {
                 const referenceFrame = viewport.referenceFrame;
-                const chr = viewport.referenceFrame.chrName;
+                const chr = viewport.referenceFrame.chr;
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(viewport.contentDiv).width());
                 const bpPerPixel = referenceFrame.bpPerPixel;

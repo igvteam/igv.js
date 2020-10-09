@@ -137,7 +137,7 @@ class ViewPort extends ViewportBase {
 
         function showZoomInNotice() {
             const referenceFrame = this.referenceFrame;
-            if (this.referenceFrame.chrName.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
                 return true;
             } else {
                 const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
@@ -156,7 +156,7 @@ class ViewPort extends ViewportBase {
 
         if (self.canvas &&
             self.tile &&
-            self.tile.chr === self.referenceFrame.chrName &&
+            self.tile.chr === self.referenceFrame.chr &&
             self.tile.bpPerPixel === referenceFrame.bpPerPixel) {
 
             const pixelOffset = Math.round((self.tile.startBP - referenceFrame.start) / referenceFrame.bpPerPixel);
@@ -181,7 +181,7 @@ class ViewPort extends ViewportBase {
     async loadFeatures() {
 
         const referenceFrame = this.referenceFrame;
-        const chr = referenceFrame.chrName;
+        const chr = referenceFrame.chr;
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
@@ -234,7 +234,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chrName)
+        const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         const features = tile.features;
         const roiFeatures = tile.roiFeatures;
         const bpPerPixel = isWGV ? this.referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
@@ -746,7 +746,7 @@ function addMouseHandlers() {
 
             let string;
 
-            if ('all' === self.referenceFrame.chrName.toLowerCase()) {
+            if ('all' === self.referenceFrame.chr.toLowerCase()) {
 
                 const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
 
