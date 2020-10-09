@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>Merged</title>
+
+</head>
+
+<body>
+
+<h1>Merged tracks</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "myc",
+            tracks: [
+
+                {
+                    "name": "Merged",
+                    "height": 50,
+                    "type": "merged",
+                    "tracks": [
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig",
+                            "color": "red"
+                        },
+                        {
+                            "type": "wig",
+                            "format": "bigwig",
+                            "url": "https://www.encodeproject.org/files/ENCFF351WPV/@@download/ENCFF351WPV.bigWig",
+                            "color": "green"
+                        }
+                    ]
+                }
+            ]
+        }
+
+    const igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+</body>
+</html>

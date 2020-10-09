@@ -29,31 +29,27 @@ import {extend, inferTrackType} from "../util/igvUtils.js";
 
 const MergedTrack = extend(TrackBase, function (config, browser) {
 
-    var self = this;
+        if (!config.tracks) {
+            throw Error("Error: no tracks defined for merged track" + config);
+        }
 
-    if (!config.tracks) {
-        console.log("Error: not tracks defined for merged track. " + config);
-        return;
+        TrackBase.call(this, config, browser);
     }
+)
 
-    TrackBase.call(this, config, browser);
-
+MergedTrack.prototype.postInit = async function () {
     this.tracks = [];
-    config.tracks.forEach(function (tconf) {
-
+    for(let tconf of this.config.tracks) {
         if (!tconf.type) inferTrackType(tconf);
-
         tconf.isMergedTrack = true;
-
-        var t = browser.createTrack(tconf);
-
+        const t = await this.browser.createTrack(tconf);
         if (t) {
             t.autoscale = false;     // Scaling done from merged track
-            self.tracks.push(t);
+            this.tracks.push(t);
         } else {
             console.warn("Could not create track " + tconf);
         }
-    });
+    }
 
     Object.defineProperty(this, "height", {
         get() {
@@ -68,8 +64,9 @@ const MergedTrack = extend(TrackBase, function (config, browser) {
         }
     });
 
-    this.height = config.height || 100;
-});
+    this.height = this.config.height || 100;
+}
+
 
 MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
 
