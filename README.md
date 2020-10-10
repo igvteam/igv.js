@@ -141,14 +141,14 @@ To run the examples start an [http-server](https://www.npmjs.com/package/http-se
 Then open [http://localhost:8080/examples](http://localhost:8080/examples).
 
 
-# Supported Browsers
+### Supported Browsers
 
-igv.js require a modern web browser with support for Javascript ECMAScript 2015. 
+igv.js require a modern web browser with support for Javascript ECMAScript 2015.
 
-# License
+### License
 
 igv.js is [MIT](/LICENSE) licensed.
 
-# [_Release Notes_](https://github.com/igvteam/igv.js/releases)
+### [_Release Notes_](https://github.com/igvteam/igv.js/releases)
 
 
