@@ -130,7 +130,7 @@ npm run test
 
 To run the examples install [http-server](https://www.npmjs.com/package/http-server).
 
-Start  http-server
+Start  http-server from the project root directory
 
 ```bash
 npx http-server 
