@@ -118,14 +118,14 @@ BamAlignment.prototype.tags = function () {
 
     function decodeTags(ba) {
 
-        var p = 0,
-            len = ba.length,
-            tags = {};
+        let p = 0;
+        const len = ba.length;
+        const tags = {};
 
         while (p < len) {
-            var tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-            var type = String.fromCharCode(ba[p + 2]);
-            var value;
+            const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
+            const type = String.fromCharCode(ba[p + 2]);
+            let value;
 
             if (type === 'A') {
                 value = String.fromCharCode(ba[p + 3]);
@@ -154,10 +154,14 @@ BamAlignment.prototype.tags = function () {
                     }
                 }
             } else if (type === 'B') {
-                value = 'Arrays not currently supported';
+                value = 'Arrays not currently supported.  Remaining fields are skipped.';
+                tags[tag] = value;
+                break;
             } else {
                 //'Unknown type ' + type;
                 value = 'Error unknown type: ' + type;
+                tags[tag] = value;
+                break;
             }
             tags[tag] = value;
         }
