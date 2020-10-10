@@ -323,8 +323,8 @@ async function blobToArrayBuffer(blob) {
 }
 
 async function blobToText(blob) {
-    if(typeof blob.arrayBuffer === 'function') {
-        return blob.arrayBuffer();
+    if(typeof blob.text === 'function') {
+        return blob.text();
     }
     return new Promise(function (resolve, reject) {
         const fileReader = new FileReader();
