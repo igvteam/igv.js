@@ -269,8 +269,9 @@ async function loadFileSlice(localfile, options) {
         localfile;
 
     if ("arraybuffer" === options.responseType) {
-        return blob.arrayBuffer();
+        return blobToArrayBuffer(blob);
     } else {
+        // binary string format, shouldn't be used anymore
         return new Promise(function (resolve, reject) {
             const fileReader = new FileReader();
             fileReader.onload = function (e) {
@@ -297,11 +298,45 @@ async function loadStringFromFile(localfile, options) {
     }
 
     if (compression === NONE) {
-        return blob.text();
+        return blobToText(blob);
     } else {
-        const arrayBuffer = await blob.arrayBuffer();
+        const arrayBuffer = await blobToArrayBuffer(blob);
         return arrayBufferToString(arrayBuffer, compression);
     }
+}
+
+async function blobToArrayBuffer(blob) {
+    if(typeof blob.arrayBuffer === 'function') {
+        return blob.arrayBuffer();
+    }
+    return new Promise(function (resolve, reject) {
+        const fileReader = new FileReader();
+        fileReader.onload = function (e) {
+            resolve(fileReader.result);
+        };
+        fileReader.onerror = function (e) {
+            console.error("reject uploading local file " + localfile.name);
+            reject(null, fileReader);
+        };
+        fileReader.readAsArrayBuffer(blob);
+    })
+}
+
+async function blobToText(blob) {
+    if(typeof blob.arrayBuffer === 'function') {
+        return blob.arrayBuffer();
+    }
+    return new Promise(function (resolve, reject) {
+        const fileReader = new FileReader();
+        fileReader.onload = function (e) {
+            resolve(fileReader.result);
+        };
+        fileReader.onerror = function (e) {
+            console.error("reject uploading local file " + localfile.name);
+            reject(null, fileReader);
+        };
+        fileReader.readAsText(blob);
+    })
 }
 
 async function loadStringFromUrl(url, options) {
