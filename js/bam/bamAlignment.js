@@ -144,13 +144,13 @@ BamAlignment.prototype.tags = function () {
                 value = readInt(ba, p);
                 p += 4;
             } else if (type === 'c' || type === 'C') {
-                value = ba[p + 3];
+                value = ba[p];
                 p++;
             } else if (type === 's' || type === 'S') {
-                value = readShort(ba, p + 3);
+                value = readShort(ba, p);
                 p += 2;
             } else if (type === 'f') {
-                value = readFloat(ba, p + 3);
+                value = readFloat(ba, p);
                 p += 4;
             } else if (type === 'Z') {
                 value = '';
