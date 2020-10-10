@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            locus: "chr7:55,242,461-55,242,520",
+            tracks: [
+                {
+                    type: 'alignment',
+                    format: 'bam',
+                    url: 'https://www.dropbox.com/s/inqirkbbopf6vvw/IonDx-2.bam?dl=0',
+                    indexURL: 'https://www.dropbox.com/s/0yuat0y7kc4ktnh/IonDx-2.bam.bai?dl=0',
+                    name: 'Test'
+                }
+            ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+            window.igvBrowser = browser;
+        })
+
+
+</script>
+
+</body>
+
+</html>
