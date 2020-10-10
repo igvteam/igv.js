@@ -24,7 +24,7 @@ requirejs(['igv'], function (igv) {
         locus: 'chr7',
         tracks: [
             {
-                url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
                 indexed: false,
                 isLog: true,
                 name: 'Segmented CN'
