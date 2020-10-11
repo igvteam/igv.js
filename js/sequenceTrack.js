@@ -27,296 +27,282 @@ import IGVGraphics from "./igv-canvas.js";
 import {nucleotideColors} from "./util/colorPalletes.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER * 1e-4
+const complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
+const translationDict = {
+    'TTT': 'F',
+    'TTC': 'F',
+    'TTA': 'L',
+    'TTG': 'L',
+    'CTT': 'L',
+    'CTC': 'L',
+    'CTA': 'L',
+    'CTG': 'L',
+    'ATT': 'I',
+    'ATC': 'I',
+    'ATA': 'I',
+    'ATG': 'M',
+    'GTT': 'V',
+    'GTC': 'V',
+    'GTA': 'V',
+    'GTG': 'V',
+    'TCT': 'S',
+    'TCC': 'S',
+    'TCA': 'S',
+    'TCG': 'S',
+    'CCT': 'P',
+    'CCC': 'P',
+    'CCA': 'P',
+    'CCG': 'P',
+    'ACT': 'T',
+    'ACC': 'T',
+    'ACA': 'T',
+    'ACG': 'T',
+    'GCT': 'A',
+    'GCC': 'A',
+    'GCA': 'A',
+    'GCG': 'A',
+    'TAT': 'Y',
+    'TAC': 'Y',
+    'TAA': 'STOP',
+    'TAG': 'STOP',
+    'CAT': 'H',
+    'CAC': 'H',
+    'CAA': 'Q',
+    'CAG': 'Q',
+    'AAT': 'N',
+    'AAC': 'N',
+    'AAA': 'K',
+    'AAG': 'K',
+    'GAT': 'D',
+    'GAC': 'D',
+    'GAA': 'E',
+    'GAG': 'E',
+    'TGT': 'C',
+    'TGC': 'C',
+    'TGA': 'STOP',
+    'TGG': 'W',
+    'CGT': 'R',
+    'CGC': 'R',
+    'CGA': 'R',
+    'CGG': 'R',
+    'AGT': 'S',
+    'AGC': 'S',
+    'AGA': 'R',
+    'AGG': 'R',
+    'GGT': 'G',
+    'GGC': 'G',
+    'GGA': 'G',
+    'GGG': 'G'
+}
 
-const SequenceTrack = function (config, browser) {
+class SequenceTrack {
 
-    this.type = "sequence";
+    constructor(config, browser) {
 
-    this.browser = browser;
+        this.type = "sequence";
+        this.browser = browser;
+        this.removable = false;
 
-    this.removable = false;
+        this.config = config;
+        this.name = "";
+        this.id = "sequence";
+        this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
+        this.height = 25;
+        this.disableButtons = false;
+        this.order = config.order || defaultSequenceTrackOrder;
+        this.ignoreTrackMenu = false;
 
-    this.config = config;
-    this.name = "";
-    this.id = "sequence";
-    this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
-    this.height = 25;
-    this.disableButtons = false;
-    this.order = config.order || defaultSequenceTrackOrder;
-    this.ignoreTrackMenu = false;
+        this.reversed = false;
+        this.frameTranslate = false;
 
-    this.removable = false;
-    this.reversed = false;
-    this.frameTranslate = false;
-    this.complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
-    this.translationDict = {
-        'TTT': 'F',
-        'TTC': 'F',
-        'TTA': 'L',
-        'TTG': 'L',
-        'CTT': 'L',
-        'CTC': 'L',
-        'CTA': 'L',
-        'CTG': 'L',
-        'ATT': 'I',
-        'ATC': 'I',
-        'ATA': 'I',
-        'ATG': 'M',
-        'GTT': 'V',
-        'GTC': 'V',
-        'GTA': 'V',
-        'GTG': 'V',
-        'TCT': 'S',
-        'TCC': 'S',
-        'TCA': 'S',
-        'TCG': 'S',
-        'CCT': 'P',
-        'CCC': 'P',
-        'CCA': 'P',
-        'CCG': 'P',
-        'ACT': 'T',
-        'ACC': 'T',
-        'ACA': 'T',
-        'ACG': 'T',
-        'GCT': 'A',
-        'GCC': 'A',
-        'GCA': 'A',
-        'GCG': 'A',
-        'TAT': 'Y',
-        'TAC': 'Y',
-        'TAA': 'STOP',
-        'TAG': 'STOP',
-        'CAT': 'H',
-        'CAC': 'H',
-        'CAA': 'Q',
-        'CAG': 'Q',
-        'AAT': 'N',
-        'AAC': 'N',
-        'AAA': 'K',
-        'AAG': 'K',
-        'GAT': 'D',
-        'GAC': 'D',
-        'GAA': 'E',
-        'GAG': 'E',
-        'TGT': 'C',
-        'TGC': 'C',
-        'TGA': 'STOP',
-        'TGG': 'W',
-        'CGT': 'R',
-        'CGC': 'R',
-        'CGA': 'R',
-        'CGG': 'R',
-        'AGT': 'S',
-        'AGC': 'S',
-        'AGA': 'R',
-        'AGG': 'R',
-        'GGT': 'G',
-        'GGC': 'G',
-        'GGA': 'G',
-        'GGG': 'G'
-    };
-};
-
-SequenceTrack.prototype.menuItemList = function () {
-    var self = this;
-
-    return [
-        {
-            name: self.reversed ? "Forward" : "Reverse",
-            click: function () {
-                self.reversed = !self.reversed;
-                self.trackView.repaintViews();
-            }
-        },
-        {
-            name: self.frameTranslate ? "Close Translation" : "Three-frame Translate",
-            click: function () {
-                self.frameTranslate = !self.frameTranslate;
-                if (self.frameTranslate) {
-                    self.trackView.viewports.forEach(function (vp) {
-                        vp.setContentHeight(115);
-                    })
-                    self.trackView.setTrackHeight(115);
-                } else {
-                    self.trackView.viewports.forEach(function (vp) {
-                        vp.setContentHeight(25);
-                    })
-                    self.trackView.setTrackHeight(25);
-                }
-                self.trackView.repaintViews()
-
-            }
-        }
-    ];
-};
-
-SequenceTrack.prototype.translateSequence = function (seq) {
-    var threeFrame = [[], [], []];
-    var self = this;
-
-    [0, 1, 2].forEach(function (fNum) {
-        var idx = fNum;
-        var obj, st;
-
-        while ((seq.length - idx) >= 3) {
-            obj = {};
-            st = seq.slice(idx, idx + 3);
-
-            if (self.reversed) {
-                st = st.split('').reverse().join('');
-            }
-
-            obj.codons = st;
-            obj.aminoA = self.translationDict[st.toUpperCase()];
-            threeFrame[fNum].push(obj);
-            obj = null;
-            idx += 3;
-        }
-    });
-
-    return threeFrame;
-};
-
-SequenceTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-
-    const browser = this.browser;
-
-
-    if (bpPerPixel && bpPerPixel > 1) {
-        return Promise.resolve(null);
-    } else {
-        return browser.genome.sequence.getSequence(chr, bpStart, bpEnd)
-            .then(function (sequence) {
-                return {
-                    bpStart: bpStart,
-                    sequence: sequence
-                }
-            });
     }
 
-};
+    menuItemList() {
 
-SequenceTrack.prototype.draw = function (options) {
+        return [
+            {
+                name: this.reversed ? "Forward" : "Reverse",
+                click: () => {
+                    this.reversed = !this.reversed;
+                    this.trackView.repaintViews();
+                }
+            },
+            {
+                name: this.frameTranslate ? "Close Translation" : "Three-frame Translate",
+                click: () => {
+                    this.frameTranslate = !this.frameTranslate;
+                    if (this.frameTranslate) {
+                        for (let vp of this.trackView.viewports) {
+                            vp.setContentHeight(115);
+                        }
+                        this.trackView.setTrackHeight(115);
+                    } else {
+                        for (let vp of this.trackView.viewports) {
+                            vp.setContentHeight(25);
+                        }
+                        this.trackView.setTrackHeight(25);
+                    }
+                    this.trackView.repaintViews()
 
-    const self = this;
-    const ctx = options.context;
+                }
+            }
+        ];
+    }
 
-    if (options.features) {
+    translateSequence(seq) {
 
-        const sequence = options.features.sequence;
-        const sequenceBpStart = options.features.bpStart;
-        const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
+        const threeFrame = [[], [], []];
 
-        let height = 15;
-        for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
+        for (let fnum of [0, 1, 2]) {
+            var idx = fNum;
+            var obj, st;
 
-            let seqOffsetBp = Math.floor(bp - sequenceBpStart);
-
-            if (seqOffsetBp < sequence.length) {
-                let letter = sequence[seqOffsetBp];
+            while ((seq.length - idx) >= 3) {
+                obj = {};
+                st = seq.slice(idx, idx + 3);
 
                 if (this.reversed) {
-                    letter = this.complement[letter.toUpperCase()];
+                    st = st.split('').reverse().join('');
                 }
 
-                let offsetBP = bp - options.bpStart;
-                let aPixel = offsetBP / options.bpPerPixel;
-                let bPixel = (offsetBP + 1) / options.bpPerPixel;
-
-                let color = fillColor.call(this, letter);
-
-
-                if (options.bpPerPixel > 1 / 10) {
-                    IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
-                } else {
-                    let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
-                    IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
-                }
+                obj.codons = st;
+                obj.aminoA = translationDict[st.toUpperCase()];
+                threeFrame[fNum].push(obj);
+                obj = null;
+                idx += 3;
             }
         }
 
-        if (this.frameTranslate) {
+        return threeFrame;
+    }
 
-            let transSeq;
-            if (this.reversed) {
-                transSeq = sequence.split('').map(function (cv) {
-                    return self.complement[cv];
-                });
-                transSeq = transSeq.join('');
-            } else {
-                transSeq = sequence;
+    async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
+
+        if (bpPerPixel && bpPerPixel > 1) {
+            return null;
+        } else {
+            const sequence = await this.browser.genome.sequence.getSequence(chr, bpStart, bpEnd);
+            return {
+                bpStart: bpStart,
+                sequence: sequence
             }
+        }
+    }
 
-            let y = height;
-            let translatedSequence = this.translateSequence(transSeq);
-            for (let arr of translatedSequence) {
+    draw(options) {
 
-                let i = translatedSequence.indexOf(arr);
-                let fNum = i;
-                let h = 25;
+        const ctx = options.context;
 
-                y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
+        if (options.features) {
 
-                for (let cv of arr) {
+            const sequence = options.features.sequence;
+            const sequenceBpStart = options.features.bpStart;
+            const bpEnd = 1 + options.bpStart + (options.pixelWidth * options.bpPerPixel);
 
-                    let aaS;
-                    let idx = arr.indexOf(cv);
-                    let xSeed = (idx + fNum) + (2 * idx);
-                    let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)';
+            let height = 15;
+            for (let bp = sequenceBpStart; bp <= bpEnd; bp++) {
 
-                    let p0 = Math.floor(xSeed / options.bpPerPixel);
-                    let p1 = Math.floor((xSeed + 3) / options.bpPerPixel);
-                    let pc = Math.round((p0 + p1) / 2);
+                let seqOffsetBp = Math.floor(bp - sequenceBpStart);
 
-                    if (cv.aminoA.indexOf('STOP') > -1) {
-                        color = 'rgb(255, 0, 0)';
-                        aaS = 'STOP'; //Color blind accessible
+                if (seqOffsetBp < sequence.length) {
+                    let letter = sequence[seqOffsetBp];
+
+                    if (this.reversed) {
+                        letter = complement[letter.toUpperCase()];
+                    }
+
+                    let offsetBP = bp - options.bpStart;
+                    let aPixel = offsetBP / options.bpPerPixel;
+                    let bPixel = (offsetBP + 1) / options.bpPerPixel;
+                    let color = this.fillColor(letter);
+
+                    if (options.bpPerPixel > 1 / 10) {
+                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                     } else {
-                        aaS = cv.aminoA;
+                        let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
+                        IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
                     }
-
-                    if (cv.aminoA === 'M') {
-                        color = 'rgb(0, 153, 0)';
-                        aaS = 'START'; //Color blind accessible
-                    }
-
-                    IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
-
-                    if (options.bpPerPixel <= 1 / 10) {
-                        IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
-                    }
-
                 }
-
             }
 
+            if (this.frameTranslate) {
+
+                let transSeq;
+                if (this.reversed) {
+                    transSeq = sequence.split('').map(function (cv) {
+                        return complement[cv];
+                    });
+                    transSeq = transSeq.join('');
+                } else {
+                    transSeq = sequence;
+                }
+
+                let y = height;
+                let translatedSequence = this.translateSequence(transSeq);
+                for (let arr of translatedSequence) {
+
+                    let i = translatedSequence.indexOf(arr);
+                    let fNum = i;
+                    let h = 25;
+
+                    y = (i === 0) ? y + 10 : y + 30; //Little less room at first.
+
+                    for (let cv of arr) {
+
+                        let aaS;
+                        let idx = arr.indexOf(cv);
+                        let xSeed = (idx + fNum) + (2 * idx);
+                        let color = 0 === idx % 2 ? 'rgb(160,160,160)' : 'rgb(224,224,224)';
+
+                        let p0 = Math.floor(xSeed / options.bpPerPixel);
+                        let p1 = Math.floor((xSeed + 3) / options.bpPerPixel);
+                        let pc = Math.round((p0 + p1) / 2);
+
+                        if (cv.aminoA.indexOf('STOP') > -1) {
+                            color = 'rgb(255, 0, 0)';
+                            aaS = 'STOP'; //Color blind accessible
+                        } else {
+                            aaS = cv.aminoA;
+                        }
+
+                        if (cv.aminoA === 'M') {
+                            color = 'rgb(0, 153, 0)';
+                            aaS = 'START'; //Color blind accessible
+                        }
+
+                        IGVGraphics.fillRect(ctx, p0, y, p1 - p0, h, {fillStyle: color});
+
+                        if (options.bpPerPixel <= 1 / 10) {
+                            IGVGraphics.strokeText(ctx, aaS, pc - (ctx.measureText(aaS).width / 2), y + 15);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    supportsWholeGenome() {
+        return false;
+    }
+
+    computePixelHeight(ignore) {
+        return this.height;
+    }
+
+    fillColor(index) {
+
+        if (this.color) {
+            return this.color;
+        } else if ("dna" === this.sequenceType) {
+            return nucleotideColors[index] || 'gray';
+        } else {
+            return 'rgb(0, 0, 150)';
         }
 
     }
-
-};
-
-function fillColor(index) {
-
-    if (this.color) {
-        return this.color;
-    } else if ("dna" === this.sequenceType) {
-        return nucleotideColors[index] || 'gray';
-    } else {
-        return 'rgb(0, 0, 150)';
-    }
-
 }
 
-SequenceTrack.prototype.supportsWholeGenome = function () {
-    return false;
-};
-
-SequenceTrack.prototype.computePixelHeight = function (ignore) {
-    return this.height;
-}
-
-export { defaultSequenceTrackOrder }
+export {defaultSequenceTrackOrder}
 
 export default SequenceTrack;
 
