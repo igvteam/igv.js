@@ -24,220 +24,187 @@
  */
 
 // Indexed fasta files
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {StringUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import GenomicInterval from "./genomicInterval.js";
 import Chromosome from "./chromosome.js";
 import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const splitLines = StringUtils.splitLines;
 
 const reservedProperties = new Set(['fastaURL', 'indexURL', 'cytobandURL', 'indexed']);
 
-const FastaSequence = function (reference) {
+class FastaSequence {
 
-    if (typeof reference.fastaURL === 'string' && reference.fastaURL.startsWith('data:')) {
-        this.file = decodeDataUri(reference.fastaURL);
-        this.indexed = false;  // dataURI is by definition not indexed
-        this.isDataURI = true;
-    } else {
-        this.file = reference.fastaURL;
-        this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
+
+    constructor(reference) {
+
+        if (typeof reference.fastaURL === 'string' && reference.fastaURL.startsWith('data:')) {
+            this.file = decodeDataUri(reference.fastaURL);
+            this.indexed = false;  // dataURI is by definition not indexed
+            this.isDataURI = true;
+        } else {
+            this.file = reference.fastaURL;
+            this.indexed = reference.indexed !== false;   // Indexed unless it explicitly is not
+            if (this.indexed) {
+                this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
+            }
+        }
+        this.withCredentials = reference.withCredentials;
+        this.chromosomeNames = [];
+        this.chromosomes = {};
+        this.sequences = {};
+        this.offsets = {};
+
+        // Build a track-like config object from the referenceObject
+        const config = {};
+        for (let key in reference) {
+            if (reference.hasOwnProperty(key) && !reservedProperties.has(key)) {
+                config[key] = reference[key];
+            }
+        }
+        this.config = config;
+    }
+
+
+    async init() {
         if (this.indexed) {
-            this.indexFile = reference.indexURL || reference.indexFile || this.file + ".fai";
+            return this.getIndex()
+        } else {
+            return this.loadAll();
         }
     }
-    this.withCredentials = reference.withCredentials;
-    this.chromosomeNames = [];
-    this.chromosomes = {};
-    this.sequences = {};
-    this.offsets = {};
-    this.config = buildConfig(reference);
 
-};
-
-// Build a track-like config object from the referenceObject
-function buildConfig(reference) {
-    var key, config = {};
-    for (key in reference) {
-        if (reference.hasOwnProperty(key) && !reservedProperties.has(key)) {
-            config[key] = reference[key];
+    async getSequence(chr, start, end) {
+        if (this.indexed) {
+            return this.getSequenceIndexed(chr, start, end);
+        } else {
+            return this.getSequenceNonIndexed(chr, start, end)
         }
     }
-    return config;
-}
 
-FastaSequence.prototype.init = function () {
+    async getSequenceIndexed(chr, start, end) {
 
-    var self = this;
+        if (!(this.interval && this.interval.contains(chr, start, end))) {
 
-    if (self.indexed) {
+            // Expand query, to minimum of 50kb
+            let qstart = start;
+            let qend = end;
+            if ((end - start) < 50000) {
+                const w = (end - start);
+                const center = Math.round(start + w / 2);
+                qstart = Math.max(0, center - 25000);
+                qend = center + 25000;
+            }
 
-        return self.getIndex()
-
-    } else {
-        return self.loadAll();
-    }
-
-}
-
-FastaSequence.prototype.getSequence = function (chr, start, end) {
-    if (this.indexed) {
-        return getSequenceIndexed.call(this, chr, start, end);
-    } else {
-        return getSequenceNonIndexed.call(this, chr, start, end)
-    }
-}
-
-function getSequenceIndexed(chr, start, end) {
-
-    var self = this;
-
-    var interval = self.interval;
-
-    if (interval && interval.contains(chr, start, end)) {
-        return Promise.resolve(getSequenceFromInterval(interval, start, end));
-    } else {
-        // Expand query, to minimum of 50kb
-        var qstart = start;
-        var qend = end;
-        if ((end - start) < 50000) {
-            var w = (end - start);
-            var center = Math.round(start + w / 2);
-            qstart = Math.max(0, center - 25000);
-            qend = center + 25000;
+            const seqBytes = await this.readSequence(chr, qstart, qend);
+            this.interval = new GenomicInterval(chr, qstart, qend, seqBytes);
         }
 
-        return self.readSequence(chr, qstart, qend)
-
-            .then(function (seqBytes) {
-                self.interval = new GenomicInterval(chr, qstart, qend, seqBytes);
-                return getSequenceFromInterval(self.interval, start, end);
-            })
-    }
-
-    function getSequenceFromInterval(interval, start, end) {
-        var offset = start - interval.start;
-        var n = end - start;
-        var seq = interval.features ? interval.features.substr(offset, n) : null;
+        const offset = start - this.interval.start;
+        const n = end - start;
+        const seq = this.interval.features ? this.interval.features.substr(offset, n) : null;
         return seq;
     }
 
-}
 
+    async getSequenceNonIndexed(chr, start, end) {
 
-function getSequenceNonIndexed(chr, start, end) {
+        if (this.offsets[chr]) {
+            start -= this.offsets[chr];
+            end -= this.offsets[chr];
+        }
+        let prefix = "";
+        if (start < 0) {
+            for (let i = start; i < Math.min(end, 0); i++) {
+                prefix += "*";
+            }
+        }
 
-    var self = this;
+        if (end <= 0) {
+            return Promise.resolve(prefix);
+        }
 
-    if (this.offsets[chr]) {
-        start -= this.offsets[chr];
-        end -= this.offsets[chr];
+        const seq = this.sequences[chr];
+        const seqEnd = Math.min(end, seq.length)
+        return prefix + seq.substring(start, seqEnd);
     }
-    let prefix = "";
-    if (start < 0) {
-        for (let i = start; i < Math.min(end, 0); i++) {
-            prefix += "*";
+
+
+    async getIndex() {
+
+        if (this.index) {
+            return this.index;
+        } else {
+            const data = await igvxhr.load(this.indexFile, buildOptions(this.config));
+            const lines = splitLines(data);
+            const len = lines.length;
+            let lineNo = 0;
+            let order = 0;
+            this.index = {};
+
+            while (lineNo < len) {
+                const tokens = lines[lineNo++].split("\t");
+                const nTokens = tokens.length;
+
+                if (nTokens === 5) {
+                    // Parse the index line.
+                    const chr = tokens[0];
+                    const size = parseInt(tokens[1]);
+                    const position = parseInt(tokens[2]);
+                    const basesPerLine = parseInt(tokens[3]);
+                    const bytesPerLine = parseInt(tokens[4]);
+
+                    const indexEntry = {
+                        size: size,
+                        position: position,
+                        basesPerLine: basesPerLine,
+                        bytesPerLine: bytesPerLine
+                    };
+
+                    this.chromosomeNames.push(chr);
+                    this.index[chr] = indexEntry;
+                    this.chromosomes[chr] = new Chromosome(chr, order++, 0, size);
+                }
+            }
+            return this.index;
         }
     }
 
-    if (end <= 0) {
-        return Promise.resolve(prefix);
-    }
+    async loadAll() {
 
-    var seq = self.sequences[chr];
-    const seqEnd = Math.min(end, seq.length)
-    return Promise.resolve(prefix + seq.substring(start, end));
-}
+        let data;
+        if (this.isDataURI) {
+            data = this.file;     // <= Strange convention, revisit.
+        } else {
+            data = await igvxhr.load(this.file, buildOptions(this.config))
+        }
 
-FastaSequence.prototype.getIndex = function () {
-
-    if (this.index) {
-        return Promise.resolve(this.index);
-    } else {
-        const self = this;
-        return igvxhr.load(self.indexFile, buildOptions(self.config))
-
-            .then(function (data) {
-
-                const lines = splitLines(data);
-                const len = lines.length;
-                let lineNo = 0;
-                let order = 0;
-                self.index = {};
-
-                while (lineNo < len) {
-                    var tokens = lines[lineNo++].split("\t");
-                    var nTokens = tokens.length;
-
-                    if (nTokens === 5) {
-                        // Parse the index line.
-                        var chr = tokens[0];
-                        var size = parseInt(tokens[1]);
-                        var position = parseInt(tokens[2]);
-                        var basesPerLine = parseInt(tokens[3]);
-                        var bytesPerLine = parseInt(tokens[4]);
-
-                        var indexEntry = {
-                            size: size,
-                            position: position,
-                            basesPerLine: basesPerLine,
-                            bytesPerLine: bytesPerLine
-                        };
-
-                        self.chromosomeNames.push(chr);
-                        self.index[chr] = indexEntry;
-                        self.chromosomes[chr] = new Chromosome(chr, order++, 0, size);
-                    }
-                }
-
-                return self.index;
-
-            })
-    }
-
-}
-
-FastaSequence.prototype.loadAll = function () {
-
-    var self = this;
-
-    if (this.isDataURI) {
-        return Promise.resolve(parseFasta(this.file));
-    } else {
-        return igvxhr.load(self.file, buildOptions(self.config))
-            .then(parseFasta)
-    }
-
-    function parseFasta(data) {
-
-        var lines = splitLines(data),
-            len = lines.length,
-            lineNo = 0,
-            nextLine,
-            currentSeq = "",
-            currentChr,
-            currentRangeLocus = undefined,
-            currentOffset = 0,
-            order = 0;
-
-
+        const lines = splitLines(data);
+        const len = lines.length;
+        let lineNo = 0;
+        let currentSeq;
+        let currentRangeLocus;
+        let currentOffset = 0;
+        let order = 0;
+        let nextLine;
+        let currentChr;
         while (lineNo < len) {
             nextLine = lines[lineNo++].trim();
             if (nextLine.startsWith("#") || nextLine.length === 0) {
                 // skip
             } else if (nextLine.startsWith(">")) {
+                // Start the next sequence
                 if (currentSeq) {
-                    self.chromosomeNames.push(currentChr);
-                    self.sequences[currentChr] = currentSeq;
-                    self.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
+                    this.chromosomeNames.push(currentChr);
+                    this.sequences[currentChr] = currentSeq;
+                    this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
                 }
 
                 const parts = nextLine.substr(1).split(/\s+/)
 
                 // Check for samtools style locus string.   This is not perfect, and could fail on weird sequence names
-                const nameParts = parts[0].split(':')
+                const nameParts = parts[0].split(':');
                 currentChr = nameParts[0];
                 currentSeq = "";
                 currentOffset = 0
@@ -252,7 +219,7 @@ FastaSequence.prototype.loadAll = function () {
                     const to = Number.parseInt(locusParts[1])
                     if (to > from) {
                         currentOffset = from - 1;
-                        self.offsets[currentChr] = currentOffset;
+                        this.offsets[currentChr] = currentOffset;
                         currentRangeLocus = nameParts[1];
                     }
                 }
@@ -262,75 +229,60 @@ FastaSequence.prototype.loadAll = function () {
         }
         // add last seq
         if (currentSeq) {
-            self.chromosomeNames.push(currentChr);
-            self.sequences[currentChr] = currentSeq;
-            self.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
+            this.chromosomeNames.push(currentChr);
+            this.sequences[currentChr] = currentSeq;
+            this.chromosomes[currentChr] = new Chromosome(currentChr, order++, currentOffset, currentOffset + currentSeq.length, currentRangeLocus);
         }
+
     }
-}
 
-FastaSequence.prototype.readSequence = function (chr, qstart, qend) {
+    async readSequence(chr, qstart, qend) {
 
-    //console.log("Read sequence " + chr + ":" + qstart + "-" + qend);
-    const self = this;
+        // let offset;
+        // let start;
+        // let end;
+        // let basesPerLine;
+        // let nEndBytes;
 
-    let offset;
-    let start;
-    let end;
-    let basesPerLine;
-    let nEndBytes;
+        await this.getIndex();
 
-    return self.getIndex()
+        const idxEntry = this.index[chr];
+        if (!idxEntry) {
+            console.log("No index entry for chr: " + chr);
 
-        .then(function () {
+            // Tag interval with null so we don't try again
+            this.interval = new GenomicInterval(chr, qstart, qend, null);
+            return null;
 
-            var idxEntry = self.index[chr];
-            if (!idxEntry) {
-                console.log("No index entry for chr: " + chr);
+        } else {
 
-                // Tag interval with null so we don't try again
-                self.interval = new GenomicInterval(chr, qstart, qend, null);
-                return null;
+            const start = Math.max(0, qstart);    // qstart should never be < 0
+            const end = Math.min(idxEntry.size, qend);
+            const bytesPerLine = idxEntry.bytesPerLine;
+            const basesPerLine = idxEntry.basesPerLine;
+            const position = idxEntry.position;
+            const nEndBytes = bytesPerLine - basesPerLine;
+            const startLine = Math.floor(start / basesPerLine);
+            const endLine = Math.floor(end / basesPerLine);
+            const base0 = startLine * basesPerLine;   // Base at beginning of start line
+            const offset = start - base0;
+            const startByte = position + startLine * bytesPerLine + offset;
+            const base1 = endLine * basesPerLine;
+            const offset1 = end - base1;
+            const endByte = position + endLine * bytesPerLine + offset1 - 1;
+            const byteCount = endByte - startByte + 1;
 
+            let allBytes;
+            if (byteCount <= 0) {
+                console.error("No sequence for " + chr + ":" + qstart + "-" + qend);
             } else {
-
-                start = Math.max(0, qstart);    // qstart should never be < 0
-                end = Math.min(idxEntry.size, qend);
-                const bytesPerLine = idxEntry.bytesPerLine;
-                basesPerLine = idxEntry.basesPerLine;
-                const position = idxEntry.position;
-                nEndBytes = bytesPerLine - basesPerLine;
-
-                const startLine = Math.floor(start / basesPerLine);
-                const endLine = Math.floor(end / basesPerLine);
-
-                const base0 = startLine * basesPerLine;   // Base at beginning of start line
-
-                offset = start - base0;
-
-                const startByte = position + startLine * bytesPerLine + offset;
-
-                const base1 = endLine * basesPerLine;
-                const offset1 = end - base1;
-                const endByte = position + endLine * bytesPerLine + offset1 - 1;
-                const byteCount = endByte - startByte + 1;
-
-
-                if (byteCount <= 0) {
-                    console.error("No sequence for " + chr + ":" + qstart + "-" + qend)
-                    return "";
-                } else {
-                    return igvxhr.load(self.file, buildOptions(self.config, {
-                        range: {
-                            start: startByte,
-                            size: byteCount
-                        }
-                    }))
-                }
+                allBytes = await igvxhr.load(this.file, buildOptions(this.config, {
+                    range: {
+                        start: startByte,
+                        size: byteCount
+                    }
+                }));
             }
-        })
-
-        .then(function (allBytes) {
 
             if (!allBytes) {
                 return null;
@@ -357,14 +309,15 @@ FastaSequence.prototype.readSequence = function (chr, qstart, qend) {
 
                 return seqBytes;
             }
-        })
+        }
+    }
 }
 
 function decodeDataUri(dataUri) {
-    var bytes,
-        split = dataUri.split(','),
-        info = split[0].split(':')[1],
-        dataString = split[1];
+
+    const split = dataUri.split(',');
+    const info = split[0].split(':')[1];
+    let dataString = split[1];
 
     if (info.indexOf('base64') >= 0) {
         dataString = atob(dataString);
@@ -372,13 +325,13 @@ function decodeDataUri(dataUri) {
         dataString = decodeURI(dataString);
     }
 
-    bytes = new Uint8Array(dataString.length);
+    const bytes = new Uint8Array(dataString.length);
     for (let i = 0; i < dataString.length; i++) {
         bytes[i] = dataString.charCodeAt(i);
     }
 
-    var inflate = new Zlib.Gunzip(bytes);
-    var plain = inflate.decompress();
+    const inflate = new Zlib.Gunzip(bytes);
+    const plain = inflate.decompress();
 
     let s = "";
     const len = plain.length;
