@@ -42,8 +42,6 @@ const GenomeUtils = {
         const cytobandUrl = options.cytobandURL;
         const aliasURL = options.aliasURL;
         const sequence = new FastaSequence(options);
-
-
         await sequence.init()
 
         let cytobands
@@ -57,7 +55,6 @@ const GenomeUtils = {
         }
 
         return new Genome(options, sequence, cytobands, aliases);
-
     },
 
     getKnownGenomes: async function () {
