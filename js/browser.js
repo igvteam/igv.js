@@ -1438,7 +1438,7 @@ Browser.prototype.search = async function (string, init) {
     return referenceFrameList;
 };
 
-function isLocusString(browser, locus) {
+function  isLocusString(browser, locus) {
 
     const a = locus.split(':')
     const chr = a[0]
@@ -1485,9 +1485,9 @@ function isLocusString(browser, locus) {
             }
         }
 
-        validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases())
-
-        return { browser, chr, start: extent.start, end: extent.end, locus }
+        validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases());
+        const queryChr = browser.genome.getChromosomeName(chr);
+        return { browser, chr: queryChr, start: extent.start, end: extent.end, locus }
 
     }
 }
