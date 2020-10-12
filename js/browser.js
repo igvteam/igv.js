@@ -1417,17 +1417,17 @@ Browser.prototype.search = async function (string, init) {
     const loci = string.split(' ')
 
     let referenceFrameList = await createReferenceFrameList(this, loci)
-    if (!referenceFrameList || referenceFrameList.length === 0) {
-        // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-        referenceFrameList = await createReferenceFrameList(this, [string])
-    }
+    // if (undefined === referenceFrameList) {
+    //     // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
+    //     referenceFrameList = await createReferenceFrameList(this, [string])
+    // }
 
-    if (referenceFrameList.length > 0) {
+    if (referenceFrameList && referenceFrameList.length > 0) {
         this.emptyViewportContainers();
         this.referenceFrameList = referenceFrameList;
         this.buildViewportsWithReferenceFrameList(referenceFrameList);
     } else {
-        throw new Error('Unrecognized locus ' + string);
+        throw new Error(`Unrecognized locus ${ string }`);
     }
 
     this.updateUIWithReferenceFrameListChange(referenceFrameList);
