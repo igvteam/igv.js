@@ -48,7 +48,7 @@ suite("testTabix", function () {
             indexURL: require.resolve("./data/tabix/csi-test.vcf.gz.csi")
         });
         await reader.readHeader();
-        const {features} = await reader.readFeatures(chr, beg, end);
+        const features = await reader.readFeatures(chr, beg, end);
         assert.ok(features);
 
         // Verify features are in query range.  The features immediately before and after query range are returned by design

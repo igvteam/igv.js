@@ -24,7 +24,6 @@
 <script type="module">
 
     import igv from "../js/index.js";
-    import google from "../js/google/googleUtils.js";
     import {StringUtils} from "../node_modules/igv-utils/src/index.js";
     const numberFormatter = StringUtils.numberFormatter;
 
@@ -32,9 +31,7 @@
 
     (async () => {
 
-        await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
-
-        const options =
+      const options =
             {
                 genome: "hg19",
                 locus: [ 'egfr', 'myc' ],

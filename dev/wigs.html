@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=./img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+</head>
+
+<body>
+
+<div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
+
+</div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const div = document.getElementById("myDiv");
+    const options = {
+        locus: '19:49301000-49305700',
+        genome: "hg19",
+        tracks: [
+            {
+                name: 'All negative points',
+                url: '../test/data/wig/allNegativewig.bedgraph',
+                indexed: false,
+                graphType: "points",
+                guideLines: [
+                    {dotted: true, y: 0, color: "green"},
+                    {dotted: true, y: -0.25, color: "blue"},
+                    {dotted: true, y: -0.5, color: "red"}
+                ]
+            },
+            {
+                name: 'All negative bars',
+                url: '../test/data/wig/allNegativewig.bedgraph',
+                indexed: false
+            },
+            {
+                name: 'Mixed_pos_neg_points',
+                url: '../test/data/wig/mixedPosNeg.bedgraph',
+                indexed: false,
+                graphType: "points",
+                guideLines: [
+                    {dotted: true, y: 0, color: "green"},
+                    {dotted: true, y: -0.5, color: "blue"},
+                    {dotted: true, y: 0.5, color: "red"}
+                ]
+            },
+            {
+                name: 'Mixed pos neg bars',
+                url: '../test/data/wig/mixedPosNeg.bedgraph',
+                indexed: false
+            },
+            {
+                name: 'All pos points',
+                url: '../test/data/wig/allPositive.bedgraph',
+                indexed: false,
+                graphType: "points",
+                guideLines: [
+                    {dotted: true, y: 0, color: "green"},
+                    {dotted: true, y: 0.25, color: "blue"},
+                    {dotted: true, y: 0.5, color: "red"}
+                ]
+            },
+            {
+                name: 'All pos bars',
+                url: '../test/data/wig/allPositive.bedgraph',
+                indexed: false
+            }
+        ]
+    };
+
+    igv.createBrowser(div, options).then(function (browser) {
+    });
+
+
+</script>
+
+</body>
+
+</html>
+

@@ -10,6 +10,8 @@ suite("testFasta", function () {
 
     test("FastaSequence - Test fasata with no index", async function () {
 
+        this.timeout(100000);
+
         const fasta = new FastaSequence(
             {
                 fastaURL: dataURL + "fasta/test.fasta",
@@ -29,6 +31,8 @@ suite("testFasta", function () {
 
     test("FastaSequence - Test getSequence", async function () {
 
+        this.timeout(100000);
+
         const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
         await fasta.init();
 
@@ -43,6 +47,8 @@ suite("testFasta", function () {
 
     test("FastaSequence - Test readSequence", async function () {
 
+        this.timeout(100000);
+
         const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
         await fasta.init()
 
@@ -56,6 +62,8 @@ suite("testFasta", function () {
     })
 
     test("FastaSequence - Test readSequence - with unknown sequence", async function () {
+
+        this.timeout(100000);
 
         const fasta = new FastaSequence({fastaURL: dataURL + "fasta/chr22.fa"});
         await fasta.init();

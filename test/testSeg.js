@@ -17,6 +17,8 @@ suite("testSeg", function () {
 
     test("SEG query", async function () {
 
+        this.timeout(100000);
+
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
@@ -35,6 +37,8 @@ suite("testSeg", function () {
 
 
     test("SEG whole genome", async function () {
+
+        this.timeout(100000);
 
         const reference = {
             id: "hg19",

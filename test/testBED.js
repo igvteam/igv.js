@@ -43,7 +43,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/gwasCatalog.test.txt")
         }
         const reader = new FeatureFileReader(config);
-        const {features }= await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features= await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
         assert.equal(features[0].name, 'rs141175086');
@@ -56,7 +56,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/wgRna.test.txt")
         }
         const reader = new FeatureFileReader(config);
-        const {features} = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
         assert.equal(features[0].name, 'hsa-mir-1302-2');
@@ -70,7 +70,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/cpgIslandExt.test.txt")
         }
         const reader = new FeatureFileReader(config);
-        const {features} = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
         assert.equal(features[0].name, 'CpG: 111');
@@ -85,7 +85,7 @@ suite("testBed", function () {
         }
         const reader = new FeatureFileReader(config);
 
-        const {features} = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
         assert.equal(features[0].name, 'ENSDART00000164359.1');
@@ -120,7 +120,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/Low_complexity.rmask")
         }
         const reader = new FeatureFileReader(config);
-        const {features} = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
 
