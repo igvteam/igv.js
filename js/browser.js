@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView, { maxViewportContentHeight, updateViewportShims } from "./trackView.js";
+import TrackView, {maxViewportContentHeight, updateViewportShims} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -34,17 +34,27 @@ import XMLSession from "./session/igvXmlSession.js";
 import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
-import ReferenceFrame, { createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment } from "./referenceFrame.js";
+import ReferenceFrame, {
+    adjustReferenceFrame,
+    createReferenceFrameList,
+    createReferenceFrameWithAlignment
+} from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
-import {doAutoscale, validateLocusExtent} from "./util/igvUtils.js";
+import {buildOptions, doAutoscale, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
-import { defaultSequenceTrackOrder } from './sequenceTrack.js';
-import {buildOptions, inferTrackType} from "./util/igvUtils.js";
+import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import deepCopy from "./util/deepCopy.js";
-import {URIUtils, StringUtils, TrackUtils, GoogleUtils, FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import {
+    DOMUtils,
+    FileUtils,
+    GoogleUtils,
+    StringUtils,
+    TrackUtils,
+    URIUtils
+} from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
 
 // igv.scss - $igv-multi-locus-gap-width
@@ -69,7 +79,7 @@ const Browser = function (options, parentDiv) {
 
     this.parent = parentDiv;
 
-    this.$root = $('<div>', { id: 'igv-root' });
+    this.$root = $('<div>', {id: 'igv-root'});
     $(parentDiv).append(this.$root);
 
     const $trackContainer = $('<div>', { id: 'igv-track-container' });
@@ -175,7 +185,7 @@ Browser.prototype.isMultiLocusMode = function () {
     return this.referenceFrameList && this.referenceFrameList.length > 1;
 };
 
-Browser.prototype.addTrackToFactory = function (name, track){
+Browser.prototype.addTrackToFactory = function (name, track) {
     TrackFactory.addTrack(name, track);
 }
 
@@ -197,8 +207,8 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
 // Render browser display as SVG
 Browser.prototype.toSVG = function () {
 
-    const { x, y, width, height } = this.trackContainer.getBoundingClientRect();
-    const { x: vpx } = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
+    const {x, y, width, height} = this.trackContainer.getBoundingClientRect();
+    const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
 
     const w = width + (this.referenceFrameList.length - 1) * multiLocusGapWidth;
 
@@ -229,7 +239,7 @@ Browser.prototype.toSVG = function () {
 
     // tracks -> SVG
     for (let trackView of this.trackViews) {
-        trackView.renderSVGContext(svgContext, { deltaX: dx, deltaY: -y });
+        trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y});
     }
 
     // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
@@ -354,7 +364,7 @@ Browser.prototype.loadSessionObject = async function (session) {
     }
     if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
         // session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
-        session.tracks.push({ type: "sequence", order:  defaultSequenceTrackOrder })
+        session.tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
     }
 
     await this.loadTrackList(session.tracks);
@@ -562,7 +572,7 @@ Browser.prototype.loadTrackList = async function (configList) {
     try {
         this.startSpinner();
         const promises = [];
-        for(let config of configList) {
+        for (let config of configList) {
             config.noSpinner = true;
             promises.push(this.loadTrack(config));
         }
@@ -631,29 +641,6 @@ Browser.prototype.loadTrack = async function (config) {
         config = deepCopy(config);
     }
 
-    // Resolve function and promise urls
-    let url = await URIUtils.resolveURL(config.url);
-    if (StringUtils.isString(url)) {
-        url = url.trim();
-    }
-
-    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
-        const json = await getDriveFileInfo(url)
-        url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
-        if (!config.filename) {
-            config.filename = json.originalFileName || json.name;
-        }
-        if (!config.format) {
-            config.format = TrackUtils.inferFileFormat(config.filename);
-        }
-    } else {
-        if (url && !config.filename) {
-            config.filename = FileUtils.getFilename(url);
-        }
-    }
-
-
-
     try {
         if (!config.noSpinner) this.startSpinner();
 
@@ -680,6 +667,7 @@ Browser.prototype.loadTrack = async function (config) {
         }
 
         return newTrack;
+
     } catch (error) {
         const httpMessages =
             {
@@ -700,23 +688,40 @@ Browser.prototype.loadTrack = async function (config) {
 
 Browser.prototype.createTrack = async function (config) {
 
-    // Lowercase format
-    if (config.format) {
-        config.format = config.format.toLowerCase();
+    // Resolve function and promise urls
+    let url = await URIUtils.resolveURL(config.url);
+    if (StringUtils.isString(url)) {
+        url = url.trim();
+    }
+
+    if(url) {
+        if (config.format) {
+            config.format = config.format.toLowerCase();
+        } else {
+            let filename = config.filename;
+            if (!filename) {
+                if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
+                    const json = await getDriveFileInfo(url)
+                    filename = json.originalFileName || json.name;
+                } else {
+                    filename = FileUtils.getFilename(url);
+                }
+            }
+            config.format = TrackUtils.inferFileFormat(filename);
+        }
     }
 
     let type = config.type;
-
-    if(type) {
+    if (type) {
         type = type.toLowerCase();
     } else {
         type = inferTrackType(config);
-        if("bedtype" === config.type) {
+        if ("bedtype" === config.type) {
             // Bed files must be read to determine track type
             const featureSource = FeatureSource(config, this.genome);
             config.featureSource = featureSource;
             const trackType = await featureSource.trackType();
-            if(trackType) {
+            if (trackType) {
                 type = trackType;
             } else {
                 type = "annotation";
@@ -947,7 +952,7 @@ Browser.prototype.resize = async function () {
 
     await this.updateViews();
 
-    for (let { viewports, $viewportContainer } of this.trackViews) {
+    for (let {viewports, $viewportContainer} of this.trackViews) {
         updateViewportShims(viewports, $viewportContainer)
     }
 
@@ -955,7 +960,7 @@ Browser.prototype.resize = async function () {
 
 const resizeWillExceedChromosomeLength = (browser, viewportContainerWidth, referenceFrame) => {
     const bp = viewportContainerWidth * referenceFrame.bpPerPixel
-    const { bpLength } = browser.genome.getChromosome(referenceFrame.chr)
+    const {bpLength} = browser.genome.getChromosome(referenceFrame.chr)
     return (bp > bpLength);
 }
 
@@ -1101,9 +1106,9 @@ Browser.prototype.viewportContainerWidth = function () {
 
     let ww
     if (this.trackViews && this.trackViews.length > 0) {
-        ww = this.trackViews[ 0 ].$viewportContainer.width()
+        ww = this.trackViews[0].$viewportContainer.width()
     } else {
-        const { width } = this.trackContainer.getBoundingClientRect();
+        const {width} = this.trackContainer.getBoundingClientRect();
         ww = width - viewportContainerShimWidth
     }
 
@@ -1267,11 +1272,11 @@ Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceF
     const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
     for (let i = 0; i < this.referenceFrameList.length; i++) {
-        const ee = this.referenceFrameList[ i ].calculateEnd(previousViewportWidth);
-        const bpp = this.referenceFrameList[ i ].calculateBPP(ee, viewportWidth);
+        const ee = this.referenceFrameList[i].calculateEnd(previousViewportWidth);
+        const bpp = this.referenceFrameList[i].calculateBPP(ee, viewportWidth);
 
-        const { chr, start } = this.referenceFrameList[ i ]
-        this.referenceFrameList[ i ].referenceFrame = new ReferenceFrame(this.genome, chr, start, ee, bpp);
+        const {chr, start} = this.referenceFrameList[i]
+        this.referenceFrameList[i].referenceFrame = new ReferenceFrame(this.genome, chr, start, ee, bpp);
     }
 
     this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
@@ -1280,7 +1285,7 @@ Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceF
         this.resize();
     } else {
 
-        for (let { viewports, $viewportContainer } of this.trackViews) {
+        for (let {viewports, $viewportContainer} of this.trackViews) {
             updateViewportShims(viewports, $viewportContainer)
         }
 
@@ -1379,7 +1384,7 @@ Browser.prototype.buildViewportsWithReferenceFrameList = function (referenceFram
 
     }
 
-    for (let { viewports, $viewportContainer } of this.trackViews) {
+    for (let {viewports, $viewportContainer} of this.trackViews) {
         updateViewportShims(viewports, $viewportContainer)
     }
 
@@ -1438,13 +1443,13 @@ Browser.prototype.search = async function (string, init) {
     return referenceFrameList;
 };
 
-function  isLocusString(browser, locus) {
+function isLocusString(browser, locus) {
 
     const a = locus.split(':')
     const chr = a[0]
 
     if ('all' === chr && browser.genome.getChromosome(chr)) {
-        return { browser, chr, start: 0, end: browser.genome.getChromosome(chr).bpLength, locus }
+        return {browser, chr, start: 0, end: browser.genome.getChromosome(chr).bpLength, locus}
     } else if (undefined === browser.genome.getChromosome(chr)) {
 
         return undefined
@@ -1457,14 +1462,14 @@ function  isLocusString(browser, locus) {
 
         if (a.length > 1) {
 
-            const b = a[ 1 ].split('-')
+            const b = a[1].split('-')
 
             if (b.length > 2) {
                 return undefined
             } else {
 
                 let numeric
-                numeric = b[ 0 ].replace(/,/g, '')
+                numeric = b[0].replace(/,/g, '')
 
                 if (isNaN(numeric)) {
                     return undefined
@@ -1474,7 +1479,7 @@ function  isLocusString(browser, locus) {
 
                 if (2 === b.length) {
 
-                    numeric = b[ 1 ].replace(/,/g, '')
+                    numeric = b[1].replace(/,/g, '')
 
                     if (isNaN(numeric)) {
                         return undefined;
@@ -1487,7 +1492,7 @@ function  isLocusString(browser, locus) {
 
         validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases());
         const queryChr = browser.genome.getChromosomeName(chr);
-        return { browser, chr: queryChr, start: extent.start, end: extent.end, locus }
+        return {browser, chr: queryChr, start: extent.start, end: extent.end, locus}
 
     }
 }
@@ -1499,7 +1504,7 @@ async function searchWebService(browser, locus, searchConfig) {
         path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
     }
     const result = await igvxhr.loadString(path)
-    return { result: result, locusSearchString: locus }
+    return {result: result, locusSearchString: locus}
 }
 
 Browser.prototype.loadSampleInformation = async function (url) {
@@ -1590,9 +1595,9 @@ Browser.prototype.toJSON = function () {
     };
 
     if (FileUtils.isFilePath(json.reference.fastaURL)) {
-        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.fastaURL.name }.`);
+        throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
     } else if (FileUtils.isFilePath(json.reference.indexURL)) {
-        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.indexURL.name }.`);
+        throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
     }
 
     // Use first available trackView.
@@ -1624,7 +1629,7 @@ Browser.prototype.toJSON = function () {
     }
 
     const trackJson = [];
-    for (let { track } of this.trackViews) {
+    for (let {track} of this.trackViews) {
 
         let config;
         if (typeof track.getState === "function") {
@@ -1642,7 +1647,7 @@ Browser.prototype.toJSON = function () {
             trackJson.push(config);
         }
     }
-    const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => FileUtils.isFilePath(url))
+    const locaTrackFiles = trackJson.filter(({type}) => 'sequence' !== type).filter(({url}) => FileUtils.isFilePath(url))
     if (locaTrackFiles.length > 0) {
         throw new Error(`Error. Sessions cannot include local file references.`);
     }
@@ -1675,7 +1680,7 @@ Browser.uncompressSession = function (url) {
     } else {
 
         let enc = url.substring(5);
-        return  StringUtils.uncompressString(enc);
+        return StringUtils.uncompressString(enc);
     }
 }
 
@@ -1895,13 +1900,13 @@ function addMouseHandlers() {
     }
 }
 
-async function getDriveFileInfo (googleDriveURL) {
+async function getDriveFileInfo(googleDriveURL) {
     const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL);
     const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
     return igvxhr.loadJson(endPoint, buildOptions({}));
 }
 
-export { isLocusString, searchWebService }
+export {isLocusString, searchWebService}
 export default Browser
 
 
