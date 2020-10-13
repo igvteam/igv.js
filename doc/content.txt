@@ -1,2 +1,0 @@
-This directory contains misc developer notes.  For API documentation see the wiki pages at
-https://github.com/igvteam/igv.js/wiki
