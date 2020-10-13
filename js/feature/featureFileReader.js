@@ -78,7 +78,7 @@ class FeatureFileReader {
      */
     async readFeatures(chr, start, end) {
 
-        const index = await this.getIndex()
+        const index = await this.getIndex();
         if (index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
@@ -95,10 +95,8 @@ class FeatureFileReader {
             return this.loadFeaturesFromDataURI(this.dataURI)
         } else {
 
-            let index;
-
             if (this.config.indexURL) {
-                index = await this.getIndex();
+                const index = await this.getIndex();
                 if (!index) {
                     // Note - it should be impossible to get here
                     throw new Error("Unable to load index: " + this.config.indexURL);
@@ -121,12 +119,16 @@ class FeatureFileReader {
                 }
                 const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
                 const data = await igvxhr.loadString(this.config.url, options)
-                const header = this.parser.parseHeader(data);
-                return {header};
+                this.header = this.parser.parseHeader(data);  // Cache header, might be needed to parse features
+                return this.header;
 
             } else {
                 // If this is a non-indexed file we will load all features in advance
-                return this.loadFeaturesNoIndex()
+                const options = buildOptions(this.config);
+                const data = await igvxhr.loadString(this.config.url, options);
+                this.header = this.parser.parseHeader(data);
+                this.features = this.parser.parseFeatures(data);   // Temporarily cache features
+                return this.header;
             }
         }
     }
@@ -149,11 +151,20 @@ class FeatureFileReader {
 
     async loadFeaturesNoIndex() {
 
-        const options = buildOptions(this.config);    // Add oauth token, if any
-        const data = await igvxhr.loadString(this.config.url, options)
-        const header = this.parser.parseHeader(data);
-        const features = this.parser.parseFeatures(data);   // <= PARSING DONE HERE
-        return {features, header};
+        if (this.features) {
+            // An optimization hack for non-indexed files, features are temporarily cached when header is read.
+            const tmp = this.features;
+            delete this.features;
+            return tmp;
+        } else {
+            const options = buildOptions(this.config);    // Add oauth token, if any
+            const data = await igvxhr.loadString(this.config.url, options)
+            if (!this.header) {
+                this.header = this.parser.parseHeader(data);
+            }
+            const features = this.parser.parseFeatures(data);   // <= PARSING DONE HERE
+            return features;
+        }
     }
 
     async loadFeaturesWithIndex(chr, start, end) {
@@ -164,13 +175,13 @@ class FeatureFileReader {
         const tabix = this.index.tabix
         const refId = tabix ? this.index.sequenceIndexMap[chr] : chr
         if (refId === undefined) {
-            return {features: []};
+            return [];
         }
 
         const genome = this.genome;
         const blocks = this.index.blocksForRange(refId, start, end);
         if (!blocks || blocks.length === 0) {
-            return {features: []};
+            return [];
         } else {
             const allFeatures = [];
             for (let block of blocks) {
@@ -249,7 +260,7 @@ class FeatureFileReader {
                 return a.start - b.start;
             });
 
-            return {features: allFeatures};
+            return allFeatures;
         }
     }
 
@@ -273,12 +284,12 @@ class FeatureFileReader {
     async loadFeaturesFromDataURI() {
 
         const plain = URIUtils.decodeDataURI(this.dataURI)
-        const header = this.parser.parseHeader(plain);
+        this.header = this.parser.parseHeader(plain);
         if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
             this.format = 'gff3';
         }
         const features = this.parser.parseFeatures(plain);
-        return {features, header};
+        return features;
     }
 
 }
