@@ -46,7 +46,6 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
-import deepCopy from "./util/deepCopy.js";
 import {
     DOMUtils,
     FileUtils,
@@ -282,7 +281,7 @@ Browser.prototype.loadSession = async function (options) {
     if (options.url || options.file) {
         session = await loadSessionFile(options)
     } else {
-        session = deepCopy(options);
+        session = options;
     }
     return this.loadSessionObject(session);
 
@@ -636,9 +635,6 @@ Browser.prototype.loadTrack = async function (config) {
     // config might be json
     if (StringUtils.isString(config)) {
         config = JSON.parse(config);
-    } else {
-        // Copy the config object as modifications will be made
-        config = deepCopy(config);
     }
 
     try {
