@@ -157,8 +157,8 @@ class TextFeatureSource {
 
         if (this.config.disableCache !== true &&
             this.featureCache &&
-            (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-            return this.featureCache;
+            (this.static || this.featureCache.containsRange(genomicInterval))) {
+            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
         } else {
 
             // Use visibility window to potentially expand query interval.
