@@ -32,7 +32,7 @@ import TrackGearPopover from "./ui/trackGearPopover.js";
 import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
-import {DOMUtils, IGVColor} from '../node_modules/igv-utils/src/index.js';
+import {DOMUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 
 var dragged,
@@ -99,7 +99,9 @@ class TrackView {
 
         if (false === exclude.has(this.track.type)) {
 
-            const defaultColors = this.track.color ? [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) : undefined
+            const defaultColors = this.track.color && StringUtils.isString(this.trackColor) ?
+                [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) :
+                undefined;
 
             const config =
                 {
