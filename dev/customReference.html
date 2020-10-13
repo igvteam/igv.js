@@ -21,8 +21,8 @@
 
     import igv from "../js/index.js";
 
-    var igvDiv = document.getElementById("igv-div");
-    var options =
+    const igvDiv = document.getElementById("igv-div");
+    const options =
         {
             reference:
                 {
@@ -31,36 +31,7 @@
                     fastaURL: "https://s3.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa",
                     indexURL: "https://s3.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa.fai",
                     cytobandURL: './data/sacCer3.ideo.tsv'
-                },
-            // reference: {
-            //     id: "myCustomGenome",
-            //     fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-            //     indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-            //     cytobandURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt",
-            //     wholeGenomeView: false
-            // },
-           // locus: 'chr7',
-            tracks: [
-                {
-                    url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
-                    indexed: false,
-                    isLog: true,
-                    name: 'Segmented CN'
-                },
-
-                {
-                    name: "Genes",
-                    type: "annotation",
-                    format: "bed",
-                    sourceType: "file",
-                    url: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/annotations/hg19/genes/refGene.hg19.bed.gz.tbi",
-                    order: Number.MAX_VALUE,
-                    visibilityWindow: 300000000,
-                    displayMode: "EXPANDED"
                 }
-
-            ]
         };
 
 

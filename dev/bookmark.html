@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>bookmark</title>
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
+</head>
+
+<body>
+<div>
+    <h1>Example of IGV bookmarking</h1>
+</div>
+<div>
+    <button id="bmBtn">Bookmark</button>
+</div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+
+    const options =
+        {
+            queryParametersSupported: true,
+            showChromosomeWidget: true,
+            genome: "hg19"
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (browser) {
+
+            document.getElementById("bmBtn").addEventListener("click", () => {
+                window.history.pushState({}, "IGV", browser.sessionURL());
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>

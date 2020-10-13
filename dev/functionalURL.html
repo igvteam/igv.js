@@ -2,22 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <meta content="IE=edge" http-equiv="X-UA-Compatible">
-            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-            <meta content="" name="description">
-            <meta content="" name="author">
-            <link href=img/favicon.ico rel="shortcut icon">
-            <title>Functional URL</title>
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>Functional URL</title>
 
-            <!-- IGV CSS -->
+    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
 
-            <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
-        </head>
+</head>
 
 <body>
 
@@ -59,7 +49,7 @@ Example of using a function or promise for a track URL.
                     name: "CTCF - function that returns promise ",
                     type: "wig",
                     format: "bigwig",
-                    url: function() {
+                    url: function () {
                         return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
                     }
                 },
@@ -67,9 +57,9 @@ Example of using a function or promise for a track URL.
                     name: "CTCF - function that returns thenable ",
                     type: "wig",
                     format: "bigwig",
-                    url: function() {
+                    url: function () {
                         return {
-                            then: function(resolve, reject) {
+                            then: function (resolve, reject) {
                                 resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
                             }
                         }

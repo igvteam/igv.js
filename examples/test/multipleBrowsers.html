@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!-- IGV JS-->
+    <script src="../../dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div id="igvDiv1" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<div id="igvDiv2" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var igvDiv1 = document.getElementById("igvDiv1");
+        var igvDiv2 = document.getElementById("igvDiv2");
+
+        var options1 =
+        {
+            genome: "hg19",
+            locus: 'chr7',
+            tracks: [
+                {
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexed: false,
+                    isLog: true,
+                    name: "GBM Copy # (TCGA Broad GDAC)"
+                }
+            ]
+        };
+
+        var options2 =
+        {
+            genome: "hg19",
+            locus: 'myc',
+            tracks: [
+                {
+                    url: "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                    name: "ctcf bigwig"
+                }
+            ]
+        };
+
+
+        igv.createBrowser(igvDiv1, options1)
+                .then(function (browser1) {
+                    console.log("Created IGV browser 1");
+                })
+
+        igv.createBrowser(igvDiv2, options2)
+                .then(function (browser2) {
+                    console.log("Created IGV browser 2");
+                })
+
+    });
+
+
+</script>
+
+</body>
+
+</html>

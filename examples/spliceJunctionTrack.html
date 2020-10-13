@@ -7,10 +7,8 @@
     <meta content="" name="description">
     <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>Splice Junctions</title>
 
-    <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -20,10 +18,14 @@
 
 <div id="igv-div" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
-        const tracks = [
+    import igv from '../dist/igv.esm.js';
+
+    const options = {
+        locus: 'chr15:92835700-93031800',
+        genome: 'hg38',
+        tracks: [
             {
                 type: 'merged',
                 name: 'Splice Junctions',
@@ -59,20 +61,15 @@
                 ]
             }
         ]
+    }
 
-        var options = {
-            locus: 'chr15:92835700-93031800',
-            genome: 'hg38',
-            tracks: tracks,
-        };
+    const igvDiv = document.getElementById("igv-div");
 
-        var igvDiv = document.getElementById("igv-div");
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
-        igv.createBrowser(igvDiv, options)
-            .then(function (browser) {
-                console.log("Created IGV browser");
-            })
-    })
 
 </script>
 
