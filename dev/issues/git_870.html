@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>git 870</title>
+
+    <link href="../css/dev.css" rel="stylesheet" type="text/css"/>
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js";
+
+    let browser;
+    const options =
+        {
+            // locus: 'muc1',
+            genome: "hg38",
+            flanking: 1000,
+            queryParametersSupported: true,
+            tracks: [
+                {
+                    name: "issue-870",
+                    type: "annotation",
+                    format: "gff3",
+                    url: "../../test/data/gff/issue-870.gff3"
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (b) {
+            browser = b;
+        })
+
+
+</script>
+
+</body>
+
+</html>

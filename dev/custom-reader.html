@@ -30,11 +30,10 @@
      */
     class CytobandReader {
 
-        constructor(config) {
+        constructor() {
         }
 
         async readFeatures(chr, start, end) {
-
             const response = await fetch(`https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=${chr}&start=${start}&end=${end}`,
                 {
                     headers: {'Content-Type': 'application/json'}
@@ -51,12 +50,13 @@
 
     const config = {
         genome: "hg38",
+        locus: "chr1",
         tracks: [
             {
                 name: "Cytobands",
                 type: "annotation",
                 displayMode: "collapsed",
-                reader: new CytobandReader({})
+                reader: new CytobandReader()
             }
         ]
     }
