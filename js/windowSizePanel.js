@@ -28,7 +28,7 @@ import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 const WindowSizePanel = function ($parent, browser) {
 
-    this.$container = $('<div>', { id: 'igv-windowsize-panel-container' });
+    this.$container = $('<div>', { class: 'igv-windowsize-panel-container' });
     $parent.append(this.$container);
     this.browser = browser;
 
