@@ -48,6 +48,10 @@ class BWSource {
         return features;
     }
 
+    async getHeader() {
+        return this.reader.loadHeader();
+    }
+
     getDefaultRange() {
         if (this.reader.totalSummary !== undefined) {
             return this.reader.totalSummary.defaultRange;
@@ -57,17 +61,7 @@ class BWSource {
     }
 
     async defaultVisibilityWindow() {
-
-        if (this.reader.getType() === "bigwig") {
-            return -1;
-        } else {
-            // bigbed
-            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
-            const header = this.reader.loadHeader();
-            // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-            return header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount);
-
-        }
+        return this.reader.defaultVisibilityWindow;
     }
 
     async getWGValues(windowFunction) {
@@ -97,7 +91,7 @@ class BWSource {
     }
 
     supportsWholeGenome() {
-        return this.reader.getType() === "bigwig" || this.defaultVisibilityWindow() <= 0;
+        return this.reader.type === "bigwig" || this.defaultVisibilityWindow() <= 0;
     }
 
     async trackType() {

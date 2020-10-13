@@ -245,6 +245,8 @@ class BWReader {
             header.dataCount = binaryParser.getInt();
             ///////////
 
+            this.setDefaultVisibilityWindow(header);
+
             this.header = header;
             return this.header;
 
@@ -275,6 +277,18 @@ class BWReader {
             return "wig";
         } else {
             return this.autoSql && this.autoSql.table === "chromatinInteract" ? "interact" : "annotation";
+        }
+    }
+
+    setDefaultVisibilityWindow(header) {
+        if (this.type === "bigwig") {
+            this.setDefaultVisibilityWindow =  -1;
+        } else {
+            // bigbed
+            let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
+            // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
+            this.setDefaultVisibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount);
+
         }
     }
 }
