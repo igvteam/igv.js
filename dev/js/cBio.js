@@ -11,7 +11,7 @@ var cBio = {
 
     fetchSamplesByStudy: function (study) {
 
-        let url = "http://www.cbioportal.org/api/studies/" + study + "/samples";
+        let url = "https://www.cbioportal.org/api/studies/" + study + "/samples";
 
         return igvxhr.loadJson(url)
 
@@ -37,7 +37,7 @@ var cBio = {
 
             .then(function (sampleStudyList) {
 
-                let url = "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY";
+                let url = "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY";
                 let body = JSON.stringify(sampleStudyList);
 
                 return igvxhr.loadJson(url, {method: "POST", sendData: body})
@@ -76,7 +76,7 @@ var cBio = {
                                         "displayMode": "EXPANDED",
                                         "sourceType": "custom",
                                         "source": {
-                                            "url": "http://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
+                                            "url": "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
                                             "method": "POST",
                                             "contentType": "application/json",
                                             "body": body,
