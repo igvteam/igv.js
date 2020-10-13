@@ -39,14 +39,14 @@
     // * "POST" used to send input parameters
     // * cBio json objects transformed to igv requirements for seg track using simple mappings.
     const cbio1 = {
-        name: "P101MF - query by chromosome",
+        name: "P101MF",
         type: "seg",
         sourceType: "custom",
         source: {
             url: function (options) {
-                const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `http://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                return `https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY`;
             },
+            queryable: false,
             method: "POST",
             contentType: "application/json",
             body: JSON.stringify([{
@@ -73,7 +73,7 @@
         source: {
             url: function (options) {
                 const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `http://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
             },
             method: "POST",
             contentType: "application/json",
