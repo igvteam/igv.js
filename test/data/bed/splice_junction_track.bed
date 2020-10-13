@@ -1,0 +1,2 @@
+chr15	92874091	92890768	motif=CT/AC;uniquely_mapped=2;multi_mapped=2;maximum_spliced_alignment_overhang=36;annotated_junction=true	2	-
+chr15	92883186	92883584	motif=GT/AG;uniquely_mapped=56;multi_mapped=2;maximum_spliced_alignment_overhang=35;annotated_junction=true	56	+
