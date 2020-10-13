@@ -1417,10 +1417,10 @@ Browser.prototype.search = async function (string, init) {
     const loci = string.split(' ')
 
     let referenceFrameList = await createReferenceFrameList(this, loci)
-    // if (undefined === referenceFrameList) {
-    //     // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-    //     referenceFrameList = await createReferenceFrameList(this, [string])
-    // }
+    if (undefined === referenceFrameList) {
+        // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
+        referenceFrameList = await createReferenceFrameList(this, [string])
+    }
 
     if (referenceFrameList && referenceFrameList.length > 0) {
         this.emptyViewportContainers();
