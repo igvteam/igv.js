@@ -67,6 +67,10 @@ class TextFeatureSource {
             }
             this.featureCache = new FeatureCache(features, genome);
             this.static = true;
+        } else if (config.reader) {
+            this.reader = config.reader;
+            this.queryable = config.queryable !== undefined ? config.queryable : true;
+            this.expandQuery = config.expandQuery ? true : false;
         } else if (config.sourceType === "ga4gh") {
             this.reader = new Ga4ghVariantReader(config, genome);
             this.queryable = true;
@@ -83,10 +87,6 @@ class TextFeatureSource {
         } else if (config.sourceType === 'custom' || config.source !== undefined) {    // Second test for backward compatibility
             this.reader = new CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
-            this.expandQuery = config.expandQuery ? true : false;
-        } else if (config.reader) {
-            this.reader = config.reader;
-            this.queryable = config.queryable !== undefined ? config.queryable : true;
             this.expandQuery = config.expandQuery ? true : false;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
@@ -118,10 +118,10 @@ class TextFeatureSource {
     }
 
     async getHeader() {
-
         if (!this.header) {
+
             if (this.reader && typeof this.reader.readHeader === "function") {
-                const {header, features} = await this.reader.readHeader()
+                const header = await this.reader.readHeader()
                 if (header) {
                     this.header = header;
                     if (header.format) {
@@ -129,10 +129,6 @@ class TextFeatureSource {
                     }
                 } else {
                     this.header = {};
-                }
-                // Non-indexed readers will return features as a side effect (entire file is read).
-                if (features) {
-                    this.ingestFeatures(features);
                 }
             } else {
                 this.header = {};
@@ -155,7 +151,42 @@ class TextFeatureSource {
         const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const featureCache = await getFeatureCache.call(this)
+        let intervalStart = bpStart;
+        let intervalEnd = bpEnd;
+        let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+        if (this.config.disableCache !== true &&
+            this.featureCache &&
+            (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
+            return this.featureCache;
+        } else {
+
+            // Use visibility window to potentially expand query interval.
+            // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
+            // indicating whole chromosome should be read at once.
+            if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
+                // Whole chromosome
+                intervalStart = 0;
+                intervalEnd = Number.MAX_SAFE_INTEGER;
+            } else if (visibilityWindow > (bpEnd - bpStart) && this.expandQuery !== false) {
+                const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
+                intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
+                intervalEnd = bpStart + expansionWindow;
+            }
+            genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+            let features = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+            if (this.queryable === undefined) {
+                this.queryable = reader.indexed;
+            }
+
+            if (features) {
+                this.ingestFeatures(features, genomicInterval);
+            } else {
+                this.featureCache = new FeatureCache();     // Empty cache
+            }
+        }
+
         const isQueryable = this.queryable;
 
         if ("all" === chr.toLowerCase()) {
@@ -165,53 +196,12 @@ class TextFeatureSource {
                 if (this.wgFeatures) {
                     return this.wgFeatures;
                 } else {
-                    this.wgFeatures = this.getWGFeatures(featureCache.getAllFeatures());
+                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures());
                     return this.wgFeatures;
                 }
             }
         } else {
-            return featureCache.queryFeatures(queryChr, bpStart, bpEnd);
-        }
-
-
-        async function getFeatureCache() {
-
-            let intervalStart = bpStart;
-            let intervalEnd = bpEnd;
-            let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-            if (this.config.disableCache !== true &&
-                this.featureCache &&
-                (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-                return this.featureCache;
-            } else {
-
-                // Use visibility window to potentially expand query interval.
-                // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
-                // indicating whole chromosome should be read at once.
-                if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
-                    // Whole chromosome
-                    intervalStart = 0;
-                    intervalEnd = Number.MAX_SAFE_INTEGER;
-                } else if (visibilityWindow > (bpEnd - bpStart) && this.expandQuery !== false) {
-                    const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
-                    intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
-                    intervalEnd = bpStart + expansionWindow;
-                }
-                genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-                let {features} = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-                if (this.queryable === undefined) {
-                    this.queryable = reader.indexed;
-                }
-
-                if (features) {
-                    this.ingestFeatures(features, genomicInterval);
-                } else {
-                    this.featureCache = new FeatureCache();     // Empty cache
-                }
-                return this.featureCache;
-            }
+            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
         }
     }
 
@@ -223,7 +213,7 @@ class TextFeatureSource {
 
         // Assign overlapping features to rows
         if (this.config.format !== "wig" && this.config.type !== "junctions") {
-            const maxRows = this.config.maxRows || 500
+            const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER;
             packFeatures(featureList, maxRows);
         }
 
