@@ -116,7 +116,7 @@ suite("testBedpe", function () {
             url: require.resolve('./data/bedpe/inter_chr_simulated.bedpe')
         });
 
-        const {features} = await reader.loadFeaturesNoIndex();
+        const features = await reader.loadFeaturesNoIndex();
         assert.equal(features.length, 17);   // 5 intra + 6 (x2) inter
 
         // Test complementary trvotfd
