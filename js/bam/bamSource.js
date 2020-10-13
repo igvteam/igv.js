@@ -30,7 +30,7 @@ import BamWebserviceReader from "./bamWebserviceReader.js";
 import HtsgetReader from "./htsgetReader.js";
 import CramReader from "../cram/cramReader.js";
 import Ga4ghAlignmentReader from "../ga4gh/ga4ghAlignmentReader.js";
-import  {pairAlignments, unpairAlignments, packAlignmentRows} from "./alignmentUtils.js";
+import {packAlignmentRows, unpairAlignments} from "./alignmentUtils.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
@@ -77,9 +77,9 @@ BamSource.prototype.setViewAsPairs = function (bool) {
 
     if (this.viewAsPairs !== bool) {
         this.viewAsPairs = bool;
-       // if (this.alignmentContainer) {
-       //     this.alignmentContainer.setViewAsPairs(bool);
-       // }
+        // if (this.alignmentContainer) {
+        //     this.alignmentContainer.setViewAsPairs(bool);
+        // }
     }
 }
 
@@ -91,42 +91,35 @@ BamSource.prototype.setShowSoftClips = function (bool) {
 
 BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
 
-    try {
-        const genome = this.genome;
-        const showSoftClips = this.showSoftClips;
+    const genome = this.genome;
+    const showSoftClips = this.showSoftClips;
 
-        if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-            return this.alignmentContainer;
+    if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+        return this.alignmentContainer;
 
-        } else {
-            const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
-            let alignments = alignmentContainer.alignments;
-            if (!this.viewAsPairs) {
-                alignments = unpairAlignments([{alignments: alignments}]);
-            }
-            const hasAlignments = alignments.length > 0;
-            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
-            alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
+    } else {
+        const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
+        let alignments = alignmentContainer.alignments;
+        if (!this.viewAsPairs) {
+            alignments = unpairAlignments([{alignments: alignments}]);
+        }
+        const hasAlignments = alignments.length > 0;
+        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
+        alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
 
-            this.alignmentContainer = alignmentContainer;
+        this.alignmentContainer = alignmentContainer;
 
-            if (!hasAlignments) {
+        if (hasAlignments) {
+            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+            if (sequence) {
+                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                alignmentContainer.sequence = sequence;           // TODO -- fix this
                 return alignmentContainer;
             } else {
-
-                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
-                if (sequence) {
-                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                    alignmentContainer.sequence = sequence;           // TODO -- fix this
-                    return alignmentContainer;
-                } else {
-                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
-                }
+                console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
             }
         }
-    } catch (e) {
-        console.error(e);
-        throw e;
+        return alignmentContainer
     }
 }
 
