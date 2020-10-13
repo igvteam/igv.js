@@ -75,7 +75,7 @@ const SegTrack = extend(TrackBase,
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource =  FeatureSource(this.config, browser.genome);
+        this.featureSource = FeatureSource(this.config, browser.genome);
 
 
         // TODO this sort doens't look right, no samples have yet been loaded
@@ -200,7 +200,7 @@ SegTrack.prototype.draw = function (options) {
             const y = pixelTop + segment.row * sampleHeight + border;
             const bottom = y + sampleHeight;
 
-            if(bottom < pixelTop || y > pixelBottom) {
+            if (bottom < pixelTop || y > pixelBottom) {
                 continue;
             }
 
@@ -288,6 +288,8 @@ SegTrack.prototype.computePixelHeight = function (features) {
 SegTrack.prototype.sortSamples = async function (chr, bpStart, bpEnd, direction) {
 
     const featureList = await this.featureSource.getFeatures(chr, bpStart, bpEnd);
+    if (!featureList) return;
+
     this.updateSampleKeys(featureList);
 
     const scores = {};
