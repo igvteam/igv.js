@@ -54,7 +54,7 @@ class Variant {
 
         if (this.info) {
             if (this.info["VT"]) {
-                this.type = variant.info["VT"];
+                this.type = this.info["VT"];
             } else if (this.info["SVTYPE"]) {
                 this.type = "SV";
             } else if (this.info["PERIOD"]) {
