@@ -45,7 +45,7 @@ function decodeBed(tokens, header) {
             // feature.name = name ? name : tmp;
 
             //parse gffTags in the name field
-            if (gffTags && tokens[3].indexOf(';') > 0) {
+            if (tokens[3].indexOf(';') > 0 && tokens[3].indexOf('=') > 0) {
                 const attributes = parseAttributeString(tokens[3], '=');
                 for (let nmField of gffNameFields) {
                     if (attributes.hasOwnProperty(nmField)) {

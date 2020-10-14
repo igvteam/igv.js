@@ -24,10 +24,10 @@ suite("testSeg", function () {
             {format: 'seg', url: url, indexed: false},
             genome);
         const chr = "chr1";
-        const bpStart = 0;
-        const bpEnd = 747751863;
+        const start = 0;
+        const end = 747751863;
 
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd})
+        const features = await featureSource.getFeatures({chr, start, end})
         assert.ok(features);
         assert.equal(features.length, 1438);
         // Test 1 feature, insure its on chr1

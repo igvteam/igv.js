@@ -82,8 +82,8 @@ WigTrack.prototype.postInit = async function () {
     if (header) this.setTrackProperties(header)
 }
 
-WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, windowFunction: this.windowFunction});
+WigTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, windowFunction: this.windowFunction});
 
 }
 

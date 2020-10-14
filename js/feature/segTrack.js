@@ -131,8 +131,8 @@ SegTrack.prototype.menuItemList = function () {
 };
 
 
-SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures({chr, bpStart, bpEnd});
+SegTrack.prototype.getFeatures = function (chr, start, end) {
+    return this.featureSource.getFeatures({chr, start, end});
 };
 
 
@@ -285,24 +285,24 @@ SegTrack.prototype.computePixelHeight = function (features) {
 /**
  * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
  */
-SegTrack.prototype.sortSamples = async function (chr, bpStart, bpEnd, direction) {
+SegTrack.prototype.sortSamples = async function (chr, start, end, direction) {
 
-    const featureList = await this.featureSource.getFeatures(chr, bpStart, bpEnd);
+    const featureList = await this.featureSource.getFeatures({chr, start, end});
     if (!featureList) return;
 
     this.updateSampleKeys(featureList);
 
     const scores = {};
-    const bpLength = bpEnd - bpStart + 1;
+    const bpLength = end - start + 1;
 
     // Compute weighted average score for each sample
     for (let segment of featureList) {
 
-        if (segment.end < bpStart) continue;
-        if (segment.start > bpEnd) break;
+        if (segment.end < start) continue;
+        if (segment.start > end) break;
 
-        const min = Math.max(bpStart, segment.start);
-        const max = Math.min(bpEnd, segment.end);
+        const min = Math.max(start, segment.start);
+        const max = Math.min(end, segment.end);
         const f = (max - min) / bpLength;
 
         const sampleKey = segment.sampleKey || segment.sample

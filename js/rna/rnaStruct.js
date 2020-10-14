@@ -53,9 +53,7 @@ const RnaStructTrack = extend(TrackBase,
     });
 
 RnaStructTrack.prototype.getFeatures = function (chr, start, end) {
-
     return this.featureSource.getFeatures({chr, start, end});
-
 }
 
 RnaStructTrack.prototype.draw = function (options) {

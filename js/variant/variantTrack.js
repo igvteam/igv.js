@@ -117,12 +117,12 @@ VariantTrack.prototype.getCallsetsLength = function () {
     return this.callSets.length;
 }
 
-VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+VariantTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
 
     if (this.header === undefined) {
         this.header = await this.getHeader();
     }
-    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow: this.visibilityWindow});
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow: this.visibilityWindow});
 
 }
 
@@ -224,7 +224,7 @@ VariantTrack.prototype.draw = function (options) {
                         let allRef = true;
                         let noCall = false;
                         for (let g of call.genotype) {
-                            if('.' === g) {
+                            if ('.' === g) {
                                 noCall = true;
                                 break;
                             } else {
@@ -316,8 +316,8 @@ function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
 
     let gt = '';
     const altArray = variant.alternateBases.split(",")
-    for(let allele of call.genotype) {
-        if('.' === allele) {
+    for (let allele of call.genotype) {
+        if ('.' === allele) {
             gt += 'No Call';
             break;
         } else if (allele === 0) {

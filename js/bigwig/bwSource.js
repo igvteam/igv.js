@@ -35,11 +35,11 @@ class BWSource {
         this.wgValues = {};
     }
 
-    async getFeatures({chr, bpStart, bpEnd, bpPerPixel, windowFunction}) {
+    async getFeatures({chr, start, end, bpPerPixel, windowFunction}) {
 
         const features = (chr.toLowerCase() === "all") ?
             await this.getWGValues(windowFunction) :
-            await this.reader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel, windowFunction);
+            await this.reader.readFeatures(chr, start, chr, end, bpPerPixel, windowFunction);
 
         const isBigWig = this.reader.type === "bigwig";
         if (!isBigWig) {

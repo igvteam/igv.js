@@ -86,8 +86,8 @@ GWASTrack.prototype.supportsWholeGenome = function () {
     return true;
 }
 
-GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures({chr, bpStart, bpEnd});
+GWASTrack.prototype.getFeatures = function (chr, start, end) {
+    return this.featureSource.getFeatures({chr, start, end});
 }
 
 GWASTrack.prototype.draw = function (options) {
@@ -208,7 +208,7 @@ GWASTrack.prototype.popupData = function (clickState) {
                     data.push("...");
                     break;
                 }
-                if(typeof f.popupData === 'function') {
+                if (typeof f.popupData === 'function') {
                     data = data.concat(f.popupData())
                 } else {
                     const chr = f.realChr || f.chr;

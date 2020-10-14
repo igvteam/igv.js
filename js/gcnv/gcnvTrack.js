@@ -57,15 +57,15 @@ GCNVTrack.prototype.menuItemList = function () {
 }
 
 
-GCNVTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-    const chrFeatures = await this.featureSource.getFeatures({chr, bpStart: 0, bpEnd: Number.MAX_VALUE});
+GCNVTrack.prototype.getFeatures = async function (chr, start, end) {
+    const chrFeatures = await this.featureSource.getFeatures({chr, start: 0, end: Number.MAX_VALUE});
     let prevIndex = undefined;
     let nextIndex = undefined;
     for (let i = 1; i < chrFeatures.length - 1; i++) {
-        if (prevIndex === undefined && chrFeatures[i].end > bpStart) {
+        if (prevIndex === undefined && chrFeatures[i].end > start) {
             prevIndex = i - 1;
         }
-        if (nextIndex === undefined && chrFeatures[i].start > bpEnd) {
+        if (nextIndex === undefined && chrFeatures[i].start > end) {
             nextIndex = i + 1;
             break;
         }
