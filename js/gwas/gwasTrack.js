@@ -111,7 +111,7 @@ GWASTrack.prototype.draw = function (options) {
             if (pos < bpStart) continue;
             if (pos > bpEnd) break;
 
-            const colorScale = this.getColorScale(variant.realChr || variant.chr);
+            const colorScale = this.getColorScale(variant._f ? variant._f.chr : variant.chr);
 
             let color;
             let val;
