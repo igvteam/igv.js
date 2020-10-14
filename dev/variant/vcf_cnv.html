@@ -6,16 +6,17 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta content="" name="description">
     <meta content="" name="author">
-    <link href=../img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>vcf-cnv</title>
 
 </head>
 
 <body>
 
-<h1>BEDPE 10X Large SVs</h1>
+<p>
 
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
 <script type="module">
 
@@ -24,15 +25,19 @@
     var options =
         {
             genome: "hg19",
-            tracks: [
-                {
-                    "url": "https://www.dropbox.com/s/rnxm70jsqfgg7p7/large_sv_calls.10X.bedpe?dl=0",
-                    "type": "interaction",
-                    "format": "bedpe",
-                    "name": "Large SVs",
-                    "arcType": "proportional"
-                }
-            ]
+            locus: ["1:69000-70010", "1:12939300-12943300"],
+            tracks:
+                [
+                    {
+                        name: "VCF",
+                        type: "variant",
+                        format: "vcf",
+                        url: "../test/data/vcf/cnv.vcf",
+                        indexed: false,
+                        displayMode: "EXPANDED"
+                    }
+                ]
+
         };
 
     var igvDiv = document.getElementById("igvDiv");
@@ -40,9 +45,7 @@
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-            window.igvBrowser = browser;
         })
-
 
 </script>
 

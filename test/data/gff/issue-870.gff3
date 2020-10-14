@@ -1,6 +1,6 @@
 ##gff-version 3
 ##sequence-region chr1 1 2000
-chr1	internal	exon	1000	1100	.	+	1	ID=feature_with_type_exon
-chr1	internal	CDS	1100	1200	.	+	1	ID=feature_with_type_CDS
-chr1	internal	contig	1200	1300	.	+	1	ID=feature_with_type_contig
-chr1	internal	gene	1300	1400	.	+	1	ID=feature_with_type_gene
+chr1	internal	exon	1000	1100	.	+	1	ID=feature_with_type_exon;name=Exon
+chr1	internal	CDS	1100	1200	.	+	1	ID=feature_with_type_CDS;name=CDS
+chr1	internal	contig	1200	1300	.	+	1	ID=feature_with_type_contig;name=Contig
+chr1	internal	gene	1300	1400	.	+	1	ID=feature_with_type_gene;name=Gene
