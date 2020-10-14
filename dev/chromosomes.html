@@ -9,15 +9,11 @@
     <link href=img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
-    <!-- IGV CSS -->
-
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
 </head>
 
 <body>
 
-<h1>Chromosomes</h1>
+<h1>Test alignment of chromosome boundaries in whole genome view</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -25,7 +21,7 @@
 
     import igv from "../js/index.js";
 
-    var options =
+    const options =
         {
             genome: "hg19",
             tracks: [
@@ -37,14 +33,13 @@
                     supportsWholeGenome: true
                 }
             ]
-        };
+        }
 
     var igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-            window.igvBrowser = browser;
         })
 
 

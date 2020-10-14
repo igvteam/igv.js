@@ -16,6 +16,10 @@
 </head>
 
 <body>
+
+<h1>Load a tabix indexed file from Google Drive</h1>
+<p>To run you must supply client ID and api key in ../oauthConfig.js, and launch from localhost with no port.</p>
+
 <button id="loadButton">Google Drive</button>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -24,10 +28,7 @@
 <script type="module">
 
     import igv from "../../js/index.js";
-    import {GoogleAuth} from '../../node_modules/igv-utils/src/index.js';
-
-    import oauthConfig from '../oauthConfig-private.js';
-
+    import oauthConfig from '../oauthConfig.js';
 
     const options =
         {
