@@ -4,9 +4,7 @@
     <meta charset="utf-8">
     <link href=img/favicon.ico rel="shortcut icon">
     <title>TDF</title>
-
     <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
 </head>
 
 <body>
@@ -19,21 +17,20 @@
 
     import igv from "../js/index.js";
 
-    var options =
+    const options =
         {
             genome: "hg19",
             locus: "chr8:128,747,267-128,754,546",
             tracks: [
                 {
-                    url: '../track_023402.tdf',
-                    name: 'tdf',
+                    url: 'https://s3.amazonaws.com/igv.org.test/data/wgEncodeBroadHistoneGm12878H3k4me3StdSig.wig.tdf',
+                    name: 'GM12878 H3K4Me3',
                     color: 'blue'
                 }
-
             ]
         };
 
-    var igvDiv = document.getElementById("igvDiv");
+    const igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {

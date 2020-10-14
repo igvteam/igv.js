@@ -16,15 +16,15 @@ suite("testBedGraph", function () {
 
 
         var chr = "chr19",
-            bpStart = 49302001,
-            bpEnd = 49304701,
+            start = 49302001,
+            end = 49304701,
             featureSource = FeatureSource({
                     format: 'bedgraph',
                     url: require.resolve('./data/wig/bedgraph-example-uscs.bedgraph')
                 },
                 genome);
 
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(features.length, 9);
 

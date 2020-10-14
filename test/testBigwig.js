@@ -15,7 +15,7 @@ suite("testBigWig", function () {
         const bw = new BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
-        const features = await bw.getFeatures({chr: 'NoSuchChromosome', bpStart: 0, bpEnd: 100});
+        const features = await bw.getFeatures({chr: 'NoSuchChromosome', start: 0, end: 100});
         assert.equal(0, features.length);
 
     });
@@ -27,7 +27,7 @@ suite("testBigWig", function () {
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
 
-        const features = await bw.getFeatures({chr: 'AluJb', bpStart: 0, bpEnd: 100});
+        const features = await bw.getFeatures({chr: 'AluJb', start: 0, end: 100});
         assert.equal(99, features.length);
         features.forEach(function (f) {
             assert.equal("AluJb", f.chr);
@@ -98,11 +98,11 @@ suite("testBigWig", function () {
         //chr21:19,146,376-19,193,466
         const url = dataURL + "bigwig/bigWigExample.bw",
             chr = "chr21",
-            bpStart = 19168957,
-            bpEnd = 19170640;
+            start = 19168957,
+            end = 19170640;
 
         const bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures({chr: chr, bpStart: bpStart, bpEnd: bpEnd});
+        const features = await bWSource.getFeatures({chr: chr, start: start, end: end});
         assert.ok(features);
         assert.equal(features.length, 337);   // Verified in iPad app
     });
@@ -114,12 +114,12 @@ suite("testBigWig", function () {
         //chr21:19,146,376-19,193,466
         const url = "https://s3.amazonaws.com/igv.org.test/data/uncompressed.bw",
             chr = "chr21",
-            bpStart = 0,
-            bpEnd = Number.MAX_SAFE_INTEGER,
+            start = 0,
+            end = Number.MAX_SAFE_INTEGER,
             bpPerPixel = 6191354.824;    // To match iOS unit test
 
         const bwReader = new BWReader({url: url});
-        const features = await bwReader.readFeatures(chr, bpStart, chr, bpEnd, bpPerPixel);
+        const features = await bwReader.readFeatures(chr, start, chr, end, bpPerPixel);
         assert.equal(features.length, 8);   // Verified in iPad app
 
     });
@@ -131,11 +131,11 @@ suite("testBigWig", function () {
         //chr21:19,146,376-19,193,466
         const url = dataURL + "bigwig/bigWigExample.bw",
             chr = "chr21",
-            bpStart = 18728264,
-            bpEnd = 26996291,
+            start = 18728264,
+            end = 26996291,
             bpPerPixel = 10765.6611328125;    // To match iOS unit test
         const bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel});
+        const features = await bWSource.getFeatures({chr, start, end, bpPerPixel});
         assert.ok(features);
         assert.equal(features.length, 1293);   // Verified in iPad app
 

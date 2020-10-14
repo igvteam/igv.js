@@ -176,14 +176,14 @@ class SequenceTrack {
         return threeFrame;
     }
 
-    async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
+    async getFeatures(chr, start, end, bpPerPixel) {
 
         if (bpPerPixel && bpPerPixel > 1) {
             return null;
         } else {
-            const sequence = await this.browser.genome.sequence.getSequence(chr, bpStart, bpEnd);
+            const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
             return {
-                bpStart: bpStart,
+                bpStart: start,
                 sequence: sequence
             }
         }

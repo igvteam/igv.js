@@ -33,12 +33,11 @@ const ROI = function (config, genome) {
     this.name = config.name;
     this.roiSource =  FeatureSource(config, genome);
     this.color = config.color || defaultHighlightColor;
-};
+}
 
 ROI.prototype.getFeatures = function (chr, start, end) {
-
-    return this.roiSource.getFeatures(chr, start, end);
-};
+    return this.roiSource.getFeatures({chr, start, end});
+}
 
 ROI.prototype.draw = function (drawConfiguration) {
 
