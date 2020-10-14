@@ -7,11 +7,20 @@
     <meta content="" name="description">
     <meta content="" name="author">
     <link href=../img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>hg38 test</title>
 
 </head>
 
 <body>
+
+<h1>Test tracks</h1>
+
+<p>
+<b>Look for console errors and compare with
+    <a target="_blank" href="https://drive.google.com/file/d/1ELE5sjbM3e2M2L5OjXI3vPnFYwZEkcnQ/view?usp=sharing">tracks-hg38.png</a>
+</b>
+</p>
+
 <div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
@@ -21,7 +30,7 @@
     var options =
         {
             genome: "hg38",
-            locus: "chr22:23,850,132-23,888,290",
+            locus: "chr22:23,767,847-23,844,164",
             tracks: [
                 {
                     type: 'gcnv',
@@ -38,7 +47,26 @@
                         "RP-1425_BON_B18-97_3_D1_v1_Exome_GCP": "red",
                     },
                     onlyHandleClicksForHighlightedSamples: false,
+                },
+                {
+                    name: 'GWAS Catalog',
+                    type: 'annotation',
+                    format: 'gtexgwas',
+                    url: 'https://storage.googleapis.com/gtex-igv-files/GWAS_catalog_v1.0.2_signif_only_filtered_reordered_renamed.txt',
+                    indexed: false,
+                    color: 'rgb(100,200,200)',
+                    displayMode: 'EXPANDED',
+                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
+                },
+                {
+                    type: "eqtl",
+                    sourceType: "gtex-ws",
+                    url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
+                    tissueSiteDetailId: "Muscle_Skeletal",
+                    name: "Muscle Skeletal",
+                    visibilityWindow: 1000000
                 }
+
             ]
         };
 
