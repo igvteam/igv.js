@@ -185,14 +185,14 @@ function createStandardControls(browser, config) {
 
     browser.navbarManager = new NavbarManager(browser);
 
-    const $navBar = $('<div>', {id: 'igv-navbar'});
+    const $navBar = $('<div>', { class: 'igv-navbar' });
     browser.$navigation = $navBar;
 
-    const $navbarLeftContainer = $('<div>', {id: 'igv-navbar-left-container'});
+    const $navbarLeftContainer = $('<div>', { class: 'igv-navbar-left-container' });
     $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    const $logo = $('<div>', {id: 'igv-logo'});
+    const $logo = $('<div>', { class: 'igv-logo' });
     $navbarLeftContainer.append($logo);
 
     const logoSvg = logo();
@@ -200,11 +200,11 @@ function createStandardControls(browser, config) {
     logoSvg.css("height", "32px");
     $logo.append(logoSvg);
 
-    browser.$current_genome = $('<div>', {id: 'igv-current-genome'});
+    browser.$current_genome = $('<div>', { class: 'igv-current-genome' });
     $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    const $genomicLocation = $('<div>', {id: 'igv-navbar-genomic-location'});
+    const $genomicLocation = $('<div>', { class: 'igv-navbar-genomic-location' });
     $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget
@@ -218,14 +218,14 @@ function createStandardControls(browser, config) {
         browser.chromosomeSelectWidget.$container.hide();
     }
 
-    const $locusSizeGroup = $('<div>', {id: 'igv-locus-size-group'});
+    const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
     $genomicLocation.append($locusSizeGroup);
 
-    const $searchContainer = $('<div>', {id: 'igv-search-container'});
+    const $searchContainer = $('<div>', {class: 'igv-search-container'});
     $locusSizeGroup.append($searchContainer);
 
     // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
-    browser.$searchInput = $('<input>', {id: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
+    browser.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
     $searchContainer.append(browser.$searchInput);
 
     browser.$searchInput.change(function (e) {
@@ -237,7 +237,7 @@ function createStandardControls(browser, config) {
             });
     });
 
-    const $searchIconContainer = $('<div>', {id: 'igv-search-icon-container'});
+    const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});
     $searchContainer.append($searchIconContainer);
 
     $searchIconContainer.append(createIcon("search"));
@@ -246,7 +246,7 @@ function createStandardControls(browser, config) {
 
     browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 
-    const $navbarRightContainer = $('<div>', {id: 'igv-navbar-right-container'});
+    const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'});
     $navBar.append($navbarRightContainer);
 
     const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');

@@ -87,7 +87,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 @import "igv-trackgear-popup";
 @import "igv-user-feedback";
 
-#igv-root {
+.igv-root {
 
   position: relative;
 
@@ -100,7 +100,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   justify-content: flex-start;
   align-items: stretch;
 
-  #igv-navbar {
+  .igv-navbar {
 
     display: flex;
     flex-flow: row;
@@ -128,7 +128,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
     border-color: $igv-border-color;
     background-color: $igv-navbar-toggle-light-color;
 
-    #igv-navbar-left-container {
+    .igv-navbar-left-container {
 
       display: flex;
       flex-flow: row;
@@ -139,13 +139,13 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
       height: $igv-navbar-height;
       line-height: $igv-navbar-height;
 
-      #igv-logo {
+      .igv-logo {
         width: 34px;
         height: $igv-navbar-height;
         margin-right: 8px;
       }
 
-      #igv-current-genome {
+      .igv-current-genome {
         height: $igv-navbar-height;
         margin-left: 4px;
         margin-right: 4px;
@@ -156,7 +156,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
         text-align: center;
       }
 
-      #igv-navbar-genomic-location {
+      .igv-navbar-genomic-location {
 
         display: flex;
         flex-flow: row;
@@ -166,7 +166,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
         height: 100%;
 
-        #igv-chromosome-select-widget-container {
+        .igv-chromosome-select-widget-container {
 
           display: flex;
           flex-flow: column;
@@ -197,7 +197,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
         }
 
-        #igv-locus-size-group {
+        .igv-locus-size-group {
           display: flex;
           flex-flow: row;
           flex-wrap: nowrap;
@@ -208,7 +208,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
           height: $igv-locus-search-height;
 
           // locus goto | search icon
-          #igv-search-container {
+          .igv-search-container {
 
             display: flex;
             flex-flow: row;
@@ -221,7 +221,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
             line-height: $igv-locus-search-height;
 
             // locus goto
-            input#igv-search-input {
+            input.igv-search-input {
               cursor: text;
 
               width: 85%;
@@ -248,7 +248,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
             }
 
             // search icon container
-            #igv-search-icon-container {
+            .igv-search-icon-container {
               cursor: pointer;
               height: 16px;
               width: 16px;
@@ -256,7 +256,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
           }
 
-          #igv-windowsize-panel-container {
+          .igv-windowsize-panel-container {
             margin-left: 4px;
             user-select: none;
           }
@@ -267,7 +267,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
     }
 
-    #igv-navbar-right-container {
+    .igv-navbar-right-container {
 
       display: flex;
       flex-flow: row;
@@ -427,7 +427,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   }
 
-  #igv-ideogram-container {
+  .igv-ideogram-container {
 
     display: flex;
     flex-flow: row;
@@ -439,12 +439,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
     height: 16px;
     width: 100%;
-
-    //#igv-ideogram-shim {
-    //  height: 100%;
-    //  width: $igv-left-hand-gutter-width;
-    //  background-color: white;
-    //}
 
     .igv-ideogram-content {
       height: 100%;
@@ -463,7 +457,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   }
 
-  #igv-track-container {
+  .igv-track-container {
     position: relative;
     user-select: none;
   }
@@ -491,7 +485,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
 }
 
-#igv-track-container-spinner {
+.igv-track-container-spinner {
 
   position: absolute;
   top: 90%;

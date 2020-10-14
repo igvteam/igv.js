@@ -579,7 +579,7 @@ class TrackView {
 
 function updateViewportShims(viewports, $viewportContainer) {
 
-    const $trackContainer = $('#igv-track-container')
+    const $trackContainer = $('.igv-track-container')
     $trackContainer.find('.igv-multi-locus-separator').remove()
 
     const {x: tx} = documentOffset($trackContainer.get(0))
