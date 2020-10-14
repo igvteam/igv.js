@@ -10,8 +10,8 @@ suite("testBAM", function() {
     test("BAM alignments - CSI index", async function () {
 
         const chr = 'chr1';
-        const bpStart = 155140000;
-        const bpEnd = 155160000;
+        const start = 155140000;
+        const end = 155160000;
 
         const bamReader = new BamReader({
             type: 'bam',
@@ -19,15 +19,15 @@ suite("testBAM", function() {
             indexURL: require.resolve('./data/bam/na12889.bam.csi')
         });
 
-        const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
+        const alignmentContainer = await bamReader.readAlignments(chr, start, end)
         validate(assert, alignmentContainer)
     });
 
     test("BAM alignments", async function () {
 
         const chr = 'chr1';
-        const bpStart = 155140000;
-        const bpEnd = 155160000;
+        const start = 155140000;
+        const end = 155160000;
 
         const bamReader = new BamReader({
             type: 'bam',
@@ -35,7 +35,7 @@ suite("testBAM", function() {
             indexURL: require.resolve('./data/bam/na12889.bam.bai')
         });
 
-        const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
+        const alignmentContainer = await bamReader.readAlignments(chr, start, end)
         validate(assert, alignmentContainer)
     });
 

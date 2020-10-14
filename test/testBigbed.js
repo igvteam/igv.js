@@ -10,14 +10,14 @@ suite("testBigBed", function () {
     test("bed9+2 features", async function () {
         const url = require.resolve("./data/bb/myBigBed2.bb");
         const chr = "chr7";
-        const bpStart = 0;
-        const bpEnd = Number.MAX_SAFE_INTEGER;
+        const start = 0;
+        const end = Number.MAX_SAFE_INTEGER;
         const bwSource = new BWSource({url: url});
 
         const trackType = await bwSource.trackType();
         assert.equal(trackType, "annotation");
 
-        const features = await bwSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 3339);   // Verified in iPad app
 
@@ -32,14 +32,14 @@ suite("testBigBed", function () {
 
         const url = require.resolve("./data/bb/interactExample3.inter.bb");
         const chr = "chr3";
-        const bpStart = 63702628;
-        const bpEnd = 63880091;
+        const start = 63702628;
+        const end = 63880091;
         const bwSource = new BWSource({url: url});
 
         const trackType = await bwSource.trackType();
         assert.equal(trackType,  "interact");
 
-        const features = await bwSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel: 1});
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 18);
 

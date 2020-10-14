@@ -24,12 +24,12 @@ suite("testTDF", function () {
         this.timeout(10000);
         const url = dataURL + "tdf/gstt1_sample.bam.tdf",
             chr = "22",
-            bpstart = 24049020,
+            start = 24049020,
             end = 24375399,
             bpPerPixel = 51304566 / (Math.pow(2, 6) * 700);
 
         const tdfSource = new TDFSource({url: url}, genome);
-        const features = await tdfSource.getFeatures({chr, bpstart, end, bpPerPixel});
+        const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel});
         assert.ok(features);
     })
 
@@ -122,11 +122,11 @@ suite("testTDF", function () {
         this.timeout(10000);
         const url = dataURL + "tdf/gstt1_sample.bam.tdf",
             chr = "22",
-            bpstart = 24376175,
+            start = 24376175,
             end = 24376200,
             bpPerPixel = 1;
         const tdfSource = new TDFSource({url: url}, genome);
-        const features = await tdfSource.getFeatures({chr, bpstart, end, bpPerPixel});
+        const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel});
         assert.ok(features);
 
     })

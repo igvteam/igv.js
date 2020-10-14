@@ -39,10 +39,8 @@ const IdeogramTrack = function (browser) {
 
 }
 
-IdeogramTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-
-    return Promise.resolve([]);
-
+IdeogramTrack.prototype.getFeatures = async function (chr, start, end) {
+    return [];
 };
 
 IdeogramTrack.prototype.computePixelHeight = function (ignore) {

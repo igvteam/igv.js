@@ -54,9 +54,9 @@ RulerTrack.prototype.updateLocusLabel = function () {
 
 };
 
-RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+RulerTrack.prototype.getFeatures = async function (chr, start, end) {
 
-    return Promise.resolve([]);
+    return [];
 
 };
 
