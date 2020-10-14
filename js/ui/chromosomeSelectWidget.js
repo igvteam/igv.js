@@ -30,7 +30,7 @@ const ChromosomeSelectWidget = function (browser, $parent) {
 
     this.showAllChromosomes = browser.config.showAllChromosomes !== false;   // i.e. default to true
 
-    this.$container = $('<div>', { id: 'igv-chromosome-select-widget-container' });
+    this.$container = $('<div>', { class: 'igv-chromosome-select-widget-container' });
     $parent.append(this.$container);
 
     this.$select = $('<select>', {'name': 'chromosome-select-widget'});

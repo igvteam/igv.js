@@ -78,10 +78,10 @@ const Browser = function (options, parentDiv) {
 
     this.parent = parentDiv;
 
-    this.$root = $('<div>', {id: 'igv-root'});
+    this.$root = $('<div>', { class: 'igv-root' });
     $(parentDiv).append(this.$root);
 
-    const $trackContainer = $('<div>', { id: 'igv-track-container' });
+    const $trackContainer = $('<div>', { class: 'igv-track-container' });
     this.$root.append($trackContainer);
 
     this.alert = new Alert(this.$root.get(0))
@@ -104,7 +104,7 @@ const Browser = function (options, parentDiv) {
     // Map of event name -> [ handlerFn, ... ]
     this.eventHandlers = {};
 
-    this.$spinner = $('<div>', { id: 'igv-track-container-spinner' });
+    this.$spinner = $('<div>', { class: 'igv-track-container-spinner' });
     $trackContainer.append(this.$spinner);
 
     this.$spinner.append(createIcon("spinner"));
