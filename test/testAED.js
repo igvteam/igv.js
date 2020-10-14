@@ -15,8 +15,8 @@ suite("testAED", function () {
     test("AED - UTF8 with BOM", async function () {
 
         var chr = "chr2",
-            bpStart = 0,
-            bpEnd = Number.MAX_VALUE,
+            start = 0,
+            end = Number.MAX_VALUE,
             featureSource = FeatureSource({
                     format: 'aed',
                     indexed: false,
@@ -25,7 +25,7 @@ suite("testAED", function () {
                 genome);
 
         // Must get file header first
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const features = await featureSource.getFeatures({chr, start, end});
 
         assert.equal(features.length, 1);
 

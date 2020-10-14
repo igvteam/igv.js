@@ -142,23 +142,23 @@ class TextFeatureSource {
      * range requested.
      *
      * @param chr
-     * @param bpStart
-     * @param bpEnd
+     * @param start
+     * @param end
      * @param bpPerPixel
      */
-    async getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow}) {
+    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
         const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        let intervalStart = bpStart;
-        let intervalEnd = bpEnd;
+        let intervalStart = start;
+        let intervalEnd = end;
         let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
         if (this.config.disableCache !== true &&
             this.featureCache &&
             (this.static || this.featureCache.containsRange(genomicInterval))) {
-            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+            return this.featureCache.queryFeatures(queryChr, start, end);
         } else {
 
             // Use visibility window to potentially expand query interval.
@@ -168,10 +168,10 @@ class TextFeatureSource {
                 // Whole chromosome
                 intervalStart = 0;
                 intervalEnd = Number.MAX_SAFE_INTEGER;
-            } else if (visibilityWindow > (bpEnd - bpStart) && this.expandQuery !== false) {
-                const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
-                intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
-                intervalEnd = bpStart + expansionWindow;
+            } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
+                const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
+                intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
+                intervalEnd = start + expansionWindow;
             }
             genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
 
@@ -201,7 +201,7 @@ class TextFeatureSource {
                 }
             }
         } else {
-            return this.featureCache.queryFeatures(queryChr, bpStart, bpEnd);
+            return this.featureCache.queryFeatures(queryChr, start, end);
         }
     }
 

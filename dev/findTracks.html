@@ -73,9 +73,9 @@
                 console.log(`  id=${t.id}   name=${t.name}`);
             }
 
-            console.log("Find tracks by function function(track) {return track.name.startsWith('GM128')}");
+            console.log("Find tracks by function function(track) {return track.name && track.name.startsWith('GM128')}");
             const tracksByFunction = browser.findTracks(function(track) {
-                return track.name.startsWith('GM128');
+                return track.name && track.name.startsWith('GM128');
             });
             for(let t of tracksByFunction) {
                 console.log(`  id=${t.id}   name=${t.name}`);
@@ -84,7 +84,7 @@
             setTimeout(function () {
                 console.log("Remove 'H3K27' tracks");
                 const tracksToRemove = browser.findTracks(function (track) {
-                    return track.name.includes('H3K27');
+                    return track.name && track.name.includes('H3K27');
                 });
                 for (let t of tracksToRemove) {
                     browser.removeTrack(t);

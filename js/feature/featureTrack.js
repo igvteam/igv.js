@@ -138,9 +138,9 @@ FeatureTrack.prototype.supportsWholeGenome = function () {
     return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
-FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+FeatureTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
     const visibilityWindow = this.visibilityWindow;
-    return this.featureSource.getFeatures({chr, bpStart, bpEnd, bpPerPixel, visibilityWindow});
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
 };
 
 

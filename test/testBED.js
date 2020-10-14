@@ -19,7 +19,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed"),
         }
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures({chr: "chr1", bpStart: 0, bpEnd: 128756129})
+        const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129})
         assert.ok(features);
         assert.equal(features.length, 6);
     })
@@ -30,7 +30,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed.gz"),
         }
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures({chr: "chr1", bpStart: 0, bpEnd: 128756129});
+        const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129});
         assert.ok(features);
         assert.equal(features.length, 6);
     })
@@ -131,12 +131,27 @@ suite("testBed", function () {
         assert.equal(f.repName, 'AT_rich');
     })
 
+    test("splice junctions", async function () {
+
+        const config = {
+            format: "bed",
+            indexed: false,
+            url: require.resolve("./data/bed/splice_junction_track.bed")
+        }
+        const reader = new FeatureFileReader(config);
+        const features = await reader.readFeatures("chr15", 0, Number.MAX_VALUE);
+        assert.equal(features.length, 2);
+        for(let f of features) {
+            const attrs = f.attributes;
+            assert.ok(attrs);
+        }
+    })
 
     test("BED query", async function () {
 
         var chr = "chr1",
-            bpStart = 67655271,
-            bpEnd = 67684468,
+            start = 67655271,
+            end = 67684468,
             featureSource = FeatureSource({
                     format: 'bed',
                     indexed: false,
@@ -146,7 +161,7 @@ suite("testBed", function () {
 
         // Must get file header first
         await featureSource.getHeader();
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(128, features.length);   // feature count. Determined by grepping file
     });
@@ -169,15 +184,15 @@ suite("testBed", function () {
     test("BED query gzip", async function () {
 
         const chr = "chr1",
-            bpStart = 67655271,
-            bpEnd = 67684468,
+            start = 67655271,
+            end = 67684468,
             featureSource = FeatureSource({
                     format: 'bed',
                     url: require.resolve('./data/bed/basic_feature_3_columns.bed.gzipped')
                 },
                 genome);
 
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(128, features.length);   // feature count. Determined by grepping file
         assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
@@ -190,15 +205,15 @@ suite("testBed", function () {
             url: require.resolve("./data/peak/test.broadPeak")
         });
         const chr = "chr22";
-        const bpStart = 16847690;
-        const bpEnd = 20009819;
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const start = 16847690;
+        const end = 20009819;
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(features.length, 100);   // # of features over this region
         const feature = features[0];
         assert.equal(chr, feature.chr);
         assert.equal(feature.start, 16847690);
-        assert.ok(feature.end > bpStart);
+        assert.ok(feature.end > start);
         assert.equal(feature.signal, 5.141275);
     });
 
@@ -212,16 +227,16 @@ suite("testBed", function () {
             genome);
 
         const chr = "chr1";
-        const bpStart = 1;
-        const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(10, features.length);   // # of features over this region
         const feature = features[0];
         assert.equal("GJA9-MYCBP", feature.name);
         assert.equal(chr, feature.chr);
         assert.equal(39328161, feature.start);
-        assert.ok(feature.end > bpStart);
+        assert.ok(feature.end > start);
         assert.equal(7, feature.exons.length);
     });
 
@@ -235,16 +250,16 @@ suite("testBed", function () {
             genome);
 
         const chr = "chr8";
-        const bpStart = 1;
-        const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(7, features.length);   // # of features over this region
         const feature = features[0];
         assert.equal("uc022bbe.2", feature.name);
         assert.equal(chr, feature.chr);
         assert.equal(127735433, feature.start);
-        assert.ok(feature.end > bpStart);
+        assert.ok(feature.end > start);
         assert.equal(3, feature.exons.length);
     });
 
@@ -258,16 +273,16 @@ suite("testBed", function () {
             genome);
 
         const chr = "chr1";
-        const bpStart = 1;
-        const bpEnd = Number.MAX_VALUE;
-        const features = await featureSource.getFeatures({chr, bpStart, bpEnd});
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
         assert.equal(10, features.length);   // # of features over this region
         const feature = features[0];
         assert.equal("GJA9-MYCBP", feature.name);
         assert.equal(chr, feature.chr);
         assert.equal(39328161, feature.start);
-        assert.ok(feature.end > bpStart);
+        assert.ok(feature.end > start);
         assert.equal(3, feature.exons.length);
 
     })
@@ -299,7 +314,7 @@ suite("testBed", function () {
         assert.equal(header.columnNames.length, 172);
         assert.equal(header.highlight.length, 2);
 
-        const features = await featureSource.getFeatures({chr: "chr22", bpStart: 0, bpEnd: Number.MAX_SAFE_INTEGER});
+        const features = await featureSource.getFeatures({chr: "chr22", start: 0, end: Number.MAX_SAFE_INTEGER});
         assert.equal(features.length, 10);
 
     })
@@ -311,7 +326,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/basic_feature_3_columns.bed"),
         }
         const featureSource = FeatureSource(config, genome);
-        const features = await featureSource.getFeatures({chr: "1", bpStart: 67658429, bpEnd: 67659549});
+        const features = await featureSource.getFeatures({chr: "1", start: 67658429, end: 67659549});
         assert.ok(features);
         assert.equal(features.length, 4);
 

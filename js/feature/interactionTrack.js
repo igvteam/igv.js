@@ -117,9 +117,9 @@ InteractionTrack.prototype.getState = function () {
 }
 
 
-InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
+InteractionTrack.prototype.getFeatures = async function (chr, start, end) {
     const visibilityWindow = this.visibilityWindow;
-    const features = await this.featureSource.getFeatures({chr, bpStart, bpEnd, visibilityWindow});
+    const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow});
 
     // Check for score or value
     if (this.hasValue === undefined && features && features.length > 0) {
