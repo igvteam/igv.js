@@ -183,7 +183,7 @@ class TextFeatureSource {
             if (features) {
                 this.ingestFeatures(features, genomicInterval);
             } else {
-                this.featureCache = new FeatureCache();     // Empty cache
+                this.featureCache = new FeatureCache([], genomicInterval);     // Empty cache
             }
         }
 

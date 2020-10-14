@@ -7,13 +7,13 @@
     <meta content="" name="description">
     <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>pacbio</title>
+    <title>IGV - Dev</title>
 
 </head>
 
 <body>
 
-<h1>Pacbio Inversion</h1>
+<h1>1000 Genomes CRAM file</h1>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -23,16 +23,26 @@
 
     var options =
         {
-            genome: "hg38",
-            locus: "chr21:25989964-26011398",
+            genome: "hg19",
+            locus: "slc25a3",
             tracks: [
                 {
                     type: 'alignment',
                     format: 'bam',
-                    url: 'https://www.dropbox.com/s/3s87gv449xon5jf/hg38_inv.bam?dl=0',
-                    indexURL: 'https://www.dropbox.com/s/pebnviqo7bu4vja/hg38_inv.bam.bai?dl=0',
-                    name: 'Pacbio Inversion'
-                }
+                    url: 'https://www.dropbox.com/s/tb6vueic5t1bvcv/heart_slc25a3.bam?dl=0',
+                    indexed: false,
+                    name: 'Heart'
+                },
+                {
+                    "type": "alignment",
+                    "name": "Heart - Downsampled",
+                    "format": "bam",
+                    "url": "https://www.dropbox.com/s/tb6vueic5t1bvcv/heart_slc25a3.bam?dl=0",
+                    "indexURL": "https://www.dropbox.com/s/x22tg6s3umkp5yy/heart_slc25a3.bam.bai?dl=0",
+                    samplingDepth: 5,
+                    samplingWindowSize: 1000
+                },
+
 
             ]
         };

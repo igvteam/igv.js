@@ -82,17 +82,18 @@ class FeatureFileReader {
         if (index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
-            this.loadFeaturesFromDataURI();
+            return this.loadFeaturesFromDataURI();
         } else {
             return this.loadFeaturesNoIndex()
         }
 
-    }
+     }
 
     async readHeader() {
 
         if (this.dataURI) {
-            return this.loadFeaturesFromDataURI(this.dataURI)
+            this.loadFeaturesFromDataURI(this.dataURI);
+            return this.header;
         } else {
 
             if (this.config.indexURL) {
@@ -283,13 +284,20 @@ class FeatureFileReader {
 
     async loadFeaturesFromDataURI() {
 
-        const plain = URIUtils.decodeDataURI(this.dataURI)
-        this.header = this.parser.parseHeader(plain);
-        if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
-            this.format = 'gff3';
+        if (this.features) {
+            // An optimization hack for non-indexed files, features are temporarily cached when header is read.
+            const tmp = this.features;
+            delete this.features;
+            return tmp;
+        } else {
+            const plain = URIUtils.decodeDataURI(this.dataURI)
+            this.header = this.parser.parseHeader(plain);
+            if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
+                this.format = 'gff3';
+            }
+            this.features = this.parser.parseFeatures(plain);
+            return this.features;
         }
-        const features = this.parser.parseFeatures(plain);
-        return features;
     }
 
 }
