@@ -1,0 +1,1 @@
+Some examples of using data uris, primarily to support igv-reports.

@@ -1,7 +1,0 @@
-{
-"version": 3,
-"mappings": "AACA,iCAAkC;EAChC,UAAU,EAAE,IAAI;EAChB,UAAU,EAAE,IAAI;;AAGlB,sCAAuC;EACrC,WAAW,EAAE,IAAI;EACjB,UAAU,EAAE,KAAK;EACjB,KAAK,EAAE,kBAAkB;EACzB,gBAAgB,EAAE,mBAAmB",
-"sources": ["custom-track-click.scss"],
-"names": [],
-"file": "custom-track-click.css"
-}
