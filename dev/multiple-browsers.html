@@ -6,8 +6,7 @@
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     <meta content="" name="description">
     <meta content="" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
+    <title>Dev - Multiple Browser</title>
 
 </head>
 
@@ -38,55 +37,42 @@
 
     import igv from "../js/index.js";
 
+    document.getElementById("removeBrowsersButton").onclick = () => igv.removeAllBrowsers()
+
     const config_a =
         {
             genome: "hg19",
             locus: 'egfr',
-            tracks: [
-                {
-                    "url": "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
-                    "indexed": false,
-                    "isLog": true,
-                    "name": "GBM Copy # (TCGA Broad GDAC)"
-                }
-            ]
+            tracks:
+                [
+                    {
+                        "url": "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                        "indexed": false,
+                        "isLog": true,
+                        "name": "GBM Copy # (TCGA Broad GDAC)"
+                    }
+                ]
         };
 
     const config_b =
         {
             genome: "hg19",
             locus: 'myc',
-            tracks: [
-                {
-                    "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
-                    "name": "ctcf bigwig"
-                }
-            ]
+            tracks:
+                [
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
+                        "name": "ctcf bigwig"
+                    }
+                ]
         };
 
-    igv.createBrowser(document.getElementById("ba"), config_a)
-        .then(function (b) {
-            console.log("Created browser guid: " + b.guid);
-        });
-
-    igv.createBrowser(document.getElementById("bb"), config_b)
-        .then(function (b) {
-            console.log("Created browser guid: " + b.guid);
-        });
-
-    igv.createBrowser(document.getElementById("bc"), config_b)
-        .then(function (b) {
-            console.log("Created browser guid: " + b.guid);
-        });
-
-    igv.createBrowser(document.getElementById("bd"), config_a)
-        .then(function (b) {
-            console.log("Created browser guid: " + b.guid);
-        });
-
-    document.getElementById("removeBrowsersButton").onclick = function () {
-        igv.removeAllBrowsers();
-    }
+    (async () => {
+        await igv.createBrowser(document.getElementById("ba"), config_a)
+        await igv.createBrowser(document.getElementById("bb"), config_b)
+        await igv.createBrowser(document.getElementById("bc"), config_a)
+        await igv.createBrowser(document.getElementById("bd"), config_b)
+    })()
 
 
 </script>
