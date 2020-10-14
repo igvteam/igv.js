@@ -8,7 +8,7 @@
     <meta content="" name="author">
     <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
 
-    <title>igv.js</title>
+    <title>hg19 test</title>
 
 </head>
 
@@ -16,12 +16,14 @@
 
 <p>
 
-<h1>Common file types</h1>
 
-<div>
-    <button id="bmBtn">Bookmark</button>
-</div>
+<h1>Test tracks</h1>
 
+<p>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1E7SkKtPHgDqnlXYm2DEWOGBsbSAIBnaD/view?usp=sharing">tracks-hg19.png</a>
+    </b>
+</p>
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -39,13 +41,6 @@
                         name: "Phase 3 WGS variants",
                         url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
                         indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
-                    },
-                    {
-                        name: "GATK gcvf (chr20)",
-                        type: "variant",
-                        format: "vcf",
-                        url: "gs://gatk-tutorials/workshop_1908/2-germline/gvcfs/father.g.vcf.gz",
-                        indexURL: "gs://gatk-tutorials/workshop_1908/2-germline/gvcfs/father.g.vcf.gz.tbi"
                     },
                     {
                         name: "ENCODE bigwig",
@@ -75,10 +70,10 @@
                         autoscaleGroup: '1'
                     },
                     {
-                        "name": "Merged",
-                        "height": 50,
-                        "type": "merged",
-                        "tracks": [
+                        name: "Merged",
+                        height: 50,
+                        type: "merged",
+                        tracks: [
                             {
                                 "type": "wig",
                                 "format": "bigwig",

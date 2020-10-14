@@ -150,7 +150,7 @@ function visibilityWindowMenuItem(trackView) {
 
         const callback = () => {
 
-            let value = trackView.browser.inputDialog.inputDialog.input.value
+            let value = trackView.browser.inputDialog.input.value
             value = '' === value || undefined === value ? -1 : value.trim()
 
             trackView.track.visibilityWindow = Number.parseInt(value);
