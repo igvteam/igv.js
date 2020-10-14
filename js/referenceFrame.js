@@ -132,15 +132,34 @@ async function createReferenceFrameList(browser, loci) {
             } else {
                 // Try webservice
                 let searchServiceResponse = await searchWebService(browser, locus, searchConfig)
-                const referenceFrame = createReferenceFrame({ browser: browser, searchServiceResponse, searchConfig, viewportWidth })
-                list.push(referenceFrame)
+                if (searchServiceResponse && '' !== searchServiceResponse.result) {
+                    const referenceFrame = createReferenceFrame({ browser: browser, searchServiceResponse, searchConfig, viewportWidth })
+                    list.push(referenceFrame)
+                }
             }
         }
 
     }
 
-    return list;
+    if (0 === list.length) {
+        return undefined
+    } else {
 
+        if (list.length < loci.length) {
+            const viewportWidth = browser.calculateViewportWidth(list.length)
+            for (let referenceFrame of list) {
+                updateBPP(referenceFrame, viewportWidth)
+            }
+        }
+
+        return list
+    }
+
+}
+
+function updateBPP(referenceFrame, viewportWidth) {
+    referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.initialStart) / viewportWidth
+    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
 }
 
 function createReferenceFrame(params) {
@@ -288,7 +307,6 @@ function parseSearchResults(browser, data) {
     return results;
 
 }
-
 
 function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
 
