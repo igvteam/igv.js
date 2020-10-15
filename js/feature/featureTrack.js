@@ -301,10 +301,6 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
             featureData.push(
               {name: (feature.end - feature.start).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), value: 'bp length'})
 
-            if (feature.attributes.label) {
-                featureData.push({name: 'label', value: feature.attributes.label.replace(/_/g, " ")})
-            }
-
             if (feature.attributes.uniquely_mapped) {
                 featureData.push(
                     {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
@@ -316,9 +312,6 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
             if (feature.attributes.uniquely_mapped && feature.attributes.multi_mapped) {
                 featureData.push(
                     {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
-            }
-            if (feature.attributes.motif) {
-                featureData.push({name: feature.attributes.motif, value: 'motif'})
             }
             if (feature.attributes.maximum_spliced_alignment_overhang) {
                 featureData.push({name: feature.attributes.maximum_spliced_alignment_overhang, value: 'bp maximum overhang'})
@@ -341,8 +334,8 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
             //add any other keys not already processed above
             for (let key of Object.keys(feature.attributes)) {
                 if (![
-                    "label", "line_width", "color", "left_shape", "right_shape", "info",
-                    "annotated_junction", "uniquely_mapped", "multi_mapped", "motif", "maximum_spliced_alignment_overhang",
+                    "line_width", "color", "left_shape", "right_shape", "info",
+                    "annotated_junction", "uniquely_mapped", "multi_mapped", "maximum_spliced_alignment_overhang",
                     "num_samples_with_this_junction", "percent_samples_with_this_junction", "num_samples_total",
                     ].includes(key)) {
                     featureData.push({name: key.replace(/_/g, " "), value: feature.attributes[key].replace(/_/g, " ")})
