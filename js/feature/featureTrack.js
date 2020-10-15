@@ -34,17 +34,17 @@ import {PaletteColorTable} from "../util/colorPalletes.js";
 import GtexUtils from "../gtex/gtexUtils.js";
 
 
-var JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
+let JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
 
 // Lock in color-to-motif mapping so it's independent of data loading order. This list may not include all possible
 // motif values as this varies depending on the RNA-seq pipeline. The current list is based on STAR v2.4 docs.
-var someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
+const someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
 someMotifValues.forEach(motif => {
     JUNCTION_MOTIF_PALETTE.getColor(motif);
 })
 
 // rendering context with values that only need to be computed once per render, rather than for each splice junction
-var junctionRenderingContext = {}
+const junctionRenderingContext = {}
 
 const FeatureTrack = extend(TrackBase,
 
@@ -977,7 +977,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.strokeStyle = color;
     ctx.stroke();
 
-    const drawArrowhead = function(ctx, x, y, size) {
+    const drawArrowhead = (ctx, x, y, size) => {
         //TODO draw better arrow heads: https://stackoverflow.com/questions/21052972/curved-thick-arrows-on-canvas
         ctx.beginPath();
         ctx.moveTo(x, y);
