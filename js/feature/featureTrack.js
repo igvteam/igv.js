@@ -206,7 +206,7 @@ FeatureTrack.prototype.draw = function (options) {
 
         if (this.config.type == 'spliceJunctions') {
             const vp = this.browser.trackViews[0].viewports[0]
-            junctionRenderingContext.referenceFrame = vp.genomicState.referenceFrame;
+            junctionRenderingContext.referenceFrame = vp.referenceFrame;
             junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
             junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(vp.contentDiv).width());
 
@@ -788,7 +788,8 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
-    feature.isVisible = false // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
+    // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
+    feature.isVisible = false
 
     const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
     const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
@@ -813,7 +814,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideStrand === feature.strand) {
         return
     }
-    
+
     // check if splice junction is inside viewport
     if (this.config.minJunctionEndsVisible) {
         let numJunctionEndsVisible = 0
