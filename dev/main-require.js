@@ -3,10 +3,6 @@
 // directory.
 requirejs.config({
     baseUrl: '../dist'
-    // ,
-    // paths: {
-    //     app: '../app'
-    // }
 });
 
 // Start loading the main app file. Put all of
