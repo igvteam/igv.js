@@ -25,7 +25,8 @@
 
 import {createVCFVariant} from "./variant.js";
 import getDataWrapper from "../feature/dataWrapper.js";
-import {splitStringRespectingQuotes} from "../util/stringUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 /**
  * Parser for VCF files.
@@ -48,7 +49,7 @@ VcfParser.prototype.parseHeader = function (data) {
         throw new Error("Invalid VCF file: missing fileformat line");
     }
 
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
 
         if (line.startsWith("#")) {
 
@@ -74,7 +75,7 @@ VcfParser.prototype.parseHeader = function (data) {
                     // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
                     // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
 
-                    const tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+                    const tokens = StringUtils.splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
 
                     for (let token of tokens) {
                         var kv = token.split("=");
@@ -144,9 +145,9 @@ VcfParser.prototype.parseFeatures = function (data) {
     const dataWrapper = getDataWrapper(data);
     const nExpectedColumns = 8 + (callSets ? callSets.length + 1: 0);
     let line;
-    while (line = dataWrapper.nextLine()) {
+    while ((line = dataWrapper.nextLine()) !== undefined) {
 
-        if (!line.startsWith("#")) {
+        if (line && !line.startsWith("#")) {
             const tokens = line.split("\t");
             if (tokens.length === nExpectedColumns) {
                 const variant = createVCFVariant(tokens);
@@ -186,9 +187,7 @@ VcfParser.prototype.parseFeatures = function (data) {
                             }
                         });
                     }
-
                 }
-
             }
         }
     }

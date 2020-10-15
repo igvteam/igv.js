@@ -26,13 +26,11 @@
 import FeatureSource from '../feature/featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVMath from "../igv-math.js";
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
 import GtexUtils from "./gtexUtils.js";
-
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
+import deepCopy from "../util/deepCopy.js"
 
 const EqtlTrack = extend(TrackBase,
 
@@ -126,18 +124,15 @@ EqtlTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
 
 };
 
-EqtlTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
+EqtlTrack.prototype.getFeatures = async function (chr, start, end) {
 
     const pValueField = this.pValueField;
-
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd)
-        .then(function (features) {
-            features.forEach(function (f) {
-                f.value = f[pValueField];
-            })
-            return features;
-        })
-};
+    const features = await this.featureSource.getFeatures({chr, start, end});
+    features.forEach(function (f) {
+        f.value = f[pValueField];
+    })
+    return features;
+}
 
 EqtlTrack.prototype.draw = function (options) {
 
@@ -150,7 +145,7 @@ EqtlTrack.prototype.draw = function (options) {
         pixelHeight = options.pixelHeight,
         bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
         yScale = (self.dataRange.max - self.dataRange.min) / pixelHeight,
-        selection = options.genomicState.selection;
+        selection = options.referenceFrame.selection;
 
     // Background
     if (this.background) IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
@@ -249,7 +244,7 @@ EqtlTrack.prototype.popupData = function (config) {
     let genomicLocation = config.genomicLocation,
         xOffset = config.x,
         yOffset = config.y,
-        referenceFrame = config.viewport.genomicState.referenceFrame,
+        referenceFrame = config.viewport.referenceFrame,
         tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
         dotSize = this.dotSize,
         tissue = this.name,
@@ -280,24 +275,8 @@ EqtlTrack.prototype.popupData = function (config) {
 
 
 EqtlTrack.prototype.menuItemList = function () {
-
-    var self = this,
-        menuItems = [];
-
-    menuItems.push(dataRangeMenuItem(this.trackView));
-
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-
-    return menuItems;
-
-};
+    return MenuUtils.numericDataMenuItems(this.trackView)
+}
 
 EqtlTrack.prototype.doAutoscale = function (featureList) {
 
@@ -316,6 +295,16 @@ EqtlTrack.prototype.doAutoscale = function (featureList) {
     }
 
     return this.dataRange;
+}
+
+EqtlTrack.prototype.getState = function () {
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
+    if (!this.autoscale && this.dataRange) {
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
+    }
+    return state;
 }
 
 export default EqtlTrack;

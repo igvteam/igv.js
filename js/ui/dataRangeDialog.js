@@ -25,157 +25,137 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import makeDraggable from "./draggable.js";
-import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
+import {makeDraggable, UIUtils} from "../../node_modules/igv-utils/src/index.js";
 
-const DataRangeDialog = function ($parent, browser) {
-    var self = this,
-        $header,
-        $buttons,
-        $div;
+class DataRangeDialog {
 
-    this.browser = browser;
+    constructor($parent, alert) {
 
-    // dialog container
-    this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
-    $parent.append(this.$container);
-    this.$container.offset({left: 0, top: 0});
+        this.alert = alert;
 
-    // dialog header
-    $header = $("<div>", {class: 'igv-generic-dialog-header'});
-    this.$container.append($header);
-    attachDialogCloseHandlerWithParent($header, function () {
-        self.$minimum_input.val(undefined);
-        self.$maximum_input.val(undefined);
-        self.$container.offset({left: 0, top: 0});
-        self.$container.hide();
-    });
+        // dialog container
+        this.$container = $("<div>", {class: 'igv-generic-dialog-container'});
+        $parent.append(this.$container);
+        this.$container.offset({left: 0, top: 0});
+
+        // dialog header
+        const $header = $("<div>", {class: 'igv-generic-dialog-header'});
+        this.$container.append($header);
+        UIUtils.attachDialogCloseHandlerWithParent($header[0], () => {
+            this.$minimum_input.val(undefined);
+            this.$maximum_input.val(undefined);
+            this.$container.offset({left: 0, top: 0});
+            this.$container.hide();
+        });
 
 
-    // minimun
-    this.$minimum = $("<div>", {class: 'igv-generic-dialog-label-input'});
-    this.$container.append(this.$minimum);
-    //
-    $div = $('<div>');
-    $div.text('Minimum');
-    this.$minimum.append($div);
-    //
-    this.$minimum_input = $("<input>");
-    this.$minimum.append(this.$minimum_input);
+        // minimun
+        this.$minimum = $("<div>", {class: 'igv-generic-dialog-label-input'});
+        this.$container.append(this.$minimum);
+        const $mindiv = $('<div>');
+        $mindiv.text('Minimum');
+        this.$minimum.append($mindiv);
+        this.$minimum_input = $("<input>");
+        this.$minimum.append(this.$minimum_input);
 
 
-    // maximum
-    this.$maximum = $("<div>", {class: 'igv-generic-dialog-label-input'});
-    this.$container.append(this.$maximum);
-    //
-    $div = $('<div>');
-    $div.text('Maximum');
-    this.$maximum.append($div);
-    //
-    this.$maximum_input = $("<input>");
-    this.$maximum.append(this.$maximum_input);
+        // maximum
+        this.$maximum = $("<div>", {class: 'igv-generic-dialog-label-input'});
+        this.$container.append(this.$maximum);
+        const $maxdiv = $('<div>');
+        $maxdiv.text('Maximum');
+        this.$maximum.append($maxdiv);
+        this.$maximum_input = $("<input>");
+        this.$maximum.append(this.$maximum_input);
 
-    // ok | cancel
-    $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
-    this.$container.append($buttons);
+        // ok | cancel
+        const $buttons = $("<div>", {class: 'igv-generic-dialog-ok-cancel'});
+        this.$container.append($buttons);
 
-    // ok
-    this.$ok = $("<div>");
-    $buttons.append(this.$ok);
-    this.$ok.text('OK');
+        // ok
+        this.$ok = $("<div>");
+        $buttons.append(this.$ok);
+        this.$ok.text('OK');
 
-    // cancel
-    this.$cancel = $("<div>");
-    $buttons.append(this.$cancel);
-    this.$cancel.text('Cancel');
+        // cancel
+        this.$cancel = $("<div>");
+        $buttons.append(this.$cancel);
+        this.$cancel.text('Cancel');
 
-    this.$cancel.on('click', function () {
-        self.$minimum_input.val(undefined);
-        self.$maximum_input.val(undefined);
-        self.$container.offset({left: 0, top: 0});
-        self.$container.hide();
-    });
+        this.$cancel.on('click', () => {
+            this.$minimum_input.val(undefined);
+            this.$maximum_input.val(undefined);
+            this.$container.offset({left: 0, top: 0});
+            this.$container.hide();
+        });
 
-    //this.$container.draggable({ handle:$header.get(0) });
-    makeDraggable(this.$container.get(0), $header.get(0));
+        //this.$container.draggable({ handle:$header.get(0) });
+        makeDraggable(this.$container.get(0), $header.get(0));
 
-    this.$container.hide();
-};
-
-DataRangeDialog.prototype.configure = function (config) {
-
-    var self = this,
-        dataRange,
-        min,
-        max;
-
-    dataRange = config.trackView.dataRange();
-
-    if (dataRange) {
-        min = dataRange.min;
-        max = dataRange.max;
-    } else {
-        min = 0;
-        max = 100;
+        this.$container.hide();
     }
 
-    this.$minimum_input.val(min);
-    this.$maximum_input.val(max);
+    configure(config) {
 
-    this.$minimum_input.unbind();
-    this.$minimum_input.on('keyup', function (e) {
-        if (13 === e.keyCode) {
-            processResults.call(self, config);
-        }
-    });
-
-    this.$maximum_input.unbind();
-    this.$maximum_input.on('keyup', function (e) {
-        if (13 === e.keyCode) {
-            processResults.call(self, config);
-        }
-    });
-
-    this.$ok.unbind();
-    this.$ok.on('click', function () {
-        processResults.call(self, config);
-    });
-};
-
-function processResults(config) {
-    var self = this,
-        min,
-        max;
-
-    min = parseFloat(this.$minimum_input.val());
-    max = parseFloat(this.$maximum_input.val());
-    if (isNaN(min) || isNaN(max)) {
-        self.browser.alert.present("Must input numeric values", undefined);
-    } else {
-
-        if (true === config.trackView.track.autoscale) {
-            $('#datarange-autoscale').trigger('click');
+        const dataRange = config.trackView.dataRange();
+        let min;
+        let max;
+        if (dataRange) {
+            min = dataRange.min;
+            max = dataRange.max;
+        } else {
+            min = 0;
+            max = 100;
         }
 
-        config.trackView.setDataRange(min, max, false);
+        this.$minimum_input.val(min);
+        this.$maximum_input.val(max);
+
+        this.$minimum_input.unbind();
+        this.$minimum_input.on('keyup', (e) => {
+            if (13 === e.keyCode) {
+                this.processResults(config);
+            }
+        });
+
+        this.$maximum_input.unbind();
+        this.$maximum_input.on('keyup', (e) => {
+            if (13 === e.keyCode) {
+                this.processResults(config);
+            }
+        });
+
+        this.$ok.unbind();
+        this.$ok.on('click',  (e) => {
+            this.processResults(config);
+        });
     }
 
-    this.$minimum_input.val(undefined);
-    this.$maximum_input.val(undefined);
-    this.$container.offset({left: 0, top: 0});
-    this.$container.hide();
+
+    processResults(config) {
+
+        const min = parseFloat(this.$minimum_input.val());
+        const max = parseFloat(this.$maximum_input.val());
+        if (isNaN(min) || isNaN(max)) {
+            this.alert.present("Must input numeric values", undefined);
+        } else {
+            config.trackView.setDataRange(min, max);
+        }
+
+        this.$minimum_input.val(undefined);
+        this.$maximum_input.val(undefined);
+        this.$container.offset({left: 0, top: 0});
+        this.$container.hide();
+    }
+
+    present($parent) {
+
+        const offset_top = $parent.offset().top;
+        const scroll_top = $('body').scrollTop();
+
+        this.$container.offset({left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top)});
+        this.$container.show();
+    }
 }
 
-DataRangeDialog.prototype.present = function ($parent) {
-
-    var offset_top,
-        scroll_top;
-
-    offset_top = $parent.offset().top;
-    scroll_top = $('body').scrollTop();
-
-    this.$container.offset({left: $parent.width() - this.$container.width(), top: (offset_top + scroll_top)});
-    this.$container.show();
-};
-
-export default DataRangeDialog;
+export default DataRangeDialog

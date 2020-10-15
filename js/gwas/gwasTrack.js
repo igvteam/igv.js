@@ -29,9 +29,9 @@ import IGVGraphics from "../igv-canvas.js";
 import {BinnedColorScale, ConstantColorScale} from "../util/colorScale.js";
 import {doAutoscale, extend} from "../util/igvUtils.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
 import gwasColors from "./gwasColors.js"
 import {randomColor} from "../util/colorPalletes.js"
+import deepCopy from "../util/deepCopy.js"
 
 const DEFAULT_POPOVER_WINDOW = 100000000;
 //const type = "gwas";
@@ -86,9 +86,9 @@ GWASTrack.prototype.supportsWholeGenome = function () {
     return true;
 }
 
-GWASTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
-};
+GWASTrack.prototype.getFeatures = function (chr, start, end) {
+    return this.featureSource.getFeatures({chr, start, end});
+}
 
 GWASTrack.prototype.draw = function (options) {
 
@@ -111,7 +111,7 @@ GWASTrack.prototype.draw = function (options) {
             if (pos < bpStart) continue;
             if (pos > bpEnd) break;
 
-            const colorScale = this.getColorScale(variant.realChr || variant.chr);
+            const colorScale = this.getColorScale(variant._f ? variant._f.chr : variant.chr);
 
             let color;
             let val;
@@ -139,14 +139,14 @@ GWASTrack.prototype.draw = function (options) {
     }
 }
 
-GWASTrack.prototype.getColorScale = function (chrName) {
+GWASTrack.prototype.getColorScale = function (chr) {
 
     if (this.useChrColors) {
-        let cs = this.colorScales[chrName];
+        let cs = this.colorScales[chr];
         if (!cs) {
-            const color = gwasColors[chrName] || randomColor();
+            const color = gwasColors[chr] || randomColor();
             cs = new ConstantColorScale(color);
-            this.colorScales[chrName] = cs;
+            this.colorScales[chr] = cs;
         }
         return cs;
     } else {
@@ -208,7 +208,7 @@ GWASTrack.prototype.popupData = function (clickState) {
                     data.push("...");
                     break;
                 }
-                if(typeof f.popupData === 'function') {
+                if (typeof f.popupData === 'function') {
                     data = data.concat(f.popupData())
                 } else {
                     const chr = f.realChr || f.chr;
@@ -231,19 +231,7 @@ GWASTrack.prototype.popupData = function (clickState) {
 }
 
 GWASTrack.prototype.menuItemList = function () {
-    const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
-    const self = this;
-    const menuItems = [];
-    menuItems.push(dataRangeMenuItem(this.trackView));
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-    return menuItems;
+    return MenuUtils.numericDataMenuItems(this.trackView);
 }
 
 
@@ -274,6 +262,16 @@ GWASTrack.prototype.doAutoscale = function (featureList) {
     }
 
     return this.dataRange;
+}
+
+GWASTrack.prototype.getState = function () {
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
+    if (!this.autoscale && this.dataRange) {
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
+    }
+    return state;
 }
 
 

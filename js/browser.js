@@ -24,8 +24,8 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView from "./trackView.js";
-import ViewPort from "./viewport.js";
+import TrackView, {maxViewportContentHeight, updateViewportShims} from "./trackView.js";
+import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
 import ROI from "./roi.js";
@@ -34,44 +34,58 @@ import XMLSession from "./session/igvXmlSession.js";
 import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
-import IdeoPanel from "./ideogram.js";
-import ReferenceFrame from "./referenceFrame.js";
+import ReferenceFrame, {
+    adjustReferenceFrame,
+    createReferenceFrameList,
+    createReferenceFrameWithAlignment
+} from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
-import {getFilename, isFilePath} from './util/fileUtils.js'
-import {inferFileFormat, inferTrackTypes} from "./util/trackUtils.js";
 import {createIcon} from "./igv-icons.js";
-import {compressString, isString, numberFormatter, splitLines, uncompressString} from "./util/stringUtils.js"
-import {guid, pageCoordinates} from "./util/domUtils.js";
-import {decodeDataURI, resolveURL} from "./util/uriUtils.js";
-import {doAutoscale, download, validateLocusExtent} from "./util/igvUtils.js";
-import google from "./google/googleUtils.js";
+import {buildOptions, doAutoscale, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
+import IdeogramTrack from "./ideogramTrack.js";
+import {defaultSequenceTrackOrder} from './sequenceTrack.js';
+import {
+    DOMUtils,
+    FileUtils,
+    GoogleUtils,
+    StringUtils,
+    TrackUtils,
+    URIUtils
+} from "../node_modules/igv-utils/src/index.js";
+import FeatureSource from "./feature/featureSource.js"
 
+// igv.scss - $igv-multi-locus-gap-width
+const multiLocusGapDivWidth = 1
+const multiLocusGapMarginWidth = 2
+
+const multiLocusGapWidth = (2 * multiLocusGapMarginWidth) + multiLocusGapDivWidth
+
+const leftHandGutterWidth = 50
+const rightHandGutterWidth = 36
+
+const trackManipulationHandleWidth = 12
+const trackManipulationHandleMarginWidth = 2
+
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
 const Browser = function (options, parentDiv) {
 
-    this.guid = guid();
+    this.guid = DOMUtils.guid();
     this.namespace = '.browser_' + this.guid;
     this.config = options;
 
     this.parent = parentDiv;
 
-    this.$root = $('<div class="igv-root-div">');
+    this.$root = $('<div>', { class: 'igv-root' });
     $(parentDiv).append(this.$root);
 
-    this.$content = $('<div class="igv-content-div">');
-    this.$root.append(this.$content);
-
-    this.$contentHeader = $('<div>', {class: 'igv-content-header'});
-    this.$content.append(this.$contentHeader);
-
-    const $trackContainer = $('<div class="igv-track-container-div">');
-    this.$content.append($trackContainer);
-
-    this.trackContainerDiv = $trackContainer.get(0);
+    const $trackContainer = $('<div>', { class: 'igv-track-container' });
+    this.$root.append($trackContainer);
 
     this.alert = new Alert(this.$root.get(0))
+    this.trackContainer = $trackContainer.get(0);
 
     initialize.call(this, options);
 
@@ -90,7 +104,7 @@ const Browser = function (options, parentDiv) {
     // Map of event name -> [ handlerFn, ... ]
     this.eventHandlers = {};
 
-    this.$spinner = $('<div class="igv-track-container-spinner">');
+    this.$spinner = $('<div>', { class: 'igv-track-container-spinner' });
     $trackContainer.append(this.$spinner);
 
     this.$spinner.append(createIcon("spinner"));
@@ -167,22 +181,21 @@ Browser.prototype.stopSpinner = function () {
 };
 
 Browser.prototype.isMultiLocusMode = function () {
-    return this.genomicStateList && this.genomicStateList.length > 1;
+    return this.referenceFrameList && this.referenceFrameList.length > 1;
 };
 
-Browser.prototype.addTrackToFactory = function (name, track){
+Browser.prototype.addTrackToFactory = function (name, track) {
     TrackFactory.addTrack(name, track);
 }
 
 Browser.prototype.isMultiLocusWholeGenomeView = function () {
 
-    if (undefined === this.genomicStateList || 1 === this.genomicStateList.length) {
+    if (undefined === this.referenceFrameList || 1 === this.referenceFrameList.length) {
         return false;
     }
 
-    for (let genomicState of this.genomicStateList) {
-        const chromosomeName = genomicState.referenceFrame.chrName.toLowerCase();
-        if ('all' === chromosomeName) {
+    for (let referenceFrame of this.referenceFrameList) {
+        if ('all' === referenceFrame.chr.toLowerCase()) {
             return true;
         }
     }
@@ -193,19 +206,12 @@ Browser.prototype.isMultiLocusWholeGenomeView = function () {
 // Render browser display as SVG
 Browser.prototype.toSVG = function () {
 
-    const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
-    const anyViewportContainerBBox = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
-    const ideoPanelBBox = this.ideoPanel ? this.ideoPanel.panels[0].$ideogram.get(0).getBoundingClientRect() : {
-        height: 0,
-        width: 0
-    };
+    const {x, y, width, height} = this.trackContainer.getBoundingClientRect();
+    const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
 
-    // multi-locus inter-panel gap
-    const multiLocusGap = 8;
+    const w = width + (this.referenceFrameList.length - 1) * multiLocusGapWidth;
 
-    const w = trackContainerBBox.width + (this.genomicStateList.length - 1) * multiLocusGap;
-
-    const h_output = trackContainerBBox.height + ideoPanelBBox.height;
+    const h_output = height;
     const h_render = 8000;
 
     let svgContext = new C2S(
@@ -216,7 +222,7 @@ Browser.prototype.toSVG = function () {
 
             backdropColor: 'white',
 
-            multiLocusGap: multiLocusGap,
+            multiLocusGap: multiLocusGapWidth,
 
             viewbox:
                 {
@@ -228,17 +234,11 @@ Browser.prototype.toSVG = function () {
 
         });
 
-    const dx = anyViewportContainerBBox.x - trackContainerBBox.x;
-
-    // ideoPanel -> SVG
-    if (this.ideoPanel) {
-
-        this.ideoPanel.renderSVGContext(svgContext, {deltaX: dx, deltaY: 0});
-    }
+    const dx = vpx - x;
 
     // tracks -> SVG
     for (let trackView of this.trackViews) {
-        trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: (ideoPanelBBox.height - trackContainerBBox.y)});
+        trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y});
     }
 
     // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
@@ -254,7 +254,7 @@ Browser.prototype.saveSVGtoFile = function (config) {
 
     if (config.$container) {
 
-        const trackContainerBBox = this.trackContainerDiv.getBoundingClientRect();
+        const trackContainerBBox = this.trackContainer.getBoundingClientRect();
 
         config.$container.empty();
         config.$container.width(trackContainerBBox.width);
@@ -263,9 +263,8 @@ Browser.prototype.saveSVGtoFile = function (config) {
 
     const path = config.filename || 'igv.svg';
     const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-    download(path, data);
-
-};
+    FileUtils.download(path, data);
+}
 
 /**
  * Initialize a session from an object, json, or by loading from a file.
@@ -273,7 +272,6 @@ Browser.prototype.saveSVGtoFile = function (config) {
  * TODO Really should be split into at least 2 functions, load from file and load from object/json
  *
  * @param options
- * @param config
  * @returns {*}
  */
 Browser.prototype.loadSession = async function (options) {
@@ -283,7 +281,7 @@ Browser.prototype.loadSession = async function (options) {
     if (options.url || options.file) {
         session = await loadSessionFile(options)
     } else {
-        session = options
+        session = options;
     }
     return this.loadSessionObject(session);
 
@@ -300,7 +298,7 @@ Browser.prototype.loadSession = async function (options) {
         } else {
             let filename = options.filename
             if (!filename) {
-                filename = (options.url ? getFilename(options.url) : options.file.name)
+                filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
             }
 
             if (filename.endsWith(".xml")) {
@@ -322,6 +320,12 @@ Browser.prototype.loadSession = async function (options) {
     }
 }
 
+
+/**
+ * Note:  public API function
+ * @param session
+ * @returns {Promise<void>}
+ */
 Browser.prototype.loadSessionObject = async function (session) {
 
     this.removeAllTracks(true);
@@ -331,17 +335,17 @@ Browser.prototype.loadSessionObject = async function (session) {
     // Restore gtex selections.
     if (session.gtexSelections) {
 
-        const genomicStates = {};
-        for (let gs of this.genomicStateList) {
-            genomicStates[gs.locusSearchString] = gs;
+        const referenceFrames = {};
+        for (let referenceFrame of this.referenceFrameList) {
+            referenceFrames[referenceFrame.locusSearchString] = referenceFrame;
         }
 
         for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
-            const gs = genomicStates[s];
-            if (gs) {
+            const referenceFrame = referenceFrames[s];
+            if (referenceFrame) {
                 const gene = session.gtexSelections[s].gene;
                 const snp = session.gtexSelections[s].snp;
-                gs.selection = new GtexSelection(gene, snp);
+                referenceFrame.selection = new GtexSelection(gene, snp);
             }
         }
     }
@@ -358,34 +362,37 @@ Browser.prototype.loadSessionObject = async function (session) {
         session.tracks = [];
     }
     if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-        session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
+        // session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
+        session.tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
     }
 
     await this.loadTrackList(session.tracks);
 
-    var panelWidth;
-
     if (false !== session.showIdeogram) {
-        if (!this.ideoPanel) {
-            panelWidth = this.viewportContainerWidth() / this.genomicStateList.length;
-            this.ideoPanel = new IdeoPanel(this.$contentHeader, panelWidth, this);
+
+        if (undefined === this.ideoPanel) {
+            this.ideoPanel = new IdeogramTrack(this)
+            this.addTrack(this.ideoPanel);
         }
-        this.ideoPanel.repaint();
+
+        //this.ideoPanel.trackView.updateViews();
     }
+
+
     if (this.rulerTrack) {
         this.rulerTrack.trackView.updateViews();
     }
 
-    this.updateLocusSearchWidget(this.genomicStateList[0]);
+    this.updateLocusSearchWidget(this.referenceFrameList[0]);
 
-    this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+    this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
 
 }
 
 Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update) {
 
     // idOrConfig might be json
-    if (isString(idOrConfig) && idOrConfig.startsWith("{")) {
+    if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
         try {
             idOrConfig = JSON.parse(idOrConfig);
         } catch (e) {
@@ -405,20 +412,22 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
     }
     this.genome = genome;
 
-    let genomicStateList
+    let referenceFrameList
     try {
-        genomicStateList = await this.search(getInitialLocus(initialLocus, genome), true)
+        referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
     } catch (error) {
         // Couldn't find initial locus
         console.error(error);
-        genomicStateList = await this.search(this.genome.getHomeChromosomeName());
+        referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
     }
-    this.genomicStateList = genomicStateList;
-    if (this.genomicStateList.length > 0) {
+    this.referenceFrameList = referenceFrameList;
+    if (this.referenceFrameList.length > 0) {
+
         if (!this.rulerTrack && false !== this.config.showRuler) {
             this.rulerTrack = new RulerTrack(this);
             this.addTrack(this.rulerTrack);
         }
+
     } else {
         const errorString = 'Unrecognized locus ' + this.config.locus;
         this.alert.present(errorString, undefined);
@@ -439,7 +448,7 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 
         var genomeID;
 
-        if (isString(conf)) {
+        if (StringUtils.isString(conf)) {
             genomeID = conf;
         } else if (conf.genome) {
             genomeID = conf.genome;
@@ -481,9 +490,9 @@ Browser.prototype.loadGenome = async function (idOrConfig, initialLocus, update)
 };
 
 //
-Browser.prototype.updateUIWithGenomicStateListChange = function (genomicStateList) {
+Browser.prototype.updateUIWithReferenceFrameListChange = function (referenceFrameList) {
 
-    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(genomicStateList[0].referenceFrame));
+    const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
     if (isWGV || this.isMultiLocusMode()) {
         this.centerGuide.forcedHide();
@@ -559,22 +568,20 @@ Browser.prototype.showCenterGuide = function () {
 
 Browser.prototype.loadTrackList = async function (configList) {
 
-    const self = this;
-
     try {
         this.startSpinner();
         const promises = [];
-        configList.forEach(function (config) {
+        for (let config of configList) {
             config.noSpinner = true;
-            promises.push(self.loadTrack(config));
-        });
+            promises.push(this.loadTrack(config));
+        }
 
         const loadedTracks = await Promise.all(promises)
-        const groupAutoscaleViews = self.trackViews.filter(function (trackView) {
+        const groupAutoscaleViews = this.trackViews.filter(function (trackView) {
             return trackView.track.autoscaleGroup
         })
         if (groupAutoscaleViews.length > 0) {
-            self.updateViews(self.genomicStateList[0], groupAutoscaleViews);
+            this.updateViews(this.referenceFrameList[0], groupAutoscaleViews);
         }
         return loadedTracks;
     } finally {
@@ -624,50 +631,16 @@ Browser.prototype.clearROIs = function () {
 
 Browser.prototype.loadTrack = async function (config) {
 
+
     // config might be json
-    if (isString(config)) {
+    if (StringUtils.isString(config)) {
         config = JSON.parse(config);
-    }
-
-    // Resolve function and promise urls
-    let url = await resolveURL(config.url);
-    if (isString(url)) {
-        url = url.trim();
-    }
-
-    if (isString(url) && url.startsWith("https://drive.google.com")) {
-        const json = await google.getDriveFileInfo(url)
-        url = "https://www.googleapis.com/drive/v3/files/" + json.id + "?alt=media";
-        if (!config.filename) {
-            config.filename = json.originalFileName || json.name;
-        }
-        if (!config.format) {
-            config.format = inferFileFormat(config.filename);
-        }
-    } else {
-        if (url && !config.filename) {
-            config.filename = getFilename(url);
-        }
-    }
-
-    inferTrackTypes(config);
-
-    // Set defaults if specified
-    if (this.trackDefaults && config.type) {
-        const settings = this.trackDefaults[config.type];
-        if (settings) {
-            for (let property in settings) {
-                if (settings.hasOwnProperty(property) && config[property] === undefined) {
-                    config[property] = settings[property];
-                }
-            }
-        }
     }
 
     try {
         if (!config.noSpinner) this.startSpinner();
 
-        const newTrack = this.createTrack(config);
+        const newTrack = await this.createTrack(config);
 
         if (undefined === newTrack) {
             this.alert.present("Unknown file type: " + url, undefined);
@@ -690,6 +663,7 @@ Browser.prototype.loadTrack = async function (config) {
         }
 
         return newTrack;
+
     } catch (error) {
         const httpMessages =
             {
@@ -708,38 +682,78 @@ Browser.prototype.loadTrack = async function (config) {
     }
 }
 
-Browser.prototype.createTrack = function (config) {
+Browser.prototype.createTrack = async function (config) {
 
-    // Lowercase format
-    if (config.format) {
-        config.format = config.format.toLowerCase();
+    // Resolve function and promise urls
+    let url = await URIUtils.resolveURL(config.url);
+    if (StringUtils.isString(url)) {
+        url = url.trim();
+    }
+
+    if(url) {
+        if (config.format) {
+            config.format = config.format.toLowerCase();
+        } else {
+            let filename = config.filename;
+            if (!filename) {
+                if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
+                    const json = await getDriveFileInfo(url)
+                    filename = json.originalFileName || json.name;
+                } else {
+                    filename = FileUtils.getFilename(url);
+                }
+            }
+            config.format = TrackUtils.inferFileFormat(filename);
+        }
+    }
+
+    let type = config.type;
+    if (type) {
+        type = type.toLowerCase();
+    } else {
+        type = inferTrackType(config);
+        if ("bedtype" === config.type) {
+            // Bed files must be read to determine track type
+            const featureSource = FeatureSource(config, this.genome);
+            config.featureSource = featureSource;
+            const trackType = await featureSource.trackType();
+            if (trackType) {
+                type = trackType;
+            } else {
+                type = "annotation";
+            }
+        }
+    }
+
+    // Set defaults if specified
+    if (this.trackDefaults && type) {
+        const settings = this.trackDefaults[type];
+        if (settings) {
+            for (let property in settings) {
+                if (settings.hasOwnProperty(property) && config[property] === undefined) {
+                    config[property] = settings[property];
+                }
+            }
+        }
     }
 
 
-    let type = (undefined === config.type) ? 'unknown_type' : config.type.toLowerCase();
-
-    if ("data" === type) type = "wig";   // deprecated
-
     // add browser to track config
-    let trackConfig = Object.assign({}, config);
-
-    trackConfig.browser = this;
+    config.browser = this;
 
     let track
-
     switch (type) {
-
         case "annotation":
         case "genes":
         case "fusionjuncspan":
         case "junctions":
         case "splicejunctions":
         case "snp":
-            track = TrackFactory.getTrack("feature")(trackConfig, this);
+            track = TrackFactory.getTrack("feature")(config, this);
             break;
         default:
             if (TrackFactory.tracks.hasOwnProperty(type)) {
-                track = TrackFactory.getTrack(type)(trackConfig, this);
+                track = TrackFactory.getTrack(type)(config, this);
             } else {
                 track = undefined;
             }
@@ -773,7 +787,7 @@ Browser.prototype.createTrack = function (config) {
 Browser.prototype.addTrack = async function (track) {
 
     var trackView;
-    trackView = new TrackView(this, $(this.trackContainerDiv), track);
+    trackView = new TrackView(this, $(this.trackContainer), track);
     this.trackViews.push(trackView);
 
     toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
@@ -796,10 +810,10 @@ Browser.prototype.reorderTracks = function () {
     });
 
     // Reattach the divs to the dom in the correct order
-    $(this.trackContainerDiv).children("igv-track-div").detach();
+    $(this.trackContainer).children("igv-track").detach();
 
     this.trackViews.forEach(function (trackView) {
-        myself.trackContainerDiv.appendChild(trackView.trackDiv);
+        myself.trackContainer.appendChild(trackView.trackDiv);
     });
 
 };
@@ -844,7 +858,7 @@ Browser.prototype.removeAllTracks = function (removeSequence) {
     for (let tv of this.trackViews) {
 
         if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
-            self.trackContainerDiv.removeChild(tv.trackDiv);
+            self.trackContainer.removeChild(tv.trackDiv);
             self.fireEvent('trackremoved', [tv.track]);
             tv.dispose();
         } else {
@@ -881,24 +895,25 @@ Browser.prototype.setTrackHeight = function (newHeight) {
 
 };
 
-Browser.prototype.visibilityChange = function () {
-    this.resize();
+Browser.prototype.visibilityChange = async function () {
+
+    const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
+
+    if (status) {
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+        for (let referenceFrame of this.referenceFrameList) {
+            referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth
+        }
+    }
+
+    await this.resize();
 };
 
 Browser.prototype.resize = async function () {
 
-    const self = this;
+    if (this.referenceFrameList) {
 
-    // Recompute bpPerPixel -- if previous width was zero this can be infinity
-    const viewportWidth = this.viewportWidth();
-
-    if (viewportWidth === 0) {
-        return;
-    }
-
-    if (this.genomicStateList && viewportWidth > 0) {
-
-        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.genomicStateList[0].referenceFrame);
+        const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
 
         if (isWGV || this.isMultiLocusMode()) {
             this.centerGuide.forcedHide();
@@ -908,77 +923,70 @@ Browser.prototype.resize = async function () {
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
-        this.genomicStateList.forEach(function (gstate) {
-            const referenceFrame = gstate.referenceFrame;
+        for (let referenceFrame of this.referenceFrameList) {
             if (!isFinite(referenceFrame.bpPerPixel) && undefined !== referenceFrame.initialEnd) {
-                referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth;
+                referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / this.viewportWidth();
             }
-        })
+        }
+
     }
 
-    if (this.genomicStateList && 1 === this.genomicStateList.length && resizeWillExceedChromosomeLength(this.genomicStateList[0])) {
-
-        this.search(this.genomicStateList[0].chromosome.name);
-
+    if (this.referenceFrameList && 1 === this.referenceFrameList.length && resizeWillExceedChromosomeLength(this, this.viewportContainerWidth(), this.referenceFrameList[0])) {
+        this.search(this.referenceFrameList[0].chr);
     } else {
 
-        if (this.ideoPanel) this.ideoPanel.resize();
         if (this.centerGuide) this.centerGuide.resize();
         this.trackViews.forEach(function (trackView) {
             trackView.resize();
         })
     }
 
-    if (this.genomicStateList && this.genomicStateList.length > 0) {
-        this.updateLocusSearchWidget(this.genomicStateList[0]);
-        this.windowSizePanel.updateWithGenomicState(this.genomicStateList[0]);
+    if (this.referenceFrameList && this.referenceFrameList.length > 0) {
+        this.updateLocusSearchWidget(this.referenceFrameList[0]);
+        this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
     }
 
     await this.updateViews();
 
-    function resizeWillExceedChromosomeLength(genomicState) {
-
-        const pixel = self.viewportContainerWidth();
-        const bpp = genomicState.referenceFrame.bpPerPixel;
-        const bp = pixel * bpp;
-        return (bp > genomicState.chromosome.bpLength);
+    for (let {viewports, $viewportContainer} of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
     }
 
 };
 
-Browser.prototype.updateViews = async function (genomicState, views, force) {
+const resizeWillExceedChromosomeLength = (browser, viewportContainerWidth, referenceFrame) => {
+    const bp = viewportContainerWidth * referenceFrame.bpPerPixel
+    const {bpLength} = browser.genome.getChromosome(referenceFrame.chr)
+    return (bp > bpLength);
+}
 
-    var self = this,
-        groupAutoscaleTracks, otherTracks;
+Browser.prototype.updateViews = async function (referenceFrame, views, force) {
 
     if (!views) {
         views = this.trackViews;
     }
 
-    if (!genomicState && this.genomicStateList && this.genomicStateList.length == 1) {
-        genomicState = this.genomicStateList[0];
+    if (!referenceFrame && this.referenceFrameList && 1 === this.referenceFrameList.length) {
+        referenceFrame = this.referenceFrameList[0];
     }
-    if (genomicState) {
-        this.updateLocusSearchWidget(genomicState);
-        this.windowSizePanel.updateWithGenomicState(genomicState);
+    if (referenceFrame) {
+        this.updateLocusSearchWidget(referenceFrame);
+        this.windowSizePanel.updateWithReferenceFrame(referenceFrame);
     }
 
-    if (this.ideoPanel) {
-        this.ideoPanel.repaint();
-    }
     if (this.centerGuide) {
         this.centerGuide.repaint();
     }
 
     // Don't autoscale while dragging.
-    if (self.dragObject) {
+    if (this.dragObject) {
         for (let trackView of views) {
             await trackView.updateViews(force);
         }
     } else {
         // Group autoscale
-        groupAutoscaleTracks = {};
-        otherTracks = [];
+        const groupAutoscaleTracks = {};
+        const otherTracks = [];
         views.forEach(function (trackView) {
             var group = trackView.track.autoscaleGroup;
             if (group) {
@@ -1036,10 +1044,9 @@ Browser.prototype.loadInProgress = function () {
     return false;
 };
 
-Browser.prototype.updateLocusSearchWidget = function (genomicState) {
+Browser.prototype.updateLocusSearchWidget = function (referenceFrame) {
 
     var self = this,
-        referenceFrame,
         ss,
         ee,
         str,
@@ -1051,35 +1058,34 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
         this.rulerTrack.updateLocusLabel();
     }
 
-    if (0 === this.genomicStateList.indexOf(genomicState) && 1 === this.genomicStateList.length) {
+    if (0 === this.referenceFrameList.indexOf(referenceFrame) && 1 === this.referenceFrameList.length) {
 
-        if (genomicState.locusSearchString && 'all' === genomicState.locusSearchString.toLowerCase()) {
+        if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
 
-            this.$searchInput.val(genomicState.locusSearchString);
+            this.$searchInput.val(referenceFrame.locusSearchString);
             this.chromosomeSelectWidget.$select.val('all');
         } else {
 
-            referenceFrame = genomicState.referenceFrame;
-            this.chromosomeSelectWidget.$select.val(referenceFrame.chrName);
+            this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
 
             if (this.$searchInput) {
 
-                end = referenceFrame.start + referenceFrame.bpPerPixel * (self.viewportContainerWidth() / this.genomicStateList.length);
+                end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
 
                 if (this.genome) {
-                    chromosome = this.genome.getChromosome(referenceFrame.chrName);
+                    chromosome = this.genome.getChromosome(referenceFrame.chr);
                     if (chromosome) {
                         end = Math.min(end, chromosome.bpLength);
                     }
                 }
 
-                ss = numberFormatter(Math.floor(referenceFrame.start + 1));
-                ee = numberFormatter(Math.floor(end));
-                str = referenceFrame.chrName + ":" + ss + "-" + ee;
+                ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = StringUtils.numberFormatter(Math.floor(end));
+                str = referenceFrame.chr + ":" + ss + "-" + ee;
                 this.$searchInput.val(str);
             }
 
-            this.fireEvent('locuschange', [{chr: referenceFrame.chrName, start: ss, end: ee, label: str}]);
+            this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
         }
 
     } else {
@@ -1094,44 +1100,27 @@ Browser.prototype.updateLocusSearchWidget = function (genomicState) {
  */
 Browser.prototype.viewportContainerWidth = function () {
 
+    let ww
     if (this.trackViews && this.trackViews.length > 0) {
-
-        return this.trackViews[0].$viewportContainer.width();
+        ww = this.trackViews[0].$viewportContainer.width()
     } else {
-
-        return syntheticViewportContainerWidth.call(this);
+        const {width} = this.trackContainer.getBoundingClientRect();
+        ww = width - viewportContainerShimWidth
     }
 
-    function syntheticViewportContainerWidth() {
-
-        var $track,
-            $viewportContainer,
-            width;
-
-        $track = $('<div class="igv-track-div">');
-        $(this.trackContainerDiv).append($track);
-
-        $viewportContainer = $('<div class="igv-viewport-container">');
-        $track.append($viewportContainer);
-
-        width = $viewportContainer.width();
-
-        // discard temporary DOM elements
-        $track.remove();
-
-        return width;
-    }
-
+    return ww
 };
 
+Browser.prototype.calculateViewportWidth = function (referenceFrameListLength) {
+    if (1 === referenceFrameListLength) {
+        return this.viewportContainerWidth()
+    } else {
+        return Math.floor((this.viewportContainerWidth() - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
+    }
+}
+
 Browser.prototype.viewportWidth = function () {
-    var cw,
-        vw;
-
-    cw = this.viewportContainerWidth();
-    vw = (undefined === this.genomicStateList || 1 === this.genomicStateList.length) ? cw : Math.round(cw / this.genomicStateList.length);
-
-    return vw;
+    return this.trackViews[0].viewports[0].$viewport.width()
 };
 
 Browser.prototype.minimumBases = function () {
@@ -1141,7 +1130,7 @@ Browser.prototype.minimumBases = function () {
 Browser.prototype.updateZoomSlider = function ($slider) {
 
     const viewport = this.trackViews[0].viewports[0];
-    const referenceFrame = viewport.genomicState.referenceFrame;
+    const referenceFrame = viewport.referenceFrame;
 
     const window = viewport.$viewport.width() * referenceFrame.bpPerPixel;
     const maxWindow = referenceFrame.getChromosome().bpLength;
@@ -1178,7 +1167,7 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
     const viewports = this.trackViews[0].viewports;
     for (let viewport of viewports) {
 
-        const referenceFrame = viewport.genomicState.referenceFrame;
+        const referenceFrame = viewport.referenceFrame;
         const centerBP = referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0);
         const chromosome = referenceFrame.getChromosome();
         const bpp = lerp(
@@ -1190,7 +1179,7 @@ Browser.prototype.zoomWithRangePercentage = function (percentage) {
         referenceFrame.start = centerBP - (viewportWidthBP / 2);
         referenceFrame.bpPerPixel = bpp;
         referenceFrame.clamp(viewport.$viewport.width())
-        this.updateViews(viewport.genomicState);
+        this.updateViews(viewport.referenceFrame);
 
         function lerp(v0, v1, t) {
             return (1 - t) * v0 + t * v1;
@@ -1204,7 +1193,7 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
     let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
     for (let viewport of viewports) {
 
-        const referenceFrame = viewport.genomicState.referenceFrame;
+        const referenceFrame = viewport.referenceFrame;
         const chromosome = referenceFrame.getChromosome();
         const start = referenceFrame.start;
         const bpPerPixel = referenceFrame.bpPerPixel;
@@ -1230,7 +1219,7 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
 
         const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
         if (viewChanged) {
-            this.updateViews(viewport.genomicState);
+            this.updateViews(viewport.referenceFrame);
         }
 
     }
@@ -1238,163 +1227,110 @@ Browser.prototype.zoomWithScaleFactor = function (scaleFactor, centerBPOrUndefin
 
 };
 
-Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, genomicState) {
-
-    const genome = this.genome;
-
-    var referenceFrame,
-        viewportWidth,
-        leftMatePairGenomicState,
-        rightMatePairGenomicState;
+Browser.prototype.presentSplitScreenMultiLocusPanel = function (alignment, leftMatePairReferenceFrame) {
 
     // account for reduced viewport width as a result of adding right mate pair panel
-    viewportWidth = (this.viewportContainerWidth() / (1 + this.genomicStateList.length));
+    const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length);
 
-    // adjust left mate pair reference frame
-    leftMatePairGenomicState = genomicState;
-    referenceFrame = leftMatePairGenomicState.referenceFrame;
-
-    const chrName = genome.getChromosomeName(alignment.chr);
-    leftMatePairGenomicState.referenceFrame = createReferenceFrame(chrName, referenceFrame.bpPerPixel, viewportWidth, alignment.start, alignment.lengthOnRef);
+    adjustReferenceFrame(leftMatePairReferenceFrame, viewportWidth, alignment.start, alignment.lengthOnRef)
 
     // create right mate pair reference frame
-    const mateChrName = genome.getChromosomeName(alignment.mate.chr);
-    rightMatePairGenomicState = {};
-    rightMatePairGenomicState.chromosome = leftMatePairGenomicState.chromosome;
-    rightMatePairGenomicState.referenceFrame = createReferenceFrame(mateChrName, referenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
+    const mateChrName = this.genome.getChromosomeName(alignment.mate.chr);
+
+    const rightMatePairReferenceFrame = createReferenceFrameWithAlignment(this.genome, mateChrName, leftMatePairReferenceFrame.bpPerPixel, viewportWidth, alignment.mate.position, alignment.lengthOnRef);
 
     // add right mate panel beside left mate panel
-    this.addMultiLocusPanelWithGenomicStateAtIndex(rightMatePairGenomicState, 1 + (this.genomicStateList.indexOf(leftMatePairGenomicState)), viewportWidth);
-
-    function createReferenceFrame(chromosomeName, bpp, pixels, alignmentStart, alignmentLength) {
-
-        var ss,
-            ee,
-            alignmentEE,
-            alignmentCC;
-
-        alignmentEE = alignmentStart + alignmentLength;
-        alignmentCC = (alignmentStart + alignmentEE) / 2;
-
-        ss = alignmentCC - (bpp * (pixels / 2));
-        ee = ss + (bpp * pixels);
-
-        return new ReferenceFrame(genome, chromosomeName, ss, ee, bpp);
-    }
+    this.addMultiLocusPanelWithReferenceFrameIndex(rightMatePairReferenceFrame, 1 + (this.referenceFrameList.indexOf(leftMatePairReferenceFrame)), viewportWidth);
 
 };
 
-Browser.prototype.selectMultiLocusPanelWithGenomicState = function (selectedGenomicState) {
-    var self = this,
-        removable;
+Browser.prototype.selectMultiLocusPanelWithReferenceFrame = function (referenceFrame) {
 
-    removable = this.genomicStateList.filter(function (gs) {
-        return selectedGenomicState !== gs;
-    });
+    const removable = this.referenceFrameList.filter(r => referenceFrame !== r);
 
-    removable.forEach(function (gs) {
-        self.removeMultiLocusPanelWithGenomicState(gs, false);
-    });
+    removable.forEach(r => this.removeMultiLocusPanelWithReferenceFrame(r, false));
 
     this.resize();
 };
 
-Browser.prototype.removeMultiLocusPanelWithGenomicState = function (genomicState, doResize) {
+Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceFrame, doResize) {
 
-    const genome = this.genome;
+    const index = this.referenceFrameList.indexOf(referenceFrame);
 
-    var self = this,
-        index,
-        viewportContainerWidth,
-        previousGenomicStateListLength,
-        width;
-
-    index = this.genomicStateList.indexOf(genomicState);
-
-    if (this.ideoPanel) {
-        this.ideoPanel.removePanelWithLocusIndex(index);
+    for (let trackView of this.trackViews) {
+        trackView.removeViewportWithLocusIndex(index);
     }
 
-    this.trackViews.forEach(function (trackView) {
-        trackView.removeViewportWithLocusIndex(index);
-    });
+    const previousListLength = this.referenceFrameList.length;
+    const previousViewportWidth = this.calculateViewportWidth(previousListLength)
 
-    viewportContainerWidth = this.viewportContainerWidth();
-    previousGenomicStateListLength = this.genomicStateList.length;
+    this.referenceFrameList.splice(index, 1);
+    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-    this.genomicStateList.splice(index, 1);
+    for (let i = 0; i < this.referenceFrameList.length; i++) {
+        const ee = this.referenceFrameList[i].calculateEnd(previousViewportWidth);
+        const bpp = this.referenceFrameList[i].calculateBPP(ee, viewportWidth);
 
-    this.genomicStateList.forEach(function (gs, i) {
+        const {chr, start} = this.referenceFrameList[i]
+        this.referenceFrameList[i].referenceFrame = new ReferenceFrame(this.genome, chr, start, ee, bpp);
+    }
 
-        const ee = gs.referenceFrame.calculateEnd(viewportContainerWidth / previousGenomicStateListLength);
-        const bpp = gs.referenceFrame.calculateBPP(ee, viewportContainerWidth / self.genomicStateList.length);
-
-        self.genomicStateList[i].referenceFrame = new ReferenceFrame(genome, gs.chromosome.name, gs.referenceFrame.start, ee, bpp);
-    });
-
-    this.updateUIWithGenomicStateListChange(this.genomicStateList);
+    this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
 
     if (true === doResize) {
         this.resize();
+    } else {
+
+        for (let {viewports, $viewportContainer} of this.trackViews) {
+            updateViewportShims(viewports, $viewportContainer)
+        }
+
     }
+
 
 };
 
-Browser.prototype.addMultiLocusPanelWithGenomicStateAtIndex = function (genomicState, index, viewportWidth) {
+Browser.prototype.addMultiLocusPanelWithReferenceFrameIndex = function (referenceFrame, index, viewportWidth) {
 
-    if (index === this.genomicStateList.length) {
+    if (index === this.referenceFrameList.length) {
 
-        this.genomicStateList.push(genomicState);
+        this.referenceFrameList.push(referenceFrame);
 
-        if (this.ideoPanel) {
-            this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index, viewportWidth);
-        }
-
-        this.trackViews.forEach(function (trackView) {
-
-            var viewport;
-            viewport = new ViewPort(trackView, trackView.$viewportContainer, genomicState, viewportWidth);
+        for (let trackView of this.trackViews) {
+            const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
             trackView.viewports.push(viewport);
-
-            trackView.decorateViewports();
-
-            trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
-        });
+        }
 
     } else {
 
-        this.genomicStateList.splice(index, 0, genomicState);
+        this.referenceFrameList.splice(index, 0, referenceFrame);
 
-        if (this.ideoPanel) {
-            this.ideoPanel.addPanelWithGenomicStateAtIndex(genomicState, index, viewportWidth);
-        }
+        for (let trackView of this.trackViews) {
 
-        this.trackViews.forEach(function (trackView) {
-
-            var viewport,
-                $detached;
-
-            viewport = new ViewPort(trackView, trackView.$viewportContainer, genomicState, viewportWidth);
-            trackView.viewports.splice(index, 0, viewport);
+            const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
+            trackView.viewports.splice(index, 0, viewport)
 
             // The viewport constructor always appends. Reorder here.
-            $detached = viewport.$viewport.detach();
-            $detached.insertAfter(trackView.viewports[index - 1].$viewport);
+            const $detached = viewport.$viewport.detach()
+            $detached.insertAfter(trackView.viewports[index - 1].$viewport)
 
-            trackView.decorateViewports();
+        }
 
-            trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
-        });
+    }
 
+    for (let trackView of this.trackViews) {
+        trackView.updateViewportForMultiLocus();
+        trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
     }
 
     if (this.rulerTrack) {
         this.rulerTrack.updateLocusLabel();
     }
 
-    this.updateUIWithGenomicStateListChange(this.genomicStateList);
+    this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
 
     this.resize();
+
 };
 
 Browser.prototype.emptyViewportContainers = function () {
@@ -1426,29 +1362,27 @@ Browser.prototype.emptyViewportContainers = function () {
         delete trackView.scrollbar;
     }
 
-    this.$contentHeader.empty();
-
 };
 
-Browser.prototype.buildViewportsWithGenomicStateList = function (genomicStateList) {
-    var width;
+Browser.prototype.buildViewportsWithReferenceFrameList = function (referenceFrameList) {
 
-    width = this.viewportContainerWidth() / this.genomicStateList.length;
-    console.log("build viewports width = " + width);
-    this.trackViews.forEach(function (trackView) {
+    const width = this.calculateViewportWidth(referenceFrameList.length);
 
-        genomicStateList.forEach(function (genomicState) {
+    for (let trackView of this.trackViews) {
 
-            var viewport;
-            viewport = new ViewPort(trackView, trackView.$viewportContainer, genomicState, width);
-
+        for (let referenceFrame of referenceFrameList) {
+            const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
             trackView.viewports.push(viewport);
-        });
+        }
 
-        trackView.decorateViewports();
+        trackView.updateViewportForMultiLocus();
+        trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
 
-        trackView.configureViewportContainer(trackView.$viewportContainer, trackView.viewports);
-    });
+    }
+
+    for (let {viewports, $viewportContainer} of this.trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
+    }
 
 };
 
@@ -1466,15 +1400,15 @@ Browser.prototype.getViewportWithGUID = function (guid) {
     return result;
 };
 
-Browser.prototype.goto = function (chrName, start, end) {
-    return this.search(chrName + ":" + start + "-" + end);
+Browser.prototype.goto = function (chr, start, end) {
+    return this.search(chr + ":" + start + "-" + end);
 };
 
 Browser.prototype.search = async function (string, init) {
 
-    const self = this
-
-    const genome = this.genome
+    if (undefined === string || '' === string) {
+        return
+    }
 
     if (string && string.trim().toLowerCase() === "all" || string === "*") {
         string = "all";
@@ -1482,284 +1416,92 @@ Browser.prototype.search = async function (string, init) {
 
     const loci = string.split(' ')
 
-    let genomicStateList = await createGenomicStateList(loci)
-    if (!genomicStateList || genomicStateList.length === 0) {
+    let referenceFrameList = await createReferenceFrameList(this, loci)
+    if (undefined === referenceFrameList) {
         // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-        genomicStateList = await createGenomicStateList([string])
+        referenceFrameList = await createReferenceFrameList(this, [string])
     }
 
-    if (genomicStateList.length > 0) {
-
+    if (referenceFrameList && referenceFrameList.length > 0) {
         this.emptyViewportContainers();
-        this.genomicStateList = genomicStateList;
-        this.buildViewportsWithGenomicStateList(genomicStateList);
-
-        // assign ids to the state objects
-        for (let gs of genomicStateList) {
-            gs.id = guid();
-        }
-
+        this.referenceFrameList = referenceFrameList;
+        this.buildViewportsWithReferenceFrameList(referenceFrameList);
     } else {
-        throw new Error('Unrecognized locus ' + string);
+        throw new Error(`Unrecognized locus ${ string }`);
     }
 
-    if (this.ideoPanel) {
-        this.ideoPanel.discardPanels();
-        const panelWidth = self.viewportContainerWidth() / genomicStateList.length;
-        this.ideoPanel.buildPanels(this.$contentHeader, panelWidth);
-    }
-
-    this.updateUIWithGenomicStateListChange(genomicStateList);
+    this.updateUIWithReferenceFrameListChange(referenceFrameList);
 
     if (!init) {
         this.updateViews();
     }
 
-    return genomicStateList;
+    return referenceFrameList;
+};
 
+function isLocusString(browser, locus) {
 
-    /**
-     * createGenomicStateList takes loci (gene name or name:start:end) and maps them into a list of genomicStates.
-     * A genomicState is fundamentally a referenceFrame. Plus some panel managment state.
-     * Each mult-locus panel refers to a genomicState.
-     *
-     * @param loci - array of locus strings (e.g. chr1:1-100,  egfr)
-     */
-    async function createGenomicStateList(loci) {
+    const a = locus.split(':')
+    const chr = a[0]
 
-        let searchConfig = self.searchConfig;
-        let result = [];
+    if ('all' === chr && browser.genome.getChromosome(chr)) {
+        return {browser, chr, start: 0, end: browser.genome.getChromosome(chr).bpLength, locus}
+    } else if (undefined === browser.genome.getChromosome(chr)) {
 
-        // Try locus string first  (e.g.  chr1:100-200)
-        for (let locus of loci) {
-            let genomicState = isLocusChrNameStartEnd(locus, self.genome);
-            if (genomicState) {
-                genomicState.locusSearchString = locus;
-                result.push(genomicState);
+        return undefined
+
+    } else {
+
+        const extent = {}
+        extent.start = 0;
+        extent.end = browser.genome.getChromosome(chr).bpLength;
+
+        if (a.length > 1) {
+
+            const b = a[1].split('-')
+
+            if (b.length > 2) {
+                return undefined
             } else {
-                // Try local feature cache.    This is created from feature tracks tagged "searcsearchablehable"
-                const feature = self.featureDB[locus.toUpperCase()];
-                if (feature) {
-                    const chromosome = self.genome.getChromosome(feature.chr);
-                    if (chromosome) {
-                        genomicState = {
-                            chromosome: chromosome,
-                            start: feature.start,
-                            end: feature.end,
-                            locusSearchString: locus
-                        }
-                        validateLocusExtent(genomicState.chromosome.bpLength, genomicState, self.minimumBases());
-                        result.push(genomicState);
-                    }
+
+                let numeric
+                numeric = b[0].replace(/,/g, '')
+
+                if (isNaN(numeric)) {
+                    return undefined
                 } else {
-                    // Try webservice
-                    let response = await searchWebService(locus)
-                    const genomicState = processSearchResult(response.result, response.locusSearchString);
-                    if (genomicState) {
-                        result.push(genomicState);
-                    }
-                }
-            }
-            appendReferenceFrames(result);
-        }
-
-        return result;
-
-        function appendReferenceFrames(genomicStateList) {
-            const viewportWidth = self.viewportContainerWidth() / genomicStateList.length;
-            genomicStateList.forEach(function (gs) {
-                gs.referenceFrame = new ReferenceFrame(genome, gs.chromosome.name, gs.start, gs.end, (gs.end - gs.start) / viewportWidth);
-            });
-            return genomicStateList;
-        }
-
-        async function searchWebService(locus) {
-            let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
-            if (path.indexOf("$GENOME$") > -1) {
-                path = path.replace("$GENOME$", (self.genome.id ? self.genome.id : "hg19"));
-            }
-            const result = await igvxhr.loadString(path)
-            return {
-                result: result,
-                locusSearchString: locus
-            }
-        }
-
-        function processSearchResult(searchServiceResponse, locusSearchString) {
-
-            let results
-            if ('plain' === searchConfig.type) {
-                results = parseSearchResults(searchServiceResponse);
-            } else {
-                results = JSON.parse(searchServiceResponse);
-            }
-
-            if (searchConfig.resultsField) {
-                results = results[searchConfig.resultsField];
-            }
-
-            if (!results || 0 === results.length) {
-                return undefined;
-            } else {
-
-                let result;
-                if (Array.isArray(results)) {
-                    // Ignoring all but first result for now
-                    // TODO -- present all and let user select if results.length > 1
-                    result = results[0];
-                } else {
-                    // When processing search results from Ensembl REST API
-                    // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/BRCA2?content-type=application/json
-                    result = results;
+                    extent.start = parseInt(numeric, 10) - 1
                 }
 
-                if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
-                    console.log("Search service results must include chromosome and start fields: " + result);
-                    return undefined;
-                }
+                if (2 === b.length) {
 
-                const chr = result[searchConfig.chromosomeField];
-                let start = result[searchConfig.startField] - searchConfig.coords;
-                let end = result[searchConfig.endField];
+                    numeric = b[1].replace(/,/g, '')
 
-                if (undefined === end) {
-                    end = start + 1;
-                }
-
-                if (self.flanking) {
-                    start = Math.max(0, start - self.flanking);
-                    end += self.flanking;
-                }
-
-                const geneNameLocusObject = Object.assign({}, result);
-                geneNameLocusObject.chromosome = self.genome.getChromosome(chr);
-                geneNameLocusObject.start = start;
-                geneNameLocusObject.end = end;
-                geneNameLocusObject.locusSearchString = locusSearchString;
-                geneNameLocusObject.selection = new GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField]);
-
-                return geneNameLocusObject;
-
-
-            }
-
-
-            /**
-             * Parse the igv line-oriented (non json) search results.
-             * Example
-             *    EGFR    chr7:55,086,724-55,275,031    refseq
-             *
-             * @param data
-             */
-            function parseSearchResults(data) {
-
-                const linesTrimmed = []
-                const results = []
-                const lines = splitLines(data);
-
-                lines.forEach(function (item) {
-                    if ("" === item) {
-                        // do nothing
-                    } else {
-                        linesTrimmed.push(item);
-                    }
-                });
-
-                linesTrimmed.forEach(function (line) {
-
-                    var tokens = line.split("\t"),
-                        source,
-                        locusTokens,
-                        rangeTokens,
-                        obj;
-
-                    if (tokens.length >= 3) {
-
-                        locusTokens = tokens[1].split(":");
-                        rangeTokens = locusTokens[1].split("-");
-                        source = tokens[2].trim();
-
-                        obj =
-                            {
-                                gene: tokens[0],
-                                chromosome: self.genome.getChromosomeName(locusTokens[0].trim()),
-                                start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                                end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                                type: ("gtex" === source ? "snp" : "gene")
-                            };
-
-                        results.push(obj);
-
-                    }
-
-                });
-
-                return results;
-
-            }
-        }
-
-        function isLocusChrNameStartEnd(locus, genome) {
-
-            var a, b, numeric, chr, chromosome, locusObject;
-
-            locusObject = {};
-            a = locus.split(':');
-
-            chr = a[0];
-            chromosome = genome.getChromosome(chr);  // Map chr to official name from (possible) alias
-            if (!chromosome) {
-                return undefined;          // Unknown chromosome
-            }
-            locusObject.chromosome = chromosome;     // Map chr to offical name from possible alias
-            locusObject.start = 0;
-            locusObject.end = chromosome.bpLength;
-
-            // if just a chromosome name we are done
-            if (1 === a.length) {
-                return locusObject;
-            } else {
-
-                b = a[1].split('-');
-
-                if (b.length > 2) {
-                    return undefined;                 // Not a locus string
-                } else {
-
-                    locusObject.start = locusObject.end = undefined;
-
-                    numeric = b[0].replace(/,/g, '');
                     if (isNaN(numeric)) {
                         return undefined;
+                    } else {
+                        extent.end = parseInt(numeric, 10)
                     }
-
-                    locusObject.start = parseInt(numeric, 10) - 1;
-
-                    if (isNaN(locusObject.start)) {
-                        return undefined;
-                    }
-
-                    if (2 === b.length) {
-
-                        numeric = b[1].replace(/,/g, '');
-                        if (isNaN(numeric)) {
-                            return false;
-                        }
-
-                        locusObject.end = parseInt(numeric, 10);
-                    }
-
                 }
-
-                validateLocusExtent(locusObject.chromosome.bpLength, locusObject, self.minimumBases());
-
-                return locusObject;
-
             }
-
         }
+
+        validateLocusExtent(browser.genome.getChromosome(chr).bpLength, extent, browser.minimumBases());
+        const queryChr = browser.genome.getChromosomeName(chr);
+        return {browser, chr: queryChr, start: extent.start, end: extent.end, locus}
+
     }
-};
+}
+
+async function searchWebService(browser, locus, searchConfig) {
+
+    let path = searchConfig.url.replace("$FEATURE$", locus.toUpperCase());
+    if (path.indexOf("$GENOME$") > -1) {
+        path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
+    }
+    const result = await igvxhr.loadString(path)
+    return {result: result, locusSearchString: locus}
+}
 
 Browser.prototype.loadSampleInformation = async function (url) {
     var name = url;
@@ -1848,10 +1590,10 @@ Browser.prototype.toJSON = function () {
         "reference": this.genome.toJSON()
     };
 
-    if (isFilePath(json.reference.fastaURL)) {
-        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.fastaURL.name }.`);
-    } else if (isFilePath(json.reference.indexURL)) {
-        throw new Error(`Error. Sessions cannot include local file references ${ json.reference.indexURL.name }.`);
+    if (FileUtils.isFilePath(json.reference.fastaURL)) {
+        throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
+    } else if (FileUtils.isFilePath(json.reference.indexURL)) {
+        throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
     }
 
     // Use first available trackView.
@@ -1860,15 +1602,15 @@ Browser.prototype.toJSON = function () {
     let anyTrackView = this.trackViews[0];
     anyTrackView.viewports.forEach(function (viewport) {
 
-        const genomicState = viewport.genomicState;
+        const referenceFrame = viewport.referenceFrame;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+        const locusString = referenceFrame.presentLocus(pixelWidth);
         locus.push(locusString);
 
-        if (genomicState.selection) {
+        if (referenceFrame.selection) {
             const selection = {
-                gene: genomicState.selection.gene,
-                snp: genomicState.selection.snp
+                gene: referenceFrame.selection.gene,
+                snp: referenceFrame.selection.snp
             };
 
             gtexSelections[locusString] = selection;
@@ -1883,7 +1625,7 @@ Browser.prototype.toJSON = function () {
     }
 
     const trackJson = [];
-    for (let { track } of this.trackViews) {
+    for (let {track} of this.trackViews) {
 
         let config;
         if (typeof track.getState === "function") {
@@ -1901,7 +1643,7 @@ Browser.prototype.toJSON = function () {
             trackJson.push(config);
         }
     }
-    const locaTrackFiles = trackJson.filter(({ type }) => 'sequence' !== type).filter(({ url }) => isFilePath(url))
+    const locaTrackFiles = trackJson.filter(({type}) => 'sequence' !== type).filter(({url}) => FileUtils.isFilePath(url))
     if (locaTrackFiles.length > 0) {
         throw new Error(`Error. Sessions cannot include local file references.`);
     }
@@ -1917,7 +1659,7 @@ Browser.prototype.compressedSession = function () {
     var json, bytes, deflate, compressedBytes, compressedString, enc;
 
     json = JSON.stringify(this.toJSON());
-    return compressString(json);
+    return StringUtils.compressString(json);
 }
 
 Browser.uncompressSession = function (url) {
@@ -1925,7 +1667,7 @@ Browser.uncompressSession = function (url) {
     let bytes
     if (url.indexOf('/gzip;base64') > 0) {
         //Proper dataURI
-        bytes = decodeDataURI(url);
+        bytes = URIUtils.decodeDataURI(url);
         let json = ''
         for (let b of bytes) {
             json += String.fromCharCode(b)
@@ -1934,7 +1676,7 @@ Browser.uncompressSession = function (url) {
     } else {
 
         let enc = url.substring(5);
-        return uncompressString(enc);
+        return StringUtils.uncompressString(enc);
     }
 }
 
@@ -1954,9 +1696,9 @@ Browser.prototype.currentLoci = function () {
     const loci = [];
     const anyTrackView = this.trackViews[0];
     for (let viewport of anyTrackView.viewports) {
-        const genomicState = viewport.genomicState;
+        const referenceFrame = viewport.referenceFrame;
         const pixelWidth = viewport.$viewport[0].clientWidth;
-        const locusString = genomicState.referenceFrame.showLocus(pixelWidth);
+        const locusString = referenceFrame.presentLocus(pixelWidth);
         loci.push(locusString);
     }
     return loci;
@@ -1973,15 +1715,14 @@ Browser.prototype.currentLoci = function () {
 Browser.prototype.mouseDownOnViewport = function (e, viewport) {
 
     var coords;
-    coords = pageCoordinates(e);
+    coords = DOMUtils.pageCoordinates(e);
     this.vpMouseDown = {
         viewport: viewport,
         lastMouseX: coords.x,
         mouseDownX: coords.x,
         lastMouseY: coords.y,
         mouseDownY: coords.y,
-        genomicState: viewport.genomicState,
-        referenceFrame: viewport.genomicState.referenceFrame
+        referenceFrame: viewport.referenceFrame
     };
 };
 
@@ -1994,7 +1735,7 @@ Browser.prototype.cancelTrackPan = function () {
     this.vpMouseDown = undefined;
 
 
-    if (dragObject && dragObject.viewport.genomicState.referenceFrame.start !== dragObject.start) {
+    if (dragObject && dragObject.viewport.referenceFrame.start !== dragObject.start) {
         this.updateViews();
         this.fireEvent('trackdragend');
     }
@@ -2076,15 +1817,15 @@ function addMouseHandlers() {
     $(this.root).on('mouseup', mouseUpOrLeave);
     $(this.root).on('mouseleave', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('mousemove', handleMouseMove);
+    $(this.trackContainer).on('mousemove', handleMouseMove);
 
-    $(this.trackContainerDiv).on('touchmove', handleMouseMove);
+    $(this.trackContainer).on('touchmove', handleMouseMove);
 
-    $(this.trackContainerDiv).on('mouseleave', mouseUpOrLeave);
+    $(this.trackContainer).on('mouseleave', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('mouseup', mouseUpOrLeave);
+    $(this.trackContainer).on('mouseup', mouseUpOrLeave);
 
-    $(this.trackContainerDiv).on('touchend', mouseUpOrLeave);
+    $(this.trackContainer).on('touchend', mouseUpOrLeave);
 
     function handleMouseMove(e) {
 
@@ -2097,7 +1838,7 @@ function addMouseHandlers() {
             return;
         }
 
-        coords = pageCoordinates(e);
+        coords = DOMUtils.pageCoordinates(e);
 
         if (self.vpMouseDown) {
 
@@ -2106,7 +1847,7 @@ function addMouseHandlers() {
 
             viewport = self.vpMouseDown.viewport;
             viewportWidth = viewport.$viewport.width();
-            referenceFrame = viewport.genomicState.referenceFrame;
+            referenceFrame = viewport.referenceFrame;
 
             if (!self.dragObject && !self.isScrolling) {
                 if (horizontal) {
@@ -2122,7 +1863,7 @@ function addMouseHandlers() {
                         self.isScrolling = true;
                         const trackView = viewport.trackView;
                         const viewportContainerHeight = trackView.$viewportContainer.height();
-                        const contentHeight = trackView.maxContentHeight();
+                        const contentHeight = maxViewportContentHeight(trackView.viewports);
                         self.vpMouseDown.r = viewportContainerHeight / contentHeight;
                     }
                 }
@@ -2131,7 +1872,7 @@ function addMouseHandlers() {
             if (self.dragObject) {
                 const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
                 if (viewChanged) {
-                    self.updateLocusSearchWidget(self.vpMouseDown.genomicState);
+                    self.updateLocusSearchWidget(self.vpMouseDown.referenceFrame);
                     self.updateViews();
                 }
                 self.fireEvent('trackdrag');
@@ -2155,7 +1896,13 @@ function addMouseHandlers() {
     }
 }
 
+async function getDriveFileInfo(googleDriveURL) {
+    const id = GoogleUtils.getGoogleDriveFileID(googleDriveURL);
+    const endPoint = "https://www.googleapis.com/drive/v3/files/" + id + "?supportsTeamDrives=true";
+    return igvxhr.loadJson(endPoint, buildOptions({}));
+}
 
+export {isLocusString, searchWebService}
 export default Browser
 
 

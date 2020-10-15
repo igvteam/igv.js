@@ -23,13 +23,13 @@
  * THE SOFTWARE.
  */
 
-import { InputDialog } from '../node_modules/igv-ui/dist/igv-ui.js';
+import {InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
-import TrackRemovalDialog from "./ui/trackRemovalDialog.js";
 import UserFeedback from "./ui/userFeedback.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
@@ -40,8 +40,8 @@ import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
-import google from "./google/googleUtils.js";
 import {createIcon} from "./igv-icons.js";
+import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
 
@@ -56,101 +56,80 @@ async function createBrowser(parentDiv, config) {
 
     if (undefined === config) config = {};
 
-    // Path to genomes.json file.   This is globally shared among all browser objects
+    // Explicit list, or path to genomes.json file which defines the list, of pre-defined genomes.
+    // The list is shared among all browser instances
     GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
 
     setDefaults(config);
 
-    // Explicit parameters have priority
     if (config.queryParametersSupported !== false) {
         extractQuery(config);
+    }
+    if (config.apiKey) {
+        igvxhr.setApiKey(config.apiKey);
+    }
+    if (config.oauthToken) {
+        oauth.setToken(config.oauthToken);
+    }
+    if (config.clientId && (!GoogleAuth.isInitialized())) {
+        await GoogleAuth.init({
+            clientId: config.clientId,
+            apiKey: config.apiKey,
+            scope: 'https://www.googleapis.com/auth/userinfo.profile'
+        })
     }
 
     // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
     setTrackOrder(config);
 
+    // Initial browser configuration -- settings that are independent of session
     const browser = new Browser(config, parentDiv);
-
+    allBrowsers.push(browser);
     setControls(browser, config);
-
-    // const str = [ 0, 1, 2, 3, 4, 5, 6, 7 ].map(digit => `ERROR ${ digit }. That was a bad thing.`).join('<br>')
-    // browser.alert.present(str)
-
-    browser.userFeedback = new UserFeedback(browser.$content);
+    browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
-
     browser.inputDialog = new InputDialog(browser.$root.get(0));
-
-    browser.trackRemovalDialog = new TrackRemovalDialog(browser.$root);
-
-    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser);
-
-    if (config.apiKey) {
-        google.setApiKey(config.apiKey);
-    }
-
-    if (config.oauthToken) {
-        oauth.setToken(config.oauthToken);
-    }
-
-    return loadSession(config)
-
-        .then(function (ignore) {
-
-            if (false === config.showTrackLabels) {
-                browser.hideTrackLabels();
-            } else {
-                browser.showTrackLabels();
-                if (browser.trackLabelControl) {
-                    browser.trackLabelControl.setState(browser.trackLabelsVisible);
-                }
-            }
-
-            if (false === config.showCursorTrackingGuide) {
-                browser.cursorGuide.doHide();
-            } else {
-                browser.cursorGuide.doShow();
-            }
-
-            if (false === config.showCenterGuide) {
-                browser.centerGuide.doHide();
-            } else {
-                browser.centerGuide.doShow();
-            }
-
-            const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.genomicStateList[0].referenceFrame);
-
-            // multi-locus mode or isWGV
-            if (browser.isMultiLocusMode() || isWGV) {
-                browser.centerGuide.forcedHide();
-            } else {
-                browser.centerGuide.forcedShow();
-            }
-
-            igvxhr.startup();
-
-            browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
-
-            return browser;
-        })
-
-        .then(function (browser) {
-
-            allBrowsers.push(browser);
-
-            return browser;
-        })
-
-
-    function loadSession(config) {
-        if (config.sessionURL) {
-            return browser.loadSession({
-                url: config.sessionURL
-            })
-        } else {
-            return browser.loadSessionObject(config)
+    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser.alert);
+    if (false === config.showTrackLabels) {
+        browser.hideTrackLabels();
+    } else {
+        browser.showTrackLabels();
+        if (browser.trackLabelControl) {
+            browser.trackLabelControl.setState(browser.trackLabelsVisible);
         }
     }
+    if (false === config.showCursorTrackingGuide) {
+        browser.cursorGuide.doHide();
+    } else {
+        browser.cursorGuide.doShow();
+    }
+    if (false === config.showCenterGuide) {
+        browser.centerGuide.doHide();
+    } else {
+        browser.centerGuide.doShow();
+    }
+
+
+    // Load initial session
+    if (config.sessionURL) {
+        await browser.loadSession({
+            url: config.sessionURL
+        })
+    } else {
+        await browser.loadSessionObject(config)
+    }
+
+    // Session dependent settings
+    const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr);
+    if (browser.isMultiLocusMode() || isWGV) {
+        browser.centerGuide.forcedHide();
+    } else {
+        browser.centerGuide.forcedShow();
+    }
+    browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
+
+
+    return browser;
 
 }
 
@@ -159,35 +138,28 @@ function removeBrowser(browser) {
     browser.$root.remove();
     allBrowsers = allBrowsers.filter(item => item !== browser);
 }
+
 function removeAllBrowsers() {
-    for(let browser of allBrowsers) {
+    for (let browser of allBrowsers) {
         browser.dispose();
         browser.$root.remove();
     }
     allBrowsers = [];
 }
 
-// A hack to replace the global igv.browser for the purpose of alert dialogs
-// TODO fixme
-function getBrowser() {
-    return allBrowsers[0];
-}
-
-
 /**
  * This function provided so clients can inform igv of a visibility change, typically when an igv instance is
  * made visible from a tab, accordion, or similar widget.
  */
-function visibilityChange () {
-    allBrowsers.forEach(function (browser) {
-        browser.visibilityChange();
-    })
+async function visibilityChange() {
+    for (let browser of allBrowsers) {
+        await browser.visibilityChange();
+    }
 }
-
 
 function setTrackOrder(conf) {
 
-    var trackOrder = 1;
+    let trackOrder = 1;
 
     if (conf.tracks) {
         conf.tracks.forEach(function (track) {
@@ -196,68 +168,47 @@ function setTrackOrder(conf) {
             }
         });
     }
-
 }
 
 function setControls(browser, conf) {
 
-    var controlDiv;
+    const $navBar = createStandardControls(browser, conf);
 
-    // Create controls. Can be customized by passing in a creation function that returns a div containing the controls
-    controlDiv = conf.createControls ? conf.createControls(browser, conf) : createStandardControls(browser, conf);
-
-    $(controlDiv).insertBefore(browser.$content);
+    $navBar.insertBefore($(browser.trackContainer));
 
     if (false === conf.showControls) {
-        $(controlDiv).hide();
+        $navBar.hide();
     }
-
 }
 
 function createStandardControls(browser, config) {
 
-    var $div,
-        $igv_nav_bar_left_container,
-        $igv_nav_bar_right_container,
-        $genomic_location,
-        $locus_size_group,
-        $toggle_button_container,
-        logoDiv,
-        logoSvg,
-        $controls,
-        $navigation,
-        $searchContainer,
-        $faSearch;
-
-    $controls = $('<div>', {class: 'igvControlDiv'});
-
-    $navigation = $('<div>', {class: 'igv-navbar'});
-    $controls.append($navigation);
-    browser.$navigation = $navigation;
     browser.navbarManager = new NavbarManager(browser);
 
-    $igv_nav_bar_left_container = $('<div>', {class: 'igv-nav-bar-left-container'});
-    $navigation.append($igv_nav_bar_left_container);
+    const $navBar = $('<div>', { class: 'igv-navbar' });
+    browser.$navigation = $navBar;
+
+    const $navbarLeftContainer = $('<div>', { class: 'igv-navbar-left-container' });
+    $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    logoDiv = $('<div>', {class: 'igv-logo'});
-    logoSvg = logo();
+    const $logo = $('<div>', { class: 'igv-logo' });
+    $navbarLeftContainer.append($logo);
+
+    const logoSvg = logo();
     logoSvg.css("width", "34px");
     logoSvg.css("height", "32px");
-    logoDiv.append(logoSvg);
-    $igv_nav_bar_left_container.append(logoDiv);
+    $logo.append(logoSvg);
 
-    // current genome
-    browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
-    $igv_nav_bar_left_container.append(browser.$current_genome);
+    browser.$current_genome = $('<div>', { class: 'igv-current-genome' });
+    $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    //
-    $genomic_location = $('<div>', {class: 'igv-nav-bar-genomic-location'});
-    $igv_nav_bar_left_container.append($genomic_location);
+    const $genomicLocation = $('<div>', { class: 'igv-navbar-genomic-location' });
+    $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget
-    browser.chromosomeSelectWidget = new ChromosomeSelectWidget(browser, $genomic_location);
+    browser.chromosomeSelectWidget = new ChromosomeSelectWidget(browser, $genomicLocation);
     if (undefined === config.showChromosomeWidget) {
         config.showChromosomeWidget = true;   // Default to true
     }
@@ -267,16 +218,14 @@ function createStandardControls(browser, config) {
         browser.chromosomeSelectWidget.$container.hide();
     }
 
+    const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
+    $genomicLocation.append($locusSizeGroup);
 
-    $locus_size_group = $('<div>', {class: 'igv-locus-size-group'});
-    $genomic_location.append($locus_size_group);
+    const $searchContainer = $('<div>', {class: 'igv-search-container'});
+    $locusSizeGroup.append($searchContainer);
 
-    // locus goto widget container
-    $searchContainer = $('<div>', {class: 'igv-search-container'});
-    $locus_size_group.append($searchContainer);
-
-    // locus goto input
-    browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+    browser.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
     $searchContainer.append(browser.$searchInput);
 
     browser.$searchInput.change(function (e) {
@@ -288,65 +237,41 @@ function createStandardControls(browser, config) {
             });
     });
 
-    // search icon container
-    $div = $('<div>');
-    $searchContainer.append($div);
+    const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});
+    $searchContainer.append($searchIconContainer);
 
-    // search icon svg
-    $div.append(createIcon("search"));
+    $searchIconContainer.append(createIcon("search"));
 
-    $div.click(function () {
-        browser.search(browser.$searchInput.val());
-    });
+    $searchIconContainer.on('click', () => browser.search(browser.$searchInput.val()));
 
-    // $searchContainer.append($faSearch);
+    browser.windowSizePanel = new WindowSizePanel($locusSizeGroup, browser);
 
-    // TODO: Currently not used
-    // search results presented in table
-    // browser.$searchResults = $('<div class="igv-search-results">');
-    // $searchContainer.append(browser.$searchResults.get(0));
-    // browser.$searchResultsTable = $('<table>');
-    // browser.$searchResults.append(browser.$searchResultsTable.get(0));
-    // browser.$searchResults.hide();
+    const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'});
+    $navBar.append($navbarRightContainer);
 
-    // window size display
-    browser.windowSizePanel = new WindowSizePanel($locus_size_group, browser);
-
-
-    // cursor guide | center guide | track labels
-
-    $igv_nav_bar_right_container = $('<div class="igv-nav-bar-right-container">');
-    $navigation.append($igv_nav_bar_right_container);
-
-    $toggle_button_container = $('<div class="igv-nav-bar-toggle-button-container">');
-    $igv_nav_bar_right_container.append($toggle_button_container);
+    const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
+    $navbarRightContainer.append($toggle_button_container);
     browser.$toggle_button_container = $toggle_button_container;
 
-    // cursor guide
-    // browser.cursorGuide = new CursorGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
-    browser.cursorGuide = new CursorGuide(browser.$content, $toggle_button_container, config, browser);
+    browser.cursorGuide = new CursorGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
-    // center guide
-    browser.centerGuide = new CenterGuide($(browser.trackContainerDiv), $toggle_button_container, config, browser);
+    browser.centerGuide = new CenterGuide($(browser.trackContainer), $toggle_button_container, config, browser);
 
-    // toggle track labels
     if (true === config.showTrackLabelButton) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
-    // SVG save button
     if (config.showSVGButton) {
         browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
 
-    // zoom widget
-    browser.zoomWidget = new ZoomWidget(browser, $igv_nav_bar_right_container);
+    browser.zoomWidget = new ZoomWidget(browser, $navbarRightContainer);
 
     if (false === config.showNavigation) {
         browser.$navigation.hide();
     }
 
-    return $controls.get(0);
+    return $navBar;
 }
 
 
@@ -421,7 +346,7 @@ function setDefaults(config) {
     }
 
     if (config.showSequence) {
-        config.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER});
+        config.tracks.push({type: "sequence", order: defaultSequenceTrackOrder});
     }
 }
 
@@ -501,11 +426,8 @@ function logo() {
     );
 }
 
-function createTrack (config, browser) {
-    return Browser.prototype.createTrack.call(browser, config)
-}
 
-export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange, getBrowser, createTrack}
+export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
 
 
 

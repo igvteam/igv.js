@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <!-- Google Platform JS -->
+    <script src="https://apis.google.com/js/platform.js"></script>
+
+
+</head>
+
+<body>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    const options =
+        {
+            genome: "hg19",
+            locus: "chr1:859,205-896,143",
+            tracks: [{
+                format: "vcf",
+                url: "https://www.dropbox.com/s/94gq1yien9eqrer/TSVC.vcf.gz?dl=0",
+                indexURL: "https://www.dropbox.com/s/37e81vtudz6u2uo/TSVC.vcf.gz.tbi?dl=0",
+                name: "TSVC vcf indexed"
+            },
+                {
+                    format: "vcf",
+                    url: "https://www.dropbox.com/s/94gq1yien9eqrer/TSVC.vcf.gz?dl=0",
+                    indexed: false,
+                    name: "TSVC vcf not indexed"
+                }]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(async function (browser) {
+        })
+
+</script>
+
+</body>
+
+</html>

@@ -60,13 +60,17 @@ class TextFeatureSource {
         }
 
         if (config.features && Array.isArray(config.features)) {
-            let features = config.features;
+            let features = fixFeatures(config.features);
             packFeatures(features);
             if (config.mappings) {
                 mapProperties(features, config.mappings)
             }
             this.featureCache = new FeatureCache(features, genome);
             this.static = true;
+        } else if (config.reader) {
+            this.reader = config.reader;
+            this.queryable = config.queryable !== undefined ? config.queryable : true;
+            this.expandQuery = config.expandQuery ? true : false;
         } else if (config.sourceType === "ga4gh") {
             this.reader = new Ga4ghVariantReader(config, genome);
             this.queryable = true;
@@ -84,10 +88,6 @@ class TextFeatureSource {
             this.reader = new CustomServiceReader(config.source);
             this.queryable = config.source.queryable !== undefined ? config.source.queryable : true;
             this.expandQuery = config.expandQuery ? true : false;
-        } else if (config.reader) {
-            this.reader = config.reader;
-            this.queryable = config.queryable !== undefined ? config.queryable : true;
-            this.expandQuery = config.expandQuery ? true : false;
         } else if ("civic-ws" === config.sourceType) {
             this.reader = new CivicReader(config);
             this.queryable = false;
@@ -102,28 +102,34 @@ class TextFeatureSource {
                 // Leav undefined -- will defer until we know if reader has an index
             }
         }
-        this.supportsWG = !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);   // Can be dynamically changed
     }
 
     supportsWholeGenome() {
-        return this.supportsWG;
+        return !this.queryable && (this.visibilityWindow === undefined || this.visibilityWindow <= 0);
     }
 
-    async getFileHeader() {
+    async trackType() {
+        const header = await this.getHeader();
+        if (header) {
+            return header.type;
+        } else {
+            return undefined;    // Convention for unknown or unspecified
+        }
+    }
+
+    async getHeader() {
         if (!this.header) {
+
             if (this.reader && typeof this.reader.readHeader === "function") {
                 const header = await this.reader.readHeader()
                 if (header) {
                     this.header = header;
-                    // Non-indexed readers will return features as a side effect (entire file is read).
-                    const features = header.features;
-                    if (features) {
-                        this.ingestFeatures(features);
-                    }
-                    if (header.format)
+                    if (header.format) {
                         this.config.format = header.format;
+                    }
+                } else {
+                    this.header = {};
                 }
-                this.header = header;
             } else {
                 this.header = {};
             }
@@ -136,16 +142,51 @@ class TextFeatureSource {
      * range requested.
      *
      * @param chr
-     * @param bpStart
-     * @param bpEnd
+     * @param start
+     * @param end
      * @param bpPerPixel
      */
-    async getFeatures(chr, bpStart, bpEnd, bpPerPixel, visibilityWindow) {
+    async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
         const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        const featureCache = await getFeatureCache.call(this)
+        let intervalStart = start;
+        let intervalEnd = end;
+        let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+        if (this.config.disableCache !== true &&
+            this.featureCache &&
+            (this.static || this.featureCache.containsRange(genomicInterval))) {
+            return this.featureCache.queryFeatures(queryChr, start, end);
+        } else {
+
+            // Use visibility window to potentially expand query interval.
+            // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
+            // indicating whole chromosome should be read at once.
+            if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
+                // Whole chromosome
+                intervalStart = 0;
+                intervalEnd = Number.MAX_SAFE_INTEGER;
+            } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
+                const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
+                intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
+                intervalEnd = start + expansionWindow;
+            }
+            genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+
+            let features = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
+            if (this.queryable === undefined) {
+                this.queryable = reader.indexed;
+            }
+
+            if (features) {
+                this.ingestFeatures(features, genomicInterval);
+            } else {
+                this.featureCache = new FeatureCache([], genomicInterval);     // Empty cache
+            }
+        }
+
         const isQueryable = this.queryable;
 
         if ("all" === chr.toLowerCase()) {
@@ -155,53 +196,12 @@ class TextFeatureSource {
                 if (this.wgFeatures) {
                     return this.wgFeatures;
                 } else {
-                    this.wgFeatures = this.getWGFeatures(featureCache.getAllFeatures());
+                    this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures());
                     return this.wgFeatures;
                 }
             }
         } else {
-            return featureCache.queryFeatures(queryChr, bpStart, bpEnd);
-        }
-
-
-        async function getFeatureCache() {
-
-            let intervalStart = bpStart;
-            let intervalEnd = bpEnd;
-            let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-            if (this.config.disableCache !== true &&
-                this.featureCache &&
-                (this.static || this.featureCache.containsRange(genomicInterval) || "all" === chr.toLowerCase())) {
-                return this.featureCache;
-            } else {
-
-                // Use visibility window to potentially expand query interval.
-                // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
-                // indicating whole chromosome should be read at once.
-                if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
-                    // Whole chromosome
-                    intervalStart = 0;
-                    intervalEnd = Number.MAX_SAFE_INTEGER;
-                } else if (visibilityWindow > (bpEnd - bpStart) && this.expandQuery !== false) {
-                    const expansionWindow = Math.min(4.1 * (bpEnd - bpStart), visibilityWindow)
-                    intervalStart = Math.max(0, (bpStart + bpEnd - expansionWindow) / 2);
-                    intervalEnd = bpStart + expansionWindow;
-                }
-                genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-                let featureList = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-                if (this.queryable === undefined) {
-                    this.queryable = reader.indexed;
-                }
-
-                if (featureList) {
-                    this.ingestFeatures(featureList, genomicInterval);
-                } else {
-                    this.featureCache = new FeatureCache();     // Empty cache
-                }
-                return this.featureCache;
-            }
+            return this.featureCache.queryFeatures(queryChr, start, end);
         }
     }
 
@@ -213,11 +213,11 @@ class TextFeatureSource {
 
         // Assign overlapping features to rows
         if (this.config.format !== "wig" && this.config.type !== "spliceJunctions") {
-            const maxRows = this.config.maxRows || 500
+            const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER;
             packFeatures(featureList, maxRows);
         }
 
-        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined)
+        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
         this.featureCache = new FeatureCache(featureList, this.genome, genomicInterval);
 
         // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
@@ -255,34 +255,20 @@ class TextFeatureSource {
                     let queryChr = genome.getChromosomeName(f.chr);
                     if (wgChromosomeNames.has(queryChr)) {
 
-                        const wg = Object.create(Object.getPrototypeOf(f));
-                        Object.assign(wg, f);
-
-                        wg.realChr = f.chr;
-                        wg.realStart = f.start;
-                        wg.realEnd = f.end;
+                        const wg = Object.assign({}, f);
 
                         wg.chr = "all";
                         wg.start = genome.getGenomeCoordinate(f.chr, f.start);
                         wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                        wg.originalFeature = f;
+                        wg._f = f;
 
                         // Don't draw exons in whole genome view
                         if (wg["exons"]) delete wg["exons"]
                         wg.popupData = function (genomeLocation) {
-                            if (typeof this.originalFeature.popupData === 'function') {
-                                return this.originalFeature.popupData();
+                            if (typeof this._f.popupData === 'function') {
+                                return this._f.popupData();
                             } else {
-                                const clonedObject = Object.assign({}, this);
-                                clonedObject.chr = this.realChr;
-                                clonedObject.start = this.realStart + 1;
-                                clonedObject.end = this.realEnd;
-                                delete clonedObject.realChr;
-                                delete clonedObject.realStart;
-                                delete clonedObject.realEnd;
-                                delete clonedObject.px;
-                                delete clonedObject.py;
-                                return TrackBase.extractPopupData(clonedObject, genome.id);
+                                return TrackBase.extractPopupData(this._f, genome.id);
                             }
                         }
 
@@ -303,34 +289,68 @@ class TextFeatureSource {
 
 function packFeatures(features, maxRows) {
 
-
     maxRows = maxRows || 1000;
     if (features == null || features.length === 0) {
         return;
     }
-
     // Segregate by chromosome
-    var chrFeatureMap = {},
-        chrs = [];
-    features.forEach(function (feature) {
-
-        var chr = feature.chr,
-            flist = chrFeatureMap[chr];
-
+    const chrFeatureMap = {};
+    const chrs = [];
+    for (let feature of features) {
+        const chr = feature.chr;
+        let flist = chrFeatureMap[chr];
         if (!flist) {
             flist = [];
             chrFeatureMap[chr] = flist;
             chrs.push(chr);
         }
-
         flist.push(feature);
-    });
+    }
 
     // Loop through chrosomosomes and pack features;
-
-    chrs.forEach(function (chr) {
+    for (let chr of chrs) {
         pack(chrFeatureMap[chr], maxRows);
-    })
+    }
+}
+
+/**
+ * This function is used to apply properties normally added during parsing to  features supplied directly in the
+ * config as an array of objects.   At the moment the only application is bedpe type features.
+ * @param features
+ */
+function fixFeatures(features) {
+
+    if (!features || features.length === 0) return;
+
+    const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined;
+    if (isBedPE) {
+        const interChrFeatures = [];
+        for (let feature of features) {
+            // Set total extent of feature
+            if (feature.chr1 === feature.chr2) {
+                feature.chr = feature.chr1;
+                feature.start = Math.min(feature.start1, feature.start2);
+                feature.end = Math.max(feature.end1, feature.end2);
+            } else {
+                interChrFeatures.push(feature);
+            }
+        }
+        // Make copies of inter-chr features, one for each chromosome
+        for (let f1 of interChrFeatures) {
+            const f2 = Object.assign({dup: true}, f1);
+            features.push(f2);
+
+            f1.chr = f1.chr1;
+            f1.start = f1.start1;
+            f1.end = f1.end1;
+
+            f2.chr = f2.chr2;
+            f2.start = f2.start2;
+            f2.end = f2.end2;
+        }
+    }
+
+    return features;
 }
 
 

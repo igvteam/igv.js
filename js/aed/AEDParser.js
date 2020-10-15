@@ -24,7 +24,7 @@
  */
 
 import getDataWrapper from "../feature/dataWrapper.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 
 /**
  *  Define parsers for bed-like files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -99,7 +99,7 @@ class AEDParser {
         let line;
         let wig;
 
-        while (line = nextLine()) {
+        while ((line = nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
@@ -388,7 +388,13 @@ function AedFeature(aed, allColumns) {
         if (aedColumn.type === 'aed:Integer') {
             token = parseInt(token);
         }
-        if (aedColumn.namespace === 'bio') {
+        var arr=[];
+        if(aedColumn.namespace.length > 0) {
+            for (let j = 0; j < aedColumn.namespace.length; j++) {
+                arr.push(aedColumn.namespace.charCodeAt(j))
+            }
+        }
+        if (aedColumn.namespace.trim() === 'bio') {
             if (aedColumn.name === 'sequence') {
                 this.chr = token;
             } else if (aedColumn.name === 'start') {

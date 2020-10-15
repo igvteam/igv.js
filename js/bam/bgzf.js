@@ -1,5 +1,5 @@
 
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 
 const BLOCK_HEADER_LENGTH = 18;
 const BLOCK_LENGTH_OFFSET = 16;  // Location in the gzip block of the total block size (actually total block size - 1)
@@ -30,7 +30,7 @@ function unbgzf(data, lim) {
             const start = 12 + xlen + ptr;    // Start of CDATA
             const bytesLeft = data.byteLength - start;
             const cDataSize = bsize - xlen - 19;
-            if (bytesLeft < cDataSize) break;
+            if (bytesLeft < cDataSize || cDataSize <= 0) break;
 
             const a = new Uint8Array(data, start, cDataSize);
             const inflate = new Zlib.RawInflate(a);

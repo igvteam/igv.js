@@ -1,15 +1,23 @@
 import BWSource from "../js/bigwig/bwSource.js";
-import {parseAutoSQL} from "../js/util/ucscUtils"
+import {parseAutoSQL} from "../js/util/ucscUtils.js"
+import {assert} from 'chai';
+import {createMockObjects} from "@igvteam/test-utils/src"
 
-function runBigbedTests() {
+suite("testBigBed", function () {
 
-    QUnit.test("bed9+2 features", async function (assert) {
-        var url = "./data/bb/myBigBed2.bb",
-            chr = "chr7",
-            bpStart = 0,
-            bpEnd = Number.MAX_SAFE_INTEGER;
-        var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd, 1);
+    createMockObjects();
+
+    test("bed9+2 features", async function () {
+        const url = require.resolve("./data/bb/myBigBed2.bb");
+        const chr = "chr7";
+        const start = 0;
+        const end = Number.MAX_SAFE_INTEGER;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType, "annotation");
+
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 3339);   // Verified in iPad app
 
@@ -20,29 +28,32 @@ function runBigbedTests() {
         assert.equal(f.spID, 'Q86Y56-3')
     });
 
-    QUnit.test("interact features", async function (assert) {
-        var url = "./data/bb/interactExample3.inter.bb",
-            chr = "chr3",
-            bpStart = 63702628,
-            bpEnd = 63880091;
+    test("interact features", async function () {
 
-        var bWSource = new BWSource({url: url});
-        const features = await bWSource.getFeatures(chr, bpStart, bpEnd, 1);
+        const url = require.resolve("./data/bb/interactExample3.inter.bb");
+        const chr = "chr3";
+        const start = 63702628;
+        const end = 63880091;
+        const bwSource = new BWSource({url: url});
+
+        const trackType = await bwSource.trackType();
+        assert.equal(trackType,  "interact");
+
+        const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
         assert.ok(features);
         assert.equal(features.length, 18);
 
-        //chr3	63702628	63705638	.	584	10	.	0	chr17	58878552	58880897	.	.	chr3	63702628	63705638	.	.
-        const firstFeature = features[0];
-        assert.ok(firstFeature.interchr);
-
         //chr3	63741418	63978511	.	350	6	.	0	chr3	63741418	63743120	.	.	chr3	63976338	63978511	.	.
         const secondFeature = features[1];
-        assert.equal(secondFeature.m1, (63741418 + 63743120) / 2);
-        assert.equal(secondFeature.m2, (63976338 + 63978511) / 2);
+        assert.equal(secondFeature.start1, 63741418);
+        assert.equal(secondFeature.end1, 63743120);
+        assert.equal(secondFeature.start2, 63976338);
+        assert.equal(secondFeature.end2, 63978511);
+
     });
 
 
-    QUnit.test("Autosql", function (assert) {
+    test("Autosql", function () {
         const autosql = `
 table chromatinInteract
 "Chromatin interaction between two regions"
@@ -78,6 +89,4 @@ table chromatinInteract
         assert.equal(r2s.name, 'region2Strand');
         assert.equal(r2s.description, 'Orientation of upper/this region: + or -.  Use . if not applicable');
     })
-}
-
-export default runBigbedTests;
+})

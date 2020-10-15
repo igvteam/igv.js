@@ -9,10 +9,6 @@
     <link href=img/favicon.ico rel="shortcut icon">
     <title>IGV - Dev</title>
 
-    <!-- IGV CSS -->
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
-
 </head>
 
 <body>
@@ -23,17 +19,15 @@
 
 <script type="module">
 
-    import igv from "../js/index.js";
-    import google from "../js/google/googleUtils.js";
-    import {numberFormatter} from "../js/util/stringUtils.js";
+    import igv from "../js";
+    import {StringUtils} from "igv-utils";
+    const numberFormatter = StringUtils.numberFormatter;
 
     let browser;
 
     (async () => {
 
-        await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google");
-
-        const options =
+      const options =
             {
                 genome: "hg19",
                 locus: [ 'egfr', 'myc' ],

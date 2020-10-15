@@ -7,13 +7,7 @@
     <meta content="" name="description">
     <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
-
-
-    <!-- IGV CSS -->
-
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
+    <title>indel</title>
 
 </head>
 
@@ -23,17 +17,12 @@
 
 <script type="module">
 
-    import google from "../js/google/googleUtils.js";
     import igv from "../js/index.js";
-
-    google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-
-        .then(function (google) {
 
             const options =
                 {
                     genome: "hg38",
-                    locus: "chr1:16760749",
+                    locus: "chr1:16,760,730-16,760,768",
                     tracks: [
                         {
                             name: "VCF Indels",
@@ -50,7 +39,6 @@
 
                 })
 
-        })
 
 </script>
 

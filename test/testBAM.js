@@ -1,36 +1,41 @@
 import BamReader from "../js/bam/bamReader.js";
 
-function runBAMTests() {
+import { assert } from 'chai';
+import {createMockObjects} from "@igvteam/test-utils/src"
 
-    QUnit.test("BAM alignments - CSI index", async function (assert) {
+suite("testBAM", function() {
+
+    createMockObjects();
+
+    test("BAM alignments - CSI index", async function () {
 
         const chr = 'chr1';
-        const bpStart = 155140000;
-        const bpEnd = 155160000;
+        const start = 155140000;
+        const end = 155160000;
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.csi'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.csi')
         });
 
-        const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
+        const alignmentContainer = await bamReader.readAlignments(chr, start, end)
         validate(assert, alignmentContainer)
     });
 
-    QUnit.test("BAM alignments", async function (assert) {
+    test("BAM alignments", async function () {
 
         const chr = 'chr1';
-        const bpStart = 155140000;
-        const bpEnd = 155160000;
+        const start = 155140000;
+        const end = 155160000;
 
         const bamReader = new BamReader({
             type: 'bam',
-            url: 'data/bam/na12889.bam',
-            indexURL: 'data/bam/na12889.bam.bai'
+            url: require.resolve('./data/bam/na12889.bam'),
+            indexURL: require.resolve('./data/bam/na12889.bam.bai')
         });
 
-        const alignmentContainer = await bamReader.readAlignments(chr, bpStart, bpEnd)
+        const alignmentContainer = await bamReader.readAlignments(chr, start, end)
         validate(assert, alignmentContainer)
     });
 
@@ -85,7 +90,5 @@ function runBAMTests() {
         assert.equal(tags["XT"], "M");
     }
 
-}
-
-export default runBAMTests;
+})
 

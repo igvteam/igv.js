@@ -4,19 +4,8 @@
     <!-- Adapted from https://www.elated.com/res/File/articles/development/javascript/document-object-model/javascript-tabs/javascript-tabs.html -->
 
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>igv.js</title>
-
-    <!-- IGV JS-->
-
-    <!-- IGV CSS -->
-
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
+    <title>tabs</title>
 
     <style type="text/css">
         body {
@@ -97,24 +86,25 @@
 
     function initIGV() {
 
-        var igvDiv, options;
-        igvDiv = document.getElementById("igvDiv");
-        options =
+        const options =
             {
                 locus: "AQP4",
                 genome: "hg19",
-                tracks: [
-                    {
-                        type: 'alignment',
-                        format: 'bam',
-                        url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
-                        name: 'HG02450'
-                    }
+                tracks:
+                    [
+                        {
+                            type: 'alignment',
+                            format: 'bam',
+                            url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                            indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai',
+                            name: 'HG02450'
+                        }
 
-                ]
+                    ]
 
             };
-        igv.createBrowser(igvDiv, options);
+
+        igv.createBrowser(document.getElementById("igvDiv"), options)
     }
 
     function initTabs() {
@@ -152,7 +142,7 @@
             tabs[i].content.className = 'tabContent hide'
         }
 
-        function showTab() {
+        async function showTab() {
 
             var selectedId = getHash(this.getAttribute('href'));
 
@@ -167,7 +157,7 @@
                 }
             });
 
-            igv.visibilityChange();
+            await igv.visibilityChange();
 
             // Stop the browser following the link
             return false;

@@ -24,26 +24,26 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {numberFormatter} from "./util/stringUtils.js";
+import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 const WindowSizePanel = function ($parent, browser) {
 
-    this.$content = $('<div class="igv-windowsizepanel-content-div">');
-    $parent.append(this.$content);
+    this.$container = $('<div>', { class: 'igv-windowsize-panel-container' });
+    $parent.append(this.$container);
     this.browser = browser;
 
 };
 
 WindowSizePanel.prototype.show = function () {
-    this.$content.show();
+    this.$container.show();
 };
 
 WindowSizePanel.prototype.hide = function () {
-    this.$content.hide();
+    this.$container.hide();
 };
 
-WindowSizePanel.prototype.updateWithGenomicState = function (genomicState) {
-    this.$content.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * genomicState.referenceFrame.bpPerPixel)));
+WindowSizePanel.prototype.updateWithReferenceFrame = function (referenceFrame) {
+    this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
 };
 
 
@@ -64,9 +64,9 @@ function prettyBasePairNumber  (raw) {
 
         value = raw / denom;
         floored = Math.floor(value);
-        return numberFormatter(floored) + units;
+        return StringUtils.numberFormatter(floored) + units;
     } else {
-        return numberFormatter(raw) + " bp";
+        return StringUtils.numberFormatter(raw) + " bp";
     }
 
     value = raw / denom;

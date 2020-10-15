@@ -26,7 +26,7 @@
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVMath from "../igv-math.js";
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {extend, isSimpleType} from "../util/igvUtils.js";
@@ -75,7 +75,7 @@ const SegTrack = extend(TrackBase,
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource =  FeatureSource(this.config, browser.genome);
+        this.featureSource = FeatureSource(this.config, browser.genome);
 
 
         // TODO this sort doens't look right, no samples have yet been loaded
@@ -87,9 +87,14 @@ const SegTrack = extend(TrackBase,
     });
 
 SegTrack.prototype.postInit = async function () {
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
     }
+    // Set properties from track line
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
+
 }
 
 
@@ -126,8 +131,8 @@ SegTrack.prototype.menuItemList = function () {
 };
 
 
-SegTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd);
+SegTrack.prototype.getFeatures = function (chr, start, end) {
+    return this.featureSource.getFeatures({chr, start, end});
 };
 
 
@@ -195,7 +200,7 @@ SegTrack.prototype.draw = function (options) {
             const y = pixelTop + segment.row * sampleHeight + border;
             const bottom = y + sampleHeight;
 
-            if(bottom < pixelTop || y > pixelBottom) {
+            if (bottom < pixelTop || y > pixelBottom) {
                 continue;
             }
 
@@ -280,22 +285,24 @@ SegTrack.prototype.computePixelHeight = function (features) {
 /**
  * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
  */
-SegTrack.prototype.sortSamples = async function (chr, bpStart, bpEnd, direction) {
+SegTrack.prototype.sortSamples = async function (chr, start, end, direction) {
 
-    const featureList = await this.featureSource.getFeatures(chr, bpStart, bpEnd);
+    const featureList = await this.featureSource.getFeatures({chr, start, end});
+    if (!featureList) return;
+
     this.updateSampleKeys(featureList);
 
     const scores = {};
-    const bpLength = bpEnd - bpStart + 1;
+    const bpLength = end - start + 1;
 
     // Compute weighted average score for each sample
     for (let segment of featureList) {
 
-        if (segment.end < bpStart) continue;
-        if (segment.start > bpEnd) break;
+        if (segment.end < start) continue;
+        if (segment.start > end) break;
 
-        const min = Math.max(bpStart, segment.start);
-        const max = Math.min(bpEnd, segment.end);
+        const min = Math.max(start, segment.start);
+        const max = Math.min(end, segment.end);
         const f = (max - min) / bpLength;
 
         const sampleKey = segment.sampleKey || segment.sample
@@ -382,7 +389,7 @@ SegTrack.prototype.popupData = function (clickState, featureList) {
 SegTrack.prototype.contextMenuItemList = function (clickState) {
 
     const self = this;
-    const referenceFrame = clickState.viewport.genomicState.referenceFrame;
+    const referenceFrame = clickState.viewport.referenceFrame;
     const genomicLocation = clickState.genomicLocation;
 
     // Define a region 5 "pixels" wide in genomic coordinates
@@ -402,7 +409,7 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 
                 const sort = {
                     direction: sortDirection,
-                    chr: referenceFrame.chrName,
+                    chr: clickState.viewport.referenceFrame.chr,
                     start: genomicLocation - bpWidth,
                     end: genomicLocation + bpWidth
 
@@ -418,7 +425,7 @@ SegTrack.prototype.contextMenuItemList = function (clickState) {
 };
 
 SegTrack.prototype.supportsWholeGenome = function () {
-    return this.featureSource.supportsWholeGenome();
+    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
 

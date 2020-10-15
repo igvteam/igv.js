@@ -26,12 +26,12 @@
 
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import MenuUtils from "../ui/menuUtils.js";
 import {extend} from "../util/igvUtils.js";
 import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
-import BWSource from "../bigwig/bwSource.js"
 
 const InteractionTrack = extend(TrackBase,
 
@@ -52,22 +52,50 @@ const InteractionTrack = extend(TrackBase,
         this.alpha = config.alpha === undefined ? "0.05" :
             config.alpha === 0 ? undefined : config.alpha.toString();
 
+        if (config.valueColumn) {
+            this.valueColumn = config.valueColumn;
+            this.hasValue = true;
+        } else if (config.useScore) {
+            this.hasValue = true;
+            this.valueColumn = "score";
+        }
+
         this.logScale = config.logScale !== false;   // i.e. defaul to true (undefined => true)
         if (config.max) {
             this.dataRange = {
                 min: config.min || 0,
                 max: config.max
             }
+            this.autoscale = false;
         } else {
             this.autoscale = true;
         }
 
         // Create the FeatureSource and override the default whole genome method
-        this.featureSource =  FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, browser.genome);
         this.featureSource.getWGFeatures = getWGFeatures;
 
         this.colorAlphaCache = {};
     });
+
+InteractionTrack.prototype.postInit = async function () {
+
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
+    }
+
+    // Set properties from track line
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
+
+    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+        this.featureSource.visibilityWindow = this.visibilityWindow;  // <- this looks odd
+    }
+
+    return this;
+}
 
 InteractionTrack.prototype.supportsWholeGenome = function () {
     return true
@@ -89,8 +117,16 @@ InteractionTrack.prototype.getState = function () {
 }
 
 
-InteractionTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, this.visibilityWindow);
+InteractionTrack.prototype.getFeatures = async function (chr, start, end) {
+    const visibilityWindow = this.visibilityWindow;
+    const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow});
+
+    // Check for score or value
+    if (this.hasValue === undefined && features && features.length > 0) {
+        this.hasValue = features[0].score !== undefined;
+    }
+
+    return features;
 }
 
 InteractionTrack.prototype.draw = function (options) {
@@ -99,6 +135,22 @@ InteractionTrack.prototype.draw = function (options) {
     } else {
         this.drawNested(options);
     }
+}
+
+function getMidpoints(feature, genome) {
+
+    let m1 = (feature.start1 + feature.end1) / 2;
+    let m2 = (feature.start2 + feature.end2) / 2;
+    if (feature.chr === 'all') {
+        m1 = genome.getGenomeCoordinate(feature.chr1, m1);
+        m2 = genome.getGenomeCoordinate(feature.chr2, m2);
+    }
+    if (m1 > m2) {
+        const tmp = m1;
+        m1 = m2;
+        m2 = tmp;
+    }
+    return {m1, m2}
 }
 
 InteractionTrack.prototype.drawNested = function (options) {
@@ -120,67 +172,95 @@ InteractionTrack.prototype.drawNested = function (options) {
         // Autoscale theta
         autoscaleNested.call(this);
         const y = this.arcOrientation ? options.pixelHeight : 0;
+        const direction = this.arcOrientation;
+
+        ctx.font = "8px";
+        ctx.textAlign = "center";
+
         for (let feature of featureList) {
 
-            if(feature.interchr) continue;
-
-            let pixelStart = Math.round((feature.m1 - bpStart) / xScale);
-            let pixelEnd = Math.round((feature.m2 - bpStart) / xScale);
-            let direction = this.arcOrientation;
-
-            let w = (pixelEnd - pixelStart);
-            if (w < 3) {
-                w = 3;
-                pixelStart--;
-            }
-
-            const a = w / 2;
-            const r = a / this.sinTheta;
-            const b = this.cosTheta * r;
-            const xc = pixelStart + a;
-
-            let yc, startAngle, endAngle;
-            if (direction) {
-                // UP
-                var trackBaseLine = this.height;
-                yc = trackBaseLine + b;
-                startAngle = Math.PI + Math.PI / 2 - this.theta;
-                endAngle = Math.PI + Math.PI / 2 + this.theta;
-
-            } else {
-                // DOWN
-                yc = -b;
-                startAngle = Math.PI / 2 - this.theta;
-                endAngle = Math.PI / 2 + this.theta;
-            }
-
             let color = feature.color || this.color;
-            if(color && this.config.useScore) {
+            if (color && this.config.useScore) {
                 color = getAlphaColor.call(this, color, scoreShade(feature.score));
-            } else if (color && w > viewportWidth) {
-                color = getAlphaColor.call(this, color, "0.1");
             }
-
             ctx.strokeStyle = color;
+            ctx.fillStyle = color;
             ctx.lineWidth = feature.thickness || this.thickness || 1;
 
-            if (this.showBlocks) {
-                ctx.fillStyle = color;
-                const s1 = (feature.start1 - bpStart) / xScale;
-                const e1 = (feature.end1 - bpStart) / xScale;
-                const s2 = (feature.start2 - bpStart) / xScale;
-                const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
-            }
+            if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
 
-            ctx.beginPath();
-            ctx.arc(xc, yc, r, startAngle, endAngle, false);
-            ctx.stroke();
+                const {m1, m2} = getMidpoints(feature, this.browser.genome);
+
+                let pixelStart = Math.round((m1 - bpStart) / xScale);
+                let pixelEnd = Math.round((m2 - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth) continue;
+
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+
+                const a = w / 2;
+                const r = a / this.sinTheta;
+                const b = this.cosTheta * r;
+                const xc = pixelStart + a;
+
+                let yc, startAngle, endAngle;
+                if (direction) { // UP
+                    yc = this.height + b;
+                    startAngle = Math.PI + Math.PI / 2 - this.theta;
+                    endAngle = Math.PI + Math.PI / 2 + this.theta;
+                } else { // DOWN
+                    yc = -b;
+                    startAngle = Math.PI / 2 - this.theta;
+                    endAngle = Math.PI / 2 + this.theta;
+                }
+
+                if (this.showBlocks && feature.chr !== 'all') {
+                    const s1 = (feature.start1 - bpStart) / xScale;
+                    const e1 = (feature.end1 - bpStart) / xScale;
+                    const s2 = (feature.start2 - bpStart) / xScale;
+                    const e2 = (feature.end2 - bpStart) / xScale;
+                    const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                    ctx.fillRect(s1, y, e1 - s1, hb)
+                    ctx.fillRect(s2, y, e2 - s2, hb);
+                }
+
+                // Alpha shade (de-emphasize) arcs that extend beyond viewport, unless alpha shading is used for score.
+                if (color && !this.config.useScore && w > viewportWidth) {
+                    color = getAlphaColor.call(this, color, "0.1");
+                }
+
+                ctx.beginPath();
+                ctx.arc(xc, yc, r, startAngle, endAngle, false);
+                ctx.stroke();
+                feature.drawState = {xc, yc, r};
+            } else {
+
+                let pixelStart = Math.round((feature.start - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.end - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth) continue;
+
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+                const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
+                if (direction) {
+                    // UP
+                    ctx.fillRect(pixelStart, this.height / 2, w, this.height / 2);
+                    ctx.fillText(otherChr, pixelStart + w / 2, this.height / 2 - 5);
+                    feature.drawState = {x: pixelStart, y: this.height / 2, w: w, h: this.height / 2};
+                } else {
+                    ctx.fillRect(pixelStart, 0, w, this.height / 2);
+                    ctx.fillText(otherChr, pixelStart + w / 2, this.height / 2 + 13);
+                    feature.drawState = {x: pixelStart, y: 0, w: w, h: this.height / 2};
+                }
+            }
         }
     }
-
 
     function autoscaleNested() {
         let max = 0;
@@ -193,7 +273,7 @@ InteractionTrack.prototype.drawNested = function (options) {
         }
         let a = Math.min(viewportWidth, max) / 2;
         if (max > 0) {
-            let coa = pixelHeight / a;
+            let coa = (pixelHeight - 10) / a;
             this.theta = estimateTheta(coa);
             this.sinTheta = Math.sin(this.theta);
             this.cosTheta = Math.cos(this.theta);
@@ -214,7 +294,6 @@ InteractionTrack.prototype.drawProportional = function (options) {
 
     const featureList = options.features;
 
-
     if (featureList && featureList.length > 0) {
 
         const yScale = this.logScale ?
@@ -224,126 +303,256 @@ InteractionTrack.prototype.drawProportional = function (options) {
         const y = this.arcOrientation ? options.pixelHeight : 0;
 
         for (let feature of featureList) {
+
             ctx.save();
-            const value = this.config.useScore ? feature.score : feature.value;
 
-            if (value === undefined || Number.isNaN(value)|| feature.interchr) continue;
-
-            let pixelStart = (feature.m1 - bpStart) / xScale;
-            let pixelEnd = (feature.m2 - bpStart) / xScale;
-            let w = (pixelEnd - pixelStart);
-            if (w < 3) {
-                w = 3;
-                pixelStart--;
-            }
-
-            if (pixelEnd < 0 || pixelStart > pixelWidth || feature.value < this.dataRange.min) continue;
+            const value = this.valueColumn ? feature[this.valueColumn] : feature.score;
+            if (value === undefined || Number.isNaN(value)) continue;
 
             const radiusY = this.logScale ?
                 Math.log10(value + 1) * yScale :
                 value * yScale;
-            const counterClockwise = this.arcOrientation ? true : false;
-            const color = feature.color || this.color;
-            ctx.strokeStyle = color;
-            ctx.lineWidth = feature.thickness || this.thickness || 1;
-            ctx.beginPath();
-            ctx.ellipse(pixelStart + w / 2, y, w / 2, radiusY, 0, 0, Math.PI, counterClockwise);
-            ctx.stroke();
 
-            if (this.showBlocks) {
-                ctx.fillStyle = color;
-                const s1 = (feature.start1 - bpStart) / xScale;
-                const e1 = (feature.end1 - bpStart) / xScale;
-                const s2 = (feature.start2 - bpStart) / xScale;
-                const e2 = (feature.end2 - bpStart) / xScale;
-                const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
-                if(e1 - s1 > 1) ctx.fillRect(s1, y, e1 - s1, hb)
-                if(e2 - s2 > 1) ctx.fillRect(s2, y, e2 - s2, hb);
-            }
+            if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
 
-            if (this.alpha) {
-                const alphaColor = getAlphaColor.call(this, color, this.alpha);
-               ctx.fillStyle = alphaColor;
-                ctx.fill();
+                const {m1, m2} = getMidpoints(feature, this.browser.genome);
+
+                let pixelStart = (m1 - bpStart) / xScale;
+                let pixelEnd = (m2 - bpStart) / xScale;
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+
+                if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
+
+                const radiusX = w / 2;
+                const xc = pixelStart + w / 2;
+                const counterClockwise = this.arcOrientation ? true : false;
+                const color = feature.color || this.color;
+                ctx.strokeStyle = color;
+                ctx.lineWidth = feature.thickness || this.thickness || 1;
+                ctx.beginPath();
+                ctx.ellipse(xc, y, radiusX, radiusY, 0, 0, Math.PI, counterClockwise);
+                ctx.stroke();
+
+                if (this.showBlocks && feature.chr !== 'all') {
+                    ctx.fillStyle = color;
+                    const s1 = (feature.start1 - bpStart) / xScale;
+                    const e1 = (feature.end1 - bpStart) / xScale;
+                    const s2 = (feature.start2 - bpStart) / xScale;
+                    const e2 = (feature.end2 - bpStart) / xScale;
+                    const hb = this.arcOrientation ? -this.blockHeight : this.blockHeight;
+                    ctx.fillRect(s1, y, e1 - s1, hb)
+                    ctx.fillRect(s2, y, e2 - s2, hb);
+                }
+
+                if (this.alpha) {
+                    const alphaColor = getAlphaColor.call(this, color, this.alpha);
+                    ctx.fillStyle = alphaColor;
+                    ctx.fill();
+                }
+                ctx.restore();
+
+                feature.drawState = {xc, yc: y, radiusX, radiusY};
+            } else {
+                let pixelStart = Math.round((feature.start - bpStart) / xScale);
+                let pixelEnd = Math.round((feature.end - bpStart) / xScale);
+                if (pixelEnd < 0 || pixelStart > pixelWidth || value < this.dataRange.min) continue;
+
+                const h = Math.min(radiusY, this.height - 13);   // Leave room for text
+                let w = (pixelEnd - pixelStart);
+                if (w < 3) {
+                    w = 3;
+                    pixelStart--;
+                }
+                const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
+                ctx.font = "8px";
+                ctx.textAlign = "center";
+                if (this.arcOrientation) {
+                    // UP
+                    const y = this.height - h;
+                    ctx.fillRect(pixelStart, y, w, h);
+                    ctx.fillText(otherChr, pixelStart + w / 2, y - 5);
+                    feature.drawState = {x: pixelStart, y, w, h};
+                } else {
+                    ctx.fillRect(pixelStart, 0, w, h);
+                    ctx.fillText(otherChr, pixelStart + w / 2, h + 13);
+                    feature.drawState = {x: pixelStart, y: 0, w, h};
+                }
             }
-            ctx.restore();
         }
     }
-
-
 }
 
 InteractionTrack.prototype.menuItemList = function () {
 
-    var self = this;
-    const items = [
+    let items = [
 
         {
             name: "Set track color",
-            click: function () {
-                self.trackView.presentColorPicker();
+            click: () => {
+                this.trackView.presentColorPicker();
             }
         },
         '<HR/>'
     ];
 
-    const lut =
-        {
-            "nested": "Nested Arcs",
-            "proportional": "Proportional Arcs"
-        };
-    for (let arcType of ["nested", "proportional"]) {
-        items.push(
+    if (this.hasValue) {
+        const lut =
             {
-                object: createCheckbox(lut[arcType], arcType === this.arcType),
-                click: function () {
-                    self.arcType = arcType;
-                    self.trackView.repaintViews();
-                }
-            });
+                "nested": "Nested Arcs",
+                "proportional": "Proportional Arcs"
+            };
+        for (let arcType of ["nested", "proportional"]) {
+            items.push(
+                {
+                    object: createCheckbox(lut[arcType], arcType === this.arcType),
+                    click: () => {
+                        this.arcType = arcType;
+                        this.trackView.repaintViews();
+                    }
+                });
+        }
     }
+
     items.push({
         object: createCheckbox("Show Blocks", this.showBlocks),
-        click: function () {
-            self.showBlocks = !self.showBlocks;
-            self.trackView.repaintViews();
+        click: () => {
+            this.showBlocks = !this.showBlocks;
+            this.trackView.repaintViews();
         }
     })
     items.push({
         name: "Toggle arc direction",
-        click: function () {
-            self.arcOrientation = !self.arcOrientation;
-            self.trackView.repaintViews();
+        click: () => {
+            this.arcOrientation = !this.arcOrientation;
+            this.trackView.repaintViews();
         }
     });
+
+    if (this.arcType === "proportional") {
+        items.push("<HR>");
+        items = items.concat(MenuUtils.numericDataMenuItems(this.trackView));
+    }
 
     return items;
 };
 
-
 InteractionTrack.prototype.doAutoscale = function (features) {
 
-    if ("proportional" === this.arcType) {
-        let max = 0;
-        if (features) {
-            for(let f of features) {
-                const v = this.config.useScore ? f.score : f.value;
-                if (!Number.isNaN(v)) {
-                    max = Math.max(max, v);
+    // if ("proportional" === this.arcType) {
+    let max = 0;
+    if (features) {
+        for (let f of features) {
+            const v = this.valueColumn ? f[this.valueColumn] : f.score;
+            if (!Number.isNaN(v)) {
+                max = Math.max(max, v);
+            }
+        }
+    }
+    return {min: 0, max: max};
+    // }
+}
+
+InteractionTrack.prototype.popupData = function (clickState, features) {
+
+    if (!features) features = this.clickedFeatures(clickState);
+
+    const data = [];
+    for (let feature of features) {
+
+        const f = feature._ || feature;   // For "whole genome" features, which keeps a pointer to the original
+
+        data.push({name: "Region 1", value: positionString(f.chr1, f.start1, f.end1, f.strand1)});
+        data.push({name: "Region 2", value: positionString(f.chr2, f.start2, f.end2, f.strand2)});
+        if (f.name) {
+            data.push({name: "Name", value: f.name});
+        }
+        if (f.value !== undefined) {
+            data.push({name: "Value", value: f.value})
+        }
+        if (f.score !== undefined) {
+            data.push({name: "Score", value: f.score})
+        }
+
+
+        if (f.extras && this.header && this.header.columnNames) {
+            const columnNames = this.header.columnNames;
+            for (let i = 10; i < columnNames.length; i++) {
+                if (columnNames[i] === 'info') {
+                    extractInfoColumn(data, f.extras[i - 10]);
+                } else {
+                    data.push({name: columnNames[i], value: f.extras[i - 10]});
                 }
             }
         }
-        return {min: 0, max: max};
+        // For now just return the top hit
+        break;
+
+        //if (data.length > 0) {
+        //     data.push("<HR>");
+        // }
     }
+    return data;
+};
+
+InteractionTrack.prototype.clickedFeatures = function (clickState) {
+
+    // We use the cached features rather than method to avoid async load.  If the
+    // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
+    const featureList = clickState.viewport.getCachedFeatures();
+    const candidates = [];
+    if (featureList) {
+        const proportional = this.arcType === "proportional";
+
+        for (let feature of featureList) {
+            if (!feature.drawState) continue;
+            if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
+                if (proportional) {
+                    //(x-xc)^2/radiusX^2 + (y-yc)^2/radiusY^2 <= 1
+                    const {xc, yc, radiusX, radiusY} = feature.drawState;
+                    const dx = clickState.canvasX - xc;
+                    const dy = clickState.canvasY - yc;
+                    const score = (dx / radiusX) * (dx / radiusX) + (dy / radiusY) * (dy / radiusY);
+                    if (score <= 1) {
+                        candidates.push({score: 1 / score, feature});
+                    }
+                } else {
+                    const {xc, yc, r} = feature.drawState;
+                    const dx = clickState.canvasX - xc;
+                    const dy = clickState.canvasY - yc;
+                    const score = Math.abs(Math.sqrt(dx * dx + dy * dy) - r);
+                    if (score < 5) {
+                        candidates.push({score, feature})
+                    }
+                }
+            } else {
+                const {x, y, w, h} = feature.drawState;
+                const tolerance = 5;
+                if (clickState.canvasX >= x - tolerance && clickState.canvasX <= x + w + tolerance &&
+                    clickState.canvasY >= y && clickState.canvasY <= y + h) {
+                    const score = -Math.abs(clickState.canvasX - (x + w / 2));
+                    candidates.push({score, feature});
+                    break;
+                }
+            }
+        }
+    }
+
+    if (candidates.length > 1) {
+        candidates.sort((a, b) => a.score - b.score);
+    }
+    return candidates.map((c) => c.feature);
 }
 
+function positionString(chr, start, end, strand) {
 
-//
-// InteractionTrack.prototype.popupData = function (config) {
-//
-//     return null;
-// };
-
+    return strand && strand !== '.' ?
+        `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)} (${strand})` :
+        `${chr}:${StringUtils.numberFormatter(start + 1)}-${StringUtils.numberFormatter(end)}`
+}
 
 /**
  * Estimate theta given the ratio of track height to 1/2 the feature width (coa).  This relationship is approximately linear.
@@ -381,46 +590,48 @@ function getAlphaColor(color, alpha) {
 }
 
 
-function getWGFeatures  (allFeatures) {
+/**
+ * Called in the context of FeatureSource
+ * @param allFeatures
+ * @returns {[]}
+ */
+function getWGFeatures(allFeatures) {
 
     const genome = this.genome;
-    const wgChromosomeNames = new Set(genome.wgChromosomeNames);
     const wgFeatures = [];
-    const genomeLength = genome.getGenomeLength();
-    const smallestFeatureVisible = genomeLength / 1000;
-
     for (let c of genome.wgChromosomeNames) {
         const chrFeatures = allFeatures[c];
-        if(chrFeatures)
-        for (let f of chrFeatures) {
-            let queryChr = genome.getChromosomeName(f.chr);
-
-            if (wgChromosomeNames.has(queryChr)) {
-
-                const m1 = genome.getGenomeCoordinate(f.chr1, f.m1);
-                const m2 = genome.getGenomeCoordinate(f.chr2, f.m2);
-                if (Math.abs(m2 - m1) < smallestFeatureVisible) continue;
-
-                const wg = Object.create(Object.getPrototypeOf(f));
-                Object.assign(wg, f);
-                wg.chr = "all";
-                wg.m1 = m1;
-                wg.m2 = m2;
-                // wg.realChr = f.chr;
-                // wg.realStart = f.start;
-                // wg.realEnd = f.end;
-
-                //wg.start = genome.getGenomeCoordinate(f.chr, f.start);
-                // wg.end = genome.getGenomeCoordinate(f.chr, f.end);
-                //wg.originalFeature = f;
-                wgFeatures.push(wg);
+        if (chrFeatures) {
+            for (let f of chrFeatures) {
+                if (!f.dup) {
+                    const wg = Object.assign({}, f);
+                    wg.chr = "all";
+                    wg.start = genome.getGenomeCoordinate(f.chr1, f.start1);
+                    wg.end = genome.getGenomeCoordinate(f.chr2, f.end2);
+                    wgFeatures.push(wg);
+                }
             }
         }
     }
-    wgFeatures.sort(function (a, b) {
-        return a.m1 - b.m2;
-    });
+
     return wgFeatures;
+}
+
+/**
+ * Extract a gff style info column for popup text.  This convention used by 10X for bedpe files
+ *     ALLELIC_FRAC=0.0375670840787;BLACK1=.;BLACK2=.;...
+ * @param data
+ * @param str
+ */
+function extractInfoColumn(data, str) {
+    const kvs = str.split(';')
+    for (let t of kvs) {
+        const kv = t.split('=');
+        if (kv.length === 2) {
+            data.push({name: kv[0], value: kv[1]})
+        }
+    }
+
 }
 
 export default InteractionTrack;

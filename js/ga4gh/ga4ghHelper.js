@@ -24,7 +24,8 @@
  */
 
 import igvxhr from "../igvxhr.js";
-import google from "../google/googleUtils.js"
+
+const apiKey = igvxhr.apiKey;
 
 function ga4ghGet(options) {
     var url = options.url + "/" + options.entity + "/" + options.entityId;
@@ -33,12 +34,12 @@ function ga4ghGet(options) {
 }
 
 function ga4ghSearch(options) {
+
     return new Promise(function (fulfill, reject) {
         var results = options.results ? options.results : [],
             url = options.url,
             body = options.body,
             decode = options.decode,
-            apiKey = google.apiKey,
             paramSeparator = "?",
             fields = options.fields;  // Partial response
 

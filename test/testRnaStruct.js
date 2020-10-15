@@ -1,9 +1,13 @@
 import RnaStructTrack from "../js/rna/rnaStruct.js";
+import {assert} from 'chai';
+import {createMockObjects} from "@igvteam/test-utils/src"
 
-function runRnaStructTests() {
+suite("testRnaStruct", function () {
 
-    // mock object
-    var browser = {
+    createMockObjects();
+
+    // mock brower object
+    const browser = {
         // Simulate a genome with 1,2,3,... naming convention
         genome: {
             getChromosomeName: function (chr) {
@@ -13,22 +17,12 @@ function runRnaStructTests() {
         constants: {}
     };
 
-    QUnit.test('Test parsing .bp file', function (assert) {
+    test('Test parsing .bp file', async function () {
 
-        var done = assert.async();
-        var rnaStruct = new igv.RnaStructTrack({url: 'data/bp/example.bp'}, browser);
-        rnaStruct.getFeatures('1', 1, 100)
-            .then(function (features) {
-                assert.ok(features);
-                assert.equal(features.length, 8);
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done();
-            });
+        const rnaStruct = new RnaStructTrack({url: require.resolve('./data/bp/example.bp')}, browser);
+        const features = await rnaStruct.getFeatures('1', 1, 100);
+        assert.ok(features);
+        assert.equal(features.length, 8);
+
     })
-}
-
-export default runRnaStructTests;
+})

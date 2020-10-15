@@ -13,8 +13,8 @@ function runUcscTests() {
         var done = assert.async();
 
         var chr = "chr8",
-            bpStart = 128739950,
-            bpEnd = 128762045,
+            start = 128739950,
+            end = 128762045,
             featureSource = new igv.FeatureSource({
                     type: "annotation",
                     sourceType: "ucscservice",
@@ -28,7 +28,7 @@ function runUcscTests() {
 
         // Must get file header first
 
-        featureSource.getFeatures(chr, bpStart, bpEnd)
+        featureSource.getFeatures(chr, start, end)
             .then(function (features) {
 
                 assert.ok(features);

@@ -34,11 +34,11 @@ const TDFSource = function (config, genome) {
     this.reader = new TDFReader(config, genome);
 };
 
-TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+TDFSource.prototype.getFeatures = async function ({chr, start, end, bpPerPixel}) {
 
     await getRootGroup.call(this);
 
-    const genomicInterval = new GenomicInterval(chr, bpStart, bpEnd);
+    const genomicInterval = new GenomicInterval(chr, start, end);
     const genome = this.genome;
 
     if (chr.toLowerCase() === "all") {
@@ -60,21 +60,21 @@ TDFSource.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixe
     }
 
     const tileWidth = dataset.tileWidth;
-    const startTile = Math.floor(bpStart / tileWidth);
-    const endTile = Math.floor(bpEnd / tileWidth);
+    const startTile = Math.floor(start / tileWidth);
+    const endTile = Math.floor(end / tileWidth);
     const NTRACKS = 1;   // TODO read this
     const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
     const features = [];
     for (let tile of tiles) {
         switch (tile.type) {
             case "bed":
-                decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                decodeBedTile(tile, chr, start, end, bpPerPixel, features);
                 break;
             case "variableStep":
-                decodeVaryTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                decodeVaryTile(tile, chr, start, end, bpPerPixel, features);
                 break;
             case "fixedStep":
-                decodeFixedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features);
+                decodeFixedTile(tile, chr, start, end, bpPerPixel, features);
                 break;
             default:
                 throw ("Unknown tile type: " + tile.type);

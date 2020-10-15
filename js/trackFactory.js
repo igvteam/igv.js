@@ -10,8 +10,12 @@ import EqtlTrack from "./gtex/eqtlTrack.js";
 import GWASTrack from "./gwas/gwasTrack.js";
 import GCNVTrack from "./gcnv/gcnvTrack.js";
 import RnaStructTrack from "./rna/rnaStruct.js";
+import IdeogramTrack from "./ideogramTrack.js";
 
 const tracks = {
+    'ideogram': (config, browser) => {
+        return new IdeogramTrack(config, browser);
+    },
     'sequence': (config, browser) => {
         return new SequenceTrack(config, browser);
     },

@@ -29,13 +29,11 @@ import TrackBase from "../trackBase.js";
 import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {createCheckbox} from "../igv-icons.js";
-import {numberFormatter} from "../util/stringUtils.js";
 import {extend} from "../util/igvUtils.js";
+import deepCopy from "../util/deepCopy.js";
 
-const dataRangeMenuItem = MenuUtils.dataRangeMenuItem;
 
 const WigTrack = extend(TrackBase,
 
@@ -80,39 +78,23 @@ const WigTrack = extend(TrackBase,
     });
 
 WigTrack.prototype.postInit = async function () {
-    const header = await this.getFileHeader();
+    const header = await this.getHeader();
     if (header) this.setTrackProperties(header)
 }
 
-WigTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.windowFunction);
+WigTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, windowFunction: this.windowFunction});
 
 }
 
 WigTrack.prototype.menuItemList = function () {
+    return MenuUtils.numericDataMenuItems(this.trackView)
+}
 
-    var self = this,
-        menuItems = [];
+WigTrack.prototype.getHeader = async function () {
 
-    menuItems.push(dataRangeMenuItem(this.trackView));
-
-    menuItems.push({
-        object: createCheckbox("Autoscale", self.autoscale),
-        click: function () {
-            self.autoscale = !self.autoscale;
-            self.config.autoscale = self.autoscale;
-            self.trackView.setDataRange(undefined, undefined, self.autoscale);
-        }
-    });
-
-    return menuItems;
-
-};
-
-WigTrack.prototype.getFileHeader = async function () {
-
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
     }
     return this.header;
 };
@@ -141,33 +123,6 @@ WigTrack.prototype.draw = function (options) {
         return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
     };
 
-    const getX = function (feature) {
-        let x = Math.floor((feature.start - bpStart) / bpPerPixel);
-        if (isNaN(x)) console.log('isNaN(x). feature start ' + numberFormatter(feature.start) + ' bp start ' + numberFormatter(bpStart));
-        return x;
-    };
-
-    const getWidth  = function (feature, x) {
-        const rectEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-        return Math.max(1, rectEnd - x);
-    };
-
-    const drawGuideLines = function (options) {
-        if (self.config.hasOwnProperty('guideLines')) {
-            for (let line of self.config.guideLines) {
-                if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
-                    let y = yScale(line.y);
-                    let props = {
-                        'strokeStyle': line['color'],
-                        'strokeWidth': 2
-                    };
-                    if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
-                    else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
-                }
-            }
-        }
-    };
-
     if (features && features.length > 0) {
 
         if (self.dataRange.min === undefined) self.dataRange.min = 0;
@@ -183,12 +138,14 @@ WigTrack.prototype.draw = function (options) {
                 if (f.end < bpStart) continue;
                 if (f.start > bpEnd) break;
 
-                const x = getX(f);
+                const x = Math.floor((f.start - bpStart) / bpPerPixel)
                 if (isNaN(x)) continue;
 
                 let y = yScale(f.value);
 
-                const width = getWidth(f, x);
+                const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel);
+                const width = Math.max(1, rectEnd - x);
+
                 let c = (f.value < 0 && self.altColor) ? self.altColor : self.color;
                 const color = (typeof c === "function") ? c(f.value) : c;
 
@@ -199,7 +156,7 @@ WigTrack.prototype.draw = function (options) {
 
                 } else {
                     let height = y - y0;
-                    if((Math.abs(height)) < 1) {
+                    if ((Math.abs(height)) < 1) {
                         height = height < 0 ? -1 : 1
                     }
                     const pixelEnd = x + width;
@@ -221,8 +178,20 @@ WigTrack.prototype.draw = function (options) {
         }
     }
 
-    drawGuideLines(options);
-
+    // Draw guidelines
+    if (self.config.hasOwnProperty('guideLines')) {
+        for (let line of self.config.guideLines) {
+            if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
+                let y = yScale(line.y);
+                let props = {
+                    'strokeStyle': line['color'],
+                    'strokeWidth': 2
+                };
+                if (line['dotted']) IGVGraphics.dashedLine(options.context, 0, y, options.pixelWidth, y, 5, props);
+                else IGVGraphics.strokeLine(options.context, 0, y, options.pixelWidth, y, props);
+            }
+        }
+    }
 }
 
 WigTrack.prototype.popupData = function (clickState, features) {
@@ -235,7 +204,7 @@ WigTrack.prototype.popupData = function (clickState, features) {
     if (features && features.length > 0) {
 
         let genomicLocation = clickState.genomicLocation;
-        let referenceFrame = clickState.viewport.genomicState.referenceFrame;
+        let referenceFrame = clickState.viewport.referenceFrame;
         let popupData = [];
 
         // We need some tolerance around genomicLocation, start with +/- 2 pixels
@@ -244,12 +213,12 @@ WigTrack.prototype.popupData = function (clickState, features) {
 
         if (selectedFeature) {
             let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                numberFormatter(selectedFeature.start + 1)
-                : numberFormatter(selectedFeature.start + 1) + "-" + numberFormatter(selectedFeature.end);
+                StringUtils.numberFormatter(selectedFeature.start + 1)
+                : StringUtils.numberFormatter(selectedFeature.start + 1) + "-" + StringUtils.numberFormatter(selectedFeature.end);
             popupData.push({name: "Position:", value: posString});
             popupData.push({
                 name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                value: numberFormatter(selectedFeature.value)
+                value: StringUtils.numberFormatter(selectedFeature.value)
             });
         }
 
@@ -348,17 +317,14 @@ function binarySearch(features, position, tolerance) {
 }
 
 WigTrack.prototype.getState = function () {
-
-    let config = this.config;
-
-    config.autoscale = this.autoscale;
+    const state = deepCopy(this.config);
+    state.autoscale = this.autoscale;
 
     if (!this.autoscale && this.dataRange) {
-        config.min = this.dataRange.min;
-        config.max = this.dataRange.max;
+        state.min = this.dataRange.min;
+        state.max = this.dataRange.max;
     }
-    return config;
-
+    return state;
 }
 
 WigTrack.prototype.supportsWholeGenome = function () {

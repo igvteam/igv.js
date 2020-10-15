@@ -29,9 +29,11 @@ import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import igvxhr from "../igvxhr.js";
 import {unbgzf, bgzBlockSize} from './bgzf.js';
-import {isString} from "../util/stringUtils.js";
-//import {decodeDataURI} from "../util/uriUtils.js";
 import {buildOptions} from "../util/igvUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
+
 
 /**
  * Class for reading a bam file

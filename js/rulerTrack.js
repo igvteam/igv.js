@@ -25,10 +25,12 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import IGVGraphics from "./igv-canvas.js";
-import IGVColor from "./igv-color.js";
+import {IGVColor} from "../node_modules/igv-utils/src/index.js";
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
-import {numberFormatter} from "./util/stringUtils.js";
+import {StringUtils} from "../node_modules/igv-utils/src/index.js";
+
+const numberFormatter = StringUtils.numberFormatter;
 
 const RulerTrack = function (browser) {
 
@@ -38,48 +40,23 @@ const RulerTrack = function (browser) {
     this.id = "ruler";
     this.disableButtons = true;
     this.ignoreTrackMenu = true;
-    this.order = -Number.MAX_SAFE_INTEGER;
+    this.order = Number.MIN_SAFE_INTEGER * 1e-2;
     this.removable = false;
     this.type = 'ruler';
 
 };
 
 RulerTrack.prototype.updateLocusLabel = function () {
-    var self = this;
 
-    this.trackView.viewports.forEach(function (viewport) {
-        var str;
-        str = viewport.genomicState.referenceFrame.showLocus(viewport.$viewport.width());
-
-        // console.log('ruler update label - viewport ' + viewport.id + ' ' + str);
-        viewport.$rulerLabel.text(str);
-    });
+    for (let viewport of this.trackView.viewports) {
+         viewport.updateLocusLabel()
+    }
 
 };
 
-RulerTrack.prototype.appendMultiPanelCloseButton = function ($viewport, genomicState) {
+RulerTrack.prototype.getFeatures = async function (chr, start, end) {
 
-    const browser = this.browser;
-
-    var $close,
-        $closeButton;
-
-    $viewport.addClass('igv-viewport-ruler');
-
-    $close = $('<div class="igv-multi-locus-panel-close-container">');
-    $viewport.append($close);
-
-    $close.append(createIcon("times-circle"));
-
-    $close.click(function (e) {
-        browser.removeMultiLocusPanelWithGenomicState(genomicState, true);
-    });
-
-};
-
-RulerTrack.prototype.getFeatures = function (chr, bpStart, bpEnd) {
-
-    return Promise.resolve([]);
+    return [];
 
 };
 
@@ -89,7 +66,7 @@ RulerTrack.prototype.computePixelHeight = function (ignore) {
 
 RulerTrack.prototype.draw = function (options) {
 
-    if (GenomeUtils.isWholeGenomeView(options.referenceFrame)) {
+    if (GenomeUtils.isWholeGenomeView(options.referenceFrame.chr)) {
 
         options.viewport.rulerSweeper.disableMouseHandlers();
 

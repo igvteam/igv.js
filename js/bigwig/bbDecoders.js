@@ -20,15 +20,10 @@
 //     string region2Name; "Identifier of upper/this region"
 //     string region2Strand; "Orientation of upper/this region: + or -.  Use . if not applicable"
 //     )
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {parseAutoSQL} from "../util/ucscUtils.js";
 
-function getDecoder(definedFieldCount, fieldCount, as) {
-
-    let autoSql;
-    if (as) {
-        autoSql = parseAutoSQL(as);
-    }
+function getDecoder(definedFieldCount, fieldCount, autoSql) {
 
     if (autoSql && 'chromatinInteract' === autoSql.table) {
         return decodeInteract;
@@ -98,16 +93,6 @@ function getDecoder(definedFieldCount, fieldCount, as) {
         feature.score = Number.parseFloat(tokens[1]);
         feature.value = Number.parseFloat(tokens[2]);
         feature.color = tokens[4] === '.' ? undefined : tokens[4] === "0" ? "rgb(0,0,0)" : tokens[4];
-
-        feature.interchr = feature.chr1 !== feature.chr2;
-
-        // Midpoints
-        if(feature.chr1 === feature.chr2) {
-            let m1 = (feature.start1 + feature.end1) / 2;
-            let m2 = (feature.start2 + feature.end2) / 2;
-            feature.m1 = (m1 < m2) ? m1 : m2;
-            feature.m2 = (m1 < m2) ? m2 : m1;
-        }
 
         return feature;
     }

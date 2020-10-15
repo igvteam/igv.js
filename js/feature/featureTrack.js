@@ -26,9 +26,8 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
-import BWSource from "../bigwig/bwSource.js";
 import IGVGraphics from "../igv-canvas.js";
-import IGVColor from "../igv-color.js";
+import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
@@ -51,7 +50,7 @@ const FeatureTrack = extend(TrackBase,
 
     function (config, browser) {
 
-        this.type = "feature";
+       // this.type = "feature";
 
         TrackBase.call(this, config, browser);
 
@@ -62,7 +61,9 @@ const FeatureTrack = extend(TrackBase,
         this.maxRows = config.maxRows;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-        this.featureSource =  FeatureSource(config, browser.genome);
+        this.featureSource = config.featureSource ?
+            config.featureSource :
+            FeatureSource(config, browser.genome);
 
         // Set default heights
         this.autoHeight = config.autoHeight;
@@ -117,39 +118,30 @@ const FeatureTrack = extend(TrackBase,
 
 FeatureTrack.prototype.postInit = async function () {
 
-    const header = await this.readFileHeader();
+    if (typeof this.featureSource.getHeader === "function") {
+        this.header = await this.featureSource.getHeader();
+    }
 
     // Set properties from track line
-    if (header) this.setTrackProperties(header)
+    if (this.header) {
+        this.setTrackProperties(this.header)
+    }
 
-    const format = this.config.format;
-    if (format &&
-        (format.toLowerCase() === 'bigbed' || format && format.toLowerCase() === 'biginteract') &&
-        this.visibilityWindow === undefined &&
-        typeof this.featureSource.defaultVisibilityWindow === 'function') {
-        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow()
-        this.featureSource.visibilityWindow = this.visibilityWindow;
+    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+        this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
     }
 
     return this;
-
 }
 
 FeatureTrack.prototype.supportsWholeGenome = function () {
-    return this.config.indexed === false && this.config.supportsWholeGenome !== false
+    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
 }
 
-FeatureTrack.prototype.readFileHeader = async function () {
-
-    if (typeof this.featureSource.getFileHeader === "function") {
-        this.header = await this.featureSource.getFileHeader();
-    }
-
-    return this.header;
-}
-
-FeatureTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
+FeatureTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
+    const visibilityWindow = this.visibilityWindow;
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
 };
 
 
@@ -640,11 +632,12 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     }
 
     const windowX = Math.round(options.viewportContainerX);
-    const nLoci = browser.genomicStateList ? browser.genomicStateList.length : 1
-    const windowX1 = windowX + options.viewportContainerWidth / nLoci;
+    // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
+    // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
+    const windowX1 = windowX + browser.viewportWidth();
 
     if (options.drawLabel) {
-        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.genomicState, options);
+        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
     }
 }
 
@@ -656,10 +649,10 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  * @param featureY  feature y-coordinate
  * @param windowX   visible window start x-coordinate
  * @param windowX1  visible window end x-coordinate
- * @param genomicState  genomic state
+ * @param referenceFrame  genomic state
  * @param options  options
  */
-function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, genomicState, options) {
+function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, referenceFrame, options) {
 
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
@@ -680,10 +673,10 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
 
     let geneColor;
     let gtexSelection = false;
-    if (genomicState.selection && GtexUtils.gtexLoaded) {
+    if (referenceFrame.selection && GtexUtils.gtexLoaded) {
         // TODO -- for gtex, figure out a better way to do this
         gtexSelection = true;
-        geneColor = genomicState.selection.colorForGene(name);
+        geneColor = referenceFrame.selection.colorForGene(name);
     }
 
 

@@ -26,7 +26,7 @@
 
 import BinaryParser from "../binary.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const GZIP_FLAG = 0x1;
@@ -337,7 +337,6 @@ function createBed(binaryParser, nTracks, type) {
         start: start,
         end: end,
         data: data,
-        name: name,
         nTracks: nTracks,
         nPositions: nPositions
     }

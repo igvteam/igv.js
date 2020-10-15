@@ -30,7 +30,10 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {extend} from "../util/igvUtils.js";
-import {isString} from "../util/stringUtils.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const isString = StringUtils.isString;
+
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
 const type = "variant";
@@ -57,16 +60,13 @@ const VariantTrack = extend(TrackBase,
         this.squishedGroupGap = config.squishedGroupGap || 5;
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
-
         this.featureSource = FeatureSource(config, browser.genome);
-
         this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
         this.mixedColor = config.mixedColor || "rgb(200, 220, 200)";
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)";
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
-
         this.sortDirection = "ASC";
 
         this.nRows = 1;  // Computed dynamically
@@ -75,8 +75,8 @@ const VariantTrack = extend(TrackBase,
 
 VariantTrack.prototype.postInit = async function () {
 
-    const header = await this.getFileHeader();   // cricital, don't remove'
-    if (undefined === this.visibilityWindow) {
+    const header = await this.getHeader();   // cricital, don't remove'
+    if (undefined === this.visibilityWindow && this.config.indexed !== false) {
         const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
         if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
             this.visibilityWindow = 1000;  // these are known to be very dense
@@ -91,22 +91,17 @@ VariantTrack.prototype.postInit = async function () {
 
 }
 
-VariantTrack.prototype.getFileHeader = async function () {
+VariantTrack.prototype.supportsWholeGenome = function () {
+    return this.config.indexed === false && this.config.supportsWholeGenome !== false
+}
+
+VariantTrack.prototype.getHeader = async function () {
 
     if (this.header) {
         return this.header;
-    } else if (typeof this.featureSource.getFileHeader === "function") {
-
-        const header = await this.featureSource.getFileHeader()
+    } else if (typeof this.featureSource.getHeader === "function") {
+        const header = await this.featureSource.getHeader()
         if (header) {
-
-            // Header (from track line).  Set properties,unless set in the config (config takes precedence)
-            if (header.name && !this.config.name) {
-                this.name = header.name;
-            }
-            if (header.color && !this.config.color) {
-                this.color = "rgb(" + header.color + ")";
-            }
             this.callSets = header.callSets || [];
         }
         this.header = header;
@@ -122,12 +117,12 @@ VariantTrack.prototype.getCallsetsLength = function () {
     return this.callSets.length;
 }
 
-VariantTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel) {
+VariantTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
 
     if (this.header === undefined) {
-        this.header = await this.getFileHeader();
+        this.header = await this.getHeader();
     }
-    return this.featureSource.getFeatures(chr, bpStart, bpEnd, bpPerPixel, this.visibilityWindow);
+    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow: this.visibilityWindow});
 
 }
 
@@ -229,7 +224,7 @@ VariantTrack.prototype.draw = function (options) {
                         let allRef = true;
                         let noCall = false;
                         for (let g of call.genotype) {
-                            if('.' === g) {
+                            if ('.' === g) {
                                 noCall = true;
                                 break;
                             } else {
@@ -321,8 +316,8 @@ function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
 
     let gt = '';
     const altArray = variant.alternateBases.split(",")
-    for(let allele of call.genotype) {
-        if('.' === allele) {
+    for (let allele of call.genotype) {
+        if ('.' === allele) {
             gt += 'No Call';
             break;
         } else if (allele === 0) {

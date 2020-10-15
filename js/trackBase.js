@@ -24,9 +24,8 @@
  */
 
 import FeatureUtils from "./feature/featureUtils.js";
-import {isFilePath} from './util/fileUtils.js'
 import {isSimpleType} from "./util/igvUtils.js";
-import {numberFormatter, capitalize} from "./util/stringUtils.js";
+import {FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 /**
  * A collection of properties and methods shared by all (or most) track types.   Used as a mixin
@@ -53,7 +52,7 @@ const TrackBase = function (config, browser) {
     if (config.name) {
         this.name = config.name;
     } else {
-        if (isFilePath(config.url)) this.name = config.url.name;
+        if (FileUtils.isFilePath(config.url)) this.name = config.url.name;
         else this.name = config.url;
     }
     this.id = this.config.id === undefined ? this.name : this.config.id;
@@ -135,9 +134,9 @@ TrackBase.prototype.clickedFeatures = function (clickState) {
  */
 TrackBase.prototype.setTrackProperties = function (properties) {
     for (let key of Object.keys(properties)) {
-        switch (key) {
+        switch (key.toLowerCase()) {
             case "name":
-            case "useScore":
+            case "usescore":
                 this[key] = properties[key]
                 break;
             case "visibility":
@@ -159,11 +158,24 @@ TrackBase.prototype.setTrackProperties = function (properties) {
                 }
                 break;
             case "color":
-            case "altColor":
-                this[key] = "rgb(" + properties[key] + ")";
+            case "altcolor":
+                this[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
                 break;
-            case "featureVisiblityWindow":
+            case "featurevisiblitywindow":
                 this.visibilityWindow = Number.parseInt(properties[key]);
+                break;
+            case "viewlimits":
+                const tokens = properties[key].split(":");
+                let min = 0;
+                let max;
+                if(tokens.length == 1) {
+                    max = Number.parseFloat(tokens[0]);
+                } else if(tokens.length == 2) {
+                    min = Number.parseFloat(tokens[0]);
+                    max = Number.parseFloat(tokens[1]);
+                }
+                this.autoscale = false;
+                this.dataRange = {min, max};
         }
     }
 }
@@ -189,7 +201,7 @@ TrackBase.extractPopupData = function (feature, genomeId) {
             !filteredProperties.has(property) &&
             isSimpleType(feature[property])) {
             let value = feature[property];
-            data.push({name: capitalize(property), value: value});
+            data.push({name: StringUtils.capitalize(property), value: value});
 
             if (property === "alleles") {
                 alleles = feature[property];
@@ -243,7 +255,7 @@ TrackBase.extractPopupData = function (feature, genomeId) {
     }
 
     // final chr position
-    let posString = `${feature.chr}:${numberFormatter(feature.start+1)}-${numberFormatter(feature.end)}`
+    let posString = `${feature.chr}:${StringUtils.numberFormatter(feature.start+1)}-${StringUtils.numberFormatter(feature.end)}`
     if(feature.strand) {
         posString += ` (${feature.strand})`
     }

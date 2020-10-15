@@ -2,14 +2,47 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
-    <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
 
-    <link href="css/dev.css" rel="stylesheet"/>
+    <title>IGV - Dev</title>
+    <style>
+        #trackList {
+
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+        }
+
+        div#myDiv > h3 {
+            font-size: large;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
 </head>
 
 <body>
@@ -29,32 +62,19 @@
 <script type="module">
 
     import igv from '../js/index.js'
-    import google from "../js/google/googleUtils.js"
+    import GtexUtils from "../js/gtex/gtexUtils.js";
 
     let browser
     (async () => {
 
-        await google.loadGoogleProperties("https://s3.amazonaws.com/igv.org.app/web_client_google")
-
         const options =
             {
                 genome: "hg19",
-                // locus: [ 'egfr', 'myc' ],
+                // locus: [ 'egfr', 'ace', 'kit', 'enam' ],
+                // locus: [ 'egfr', 'myc', 'ace' ],
+                // locus: [ 'ace', 'myc' ],
                 locus: "myc",
-                flanking: 1000,
-                queryParametersSupported: true,
-                showAllChromosomes: true,
-                showCursorTrackingGuide: true,
-                showControls: true,
-                // tracks:
-                // [
-                //     {
-                //         name: "BED Render Bug",
-                //         url: 'https://www.encodeproject.org/files/ENCFF768ZWJ/@@download/ENCFF768ZWJ.bigBed'
-                //     }
-                //
-                // ]
-
+                // locus: 'chr8:100,117,313-100,120,998'
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
@@ -93,7 +113,7 @@
 
                 })
 
-                return igv.GtexUtils.getTissueInfo("gtex_v7")
+                return GtexUtils.getTissueInfo("gtex_v7")
             })
 
             .then(function (json) {
@@ -107,7 +127,7 @@
                     trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
                     trackDiv.addEventListener('click', function (event) {
 
-                        browser.loadTrack(igv.GtexUtils.trackConfiguration(obj));
+                        browser.loadTrack(GtexUtils.trackConfiguration(obj));
 
                     });
 

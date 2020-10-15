@@ -39,7 +39,7 @@
                     <li>
                         <a href="#"
                            onclick="igv.browser.loadTrack({
-                                 url: 'https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz',
+                                 url: 'https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz',
                                  indexed: false,
                                  isLog: true,
                                  name: 'GBM Copy # (TCGA Broad GDAC)'});">GBM Copy # (TCGA Broad GDAC))</a>
@@ -76,6 +76,7 @@
                                 type: 'alignment',
                                 format: 'bam',
                                 url:'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam',
+                                indexURL:'https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai',
                                 name: 'HG02450'
                                 })">1KG Bam (HG02450)
                         </a>

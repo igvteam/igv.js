@@ -28,7 +28,7 @@ import $ from "../vendor/jquery-3.3.1.slim.js";
 
 const SVGSaveControl = function ($parent, browser) {
 
-    let $button = $('<div class="igv-nav-bar-button">');
+    let $button = $('<div class="igv-navbar-button">');
     $parent.append($button);
 
     $button.text('Save SVG');

@@ -3,7 +3,7 @@
 
 import BinaryParser from "../binary.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const CSI1_MAGIC = 21582659 // CSI\1
@@ -20,7 +20,14 @@ async function loadCsiIndex(indexURL, config, tabix, genome) {
     let arrayBuffer = await igvxhr.loadArrayBuffer(indexURL, buildOptions(config))
     const inflate = new Zlib.Gunzip(new Uint8Array(arrayBuffer))
     arrayBuffer = inflate.decompress().buffer;
-    const idx = new CSIIndex(tabix);
+    const idx = new CSIIndex();
+    idx.parse(arrayBuffer, genome);
+    return idx;
+}
+
+async function parseCsiIndex(arrayBuffer, genome) {
+
+    const idx = new CSIIndex();
     idx.parse(arrayBuffer, genome);
     return idx;
 }
@@ -28,7 +35,7 @@ async function loadCsiIndex(indexURL, config, tabix, genome) {
 class CSIIndex {
 
     constructor(tabix) {
-        this.tabix = tabix;
+        this.tabix = true;   // Means whatever is indexed is bgzipped
     }
 
     parse(arrayBuffer, genome) {
@@ -233,4 +240,4 @@ function canMerge(chunk1, chunk2) {
 }
 
 
-export default loadCsiIndex;
+export {loadCsiIndex, parseCsiIndex};

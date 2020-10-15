@@ -53,9 +53,7 @@ const RnaStructTrack = extend(TrackBase,
     });
 
 RnaStructTrack.prototype.getFeatures = function (chr, start, end) {
-
-    return this.featureSource.getFeatures(chr, start, end);
-
+    return this.featureSource.getFeatures({chr, start, end});
 }
 
 RnaStructTrack.prototype.draw = function (options) {
@@ -272,7 +270,7 @@ function RNAFeatureSource(config, genome) {
     this.genome = genome;
 }
 
-RNAFeatureSource.prototype.getFeatures = function (chr, start, end) {
+RNAFeatureSource.prototype.getFeatures = function ({chr, start, end}) {
 
     const self = this;
     const genome = this.genome;
@@ -308,7 +306,7 @@ RNAFeatureSource.prototype.getFeatures = function (chr, start, end) {
         const descriptors = [];
         const features = [];
 
-        while (line = dataWrapper.nextLine()) {
+        while ((line = dataWrapper.nextLine()) !== undefined) {
 
             const tokens = line.split('\t');
 

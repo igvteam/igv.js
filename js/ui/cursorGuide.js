@@ -25,6 +25,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
@@ -45,11 +46,11 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
         let $viewport = undefined;
 
-        if ($parent.hasClass('igv-viewport-content-div')) {
+        if ($parent.hasClass('igv-viewport-content')) {
             $viewport = $parent.parent();
-        } else if ($parent.hasClass('igv-viewport-div') && $child.hasClass('igv-viewport-content-div')) {
+        } else if ($parent.hasClass('igv-viewport') && $child.hasClass('igv-viewport-content')) {
             $viewport = $parent;
-        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport-div')) {
+        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport')) {
             $viewport = $child;
         }
 
@@ -77,7 +78,7 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
     if (true === config.showCursorTrackingGuideButton) {
 
-        this.$button = $('<div class="igv-nav-bar-button">');
+        this.$button = $('<div class="igv-navbar-button">');
         $controlParent.append(this.$button);
         this.$button.text('cursor guide');
 
@@ -96,13 +97,13 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
 
     // pixel location of guide line
-    const { x } = getMouseXY($guideParent.get(0), event);
-    const left = `${ x }px`;
+    const parent = $guideParent.get(0)
+    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, parent);
+    const left = `${ xParent }px`;
     $guideLine.css({ left });
 
-
     // base-pair location of guide line
-    const viewportMouseXY = getMouseXY($viewport.get(0), event);
+    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0));
 
     const guid = $viewport.data('viewportGUID');
     const viewport = browser.getViewportWithGUID(guid);
@@ -112,39 +113,33 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
         return undefined;
     }
 
-    const { referenceFrame } = viewport.genomicState;
-
-
-    const _startBP = referenceFrame.start;
-    const _endBP = 1 + referenceFrame.start + (viewportMouseXY.width * referenceFrame.bpPerPixel);
-
-    // bp = bp + (pixel * (bp / pixel))
-    const bp = Math.round(_startBP + viewportMouseXY.x * referenceFrame.bpPerPixel);
+    const { start, bpPerPixel } = viewport.referenceFrame;
 
     // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
-    const $trackContainer = $viewport.closest('.igv-track-container-div');
-    const trackContainerMouseXY = getMouseXY($trackContainer.get(0), event);
-
+    const $trackContainer = $viewport.closest('.igv-track-container');
 
     return {
         $host: $trackContainer,
         host_css_left: left,
-        bp,
-        start: _startBP,
-        end: _endBP,
-        interpolant: viewportMouseXY.xNormalized
+
+        // units: bp = bp + (pixel * (bp / pixel))
+        bp: Math.round(start + x * bpPerPixel),
+
+        start,
+        end: 1 + start + (width * bpPerPixel),
+        interpolant: xNormalized
     };
 };
 
 CursorGuide.prototype.doHide = function () {
     if (this.$button) {
-        this.$button.removeClass('igv-nav-bar-button-clicked');
+        this.$button.removeClass('igv-navbar-button-clicked');
     }
     this.browser.hideCursorGuide();
 };
 
 CursorGuide.prototype.doShow = function () {
-    this.$button.addClass('igv-nav-bar-button-clicked');
+    this.$button.addClass('igv-navbar-button-clicked');
     this.browser.showCursorGuide();
 };
 
@@ -153,9 +148,9 @@ CursorGuide.prototype.setState = function (cursorGuideVisible) {
     if (this.$button) {
 
         if (true === cursorGuideVisible) {
-            this.$button.addClass('igv-nav-bar-button-clicked');
+            this.$button.addClass('igv-navbar-button-clicked');
         } else {
-            this.$button.removeClass('igv-nav-bar-button-clicked');
+            this.$button.removeClass('igv-navbar-button-clicked');
         }
 
     }
@@ -171,23 +166,5 @@ CursorGuide.prototype.enable = function () {
         this.$button.show();
     }
 };
-
-function getMouseXY(domElement, event) {
-
-    // a DOMRect object with eight properties: left, top, right, bottom, x, y, width, height
-    const dr = domElement.getBoundingClientRect();
-
-    const xy =
-        {
-            x: event.clientX - dr.left,
-            y: event.clientY - dr.top,
-            xNormalized: (event.clientX - dr.left)/dr.width,
-            yNormalized: (event.clientY - dr.top)/dr.height,
-            width: dr.width,
-            height: dr.height
-        };
-
-    return xy;
-}
 
 export default CursorGuide;

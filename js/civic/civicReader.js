@@ -1,5 +1,5 @@
 import igvxhr from "../igvxhr.js";
-import {numberFormatter} from "../util/stringUtils.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CivicReader = function (config) {
             this.config = config;
@@ -71,8 +71,8 @@ const CivicReader = function (config) {
             }
 
             this.locationString = (this.chr + ":" +
-                numberFormatter(this.start + 1) + "-" +
-                numberFormatter(this.end));
+                StringUtils.numberFormatter(this.start + 1) + "-" +
+                StringUtils.numberFormatter(this.end));
 
             // Color based on actionability score
             if (this.actionabilityScore !== undefined) {

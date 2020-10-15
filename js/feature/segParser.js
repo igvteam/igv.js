@@ -23,8 +23,9 @@
  * THE SOFTWARE.
  */
 
-import {splitLines} from "../util/stringUtils.js";
 import getDataWrapper from "./dataWrapper.js"
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 /**
  *  Define parser for seg files  (.bed, .gff, .vcf, etc).  A parser should implement 2 methods
@@ -44,7 +45,7 @@ const sampleKeyColumn = 0,
 
 class SegParser {
     parseHeader(data) {
-        const lines = splitLines(data);
+        const lines = StringUtils.splitLines(data);
         for (let line of lines) {
             if (line.startsWith("#")) {
                 // skip
@@ -66,7 +67,7 @@ class SegParser {
         }
         const dataColumn = this.header.headings.length - 1;
         let line;
-        while (line = nextLine()) {
+        while ((line = nextLine()) !== undefined) {
             const tokens = line.split("\t");
             if (tokens.length > dataColumn) {
                 allFeatures.push({

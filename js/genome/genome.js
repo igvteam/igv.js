@@ -26,10 +26,12 @@
 import Cytoband from "./cytoband.js";
 import FastaSequence from "./fasta.js";
 import igvxhr from "../igvxhr.js";
-import Zlib from "../vendor/zlib_and_gzip.js";
-import {splitLines} from "../util/stringUtils.js";
-import {decodeDataURI} from "../util/uriUtils.js";
+import {Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import {URIUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
+const splitLines = StringUtils.splitLines;
+
 
 let KNOWN_GENOMES;
 
@@ -40,8 +42,6 @@ const GenomeUtils = {
         const cytobandUrl = options.cytobandURL;
         const aliasURL = options.aliasURL;
         const sequence = new FastaSequence(options);
-
-
         await sequence.init()
 
         let cytobands
@@ -55,7 +55,6 @@ const GenomeUtils = {
         }
 
         return new Genome(options, sequence, cytobands, aliases);
-
     },
 
     getKnownGenomes: async function () {
@@ -88,8 +87,8 @@ const GenomeUtils = {
         }
     },
 
-    isWholeGenomeView: function (referenceFrame) {
-        let chromosomeName = referenceFrame.chrName.toLowerCase();
+    isWholeGenomeView: function (chr) {
+        let chromosomeName = chr.toLowerCase();
         return 'all' === chromosomeName;
     }
 };
@@ -360,7 +359,7 @@ function loadCytobands(cytobandUrl, config) {
         let plain
 
         if (dataUri.startsWith("data:application/gzip;base64")) {
-            plain = decodeDataURI(dataUri)
+            plain = URIUtils.decodeDataURI(dataUri)
         } else {
 
             let bytes,

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>git 870</title>
+
+</head>
+
+<body>
+
+<h2><a href="https://github.com/igvteam/igv.js/issues/870" target="_blank">Git issue 870</a></h2>
+
+Orphaned transcript parts (e.g. exon, CDS) were not being drawn.
+The referenced GFF should result in 4 features being drawn.
+
+<pre>
+chr1	internal	exon	1000	1100	.	+	1	ID=feature_with_type_exon;name=Exon
+chr1	internal	CDS	1100	1200	.	+	1	ID=feature_with_type_CDS;name=CDS
+chr1	internal	contig	1200	1300	.	+	1	ID=feature_with_type_contig;name=Contig
+chr1	internal	gene	1300	1400	.	+	1	ID=feature_with_type_gene;name=Gene
+</pre>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../../js";
+
+    let browser;
+    const options =
+        {
+            // locus: 'muc1',
+            genome: "hg38",
+            locus: "chr1:750-1500",
+            queryParametersSupported: true,
+            tracks: [
+                {
+                    name: "issue-870",
+                    type: "annotation",
+                    format: "gff3",
+                    url: "../../test/data/gff/issue-870.gff3"
+                }
+            ]
+        };
+
+    igv.createBrowser(document.getElementById('igvDiv'), options)
+        .then(function (b) {
+            browser = b;
+        })
+
+
+</script>
+
+</body>
+
+</html>

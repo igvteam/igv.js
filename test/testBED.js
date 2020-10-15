@@ -1,196 +1,94 @@
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import FeatureSource from "../js/feature/featureSource.js";
+import {assert} from 'chai';
+import {createMockObjects} from "@igvteam/test-utils/src"
 
-function runBedTests() {
+suite("testBed", function () {
 
-    // mock objects
+    createMockObjects();
+
     const genome = {
         getChromosomeName: function (chr) {
             return chr.startsWith("chr") ? chr : "chr" + chr;
         }
     }
 
-    //
-    // QUnit.test("Missing line feed  - gzipped", function(assert) {
-    //
-    //     var done = assert.async();
-    //
-    //     var chr = "chr1",
-    //         bpStart = 0,
-    //         bpEnd = Number.MAX_VALUE,
-    //         featureSource = new igv.FeatureSource({
-    //                 format: 'bed',
-    //                 indexed: false,
-    //                 url: 'data/bed/missing_linefeed.bed.gz'
-    //             },
-    //             genome);
-    //
-    //     // Must get file header first
-    //     featureSource.getFeatures(chr, bpStart, bpEnd)
-    //         .then(function (features) {
-    //
-    //             assert.equal(4, features.length);   // feature count. Determined by grepping file
-    //
-    //             done();
-    //         })
-    //         .catch(function (error) {
-    //             console.log(error);
-    //         });
-    // });
-    //
-    //
-    // QUnit.test("UCSC SNP format", function (assert) {
-    //
-    //     const done = assert.async();
-    //
-    //     const config = {
-    //         format: "snp",
-    //         indexed: false,
-    //         url: "data/snp/ucsc_snp.txt"
-    //     }
-    //
-    //     const reader = new igv.FeatureFileReader(config);
-    //
-    //     reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-    //         .then(features => {
-    //             assert.ok(features);
-    //             assert.equal(features.length, 3);
-    //             assert.equal(features[0].submitters, '1000GENOMES,BILGI_BIOE,');
-    //             done();
-    //         })
-    //         .catch(function (error) {
-    //             console.error(error);
-    //             assert.ok(false);
-    //             done;
-    //         })
-    // })
-
-    QUnit.test("Chr aliasing", async function (assert) {
-
-        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
-        const done = assert.async();
-
+    test("Empty lines", async function () {
         const config = {
-            format: "refgene",
-            url: "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz",
-            indexlURL: "https://s3.amazonaws.com/igv.org.genomes/hg19/refGene.sorted.txt.gz.tbi"
+            format: "bed",
+            url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed"),
         }
-
         const reader = FeatureSource(config, genome);
-        const features = await reader.getFeatures("8", 128746680, 128756129)
+        const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129})
         assert.ok(features);
-        assert.equal(features.length, 2);
-
-        // now query with
-        done();
-
+        assert.equal(features.length, 6);
     })
 
-    QUnit.test("GWAS Catalog format", function (assert) {
+    test("Empty lines - gzipped", async function () {
+        const config = {
+            format: "bed",
+            url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed.gz"),
+        }
+        const reader = FeatureSource(config, genome);
+        const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129});
+        assert.ok(features);
+        assert.equal(features.length, 6);
+    })
 
-        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
-        const done = assert.async();
 
+    test("GWAS Catalog format", async function () {
         const config = {
             format: "gwasCatalog",
             indexed: false,
-            url: "data/bed/gwasCatalog.test.txt"
+            url: require.resolve("./data/bed/gwasCatalog.test.txt")
         }
-
         const reader = new FeatureFileReader(config);
-
-        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-            .then(features => {
-                assert.ok(features);
-                assert.equal(features.length, 3);
-                assert.equal(features[0].name, 'rs141175086');
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done;
-            })
+        const features= await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
+        assert.equal(features[0].name, 'rs141175086');
     })
 
-    QUnit.test("wgRna format", function (assert) {
-
-        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
-        const done = assert.async();
-
+    test("wgRna format", async function () {
         const config = {
             format: "wgRna",
             indexed: false,
-            url: "data/bed/wgRna.test.txt"
+            url: require.resolve("./data/bed/wgRna.test.txt")
         }
-
         const reader = new FeatureFileReader(config);
-
-        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-            .then(features => {
-                assert.ok(features);
-                assert.equal(features.length, 3);
-                assert.equal(features[0].name, 'hsa-mir-1302-2');
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done;
-            })
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
+        assert.equal(features[0].name, 'hsa-mir-1302-2');
     })
 
-    QUnit.test("cpgIslandExt format", function (assert) {
-
-        ///Users/jrobinso/Dropbox/projects/igv.js/test/data/bed/gwasCatalog.test.txt
-        const done = assert.async();
+    test("cpgIslandExt format", async function () {
 
         const config = {
             format: "cpgIslandExt",
             indexed: false,
-            url: "data/bed/cpgIslandExt.test.txt"
+            url: require.resolve("./data/bed/cpgIslandExt.test.txt")
         }
-
         const reader = new FeatureFileReader(config);
-
-        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-            .then(features => {
-                assert.ok(features);
-                assert.equal(features.length, 3);
-                assert.equal(features[0].name, 'CpG: 111');
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done;
-            })
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
+        assert.equal(features[0].name, 'CpG: 111');
     })
 
-    QUnit.test("ensgene format", function (assert) {
-
-        const done = assert.async();
+    test("ensgene format", async function () {
 
         const config = {
             format: "ensgene",
             indexed: false,
-            url: "data/bed/ensGene.test.txt"
+            url: require.resolve("./data/bed/ensGene.test.txt")
         }
-
         const reader = new FeatureFileReader(config);
 
-        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-            .then(features => {
-                assert.ok(features);
-                assert.equal(features.length, 3);
-                assert.equal(features[0].name, 'ENSDART00000164359.1');
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done;
-            })
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
+        assert.equal(features[0].name, 'ENSDART00000164359.1');
     })
 
 
@@ -212,270 +110,227 @@ function runBedTests() {
     * 15 repLeft    0    int(11)    -#bases after match (if strand is +) or start (if strand is -) in repeat sequence
     * 16 id    1    char(1)    First digit of id field in RepeatMasker .out file. Best ignored. */
     //24	0	0	0	chr1	46216	46240	-249204381	+	AT_rich	Low_complexity	Low_complexity	1	24	0	4
-    QUnit.test("UCSC repeat masker format", function (assert) {
 
-        const done = assert.async();
+    test("UCSC repeat masker format", async function () {
 
         const config = {
             type: "annotation",
             format: "rmsk",
             indexed: false,
-            url: "data/bed/Low_complexity.rmask"
+            url: require.resolve("./data/bed/Low_complexity.rmask")
         }
-
         const reader = new FeatureFileReader(config);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        assert.ok(features);
+        assert.equal(features.length, 3);
 
-        reader.readFeatures("chr1", 0, Number.MAX_VALUE)
-
-            .then(features => {
-                assert.ok(features);
-                assert.equal(features.length, 3);
-
-                const f = features[0];
-                assert.equal("chr1", f.chr);
-                assert.equal(46216, f.start);
-                assert.equal(46240, f.end);
-                assert.equal(f.repName, 'AT_rich');
-
-                done();
-            })
-            .catch(function (error) {
-                console.error(error);
-                assert.ok(false);
-                done;
-            })
+        const f = features[0];
+        assert.equal("chr1", f.chr);
+        assert.equal(46216, f.start);
+        assert.equal(46240, f.end);
+        assert.equal(f.repName, 'AT_rich');
     })
 
+    test("splice junctions", async function () {
 
-    QUnit.test("BED query", function (assert) {
+        const config = {
+            format: "bed",
+            indexed: false,
+            url: require.resolve("./data/bed/splice_junction_track.bed")
+        }
+        const reader = new FeatureFileReader(config);
+        const features = await reader.readFeatures("chr15", 0, Number.MAX_VALUE);
+        assert.equal(features.length, 2);
+        for(let f of features) {
+            const attrs = f.attributes;
+            assert.ok(attrs);
+        }
+    })
 
-        var done = assert.async();
+    test("BED query", async function () {
 
         var chr = "chr1",
-            bpStart = 67655271,
-            bpEnd = 67684468,
+            start = 67655271,
+            end = 67684468,
             featureSource = FeatureSource({
                     format: 'bed',
                     indexed: false,
-                    url: 'data/bed/basic_feature_3_columns.bed'
+                    url: require.resolve('./data/bed/basic_feature_3_columns.bed')
                 },
                 genome);
 
         // Must get file header first
-        featureSource.getFileHeader().then(function (header) {
-            featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-                assert.ok(features);
-                assert.equal(128, features.length);   // feature count. Determined by grepping file
-                assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
-
-                done();
-            }, undefined);
-        }).catch(function (error) {
-            console.log(error);
-        });
+        await featureSource.getHeader();
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(128, features.length);   // feature count. Determined by grepping file
     });
 
-    QUnit.test("BED track line", function (assert) {
+    test("BED track line", async function () {
 
-        var done = assert.async();
-
-        var featureSource = FeatureSource({
+        const featureSource = FeatureSource({
                 format: 'bed',
                 indexed: false,
-                url: 'data/bed/basic_feature_3_columns.bed'
+                url: require.resolve('./data/bed/basic_feature_3_columns.bed')
             },
             genome);
 
-        featureSource.getFileHeader().then(function (header) {
-
-            assert.ok(header);
-            assert.equal(header.name, "Basic Features");
-            assert.equal(header.color, "255,0,0");
-            done();
-        });
-
+        const header = await featureSource.getHeader();
+        assert.ok(header);
+        assert.equal(header.name, "Basic Features");
+        assert.equal(header.color, "255,0,0");
     });
 
-    QUnit.test("BED query gzip", function (assert) {
+    test("BED query gzip", async function () {
 
-        var done = assert.async();
-
-        var chr = "chr1",
-            bpStart = 67655271,
-            bpEnd = 67684468,
+        const chr = "chr1",
+            start = 67655271,
+            end = 67684468,
             featureSource = FeatureSource({
                     format: 'bed',
-                    url: 'data/bed/basic_feature_3_columns.bed.gzipped'
+                    url: require.resolve('./data/bed/basic_feature_3_columns.bed.gzipped')
                 },
                 genome);
 
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-            assert.ok(features);
-            assert.equal(128, features.length);   // feature count. Determined by grepping file
-            assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
-
-            done();
-        }, undefined);
-
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(128, features.length);   // feature count. Determined by grepping file
+        assert.equal(chr, features[0].chr); // ensure features chromosome is specified chromosome
     });
 
-    QUnit.test("broadPeak parsing ", function (assert) {
+    test("broadPeak parsing ", async function () {
 
-        var done = assert.async();
-
-        var featureSource,
-            chr,
-            bpStart,
-            bpEnd;
-
-        featureSource = FeatureSource({
+        const featureSource = FeatureSource({
             format: 'broadPeak',
-            url: "data/peak/test.broadPeak"
+            url: require.resolve("./data/peak/test.broadPeak")
+        });
+        const chr = "chr22";
+        const start = 16847690;
+        const end = 20009819;
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(features.length, 100);   // # of features over this region
+        const feature = features[0];
+        assert.equal(chr, feature.chr);
+        assert.equal(feature.start, 16847690);
+        assert.ok(feature.end > start);
+        assert.equal(feature.signal, 5.141275);
+    });
+
+
+    test("refflat parsing ", async function () {
+
+        const featureSource = FeatureSource({
+                format: 'refflat',
+                url: require.resolve("./data/bed/myc_refFlat.txt")
+            },
+            genome);
+
+        const chr = "chr1";
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(10, features.length);   // # of features over this region
+        const feature = features[0];
+        assert.equal("GJA9-MYCBP", feature.name);
+        assert.equal(chr, feature.chr);
+        assert.equal(39328161, feature.start);
+        assert.ok(feature.end > start);
+        assert.equal(7, feature.exons.length);
+    });
+
+
+    test("genepred parsing ", async function () {
+
+        const featureSource = FeatureSource({
+                format: 'genePred',
+                url: require.resolve("./data/bed/genePred_myc_hg38.txt")
+            },
+            genome);
+
+        const chr = "chr8";
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(7, features.length);   // # of features over this region
+        const feature = features[0];
+        assert.equal("uc022bbe.2", feature.name);
+        assert.equal(chr, feature.chr);
+        assert.equal(127735433, feature.start);
+        assert.ok(feature.end > start);
+        assert.equal(3, feature.exons.length);
+    });
+
+
+    test("refgene parsing ", async function () {
+
+        const featureSource = FeatureSource({
+                format: 'refgene',
+                url: require.resolve("./data/bed/myc_refGene_genePredExt.txt")
+            },
+            genome);
+
+        const chr = "chr1";
+        const start = 1;
+        const end = Number.MAX_VALUE;
+        const features = await featureSource.getFeatures({chr, start, end});
+        assert.ok(features);
+        assert.equal(10, features.length);   // # of features over this region
+        const feature = features[0];
+        assert.equal("GJA9-MYCBP", feature.name);
+        assert.equal(chr, feature.chr);
+        assert.equal(39328161, feature.start);
+        assert.ok(feature.end > start);
+        assert.equal(3, feature.exons.length);
+
+    })
+
+    test("ucsc interact", async function () {
+
+        const featureSource = FeatureSource({
+            url: require.resolve("./data/bed/ucsc_interact_1.bed")
         });
 
-        chr = "chr22";
-        bpStart = 16847690;
-        bpEnd = 20009819;
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
+        const trackType = await featureSource.trackType();
+        const header = await featureSource.getHeader();
 
-            var feature;
+        assert.equal(header.format, "interact");
+        assert.equal(trackType, "interact");
+    })
 
-            assert.ok(features);
-            assert.equal(features.length, 100);   // # of features over this region
+    test("gcnv", async function() {
 
-            feature = features[0];
-            assert.equal(chr, feature.chr);
+        const featureSource = FeatureSource({
+            url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")
+        });
 
-            assert.equal(feature.start, 16847690);
-            assert.ok(feature.end > bpStart);
-            assert.equal(feature.signal, 5.141275);
+        const trackType = await featureSource.trackType();
+        const header = await featureSource.getHeader();
 
-            done();
+        assert.equal(header.format, "gcnv");
+        assert.equal(trackType, "gcnv");
+        assert.equal(header.columnNames.length, 172);
+        assert.equal(header.highlight.length, 2);
 
-        }, undefined);
+        const features = await featureSource.getFeatures({chr: "chr22", start: 0, end: Number.MAX_SAFE_INTEGER});
+        assert.equal(features.length, 10);
 
-    });
+    })
 
+    test("Chr aliasing", async function () {
 
-    QUnit.test("refflat parsing ", function (assert) {
+        const config = {
+            format: "bed",
+            url: require.resolve("./data/bed/basic_feature_3_columns.bed"),
+        }
+        const featureSource = FeatureSource(config, genome);
+        const features = await featureSource.getFeatures({chr: "1", start: 67658429, end: 67659549});
+        assert.ok(features);
+        assert.equal(features.length, 4);
 
-        var done = assert.async();
+    })
 
-        var featureSource,
-            chr,
-            bpStart,
-            bpEnd;
+})
 
-        featureSource = FeatureSource({
-                format: 'refflat',
-                url: "data/bed/myc_refFlat.txt"
-            },
-            genome);
-
-        chr = "chr1";
-        bpStart = 1;
-        bpEnd = Number.MAX_VALUE;
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-            var feature;
-
-            assert.ok(features);
-            assert.equal(10, features.length);   // # of features over this region
-
-            feature = features[0];
-            assert.equal("GJA9-MYCBP", feature.name);
-            assert.equal(chr, feature.chr);
-
-            assert.equal(39328161, feature.start);
-            assert.ok(feature.end > bpStart);
-            assert.equal(7, feature.exons.length);
-
-            done();
-
-        }, undefined);
-
-    });
-
-
-    QUnit.test("genepred parsing ", function (assert) {
-
-        var done = assert.async();
-
-        var featureSource,
-            chr,
-            bpStart,
-            bpEnd;
-
-        featureSource = FeatureSource({
-                format: 'genePred',
-                url: "data/bed/genePred_myc_hg38.txt"
-            },
-            genome);
-
-        chr = "chr8";
-        bpStart = 1;
-        bpEnd = Number.MAX_VALUE;
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-            var feature;
-
-            assert.ok(features);
-            assert.equal(7, features.length);   // # of features over this region
-
-            feature = features[0];
-            assert.equal("uc022bbe.2", feature.name);
-            assert.equal(chr, feature.chr);
-
-            assert.equal(127735433, feature.start);
-            assert.ok(feature.end > bpStart);
-            assert.equal(3, feature.exons.length);
-
-            done();
-
-        }, undefined);
-
-    });
-
-
-    QUnit.test("refgene parsing ", function (assert) {
-
-        var done = assert.async();
-
-        var featureSource,
-            chr,
-            bpStart,
-            bpEnd;
-
-        featureSource = FeatureSource({
-                format: 'refgene',
-                url: "data/bed/myc_refGene_genePredExt.txt"
-            },
-            genome);
-
-        chr = "chr1";
-        bpStart = 1;
-        bpEnd = Number.MAX_VALUE;
-        featureSource.getFeatures(chr, bpStart, bpEnd).then(function (features) {
-
-            var feature;
-
-            assert.ok(features);
-            assert.equal(10, features.length);   // # of features over this region
-
-            feature = features[0];
-            assert.equal("GJA9-MYCBP", feature.name);
-            assert.equal(chr, feature.chr);
-
-            assert.equal(39328161, feature.start);
-            assert.ok(feature.end > bpStart);
-            assert.equal(3, feature.exons.length);
-
-            done();
-
-        }, undefined);
-    });
-}
-
-export default runBedTests;

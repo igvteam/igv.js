@@ -38,7 +38,7 @@ const CenterGuide = function ($guideParent, $controlParent, config, browser) {
 
     if (true === config.showCenterGuideButton) {
 
-        this.$centerGuideToggle = $('<div class="igv-nav-bar-button">');
+        this.$centerGuideToggle = $('<div class="igv-navbar-button">');
         $controlParent.append(this.$centerGuideToggle);
         this.$centerGuideToggle.text('center line');
 
@@ -56,7 +56,7 @@ const CenterGuide = function ($guideParent, $controlParent, config, browser) {
 
 CenterGuide.prototype.doHide = function () {
     if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+        this.$centerGuideToggle.removeClass('igv-navbar-button-clicked');
     }
     this.browser.hideCenterGuide();
 };
@@ -64,7 +64,7 @@ CenterGuide.prototype.doHide = function () {
 CenterGuide.prototype.doShow = function () {
 
     if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+        this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
     }
 
     this.browser.showCenterGuide();
@@ -75,9 +75,9 @@ CenterGuide.prototype.setState = function (isCenterGuideVisible) {
     if (this.$centerGuideToggle) {
 
         if (true === isCenterGuideVisible) {
-            this.$centerGuideToggle.addClass('igv-nav-bar-button-clicked');
+            this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
         } else {
-            this.$centerGuideToggle.removeClass('igv-nav-bar-button-clicked');
+            this.$centerGuideToggle.removeClass('igv-navbar-button-clicked');
         }
 
     }
@@ -120,9 +120,9 @@ CenterGuide.prototype.repaint = function () {
         center,
         referenceFrame;
 
-    if (this.browser.genomicStateList) {
+    if (this.browser.referenceFrameList) {
 
-        referenceFrame = this.browser.genomicStateList[0].referenceFrame;
+        referenceFrame = this.browser.referenceFrameList[0]
         ppb = 1.0 / referenceFrame.bpPerPixel;
 
         if (ppb > 1) {

@@ -23,6 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {FileUtils,TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+
 const extend = function (parent, child) {
 
     child.prototype = Object.create(parent.prototype);
@@ -44,7 +46,7 @@ function isSimpleType(value) {
     return (value !== undefined && (simpleTypes.has(valueType) || value.substring || value.toFixed))
 }
 
-function buildOptions (config, options) {
+function buildOptions(config, options) {
 
     var defaultOptions = {
         oauthToken: config.oauthToken,
@@ -55,19 +57,6 @@ function buildOptions (config, options) {
 
     return Object.assign(defaultOptions, options);
 }
-
-
-function download  (filename, data) {
-
-    const element = document.createElement('a');
-    element.setAttribute('href', data);
-    element.setAttribute('download', filename);
-    element.style.display = 'none';
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-}
-
 
 /**
  * isMobile test from http://detectmobilebrowsers.com
@@ -149,7 +138,6 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 };
 
 
-
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -157,7 +145,7 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
  * Released under the MIT License.
  */
 
-const isNumber = function(num) {
+const isNumber = function (num) {
     if (typeof num === 'number') {
         return num - num === 0;
     }
@@ -167,5 +155,103 @@ const isNumber = function(num) {
     return false;
 };
 
-export {extend, isSimpleType, buildOptions, download, validateLocusExtent, doAutoscale, isNumber}
+
+function inferTrackType(config) {
+
+    translateDeprecatedTypes(config);
+
+    if (undefined === config.sourceType && config.url) {
+        config.sourceType = "file";
+    }
+
+    if ("file" === config.sourceType) {
+        if (undefined === config.format) {
+            const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
+            config.format = TrackUtils.inferFileFormat(path);
+        } else {
+            config.format = config.format.toLowerCase();
+        }
+    }
+
+    if (undefined === config.type) {
+
+        if (config.format) {
+
+            switch (config.format.toLowerCase()) {
+                case "bw":
+                case "bigwig":
+                case "wig":
+                case "bedgraph":
+                case "tdf":
+                    config.type = "wig";
+                    break;
+                case "vcf":
+                    config.type = "variant";
+                    break;
+                case "seg":
+                    config.type = "seg";
+                    break;
+                case "bam":
+                case "cram":
+                    config.type = "alignment";
+                    break;
+                case "bedpe":
+                case "bedpe-loop":
+                    config.type = "interaction";
+                    break;
+                case "bp":
+                    config.type = "arc";
+                    break;
+                case "gwas":
+                    config.type = "gwas";
+                    break;
+                case "bed":
+                case "bigbed":
+                case "bb":
+                    config.type = "bedtype";
+                    break;
+                default:
+                    config.type = "annotation";
+
+            }
+        }
+
+    }
+    return config.type;
+}
+
+
+function translateDeprecatedTypes(config) {
+
+    if (config.featureType) {  // Translate deprecated "feature" type
+        config.type = config.type || config.featureType;
+        config.featureType = undefined;
+    }
+    if ("junctions" === config.type) {
+        config.type = "spliceJunctions"
+    } else if ("bed" === config.type) {
+        config.type = "annotation";
+        config.format = config.format || "bed";
+    } else if ("annotations" === config.type) {
+        config.type = "annotation"
+    } else if ("alignments" === config.type) {
+        config.type = "alignment"
+    } else if ("bam" === config.type) {
+        config.type = "alignment";
+        config.format = "bam"
+    } else if ("vcf" === config.type) {
+        config.type = "variant";
+        config.format = "vcf"
+    } else if ("t2d" === config.type) {
+        config.type = "gwas";
+    } else if ("FusionJuncSpan" === config.type && !config.format) {
+        config.format = "fusionjuncspan";
+    } else if ("aed" === config.type) {
+        config.type = "annotation";
+        config.format = config.format || "aed";
+    }
+}
+
+
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType}
 

@@ -1,4 +1,5 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {createCheckbox} from "../igv-icons.js"
 
 /**
  * Configure item list for track "gear" menu.
@@ -39,78 +40,99 @@ const MenuUtils = {
         return menuItems;
     },
 
-    dataRangeMenuItem: function (trackView) {
+    numericDataMenuItems: function (trackView) {
 
-        var $e,
-            clickHandler;
+        const menuItems = [];
 
-        $e = $('<div>');
+        // Data range
+        const $e = $('<div>');
         $e.text('Set data range');
-
-        clickHandler = function () {
+        const clickHandler = function () {
             trackView.browser.dataRangeDialog.configure({trackView: trackView});
             trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
         };
+        menuItems.push({object: $e, click: clickHandler});
 
-        return {object: $e, click: clickHandler};
+        if( trackView.track.logScale !== undefined) {
+            menuItems.push({
+                    object: createCheckbox("Log scale", trackView.track.logScale),
+                    click: () => {
+                        trackView.track.logScale = !trackView.track.logScale;
+                        trackView.repaintViews();
+                    }
+                }
+            )
+        }
+
+        menuItems.push({
+                object: createCheckbox("Autoscale", trackView.track.autoscale),
+                click: () => {
+                    trackView.track.autoscale = !trackView.track.autoscale;
+                    trackView.repaintViews();
+                }
+            }
+        )
+
+
+        return menuItems;
     },
 
-    trackMenuItemListHelper: function(itemList, $popover) {
+    trackMenuItemListHelper: function (itemList, $popover) {
 
-    var list = [];
+        var list = [];
 
-    if (itemList.length > 0) {
+        if (itemList.length > 0) {
 
-        list = itemList.map(function (item, i) {
-            var $e;
+            list = itemList.map(function (item, i) {
+                var $e;
 
-            // name and object fields checked for backward compatibility
-            if (item.name) {
-                $e = $('<div>');
-                $e.text(item.name);
-            } else if (item.object) {
-                $e = item.object
-            } else if (typeof item.label === 'string') {
-                $e = $('<div>');
-                $e.html(item.label)
-            } else if (typeof item === 'string') {
+                // name and object fields checked for backward compatibility
+                if (item.name) {
+                    $e = $('<div>');
+                    $e.text(item.name);
+                } else if (item.object) {
+                    $e = item.object
+                } else if (typeof item.label === 'string') {
+                    $e = $('<div>');
+                    $e.html(item.label)
+                } else if (typeof item === 'string') {
 
-                if (item.startsWith("<")) {
-                    $e = $(item);
-                } else {
-                    $e = $("<div>" + item + "</div>");
+                    if (item.startsWith("<")) {
+                        $e = $(item);
+                    } else {
+                        $e = $("<div>" + item + "</div>");
+                    }
                 }
-            }
 
-            if (0 === i) {
-                $e.addClass('igv-track-menu-border-top');
-            }
-
-            if (item.click) {
-                $e.on('click', handleClick);
-                $e.on('touchend', function (e) {
-                    handleClick(e);
-                });
-                $e.on('mouseup', function (e) {
-                    e.preventDefault();
-                    e.stopPropagation();
-                })
-
-                // eslint-disable-next-line no-inner-declarations
-                function handleClick(e) {
-                    item.click(e);
-                    $popover.hide();
-                    e.preventDefault();
-                    e.stopPropagation()
+                if (0 === i) {
+                    $e.addClass('igv-track-menu-border-top');
                 }
-            }
 
-            return {object: $e, init: (item.init || undefined)};
-        });
+                if (item.click) {
+                    $e.on('click', handleClick);
+                    $e.on('touchend', function (e) {
+                        handleClick(e);
+                    });
+                    $e.on('mouseup', function (e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    })
+
+                    // eslint-disable-next-line no-inner-declarations
+                    function handleClick(e) {
+                        item.click(e);
+                        $popover.hide();
+                        e.preventDefault();
+                        e.stopPropagation()
+                    }
+                }
+
+                return {object: $e, init: (item.init || undefined)};
+            });
+        }
+
+        return list;
     }
-
-    return list;
-}
 
 }
 
@@ -128,7 +150,7 @@ function visibilityWindowMenuItem(trackView) {
 
         const callback = () => {
 
-            let value = trackView.browser.inputDialog.inputDialog.input.value
+            let value = trackView.browser.inputDialog.input.value
             value = '' === value || undefined === value ? -1 : value.trim()
 
             trackView.track.visibilityWindow = Number.parseInt(value);
@@ -149,7 +171,7 @@ function visibilityWindowMenuItem(trackView) {
 
     const object = $('<div>');
     object.text('Set visibility window');
-    return { object, click };
+    return {object, click};
 
 }
 
@@ -189,7 +211,7 @@ function colorPickerMenuItem(trackView) {
 
 function trackRenameMenuItem(trackView) {
 
-    const click = e =>  {
+    const click = e => {
 
         const callback = function () {
             let value = trackView.browser.inputDialog.input.value;
@@ -210,14 +232,14 @@ function trackRenameMenuItem(trackView) {
 
     const object = $('<div>');
     object.text('Set track name');
-    return { object, click };
+    return {object, click};
 
 
 }
 
 function trackHeightMenuItem(trackView) {
 
-    const click =  e => {
+    const click = e => {
 
         const callback = () => {
 
@@ -253,7 +275,7 @@ function trackHeightMenuItem(trackView) {
 
     const object = $('<div>');
     object.text('Set track height');
-    return { object, click };
+    return {object, click};
 
 
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>igv.js</title>
+
+
+</head>
+
+<body>
+
+<h1>Example illustrating embedding features in a track in lieu of a URL</h1>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js/index.js";
+
+    var igvDiv = document.getElementById("igv-div");
+    var options =
+        {
+            genome: 'hg19',
+            locus: 'chrX',
+            tracks:
+                [
+                    {
+                        type: "interaction",
+                        format: "bedpe",
+                        name: "test - proportional",
+                        features: [{
+                            "chr1": "chrX",
+                            "start1": 22385,
+                            "end1": 22387,
+                            "chr2": "chrX",
+                            "start2": 23286,
+                            "end2": 23288,
+                            "name": "e871822f",
+                            "score": 1
+                        }, {
+                            "chr1": "chrX",
+                            "start1": 96049,
+                            "end1": 96049,
+                            "chr2": "chrX",
+                            "start2": 24240615,
+                            "end2": 24240615,
+                            "name": "6245251c",
+                            "score": 1
+                        }, {
+                            "chr1": "chrX",
+                            "start1": 244617,
+                            "end1": 245039,
+                            "chr2": "chrX",
+                            "start2": 247876,
+                            "end2": 248256,
+                            "name": "3a0fe106",
+                            "score": 1
+                        }, {
+                            "chr1": "chrX",
+                            "start1": 249414,
+                            "end1": 249453,
+                            "chr2": "chrX",
+                            "start2": 249475,
+                            "end2": 249475,
+                            "name": "306724c1",
+                            "score": 1
+                        }],
+                        arcType: "proportional",
+                        color: "rgb(0,200,0)",
+                        alpha: "0.05",
+                        logScale: true,
+                        showBlocks: true
+                    }
+                ]
+        }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+
+</script>
+
+</body>
+
+</html>

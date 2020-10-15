@@ -2,37 +2,15 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>IGV - Dev</title>
-
-
-    <!-- IGV CSS -->
-
-    <link href="css/dev.css" rel="stylesheet" type="text/css"/>
-
+    <title>rnaStruct</title>
 
 </head>
 <body>
 
-<div>
-    <button onclick="bookmark();">Bookmark</button>
-</div>
-
 <div id="myDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto">
 
 </div>
-
-<script>
-    let igvBrowser;
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", igvBrowser.sessionURL());
-    }
-</script>
 
 <script type="module">
 

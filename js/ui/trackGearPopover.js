@@ -24,9 +24,9 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import makeDraggable from "./draggable.js";
-import {attachDialogCloseHandlerWithParent} from "./ui-utils.js";
 import MenuUtils from "./menuUtils.js"
+import {UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
+
 
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
@@ -40,10 +40,7 @@ const TrackGearPopover = function ($parent) {
     let $popoverHeader = $('<div>', {class: 'igv-trackgear-popover-header'});
     this.$popover.append($popoverHeader);
 
-    let self = this;
-    attachDialogCloseHandlerWithParent($popoverHeader, function () {
-        self.$popover.hide();
-    });
+    UIUtils.attachDialogCloseHandlerWithParent($popoverHeader[0], () => this.$popover.hide());
 
     this.$popoverContent = $('<div>');
     this.$popover.append(this.$popoverContent);
@@ -60,14 +57,13 @@ const TrackGearPopover = function ($parent) {
 
 TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
 
-    var self = this,
-        $container;
+    hideAllTrackGearMenus()
 
     if (list.length > 0) {
 
         this.$popoverContent.empty();
 
-        list = trackMenuItemListHelper(list, self.$popover);
+        list = trackMenuItemListHelper(list, this.$popover);
 
         for (let item of list) {
 
@@ -103,6 +99,8 @@ TrackGearPopover.prototype.dispose = function () {
         this[key] = undefined;
     })
 };
+
+const hideAllTrackGearMenus = () => $('.igv-trackgear-popover').hide()
 
 export default TrackGearPopover;
 
