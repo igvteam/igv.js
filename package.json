@@ -60,7 +60,7 @@
     "w3c-xmlhttprequest": "^3.0.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui#9cb0b133",
+    "igv-ui": "github:igvteam/igv-ui#9fa78db1",
     "igv-utils": "github:igvteam/igv-utils#36c425bb"
   }
 }
