@@ -44,6 +44,8 @@ someMotifValues.forEach(motif => {
     JUNCTION_MOTIF_PALETTE.getColor(motif);
 })
 
+// rendering context with values that only need to be computed once per render, rather than for each splice junction
+var junctionRenderingContext = {}
 
 const FeatureTrack = extend(TrackBase,
 
@@ -210,6 +212,17 @@ FeatureTrack.prototype.draw = function (options) {
             options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
         }
 
+        if (this.config.type == 'spliceJunctions') {
+            const vp = this.browser.trackViews[0].viewports[0]
+            junctionRenderingContext.referenceFrame = vp.genomicState.referenceFrame;
+            junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
+            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(vp.contentDiv).width());
+
+            // For a given viewport, records where features that are < 2px in width have been rendered already.
+            // This prevents wasteful rendering of multiple such features onto the same pixels.
+            junctionRenderingContext.featureZoomOutTracker = {}
+        }
+
         let lastPxEnd = [];
         for (let feature of featureList) {
             if (feature.end < bpStart) continue;
@@ -276,11 +289,14 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
 
     const data = [];
     for (let feature of features) {
-        let featureData
-        if (this.config.type === 'spliceJunctions' && feature.attributes) {
-            featureData = []
+        let featureData = []
+        if (this.config.type === 'spliceJunctions') {
+            if (!feature.isVisible || !feature.attributes) {
+                continue
+            }
+
             featureData.push(
-              {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ')'})
+              {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ' strand)'})
 
             if (feature.attributes.annotated_junction) {
                 if (feature.attributes.annotated_junction === 'true') {
@@ -288,15 +304,27 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
                 } else {
                     featureData.push({name: 'Novel Junction', value: ''})
                 }
+                featureData.push("<hr />")
+            }
+            featureData.push(
+              {name: (feature.end - feature.start).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), value: 'bp length'})
+
+            if (feature.attributes.label) {
+                featureData.push({name: 'label', value: feature.attributes.label.replace(/_/g, " ")})
             }
 
-            featureData.push(
-                {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
-            featureData.push(
-                {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
-            featureData.push(
-                {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
-
+            if (feature.attributes.uniquely_mapped) {
+                featureData.push(
+                    {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
+            }
+            if (feature.attributes.multi_mapped) {
+                featureData.push(
+                    {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
+            }
+            if (feature.attributes.uniquely_mapped && feature.attributes.multi_mapped) {
+                featureData.push(
+                    {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
+            }
             if (feature.attributes.motif) {
                 featureData.push({name: feature.attributes.motif, value: 'motif'})
             }
@@ -305,12 +333,27 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
             }
 
             if (feature.attributes.num_samples_with_this_junction) {
-                featureData.push({name: feature.attributes.num_samples_with_this_junction, value: 'samples have this junction'})
-                if (feature.attributes.num_samples_total && feature.attributes.num_samples_total > 0) {
-                    featureData.push({name: feature.attributes.num_samples_total, value: 'out of total samples'})
-                    if (feature.attributes.percent_samples_with_this_junction) {
-                        featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
-                    }
+                featureData.push({
+                    name: feature.attributes.num_samples_with_this_junction,
+                    value: (feature.attributes.num_samples_total ? 'out of ' + feature.attributes.num_samples_total + ' ' : '') + 'samples have this junction'
+                })
+                if (feature.attributes.percent_samples_with_this_junction) {
+                    featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
+                }
+
+            }
+            if (feature.attributes.info) {
+                featureData.push({name: ' ', value: feature.attributes.info.replace("_", " ")})
+            }
+
+            //add any other keys not already processed above
+            for (let key of Object.keys(feature.attributes)) {
+                if (![
+                    "label", "line_width", "color", "left_shape", "right_shape", "info",
+                    "annotated_junction", "uniquely_mapped", "multi_mapped", "motif", "maximum_spliced_alignment_overhang",
+                    "num_samples_with_this_junction", "percent_samples_with_this_junction", "num_samples_total",
+                    ].includes(key)) {
+                    featureData.push({name: key.replace(/_/g, " "), value: feature.attributes[key].replace(/_/g, " ")})
                 }
             }
         } else {
@@ -318,6 +361,7 @@ FeatureTrack.prototype.popupData = function (clickState, features) {
             feature.popupData(genomicLocation) :
             TrackBase.extractPopupData(feature, this.getGenomeId());
         }
+
         if (featureData) {
             if (data.length > 0) {
                 data.push("<HR>");
@@ -751,6 +795,18 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
+    feature.isVisible = false // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
+
+    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
+    if (junctionRightPx - junctionLeftPx <= 3) {
+        if (junctionMiddlePx in junctionRenderingContext.featureZoomOutTracker) {
+            return
+        }
+        junctionRenderingContext.featureZoomOutTracker[junctionMiddlePx] = true
+    }
+
     // TODO: cache filter and pixel calculations by doing them earlier when features are initially parsed?
     if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
         return
@@ -764,43 +820,40 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideStrand === feature.strand) {
         return
     }
-
-    const vp = this.browser.trackViews[0].viewports[0]
-    const referenceFrame = vp.genomicState.referenceFrame;
-    const referenceFrameStart = referenceFrame.start;
-    const referenceFrameEnd = referenceFrameStart + referenceFrame.toBP($(vp.contentDiv).width());
-    if (feature.end < referenceFrameStart || feature.start > referenceFrameEnd) {
-        //skip junctions outside the viewport
-        return
-    }
+    
     // check if splice junction is inside viewport
     if (this.config.minJunctionEndsVisible) {
-        let numEdgesInViewport = 0
-        if (feature.start >= referenceFrameStart && feature.start <= referenceFrameEnd) {
-            numEdgesInViewport += 1
+        let numJunctionEndsVisible = 0
+        if (feature.start >= junctionRenderingContext.referenceFrameStart && feature.start <= junctionRenderingContext.referenceFrameEnd) {
+            numJunctionEndsVisible += 1
         }
-        if (feature.end >= referenceFrameStart && feature.end <= referenceFrameEnd) {
-            numEdgesInViewport += 1
+        if (feature.end >= junctionRenderingContext.referenceFrameStart && feature.end <= junctionRenderingContext.referenceFrameEnd) {
+            numJunctionEndsVisible += 1
         }
-        if (numEdgesInViewport < this.config.minJunctionEndsVisible) {
+        if (numJunctionEndsVisible < this.config.minJunctionEndsVisible) {
             return
         }
     }
 
-    const uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
-    if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
-        return
-    }
-    const multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
-    const totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
-    if (totalReadCount < this.config.minTotalReads) {
-        return
-    }
-    if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
-        return
-    }
-    if (feature.attributes.maximum_spliced_alignment_overhang && parseInt(feature.attributes.maximum_spliced_alignment_overhang) < this.config.minSplicedAlignmentOverhang) {
-        return
+    let uniquelyMappedReadCount;
+    let multiMappedReadCount;
+    let totalReadCount;
+    if (feature.attributes.uniquely_mapped) {
+        uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
+        if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
+            return
+        }
+        multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
+        totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
+        if (totalReadCount < this.config.minTotalReads) {
+            return
+        }
+        if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
+            return
+        }
+        if (feature.attributes.maximum_spliced_alignment_overhang && parseInt(feature.attributes.maximum_spliced_alignment_overhang) < this.config.minSplicedAlignmentOverhang) {
+            return
+        }
     }
 
     let numSamplesWithThisJunction
@@ -823,8 +876,6 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         }
     }
 
-    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
     const py = this.margin;
     const rowHeight = this.height;
 
@@ -834,36 +885,39 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     const bezierBottomY = bottomY - 10;
 
     // draw the junction arc
-    const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
     const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
     const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
 
-    let lineWidth;
-    if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
-        lineWidth = uniquelyMappedReadCount;
-    } else if (this.config.thicknessBasedOn === 'numReads') {
-        lineWidth = totalReadCount;
-    } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
-        if (numSamplesWithThisJunction !== undefined) {
-            lineWidth = numSamplesWithThisJunction;
+    let lineWidth = 1;
+    if (feature.attributes.line_width) {
+        lineWidth = parseFloat(feature.attributes.line_width)
+    } else {
+        if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
+            lineWidth = uniquelyMappedReadCount;
+        } else if (this.config.thicknessBasedOn === 'numReads') {
+            lineWidth = totalReadCount;
+        } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
+            if (numSamplesWithThisJunction !== undefined) {
+                lineWidth = numSamplesWithThisJunction;
+            }
         }
+        lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
     }
-    lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
 
     let bounceHeight;
     if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
     } else if (this.config.bounceHeightBasedOn === 'distance') {
-        bounceHeight = (feature.end - feature.start) / 1000;
+        bounceHeight = 6 * (feature.end - feature.start) / (junctionRenderingContext.referenceFrameEnd - junctionRenderingContext.referenceFrameStart);
     } else if (this.config.bounceHeightBasedOn === 'thickness') {
         bounceHeight = 2 * lineWidth;
     }
     topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
 
     let color;
-    if (feature.color) {
-        color = feature.color;  // Explicit setting
+    if (feature.attributes.color) {
+        color = feature.attributes.color;  // Explicit setting
     } else if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
         color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
     } else if (this.config.colorBy === 'numReads') {
@@ -874,10 +928,14 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0';
     } else if (this.config.colorBy === 'motif') {
         color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
+    } else {
+        color = '#AAAAAA'
     }
 
-    let label = ''
-    if (this.config.labelWith === undefined || this.config.labelWith === 'uniqueReadCount') {
+    let label = ""
+    if (feature.attributes.label) {
+        label = feature.attributes.label.replace(/_/g, " ")
+    } else if (this.config.labelWith === undefined || this.config.labelWith === 'uniqueReadCount') {
         //default label
         label = uniquelyMappedReadCount
     } else if(this.config.labelWith === 'totalReadCount') {
@@ -923,7 +981,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     // feature.score:  unique spanning read counts
     // feature.name:   unique + multi-mapped spanning read counts
     //example feature:  { chr: "chr17", start: 39662344, end: 39662803, name: "59", row: 0, score: 38, strand: "+"}
-
+    feature.isVisible = true
     ctx.beginPath();
     ctx.moveTo(junctionLeftPx, bezierBottomY);
     ctx.bezierCurveTo(bezierControlLeftPx, topY, bezierControlRightPx, topY, junctionRightPx, bezierBottomY);
@@ -931,6 +989,28 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
     ctx.stroke();
+
+    const drawArrowhead = function(ctx, x, y, size) {
+        //TODO draw better arrow heads: https://stackoverflow.com/questions/21052972/curved-thick-arrows-on-canvas
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - size / 2, y - size);
+        ctx.lineTo(x + size / 2, y - size);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.fill();
+    }
+
+    if (feature.attributes.left_shape || feature.attributes.right_shape) {
+        ctx.fillStyle = color;
+        const arrowSize = ctx.lineWidth > 2 ? 10 : 7;
+        if (feature.attributes.left_shape) {
+            drawArrowhead(ctx, junctionLeftPx, bezierBottomY, arrowSize)
+        }
+        if (feature.attributes.right_shape) {
+            drawArrowhead(ctx, junctionRightPx, bezierBottomY, arrowSize)
+        }
+    }
 
     ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8);
 }
