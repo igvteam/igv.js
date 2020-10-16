@@ -29,66 +29,69 @@ import BamUtils from "./bamUtils.js";
 import igvxhr from "../igvxhr.js";
 import {unbgzf} from './bgzf.js';
 
-const HtsgetReader = function (config, genome) {
-    this.config = config;
-    this.genome = genome;
-    BamUtils.setReaderDefaults(this, config);
-};
+class HtsgetReader {
 
-HtsgetReader.prototype.readAlignments = async function (chr, start, end, retryCount) {
-
-    if (this.config.format && this.config.format.toUpperCase() !== "BAM") {
-        throw  Error(`htsget format ${this.config.format} is not supported`);
+    constructor(config, genome) {
+        this.config = config;
+        this.genome = genome;
+        BamUtils.setReaderDefaults(this, config);
     }
 
-    const genome = this.genome;
-    let queryChr;
-    if (this.header) {
-        queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr;
-    } else {
-        queryChr = chr;
-    }
 
-    let endpointURL;
-    if (!this.config.url) {
-        endpointURL = this.config.endpoint + '/reads/';   // Backward compatibility
-    } else {
-        endpointURL = this.config.url + this.config.endpoint;
-    }
+    async readAlignments(chr, start, end, retryCount) {
 
-    const url = endpointURL + this.config.id + '?format=BAM' +
-        '&referenceName=' + queryChr +
-        '&start=' + start +
-        '&end=' + end;
+        if (this.config.format && this.config.format.toUpperCase() !== "BAM") {
+            throw  Error(`htsget format ${this.config.format} is not supported`);
+        }
 
-    const data = await igvxhr.loadJson(url, this.config);
-    const dataArr = await loadUrls(data.htsget.urls);
-    const compressedData = concatArrays(dataArr);  // In essence a complete bam file
-    const unc = unbgzf(compressedData.buffer);
-    const ba = unc;
+        const genome = this.genome;
+        let queryChr;
+        if (this.header) {
+            queryChr = this.header.chrAliasTable.hasOwnProperty(chr) ? this.header.chrAliasTable[chr] : chr;
+        } else {
+            queryChr = chr;
+        }
 
-    this.header = BamUtils.decodeBamHeader(ba, genome);
-    
-    const chrIdx = this.header.chrToIndex[chr];
-    const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
-    BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end);
-    alignmentContainer.finish();
+        let endpointURL;
+        if (!this.config.url) {
+            endpointURL = this.config.endpoint + '/reads/';   // Backward compatibility
+        } else {
+            endpointURL = this.config.url + this.config.endpoint;
+        }
 
-    if (alignmentContainer.alignments.length === 0) {
-        if (chrIdx === undefined && this.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
-            queryChr = this.header.chrAliasTable[chr]
-            return this.readAlignments(queryChr, start, end, 1);
+        const url = endpointURL + this.config.id + '?format=BAM' +
+            '&referenceName=' + queryChr +
+            '&start=' + start +
+            '&end=' + end;
+
+        const data = await igvxhr.loadJson(url, this.config);
+        const dataArr = await loadUrls(data.htsget.urls);
+        const compressedData = concatArrays(dataArr);  // In essence a complete bam file
+        const unc = unbgzf(compressedData.buffer);
+        const ba = unc;
+
+        this.header = BamUtils.decodeBamHeader(ba, genome);
+
+        const chrIdx = this.header.chrToIndex[chr];
+        const alignmentContainer = new AlignmentContainer(chr, start, end, this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+        BamUtils.decodeBamRecords(ba, this.header.size, alignmentContainer, this.header.chrNames, chrIdx, start, end);
+        alignmentContainer.finish();
+
+        if (alignmentContainer.alignments.length === 0) {
+            if (chrIdx === undefined && this.header.chrAliasTable.hasOwnProperty(chr) && !retryCount) {
+                queryChr = this.header.chrAliasTable[chr]
+                return this.readAlignments(queryChr, start, end, 1);
+            } else {
+                return alignmentContainer;
+            }
         } else {
             return alignmentContainer;
         }
-    } else {
-        return alignmentContainer;
-    }
 
+    }
 }
 
-
-function loadUrls(urls) {
+async function loadUrls(urls) {
 
     const promiseArray = [];
 
@@ -117,7 +120,7 @@ function loadUrls(urls) {
         }
     });
 
-    return Promise.all(promiseArray);
+    return Promise.all(promiseArray)
 }
 
 /**
@@ -139,7 +142,6 @@ function concatArrays(arrays) {
     });
 
     return newArray;
-
 }
 
 function dataUriToBytes(dataUri) {
