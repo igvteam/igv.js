@@ -855,12 +855,12 @@ function addMouseHandlers() {
      */
     function formatPopoverText(nameValueArray) {
 
-        var markup = "<table class=\"igv-popover-table\">";
+        var markup = "<table>";
 
         nameValueArray.forEach(function (nameValue) {
 
             if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
+                markup += "<tr><td>" + "<div class=\"igv-ui-popover-name-value\">" + "<span class=\"igv-ui-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-ui-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
             } else {
                 // not a name/value pair
                 markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
