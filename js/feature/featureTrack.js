@@ -29,7 +29,6 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
-import {extend} from "../util/igvUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import GtexUtils from "../gtex/gtexUtils.js";
 
@@ -44,7 +43,7 @@ someMotifValues.forEach(motif => {
 })
 
 
-class FeatureTrack  extends TrackBase {
+class FeatureTrack extends TrackBase {
 
     constructor(config, browser) {
 
@@ -214,6 +213,7 @@ class FeatureTrack  extends TrackBase {
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
                 const last = lastPxEnd[row];
                 if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
+
                     this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
                     if (this.config.type !== 'spliceJunctions') {
@@ -441,9 +441,12 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         if (colorByValue) {
             color = this.config.colorBy.pallete[colorByValue];
         }
+    } else if (this.config.altColor && "-" === feature.strand) {
+        color = this.config.altColor;
     } else if (feature.color) {
         color = feature.color;
     }
+
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
 
