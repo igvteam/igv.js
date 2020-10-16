@@ -146,12 +146,21 @@ class TrackView {
 
     }
 
-    removeViewportWithLocusIndex(index) {
+    removeViewportForReferenceFrame(referenceFrame) {
 
-        this.viewports[index].$viewport.remove();
-        this.viewports.splice(index, 1);
+        let index = -1;
+        for (let i = 0; i < this.viewports.length; i++) {
+            if (this.viewports[i].referenceFrame === referenceFrame) {
+                index = i;
+                break;
+            }
+        }
 
-        this.updateViewportForMultiLocus();
+        if (index >= 0) {
+            this.viewports[index].$viewport.remove();
+            this.viewports.splice(index, 1);
+            this.updateViewportForMultiLocus();
+        }
     }
 
     updateViewportForMultiLocus() {
@@ -665,23 +674,23 @@ class TrackScrollbar {
 
         this.$innerScroll.on("mousedown", mouseDown);
 
-        this.$innerScroll.on("click",  (event) => {
+        this.$innerScroll.on("click", (event) => {
             event.stopPropagation();
         });
 
-        this.$outerScroll.on("click",  (event) => {
+        this.$outerScroll.on("click", (event) => {
             this.moveScrollerBy(event.offsetY - this.$innerScroll.height() / 2);
             event.stopPropagation();
 
         });
     }
 
-    moveScrollerBy  (delta) {
+    moveScrollerBy(delta) {
         const y = this.$innerScroll.position().top + delta;
         this.moveScrollerTo(y);
     }
 
-    moveScrollerTo  (y) {
+    moveScrollerTo(y) {
 
         const outerScrollHeight = this.$outerScroll.height();
         const innerScrollHeight = this.$innerScroll.height();
@@ -693,18 +702,18 @@ class TrackScrollbar {
 
         this.$innerScroll.css("top", newTop + "px");
 
-        for(let viewport of this.viewports) {
+        for (let viewport of this.viewports) {
             viewport.setTop(contentTop)
         }
 
     }
 
-    dispose  () {
+    dispose() {
         $(window).off(this.namespace);
         this.$innerScroll.off();
     }
 
-    update  () {
+    update() {
 
         const viewportContainerHeight = this.$viewportContainer.height();
 
