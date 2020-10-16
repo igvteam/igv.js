@@ -4,6 +4,9 @@
     <meta charset="utf-8">
 
     <title>IGV - Dev</title>
+
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
     <style>
         #trackList {
 
@@ -70,11 +73,13 @@
         const options =
             {
                 genome: "hg19",
-                // locus: [ 'egfr', 'ace', 'kit', 'enam' ],
                 // locus: [ 'egfr', 'myc', 'ace' ],
                 // locus: [ 'ace', 'myc' ],
-                locus: "myc",
-                // locus: 'chr8:100,117,313-100,120,998'
+                // locus: "myc",
+                // locus: 'chr8:100,117,313-100,120,998',
+
+                // use for one-feature BED track
+                locus: 'chr1:999999-1000000'
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
