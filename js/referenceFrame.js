@@ -23,90 +23,93 @@
  * THE SOFTWARE.
  */
 
-import { isLocusString, searchWebService } from './browser.js'
-import {StringUtils,DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import {isLocusString, searchWebService} from './browser.js'
+import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
 
 // Reference frame classes.  Converts domain coordinates (usually genomic) to pixel coordinates
 
-const ReferenceFrame = function (genome, chr, start, end, bpPerPixel) {
-    this.genome = genome;
-    this.chr = chr;
-    this.start = start;
-    this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
-    this.initialStart = start;
-    this.bpPerPixel = bpPerPixel;
-    this.id = DOMUtils.guid()
+class ReferenceFrame {
 
-};
+    constructor(genome, chr, start, end, bpPerPixel) {
+        this.genome = genome;
+        this.chr = chr;
+        this.start = start;
+        this.initialEnd = end;                 // TODO WARNING THIS IS NOT UPDATED !!!
+        this.initialStart = start;
+        this.bpPerPixel = bpPerPixel;
+        this.id = DOMUtils.guid()
+    }
 
-ReferenceFrame.prototype.calculateEnd = function (pixels) {
-    return this.start + this.bpPerPixel * pixels;
-};
 
-ReferenceFrame.prototype.calculateBPP = function (end, pixels) {
-    return (end - this.start) / pixels;
-};
+    calculateEnd(pixels) {
+        return this.start + this.bpPerPixel * pixels;
+    }
 
-ReferenceFrame.prototype.set = function (json) {
-    this.chr = json.chr;
-    this.start = json.start;
-    this.bpPerPixel = json.bpPerPixel;
-};
+    calculateBPP(end, pixels) {
+        return (end - this.start) / pixels;
+    }
 
-ReferenceFrame.prototype.toPixels = function (bp) {
-    return bp / this.bpPerPixel;
-};
+    set(json) {
+        this.chr = json.chr;
+        this.start = json.start;
+        this.bpPerPixel = json.bpPerPixel;
+    }
 
-ReferenceFrame.prototype.toBP = function (pixels) {
-    return this.bpPerPixel * pixels;
-};
+    toPixels(bp) {
+        return bp / this.bpPerPixel;
+    }
 
-/**
- * Shift frame by stated pixels.  Return true if view changed, false if not.
- * @param pixels
- * @param viewportWidth
- */
-ReferenceFrame.prototype.shiftPixels = function (pixels, viewportWidth) {
-    const start = this.start;
-    this.start += pixels * this.bpPerPixel;
-    this.clamp(viewportWidth);
-    return start !== this.start;
-};
+    toBP(pixels) {
+        return this.bpPerPixel * pixels;
+    }
 
-ReferenceFrame.prototype.clamp = function (viewportWidth) {
-    // clamp left
-    const min = this.genome.getChromosome(this.chr).bpStart || 0
-    this.start = Math.max(min, this.start);
+    /**
+     * Shift frame by stated pixels.  Return true if view changed, false if not.
+     * @param pixels
+     * @param viewportWidth
+     */
+    shiftPixels(pixels, viewportWidth) {
+        const start = this.start;
+        this.start += pixels * this.bpPerPixel;
+        this.clamp(viewportWidth);
+        return start !== this.start;
+    }
 
-    // clamp right
-    if (viewportWidth) {
+    clamp(viewportWidth) {
+        // clamp left
+        const min = this.genome.getChromosome(this.chr).bpStart || 0
+        this.start = Math.max(min, this.start);
 
-        var chromosome = this.genome.getChromosome(this.chr);
-        var maxEnd = chromosome.bpLength;
-        var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+        // clamp right
+        if (viewportWidth) {
 
-        if (this.start > maxStart) {
-            this.start = maxStart;
+            var chromosome = this.genome.getChromosome(this.chr);
+            var maxEnd = chromosome.bpLength;
+            var maxStart = maxEnd - (viewportWidth * this.bpPerPixel);
+
+            if (this.start > maxStart) {
+                this.start = maxStart;
+            }
         }
     }
-}
 
-ReferenceFrame.prototype.getChromosome = function () {
-    return this.genome.getChromosome(this.chr)
-}
-
-ReferenceFrame.prototype.presentLocus = function(pixels) {
-
-    if ('all' === this.chr) {
-        return this.chr
-    } else {
-        const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
-        const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
-        return `${ this.chr }:${ ss }-${ ee }`
+    getChromosome() {
+        return this.genome.getChromosome(this.chr)
     }
 
+    presentLocus(pixels) {
+
+        if ('all' === this.chr) {
+            return this.chr
+        } else {
+            const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1);
+            const ee = StringUtils.numberFormatter(Math.round(this.start + this.bpPerPixel * pixels));
+            return `${this.chr}:${ss}-${ee}`
+        }
+
+    }
 }
 
 async function createReferenceFrameList(browser, loci) {
@@ -125,15 +128,20 @@ async function createReferenceFrameList(browser, loci) {
             const referenceFrame = createReferenceFrame(candidate)
             list.push(referenceFrame)
         } else {
-            const feature = browser.featureDB[ locus.toUpperCase() ]
+            const feature = browser.featureDB[locus.toUpperCase()]
             if (feature) {
-                const referenceFrame = createReferenceFrame({ browser: browser, feature, locus, viewportWidth })
+                const referenceFrame = createReferenceFrame({browser: browser, feature, locus, viewportWidth})
                 list.push(referenceFrame)
             } else {
                 // Try webservice
                 let searchServiceResponse = await searchWebService(browser, locus, searchConfig)
                 if (searchServiceResponse && '' !== searchServiceResponse.result) {
-                    const referenceFrame = createReferenceFrame({ browser: browser, searchServiceResponse, searchConfig, viewportWidth })
+                    const referenceFrame = createReferenceFrame({
+                        browser: browser,
+                        searchServiceResponse,
+                        searchConfig,
+                        viewportWidth
+                    })
                     list.push(referenceFrame)
                 }
             }
@@ -170,10 +178,10 @@ function createReferenceFrame(params) {
         referenceFrame = initializeWithLocus(params)
     } else if (params.browser && params.feature && params.locus) {
 
-        const { chr, start, end } = params.feature
+        const {chr, start, end} = params.feature
 
         const chromosome = params.browser.genome.getChromosome(chr)
-        validateLocusExtent(chromosome.bpLength, { start, end }, params.browser.minimumBases())
+        validateLocusExtent(chromosome.bpLength, {start, end}, params.browser.minimumBases())
 
         referenceFrame = new ReferenceFrame(params.browser.genome, chr, start, end, (end - start) / params.viewportWidth)
         referenceFrame.locusSearchString = params.locus
@@ -192,7 +200,7 @@ function createReferenceFrame(params) {
 function initializeWithLocus(params) {
 
     const chromosome = params.browser.genome.getChromosome(params.chr)
-    validateLocusExtent(chromosome.bpLength, { start: params.start, end: params.end }, params.browser.minimumBases())
+    validateLocusExtent(chromosome.bpLength, {start: params.start, end: params.end}, params.browser.minimumBases())
 
     const referenceFrame = new ReferenceFrame(params.browser.genome, params.chr, params.start, params.end, (params.end - params.start) / params.viewportWidth)
     referenceFrame.locusSearchString = params.locus
@@ -245,7 +253,7 @@ function processSearchResult(browser, searchServiceResponse, searchConfig, viewp
             end += browser.flanking
         }
 
-        const chromosome = browser.genome.getChromosome(result[ searchConfig.chromosomeField ])
+        const chromosome = browser.genome.getChromosome(result[searchConfig.chromosomeField])
         const referenceFrame = new ReferenceFrame(browser.genome, chromosome.name, start, end, (end - start) / viewportWidth)
 
         referenceFrame.locusSearchString = searchServiceResponse.locusSearchString
@@ -333,5 +341,5 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
     return referenceFrame
 }
 
-export { createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment }
+export {createReferenceFrameList, adjustReferenceFrame, createReferenceFrameWithAlignment}
 export default ReferenceFrame;
