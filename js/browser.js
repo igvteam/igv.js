@@ -1255,26 +1255,12 @@ Browser.prototype.selectMultiLocusPanelWithReferenceFrame = function (referenceF
 
 Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceFrame, doResize) {
 
-    const index = this.referenceFrameList.indexOf(referenceFrame);
-
     for (let trackView of this.trackViews) {
-        trackView.removeViewportWithLocusIndex(index);
+        trackView.removeViewportForReferenceFrame(referenceFrame);
     }
 
-    const previousListLength = this.referenceFrameList.length;
-    const previousViewportWidth = this.calculateViewportWidth(previousListLength)
-
+    const index = this.referenceFrameList.indexOf(referenceFrame);
     this.referenceFrameList.splice(index, 1);
-    const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
-
-    for (let i = 0; i < this.referenceFrameList.length; i++) {
-        const ee = this.referenceFrameList[i].calculateEnd(previousViewportWidth);
-        const bpp = this.referenceFrameList[i].calculateBPP(ee, viewportWidth);
-
-        const {chr, start} = this.referenceFrameList[i]
-        this.referenceFrameList[i].referenceFrame = new ReferenceFrame(this.genome, chr, start, ee, bpp);
-    }
-
     this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
 
     if (true === doResize) {
@@ -1284,11 +1270,8 @@ Browser.prototype.removeMultiLocusPanelWithReferenceFrame = function (referenceF
         for (let {viewports, $viewportContainer} of this.trackViews) {
             updateViewportShims(viewports, $viewportContainer)
         }
-
     }
-
-
-};
+}
 
 Browser.prototype.addMultiLocusPanelWithReferenceFrameIndex = function (referenceFrame, index, viewportWidth) {
 
@@ -1427,7 +1410,7 @@ Browser.prototype.search = async function (string, init) {
         this.referenceFrameList = referenceFrameList;
         this.buildViewportsWithReferenceFrameList(referenceFrameList);
     } else {
-        throw new Error(`Unrecognized locus ${ string }`);
+        throw new Error(`Unrecognized locus ${string}`);
     }
 
     this.updateUIWithReferenceFrameListChange(referenceFrameList);
