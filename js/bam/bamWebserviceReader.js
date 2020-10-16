@@ -30,7 +30,7 @@ import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 /**
- * Class for reading bam records from an igv.js-flask server
+ * Class for reading bam records from an igv.js-flask server backed by pysam.  Deprecated.
  *
  * @param config
  * @constructor

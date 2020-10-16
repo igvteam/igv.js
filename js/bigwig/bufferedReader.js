@@ -26,7 +26,9 @@
 import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
 
-const BufferedReader = function (config, contentLength, bufferSize) {
+class BufferedReader {
+
+    constructor(config, contentLength, bufferSize) {
         this.path = config.url;
         this.bufferSize = bufferSize ? bufferSize : 512000;
         this.range = {start: -1, size: -1};
@@ -39,50 +41,31 @@ const BufferedReader = function (config, contentLength, bufferSize) {
      * @param fulfill - function to receive result
      * @param asUint8 - optional flag to return result as an UInt8Array
      */
-    BufferedReader.prototype.dataViewForRange = function (requestedRange, asUint8) {
+    async dataViewForRange(requestedRange, asUint8) {
 
-        var self = this;
+        const hasData = (this.data && (this.range.start <= requestedRange.start) &&
+            ((this.range.start + this.range.size) >= (requestedRange.start + requestedRange.size)));
 
-        var hasData = (self.data && (self.range.start <= requestedRange.start) &&
-            ((self.range.start + self.range.size) >= (requestedRange.start + requestedRange.size))),
-            bufferSize,
-            loadRange;
-
-        if (hasData) {
-            return Promise.resolve(subbuffer(self, requestedRange, asUint8));
-        }
-        else {
-            // If requested range size is specified, expand buffer size
+        if (!hasData) {
+            let bufferSize;
+            // If requested range size is specified, potentially expand buffer size
             if (requestedRange.size) {
-                bufferSize = Math.max(self.bufferSize, requestedRange.size);
+                bufferSize = Math.max(this.bufferSize, requestedRange.size);
+            } else {
+                bufferSize = this.bufferSize;
             }
-            else {
-                bufferSize = self.bufferSize;
-            }
-
-            loadRange = {start: requestedRange.start, size: bufferSize};
-
-
-            return igvxhr.loadArrayBuffer(self.path, buildOptions(self.config, {range: loadRange}))
-                .then(function (arrayBuffer) {
-                    self.data = arrayBuffer;
-                    self.range = loadRange;
-                    return subbuffer(self, requestedRange, asUint8);
-                })
+            const loadRange = {start: requestedRange.start, size: bufferSize};
+            const arrayBuffer = await igvxhr.loadArrayBuffer(this.path, buildOptions(this.config, {range: loadRange}));
+            this.data = arrayBuffer;
+            this.range = loadRange;
         }
 
-
-        function subbuffer(bufferedReader, requestedRange, asUint8) {
-
-            var len = bufferedReader.data.byteLength,
-                bufferStart = requestedRange.start - bufferedReader.range.start,
-                result = asUint8 ?
-                    new Uint8Array(bufferedReader.data, bufferStart, len - bufferStart) :
-                    new DataView(bufferedReader.data, bufferStart, len - bufferStart);
-            return result;
-        }
-
-
+        const len = this.data.byteLength;
+        const bufferStart = requestedRange.start - this.range.start
+        return asUint8 ?
+            new Uint8Array(this.data, bufferStart, len - bufferStart) :
+            new DataView(this.data, bufferStart, len - bufferStart);
     }
+}
 
-export default BufferedReader;
+export default BufferedReader
