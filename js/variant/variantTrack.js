@@ -108,7 +108,7 @@ class VariantTrack extends TrackBase {
 
     }
 
-    getCallsetsLength = function () {
+    getCallsetsLength () {
         return this.callSets.length;
     }
 
