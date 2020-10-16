@@ -29,14 +29,16 @@
  */
 
 
-const AlignmentBlock = function (b) {
-    if (b) {
-        Object.assign(this, b);
+class AlignmentBlock {
+    constructor(b) {
+        if (b) {
+            Object.assign(this, b);
+        }
     }
-}
 
-AlignmentBlock.prototype.seqIndexAt = function (genomicLocation) {
-    return Math.floor(genomicLocation) - this.start + this.seqOffset
+    seqIndexAt(genomicLocation) {
+        return Math.floor(genomicLocation) - this.start + this.seqOffset
+    }
 }
 
 export default AlignmentBlock;
