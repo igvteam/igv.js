@@ -1,0 +1,45 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+        "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+    <title>Title</title>
+</head>
+<body>
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const options = {
+        reference: {
+            "id": "hg38",
+            "name": "Human (GRCh38/hg38)",
+            "fastaURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai",
+            "cytobandURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/cytoBandIdeo.txt.gz",
+            "tracks": [
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/ncbiRefGene.txt.gz",
+                    "indexed": false,
+                    "visibilityWindow": -1,
+                    "removable": false,
+                    color: "green",
+                    altColor: "red",
+                    "order": 1000000
+                }
+            ]
+        }
+    }
+    const igvDiv = document.getElementById("igv-div");
+
+    igv.createBrowser(igvDiv, options);
+
+
+</script>
+
+</body>
+</html>
