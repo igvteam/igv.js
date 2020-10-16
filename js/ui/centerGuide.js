@@ -26,135 +26,136 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 
-const CenterGuide = function ($guideParent, $controlParent, config, browser) {
+class CenterGuide {
 
-    const self = this;
+    constructor($guideParent, $controlParent, config, browser) {
 
-    this.browser = browser;
+        const self = this;
 
-    this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
+        this.browser = browser;
 
-    $guideParent.append(this.$container);
+        this.$container = $('<div class="igv-center-guide igv-center-guide-thin">');
 
-    if (true === config.showCenterGuideButton) {
+        $guideParent.append(this.$container);
 
-        this.$centerGuideToggle = $('<div class="igv-navbar-button">');
-        $controlParent.append(this.$centerGuideToggle);
-        this.$centerGuideToggle.text('center line');
+        if (true === config.showCenterGuideButton) {
 
-        this.$centerGuideToggle.on('click', function () {
-            if (true === browser.isCenterGuideVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
+            this.$centerGuideToggle = $('<div class="igv-navbar-button">');
+            $controlParent.append(this.$centerGuideToggle);
+            this.$centerGuideToggle.text('center line');
 
+            this.$centerGuideToggle.on('click', function () {
+                if (true === browser.isCenterGuideVisible) {
+                    self.doHide();
+                } else {
+                    self.doShow();
+                }
+            });
+
+        }
     }
 
-};
 
-CenterGuide.prototype.doHide = function () {
-    if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.removeClass('igv-navbar-button-clicked');
-    }
-    this.browser.hideCenterGuide();
-};
-
-CenterGuide.prototype.doShow = function () {
-
-    if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
-    }
-
-    this.browser.showCenterGuide();
-};
-
-CenterGuide.prototype.setState = function (isCenterGuideVisible) {
-
-    if (this.$centerGuideToggle) {
-
-        if (true === isCenterGuideVisible) {
-            this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
-        } else {
+    doHide() {
+        if (this.$centerGuideToggle) {
             this.$centerGuideToggle.removeClass('igv-navbar-button-clicked');
         }
+        this.browser.hideCenterGuide();
+    };
 
-    }
+    doShow() {
 
-};
-
-CenterGuide.prototype.forcedHide = function () {
-
-    if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.hide();
-    }
-
-    if (true === this.browser.isCenterGuideVisible) {
-        this.$container.hide();
-    }
-
-};
-
-CenterGuide.prototype.forcedShow = function () {
-
-    if (this.$centerGuideToggle) {
-        this.$centerGuideToggle.show();
-    }
-
-    if (true === this.browser.isCenterGuideVisible) {
-        this.$container.show();
-    }
-
-};
-
-CenterGuide.prototype.repaint = function () {
-
-    var ppb,
-        xy,
-        halfWidth,
-        width,
-        left,
-        ls,
-        ws,
-        center,
-        referenceFrame;
-
-    if (this.browser.referenceFrameList) {
-
-        referenceFrame = this.browser.referenceFrameList[0]
-        ppb = 1.0 / referenceFrame.bpPerPixel;
-
-        if (ppb > 1) {
-
-            xy = this.browser.trackViews[0].$viewportContainer.position();
-            halfWidth = Math.round(this.browser.trackViews[0].$viewportContainer.width() / 2);
-
-            center = xy.left + halfWidth;
-            width = referenceFrame.toPixels(1);
-            left = center - 0.5 * width;
-
-            ls = Math.round(left).toString() + 'px';
-            ws = Math.round(width).toString() + 'px';
-            this.$container.css({left: ls, width: ws});
-
-            this.$container.removeClass('igv-center-guide-thin');
-            this.$container.addClass('igv-center-guide-wide');
-        } else {
-
-            this.$container.css({left: '50%', width: '1px'});
-
-            this.$container.removeClass('igv-center-guide-wide');
-            this.$container.addClass('igv-center-guide-thin');
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
         }
 
+        this.browser.showCenterGuide();
+    };
+
+    setState(isCenterGuideVisible) {
+
+        if (this.$centerGuideToggle) {
+
+            if (true === isCenterGuideVisible) {
+                this.$centerGuideToggle.addClass('igv-navbar-button-clicked');
+            } else {
+                this.$centerGuideToggle.removeClass('igv-navbar-button-clicked');
+            }
+
+        }
+
+    };
+
+    forcedHide() {
+
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.hide();
+        }
+
+        if (true === this.browser.isCenterGuideVisible) {
+            this.$container.hide();
+        }
+
+    };
+
+    forcedShow() {
+
+        if (this.$centerGuideToggle) {
+            this.$centerGuideToggle.show();
+        }
+
+        if (true === this.browser.isCenterGuideVisible) {
+            this.$container.show();
+        }
+
+    };
+
+    repaint() {
+
+        var ppb,
+            xy,
+            halfWidth,
+            width,
+            left,
+            ls,
+            ws,
+            center,
+            referenceFrame;
+
+        if (this.browser.referenceFrameList) {
+
+            referenceFrame = this.browser.referenceFrameList[0]
+            ppb = 1.0 / referenceFrame.bpPerPixel;
+
+            if (ppb > 1) {
+
+                xy = this.browser.trackViews[0].$viewportContainer.position();
+                halfWidth = Math.round(this.browser.trackViews[0].$viewportContainer.width() / 2);
+
+                center = xy.left + halfWidth;
+                width = referenceFrame.toPixels(1);
+                left = center - 0.5 * width;
+
+                ls = Math.round(left).toString() + 'px';
+                ws = Math.round(width).toString() + 'px';
+                this.$container.css({left: ls, width: ws});
+
+                this.$container.removeClass('igv-center-guide-thin');
+                this.$container.addClass('igv-center-guide-wide');
+            } else {
+
+                this.$container.css({left: '50%', width: '1px'});
+
+                this.$container.removeClass('igv-center-guide-wide');
+                this.$container.addClass('igv-center-guide-thin');
+            }
+
+        }
     }
 
-
-};
-
-CenterGuide.prototype.resize = function () {
-    this.repaint();
-};
+    resize() {
+        this.repaint();
+    }
+}
 
 export default CenterGuide;

@@ -28,47 +28,48 @@ import IGVGraphics from "./igv-canvas.js";
 
 var defaultHighlightColor = "rgba(68, 134, 247, 0.25)";
 
-const ROI = function (config, genome) {
-    this.config = config;
-    this.name = config.name;
-    this.roiSource =  FeatureSource(config, genome);
-    this.color = config.color || defaultHighlightColor;
-}
+class ROI {
 
-ROI.prototype.getFeatures = function (chr, start, end) {
-    return this.roiSource.getFeatures({chr, start, end});
-}
-
-ROI.prototype.draw = function (drawConfiguration) {
-
-    var endBP,
-        region,
-        coord,
-        regions;
-
-    regions = drawConfiguration.features;
-    if (!regions) {
-        return;
+    constructor(config, genome) {
+        this.config = config;
+        this.name = config.name;
+        this.roiSource = FeatureSource(config, genome);
+        this.color = config.color || defaultHighlightColor;
     }
 
-    endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
-    for (var i = 0, len = regions.length; i < len; i++) {
-
-        region = regions[i];
-        if (region.end < drawConfiguration.bpStart) {
-            continue;
-        }
-
-        if (region.start > endBP) {
-            break;
-        }
-
-        coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
-        IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+    async getFeatures(chr, start, end) {
+        return this.roiSource.getFeatures({chr, start, end});
     }
 
+    draw(drawConfiguration) {
 
-};
+        var endBP,
+            region,
+            coord,
+            regions;
+
+        regions = drawConfiguration.features;
+        if (!regions) {
+            return;
+        }
+
+        endBP = drawConfiguration.bpStart + (drawConfiguration.pixelWidth * drawConfiguration.bpPerPixel + 1);
+        for (var i = 0, len = regions.length; i < len; i++) {
+
+            region = regions[i];
+            if (region.end < drawConfiguration.bpStart) {
+                continue;
+            }
+
+            if (region.start > endBP) {
+                break;
+            }
+
+            coord = coordinates(region, drawConfiguration.bpStart, drawConfiguration.bpPerPixel);
+            IGVGraphics.fillRect(drawConfiguration.context, coord.x, drawConfiguration.pixelTop, coord.width, drawConfiguration.pixelHeight, {fillStyle: this.color});
+        }
+    }
+}
 
 function coordinates(region, startBP, bpp) {
 
