@@ -31,7 +31,6 @@ import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {createCheckbox} from "../igv-icons.js";
 import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
-import {extend} from "../util/igvUtils.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const alignmentStartGap = 5;
@@ -42,17 +41,16 @@ const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
+class BAMTrack extends TrackBase {
 
-const BAMTrack = extend(TrackBase,
-
-    function (config, browser) {
-
-        this.type = "alignment";   // Not sure this is used for anything
+    constructor(config, browser) {
 
         // Override default track height for bams
         if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
-        TrackBase.call(this, config, browser);
+        super(config, browser);
+
+        this.type = "alignment";   // Not sure this is used for anything
 
         if (config.coverageTrackHeight === undefined) {
             config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
@@ -122,317 +120,299 @@ const BAMTrack = extend(TrackBase,
             }
 
         }
-    });
-
-BAMTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
-
-    const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
-
-    if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
-        if (undefined === this.minFragmentLength) {
-            this.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
-        }
-        if (undefined === this.maxFragmentLength) {
-            this.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
-        }
     }
 
-    const sort = this.sortObjects[viewport.referenceFrame.id];
-    if (sort) {
-        if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
-            this.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
-            this.trackView.repaintViews();
+
+    async getFeatures(chr, bpStart, bpEnd, bpPerPixel, viewport) {
+
+        const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
+
+        if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
+            if (undefined === this.minFragmentLength) {
+                this.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
+            }
+            if (undefined === this.maxFragmentLength) {
+                this.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
+            }
+        }
+
+        const sort = this.sortObjects[viewport.referenceFrame.id];
+        if (sort) {
+            if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
+                this.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
+                this.trackView.repaintViews();
+            } else {
+                delete this.sortObjects[viewport.referenceFrame.id];
+            }
+        }
+
+        return alignmentContainer;
+    }
+
+
+    /**
+     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
+     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     *
+     * @param alignmentContainer
+     * @returns {number}
+     */
+    computePixelHeight(alignmentContainer) {
+        const h =
+            (this.showCoverage ? this.coverageTrack.height : 0) +
+            (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
+            15;
+        return h;
+
+    };
+
+    draw(options) {
+
+        IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        if (true === this.showCoverage && this.coverageTrack.height > 0) {
+            this.trackView.controlCanvas.style.display = 'block'
+            this.coverageTrack.draw(options);
         } else {
-            delete this.sortObjects[viewport.referenceFrame.id];
+            this.trackView.controlCanvas.style.display = 'none'
+        }
+
+        if (true === this.showAlignments) {
+            this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
+            this.alignmentTrack.draw(options);
         }
     }
 
-    return alignmentContainer;
-}
+    paintAxis(ctx, pixelWidth, pixelHeight) {
 
-BAMTrack.filters = {
-
-    noop: function () {
-        return function (alignment) {
-            return false;
-        };
-    },
-
-    strand: function (strand) {
-        return function (alignment) {
-            return alignment.strand === strand;
-        };
-    },
-
-    mappingQuality: function (lower, upper) {
-        return function (alignment) {
-            if (lower && alignment.mq < lower) {
-                return true;
-            }
-            if (upper && alignment.mq > upper) {
-                return true;
-            }
-            return false;
+        if (this.browser.isMultiLocusMode()) {
+            ctx.clearRect(0, 0, pixelWidth, pixelHeight);
+        } else {
+            this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
         }
     }
-}
 
-
-/**
- * Optional method to compute pixel height to accomodate the list of features.  The implementation below
- * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
- *
- * @param alignmentContainer
- * @returns {number}
- */
-BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
-    const h =
-        (this.showCoverage ? this.coverageTrack.height : 0) +
-        (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
-        15;
-    return h;
-
-};
-
-BAMTrack.prototype.draw = function (options) {
-
-    IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-    if (true === this.showCoverage && this.coverageTrack.height > 0) {
-        this.trackView.controlCanvas.style.display = 'block'
-        this.coverageTrack.draw(options);
-    } else {
-        this.trackView.controlCanvas.style.display = 'none'
+    contextMenuItemList(config) {
+        return this.alignmentTrack.contextMenuItemList(config);
     }
 
-    if (true === this.showAlignments) {
-        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
-        this.alignmentTrack.draw(options);
-    }
-}
+    popupData(config) {
 
-BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
-
-    if (this.browser.isMultiLocusMode()) {
-        ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-    } else {
-        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
-    }
-}
-
-BAMTrack.prototype.contextMenuItemList = function (config) {
-    return this.alignmentTrack.contextMenuItemList(config);
-}
-
-BAMTrack.prototype.popupData = function (config) {
-
-    if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-        return this.coverageTrack.popupData(config);
-    } else {
-        return this.alignmentTrack.popupData(config);
-    }
-
-}
-
-BAMTrack.prototype.menuItemList = function () {
-
-    const menuItems = [];
-
-    // Color by items
-    const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-    $e.text('Color by');
-    menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
-
-    const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
-    if (this.alignmentTrack.hasPairs) {
-        colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
-        colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
-        colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'});
-    }
-    const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '');
-    colorByMenuItems.push({key: 'tag', label: tagLabel});
-    for (let item of colorByMenuItems) {
-        const selected = (this.alignmentTrack.colorBy === item.key);
-        menuItems.push(colorByCB.call(this, item, selected));
-    }
-
-    // Show / hide alignments and coverage
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-    menuItems.push({
-        object: createCheckbox("Show Coverage", this.showCoverage),
-        click: () => {
-            this.showCoverage = !this.showCoverage;
-            const ah = this.autoHeight;
-            this.autoHeight = true;
-            this.trackView.checkContentHeight();
-            this.autoHeight = ah;
-            this.trackView.repaintViews();
+        if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+            return this.coverageTrack.popupData(config);
+        } else {
+            return this.alignmentTrack.popupData(config);
         }
-    });
-    menuItems.push({
-        object: createCheckbox("Show Alignments", this.showAlignments),
-        click: () => {
-            this.showAlignments = !this.showAlignments;
-            const ah = this.autoHeight;
-            this.autoHeight = true;
-            this.trackView.checkContentHeight();
-            this.autoHeight = ah;
-            this.trackView.repaintViews();
+
+    }
+
+    menuItemList() {
+
+        const menuItems = [];
+
+        // Color by items
+        const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $e.text('Color by');
+        menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+
+        const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
+        if (this.alignmentTrack.hasPairs) {
+            colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
+            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
+            colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'});
         }
-    });
-
-    // Show all bases
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-    menuItems.push({
-        object: createCheckbox("Show all bases", this.showAllBases),
-        click: () => {
-            this.showAllBases = !this.showAllBases;
-            this.config.showAllBases = this.showAllBases;
-            this.trackView.repaintViews();
+        const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '');
+        colorByMenuItems.push({key: 'tag', label: tagLabel});
+        for (let item of colorByMenuItems) {
+            const selected = (this.alignmentTrack.colorBy === item.key);
+            menuItems.push(this.colorByCB(item, selected));
         }
-    });
 
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
-    // View as pairs
-    if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+        // Show / hide alignments and coverage
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
-            object: createCheckbox("View as pairs", this.viewAsPairs),
+            object: createCheckbox("Show Coverage", this.showCoverage),
             click: () => {
-                this.viewAsPairs = !this.viewAsPairs;
-                this.config.viewAsPairs = this.viewAsPairs;
-                this.featureSource.setViewAsPairs(this.viewAsPairs);
+                this.showCoverage = !this.showCoverage;
+                const ah = this.autoHeight;
+                this.autoHeight = true;
+                this.trackView.checkContentHeight();
+                this.autoHeight = ah;
+                this.trackView.repaintViews();
+            }
+        });
+        menuItems.push({
+            object: createCheckbox("Show Alignments", this.showAlignments),
+            click: () => {
+                this.showAlignments = !this.showAlignments;
+                const ah = this.autoHeight;
+                this.autoHeight = true;
+                this.trackView.checkContentHeight();
+                this.autoHeight = ah;
+                this.trackView.repaintViews();
+            }
+        });
+
+        // Show all bases
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        menuItems.push({
+            object: createCheckbox("Show all bases", this.showAllBases),
+            click: () => {
+                this.showAllBases = !this.showAllBases;
+                this.config.showAllBases = this.showAllBases;
+                this.trackView.repaintViews();
+            }
+        });
+
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
+        // View as pairs
+        if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+            menuItems.push({
+                object: createCheckbox("View as pairs", this.viewAsPairs),
+                click: () => {
+                    this.viewAsPairs = !this.viewAsPairs;
+                    this.config.viewAsPairs = this.viewAsPairs;
+                    this.featureSource.setViewAsPairs(this.viewAsPairs);
+                    const alignmentContainers = this.getCachedAlignmentContainers();
+                    for (let ac of alignmentContainers) {
+                        ac.setViewAsPairs(this.viewAsPairs);
+                    }
+                    this.trackView.repaintViews();
+                }
+            });
+        }
+
+        // Soft clips
+        menuItems.push({
+            object: createCheckbox("Show soft clips", this.showSoftClips),
+            click: () => {
+                this.showSoftClips = !this.showSoftClips;
+                this.config.showSoftClips = this.showSoftClips;
+                this.featureSource.setShowSoftClips(this.showSoftClips);
                 const alignmentContainers = this.getCachedAlignmentContainers();
                 for (let ac of alignmentContainers) {
-                    ac.setViewAsPairs(this.viewAsPairs);
+                    ac.setShowSoftClips(this.showSoftClips);
                 }
                 this.trackView.repaintViews();
             }
         });
-    }
 
-    // Soft clips
-    menuItems.push({
-        object: createCheckbox("Show soft clips", this.showSoftClips),
-        click: () => {
-            this.showSoftClips = !this.showSoftClips;
-            this.config.showSoftClips = this.showSoftClips;
-            this.featureSource.setShowSoftClips(this.showSoftClips);
-            const alignmentContainers = this.getCachedAlignmentContainers();
-            for (let ac of alignmentContainers) {
-                ac.setShowSoftClips(this.showSoftClips);
+        // Display mode
+        const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $displayModeLabel.text('Display mode');
+        menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+
+        menuItems.push({
+            object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
+            click: () => {
+                this.alignmentTrack.displayMode = "EXPANDED";
+                this.config.displayMode = "EXPANDED";
+                this.trackView.repaintViews();
             }
-            this.trackView.repaintViews();
-        }
-    });
+        });
 
-    // Display mode
-    const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-    $displayModeLabel.text('Display mode');
-    menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+        menuItems.push({
+            object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
+            click: () => {
+                this.alignmentTrack.displayMode = "SQUISHED";
+                this.config.displayMode = "SQUISHED";
+                this.trackView.repaintViews();
+            }
+        });
 
-    menuItems.push({
-        object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
-        click: () => {
-            this.alignmentTrack.displayMode = "EXPANDED";
-            this.config.displayMode = "EXPANDED";
-            this.trackView.repaintViews();
-        }
-    });
-
-    menuItems.push({
-        object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
-        click: () => {
-            this.alignmentTrack.displayMode = "SQUISHED";
-            this.config.displayMode = "SQUISHED";
-            this.trackView.repaintViews();
-        }
-    });
-
-    return menuItems;
-}
-
-/**
- * Create a "color by" checkbox menu item, optionally initially checked
- * @param menuItem
- * @param showCheck
- * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
- */
-function colorByCB(menuItem, showCheck) {
-    const $e = createCheckbox(menuItem.label, showCheck);
-    const clickHandler = (ev) => {
-
-        if (menuItem.key === this.alignmentTrack.colorBy) {
-            this.alignmentTrack.colorBy = 'none';
-            this.config.colorBy = 'none';
-            this.trackView.repaintViews();
-
-        } else if ('tag' === menuItem.key) {
-
-            this.browser.inputDialog.present({
-                label: 'Tag Name',
-                value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
-                callback:  (tag) => {
-                    this.alignmentTrack.colorBy = 'tag';
-                    this.config.colorBy = 'tag';
-
-                    if (tag !== this.alignmentTrack.colorByTag) {
-                        this.alignmentTrack.colorByTag = tag;
-                        this.config.colorByTag = tag;
-                        this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
-                        $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                    }
-
-                    this.trackView.repaintViews();
-                }
-            }, ev)
-
-        } else {
-
-            this.alignmentTrack.colorBy = menuItem.key;
-            this.config.colorBy = menuItem.key;
-            this.trackView.repaintViews();
-        }
-
-    };
-
-    return {name: undefined, object: $e, click: clickHandler, init: undefined}
-}
-
-/**
- * Called when the track is removed.  Do any needed cleanup here
- */
-BAMTrack.prototype.dispose = function () {
-    this.trackView = undefined;
-}
-
-/**
- * Return the current state of the track.  Used to create sessions and bookmarks.
- *
- * @returns {*|{}}
- */
-BAMTrack.prototype.getState = function () {
-
-    const config = Object.assign({}, this.config);
-
-    config.sort = undefined;
-
-    for (let referenceFrame of this.browser.referenceFrameList) {
-
-        const s = this.sortObjects[ referenceFrame.id ];
-
-        if (s) {
-            config.sort = config.sort || [];
-            config.sort.push({ locus: s.chr + ":" + (s.position + 1), option: s.sortOption, direction: s.direction ? "ASC" : "DESC", tag: s.tag });
-        }
+        return menuItems;
     }
 
-    return config;
+
+    /**
+     * Create a "color by" checkbox menu item, optionally initially checked
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    colorByCB(menuItem, showCheck) {
+        const $e = createCheckbox(menuItem.label, showCheck);
+        const clickHandler = (ev) => {
+
+            if (menuItem.key === this.alignmentTrack.colorBy) {
+                this.alignmentTrack.colorBy = 'none';
+                this.config.colorBy = 'none';
+                this.trackView.repaintViews();
+
+            } else if ('tag' === menuItem.key) {
+
+                this.browser.inputDialog.present({
+                    label: 'Tag Name',
+                    value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
+                    callback: (tag) => {
+                        this.alignmentTrack.colorBy = 'tag';
+                        this.config.colorBy = 'tag';
+
+                        if (tag !== this.alignmentTrack.colorByTag) {
+                            this.alignmentTrack.colorByTag = tag;
+                            this.config.colorByTag = tag;
+                            this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                        }
+
+                        this.trackView.repaintViews();
+                    }
+                }, ev)
+
+            } else {
+
+                this.alignmentTrack.colorBy = menuItem.key;
+                this.config.colorBy = menuItem.key;
+                this.trackView.repaintViews();
+            }
+
+        };
+
+        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    }
+
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    dispose() {
+        this.trackView = undefined;
+    }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+
+        const config = Object.assign({}, this.config);
+
+        config.sort = undefined;
+
+        for (let referenceFrame of this.browser.referenceFrameList) {
+
+            const s = this.sortObjects[referenceFrame.id];
+
+            if (s) {
+                config.sort = config.sort || [];
+                config.sort.push({
+                    locus: s.chr + ":" + (s.position + 1),
+                    option: s.sortOption,
+                    direction: s.direction ? "ASC" : "DESC",
+                    tag: s.tag
+                });
+            }
+        }
+
+        return config;
+    }
+
+    getCachedAlignmentContainers() {
+        return this.trackView.viewports.map(vp => vp.getCachedFeatures())
+    }
 }
 
-BAMTrack.prototype.getCachedAlignmentContainers = function () {
-    return this.trackView.viewports.map(vp => vp.getCachedFeatures())
-}
 
 class CoverageTrack {
 
@@ -637,7 +617,7 @@ class AlignmentTrack {
     computePixelHeight(alignmentContainer) {
 
         if (alignmentContainer.packedAlignmentRows) {
-            const h =  alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0;
+            const h = alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0;
             const alignmentRowHeight = this.displayMode === "SQUISHED" ?
                 this.squishedRowHeight :
                 this.alignmentRowHeight;
