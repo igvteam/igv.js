@@ -27,8 +27,7 @@ import igvxhr from "../igvxhr.js";
 
 const cBioUtils = {
 
-
-    fetchStudies: function (baseURL) {
+    fetchStudies: async function (baseURL) {
 
         baseURL = baseURL || "http://www.cbioportal.org/api";
 
@@ -36,109 +35,93 @@ const cBioUtils = {
         return igvxhr.loadJson(url);
     },
 
-    fetchSamplesByStudy: function (study, baseURL) {
+    fetchSamplesByStudy: async function (study, baseURL) {
 
         baseURL = baseURL || "http://www.cbioportal.org/api"
 
         let url = baseURL + "/studies/" + study.studyId + "/samples";
 
-        return igvxhr.loadJson(url)
+        const samples = await igvxhr.loadJson(url);
 
-            .then(function (samples) {
+        let sampleStudyList = {
+            studyId: study.studyId,
+            study: study,
+            sampleIDs: []
+        }
 
-                let sampleStudyList = {
-                    studyId: study.studyId,
-                    study: study,
-                    sampleIDs: []
-                }
+        for (let sampleJson of samples) {
+            sampleStudyList.sampleIDs.push(sampleJson["sampleId"]);
+        }
 
-                for (let sampleJson of samples) {
+        return sampleStudyList;
 
-                    sampleStudyList.sampleIDs.push(sampleJson["sampleId"]);
-                }
-
-                return sampleStudyList;
-            })
     },
 
-    fetchCopyNumberByStudy: function (study, baseURL) {
+    fetchCopyNumberByStudy: async function (study, baseURL) {
 
         baseURL = baseURL || "http://www.cbioportal.org/api";
 
-        this.fetchSamplesByStudy(study)
+        const sampleStudyList = await this.fetchSamplesByStudy(study);
+        let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
+        let body = JSON.stringify(sampleStudyList);
+        return igvxhr.loadJson(url, {method: "POST", sendData: body})
 
-            .then(function (sampleStudyList) {
-
-                let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
-                let body = JSON.stringify(sampleStudyList);
-
-                return igvxhr.loadJson(url, {method: "POST", sendData: body})
-
-            })
     },
 
-    initMenu: function (baseURL) {
+    initMenu: async function (baseURL) {
 
         baseURL = baseURL || "http://www.cbioportal.org/api";
 
         const self = this;
 
-        return this.fetchStudies(baseURL)
+        const studies = await this.fetchStudies(baseURL);
 
-            .then(function (studies) {
+        const samplePromises = [];
 
-                const samplePromises = [];
+        for (let study of studies) {
 
-                for (let study of studies) {
+            let sampleCount = study["cnaSampleCount"];
+            if (sampleCount > 0) {
+                samplePromises.push(self.fetchSamplesByStudy(study.studyId, baseURL));
+            }
+        }
+        const sampleStudyListArray = await Promise.all(samplePromises);
 
-                    let sampleCount = study["cnaSampleCount"];
-                    if (sampleCount > 0) {
-                        samplePromises.push(self.fetchSamplesByStudy(study.studyId, baseURL));
+
+        const trackJson = [];
+        for (let sampleStudyList of sampleStudyListArray) {
+            const study = sampleStudyList.study;
+            const sampleCount = sampleStudyList.sampleIDs.length;
+
+            if (sampleCount > 0) {
+
+                const name = study["shortName"] + " (" + sampleCount + ")";
+                const body = JSON.stringify(sampleStudyList);
+
+                trackJson.push({
+                    "name": name,
+                    "type": "seg",
+                    "displayMode": "EXPANDED",
+                    "sourceType": "custom",
+                    "source": {
+                        "url": baseURL + "/copy-number-segments/fetch?projection=SUMMARY",
+                        "method": "POST",
+                        "contentType": "application/json",
+                        "body": body,
+                        "queryable": false,
+                        "isLog": true,
+                        "mappings": {
+                            "chr": "chromosome",
+                            "value": "segmentMean",
+                            "sampleKey": "uniqueSampleKey",
+                            "sample": "sampleId"
+                        }
                     }
-                }
+                });
+            }
+        }
 
-                return Promise.all(samplePromises);
-            })
-
-            .then(function (sampleStudyListArray) {
-
-                const trackJson = [];
-
-                for (let sampleStudyList of sampleStudyListArray) {
-
-                    const study = sampleStudyList.study;
-                    const sampleCount = sampleStudyList.sampleIDs.length;
-
-                    if (sampleCount > 0) {
-
-                        const name = study["shortName"] + " (" + sampleCount + ")";
-                        const body = JSON.stringify(sampleStudyList);
-
-                        trackJson.push({
-                            "name": name,
-                            "type": "seg",
-                            "displayMode": "EXPANDED",
-                            "sourceType": "custom",
-                            "source": {
-                                "url": baseURL + "/copy-number-segments/fetch?projection=SUMMARY",
-                                "method": "POST",
-                                "contentType": "application/json",
-                                "body": body,
-                                "queryable": false,
-                                "isLog": true,
-                                "mappings": {
-                                    "chr": "chromosome",
-                                    "value": "segmentMean",
-                                    "sampleKey": "uniqueSampleKey",
-                                    "sample": "sampleId"
-                                }
-                            }
-                        });
-                    }
-                }
-
-                return trackJson;
-            })
+        return trackJson;
     }
 }
 
