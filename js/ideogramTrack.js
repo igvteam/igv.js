@@ -23,40 +23,42 @@
  * THE SOFTWARE.
  */
 
-const IdeogramTrack = function (browser) {
+class IdeogramTrack {
+    constructor(browser) {
 
-    this.browser = browser
+        this.browser = browser
 
-    this.type = 'ideogram'
-    this.id = this.type
+        this.type = 'ideogram'
+        this.id = this.type
 
-    this.height = 16
+        this.height = 16
 
-    this.order = Number.MIN_SAFE_INTEGER;
+        this.order = Number.MIN_SAFE_INTEGER;
 
-    this.disableButtons = true;
-    this.ignoreTrackMenu = true;
+        this.disableButtons = true;
+        this.ignoreTrackMenu = true;
 
-}
+    }
 
-IdeogramTrack.prototype.getFeatures = async function (chr, start, end) {
-    return [];
-};
+    async getFeatures(chr, start, end) {
+        return [];
+    }
 
-IdeogramTrack.prototype.computePixelHeight = function (ignore) {
-    return this.height;
-};
+    computePixelHeight(ignore) {
+        return this.height;
+    }
 
-IdeogramTrack.prototype.draw = function (options) {
-    console.log('Ideogram Track - draw()')
-}
+    draw(options) {
+        console.log('Ideogram Track - draw()')
+    }
 
-IdeogramTrack.prototype.computePixelHeight = function () {
+    computePixelHeight() {
 
-}
+    }
 
-IdeogramTrack.prototype.dispose = function () {
-    this.trackView = undefined
+    dispose() {
+        this.trackView = undefined
+    }
 }
 
 export default IdeogramTrack

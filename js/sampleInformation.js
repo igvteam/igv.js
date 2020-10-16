@@ -29,51 +29,53 @@ import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 const splitLines = StringUtils.splitLines;
 
-const SampleInformation = function () {
-    this.attributes = {};
-    this.plinkLoaded = false;
-};
-
-SampleInformation.prototype.loadPlinkFile = async function (url, config) {
-
-    if (!config) config = {};
-
-    var options = buildOptions(config);    // Add oauth token, if any
-    const data = await igvxhr.loadString(url, options);
-    var lines = splitLines(data);
-
-    for(let line of lines) {
-        var line_arr = line.split(' ');
-        this.attributes[line_arr[1]] = {
-            familyId: line_arr[0],
-            fatherId: line_arr[2],
-            motherId: line_arr[3],
-            sex: line_arr[4],
-            phenotype: line_arr[5]
-        }
+class SampleInformation {
+    constructor() {
+        this.attributes = {};
+        this.plinkLoaded = false;
     }
-    this.plinkLoaded = true;
-    return this;
+
+    async loadPlinkFile(url, config) {
+
+        if (!config) config = {};
+
+        var options = buildOptions(config);    // Add oauth token, if any
+        const data = await igvxhr.loadString(url, options);
+        var lines = splitLines(data);
+
+        for (let line of lines) {
+            var line_arr = line.split(' ');
+            this.attributes[line_arr[1]] = {
+                familyId: line_arr[0],
+                fatherId: line_arr[2],
+                motherId: line_arr[3],
+                sex: line_arr[4],
+                phenotype: line_arr[5]
+            }
+        }
+        this.plinkLoaded = true;
+        return this;
+    }
+
+    /**
+     * Return the attributes for the given sample as a map-like object (key-value pairs)
+     * @param sample
+     */
+    getAttributes(sample) {
+        return this.attributes[sample];
+    };
+
+    getAttributeNames() {
+
+        if (this.hasAttributes()) {
+            return Object.keys(this.attributes[Object.keys(this.attributes)[0]]);
+        } else return [];
+    };
+
+    hasAttributes() {
+        return Object.keys(this.attributes).length > 0;
+    }
 }
-
-/**
- * Return the attributes for the given sample as a map-like object (key-value pairs)
- * @param sample
- */
-SampleInformation.prototype.getAttributes = function (sample) {
-    return this.attributes[sample];
-};
-
-SampleInformation.prototype.getAttributeNames = function () {
-
-    if (this.hasAttributes()) {
-        return Object.keys(this.attributes[Object.keys(this.attributes)[0]]);
-    } else return [];
-};
-
-SampleInformation.prototype.hasAttributes = function () {
-    return Object.keys(this.attributes).length > 0;
-};
 
 function loadPlinkFile(url, config) {
     const si = new SampleInformation();

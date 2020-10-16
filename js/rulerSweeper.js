@@ -28,124 +28,126 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
 import {DOMUtils} from "../node_modules/igv-utils/src/index.js"
 
-const RulerSweeper = function (viewport) {
-    this.viewport = viewport;
-    this.browser = viewport.browser;
-    this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
-    $(viewport.contentDiv).append(this.$rulerSweeper);
-    this.namespace = '.sweeper_' + DOMUtils.guid();
-    this.addMouseHandlers();
-};
+class RulerSweeper {
 
-RulerSweeper.prototype.disableMouseHandlers = function () {
+    constructor(viewport) {
+        this.viewport = viewport;
+        this.browser = viewport.browser;
+        this.$rulerSweeper = $('<div class="igv-ruler-sweeper-div">');
+        $(viewport.contentDiv).append(this.$rulerSweeper);
+        this.namespace = '.sweeper_' + DOMUtils.guid();
+        this.addMouseHandlers();
+    }
 
-    $(document).off(this.namespace);
-    this.viewport.$viewport.off(this.namespace);
-};
+    disableMouseHandlers() {
 
-RulerSweeper.prototype.addMouseHandlers = function () {
+        $(document).off(this.namespace);
+        this.viewport.$viewport.off(this.namespace);
+    };
 
-    const browser = this.browser;
-    const self = this;
+    addMouseHandlers() {
 
-    var isMouseDown,
-        isMouseIn,
-        mouseDown,
-        left,
-        threshold,
-        width,
-        dx;
+        const browser = this.browser;
+        const self = this;
 
-    this.disableMouseHandlers();
+        var isMouseDown,
+            isMouseIn,
+            mouseDown,
+            left,
+            threshold,
+            width,
+            dx;
 
-    isMouseDown = isMouseIn = mouseDown = undefined;
+        this.disableMouseHandlers();
 
-    threshold = 1;
+        isMouseDown = isMouseIn = mouseDown = undefined;
 
-    $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
+        threshold = 1;
 
-        isMouseIn = true;
+        $(this.browser.$root).on('mousedown' + this.namespace, function (e) {
 
-        mouseDown = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
+            isMouseIn = true;
 
-        if (true === isMouseDown) {
+            mouseDown = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
 
-            self.$rulerSweeper.show();
+            if (true === isMouseDown) {
 
-            width = threshold;
-            left = mouseDown;
-            self.$rulerSweeper.css({left: left + 'px'});
-            self.$rulerSweeper.width(width);
+                self.$rulerSweeper.show();
 
-        }
-
-    });
-
-    $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
-        var mouseCurrent;
-
-        if (isMouseDown && isMouseIn) {
-
-            mouseCurrent = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
-            mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
-            mouseCurrent = Math.max(mouseCurrent, 0);
-
-            dx = mouseCurrent - mouseDown;
-
-            width = Math.abs(dx);
-            self.$rulerSweeper.width(width);
-
-            if (dx < 0) {
-                left = mouseDown + dx;
+                width = threshold;
+                left = mouseDown;
                 self.$rulerSweeper.css({left: left + 'px'});
+                self.$rulerSweeper.width(width);
+
             }
 
-        }
+        });
 
-    });
+        $(this.browser.$root).on('mousemove' + this.namespace, function (e) {
+            var mouseCurrent;
 
-    $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
+            if (isMouseDown && isMouseIn) {
 
-        let extent;
+                mouseCurrent = DOMUtils.translateMouseCoordinates(e, self.viewport.$viewport.get(0)).x;
+                mouseCurrent = Math.min(mouseCurrent, self.viewport.$viewport.width());
+                mouseCurrent = Math.max(mouseCurrent, 0);
 
-        if (true === isMouseDown && true === isMouseIn) {
+                dx = mouseCurrent - mouseDown;
 
-            isMouseDown = isMouseIn = undefined;
+                width = Math.abs(dx);
+                self.$rulerSweeper.width(width);
 
-            self.$rulerSweeper.hide();
+                if (dx < 0) {
+                    left = mouseDown + dx;
+                    self.$rulerSweeper.css({left: left + 'px'});
+                }
 
-            extent = {};
-            extent.start = bp.call(self, left);
-            extent.end = bp.call(self, left + width);
-
-            if (width > threshold) {
-
-                validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chr).bpLength, extent, browser.minimumBases());
-
-                self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
-                self.viewport.referenceFrame.start = Math.round(extent.start);
-                self.viewport.referenceFrame.initialEnd = Math.round(extent.end);
-                browser.updateViews(self.viewport.referenceFrame);
             }
 
-        }
+        });
 
-    });
+        $(this.browser.$root).on('mouseup' + this.namespace, function (e) {
 
-    this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
+            let extent;
 
-        isMouseDown = true;
-    });
+            if (true === isMouseDown && true === isMouseIn) {
 
-};
+                isMouseDown = isMouseIn = undefined;
 
-RulerSweeper.prototype.dispose = function () {
-    this.disableMouseHandlers();
-};
+                self.$rulerSweeper.hide();
 
+                extent = {};
+                extent.start = self.bp(left);
+                extent.end = self.bp(left + width);
 
-function bp(pixel) {
-    return this.viewport.referenceFrame.start + (pixel * this.viewport.referenceFrame.bpPerPixel);
+                if (width > threshold) {
+
+                    validateLocusExtent(browser.genome.getChromosome(self.viewport.referenceFrame.chr).bpLength, extent, browser.minimumBases());
+
+                    self.viewport.referenceFrame.bpPerPixel = (Math.round(extent.end) - Math.round(extent.start)) / self.viewport.$viewport.width();
+                    self.viewport.referenceFrame.start = Math.round(extent.start);
+                    self.viewport.referenceFrame.initialEnd = Math.round(extent.end);
+                    browser.updateViews(self.viewport.referenceFrame);
+                }
+
+            }
+
+        });
+
+        this.viewport.$viewport.on('mousedown' + this.namespace, function (e) {
+
+            isMouseDown = true;
+        });
+
+    }
+
+    dispose() {
+        this.disableMouseHandlers();
+    }
+
+    bp(pixel) {
+        return this.viewport.referenceFrame.start + (pixel * this.viewport.referenceFrame.bpPerPixel);
+    }
 }
 
 
