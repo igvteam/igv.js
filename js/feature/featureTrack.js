@@ -44,18 +44,18 @@ someMotifValues.forEach(motif => {
 })
 
 
-const FeatureTrack = extend(TrackBase,
+class FeatureTrack  extends TrackBase {
 
-    function (config, browser) {
-
-       // this.type = "feature";
-
-        TrackBase.call(this, config, browser);
+    constructor(config, browser) {
 
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
         if (config.maxRows === undefined) {
-            config.maxRows = 500;
+            config.maxRows = 1000;
         }
+
+        super(config, browser);
+
+
         this.maxRows = config.maxRows;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
@@ -113,257 +113,257 @@ const FeatureTrack = extend(TrackBase,
             monitorTrackDrag(this);
         }
 
-    });
-
-FeatureTrack.prototype.postInit = async function () {
-
-    if (typeof this.featureSource.getHeader === "function") {
-        this.header = await this.featureSource.getHeader();
     }
 
-    // Set properties from track line
-    if (this.header) {
-        this.setTrackProperties(this.header)
-    }
+    async postInit() {
 
-    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
-        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
-        this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
-    }
-
-    return this;
-}
-
-FeatureTrack.prototype.supportsWholeGenome = function () {
-    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
-}
-
-FeatureTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
-    const visibilityWindow = this.visibilityWindow;
-    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
-};
-
-
-/**
- * The required height in pixels required for the track content.   This is not the visible track height, which
- * can be smaller (with a scrollbar) or larger.
- *
- * @param features
- * @returns {*}
- */
-FeatureTrack.prototype.computePixelHeight = function (features) {
-
-    if (this.type === 'spliceJunctions') {
-        return this.height;
-    } else if (this.displayMode === "COLLAPSED") {
-        return this.margin + this.expandedRowHeight;
-    } else {
-        let maxRow = 0;
-        if (features && (typeof features.forEach === "function")) {
-            for (let feature of features) {
-                if (feature.row && feature.row > maxRow) {
-                    maxRow = feature.row;
-                }
-            }
+        if (typeof this.featureSource.getHeader === "function") {
+            this.header = await this.featureSource.getHeader();
         }
 
-        const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
-        return height;
-
-    }
-
-};
-
-FeatureTrack.prototype.draw = function (options) {
-
-    const featureList = options.features;
-    const ctx = options.context;
-    const bpPerPixel = options.bpPerPixel;
-    const bpStart = options.bpStart;
-    const pixelWidth = options.pixelWidth;
-    const pixelHeight = options.pixelHeight;
-    const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-
-
-    if (!this.config.isMergedTrack) {
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-    }
-
-    if (featureList) {
-
-        const rowFeatureCount = [];
-        options.rowLastX = [];
-        for (let feature of featureList) {
-            const row = feature.row || 0;
-            if (rowFeatureCount[row] === undefined) {
-                rowFeatureCount[row] = 1;
-            } else {
-                rowFeatureCount[row]++;
-            }
-            options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
+        // Set properties from track line
+        if (this.header) {
+            this.setTrackProperties(this.header)
         }
 
-        let lastPxEnd = [];
-        for (let feature of featureList) {
-            if (feature.end < bpStart) continue;
-            if (feature.start > bpEnd) break;
+        if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+            this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+            this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
+        }
 
-            const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
-            const featureDensity = pixelWidth / rowFeatureCount[row];
-            options.drawLabel = options.labelAllFeatures || featureDensity > 10;
-            const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-            const last = lastPxEnd[row];
-            if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
-                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+        return this;
+    }
 
-                if (this.config.type !== 'spliceJunctions') {
-                    // Ensure a visible gap between features
-                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                    if (last && pxStart - last <= 0) {
-                        ctx.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        ctx.globalAlpha = 1.0
+    supportsWholeGenome() {
+        return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
+    }
+
+    async getFeatures(chr, start, end, bpPerPixel) {
+        const visibilityWindow = this.visibilityWindow;
+        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
+    };
+
+
+    /**
+     * The required height in pixels required for the track content.   This is not the visible track height, which
+     * can be smaller (with a scrollbar) or larger.
+     *
+     * @param features
+     * @returns {*}
+     */
+    computePixelHeight(features) {
+
+        if (this.type === 'spliceJunctions') {
+            return this.height;
+        } else if (this.displayMode === "COLLAPSED") {
+            return this.margin + this.expandedRowHeight;
+        } else {
+            let maxRow = 0;
+            if (features && (typeof features.forEach === "function")) {
+                for (let feature of features) {
+                    if (feature.row && feature.row > maxRow) {
+                        maxRow = feature.row;
                     }
-                    lastPxEnd[row] = pxEnd;
                 }
+            }
+
+            const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
+            return height;
+
+        }
+
+    };
+
+    draw(options) {
+
+        const featureList = options.features;
+        const ctx = options.context;
+        const bpPerPixel = options.bpPerPixel;
+        const bpStart = options.bpStart;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
+
+        if (!this.config.isMergedTrack) {
+            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        }
+
+        if (featureList) {
+
+            const rowFeatureCount = [];
+            options.rowLastX = [];
+            for (let feature of featureList) {
+                const row = feature.row || 0;
+                if (rowFeatureCount[row] === undefined) {
+                    rowFeatureCount[row] = 1;
+                } else {
+                    rowFeatureCount[row]++;
+                }
+                options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
+            }
+
+            let lastPxEnd = [];
+            for (let feature of featureList) {
+                if (feature.end < bpStart) continue;
+                if (feature.start > bpEnd) break;
+
+                const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
+                const featureDensity = pixelWidth / rowFeatureCount[row];
+                options.drawLabel = options.labelAllFeatures || featureDensity > 10;
+                const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
+                const last = lastPxEnd[row];
+                if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
+                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+
+                    if (this.config.type !== 'spliceJunctions') {
+                        // Ensure a visible gap between features
+                        const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                        if (last && pxStart - last <= 0) {
+                            ctx.globalAlpha = 0.5
+                            IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                            ctx.globalAlpha = 1.0
+                        }
+                        lastPxEnd[row] = pxEnd;
+                    }
+                }
+            }
+
+        } else {
+            console.log("No feature list");
+        }
+
+    };
+
+    clickedFeatures(clickState) {
+
+        const y = clickState.y - this.margin;
+        const allFeatures = TrackBase.clickedFeatures(clickState);
+
+        let row;
+        switch (this.displayMode) {
+            case 'SQUISHED':
+                row = Math.floor(y / this.squishedRowHeight);
+                break;
+            case 'EXPANDED':
+                row = Math.floor(y / this.expandedRowHeight);
+                break;
+            default:
+                row = undefined;
+        }
+
+        return allFeatures.filter(function (feature) {
+            return (row === undefined || feature.row === undefined || row === feature.row);
+        })
+    }
+
+    /**
+     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
+     */
+    popupData(clickState, features) {
+
+        let self = this;
+
+        if (!features) features = this.clickedFeatures(clickState);
+        const genomicLocation = clickState.genomicLocation;
+
+        const data = [];
+        for (let feature of features) {
+
+            const featureData = (typeof feature.popupData === "function") ?
+                feature.popupData(genomicLocation) :
+                TrackBase.extractPopupData(feature, this.getGenomeId());
+
+            if (featureData) {
+                if (data.length > 0) {
+                    data.push("<HR>");
+                }
+                Array.prototype.push.apply(data, featureData);
             }
         }
 
-    } else {
-        console.log("No feature list");
+        return data;
+
     }
 
-};
 
-FeatureTrack.prototype.clickedFeatures = function (clickState) {
+    menuItemList() {
 
-    const y = clickState.y - this.margin;
-    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
+        const self = this;
+        const menuItems = [];
 
-    let row;
-    switch (this.displayMode) {
-        case 'SQUISHED':
-            row = Math.floor(y / this.squishedRowHeight);
-            break;
-        case 'EXPANDED':
-            row = Math.floor(y / this.expandedRowHeight);
-            break;
-        default:
-            row = undefined;
-    }
-
-    return allFeatures.filter(function (feature) {
-        return (row === undefined || feature.row === undefined || row === feature.row);
-    })
-}
-
-/**
- * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
- */
-FeatureTrack.prototype.popupData = function (clickState, features) {
-
-    let self = this;
-
-    if (!features) features = this.clickedFeatures(clickState);
-    const genomicLocation = clickState.genomicLocation;
-
-    const data = [];
-    for (let feature of features) {
-
-        const featureData = (typeof feature.popupData === "function") ?
-            feature.popupData(genomicLocation) :
-            TrackBase.extractPopupData(feature, this.getGenomeId());
-
-        if (featureData) {
-            if (data.length > 0) {
-                data.push("<HR>");
-            }
-            Array.prototype.push.apply(data, featureData);
-        }
-    }
-
-    return data;
-
-};
-
-
-FeatureTrack.prototype.menuItemList = function () {
-
-    const self = this;
-    const menuItems = [];
-
-    if (this.render === renderSnp) {
-        (["function", "class"]).forEach(function (colorScheme) {
-            menuItems.push({
-                object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
-                click: function () {
-                    self.colorBy = colorScheme;
-                    self.trackView.repaintViews();
-                }
+        if (this.render === renderSnp) {
+            (["function", "class"]).forEach(function (colorScheme) {
+                menuItems.push({
+                    object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
+                    click: function () {
+                        self.colorBy = colorScheme;
+                        self.trackView.repaintViews();
+                    }
+                });
             });
-        });
+
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
+        }
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+            const lut =
+                {
+                    "COLLAPSED": "Collapse",
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand"
+                };
+
+            menuItems.push(
+                {
+                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        self.displayMode = displayMode;
+                        self.config.displayMode = displayMode;
+                        self.trackView.checkContentHeight();
+                        self.trackView.repaintViews();
+                    }
+                });
+        });
+
+        return menuItems;
+
+    };
+
+
+    description() {
+
+        // if('snp' === this.type) {
+        if (renderSnp === this.render) {
+            let desc = "<html>" + this.name + "<hr>";
+            desc += '<em>Color By Function:</em><br>';
+            desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
+            desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
+            desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
+            desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
+            desc += '<em>Color By Class:</em><br>';
+            desc += '<span style="color:red">Red</span>: Deletion<br>';
+            desc += '<span style="color:green">Green</span>: MNP<br>';
+            desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
+            desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
+            desc += "</html>";
+            return desc;
+        } else {
+            return this.name;
+        }
+
+    };
+
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    dispose() {
+        this.trackView = undefined;
     }
-
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
-    ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
-        const lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
-
-        menuItems.push(
-            {
-                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                click: function () {
-                    self.displayMode = displayMode;
-                    self.config.displayMode = displayMode;
-                    self.trackView.checkContentHeight();
-                    self.trackView.repaintViews();
-                }
-            });
-    });
-
-    return menuItems;
-
-};
-
-
-FeatureTrack.prototype.description = function () {
-
-    // if('snp' === this.type) {
-    if (renderSnp === this.render) {
-        let desc = "<html>" + this.name + "<hr>";
-        desc += '<em>Color By Function:</em><br>';
-        desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
-        desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
-        desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
-        desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
-        desc += '<em>Color By Class:</em><br>';
-        desc += '<span style="color:red">Red</span>: Deletion<br>';
-        desc += '<span style="color:green">Green</span>: MNP<br>';
-        desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
-        desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
-        desc += "</html>";
-        return desc;
-    } else {
-        return this.name;
-    }
-
-};
-
-/**
- * Called when the track is removed.  Do any needed cleanup here
- */
-FeatureTrack.prototype.dispose = function () {
-    this.trackView = undefined;
 }
-
 
 /**
  * Monitors track drag events, updates label position to ensure that they're always visible.
