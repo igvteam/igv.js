@@ -24,202 +24,206 @@
  */
 
 
-// TODO -- big endian
+// TODO -- big endian?
 
-const BinaryParser = function (dataView, littleEndian) {
+class BinaryParser {
+    constructor(dataView, littleEndian) {
 
-    this.littleEndian = littleEndian !== undefined ? littleEndian : true
-    this.position = 0;
-    this.view = dataView;
-    this.length = dataView.byteLength;
-}
+        this.littleEndian = littleEndian !== undefined ? littleEndian : true
+        this.position = 0;
+        this.view = dataView;
+        this.length = dataView.byteLength;
+    }
 
-BinaryParser.prototype.available = function () {
-    return this.length - this.position;
-}
+    available() {
+        return this.length - this.position;
+    }
 
-BinaryParser.prototype.remLength = function () {
-    return this.length - this.position;
-}
+    remLength() {
+        return this.length - this.position;
+    }
 
-BinaryParser.prototype.hasNext = function () {
-    return this.position < this.length - 1;
-}
+    hasNext() {
+        return this.position < this.length - 1;
+    }
 
-BinaryParser.prototype.getByte = function () {
-    var retValue = this.view.getUint8(this.position, this.littleEndian);
-    this.position++;
-    return retValue;
-}
+    getByte() {
+        var retValue = this.view.getUint8(this.position, this.littleEndian);
+        this.position++;
+        return retValue;
+    }
 
-BinaryParser.prototype.getShort = function () {
+    getShort() {
 
-    var retValue = this.view.getInt16(this.position, this.littleEndian);
-    this.position += 2
-    return retValue;
-}
+        var retValue = this.view.getInt16(this.position, this.littleEndian);
+        this.position += 2
+        return retValue;
+    }
 
-BinaryParser.prototype.getUShort = function () {
+    getUShort() {
 
-    // var byte1 = this.getByte(),
-    //     byte2 = this.getByte(),
-    //     retValue = ((byte2 << 24 >>> 16) + (byte1 << 24 >>> 24));
-    //     return retValue;
+        // var byte1 = this.getByte(),
+        //     byte2 = this.getByte(),
+        //     retValue = ((byte2 << 24 >>> 16) + (byte1 << 24 >>> 24));
+        //     return retValue;
 
-    //
-    var retValue = this.view.getUint16(this.position, this.littleEndian);
-    this.position += 2
-    return retValue;
-}
-
-
-BinaryParser.prototype.getInt = function () {
-
-    var retValue = this.view.getInt32(this.position, this.littleEndian);
-    this.position += 4;
-    return retValue;
-}
-
-
-BinaryParser.prototype.getUInt = function () {
-    var retValue = this.view.getUint32(this.position, this.littleEndian);
-    this.position += 4;
-    return retValue;
-}
-
-BinaryParser.prototype.getLong = function () {
-
-    // DataView doesn't support long. So we'll try manually
-
-    var b = [];
-    b[0] = this.view.getUint8(this.position);
-    b[1] = this.view.getUint8(this.position + 1);
-    b[2] = this.view.getUint8(this.position + 2);
-    b[3] = this.view.getUint8(this.position + 3);
-    b[4] = this.view.getUint8(this.position + 4);
-    b[5] = this.view.getUint8(this.position + 5);
-    b[6] = this.view.getUint8(this.position + 6);
-    b[7] = this.view.getUint8(this.position + 7);
-
-    var value = 0;
-    if (this.littleEndian) {
-        for (let i = b.length - 1; i >= 0; i--) {
-            value = (value * 256) + b[i];
-        }
-    } else {
-        for (let i = 0; i < b.length; i++) {
-            value = (value * 256) + b[i];
-        }
+        //
+        var retValue = this.view.getUint16(this.position, this.littleEndian);
+        this.position += 2
+        return retValue;
     }
 
 
-    this.position += 8;
-    return value;
-}
+    getInt() {
 
-BinaryParser.prototype.getString = function (len) {
-
-    var s = "";
-    var c;
-    while ((c = this.view.getUint8(this.position++)) !== 0) {
-        s += String.fromCharCode(c);
-        if (len && s.length === len) break;
+        var retValue = this.view.getInt32(this.position, this.littleEndian);
+        this.position += 4;
+        return retValue;
     }
-    return s;
-}
 
-BinaryParser.prototype.getFixedLengthString = function (len) {
 
-    var s = "";
-    var i;
-    var c;
-    for (i = 0; i < len; i++) {
-        c = this.view.getUint8(this.position++);
-        if (c > 0) {
+    getUInt() {
+        var retValue = this.view.getUint32(this.position, this.littleEndian);
+        this.position += 4;
+        return retValue;
+    }
+
+    getLong() {
+
+        // DataView doesn't support long. So we'll try manually
+
+        var b = [];
+        b[0] = this.view.getUint8(this.position);
+        b[1] = this.view.getUint8(this.position + 1);
+        b[2] = this.view.getUint8(this.position + 2);
+        b[3] = this.view.getUint8(this.position + 3);
+        b[4] = this.view.getUint8(this.position + 4);
+        b[5] = this.view.getUint8(this.position + 5);
+        b[6] = this.view.getUint8(this.position + 6);
+        b[7] = this.view.getUint8(this.position + 7);
+
+        var value = 0;
+        if (this.littleEndian) {
+            for (let i = b.length - 1; i >= 0; i--) {
+                value = (value * 256) + b[i];
+            }
+        } else {
+            for (let i = 0; i < b.length; i++) {
+                value = (value * 256) + b[i];
+            }
+        }
+
+
+        this.position += 8;
+        return value;
+    }
+
+    getString(len) {
+
+        var s = "";
+        var c;
+        while ((c = this.view.getUint8(this.position++)) !== 0) {
             s += String.fromCharCode(c);
+            if (len && s.length === len) break;
         }
+        return s;
     }
-    return s;
-}
 
-BinaryParser.prototype.getFixedLengthTrimmedString = function (len) {
+    getFixedLengthString(len) {
 
-    var s = "";
-    var i;
-    var c;
-    for (i = 0; i < len; i++) {
-        c = this.view.getUint8(this.position++);
-        if (c > 32) {
-            s += String.fromCharCode(c);
+        var s = "";
+        var i;
+        var c;
+        for (i = 0; i < len; i++) {
+            c = this.view.getUint8(this.position++);
+            if (c > 0) {
+                s += String.fromCharCode(c);
+            }
         }
+        return s;
     }
-    return s;
+
+    getFixedLengthTrimmedString(len) {
+
+        var s = "";
+        var i;
+        var c;
+        for (i = 0; i < len; i++) {
+            c = this.view.getUint8(this.position++);
+            if (c > 32) {
+                s += String.fromCharCode(c);
+            }
+        }
+        return s;
+    }
+
+    getFloat() {
+
+        var retValue = this.view.getFloat32(this.position, this.littleEndian);
+        this.position += 4;
+        return retValue;
+
+
+    }
+
+    getDouble() {
+
+        var retValue = this.view.getFloat64(this.position, this.littleEndian);
+        this.position += 8;
+        return retValue;
+    }
+
+    skip(n) {
+
+        this.position += n;
+        return this.position;
+    }
+
+
+    /**
+     * Return a bgzip (bam and tabix) virtual pointer
+     * TODO -- why isn't 8th byte used ?
+     * @returns {*}
+     */
+    getVPointer() {
+
+        var position = this.position,
+            offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
+            byte6 = ((this.view.getUint8(position + 6) & 0xff) * 0x100000000),
+            byte5 = ((this.view.getUint8(position + 5) & 0xff) * 0x1000000),
+            byte4 = ((this.view.getUint8(position + 4) & 0xff) * 0x10000),
+            byte3 = ((this.view.getUint8(position + 3) & 0xff) * 0x100),
+            byte2 = ((this.view.getUint8(position + 2) & 0xff)),
+            block = byte6 + byte5 + byte4 + byte3 + byte2;
+        this.position += 8;
+
+        //       if (block == 0 && offset == 0) {
+        //           return null;
+        //       } else {
+        return new VPointer(block, offset);
+        //       }
+    }
 }
 
-BinaryParser.prototype.getFloat = function () {
+class VPointer {
+    constructor(block, offset) {
+        this.block = block;
+        this.offset = offset;
+    }
 
-    var retValue = this.view.getFloat32(this.position, this.littleEndian);
-    this.position += 4;
-    return retValue;
+    isLessThan(vp) {
+        return this.block < vp.block ||
+            (this.block === vp.block && this.offset < vp.offset);
+    }
 
+    isGreaterThan(vp) {
+        return this.block > vp.block ||
+            (this.block === vp.block && this.offset > vp.offset);
+    }
 
-}
-
-BinaryParser.prototype.getDouble = function () {
-
-    var retValue = this.view.getFloat64(this.position, this.littleEndian);
-    this.position += 8;
-    return retValue;
-}
-
-BinaryParser.prototype.skip = function (n) {
-
-    this.position += n;
-    return this.position;
-}
-
-
-/**
- * Return a bgzip (bam and tabix) virtual pointer
- * TODO -- why isn't 8th byte used ?
- * @returns {*}
- */
-BinaryParser.prototype.getVPointer = function () {
-
-    var position = this.position,
-        offset = (this.view.getUint8(position + 1) << 8) | (this.view.getUint8(position)),
-        byte6 = ((this.view.getUint8(position + 6) & 0xff) * 0x100000000),
-        byte5 = ((this.view.getUint8(position + 5) & 0xff) * 0x1000000),
-        byte4 = ((this.view.getUint8(position + 4) & 0xff) * 0x10000),
-        byte3 = ((this.view.getUint8(position + 3) & 0xff) * 0x100),
-        byte2 = ((this.view.getUint8(position + 2) & 0xff)),
-        block = byte6 + byte5 + byte4 + byte3 + byte2;
-    this.position += 8;
-
-    //       if (block == 0 && offset == 0) {
-    //           return null;
-    //       } else {
-    return new VPointer(block, offset);
-    //       }
-}
-
-function VPointer(block, offset) {
-    this.block = block;
-    this.offset = offset;
-}
-
-VPointer.prototype.isLessThan = function (vp) {
-    return this.block < vp.block ||
-        (this.block === vp.block && this.offset < vp.offset);
-}
-
-VPointer.prototype.isGreaterThan = function (vp) {
-    return this.block > vp.block ||
-        (this.block === vp.block && this.offset > vp.offset);
-}
-
-VPointer.prototype.print = function () {
-    return "" + this.block + ":" + this.offset;
+    print() {
+        return "" + this.block + ":" + this.offset;
+    }
 }
 
 export default BinaryParser;

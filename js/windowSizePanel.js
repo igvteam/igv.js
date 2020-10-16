@@ -26,25 +26,25 @@
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
-const WindowSizePanel = function ($parent, browser) {
+class WindowSizePanel {
+    constructor($parent, browser) {
+        this.$container = $('<div>', {class: 'igv-windowsize-panel-container'});
+        $parent.append(this.$container);
+        this.browser = browser;
+    }
 
-    this.$container = $('<div>', { class: 'igv-windowsize-panel-container' });
-    $parent.append(this.$container);
-    this.browser = browser;
+    show() {
+        this.$container.show();
+    }
 
-};
+    hide() {
+        this.$container.hide();
+    }
 
-WindowSizePanel.prototype.show = function () {
-    this.$container.show();
-};
-
-WindowSizePanel.prototype.hide = function () {
-    this.$container.hide();
-};
-
-WindowSizePanel.prototype.updateWithReferenceFrame = function (referenceFrame) {
-    this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
-};
+    updateWithReferenceFrame(referenceFrame) {
+        this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
+    }
+}
 
 
 function prettyBasePairNumber  (raw) {
