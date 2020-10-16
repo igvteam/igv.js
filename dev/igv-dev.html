@@ -74,11 +74,21 @@
                 genome: "hg19",
                 // locus: [ 'egfr', 'myc', 'ace' ],
                 // locus: [ 'ace', 'myc' ],
-                // locus: "myc",
+                locus: "myc",
                 // locus: 'chr8:100,117,313-100,120,998',
 
                 // use for one-feature BED track
-                locus: 'chr1:999999-1000000'
+                // locus: 'chr1:999999-1000000',
+                tracks:
+                [
+                    {
+                        "sourceType": "gcs",
+                        "type": "alignment",
+                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam",
+                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12878_S1.bam.bai",
+                        "name": "NA12878"
+                    }
+                ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
