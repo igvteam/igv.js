@@ -100,8 +100,6 @@ class WigTrack extends TrackBase {
 
     draw(options) {
 
-        let self = this;
-
         const features = options.features;
         const ctx = options.context;
         const bpPerPixel = options.bpPerPixel;
@@ -114,24 +112,24 @@ class WigTrack extends TrackBase {
         let lastNegValue = 1;
 
         let baselineColor;
-        if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
-            baselineColor = IGVColor.addAlpha(self.color, 0.1);
+        if (typeof this.color === "string" && this.color.startsWith("rgb(")) {
+            baselineColor = IGVColor.addAlpha(this.color, 0.1);
         }
 
         const yScale = (yValue) => {
-            return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
+            return ((this.dataRange.max - yValue) / (this.dataRange.max - this.dataRange.min)) * pixelHeight
         };
 
         if (features && features.length > 0) {
 
-            if (self.dataRange.min === undefined) self.dataRange.min = 0;
+            if (this.dataRange.min === undefined) this.dataRange.min = 0;
 
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
-            if (self.dataRange.max > self.dataRange.min) {
+            if (this.dataRange.max > this.dataRange.min) {
 
 
-                const y0 = self.dataRange.min == 0 ? pixelHeight : yScale(0);
+                const y0 = this.dataRange.min == 0 ? pixelHeight : yScale(0);
                 for (let f of features) {
 
                     if (f.end < bpStart) continue;
@@ -145,11 +143,11 @@ class WigTrack extends TrackBase {
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel);
                     const width = Math.max(1, rectEnd - x);
 
-                    let c = (f.value < 0 && self.altColor) ? self.altColor : self.color;
+                    let c = (f.value < 0 && this.altColor) ? this.altColor : this.color;
                     const color = (typeof c === "function") ? c(f.value) : c;
 
-                    if (self.graphType === "points") {
-                        const pointSize = self.config.pointSize || 3;
+                    if (this.graphType === "points") {
+                        const pointSize = this.config.pointSize || 3;
                         const px = x + width / 2;
                         IGVGraphics.fillCircle(ctx, px, y, pointSize / 2, {"fillStyle": color, "strokeStyle": color});
 
@@ -168,18 +166,16 @@ class WigTrack extends TrackBase {
                 }
 
                 // If the track includes negative values draw a baseline
-                if (self.dataRange.min < 0) {
-                    const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
+                if (this.dataRange.min < 0) {
+                    const basepx = (this.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight;
                     IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
                 }
-
-
             }
         }
 
         // Draw guidelines
-        if (self.config.hasOwnProperty('guideLines')) {
-            for (let line of self.config.guideLines) {
+        if (this.config.hasOwnProperty('guideLines')) {
+            for (let line of this.config.guideLines) {
                 if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
                     let y = yScale(line.y);
                     let props = {
