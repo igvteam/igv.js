@@ -328,7 +328,7 @@ class SegTrack extends TrackBase {
 
     clickedFeatures(clickState) {
 
-        const allFeatures = TrackBase.clickedFeatures(clickState);
+        const allFeatures = super.clickedFeatures(clickState);
         return filterByRow(allFeatures, clickState.y);
 
         function filterByRow(features, y) {
