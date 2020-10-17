@@ -160,7 +160,7 @@ class RnaStructTrack extends TrackBase {
 
     clickedFeatures(clickState) {
 
-        let features = TrackBase.clickedFeatures(clickState);
+        let features = super.clickedFeatures(clickState);
 
         const clicked = [];
 

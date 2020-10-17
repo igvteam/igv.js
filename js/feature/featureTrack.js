@@ -238,7 +238,7 @@ class FeatureTrack extends TrackBase {
     clickedFeatures(clickState) {
 
         const y = clickState.y - this.margin;
-        const allFeatures = TrackBase.clickedFeatures(clickState);
+        const allFeatures = super.clickedFeatures(clickState);
 
         let row;
         switch (this.displayMode) {
