@@ -36,13 +36,17 @@ class BamAlignmentRow {
         this.score = undefined;
     }
 
-    findAlignment(genomicLocation) {
+    findAlignment(chr, genomicLocation) {
+
+        const alignmentContains = (a, genomicLocation) => {
+            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
+        }
 
         // find single alignment that overlaps sort location
         let centerAlignment;
         for (let i = 0; i < this.alignments.length; i++) {
             const a = this.alignments[i];
-            if (alignmentContains(a, genomicLocation)) {
+            if (a.chr === chr && genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
                         centerAlignment = a.firstAlignment;
@@ -58,36 +62,33 @@ class BamAlignmentRow {
 
         return centerAlignment;
 
-        function alignmentContains(a, genomicLocation) {
-            return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
-        }
+
     }
 
     updateScore(options, alignmentContainer) {
         this.score = this.calculateScore(options, alignmentContainer);
     }
 
-    calculateScore(options, alignmentContainer) {
+    calculateScore({chr, position, option, direction, tag}, alignmentContainer) {
 
-        const genomicLocation = Math.floor(options.position);
-        const sortOption = options.sortOption;
-        const sortDirection = options.direction
+        if (!option) option = "BASE";
 
-        const alignment = this.findAlignment(genomicLocation);
+        const alignment = this.findAlignment(chr, position);
 
         if (undefined === alignment) {
-            return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
+            return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
         }
 
         let mate;
-        switch (sortOption) {
-            case "NUCLEOTIDE": {
-                const readBase = alignment.readBaseAt(genomicLocation);
-                const quality = alignment.readBaseQualityAt(genomicLocation);
+        switch (option) {
+            case "NUCLEOTIDE":
+            case "BASE": {
+                const readBase = alignment.readBaseAt(position);
+                const quality = alignment.readBaseQualityAt(position);
                 if (!readBase) {
-                    return sortDirection ? Number.MAX_VALUE : -Number.MAX_VALUE;
+                    return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
                 } else {
-                    return calculateBaseScore(readBase, quality, alignmentContainer, genomicLocation);
+                    return calculateBaseScore(readBase, quality, alignmentContainer, position);
                 }
             }
             case "STRAND":
@@ -95,8 +96,8 @@ class BamAlignmentRow {
             case "START":
                 return alignment.start;
             case "TAG": {
-                const tagKey = options.tag;
-                const tagValue = alignment.tags()[tagKey];
+
+                const tagValue = alignment.tags()[tag];
                 if (tagValue !== undefined) {
                     return isString(tagValue) ? hashCode(tagValue) : tagValue;
                 } else {
@@ -106,7 +107,7 @@ class BamAlignmentRow {
             case "INSERT_SIZE":
                 return -Math.abs(alignment.fragmentLength);
             case "GAP_SIZE":
-                return -alignment.gapSizeAt(genomicLocation);
+                return -alignment.gapSizeAt(position);
             case "MATE_CHR":
                 mate = alignment.mate;
                 if (!mate) {

@@ -66,9 +66,7 @@ class BAMTrack extends TrackBase {
 
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
-
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
-
         this.visibilityWindow = config.visibilityWindow || 30000;
         this.viewAsPairs = config.viewAsPairs;
         this.pairsSupported = config.pairsSupported !== false;
@@ -81,45 +79,52 @@ class BAMTrack extends TrackBase {
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
-        // Transient object, maintains the last sort option per viewport.
-        this.sortObjects = {};
-
+        // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
+        // are present for a given reference frame the last one will take precedence
         if (config.sort) {
             if (Array.isArray(config.sort)) {
-                for (let sort of config.sort) {
-                    assignSort(this.sortObjects, sort);
-                }
+                // Legacy support
+                this.assignSort(config.sort[0]);
             } else {
-                assignSort(this.sortObjects, config.sort);
+                this.assignSort(config.sort);
             }
-            config.sort = undefined;
         }
+    }
 
-        // Assign sort objects to a genomic state
-        function assignSort(currentSorts, sort) {
+    sort(options) {
+        options = this.assignSort(options);
 
-            const range = StringUtils.parseLocusString(sort.locus);
-            if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
-
-            // Loop through current genomic states, assign sort to first matching state
-            for (let rf of browser.referenceFrameList) {
-                // We would like to use actual viewport width to calculate ref frame end, but viewport is not assigned at this point.
-                const rfEnd = rf.start + (rf.initialEnd - rf.initialStart);
-                if (rf.chr === range.chr && range.start >= rf.start && range.start <= rfEnd) {
-
-                    currentSorts[rf.id] = {
-                        chr: range.chr,
-                        position: range.start,
-                        sortOption: sort.option || "NUCLEOTIDE",
-                        direction: sort.direction === undefined ? true : "ASC" === sort.direction,
-                        tag: sort.tag ? sort.tag.toUpperCase() : undefined
-                    }
-
-                    break;
+        for(let vp of this.trackView.viewports) {
+            if(vp.containsPosition(options.chr, options.position)) {
+                const alignmentContainer = vp.getCachedFeatures();
+                if (alignmentContainer) {
+                    sortAlignmentRows(options, alignmentContainer);
+                    vp.repaint();
                 }
             }
-
         }
+    }
+
+    /**
+     * Fix syntax problems for sort options.
+     * @param options
+     */
+    assignSort(options) {
+        // convert old syntax
+        if (options.locus) {
+            const range = StringUtils.parseLocusString(options.locus);
+            options.chr = range.chr;
+            options.position = range.start;
+        } else {
+            options.position--;
+        }
+        options.direction = options.direction === "ASC" || options.direction === true;
+
+        // chr aliasing
+        options.chr = this.browser.genome.getChromosomeName(options.chr);
+        this.sortObject = options;
+
+        return this.sortObject;
     }
 
 
@@ -136,13 +141,10 @@ class BAMTrack extends TrackBase {
             }
         }
 
-        const sort = this.sortObjects[viewport.referenceFrame.id];
+        const sort = this.sortObject;
         if (sort) {
             if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
-                this.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
-                this.trackView.repaintViews();
-            } else {
-                delete this.sortObjects[viewport.referenceFrame.id];
+                sortAlignmentRows(sort, alignmentContainer);
             }
         }
 
@@ -341,7 +343,6 @@ class BAMTrack extends TrackBase {
                 this.trackView.repaintViews();
 
             } else if ('tag' === menuItem.key) {
-
                 this.browser.inputDialog.present({
                     label: 'Tag Name',
                     value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
@@ -361,7 +362,6 @@ class BAMTrack extends TrackBase {
                 }, ev)
 
             } else {
-
                 this.alignmentTrack.colorBy = menuItem.key;
                 this.config.colorBy = menuItem.key;
                 this.trackView.repaintViews();
@@ -388,21 +388,15 @@ class BAMTrack extends TrackBase {
 
         const config = Object.assign({}, this.config);
 
-        config.sort = undefined;
-
-        for (let referenceFrame of this.browser.referenceFrameList) {
-
-            const s = this.sortObjects[referenceFrame.id];
-
-            if (s) {
-                config.sort = config.sort || [];
-                config.sort.push({
-                    locus: s.chr + ":" + (s.position + 1),
-                    option: s.sortOption,
-                    direction: s.direction ? "ASC" : "DESC",
-                    tag: s.tag
-                });
+        if (this.sortObject) {
+            config.sort = {
+                chr: this.sortObject.chr,
+                position: this.sortObject.position + 1,
+                option: this.sortObject.option,
+                direction: this.sortObject.direction ? "ASC" : "DESC"
             }
+        } else if (config.hasOwnProperty("sort")) {
+            delete config.sort;
         }
 
         return config;
@@ -953,23 +947,6 @@ class AlignmentTrack {
 
     };
 
-    sortAlignmentRows(options, alignmentContainer) {
-
-        const direction = options.direction
-        if (alignmentContainer === null) {
-            alignmentContainer = this.featureSource.alignmentContainer;
-        }
-        for (let row of alignmentContainer.packedAlignmentRows) {
-            row.updateScore(options, alignmentContainer);
-        }
-
-        alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-            const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
-            return true === direction ? i : -i;
-        });
-
-    };
-
     popupData(config) {
 
         const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
@@ -986,7 +963,7 @@ class AlignmentTrack {
         const list = [];
 
         list.push('<b>Sort by...</b>')
-        list.push({label: '&nbsp; base', click: () => sortByOption("NUCLEOTIDE")});
+        list.push({label: '&nbsp; base', click: () => sortByOption("BASE")});
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")});
         list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")});
         list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")});
@@ -1004,47 +981,43 @@ class AlignmentTrack {
 
 
         function sortByOption(option) {
-            sortRows({
+            const cs = self.parent.sortObject;
+            const newSortObject = {
                 chr: viewport.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
-                sortOption: option
-            })
+                sortOption: option,
+                direction: cs ? !cs.direction : true
+            }
+            sortRows(newSortObject, viewport);
         }
 
         function sortByTag() {
+            const cs = self.parent.sortObject;
             const config =
                 {
                     label: 'Tag Name',
                     input: self.sortByTag ? self.sortByTag : '',
-                    click: function () {
-                        const tag = self.browser.inputDialog.$input.val().trim();
-                        self.sortByTag = tag;
-                        sortRows({
-                            chr: viewport.referenceFrame.chr,
-                            position: Math.floor(clickState.genomicLocation),
-                            sortOption: "TAG",
-                            tag: tag
-                        })
+                    callback: (tag) => {
+                        if (tag) {
+                            const newSortObject = {
+                                chr: viewport.referenceFrame.chr,
+                                position: Math.floor(clickState.genomicLocation),
+                                sortOption: "TAG",
+                                tag: tag,
+                                direction: cs ? !cs.direction : true
+                            }
+                            self.sortByTag = tag;
+                            sortRows(newSortObject, viewport);
+                        }
                     }
                 };
-            self.browser.inputDialog.configure(config);
-            self.browser.inputDialog.present($(self.parent.trackView.trackDiv));
+            self.browser.inputDialog.present(config, clickState.event);
         }
 
-        function sortRows(options) {
-
-            if (!clickState.viewport.tile) {
-                return;
-            }
-
-            const currentSorts = self.parent.sortObjects;
-            const cs = currentSorts[viewport.referenceFrame.id];
-            options.direction = cs ? !cs.direction : true;
-
-            self.sortAlignmentRows(options, clickState.viewport.getCachedFeatures());
-            self.parent.trackView.repaintViews();
-
-            currentSorts[viewport.referenceFrame.id] = options;
+        function sortRows(options, viewport) {
+            self.parent.sortObject = options;
+            sortAlignmentRows(options, viewport.getCachedFeatures());
+            viewport.repaint();
         }
 
         function viewMateInSplitScreen() {
@@ -1209,6 +1182,21 @@ class AlignmentTrack {
         return color;
 
     }
+}
+
+function sortAlignmentRows(options, alignmentContainer) {
+
+    const direction = options.direction
+
+    for (let row of alignmentContainer.packedAlignmentRows) {
+        row.updateScore(options, alignmentContainer);
+    }
+
+    alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
+        const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
+        return true === direction ? i : -i;
+    });
+
 }
 
 function shadedBaseColor(qual, nucleotide) {
