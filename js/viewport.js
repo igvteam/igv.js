@@ -804,6 +804,7 @@ function addMouseHandlers() {
         }
 
         return {
+            event: e,
             viewport: viewport,
             referenceFrame: referenceFrame,
             genomicLocation: genomicLocation,
