@@ -1820,11 +1820,14 @@ function isLocusString(browser, locus) {
 
                 let numeric
                 numeric = b[0].replace(/,/g, '')
-
                 if (isNaN(numeric)) {
                     return undefined
-                } else {
-                    extent.start = parseInt(numeric, 10) - 1
+                }
+
+                if (1 === b.length) {
+                    const mid = parseInt(numeric, 10) - 1
+                    extent.start = mid - 20;
+                    extent.end = mid + 20;
                 }
 
                 if (2 === b.length) {
