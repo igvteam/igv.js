@@ -142,6 +142,10 @@ class ViewportBase {
         this.canvas.style.width = (`${ width }px`);
         this.canvas.setAttribute('width', width);
     }
+    
+    getWidth() {
+        return this.$viewport.width();
+    }
 
     shift() {}
 
@@ -163,6 +167,14 @@ class ViewportBase {
 
     getContentTop() {
         return this.contentDiv.offsetTop;
+    }
+
+    containsPosition(chr, position) {
+        if(this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
+            return position <= this.referenceFrame.calculateEnd(this.getWidth());
+        } else {
+            return false;
+        }
     }
 
     /**
