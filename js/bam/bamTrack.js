@@ -94,8 +94,8 @@ class BAMTrack extends TrackBase {
     sort(options) {
         options = this.assignSort(options);
 
-        for(let vp of this.trackView.viewports) {
-            if(vp.containsPosition(options.chr, options.position)) {
+        for (let vp of this.trackView.viewports) {
+            if (vp.containsPosition(options.chr, options.position)) {
                 const alignmentContainer = vp.getCachedFeatures();
                 if (alignmentContainer) {
                     sortAlignmentRows(options, alignmentContainer);
@@ -948,20 +948,30 @@ class AlignmentTrack {
     };
 
     popupData(config) {
-
         const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
     contextMenuItemList(clickState) {
 
-        const self = this;
         const viewport = clickState.viewport;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
         const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
+        const sortByOption = (option) => {
+            const cs = this.parent.sortObject;
+            const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true;
+            const newSortObject = {
+                chr: viewport.referenceFrame.chr,
+                position: Math.floor(clickState.genomicLocation),
+                sortOption: option,
+                direction: direction
+            }
+            this.parent.sortObject = newSortObject;
+            sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
+            viewport.repaint();
+        }
         list.push('<b>Sort by...</b>')
         list.push({label: '&nbsp; base', click: () => sortByOption("BASE")});
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")});
@@ -969,75 +979,65 @@ class AlignmentTrack {
         list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")});
         list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")});
         list.push({label: '&nbsp; mapping quality', click: () => sortByOption("MQ")});
-        list.push({label: '&nbsp; tag', click: sortByTag});
+        list.push({
+            label: '&nbsp; tag', click: () => {
+                const cs = this.parent.sortObject;
+                const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true;
+                const config =
+                    {
+                        label: 'Tag Name',
+                        value: this.sortByTag ? this.sortByTag : '',
+                        callback: (tag) => {
+                            if (tag) {
+                                const newSortObject = {
+                                    chr: viewport.referenceFrame.chr,
+                                    position: Math.floor(clickState.genomicLocation),
+                                    sortOption: "TAG",
+                                    tag: tag,
+                                    direction: direction
+                                }
+                                this.sortByTag = tag;
+                                this.parent.sortObject = newSortObject;
+                                sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
+                                viewport.repaint();
+                            }
+                        }
+                    };
+                this.browser.inputDialog.present(config, clickState.event);
+            }
+        });
         list.push('<hr/>');
 
         if (isSingleAlignment && clickedObject.isMateMapped()) {
-            list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
+            list.push({
+                label: 'View mate in split screen',
+                click: () => {
+                    if (clickedObject.mate) {
+                        this.highlightedAlignmentReadNamed = clickedObject.readName;
+                        this.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
+                    }
+                },
+                init: undefined
+            });
         }
-        list.push({label: 'View read sequence', click: viewReadSequence});
+
+        list.push({
+            label: 'View read sequence',
+            click: () => {
+                const alignment = clickedObject;
+                if (!alignment) return;
+
+                const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
+                if (!seqstring || "*" === seqstring) {
+                    this.browser.alert.present("Read sequence: *")
+                } else {
+                    this.browser.alert.present(seqstring);
+                }
+            }
+        });
         list.push('<hr/>');
         return list;
 
-
-        function sortByOption(option) {
-            const cs = self.parent.sortObject;
-            const newSortObject = {
-                chr: viewport.referenceFrame.chr,
-                position: Math.floor(clickState.genomicLocation),
-                sortOption: option,
-                direction: cs ? !cs.direction : true
-            }
-            sortRows(newSortObject, viewport);
-        }
-
-        function sortByTag() {
-            const cs = self.parent.sortObject;
-            const config =
-                {
-                    label: 'Tag Name',
-                    input: self.sortByTag ? self.sortByTag : '',
-                    callback: (tag) => {
-                        if (tag) {
-                            const newSortObject = {
-                                chr: viewport.referenceFrame.chr,
-                                position: Math.floor(clickState.genomicLocation),
-                                sortOption: "TAG",
-                                tag: tag,
-                                direction: cs ? !cs.direction : true
-                            }
-                            self.sortByTag = tag;
-                            sortRows(newSortObject, viewport);
-                        }
-                    }
-                };
-            self.browser.inputDialog.present(config, clickState.event);
-        }
-
-        function sortRows(options, viewport) {
-            self.parent.sortObject = options;
-            sortAlignmentRows(options, viewport.getCachedFeatures());
-            viewport.repaint();
-        }
-
-        function viewMateInSplitScreen() {
-            if (clickedObject.mate) {
-                self.highlightedAlignmentReadNamed = clickedObject.readName;
-                self.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
-            }
-        }
-
-        function viewReadSequence() {
-            const alignment = clickedObject;
-            if (!alignment) return;
-
-            const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-            if (!seqstring || "*" === seqstring) {
-                self.browser.alert.present("Read sequence: *")
-            } else {
-                self.browser.alert.present(seqstring);
-            }
-        }
 
     };
 
