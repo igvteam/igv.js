@@ -79,17 +79,13 @@
 
                 // use for one-feature BED track
                 // locus: 'chr1:999999-1000000',
-                tracks:
-                [
-                    {
-                        "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                        "name": "Encode bigwig"
-                    },
-                    {
-                        "url": "https://www.encodeproject.org/files/ENCFF356YES/@@download/ENCFF356YES.bigWig",
-                        "name": "ctcf bigwig"
-                    }
-                ]
+                // tracks:
+                // [
+                //     {
+                //         "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
+                //         "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
+                //         "name": "1KG Sites"
+                //     }                ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)

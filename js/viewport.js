@@ -782,7 +782,7 @@ function addMouseHandlers() {
 
                 popupTimerID = setTimeout(function () {
 
-                        var content = getPopupContent(e, self);
+                        const content = getPopupContent(e, self);
                         if (content) {
                             if (self.popover) self.popover.dispose()
                             const size = { width: 320, height: 640 }
@@ -861,9 +861,17 @@ function addMouseHandlers() {
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
     function formatPopoverText(nameValues) {
-        // const rows = nameValues.map(nameValue => nameValue.name ? `<div><div>${ nameValue.name }</div><div>${ nameValue.value }</div></div>` : `<div><div></div>${ nameValue.toString() }</div>`)
-        const rows = nameValues.map(nameValue => nameValue.name ? `<div><div>${ nameValue.name }</div><div>${ nameValue.value }</div></div>` : nameValue.toString())
-        return rows.join('');
+
+        const rows = nameValues.map(nameValue => {
+
+            if (nameValue.name) {
+                return `<div>${ nameValue.name }&nbsp&nbsp&nbsp${ nameValue.value }</div>`
+            } else {
+                return '<hr>' === nameValue ? nameValue : `<div>${ nameValue }</div>`
+            }
+        })
+
+        return rows.join('')
     }
 }
 
