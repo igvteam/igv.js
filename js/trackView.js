@@ -68,8 +68,6 @@ class TrackView {
         this.viewports = [];
         const width = browser.calculateViewportWidth(browser.referenceFrameList.length);
 
-        // console.log(`TrackView ${ track.id }`);
-
         for (let referenceFrame of browser.referenceFrameList) {
             const viewport = createViewport(this, browser.referenceFrameList, browser.referenceFrameList.indexOf(referenceFrame), width)
             this.viewports.push(viewport);
@@ -82,7 +80,10 @@ class TrackView {
         const exclude = new Set(['ruler', 'sequence', 'ideogram']);
 
         if (false === exclude.has(this.track.type)) {
-            this.attachScrollbar(this.$viewportContainer, this.viewports);
+            this.attachScrollbar($track, this.$viewportContainer, this.viewports)
+        } else {
+            const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
+            $track.append($shim)
         }
 
         if (true === this.track.ignoreTrackMenu) {
@@ -137,11 +138,11 @@ class TrackView {
 
     }
 
-    attachScrollbar($viewportContainer, viewports) {
+    attachScrollbar($track, $viewportContainer, viewports) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
             this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
-            $viewportContainer.append(this.scrollbar.$outerScroll);
+            $track.append(this.scrollbar.$outerScroll);
         }
 
     }
@@ -721,13 +722,11 @@ class TrackScrollbar {
 
         const innerScrollHeight = Math.round((viewportContainerHeight / viewportContentHeight) * viewportContainerHeight);
 
-        // this.$outerScroll.show();
-        // this.$innerScroll.height(innerScrollHeight);
         if (viewportContentHeight > viewportContainerHeight) {
-            this.$outerScroll.show();
+            this.$innerScroll.show();
             this.$innerScroll.height(innerScrollHeight);
         } else {
-            this.$outerScroll.hide();
+            this.$innerScroll.hide();
         }
     }
 }
