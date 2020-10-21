@@ -100,22 +100,6 @@ class InteractionTrack extends TrackBase {
         return true
     }
 
-    /**
-     * Return the current state of the track.  Used to create sessions and bookmarks.
-     *
-     * @returns {*|{}}
-     */
-    getState() {
-
-        var config = this.config || {};
-        config.arcOrientation = this.arcOrientation;
-        config.thickness = this.thickness;
-        config.color = this.color;
-        return config;
-
-    }
-
-
     async getFeatures(chr, start, end) {
         const visibilityWindow = this.visibilityWindow;
         const features = await this.featureSource.getFeatures({chr, start, end, visibilityWindow});

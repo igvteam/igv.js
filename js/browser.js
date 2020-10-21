@@ -70,10 +70,9 @@ class Browser {
 
     constructor(options, parentDiv) {
 
-
+        this.config = options;
         this.guid = DOMUtils.guid();
         this.namespace = '.browser_' + this.guid;
-        this.config = options;
 
         this.parent = parentDiv;
 
@@ -1460,38 +1459,39 @@ class Browser {
 
     toJSON() {
 
-        const json = {
-            "reference": this.genome.toJSON()
-        };
 
-        if (FileUtils.isFilePath(json.reference.fastaURL)) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
-        } else if (FileUtils.isFilePath(json.reference.indexURL)) {
-            throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
+        const json = {}
+
+        if(this.config.genome) {
+            json["genome"] = this.config.genome;
+        } else {
+            json["reference"] = this.genome.toJSON();
+            if (FileUtils.isFilePath(json.reference.fastaURL)) {
+                throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
+            } else if (FileUtils.isFilePath(json.reference.indexURL)) {
+                throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
+            }
         }
 
-        // Use first available trackView.
+        // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = [];
         const gtexSelections = {};
         let anyTrackView = this.trackViews[0];
-        anyTrackView.viewports.forEach(function (viewport) {
-
+        for(let viewport of anyTrackView.viewports) {
             const referenceFrame = viewport.referenceFrame;
             const pixelWidth = viewport.$viewport[0].clientWidth;
             const locusString = referenceFrame.presentLocus(pixelWidth);
             locus.push(locusString);
-
             if (referenceFrame.selection) {
                 const selection = {
                     gene: referenceFrame.selection.gene,
                     snp: referenceFrame.selection.snp
                 };
-
                 gtexSelections[locusString] = selection;
             }
-        });
+        }
 
-        json["locus"] = locus;
+        json["locus"] = locus.length === 1 ? locus[0] : locus;
 
         const gtexKeys = Object.getOwnPropertyNames(gtexSelections);
         if (gtexKeys.length > 0) {

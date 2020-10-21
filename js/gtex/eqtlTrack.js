@@ -294,15 +294,6 @@ class EqtlTrack extends TrackBase {
         return this.dataRange;
     }
 
-    getState() {
-        const state = deepCopy(this.config);
-        state.autoscale = this.autoscale;
-        if (!this.autoscale && this.dataRange) {
-            state.min = this.dataRange.min;
-            state.max = this.dataRange.max;
-        }
-        return state;
-    }
 }
 
 export default EqtlTrack;
