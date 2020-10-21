@@ -43,7 +43,6 @@ class SegTrack extends TrackBase {
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 12;
 
-
         this.posColorScale = config.posColorScale ||
             new GradientColorScale(
                 {
@@ -77,12 +76,7 @@ class SegTrack extends TrackBase {
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = FeatureSource(this.config, browser.genome);
 
-
-        // TODO this sort doens't look right, no samples have yet been loaded
-        if (config.sort) {
-            const sort = config.sort;
-            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
-        }
+        this.initialSort = config.sort;
 
     }
 
@@ -94,7 +88,6 @@ class SegTrack extends TrackBase {
         if (this.header) {
             this.setTrackProperties(this.header)
         }
-
     }
 
 
@@ -132,7 +125,13 @@ class SegTrack extends TrackBase {
 
 
     async getFeatures(chr, start, end) {
-        return this.featureSource.getFeatures({chr, start, end});
+        const features = await this.featureSource.getFeatures({chr, start, end});
+        if (this.initialSort) {
+            const sort = this.initialSort;
+            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
+            this.initialSort = undefined;  // Sample order is sorted,
+        }
+        return features;
     };
 
 
@@ -285,9 +284,11 @@ class SegTrack extends TrackBase {
     /**
      * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
      */
-    async sortSamples(chr, start, end, direction) {
+    async sortSamples(chr, start, end, direction, featureList) {
 
-        const featureList = await this.featureSource.getFeatures({chr, start, end});
+        if (!featureList) {
+            featureList = await this.featureSource.getFeatures({chr, start, end});
+        }
         if (!featureList) return;
 
         this.updateSampleKeys(featureList);
@@ -388,7 +389,6 @@ class SegTrack extends TrackBase {
 
     contextMenuItemList(clickState) {
 
-        const self = this;
         const referenceFrame = clickState.viewport.referenceFrame;
         const genomicLocation = clickState.genomicLocation;
 
@@ -398,13 +398,15 @@ class SegTrack extends TrackBase {
             "DESC";
         const bpWidth = referenceFrame.toBP(2.5);
 
-        function sortHandler(sort) {
-            self.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
+        const sortHandler = (sort) => {
+            const viewport = clickState.viewport;
+            const features = viewport.getCachedFeatures();
+            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
         }
 
         return [
             {
-                label: 'Sort by value', click: function (e) {
+                label: 'Sort by value', click: (e) => {
 
 
                     const sort = {
@@ -417,7 +419,7 @@ class SegTrack extends TrackBase {
 
                     sortHandler(sort);
 
-                    self.config.sort = sort;
+                    this.config.sort = sort;
 
                 }
             }];
