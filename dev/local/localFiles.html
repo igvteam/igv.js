@@ -20,6 +20,9 @@
             <input id="fileWidget" multiple="true" type="file" disabled/>
         </label>
     </p>
+    <p>
+        <button id="sessionButton">Session JSON</button>
+    </p>
 
 </div>
 
@@ -36,71 +39,76 @@
     const fileWidget = document.getElementById("fileWidget");
 
     const genome = "hg38";
-    let igvBrowser;
     igv.createBrowser(div, {genome})
         .then(function (browser) {
-            igvBrowser = browser;
+
             fileWidget.disabled = false;
-        })
+            fileWidget.onchange = () => {
 
+                const files = fileWidget.files;
 
-    fileWidget.onchange = function (e) {
+                // Search for index files  (.bai, .csi, .tbi, .idx)
+                const indexExtensions = new Set(["bai", "csi", "tbi", "idx", "crai"]);
+                const indexLUT = new Map();
+                const dataFiles = [];
+                for (let f of files) {
+                    const ext = FileUtils.getExtension(f.name);
+                    if (indexExtensions.has(ext)) {
+                        const fn = f.name;
+                        let key = fn.substring(0, fn.length - (ext.length + 1));
 
-        const files = fileWidget.files;
+                        // bam and cram files (.bai, .crai) have 2 convension <data>.bam.bai and <data.bai>, account for second
+                        if (ext === "bai" && !key.endsWith("bam")) {
+                            key = key + ".bam"
+                        } else if (ext === "crai" && !key.endsWith("cram")) {
+                            key = key + ".cram";
+                        }
+                        indexLUT.set(key, f);
 
-        // Search for index files  (.bai, .csi, .tbi, .idx)
-        const indexExtensions = new Set(["bai", "csi", "tbi", "idx", "crai"]);
-        const indexLUT = new Map();
-        const dataFiles = [];
-        for(let f of files) {
-                const ext = FileUtils.getExtension(f.name);
-                if (indexExtensions.has(ext)) {
-                    const fn = f.name;
-                    let key = fn.substring(0, fn.length - (ext.length + 1));
-
-                    // bam and cram files (.bai, .crai) have 2 convension <data>.bam.bai and <data.bai>, account for second
-                    if(ext === "bai" && !key.endsWith("bam")) {
-                        key = key + ".bam"
-                    } else if(ext === "crai" && !key.endsWith("cram")) {
-                        key = key + ".cram";
+                    } else {
+                        dataFiles.push(f);
                     }
-                    indexLUT.set(key, f);
-
-                } else {
-                    dataFiles.push(f);
                 }
-        }
 
-        // Loop through data files building "configs"
-        const trackConfigs = [];
-        for(let df of dataFiles) {
-            const fn = df.name;
-            const format = TrackUtils.inferFileFormat(fn);
-            if (!format) {
-                console.log(`Skipping ${fn} - unknown format.`);
-            } else {
-                if (indexLUT.has(fn)) {
-                    trackConfigs.push({
-                        format: format,
-                        url: df,
-                        indexURL: indexLUT.get(fn),
-                        name: df.name
-                    })
-                } else {
-                    trackConfigs.push({
-                        format: format,
-                        url: df,
-                        name: df.name
-                    })
+                // Loop through data files building "configs"
+                const trackConfigs = [];
+                for (let df of dataFiles) {
+                    const fn = df.name;
+                    const format = TrackUtils.inferFileFormat(fn);
+                    if (!format) {
+                        console.log(`Skipping ${fn} - unknown format.`);
+                    } else {
+                        if (indexLUT.has(fn)) {
+                            trackConfigs.push({
+                                format: format,
+                                url: df,
+                                indexURL: indexLUT.get(fn),
+                                name: df.name
+                            })
+                        } else {
+                            trackConfigs.push({
+                                format: format,
+                                url: df,
+                                name: df.name
+                            })
+                        }
+                    }
+                }
+
+                if (trackConfigs.length > 0) {
+                    browser.loadTrackList(trackConfigs);
                 }
             }
-        }
 
-        if (trackConfigs.length > 0) {
-            igvBrowser.loadTrackList(trackConfigs);
-        }
+            document.getElementById("sessionButton").addEventListener("click", () =>{
+                try {
+                    console.log(browser.toJSON());
+                } catch (e) {
+                    alert(e);
+                }
+            })
+        })
 
-    }
 </script>
 
 </body>

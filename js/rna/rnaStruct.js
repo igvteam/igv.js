@@ -230,20 +230,7 @@ class RnaStructTrack extends TrackBase {
 
     };
 
-    /**
-     * Return the current state of the track.  Used to create sessions and bookmarks.
-     *
-     * @returns {*|{}}
-     */
-    getState() {
 
-        var config = this._super.getState.call(this)
-        config.arcOrientation = this.arcOrientation;
-        config.thickness = this.thickness;
-        config.color = this.color;
-        return config;
-
-    }
 }
 
 function sortByScore(featureList, direction) {
