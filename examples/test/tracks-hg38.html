@@ -56,7 +56,6 @@
                     indexed: false,
                     color: 'rgb(100,200,200)',
                     displayMode: 'EXPANDED',
-                    order: Number.MAX_SAFE_INTEGER // 2nd to last track
                 },
                 {
                     type: "eqtl",
@@ -65,6 +64,35 @@
                     tissueSiteDetailId: "Muscle_Skeletal",
                     name: "Muscle Skeletal",
                     visibilityWindow: 1000000
+                },
+                {
+                    name: "Indexed GTF (Gencode)",
+                    url: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz",
+                    indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/gencode.v28.basic.annotation.sorted.gtf.gz.tbi"
+                },
+                {
+                    name: "Indexed GFF (Ensemble Genes)",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi"
+                },
+                {
+                    "name": "Common SNPs (150)",
+                    "type": "snp",
+                    "format": "snp",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
+                },
+                {
+                    "name": "Repeat Masker",
+                    "type": "annotation",
+                    "format": "rmsk",
+                    "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
+                    "visibilityWindow": 1000000
+                },
+                {
+                    name: "bigbed (Clinvar)",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb"
                 }
 
             ]
