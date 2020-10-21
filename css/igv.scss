@@ -53,7 +53,7 @@ $igv-left-hand-gutter-width: 50px;
 $igv-right-hand-gutter-width: 36px;
 
 $igv-track-manipulation-handle-width: 12px;
-$igv-track-manipulation-handle-margin-width: 2px;
+$igv-track-manipulation-handle-margin-width: 0;
 $igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width;
 $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim + $igv-scrollbar-outer-width;
 
@@ -592,7 +592,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   width: $igv-scrollbar-outer-width;
   height: 100%;
 
-  background-color: deeppink;
+  //background-color: deeppink;
+  background-color: white;
 
 }
 
@@ -603,8 +604,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   width: $igv-scrollbar-outer-width;
   height: 100%;
 
-  background-color: salmon;
-  //background-color: white;
+  //background-color: salmon;
+  background-color: white;
 
   div {
 
@@ -618,7 +619,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
     border-width: $igv-scrollbar-inner-border-width;
     border-style: solid;
-    //border-color: grey;
     border-color: transparent;
 
     border-top-left-radius: 4px;
@@ -627,8 +627,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
 
-    background-color: chartreuse;
-    //background-color: white;
+    //background-color: chartreuse;
+    background-color: #c4c4c4;
    }
 
 }

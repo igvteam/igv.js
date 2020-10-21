@@ -46,6 +46,7 @@ class TrackView {
 
         this.browser = browser;
         this.track = track;
+
         track.trackView = this;
 
         const $track = $('<div class="igv-track">');
@@ -54,7 +55,7 @@ class TrackView {
 
         this.namespace = '.trackview_' + DOMUtils.guid();
 
-        if (this.track instanceof RulerTrack) {
+        if (track instanceof RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
         }
 
@@ -62,46 +63,34 @@ class TrackView {
             this.trackDiv.style.height = track.height + "px";
         }
 
+        // left hand gutter
         this.appendLeftHandGutter($track);
 
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
 
-        this.viewports = [];
-        const width = browser.calculateViewportWidth(browser.referenceFrameList.length);
+        // viewport container DOM elements
+        populateViewportContainer(browser, browser.referenceFrameList, this)
 
-        for (let referenceFrame of browser.referenceFrameList) {
-            const viewport = createViewport(this, browser.referenceFrameList, browser.referenceFrameList.indexOf(referenceFrame), width)
-            this.viewports.push(viewport);
-        }
-
-        updateViewportShims(this.viewports, this.$viewportContainer)
-
-        this.updateViewportForMultiLocus();
-
-        if (false === trackExclusionSet.has(this.track.type)) {
-            this.attachScrollbar($track, this.$viewportContainer, this.viewports)
-        } else {
-            const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
-            $track.append($shim)
-        }
-
-        if (true === this.track.ignoreTrackMenu) {
-            // do nothing
-        } else {
-            this.appendRightHandGutter($track);
-        }
-
-        if ('ideogram' === this.track.type || 'ruler' === this.track.type) {
+        // Track drag handle
+        if ('ideogram' === track.type || 'ruler' === track.type) {
             // do nothing
         } else {
             this.attachDragWidget($track, this.$viewportContainer);
         }
 
-        if (false === trackExclusionSet.has(this.track.type)) {
+        // right hand gutter
+        if (true === track.ignoreTrackMenu) {
+            // do nothing
+        } else {
+            this.appendRightHandGutter($track);
+        }
 
-            const defaultColors = this.track.color && StringUtils.isString(this.trackColor) ?
-                [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) :
+        // color picker
+        if (false === trackExclusionSet.has(track.type)) {
+
+            const defaultColors = track.color && StringUtils.isString(this.trackColor) ?
+                [track.color].map(rgb => IGVColor.rgbToHex(rgb)) :
                 undefined;
 
             const config =
@@ -141,8 +130,8 @@ class TrackView {
     attachScrollbar($track, $viewportContainer, viewports) {
 
         if ("hidden" === $viewportContainer.css("overflow-y")) {
-            this.scrollbar = new TrackScrollbar($viewportContainer, viewports);
-            $track.append(this.scrollbar.$outerScroll);
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports)
+            this.scrollbar.$outerScroll.insertAfter($viewportContainer)
         }
 
     }
@@ -612,36 +601,31 @@ function emptyViewportContainers(trackViews) {
         }
 
         delete trackView.viewports;
-        trackView.viewports = [];
 
         delete trackView.scrollbar;
     }
 }
 
-function buildViewports(browser, referenceFrameList, trackViews) {
+function populateViewportContainer(browser, referenceFrameList, trackView) {
 
     const width = browser.calculateViewportWidth(referenceFrameList.length);
 
-    for (let trackView of trackViews) {
+    trackView.viewports = [];
 
-        for (let referenceFrame of referenceFrameList) {
-            const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
-            trackView.viewports.push(viewport);
-        }
-
-        trackView.updateViewportForMultiLocus();
-
-        if (false === trackExclusionSet.has(trackView.track.type)) {
-            trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
-        } else {
-            const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
-            $(trackView.trackDiv).append($shim)
-        }
-
+    for (let referenceFrame of referenceFrameList) {
+        const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
+        trackView.viewports.push(viewport);
     }
 
-    for (let {viewports, $viewportContainer} of trackViews) {
-        updateViewportShims(viewports, $viewportContainer)
+    updateViewportShims(trackView.viewports, trackView.$viewportContainer)
+
+    trackView.updateViewportForMultiLocus();
+
+    if (false === trackExclusionSet.has(trackView.track.type)) {
+        trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
+    } else {
+        const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
+        $shim.insertAfter(trackView.$viewportContainer)
     }
 }
 
@@ -789,5 +773,5 @@ class TrackScrollbar {
     }
 }
 
-export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, buildViewports}
+export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer}
 export default TrackView

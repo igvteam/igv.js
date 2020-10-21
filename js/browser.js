@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView, {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, buildViewports} from "./trackView.js";
+import TrackView, {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -1311,11 +1311,17 @@ class Browser {
         }
 
         if (referenceFrameList && referenceFrameList.length > 0) {
-            this.referenceFrameList = referenceFrameList;
+
+            this.referenceFrameList = referenceFrameList
+
             emptyViewportContainers(this.trackViews)
-            buildViewports(this, referenceFrameList, this.trackViews);
+
+            for (let trackView of this.trackViews) {
+                populateViewportContainer(this, referenceFrameList, trackView);
+            }
+
         } else {
-            throw new Error(`Unrecognized locus ${string}`);
+            throw new Error(`Unrecognized locus ${string}`)
         }
 
         this.updateUIWithReferenceFrameListChange(referenceFrameList);
