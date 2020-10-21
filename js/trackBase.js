@@ -81,23 +81,29 @@ class TrackBase {
     }
 
     /**
-     * Default implementation -- return the current state of the "this" object, which should be a this.  Used
+     * Default implementation -- update config with current values.
      * to create session object for bookmarking, sharing.  Updates the track "config" object to reflect the
      * current state.  Only simple properties (string, number, boolean) are updated.
      */
     getState() {
 
-        const config = Object.assign({}, this.config);
+        const state = Object.assign({}, this.config);
         const self = this;
 
-        Object.keys(config).forEach(function (key) {
+        Object.keys(this).forEach(function (key) {
             const value = self[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
-                config[key] = value;
+                state[key] = value;
             }
         })
 
-        return config;
+        // Flatten dataRange if present
+        if (!this.autoscale && this.dataRange) {
+            state.min = this.dataRange.min;
+            state.max = this.dataRange.max;
+        }
+
+        return state;
     }
 
     supportsWholeGenome() {
