@@ -386,7 +386,7 @@ class BAMTrack extends TrackBase {
      */
     getState() {
 
-        const config = Object.assign({}, this.config);
+        const config = super.getState();
 
         if (this.sortObject) {
             config.sort = {
@@ -395,8 +395,6 @@ class BAMTrack extends TrackBase {
                 option: this.sortObject.option,
                 direction: this.sortObject.direction ? "ASC" : "DESC"
             }
-        } else if (config.hasOwnProperty("sort")) {
-            delete config.sort;
         }
 
         return config;

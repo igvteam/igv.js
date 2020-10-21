@@ -59,7 +59,7 @@
         console.log(JSON.stringify(config));
 
         console.log(" about to call 'await loadTrack(config)'");
-        igvBrowser.loadTrack(config)
+        browser.loadTrack(config)
             .then(function (ignore) {
                 console.log(" 'await loadTrack(config)' returned");
                 listTrackNames();
@@ -74,9 +74,9 @@
 
 
     function listTrackNames() {
-        var count = igvBrowser.trackViews.length;
+        var count = browser.trackViews.length;
         for (var i = 0; i < count; i++) {
-            var trackName = igvBrowser.trackViews[i].track.name;
+            var trackName = browser.trackViews[i].track.name;
             console.log(trackName);
         }
     }
