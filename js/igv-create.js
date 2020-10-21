@@ -58,7 +58,10 @@ async function createBrowser(parentDiv, config) {
 
     // Explicit list, or path to genomes.json file which defines the list, of pre-defined genomes.
     // The list is shared among all browser instances
-    GenomeUtils.genomeList = config.genomeList || "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+    GenomeUtils.genomeList =
+        config.genomeList ||
+        config.genomes ||
+        "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
 
     setDefaults(config);
 
