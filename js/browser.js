@@ -555,8 +555,8 @@ class Browser {
             this.startSpinner();
             const promises = [];
             for (let config of configList) {
-                config.noSpinner = true;
-                promises.push(this.loadTrack(config));
+                const noSpinner = true;
+                promises.push(this.loadTrack(config, noSpinner));
             }
 
             const loadedTracks = await Promise.all(promises)
@@ -612,7 +612,7 @@ class Browser {
      * @returns {*}
      */
 
-    async loadTrack(config) {
+    async loadTrack(config, noSpinner) {
 
 
         // config might be json
@@ -621,7 +621,7 @@ class Browser {
         }
 
         try {
-            if (!config.noSpinner) this.startSpinner();
+            if (!noSpinner) this.startSpinner();
 
             const newTrack = await this.createTrack(config);
 
@@ -661,7 +661,9 @@ class Browser {
             }
             this.alert.present(msg, undefined);
         } finally {
-            if (!config.noSpinner) this.stopSpinner();
+            if (!noSpinner) {
+                this.stopSpinner();
+            }
         }
     }
 
@@ -1462,7 +1464,7 @@ class Browser {
 
         const json = {}
 
-        if(this.config.genome) {
+        if (this.config.genome) {
             json["genome"] = this.config.genome;
         } else {
             json["reference"] = this.genome.toJSON();
@@ -1477,7 +1479,7 @@ class Browser {
         const locus = [];
         const gtexSelections = {};
         let anyTrackView = this.trackViews[0];
-        for(let viewport of anyTrackView.viewports) {
+        for (let viewport of anyTrackView.viewports) {
             const referenceFrame = viewport.referenceFrame;
             const pixelWidth = viewport.$viewport[0].clientWidth;
             const locusString = referenceFrame.presentLocus(pixelWidth);
@@ -1812,28 +1814,27 @@ function isLocusString(browser, locus) {
 
         if (a.length > 1) {
 
-            const b = a[1].split('-')
+            const b = a[1].split('-');
 
             if (b.length > 2) {
-                return undefined
+                return undefined;
             } else {
 
                 let numeric
                 numeric = b[0].replace(/,/g, '')
                 if (isNaN(numeric)) {
-                    return undefined
+                    return undefined;
                 }
 
+                extent.start = parseInt(numeric, 10) - 1;
+
                 if (1 === b.length) {
-                    const mid = parseInt(numeric, 10) - 1
-                    extent.start = mid - 20;
-                    extent.end = mid + 20;
+                    extent.start = extent.start - 20;
+                    extent.end = extent.start + 20;
                 }
 
                 if (2 === b.length) {
-
                     numeric = b[1].replace(/,/g, '')
-
                     if (isNaN(numeric)) {
                         return undefined;
                     } else {

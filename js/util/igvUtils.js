@@ -160,11 +160,7 @@ function inferTrackType(config) {
 
     translateDeprecatedTypes(config);
 
-    if (undefined === config.sourceType && config.url) {
-        config.sourceType = "file";
-    }
-
-    if ("file" === config.sourceType) {
+    if ("file" === config.sourceType || (undefined === config.sourceType && config.url)) {
         if (undefined === config.format) {
             const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
             config.format = TrackUtils.inferFileFormat(path);

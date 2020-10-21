@@ -54,11 +54,6 @@ class TextFeatureSource {
 
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
 
-        // Default GFF filter -- these feature types will be filtered out
-        if (undefined === config.filterTypes) {
-            config.filterTypes = ['chromosome']
-        }
-
         if (config.features && Array.isArray(config.features)) {
             let features = fixFeatures(config.features);
             packFeatures(features);

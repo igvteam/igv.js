@@ -90,7 +90,7 @@ class TrackBase {
         const state = Object.assign({}, this.config);
         const self = this;
 
-        Object.keys(this).forEach(function (key) {
+        Object.keys(state).forEach(function (key) {
             const value = self[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
