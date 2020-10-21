@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import TrackView, {maxViewportContentHeight, updateViewportShims} from "./trackView.js";
+import TrackView, {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, buildViewports} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -1262,7 +1262,7 @@ class Browser {
 
         for (let trackView of this.trackViews) {
             trackView.updateViewportForMultiLocus();
-            trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
+            trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports);
         }
 
         if (this.rulerTrack) {
@@ -1272,57 +1272,6 @@ class Browser {
         this.updateUIWithReferenceFrameListChange(this.referenceFrameList);
 
         this.resize();
-    }
-
-    emptyViewportContainers() {
-
-        for (let trackView of this.trackViews) {
-
-            if (trackView.scrollbar) {
-                trackView.scrollbar.$outerScroll.remove()
-                trackView.scrollbar = null
-                trackView.scrollbar = undefined
-            }
-
-            for (let viewport of trackView.viewports) {
-
-                if (viewport.rulerSweeper) {
-                    viewport.rulerSweeper.$rulerSweeper.remove();
-                }
-
-                if (viewport.popover) {
-                    viewport.popover.dispose()
-                }
-
-                viewport.$viewport.remove();
-            }
-
-            delete trackView.viewports;
-            trackView.viewports = [];
-
-            delete trackView.scrollbar;
-        }
-    }
-
-    buildViewportsWithReferenceFrameList(referenceFrameList) {
-
-        const width = this.calculateViewportWidth(referenceFrameList.length);
-
-        for (let trackView of this.trackViews) {
-
-            for (let referenceFrame of referenceFrameList) {
-                const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
-                trackView.viewports.push(viewport);
-            }
-
-            trackView.updateViewportForMultiLocus();
-            trackView.attachScrollbar(trackView.$viewportContainer, trackView.viewports);
-
-        }
-
-        for (let {viewports, $viewportContainer} of this.trackViews) {
-            updateViewportShims(viewports, $viewportContainer)
-        }
     }
 
     getViewportWithGUID(guid) {
@@ -1362,9 +1311,9 @@ class Browser {
         }
 
         if (referenceFrameList && referenceFrameList.length > 0) {
-            this.emptyViewportContainers();
             this.referenceFrameList = referenceFrameList;
-            this.buildViewportsWithReferenceFrameList(referenceFrameList);
+            emptyViewportContainers(this.trackViews)
+            buildViewports(this, referenceFrameList, this.trackViews);
         } else {
             throw new Error(`Unrecognized locus ${string}`);
         }

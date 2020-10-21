@@ -41,7 +41,13 @@ $igv-trackgear-popover-border-radius: 4px;
 $igv-trackgear-font-color: #4b4b4b;
 $igv-trackgear-default-font-face: 'Open Sans', sans-serif;
 
-$igv-scrollbar-outer-width: 14px;
+$igv-scrollbar-outer-width: 12px;
+
+$igv-scrollbar-inner-left: 2px;
+$igv-scrollbar-inner-width: $igv-scrollbar-outer-width - (2 * $igv-scrollbar-inner-left);
+
+$igv-scrollbar-inner-border-width: 0;
+
 
 $igv-left-hand-gutter-width: 50px;
 $igv-right-hand-gutter-width: 36px;
@@ -597,7 +603,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   width: $igv-scrollbar-outer-width;
   height: 100%;
 
-  background-color: white;
+  background-color: salmon;
+  //background-color: white;
 
   div {
 
@@ -605,13 +612,14 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
     position:absolute;
     top: 0;
-    left: 2px;
+    left: $igv-scrollbar-inner-left;
 
-    width:8px;
+    width: $igv-scrollbar-inner-width;
 
+    border-width: $igv-scrollbar-inner-border-width;
     border-style: solid;
-    border-width: 1px;
-    border-color: grey;
+    //border-color: grey;
+    border-color: transparent;
 
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
@@ -619,7 +627,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
 
-    background-color: white;
+    background-color: chartreuse;
+    //background-color: white;
    }
 
 }

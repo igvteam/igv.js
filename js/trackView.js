@@ -35,8 +35,10 @@ import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 
-var dragged,
-    dragDestination;
+let dragged
+let dragDestination
+
+const trackExclusionSet = new Set(['ruler', 'sequence', 'ideogram'])
 
 class TrackView {
 
@@ -77,9 +79,7 @@ class TrackView {
 
         this.updateViewportForMultiLocus();
 
-        const exclude = new Set(['ruler', 'sequence', 'ideogram']);
-
-        if (false === exclude.has(this.track.type)) {
+        if (false === trackExclusionSet.has(this.track.type)) {
             this.attachScrollbar($track, this.$viewportContainer, this.viewports)
         } else {
             const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
@@ -98,7 +98,7 @@ class TrackView {
             this.attachDragWidget($track, this.$viewportContainer);
         }
 
-        if (false === exclude.has(this.track.type)) {
+        if (false === trackExclusionSet.has(this.track.type)) {
 
             const defaultColors = this.track.color && StringUtils.isString(this.trackColor) ?
                 [this.track.color].map(rgb => IGVColor.rgbToHex(rgb)) :
@@ -181,11 +181,11 @@ class TrackView {
 
     }
 
-    appendLeftHandGutter($parent) {
+    appendLeftHandGutter($track) {
 
         const $leftHandGutter = $('<div class="igv-left-hand-gutter">');
         this.leftHandGutter = $leftHandGutter[0];
-        $parent.append($leftHandGutter);
+        $track.append($leftHandGutter);
 
         if (typeof this.track.paintAxis === 'function') {
 
@@ -586,6 +586,64 @@ class TrackView {
     }
 }
 
+function emptyViewportContainers(trackViews) {
+
+    for (let trackView of trackViews) {
+
+        if (trackView.scrollbar) {
+            trackView.scrollbar.$outerScroll.remove()
+            trackView.scrollbar = null
+            trackView.scrollbar = undefined
+        } else {
+            $(trackView.trackDiv).find('.igv-scrollbar-shim').remove()
+        }
+
+        for (let viewport of trackView.viewports) {
+
+            if (viewport.rulerSweeper) {
+                viewport.rulerSweeper.$rulerSweeper.remove();
+            }
+
+            if (viewport.popover) {
+                viewport.popover.dispose()
+            }
+
+            viewport.$viewport.remove();
+        }
+
+        delete trackView.viewports;
+        trackView.viewports = [];
+
+        delete trackView.scrollbar;
+    }
+}
+
+function buildViewports(browser, referenceFrameList, trackViews) {
+
+    const width = browser.calculateViewportWidth(referenceFrameList.length);
+
+    for (let trackView of trackViews) {
+
+        for (let referenceFrame of referenceFrameList) {
+            const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
+            trackView.viewports.push(viewport);
+        }
+
+        trackView.updateViewportForMultiLocus();
+
+        if (false === trackExclusionSet.has(trackView.track.type)) {
+            trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
+        } else {
+            const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
+            $(trackView.trackDiv).append($shim)
+        }
+
+    }
+
+    for (let {viewports, $viewportContainer} of trackViews) {
+        updateViewportShims(viewports, $viewportContainer)
+    }
+}
 
 function updateViewportShims(viewports, $viewportContainer) {
 
@@ -731,5 +789,5 @@ class TrackScrollbar {
     }
 }
 
-export {maxViewportContentHeight, updateViewportShims}
+export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, buildViewports}
 export default TrackView
