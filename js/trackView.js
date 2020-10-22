@@ -222,6 +222,7 @@ class TrackView {
         if (max !== undefined) {
             this.track.dataRange.max = max;
         }
+        this.track.autoscale = false;
         this.repaintViews();
     }
 
@@ -339,7 +340,12 @@ class TrackView {
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
                 if (vp.tile && vp.tile.features) {
-                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                    if(typeof vp.tile.features.getMax === 'function') {
+                        const max = vp.tile.features.getMax(start, end);
+                        allFeatures.push({value: max});
+                     } else {
+                        allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                    }
                 }
             }
             if (typeof this.track.doAutoscale === 'function') {
@@ -387,7 +393,13 @@ class TrackView {
                 const referenceFrame = vp.referenceFrame;
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
-                allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+
+                if(typeof vp.tile.features.getMax === 'function') {
+                    const max = vp.tile.features.getMax(start, end);
+                    allFeatures.push({value: max});
+                } else {
+                    allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
+                }
             }
         }
         return allFeatures;
