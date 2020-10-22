@@ -48,17 +48,17 @@ class ViewPort extends ViewportBase {
                 e.stopPropagation();
                 if (typeof track.description === 'function') {
                     str = track.description();
-
                 } else if (track.description) {
-                    str = track.description;
-
+                    str = `<div title="${ track.description }"><div>${ track.description }</div></div>`
                 } else {
-                    str = track.name;
+                    str = `<div title="${ track.name }"><div>${ track.name }</div></div>`
                 }
 
                 if (this.popover) this.popover.dispose()
                 const size = { width: 160, height: 64 }
+
                 this.popover = new Popover(this.browser.trackContainer, size)
+
                 this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
@@ -865,12 +865,12 @@ function addMouseHandlers() {
         const rows = nameValues.map(nameValue => {
 
             if (nameValue.name) {
-                const str = `&nbsp${ nameValue.name }&nbsp&nbsp&nbsp${ nameValue.value }`
+                const str = `<div><span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }</div>`
                 return `<div title="${ nameValue.value }">${ str }</div>`
             } else if ('<hr>' === nameValue) {
                 return nameValue
             } else {
-                const str = `&nbsp${ nameValue }`
+                const str = `<div>${ nameValue }</div>`
                 return `<div title="${ nameValue }">${ str }</div>`
             }
 
