@@ -668,8 +668,7 @@
       border-right-style: solid;
       border-right-width: 1px; }
   .igv-root .igv-track-container {
-    position: relative;
-    user-select: none; }
+    position: relative; }
 
 .igv-multi-locus-separator {
   pointer-events: none;

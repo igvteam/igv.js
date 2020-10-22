@@ -466,7 +466,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   .igv-track-container {
     position: relative;
-    user-select: none;
+    //user-select: none;
   }
 
 }
@@ -563,7 +563,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
     background-color: white;
   }
 
-  // width + 2 * margin = $igv-multi-locus-gap-width
   .igv-viewport-multi-locus-gap-shim {
     height: 100%;
     width: $igv-multi-locus-gap-div-width;
