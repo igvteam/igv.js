@@ -147,6 +147,10 @@ class AlignmentContainer {
         }
         return alignments;
     }
+
+    getMax(start, end) {
+        return this.coverageMap.getMax(start, end);
+    }
 }
 
 
@@ -229,8 +233,6 @@ class DownsampleBucket {
     }
 }
 
-
-// TODO -- refactor this to use an object, rather than an array,  if end-start is > some threshold
 class CoverageMap {
 
     constructor(chr, start, end, alleleFreqThreshold) {
@@ -240,11 +242,29 @@ class CoverageMap {
         this.length = (end - start);
 
         this.coverage = new Array(this.length);
-
         this.maximum = 0;
 
         this.threshold = alleleFreqThreshold;
         this.qualityWeight = true;
+    }
+
+    /**
+     * Return the maximum coverage value between start and end.  This is used for autoscaling.
+     * @param start
+     * @param end
+     */
+    getMax(start, end) {
+        let max = 0;
+        const len = this.coverage.length;
+        for (let i=0; i<len; i++) {
+            const pos = this.bpStart + i;
+            if(pos > end) break;
+            const cov = this.coverage[i];
+            if (pos >= start && cov) {
+                max = Math.max(max, cov.total);
+            }
+        }
+        return max;
     }
 
     incCounts(alignment) {
