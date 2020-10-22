@@ -949,8 +949,8 @@ class Browser {
             // Group autoscale
             const groupAutoscaleTracks = {};
             const otherTracks = [];
-            views.forEach(function (trackView) {
-                var group = trackView.track.autoscaleGroup;
+            for(let trackView of views) {
+                const group = trackView.track.autoscaleGroup;
                 if (group) {
                     var l = groupAutoscaleTracks[group];
                     if (!l) {
@@ -961,19 +961,17 @@ class Browser {
                 } else {
                     otherTracks.push(trackView);
                 }
-            })
+            }
 
             const keys = Object.keys(groupAutoscaleTracks);
             for (let group of keys) {
 
-                var groupTrackViews, promises;
+                const groupTrackViews = groupAutoscaleTracks[group];
+                const promises = [];
 
-                groupTrackViews = groupAutoscaleTracks[group];
-                promises = [];
-
-                groupTrackViews.forEach(function (trackView) {
+                for(let trackView of groupTrackViews) {
                     promises.push(trackView.getInViewFeatures());
-                });
+                }
 
                 const featureArray = await Promise.all(promises)
 
@@ -989,7 +987,6 @@ class Browser {
                     trackView.track.autoscale = false;
                     await trackView.updateViews(force);
                 }
-
             }
 
             for (let trackView of otherTracks) {

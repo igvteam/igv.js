@@ -30,8 +30,10 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {createCheckbox} from "../igv-icons.js";
+import MenuUtils from "../ui/menuUtils.js";
 import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 
 const alignmentStartGap = 5;
 const downsampleRowHeight = 5;
@@ -127,7 +129,6 @@ class BAMTrack extends TrackBase {
         return this.sortObject;
     }
 
-
     async getFeatures(chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
         const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
@@ -210,7 +211,9 @@ class BAMTrack extends TrackBase {
 
     menuItemList() {
 
-        const menuItems = [];
+        // Start with overage track items
+        let menuItems = ["<hr/>"];
+        menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
 
         // Color by items
         const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
@@ -403,6 +406,30 @@ class BAMTrack extends TrackBase {
     getCachedAlignmentContainers() {
         return this.trackView.viewports.map(vp => vp.getCachedFeatures())
     }
+
+    get dataRange() {
+        return this.coverageTrack.dataRange;
+    }
+
+    set dataRange(dataRange) {
+        this.coverageTrack.dataRange = dataRange;
+    }
+
+    get logScale() {
+        return this.coverageTrack.logScale;
+    }
+
+    set logScale(logScale) {
+        this.coverageTrack.logScale = logScale;
+    }
+
+    get autoscale() {
+        return this.coverageTrack.autoscale;
+    }
+
+    set autoscale(autoscale) {
+        this.coverageTrack.autoscale = autoscale;
+    }
 }
 
 
@@ -412,9 +439,17 @@ class CoverageTrack {
         this.parent = parent;
         this.featureSource = parent.featureSource;
         this.height = config.coverageTrackHeight;
-        this.dataRange = {min: 0};   // Leav max undefined
         this.paintAxis = paintAxis;
         this.top = 0;
+
+        this.autoscale = config.autoscale || config.max === undefined;
+        if (!this.autoscale) {
+            this.dataRange = {
+                min: config.min || 0,
+                max: config.max
+            }
+        }
+
     }
 
     draw(options) {
@@ -429,7 +464,6 @@ class CoverageTrack {
         const ctx = options.context;
         const alignmentContainer = options.features;
         const coverageMap = alignmentContainer.coverageMap;
-        this.dataRange.max = coverageMap.maximum;
 
         let sequence;
         if (coverageMap.refSeq) {

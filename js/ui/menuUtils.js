@@ -68,7 +68,7 @@ const MenuUtils = {
                 object: createCheckbox("Autoscale", trackView.track.autoscale),
                 click: () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
-                    trackView.repaintViews();
+                    trackView.updateViews();
                 }
             }
         )
