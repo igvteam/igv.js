@@ -55,10 +55,7 @@ class ViewPort extends ViewportBase {
                 }
 
                 if (this.popover) this.popover.dispose()
-                const size = { width: 160, height: 64 }
-
-                this.popover = new Popover(this.browser.trackContainer, size)
-
+                this.popover = new Popover(this.browser.trackContainer)
                 this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
@@ -645,8 +642,7 @@ function addMouseHandlers() {
             });
 
         if (self.popover) self.popover.dispose()
-        const size = { width: 160, height: 320 }
-        self.popover = new Popover(self.browser.trackContainer, size);
+        self.popover = new Popover(self.browser.trackContainer);
         self.popover.presentMenu(e, menuItems);
 
     });
@@ -785,8 +781,7 @@ function addMouseHandlers() {
                         const content = getPopupContent(e, self);
                         if (content) {
                             if (self.popover) self.popover.dispose()
-                            const size = { width: 320, height: 640 }
-                            self.popover = new Popover(self.browser.trackContainer, size)
+                            self.popover = new Popover(self.browser.trackContainer)
                             self.popover.presentContentWithEvent(e, content)
                         }
                         clearTimeout(popupTimerID);
