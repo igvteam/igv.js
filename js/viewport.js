@@ -30,9 +30,6 @@ class ViewPort extends ViewportBase {
 
         const { track } = this.trackView
         if ('sequence' !== track.type) {
-            this.popover = new Popover(this.browser.trackContainer);
-            let str = track.name.toLowerCase().split(' ').join('_');
-            this.popover.id = `${ str }_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`;
             this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
         }
 
@@ -51,14 +48,15 @@ class ViewPort extends ViewportBase {
                 e.stopPropagation();
                 if (typeof track.description === 'function') {
                     str = track.description();
-
                 } else if (track.description) {
-                    str = track.description;
-
+                    str = `<div title="${ track.description }"><div>${ track.description }</div></div>`
                 } else {
-                    str = track.name;
+                    str = `<div title="${ track.name }"><div>${ track.name }</div></div>`
                 }
-                this.popover.presentContentWithEvent(e, str);
+
+                if (this.popover) this.popover.dispose()
+                this.popover = new Popover(this.browser.trackContainer)
+                this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -643,7 +641,9 @@ function addMouseHandlers() {
                 }
             });
 
-        if (self.popover) self.popover.presentMenu(e, menuItems);
+        if (self.popover) self.popover.dispose()
+        self.popover = new Popover(self.browser.trackContainer);
+        self.popover.presentMenu(e, menuItems);
 
     });
 
@@ -778,9 +778,11 @@ function addMouseHandlers() {
 
                 popupTimerID = setTimeout(function () {
 
-                        var content = getPopupContent(e, self);
+                        const content = getPopupContent(e, self);
                         if (content) {
-                            self.popover.presentContentWithEvent(e, content);
+                            if (self.popover) self.popover.dispose()
+                            self.popover = new Popover(self.browser.trackContainer)
+                            self.popover.presentContentWithEvent(e, content)
                         }
                         clearTimeout(popupTimerID);
                         popupTimerID = undefined;
@@ -853,22 +855,23 @@ function addMouseHandlers() {
     /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    function formatPopoverText(nameValueArray) {
+    function formatPopoverText(nameValues) {
 
-        var markup = "<table class=\"igv-popover-table\">";
-
-        nameValueArray.forEach(function (nameValue) {
+        const rows = nameValues.map(nameValue => {
 
             if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
+                const str = `<div><span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }</div>`
+                return `<div title="${ nameValue.value }">${ str }</div>`
+            } else if ('<hr>' === nameValue) {
+                return nameValue
             } else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                const str = `<div>${ nameValue }</div>`
+                return `<div title="${ nameValue }">${ str }</div>`
             }
-        });
 
-        markup += "</table>";
-        return markup;
+        })
+
+        return rows.join('')
     }
 }
 
