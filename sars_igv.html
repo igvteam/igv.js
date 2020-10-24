@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
+
+    <title>igv.js</title>
+
+    <!-- IGV JS-->
+    <script src="dist/igv.min.js"></script>
+
+</head>
+
+<body>
+
+
+<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        var igvDiv = document.getElementById("igv-div");
+        var options =
+        {
+            reference: {
+                id: "sarscov2",
+                fastaURL: "https://sysbio.informatics.iupui.edu/primer_project/genomes/sarscov2/sars_cov_2.fasta",
+                indexURL: "https://sysbio.informatics.iupui.edu/primer_project/genomes/sarscov2/sars_cov_2.fasta.fai",
+                wholeGenomeView: false
+            },
+
+        };
+
+
+        igv.createBrowser(igvDiv, options)
+                .then(function (browser) {
+                    console.log("Created IGV browser");
+                })
+
+    });
+
+</script>
+
+</body>
+
+</html>
