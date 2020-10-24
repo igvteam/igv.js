@@ -4,6 +4,7 @@
     <meta charset="utf-8">
 
     <title>IGV - Dev</title>
+
     <style>
         #trackList {
 
@@ -43,6 +44,7 @@
         }
 
     </style>
+
 </head>
 
 <body>
@@ -70,11 +72,20 @@
         const options =
             {
                 genome: "hg19",
-                // locus: [ 'egfr', 'ace', 'kit', 'enam' ],
                 // locus: [ 'egfr', 'myc', 'ace' ],
                 // locus: [ 'ace', 'myc' ],
                 locus: "myc",
-                // locus: 'chr8:100,117,313-100,120,998'
+                // locus: 'chr8:100,117,313-100,120,998',
+
+                // use for one-feature BED track
+                // locus: 'chr1:999999-1000000',
+                // tracks:
+                // [
+                //     {
+                //         "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
+                //         "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
+                //         "name": "1KG Sites"
+                //     }                ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
