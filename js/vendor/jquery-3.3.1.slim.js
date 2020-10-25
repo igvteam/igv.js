@@ -2681,58 +2681,7 @@ var Sizzle =
 
 // Initialize against the default document
         setDocument();
-
-// Support: Webkit<537.32 - Safari 6.0.3/Chrome 25 (fixed in Chrome 27)
-// Detached nodes confoundingly follow *each other*
-        support.sortDetached = assert(function (el) {
-            // Should return 1, but returns 4 (following)
-            return el.compareDocumentPosition(document.createElement("fieldset")) & 1;
-        });
-
-// Support: IE<8
-// Prevent attribute/property "interpolation"
-// https://msdn.microsoft.com/en-us/library/ms536429%28VS.85%29.aspx
-        if (!assert(function (el) {
-            el.innerHTML = "<a href='#'></a>";
-            return el.firstChild.getAttribute("href") === "#";
-        })) {
-            addHandle("type|href|height|width", function (elem, name, isXML) {
-                if (!isXML) {
-                    return elem.getAttribute(name, name.toLowerCase() === "type" ? 1 : 2);
-                }
-            });
-        }
-
-// Support: IE<9
-// Use defaultValue in place of getAttribute("value")
-        if (!support.attributes || !assert(function (el) {
-            el.innerHTML = "<input/>";
-            el.firstChild.setAttribute("value", "");
-            return el.firstChild.getAttribute("value") === "";
-        })) {
-            addHandle("value", function (elem, name, isXML) {
-                if (!isXML && elem.nodeName.toLowerCase() === "input") {
-                    return elem.defaultValue;
-                }
-            });
-        }
-
-// Support: IE<9
-// Use getAttributeNode to fetch booleans when getAttribute lies
-        if (!assert(function (el) {
-            return el.getAttribute("disabled") == null;
-        })) {
-            addHandle(booleans, function (elem, name, isXML) {
-                var val;
-                if (!isXML) {
-                    return elem[name] === true ? name.toLowerCase() :
-                        (val = elem.getAttributeNode(name)) && val.specified ?
-                            val.value :
-                            null;
-                }
-            });
-        }
-
+        
         return Sizzle;
 
     })(window);
