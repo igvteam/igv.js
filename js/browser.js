@@ -42,6 +42,7 @@ import GtexUtils from "./gtex/gtexUtils.js";
 import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
+import version from "./version.js";
 import {
     DOMUtils,
     FileUtils,
