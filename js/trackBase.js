@@ -27,6 +27,7 @@ import FeatureUtils from "./feature/featureUtils.js";
 import {isSimpleType} from "./util/igvUtils.js";
 import {FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 
+
 /**
  * A collection of properties and methods shared by all (or most) track types.
  *
@@ -49,9 +50,8 @@ class TrackBase {
         this.description = config.description;
         this.supportHiDPI = config.supportHiDPI === undefined ? true : config.supportHiDPI;
 
-        config.name = config.name || config.label;   // synonym for name, label is deprecated
-        if (config.name) {
-            this.name = config.name;
+        if (config.name || config.label) {
+            this.name = config.name || config.label;
         } else {
             if (FileUtils.isFilePath(config.url)) this.name = config.url.name;
             else this.name = config.url;
@@ -61,11 +61,10 @@ class TrackBase {
         this.order = config.order;
 
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
-            this.color = "rgb(155,20,20)";
+            this.defaultColor = "rgb(155,20,20)";
         } else {
-            this.color = config.color || config.defaultColor || "rgb(0,0,150)";
+            this.defaultColor = "rgb(0,0,150)";
         }
-
 
         this.autoscaleGroup = config.autoscaleGroup;
 
@@ -77,7 +76,6 @@ class TrackBase {
         this.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
         this.visibilityWindow = config.visibilityWindow;
-
     }
 
     /**
@@ -116,14 +114,21 @@ class TrackBase {
 
     /**
      * Set certain track properties, usually from a "track" line.  Not all UCSC properties are supported.
+     *
+     * Track configuration settings have precendence over track line properties, so if both are present ignore the
+     * track line.
+     *
      * @param properties
      */
     setTrackProperties(properties) {
+
+        const tracklineConfg = {};
+        let tokens;
         for (let key of Object.keys(properties)) {
             switch (key.toLowerCase()) {
                 case "name":
                 case "usescore":
-                    this[key] = properties[key]
+                    tracklineConfg[key] = properties[key]
                     break;
                 case "visibility":
                     //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
@@ -132,36 +137,54 @@ class TrackBase {
                         case "3":
                         case "pack":
                         case "full":
-                            this.displayMode = "EXPANDED"
+                            tracklineConfg.displayMode = "EXPANDED"
                             break;
                         case "4":
                         case "squish":
-                            this.displayMode = "SQUISHED"
+                            tracklineConfg.displayMode = "SQUISHED"
                             break;
                         case "1":
                         case "dense":
-                            this.displayMode = "COLLAPSED"
+                            tracklineConfg.displayMode = "COLLAPSED"
                     }
                     break;
                 case "color":
                 case "altcolor":
-                    this[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
+                    tracklineConfg[key] = properties[key].startsWith("rgb(") ? properties[key] : "rgb(" + properties[key] + ")";
                     break;
                 case "featurevisiblitywindow":
-                    this.visibilityWindow = Number.parseInt(properties[key]);
+                case "visibilitywindow":
+                    tracklineConfg.visibilityWindow = Number.parseInt(properties[key]);
+                    break;
+                case "maxheightpixels":
+                    tokens = properties[key].split(":");
+                    if (tokens.length === 3) {
+                        tracklineConfg.minHeight = Number.parseInt(tokens[2]);
+                        tracklineConfg.height = Number.parseInt(tokens[1]);
+                        tracklineConfg.maxHeight = Number.parseInt(tokens[0]);
+                    }
                     break;
                 case "viewlimits":
-                    const tokens = properties[key].split(":");
-                    let min = 0;
-                    let max;
-                    if (tokens.length == 1) {
-                        max = Number.parseFloat(tokens[0]);
-                    } else if (tokens.length == 2) {
-                        min = Number.parseFloat(tokens[0]);
-                        max = Number.parseFloat(tokens[1]);
+                    if(!this.config.autoscale) {   // autoscale in the config has precedence
+                        tokens = properties[key].split(":");
+                        let min = 0;
+                        let max;
+                        if (tokens.length == 1) {
+                            max = Number.parseFloat(tokens[0]);
+                        } else if (tokens.length == 2) {
+                            min = Number.parseFloat(tokens[0]);
+                            max = Number.parseFloat(tokens[1]);
+                        }
+                        tracklineConfg.autoscale = false;
+                        tracklineConfg.dataRange = {min, max};
                     }
-                    this.autoscale = false;
-                    this.dataRange = {min, max};
+            }
+        }
+
+        // Track configuration objects have precendence over track line properties
+        for (let key of Object.keys(tracklineConfg)) {
+            if (!this.config.hasOwnProperty(key)) {
+                this[key] = tracklineConfg[key];
             }
         }
     }
@@ -270,7 +293,6 @@ class TrackBase {
         return data;
 
     }
-
 
     static getCravatLink(chr, position, ref, alt, genomeID) {
 
