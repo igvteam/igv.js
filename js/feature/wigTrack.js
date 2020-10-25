@@ -33,26 +33,17 @@ import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
 import deepCopy from "../util/deepCopy.js";
 
+const DEFAULT_COLOR = "rgb(150,150,150)";
 
 class WigTrack extends TrackBase {
 
     constructor(config, browser) {
 
-
-        // Default color, might be overridden by track line
-        if (config.color === undefined) {
-            config.color = "rgb(150,150,150)";
-        }
-
-        if (config.height === undefined) {
-            config.height = 50;
-        }
-
         super(config, browser);
+
         this.type = "wig";
-
+        this.height = config.height || 50;
         this.featureType = 'numeric';
-
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
@@ -110,10 +101,11 @@ class WigTrack extends TrackBase {
         let lastPixelEnd = -1;
         let lastValue = -1;
         let lastNegValue = 1;
+        const posColor = this.color || DEFAULT_COLOR;
 
         let baselineColor;
-        if (typeof this.color === "string" && this.color.startsWith("rgb(")) {
-            baselineColor = IGVColor.addAlpha(this.color, 0.1);
+        if (typeof posColor === "string" && posColor.startsWith("rgb(")) {
+            baselineColor = IGVColor.addAlpha(posColor, 0.1);
         }
 
         const yScale = (yValue) => {
@@ -127,7 +119,6 @@ class WigTrack extends TrackBase {
             // Max can be less than min if config.min is set but max left to autoscale.   If that's the case there is
             // nothing to paint.
             if (this.dataRange.max > this.dataRange.min) {
-
 
                 const y0 = this.dataRange.min == 0 ? pixelHeight : yScale(0);
                 for (let f of features) {
@@ -143,7 +134,7 @@ class WigTrack extends TrackBase {
                     const rectEnd = Math.ceil((f.end - bpStart) / bpPerPixel);
                     const width = Math.max(1, rectEnd - x);
 
-                    let c = (f.value < 0 && this.altColor) ? this.altColor : this.color;
+                    let c = (f.value < 0 && this.altColor) ? this.altColor : posColor;
                     const color = (typeof c === "function") ? c(f.value) : c;
 
                     if (this.graphType === "points") {
