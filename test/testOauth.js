@@ -1,3 +1,4 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import oauth from "../js/oauth.js";
 import {assert} from 'chai';
 
