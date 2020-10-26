@@ -20,8 +20,11 @@
 <h1>Test tracks</h1>
 
 <p>
-    <button id="sessionButton">Session JSON</button>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1E7SkKtPHgDqnlXYm2DEWOGBsbSAIBnaD/view?usp=sharing">tracks-hg19.png</a>
+    </b>
 </p>
+
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
@@ -164,13 +167,6 @@
 
             console.log("Created IGV browser");
 
-            document.getElementById("sessionButton").addEventListener("click", () => {
-                try {
-                    console.log(browser.toJSON());
-                } catch (e) {
-                    alert(e);
-                }
-            })
         })
 
 </script>

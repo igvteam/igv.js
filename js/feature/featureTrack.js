@@ -55,9 +55,14 @@ class FeatureTrack extends TrackBase {
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        this.featureSource = config.featureSource ?
-            config.featureSource :
-            FeatureSource(config, browser.genome);
+        if(config.tmpFeatureSource) {
+            this.featureSource = config.tmpFeatureSource;
+            delete config.tmpFeatureSource;
+        } else {
+            this.featureSource = config.featureSource ?
+                config.featureSource :
+                FeatureSource(config, browser.genome);
+        }
 
         // Set default heights
         this.autoHeight = config.autoHeight;

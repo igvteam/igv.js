@@ -627,7 +627,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                this.alert.present("Unknown file type: " + url, undefined);
+                this.alert.present("Unknown file type: " + config.url || config, undefined);
                 return newTrack;
             }
 
@@ -694,14 +694,14 @@ class Browser {
         }
 
         let type = config.type;
-        if (type) {
+        if (type && "bedtype" !== type) {
             type = type.toLowerCase();
         } else {
             type = inferTrackType(config);
             if ("bedtype" === config.type) {
                 // Bed files must be read to determine track type
                 const featureSource = FeatureSource(config, this.genome);
-                config.featureSource = featureSource;
+                config.tmpFeatureSource = featureSource;    // This is a temp variable, bit of a hack
                 const trackType = await featureSource.trackType();
                 if (trackType) {
                     type = trackType;
@@ -722,10 +722,6 @@ class Browser {
                 }
             }
         }
-
-
-        // add browser to track config
-        config.browser = this;
 
         let track
         switch (type) {
@@ -1414,19 +1410,21 @@ class Browser {
 
     toJSON() {
 
+        const json = {
+            "version": version()
+        }
 
-        const json = {}
-
-        if (this.config.genome) {
-            json["genome"] = this.config.genome;
-        } else {
+        // TODO -- if using genome ID skip annotation track(s)
+     //   if (this.config.genome) {
+     //       json["genome"] = this.config.genome;
+      //  } else {
             json["reference"] = this.genome.toJSON();
             if (FileUtils.isFilePath(json.reference.fastaURL)) {
                 throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
             } else if (FileUtils.isFilePath(json.reference.indexURL)) {
                 throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
             }
-        }
+      //  }
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = [];
@@ -1484,23 +1482,15 @@ class Browser {
     }
 
     compressedSession() {
-
-        var json, bytes, deflate, compressedBytes, compressedString, enc;
-
-        json = JSON.stringify(this.toJSON());
+        const json = JSON.stringify(this.toJSON());
         return StringUtils.compressString(json);
     }
 
     sessionURL() {
-        var surl, path, idx;
-
-        path = window.location.href.slice();
-        idx = path.indexOf("?");
-
-        surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=data:" + this.compressedSession();
-
+        const path = window.location.href.slice();
+        const idx = path.indexOf("?");
+        const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=data:" + this.compressedSession();
         return surl;
-
     }
 
     currentLoci() {
