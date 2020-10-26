@@ -16,9 +16,14 @@
 <h1>Test tracks</h1>
 
 <p>
-<b>Look for console errors and compare with
-    <a target="_blank" href="https://drive.google.com/file/d/1ELE5sjbM3e2M2L5OjXI3vPnFYwZEkcnQ/view?usp=sharing">tracks-hg38.png</a>
-</b>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1ELE5sjbM3e2M2L5OjXI3vPnFYwZEkcnQ/view?usp=sharing">tracks-hg38.png</a>
+    </b>
+</p>
+
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
 </p>
 
 <div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
@@ -73,7 +78,9 @@
                 {
                     name: "Indexed GFF (Ensemble Genes)",
                     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
-                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi"
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.tbi",
+                    color: "blue",
+                    altColor: "red"
                 },
                 {
                     "name": "Common SNPs (150)",
@@ -93,6 +100,12 @@
                 {
                     name: "bigbed (Clinvar)",
                     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/clinvarMain.bb"
+                },
+                {
+                    name: "Conservation phyloP 100 way",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
+                    color: "blue",
+                    altColor: "red"
                 }
 
             ]
@@ -103,8 +116,33 @@
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-            window.igvBrowser = browser;
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON();
+                    console.log(json);
+                    const jsonString = JSON.stringify(json, null, '\t');
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                    download("session.json", data);
+                } catch (e) {
+                    alert(e);
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
         })
+
+    function download  (filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
 
 </script>
