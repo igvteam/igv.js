@@ -1139,26 +1139,23 @@ class AlignmentTrack {
 
     getAlignmentColor(alignment) {
 
-        const self = this;
-        let color = self.parent.color;
-        const option = self.colorBy;
-        let tagValue;
+        let color = this.parent.color;   // The default color if nothing else applies
+        const option = this.colorBy;
         switch (option) {
-
             case "strand":
-                color = alignment.strand ? self.posStrandColor : self.negStrandColor;
+                color = alignment.strand ? this.posStrandColor : this.negStrandColor;
                 break;
 
             case "firstOfPairStrand":
 
                 if (alignment instanceof PairedAlignment) {
-                    color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
+                    color = alignment.firstOfPairStrand() ? this.posStrandColor : this.negStrandColor;
                 } else if (alignment.isPaired()) {
 
                     if (alignment.isFirstOfPair()) {
-                        color = alignment.strand ? self.posStrandColor : self.negStrandColor;
+                        color = alignment.strand ? this.posStrandColor : this.negStrandColor;
                     } else if (alignment.isSecondOfPair()) {
-                        color = alignment.strand ? self.negStrandColor : self.posStrandColor;
+                        color = alignment.strand ? this.negStrandColor : this.posStrandColor;
                     } else {
                         console.error("ERROR. Paired alignments are either first or second.")
                     }
@@ -1169,10 +1166,10 @@ class AlignmentTrack {
 
                 if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                     color = getChrColor(alignment.mate.chr);
-                } else if (self.pairOrientation && alignment.pairOrientation) {
-                    var oTypes = orientationTypes[self.pairOrientation];
+                } else if (this.pairOrientation && alignment.pairOrientation) {
+                    var oTypes = orientationTypes[this.pairOrientation];
                     if (oTypes) {
-                        var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
+                        var pairColor = this.pairColors[oTypes[alignment.pairOrientation]];
                         if (pairColor) color = pairColor;
                     }
                 }
@@ -1183,32 +1180,32 @@ class AlignmentTrack {
 
                 if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                     color = getChrColor(alignment.mate.chr);
-                } else if (self.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < self.parent.minFragmentLength) {
-                    color = self.smallFragmentLengthColor;
-                } else if (self.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > self.parent.maxFragmentLength) {
-                    color = self.largeFragmentLengthColor;
+                } else if (this.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < this.parent.minFragmentLength) {
+                    color = this.smallFragmentLengthColor;
+                } else if (this.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > this.parent.maxFragmentLength) {
+                    color = this.largeFragmentLengthColor;
                 }
 
                 break;
 
             case "tag":
-                tagValue = alignment.tags()[self.colorByTag];
+                const tagValue = alignment.tags()[this.colorByTag];
                 if (tagValue !== undefined) {
-                    if (self.bamColorTag === self.colorByTag) {
+                    if (this.bamColorTag === this.colorByTag) {
                         // UCSC style color option
                         color = "rgb(" + tagValue + ")";
                     } else {
 
-                        if (!self.tagColors) {
-                            self.tagColors = new PaletteColorTable("Set1");
+                        if (!this.tagColors) {
+                            this.tagColors = new PaletteColorTable("Set1");
                         }
-                        color = self.tagColors.getColor(tagValue);
+                        color = this.tagColors.getColor(tagValue);
                     }
                 }
                 break;
 
             default:
-                color = self.parent.color;
+                color = this.parent.color;
         }
 
         return color;
