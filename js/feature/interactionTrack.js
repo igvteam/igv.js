@@ -32,6 +32,7 @@ import {createCheckbox} from "../igv-icons.js"
 import {scoreShade} from "../util/ucscUtils.js"
 import FeatureSource from "./featureSource.js"
 
+
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
@@ -48,8 +49,7 @@ class InteractionTrack extends TrackBase {
         this.blockHeight = config.blockHeight || 3;
         this.thickness = config.thickness || 1;
         this.color = config.color || "rgb(180,25,137)"
-        this.alpha = config.alpha === undefined ? "0.05" :
-            config.alpha === 0 ? undefined : config.alpha.toString();
+        this.alpha = config.alpha || 0.15;
 
         if (config.valueColumn) {
             this.valueColumn = config.valueColumn;
@@ -73,8 +73,6 @@ class InteractionTrack extends TrackBase {
         // Create the FeatureSource and override the default whole genome method
         this.featureSource = FeatureSource(config, browser.genome);
         this.featureSource.getWGFeatures = getWGFeatures;
-
-        this.colorAlphaCache = {};
     }
 
     async postInit() {
@@ -148,10 +146,8 @@ class InteractionTrack extends TrackBase {
 
                 let color = feature.color || this.color;
                 if (color && this.config.useScore) {
-                    color = getAlphaColor.call(this, color, scoreShade(feature.score));
+                    color = getAlphaColor(color, scoreShade(feature.score));
                 }
-                ctx.strokeStyle = color;
-                ctx.fillStyle = color;
                 ctx.lineWidth = feature.thickness || this.thickness || 1;
 
                 if (feature.chr1 === feature.chr2 || feature.chr === 'all') {
@@ -196,9 +192,10 @@ class InteractionTrack extends TrackBase {
 
                     // Alpha shade (de-emphasize) arcs that extend beyond viewport, unless alpha shading is used for score.
                     if (color && !this.config.useScore && w > viewportWidth) {
-                        color = getAlphaColor.call(this, color, "0.1");
+                        color = getAlphaColor(color, this.alpha);
                     }
-
+                    ctx.strokeStyle = color;
+                    ctx.fillStyle = color;
                     ctx.beginPath();
                     ctx.arc(xc, yc, r, startAngle, endAngle, false);
                     ctx.stroke();
@@ -215,6 +212,8 @@ class InteractionTrack extends TrackBase {
                         pixelStart--;
                     }
                     const otherChr = feature.chr === feature.chr1 ? feature.chr2 : feature.chr1;
+                    ctx.strokeStyle = color;
+                    ctx.fillStyle = color;
                     if (direction) {
                         // UP
                         ctx.fillRect(pixelStart, this.height / 2, w, this.height / 2);
@@ -316,7 +315,7 @@ class InteractionTrack extends TrackBase {
                     }
 
                     if (this.alpha) {
-                        const alphaColor = getAlphaColor.call(this, color, this.alpha);
+                        const alphaColor = getAlphaColor(color, this.alpha);
                         ctx.fillStyle = alphaColor;
                         ctx.fill();
                     }
@@ -562,12 +561,14 @@ function estimateTheta(x) {
 
 }
 
-function getAlphaColor(color, alpha) {
+const colorAlphaCache = new Map();
 
-    let c = this.colorAlphaCache[color];
+function getAlphaColor(color, alpha) {
+    const key = `${color}_${alpha}`;
+    let c = colorAlphaCache.get(key);
     if (!c) {
         c = IGVColor.addAlpha(color, alpha);
-        this.colorAlphaCache[color] = c;
+        colorAlphaCache.set(key, c);
     }
     return c;
 }
