@@ -53,8 +53,7 @@ suite("testTrackLine", function () {
 
         assert.equal(track.type, "wig");
         assert.equal(track.name, "example wig");
-        assert.equal(track.color, undefined);
-        assert.equal(track.config.color, "blue");
+        assert.equal(track.color, "blue");
         assert.equal(track.dataRange, undefined);
         assert.equal(track.autoscale, true);
         assert.equal(track.height, 75);
