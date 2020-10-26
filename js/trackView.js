@@ -87,13 +87,25 @@ class TrackView {
         }
 
         // color picker
-        if (false === trackExclusionSet.has(track.type)) {
+        if (MenuUtils.showColorPicker(track)) {
 
-            const defaultColors = track.color && StringUtils.isString(this.trackColor) ?
-                [track.color].map(rgb => IGVColor.rgbToHex(rgb)) :
-                undefined;
+            const trackColors = []
+            const color = track.color || track.config.color || track.defaultColor;
+            if (StringUtils.isString(color)) {
+                trackColors.push(color);
+            }
 
-            const config =
+            if (track.altColor && StringUtils.isString(track.altColor)) {
+                trackColors.push(track.altColor);
+            }
+
+            const defaultColors = trackColors.map(c => {
+                return c.startsWith("#") ? c :
+                    c.startsWith("rgb(") ?
+                        IGVColor.rgbToHex(c) :
+                        IGVColor.colorNameToHex(c);
+            });
+            const options =
                 {
                     parent: this.trackDiv,
                     top: undefined,
@@ -101,10 +113,20 @@ class TrackView {
                     width: 432,
                     height: undefined,
                     defaultColors,
-                    colorHandler: rgb => this.setColor(rgb)
+                    colorHandler: color => {
+                        this.track.color = color;
+                        this.repaintViews();
+                    }
                 };
 
-            this.colorPicker = new ColorPicker(config);
+            this.colorPicker = new ColorPicker(options);
+
+            // alt color picker -- TODO pass handler in at "show" time and use 1 color picker
+            options.colorHandler = (color) => {
+                this.track.altColor = color;
+                this.repaintViews();
+            }
+            this.altColorPicker = new ColorPicker(options);
         }
 
     }
@@ -216,14 +238,12 @@ class TrackView {
         this.repaintViews();
     }
 
-    setColor(color) {
-        this.track.color = color;
-        this.track.config.color = color;
-        this.repaintViews(true);
-    }
-
-    presentColorPicker() {
-        this.colorPicker.show();
+    presentColorPicker(option) {
+        if(option === "altColor") {
+            this.altColorPicker.show();
+        } else {
+            this.colorPicker.show();
+        }
     }
 
     setTrackHeight(newHeight, update, force) {
@@ -330,10 +350,10 @@ class TrackView {
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
                 if (vp.tile && vp.tile.features) {
-                    if(typeof vp.tile.features.getMax === 'function') {
+                    if (typeof vp.tile.features.getMax === 'function') {
                         const max = vp.tile.features.getMax(start, end);
                         allFeatures.push({value: max});
-                     } else {
+                    } else {
                         allFeatures = allFeatures.concat(FeatureUtils.findOverlapping(vp.tile.features, start, end));
                     }
                 }
@@ -384,7 +404,7 @@ class TrackView {
                 const start = referenceFrame.start;
                 const end = start + referenceFrame.toBP($(vp.contentDiv).width());
 
-                if(typeof vp.tile.features.getMax === 'function') {
+                if (typeof vp.tile.features.getMax === 'function') {
                     const max = vp.tile.features.getMax(start, end);
                     allFeatures.push({value: max});
                 } else {
@@ -636,7 +656,7 @@ function populateViewportContainer(browser, referenceFrameList, trackView) {
     if (false === trackExclusionSet.has(trackView.track.type)) {
         trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
     } else {
-        const $shim = $('<div>', { class: 'igv-scrollbar-shim' })
+        const $shim = $('<div>', {class: 'igv-scrollbar-shim'})
         $shim.insertAfter(trackView.$viewportContainer)
     }
 }

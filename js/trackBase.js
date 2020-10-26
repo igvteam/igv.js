@@ -60,6 +60,8 @@ class TrackBase {
 
         this.order = config.order;
 
+        this.color = config.color;
+        this.altColor = config.altColor;
         if ("civic-ws" === config.sourceType) {    // Ugly proxy for specialized track type
             this.defaultColor = "rgb(155,20,20)";
         } else {
@@ -88,12 +90,16 @@ class TrackBase {
         const state = Object.assign({}, this.config);
         const self = this;
 
+        // Update original config values with any changes
         Object.keys(state).forEach(function (key) {
             const value = self[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
             }
         })
+
+        if(this.color) state.color = this.color;
+        if(this.altColor) state.altColor = this.altColor;
 
         // Flatten dataRange if present
         if (!this.autoscale && this.dataRange) {
