@@ -1,6 +1,5 @@
-
-import {assert} from 'chai';
 import {createMockObjects} from "@igvteam/test-utils/src"
+import {assert} from 'chai';
 import {loadIndex} from "../js/bam/indexFactory.js"
 
 suite("testTribble", function () {

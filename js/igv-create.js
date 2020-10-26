@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {Alert,InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
 import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
@@ -92,7 +92,7 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback = new UserFeedback($(browser.trackContainer));
     browser.userFeedback.hide();
     browser.inputDialog = new InputDialog(browser.$root.get(0));
-    browser.dataRangeDialog = new DataRangeDialog(browser.$root, browser.alert);
+    browser.dataRangeDialog = new DataRangeDialog(browser.$root);
     if (false === config.showTrackLabels) {
         browser.hideTrackLabels();
     } else {
@@ -236,7 +236,7 @@ function createStandardControls(browser, config) {
         browser.search($(this).val())
 
             .catch(function (error) {
-                browser.alert.present(error);
+                Alert.presentAlert(error);
             });
     });
 

@@ -1,6 +1,6 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import BufferedReader from "../js/bigwig/bufferedReader.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testBigWig", function () {
 
