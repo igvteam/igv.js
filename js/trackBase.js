@@ -88,15 +88,14 @@ class TrackBase {
     getState() {
 
         const state = Object.assign({}, this.config);
-        const self = this;
 
         // Update original config values with any changes
-        Object.keys(state).forEach(function (key) {
-            const value = self[key];
+        for(let key of Object.keys(state)) {
+            const value = this[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
             }
-        })
+        }
 
         if(this.color) state.color = this.color;
         if(this.altColor) state.altColor = this.altColor;
@@ -105,6 +104,17 @@ class TrackBase {
         if (!this.autoscale && this.dataRange) {
             state.min = this.dataRange.min;
             state.max = this.dataRange.max;
+        }
+
+        // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
+        for(let key of Object.keys(state)) {
+            if(typeof state[key] === 'function') {
+                throw Error(`Property ${key} of track '${this.name} is a function. Functions cannot be saved in sessions.` );
+            } if(state[key] instanceof Promise) {
+                throw Error(`Property ${key} of track '${this.name} is a local File. File objects cannot be saved in sessions.`);
+            } if(state[key] instanceof File) {
+                throw Error(`Property ${key} of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
+            }
         }
 
         return state;

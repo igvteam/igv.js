@@ -3,6 +3,7 @@
 ![](https://img.shields.io/npm/dw/igv.svg)
 ![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)
 ![](https://img.shields.io/npm/l/igv.svg)
+[![](https://data.jsdelivr.com/v1/package/npm/igv/badge)](https://www.jsdelivr.com/package/npm/igv)
 
 igv.js is an embeddable interactive genome visualization component developed by the 
  [Integrative Genomics Viewer (IGV)](https://igv.org) team. 
