@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils,TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, TrackUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const extend = function (parent, child) {
 
@@ -160,60 +160,50 @@ function inferTrackType(config) {
 
     translateDeprecatedTypes(config);
 
+    if (config.type) {
+        return config.type;
+    }
+
+    let format;
     if ("file" === config.sourceType || (undefined === config.sourceType && config.url)) {
         if (undefined === config.format) {
             const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
-            config.format = TrackUtils.inferFileFormat(path);
+            format = TrackUtils.inferFileFormat(path);
         } else {
-            config.format = config.format.toLowerCase();
+            format = config.format.toLowerCase();
         }
     }
 
-    if (undefined === config.type) {
-
-        if (config.format) {
-
-            switch (config.format.toLowerCase()) {
-                case "bw":
-                case "bigwig":
-                case "wig":
-                case "bedgraph":
-                case "tdf":
-                    config.type = "wig";
-                    break;
-                case "vcf":
-                    config.type = "variant";
-                    break;
-                case "seg":
-                    config.type = "seg";
-                    break;
-                case "bam":
-                case "cram":
-                    config.type = "alignment";
-                    break;
-                case "bedpe":
-                case "bedpe-loop":
-                    config.type = "interaction";
-                    break;
-                case "bp":
-                    config.type = "arc";
-                    break;
-                case "gwas":
-                    config.type = "gwas";
-                    break;
-                case "bed":
-                case "bigbed":
-                case "bb":
-                    config.type = "bedtype";
-                    break;
-                default:
-                    config.type = "annotation";
-
-            }
+    if (format) {
+        switch (format) {
+            case "bw":
+            case "bigwig":
+            case "wig":
+            case "bedgraph":
+            case "tdf":
+               return "wig";
+            case "vcf":
+                return "variant";
+            case "seg":
+                return "seg";
+            case "bam":
+            case "cram":
+                return "alignment";
+            case "bedpe":
+            case "bedpe-loop":
+                return "interaction";
+            case "bp":
+                return "arc";
+            case "gwas":
+                return "gwas";
+            case "bed":
+            case "bigbed":
+            case "bb":
+                return "bedtype";
+            default:
+                return "annotation";
         }
-
     }
-    return config.type;
 }
 
 
