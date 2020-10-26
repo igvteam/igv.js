@@ -1,6 +1,5 @@
-import ignore from "./windowMockObjects.js";    // Important, don't remove
-import {assert} from 'chai';
 import {createMockObjects} from "@igvteam/test-utils/src"
+import {assert} from 'chai';
 import WigTrack from "../js/feature/wigTrack";
 
 suite("testTrackLine", function () {

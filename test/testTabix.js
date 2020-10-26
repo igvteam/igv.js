@@ -1,10 +1,9 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {unbgzf} from "../js/bam/bgzf.js";
 import igvxhr from "../js/igvxhr.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
-
 
 suite("testTabix", function () {
 

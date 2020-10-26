@@ -1,6 +1,6 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import FastaSequence from "../js/genome/fasta.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testFasta", function () {
 

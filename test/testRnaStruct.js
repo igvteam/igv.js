@@ -1,6 +1,6 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import RnaStructTrack from "../js/rna/rnaStruct.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testRnaStruct", function () {
 
