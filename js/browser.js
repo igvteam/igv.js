@@ -25,7 +25,12 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js'
-import TrackView, {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer} from "./trackView.js";
+import TrackView, {
+    emptyViewportContainers,
+    maxViewportContentHeight,
+    populateViewportContainer,
+    updateViewportShims
+} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
 import TrackFactory from "./trackFactory.js";
@@ -698,7 +703,7 @@ class Browser {
             type = type.toLowerCase();
         } else {
             type = inferTrackType(config);
-            if ("bedtype" === config.type) {
+            if ("bedtype" === type) {
                 // Bed files must be read to determine track type
                 const featureSource = FeatureSource(config, this.genome);
                 config.tmpFeatureSource = featureSource;    // This is a temp variable, bit of a hack
@@ -946,7 +951,7 @@ class Browser {
             // Group autoscale
             const groupAutoscaleTracks = {};
             const otherTracks = [];
-            for(let trackView of views) {
+            for (let trackView of views) {
                 const group = trackView.track.autoscaleGroup;
                 if (group) {
                     var l = groupAutoscaleTracks[group];
@@ -966,7 +971,7 @@ class Browser {
                 const groupTrackViews = groupAutoscaleTracks[group];
                 const promises = [];
 
-                for(let trackView of groupTrackViews) {
+                for (let trackView of groupTrackViews) {
                     promises.push(trackView.getInViewFeatures());
                 }
 
@@ -1414,17 +1419,12 @@ class Browser {
             "version": version()
         }
 
-        // TODO -- if using genome ID skip annotation track(s)
-     //   if (this.config.genome) {
-     //       json["genome"] = this.config.genome;
-      //  } else {
-            json["reference"] = this.genome.toJSON();
-            if (FileUtils.isFilePath(json.reference.fastaURL)) {
-                throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
-            } else if (FileUtils.isFilePath(json.reference.indexURL)) {
-                throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
-            }
-      //  }
+        json["reference"] = this.genome.toJSON();
+        if (FileUtils.isFilePath(json.reference.fastaURL)) {
+            throw new Error(`Error. Sessions cannot include local file references ${json.reference.fastaURL.name}.`);
+        } else if (FileUtils.isFilePath(json.reference.indexURL)) {
+            throw new Error(`Error. Sessions cannot include local file references ${json.reference.indexURL.name}.`);
+        }
 
         // Build locus array (multi-locus view).  Use the first track to extract the loci, any track could be used.
         const locus = [];
@@ -1443,7 +1443,6 @@ class Browser {
                 gtexSelections[locusString] = selection;
             }
         }
-
         json["locus"] = locus.length === 1 ? locus[0] : locus;
 
         const gtexKeys = Object.getOwnPropertyNames(gtexSelections);
