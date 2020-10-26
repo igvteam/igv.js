@@ -414,6 +414,30 @@ function calculateFeatureCoordinates(feature, bpStart, xScale) {
 }
 
 /**
+ * Return color for feature.  Called in the context of a FeatureTrack instance.
+ * @param feature
+ * @returns {string}
+ */
+function getColorForFeature(feature) {
+    let color;
+    if (this.altColor && "-" === feature.strand) {
+        color = this.altColor;
+    } else if (this.color) {
+        color = this.color;   // Explicit setting via menu, or possibly track line if !config.color
+    } else if (this.config.colorBy) {
+        const colorByValue = feature[this.config.colorBy.field];
+        if (colorByValue) {
+            color = this.config.colorBy.pallete[colorByValue];  // This is an undocumented option, and its not clear if its used
+        }
+    } else if (feature.color) {
+        color = feature.color;   // Explicit color for feature
+    } else {
+        color = this.defaultColor;   // Track default
+    }
+    return color
+}
+
+/**
  *
  * @param feature
  * @param bpStart  genomic location of the left edge of the current canvas
@@ -425,23 +449,12 @@ function calculateFeatureCoordinates(feature, bpStart, xScale) {
 function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
     const browser = this.browser;
-
-    let color = this.color;  // default
+    let color = getColorForFeature.call(this, feature)
 
     if (feature.alpha && feature.alpha !== 1) {
-        color = IGVColor.addAlpha(this.color, feature.alpha);
+        color = IGVColor.addAlpha(color, feature.alpha);
     }
 
-    if (this.config.colorBy) {
-        const colorByValue = feature[this.config.colorBy.field];
-        if (colorByValue) {
-            color = this.config.colorBy.pallete[colorByValue];
-        }
-    } else if (this.config.altColor && "-" === feature.strand) {
-        color = this.config.altColor;
-    } else if (feature.color) {
-        color = feature.color;
-    }
 
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
@@ -575,7 +588,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
     if (name === undefined) name = feature.id || feature.ID
-    if (name === undefined) return;
+    if (!name || name === '.') return;
 
     // feature outside of viewable window
     let boxX;
@@ -589,6 +602,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
         boxX1 = Math.min(featureX1, windowX1);
     }
 
+    let color = getColorForFeature.call(this, feature);
     let geneColor;
     let gtexSelection = false;
     if (referenceFrame.selection && GtexUtils.gtexLoaded) {
@@ -601,8 +615,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     if (this.displayMode !== "SQUISHED") {
         const geneFontStyle = {
             textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
-            fillStyle: geneColor || feature.color || this.color,
-            strokeStyle: geneColor || feature.color || this.color
+            fillStyle: geneColor || color,
+            strokeStyle: geneColor || color
         };
 
         let transform;
@@ -836,6 +850,7 @@ const locusSet = new Set(['near-gene-3', 'near-gene-5']);
 const intronSet = new Set(['intron']);
 
 /**
+ * Renderer for a UCSC snp track
  *
  * @param snp
  * @param bpStart  genomic location of the left edge of the current canvas

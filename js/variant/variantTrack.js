@@ -200,9 +200,8 @@ class VariantTrack extends TrackBase {
                 } else if ("MIXED" === variant.type) {
                     ctx.fillStyle = this.mixedColor;
                 } else {
-                    ctx.fillStyle = this.color;
+                    ctx.fillStyle = this.color || this.defaultColor;
                 }
-
 
                 ctx.fillRect(px, py, pw, vh);
 
