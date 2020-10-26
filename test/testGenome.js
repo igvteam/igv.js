@@ -1,6 +1,6 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testGenome", function () {
 

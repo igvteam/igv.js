@@ -32,6 +32,8 @@
  *   Search       findOverlapping
  */
 
+import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js'
+
 var BLACK = 1;
 var RED = 2;
 
@@ -309,7 +311,7 @@ class Interval {
             return (this.low <= other.high && other.low <= this.high);
         } catch (e) {
             //alert(e);
-            igv.browser.alert.present(e, undefined);
+            Alert.presentAlert(e, undefined);
         }
     }
 }

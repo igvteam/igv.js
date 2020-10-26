@@ -24,6 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
+import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js'
 import TrackView, {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer} from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
 import C2S from "./canvas2svg.js";
@@ -39,7 +40,6 @@ import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
 import {buildOptions, doAutoscale, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
-import Alert from "./ui/alert.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";
@@ -83,7 +83,7 @@ class Browser {
         const $trackContainer = $('<div>', {class: 'igv-track-container'});
         this.$root.append($trackContainer);
 
-        this.alert = new Alert(this.$root.get(0))
+        Alert.init(this.$root.get(0))
         this.trackContainer = $trackContainer.get(0);
 
         this.initialize(options);
@@ -428,7 +428,7 @@ class Browser {
 
         } else {
             const errorString = 'Unrecognized locus ' + this.config.locus;
-            this.alert.present(errorString, undefined);
+            Alert.presentAlert(errorString, undefined);
         }
 
         if (genomeConfig.tracks) {
@@ -627,7 +627,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                this.alert.present("Unknown file type: " + config.url || config, undefined);
+                Alert.presentAlert("Unknown file type: " + config.url || config, undefined);
                 return newTrack;
             }
 
@@ -660,7 +660,7 @@ class Browser {
             if (httpMessages.hasOwnProperty(msg)) {
                 msg = httpMessages[msg] + ": " + config.url;
             }
-            this.alert.present(msg, undefined);
+            Alert.presentAlert(msg, undefined);
         } finally {
             if (!noSpinner) {
                 this.stopSpinner();

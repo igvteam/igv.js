@@ -1,6 +1,6 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import igvxhr from "../js/igvxhr.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testIgvXhr", function () {
 
