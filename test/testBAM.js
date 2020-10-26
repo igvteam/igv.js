@@ -1,7 +1,6 @@
-import BamReader from "../js/bam/bamReader.js";
-
-import { assert } from 'chai';
 import {createMockObjects} from "@igvteam/test-utils/src"
+import BamReader from "../js/bam/bamReader.js";
+import { assert } from 'chai';
 
 suite("testBAM", function() {
 

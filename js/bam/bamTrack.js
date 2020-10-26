@@ -24,6 +24,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamSource from "./bamSource.js";
 import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
@@ -1061,9 +1062,9 @@ class AlignmentTrack {
 
                 const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
                 if (!seqstring || "*" === seqstring) {
-                    this.browser.alert.present("Read sequence: *")
+                    Alert.presentAlert("Read sequence: *")
                 } else {
-                    this.browser.alert.present(seqstring);
+                    Alert.presentAlert(seqstring);
                 }
             }
         });

@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamReader from "./bamReader.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
@@ -88,7 +89,7 @@ class ShardedBamReader {
 
                 .catch(function (error) {
                     console.error(error);
-                    igv.browser.alert.present("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                    Alert.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
                     self.bamReaders[queryChr] = "none";
                     return new AlignmentContainer(chr, start, end);   // Empty alignment container
                 })

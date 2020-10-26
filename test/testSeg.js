@@ -1,7 +1,7 @@
+import {createMockObjects} from "@igvteam/test-utils/src"
 import FeatureSource from "../js/feature/featureSource.js";
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testSeg", function () {
 
