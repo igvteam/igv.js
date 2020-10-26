@@ -103,7 +103,7 @@
                 },
                 {
                     name: "Conservation phyloP 100 way",
-                    url: "http://hgdownload.cse.ucsc.edu/goldenPath/hg38/phyloP100way/hg38.phyloP100way.bw",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
                     color: "blue",
                     altColor: "red"
                 }
@@ -119,7 +119,11 @@
 
             document.getElementById("sessionButton").addEventListener("click", () => {
                 try {
-                    console.log(browser.toJSON());
+                    const json = browser.toJSON();
+                    console.log(json);
+                    const jsonString = JSON.stringify(json, null, '\t');
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                    download("session.json", data);
                 } catch (e) {
                     alert(e);
                 }
@@ -128,6 +132,17 @@
             document.getElementById("bookmarkButton").addEventListener("click",
                 () => window.history.pushState({}, "IGV", browser.sessionURL()))
         })
+
+    function download  (filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
 
 </script>
