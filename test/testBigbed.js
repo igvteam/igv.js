@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai';

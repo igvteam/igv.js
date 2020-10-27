@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {unbgzf} from "../js/bam/bgzf.js";
 import igvxhr from "../js/igvxhr.js";
