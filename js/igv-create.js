@@ -419,8 +419,11 @@ function logo() {
     );
 }
 
+async function createTrack (config, browser) {
+    return await Browser.prototype.createTrack.call(browser, config)
+}
 
-export {createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
+export {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange}
 
 
 
