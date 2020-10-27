@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
 

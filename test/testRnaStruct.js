@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import RnaStructTrack from "../js/rna/rnaStruct.js";
 import {assert} from 'chai';
 

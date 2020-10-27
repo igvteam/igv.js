@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import igvxhr from "../js/igvxhr.js";
 import {assert} from 'chai';
 

@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import BamReader from "../js/bam/bamReader.js";
 import { assert } from 'chai';
 

@@ -42,7 +42,6 @@
     "@babel/plugin-transform-regenerator": "^7.8.3",
     "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
-    "@igvteam/test-utils": "github:igvteam/test-utils",
     "@rollup/plugin-commonjs": "^11.0.2",
     "btoa": "^1.2.1",
     "chai": "^4.2.0",
@@ -60,7 +59,7 @@
     "w3c-xmlhttprequest": "^3.0.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui",
+    "igv-ui": "github:igvteam/igv-ui#2ef53938",
     "igv-utils": "github:igvteam/igv-utils#36c425bb"
   }
 }
