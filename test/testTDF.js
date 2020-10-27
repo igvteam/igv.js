@@ -1,4 +1,4 @@
-import {createMockObjects} from "@igvteam/test-utils/src"
+import {createMockObjects} from "./utils/index.js"
 import TDFReader from "../js/tdf/tdfReader.js";
 import TDFSource from "../js/tdf/tdfSource.js";
 import {assert} from 'chai';
