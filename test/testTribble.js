@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import {assert} from 'chai';
 import {loadIndex} from "../js/bam/indexFactory.js"
 
 suite("testTribble", function () {
 
-    createMockObjects();
-
-    const genome = {
+const genome = {
         getChromosomeName: function (chr) {
             return chr.startsWith("chr") ? chr : "chr" + chr;
         }

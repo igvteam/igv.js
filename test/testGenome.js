@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
 
 suite("testGenome", function () {
 
-    createMockObjects();
-
-    test("Genome coordinates", async function () {
+test("Genome coordinates", async function () {
 
         this.timeout(100000);
 

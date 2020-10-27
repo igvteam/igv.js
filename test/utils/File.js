@@ -1,6 +1,9 @@
+/**
+ * Mock object for browser 'File' class
+ */
+
 import fs from 'fs';
 
-// Mock object for browser File type
 class File {
 
     //new File(bits, name[, options]);
@@ -25,7 +28,7 @@ class File {
     }
 
     stream() {
-        throw Error ("Not implemented")
+        throw Error("Not implemented")
     }
 }
 

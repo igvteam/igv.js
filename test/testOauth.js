@@ -1,4 +1,4 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import oauth from "../js/oauth.js";
 import {assert} from 'chai';
 

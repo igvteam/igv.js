@@ -1,11 +1,9 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
 
 suite("testBed", function () {
-
-    createMockObjects();
 
     const genome = {
         getChromosomeName: function (chr) {
@@ -43,7 +41,7 @@ suite("testBed", function () {
             url: require.resolve("./data/bed/gwasCatalog.test.txt")
         }
         const reader = new FeatureFileReader(config);
-        const features= await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
+        const features = await reader.readFeatures("chr1", 0, Number.MAX_VALUE);
         assert.ok(features);
         assert.equal(features.length, 3);
         assert.equal(features[0].name, 'rs141175086');
@@ -141,7 +139,7 @@ suite("testBed", function () {
         const reader = new FeatureFileReader(config);
         const features = await reader.readFeatures("chr15", 0, Number.MAX_VALUE);
         assert.equal(features.length, 2);
-        for(let f of features) {
+        for (let f of features) {
             const attrs = f.attributes;
             assert.ok(attrs);
         }
@@ -300,7 +298,7 @@ suite("testBed", function () {
         assert.equal(trackType, "interact");
     })
 
-    test("gcnv", async function() {
+    test("gcnv", async function () {
 
         const featureSource = FeatureSource({
             url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")

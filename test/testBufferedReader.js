@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import BufferedReader from "../js/bigwig/bufferedReader.js";
 import {assert} from 'chai';
 
 suite("testBigWig", function () {
 
-    createMockObjects();
-
-    test("read", async function() {
+test("read", async function() {
 
         const url = require.resolve('./data/misc/BufferedReaderTest.bin');
         const range = {start: 25, size: 100};
