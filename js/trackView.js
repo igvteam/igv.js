@@ -87,47 +87,46 @@ class TrackView {
         }
 
         // color picker
-        if (MenuUtils.showColorPicker(track)) {
 
-            const trackColors = []
-            const color = track.color || track.config.color || track.defaultColor;
-            if (StringUtils.isString(color)) {
-                trackColors.push(color);
-            }
-
-            if (track.altColor && StringUtils.isString(track.altColor)) {
-                trackColors.push(track.altColor);
-            }
-
-            const defaultColors = trackColors.map(c => {
-                return c.startsWith("#") ? c :
-                    c.startsWith("rgb(") ?
-                        IGVColor.rgbToHex(c) :
-                        IGVColor.colorNameToHex(c);
-            });
-            const options =
-                {
-                    parent: this.trackDiv,
-                    top: undefined,
-                    left: undefined,
-                    width: 432,
-                    height: undefined,
-                    defaultColors,
-                    colorHandler: color => {
-                        this.track.color = color;
-                        this.repaintViews();
-                    }
-                };
-
-            this.colorPicker = new ColorPicker(options);
-
-            // alt color picker -- TODO pass handler in at "show" time and use 1 color picker
-            options.colorHandler = (color) => {
-                this.track.altColor = color;
-                this.repaintViews();
-            }
-            this.altColorPicker = new ColorPicker(options);
+        const trackColors = []
+        const color = track.color || track.config.color || track.defaultColor;
+        if (StringUtils.isString(color)) {
+            trackColors.push(color);
         }
+
+        if (track.altColor && StringUtils.isString(track.altColor)) {
+            trackColors.push(track.altColor);
+        }
+
+        const defaultColors = trackColors.map(c => {
+            return c.startsWith("#") ? c :
+                c.startsWith("rgb(") ?
+                    IGVColor.rgbToHex(c) :
+                    IGVColor.colorNameToHex(c);
+        });
+        const options =
+            {
+                parent: this.trackDiv,
+                top: undefined,
+                left: undefined,
+                width: 432,
+                height: undefined,
+                defaultColors,
+                colorHandler: color => {
+                    this.track.color = color;
+                    this.repaintViews();
+                }
+            };
+
+        this.colorPicker = new ColorPicker(options);
+
+        // alt color picker -- TODO pass handler in at "show" time and use 1 color picker
+        options.colorHandler = (color) => {
+            this.track.altColor = color;
+            this.repaintViews();
+        }
+        this.altColorPicker = new ColorPicker(options);
+
 
     }
 
@@ -239,7 +238,7 @@ class TrackView {
     }
 
     presentColorPicker(option) {
-        if(option === "altColor") {
+        if (option === "altColor") {
             this.altColorPicker.show();
         } else {
             this.colorPicker.show();
