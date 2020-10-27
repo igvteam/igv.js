@@ -1,13 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import {assert} from 'chai';
 import WigTrack from "../js/feature/wigTrack";
 
 suite("testTrackLine", function () {
 
-    createMockObjects();
-
-
-    const browser = {
+const browser = {
         genome: {
             getChromosomeName: function (chr) {
                 return chr.startsWith("chr") ? chr : "chr" + chr;

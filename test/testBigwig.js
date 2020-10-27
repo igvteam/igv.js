@@ -1,13 +1,11 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import BWReader from "../js/bigwig/bwReader.js";
 import {assert} from 'chai';
 
 suite("testBigWig", function () {
 
-    createMockObjects();
-
-    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
+const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
     test("No data", async function () {
 

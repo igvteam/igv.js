@@ -1,10 +1,8 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import BamReader from "../js/bam/bamReader.js";
-import { assert } from 'chai';
+import {assert} from 'chai';
 
-suite("testBAM", function() {
-
-    createMockObjects();
+suite("testBAM", function () {
 
     test("BAM alignments - CSI index", async function () {
 
@@ -37,7 +35,6 @@ suite("testBAM", function() {
         const alignmentContainer = await bamReader.readAlignments(chr, start, end)
         validate(assert, alignmentContainer)
     });
-
 
 
     function validate(assert, alignmentContainer) {
