@@ -1,8 +1,8 @@
 # igv.js
 [![Build Status](https://travis-ci.com/igvteam/igv.js.svg?branch=master)](https://travis-ci.com/igvteam/igv.js)
-![](https://img.shields.io/npm/dw/igv.svg)
-![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)
-![](https://img.shields.io/npm/l/igv.svg)
+[![](https://img.shields.io/npm/dw/igv.svg)](https://www.npmjs.com/package/igv)
+[![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)](https://github.com/igvteam/igv.js)
+[![](https://img.shields.io/npm/l/igv.svg)](LICENSE)
 [![](https://data.jsdelivr.com/v1/package/npm/igv/badge)](https://www.jsdelivr.com/package/npm/igv)
 
 igv.js is an embeddable interactive genome visualization component developed by the 
