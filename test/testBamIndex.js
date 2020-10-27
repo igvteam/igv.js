@@ -1,13 +1,11 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {assert} from 'chai';
 
 
 suite("testBamIndex", function () {
 
-    createMockObjects();
-
-    test("load bam index", async function () {
+test("load bam index", async function () {
         this.timeout(100000);
         const url = require.resolve("./data/bam/na12889.bam.bai");
         const bamIndex = await loadIndex(url, {}, false)

@@ -1,30 +1,29 @@
+/**
+ * Define global mock objects for running unit tests in Node.  This file is imported for side effects only and
+ * has no exports.
+ */
+
 import {File} from "./File.js"
 import {XMLHttpRequestMock} from "./XMLHttpRequestMock.js"
-import {document} from "./document.js";
+import {Document, DOMImplementation} from "./Document.js";
 
-global.document = document;
+global.document = new Document();
+
+global.document.implementation = new DOMImplementation();    // For jQUery
 
 global.window = {
-    document,
+    document: global.document,
     setTimeout: function () {
     }
 }
 
 global.File = File;
+
 global.XMLHttpRequest = XMLHttpRequestMock;
+
 global.navigator = {
     userAgent: "Node",
     vendor: "Node"
 }
 
-
-/**
- * Setup mock objects for unit tests
- * @param type   local|remote
- */
-function createMockObjects() {
-    // nothing to do, objects created on import
-}
-
-export {createMockObjects};
 

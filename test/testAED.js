@@ -1,10 +1,9 @@
-import {createFile, createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js";
+import {createFile} from "./utils/File.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
 
 suite("testAED", function () {
-
-    createMockObjects();
 
     const genome = {
         getChromosomeName: function (chr) {

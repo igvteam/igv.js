@@ -1,13 +1,11 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import TDFReader from "../js/tdf/tdfReader.js";
 import TDFSource from "../js/tdf/tdfSource.js";
 import {assert} from 'chai';
 
 suite("testTDF", function () {
 
-    createMockObjects();
-
-    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
+const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
     // The TDF file uses chr1, chr2, ... convention.  Define genome as 1,2,3... to test chromosome aliasing
     const genome = {

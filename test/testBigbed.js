@@ -1,13 +1,11 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import {parseAutoSQL} from "../js/util/ucscUtils.js"
 import {assert} from 'chai';
 
 suite("testBigBed", function () {
 
-    createMockObjects();
-
-    test("bed9+2 features", async function () {
+test("bed9+2 features", async function () {
         const url = require.resolve("./data/bb/myBigBed2.bb");
         const chr = "chr7";
         const start = 0;

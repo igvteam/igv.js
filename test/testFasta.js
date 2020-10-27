@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import FastaSequence from "../js/genome/fasta.js";
 import {assert} from 'chai';
 
 suite("testFasta", function () {
 
-    createMockObjects();
-
-    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
+const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
     test("FastaSequence - Test fasata with no index", async function () {
 

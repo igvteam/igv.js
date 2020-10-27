@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import RnaStructTrack from "../js/rna/rnaStruct.js";
 import {assert} from 'chai';
 
 suite("testRnaStruct", function () {
 
-    createMockObjects();
-
-    // mock brower object
+// mock brower object
     const browser = {
         // Simulate a genome with 1,2,3,... naming convention
         genome: {
