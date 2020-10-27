@@ -1,10 +1,11 @@
-// Emulate the browser XMLHttpRequest object for local files using the Node file system
+// Emulate the browser XMLHttpRequest object for remote files
 // url will be a relative file path
 // supports 'GET' only
 // support range header, responseType
 
 import {XMLHttpRequestLocal} from './XMLHttpRequestLocal.js';
 import {XMLHttpRequest} from 'w3c-xmlhttprequest'
+
 /**
  * Emulation of w3c XMLHttpRequest for local file paths -- useful for unit tests with no server.
  */
@@ -24,7 +25,7 @@ class XMLHttpRequestMock {
     }
 
     open(method, url) {
-        if(url.startsWith("http://") || url.startsWith("https://")) {
+        if (url.startsWith("http://") || url.startsWith("https://")) {
             this.impl = new XMLHttpRequest();
         } else {
             this.impl = new XMLHttpRequestLocal();
@@ -57,5 +58,5 @@ class XMLHttpRequestMock {
     }
 }
 
-export  {XMLHttpRequestMock}
+export {XMLHttpRequestMock}
 

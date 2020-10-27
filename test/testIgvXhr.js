@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import igvxhr from "../js/igvxhr.js";
 import {assert} from 'chai';
 
 suite("testIgvXhr", function () {
 
-    createMockObjects();
-
-    const range = {start: 25, size: 100};
+const range = {start: 25, size: 100};
 
     function verifyBytes(arrayBuffer) {
         assert.ok(arrayBuffer);

@@ -1,13 +1,11 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
 
 suite("testSeg", function () {
 
-    createMockObjects();
-
-    const genome = {
+const genome = {
         getChromosomeName: function (chr) {
             return chr.startsWith("chr") ? chr : "chr" + chr;
         }

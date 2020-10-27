@@ -1,12 +1,10 @@
-import {createMockObjects} from "./utils/index.js"
+import "./utils/mockObjects.js"
 import FeatureFileReader from '../js/feature/featureFileReader.js';
 import {assert} from 'chai';
 
 suite("testTrackLine", function () {
 
-    createMockObjects();
-
-    const browser = {
+const browser = {
         genome: {
             getChromosomeName: function (chr) {
                 return chr.startsWith("chr") ? chr : "chr" + chr;
