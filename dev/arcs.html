@@ -19,8 +19,12 @@
 
 <h1>BEDPE Proportional Arcs</h1>
 
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<p>
+    <button id="bookmarkButton">Bookmark</button>
+    <button id="sessionButton">Session JSON</button>
+</p>
 
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 <script type="module">
 
@@ -61,9 +65,25 @@
     const igvDiv = document.getElementById("igvDiv");
 
     igv.createBrowser(igvDiv, options)
+
         .then(function (browser) {
+
             console.log("Created IGV browser");
-            window.igvBrowser = browser;
+
+            document.getElementById("sessionButton").addEventListener("click", () => {
+                try {
+                    const json = browser.toJSON();
+                    console.log(json);
+                    const jsonString = JSON.stringify(json, null, '\t');
+                    const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                    download("session.json", data);
+                } catch (e) {
+                    alert(e);
+                }
+            })
+
+            document.getElementById("bookmarkButton").addEventListener("click",
+                () => window.history.pushState({}, "IGV", browser.sessionURL()))
         })
 
 
