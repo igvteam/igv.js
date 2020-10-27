@@ -11,7 +11,7 @@ import {isNumber} from "../../util/igvUtils.js"
  *
  * Another common variant is a "hiccups" output file, which is standard bedpe with the exception of a header line
  * of the form
- * chr1	x1	x2	chr2	y1	y2	name	score	strand1	strand2	color	observed	expectedBL	expectedDonut	expectedH	expectedV	fdrBL	fdrDonut	fdrH	fdrV
+ * chr1    x1    x2    chr2    y1    y2    name    score    strand1    strand2    color    observed    expectedBL    expectedDonut    expectedH    expectedV    fdrBL    fdrDonut    fdrH    fdrV
  *
  * @param tokens
  * @param ignore
@@ -34,24 +34,24 @@ function decodeBedpe(tokens, header) {
         end2: Number.parseInt(tokens[5])
     }
 
-    if(isNaN(feature.start1) || isNaN(feature.end1) || isNaN(feature.start2) || isNaN(feature.end2)) {
+    if (isNaN(feature.start1) || isNaN(feature.end1) || isNaN(feature.start2) || isNaN(feature.end2)) {
         //throw Error(`Error parsing line: ${tokens.join('\t')}`);
         return undefined;
     }
 
-    if (tokens.length > 6) {
+    if (tokens.length > 6 && tokens[6] !== ".") {
         feature.name = tokens[6];
     }
 
-    if (tokens.length > 7) {
+    if (tokens.length > 7 && tokens[7] !== ".") {
         feature.score = parseFloat(tokens[7]);
     }
 
-    if (tokens.length > 8) {
+    if (tokens.length > 8 && tokens[8] !== ".") {
         feature.strand1 = tokens[8];
     }
 
-    if(tokens.length > 9) {
+    if (tokens.length > 9 && tokens[9] !== ".") {
         feature.strand2 = tokens[9];
     }
 
@@ -66,15 +66,14 @@ function decodeBedpe(tokens, header) {
             feature.thickness = tokens[thicknessColumn];
         }
 
-        if(tokens.length > 10 && header.columnNames && header.columnNames.length === tokens.length) {
+        if (tokens.length > 10 && header.columnNames && header.columnNames.length === tokens.length) {
             feature.extras = tokens.slice(10);
         }
     }
 
 
-
     // Set total extent of feature
-    if(feature.chr1 === feature.chr2) {
+    if (feature.chr1 === feature.chr2) {
         feature.chr = feature.chr1;
         feature.start = Math.min(feature.start1, feature.start2);
         feature.end = Math.max(feature.end1, feature.end2);
@@ -89,16 +88,16 @@ function decodeBedpe(tokens, header) {
  */
 function fixBedPE(features) {
 
-    if(features.length == 0) return;
+    if (features.length == 0) return;
 
     // Assume all features have same properties
     const firstFeature = features[0];
-    if(firstFeature.score === undefined && firstFeature.name !== undefined) {
+    if (firstFeature.score === undefined && firstFeature.name !== undefined) {
         // Name field (col 7) is sometimes used for score.
-        for(let f of features) {
-            if(!(isNumber(f.name) || f.name === '.')) return;
+        for (let f of features) {
+            if (!(isNumber(f.name) || f.name === '.')) return;
         }
-        for(let f of features) {
+        for (let f of features) {
             f.score = parseFloat(f.name);
             delete f.name;
         }
@@ -106,7 +105,7 @@ function fixBedPE(features) {
 
     // Make copies of inter-chr features, one for each chromosome
     const interChrFeatures = features.filter(f => f.chr1 !== f.chr2);
-    for(let f1 of interChrFeatures) {
+    for (let f1 of interChrFeatures) {
         const f2 = Object.assign({}, f1);
         f2.dup = true;
         features.push(f2);
