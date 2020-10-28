@@ -2,74 +2,89 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
+    <meta content="Jim Robinson" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>Custom Web Service Examples</title>
+    <title>igv.js</title>
 
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
 </head>
 
 <body>
 
 <h1>Custom Reader Example</h1>
 <p>In this example a custom javascript class is supplied to read features from a url. The class implements
-    the required method
-<pre>  async features(chr, start, end)</pre>
+    the required method <b>async features(chr, start, end)</b>
+<pre>
+
+    class CytobandReader {
+      async readFeatures(chr, start, end) {
+        const response = await fetch(`https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=${chr}&start=${start}&end=${end}`,
+                                    {headers: {'Content-Type': 'application/json'}});
+        return response.json();
+      }
+    }
+    ...
+    const config = {
+      genome: "hg38",
+      locus: "chr1",
+      tracks: [
+        {
+          name: "Cytobands",
+          type: "annotation",
+          displayMode: "collapsed",
+          reader: new CytobandReader({})
+         }
+      ]
+    }
+</pre>
 </p>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
-<script type="module">
+<script type="text/javascript">
 
-    import igv from '../dist/igv.esm.js'
+    document.addEventListener("DOMContentLoaded", function () {
 
-    /**
-     * A custom feature reader implementation
-     * Required methods:
-     *    constructor
-     *    readFeatures
-     */
-    class CytobandReader {
+        /**
+         * A custom feature reader implementation
+         * Required methods:
+         *    constructor
+         *    readFeatures
+         */
+        class CytobandReader {
+            constructor(config) {
+            }
+            async readFeatures(chr, start, end) {
 
-        constructor(config) {
-        }
-
-        async readFeatures(chr, start, end) {
-
-            const response = await fetch(`https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=${chr}&start=${start}&end=${end}`,
-                {
-                    headers: {'Content-Type': 'application/json'}
-                }
-            );
-            if (!response.ok) {
-                throw Error(response.statusText);
-            } else {
+                const response = await fetch(`https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=${chr}&start=${start}&end=${end}`,
+                    {
+                        headers: {'Content-Type': 'application/json'}
+                    }
+                );
                 return response.json();
             }
         }
-    }
 
 
-    const config = {
-        genome: "hg38",
-        locus: "chr1",
-        tracks: [
-            {
-                name: "Cytobands",
-                type: "annotation",
-                displayMode: "collapsed",
-                reader: new CytobandReader({})
-            }
-        ]
-    }
+        const config = {
+            genome: "hg38",
+            locus: "chr1",
+            tracks: [
+                {
+                    name: "Cytobands",
+                    type: "annotation",
+                    displayMode: "collapsed",
+                    reader: new CytobandReader({})
+                }
+            ]
+        }
 
-    igv.createBrowser(igvDiv, config)
-        .then(function (b) {
-            console.log("IGV browser created");
-        })
-
+        igv.createBrowser(igvDiv, config)
+            .then(function (b) {
+                console.log("IGV browser created");
+            })
+    })
 
 </script>
 

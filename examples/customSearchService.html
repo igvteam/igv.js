@@ -2,58 +2,57 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
 
-
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
 </head>
 
 <body>
 
 <h1>Custom search service example</h1>
-<h2ß>This example uses an Ensembl web service to provide annotation search capability for Macaca Fasciularis.  To test search for  'OLIG3'</h2ß>
+<h4>This example configures a search object as described
+    <a href="https://github.com/igvteam/igv.js/wiki/Browser-Creation#search-object-details">here</a>
+    to use the Ensembl web service to provide annotation search capability for Macaca Fasciularis.  To test search for  'OLIG3'</h4>
 
-<div id="igv-div" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+<div id="igv-div" style="margin-top: 50px;padding-top:10px; padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script type="module">
+<script type="text/javascript">
 
-    import igv from '../dist/igv.esm.min.js'
+    document.addEventListener("DOMContentLoaded", function () {
 
-    const igvDiv = document.getElementById("igv-div");
-    const options =
-        {
-            search: {
-                url: 'https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/$FEATURE$?content-type=application/json',
-                chromosomeField: 'seq_region_name',
-                displayName: 'display_name'
-            },
-            reference: {
-                id: "Macaca_fascicularis_5.0",
-                fastaURL: "https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.dna.toplevel.fa",
-                indexURL: "https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.dna.toplevel.fa.fai"
-            },
-            tracks: [
-                {
-                    name: "Annotations",
-                    type: "annotation",
-                    format: "gtf",
-                    url: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz',
-                    indexed: false
-                }
-            ]
-        };
+        const igvDiv = document.getElementById("igv-div");
+        const options =
+            {
+                search: {
+                    url: 'https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/$FEATURE$?content-type=application/json',
+                    chromosomeField: 'seq_region_name',
+                    displayName: 'display_name'
+                },
+                reference: {
+                    id: "Macaca_fascicularis_5.0",
+                    fastaURL: "https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.dna.toplevel.fa",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.dna.toplevel.fa.fai"
+                },
+                tracks: [
+                    {
+                        name: "Annotations",
+                        type: "annotation",
+                        format: "gtf",
+                        url: 'https://s3.amazonaws.com/igv.org.genomes/Macaca_fascicularis_5.0/Macaca_fascicularis.Macaca_fascicularis_5.0.100.gtf.gz',
+                        indexed: false
+                    }
+                ]
+            };
 
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-        })
-
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    })
 
 </script>
 
