@@ -66,7 +66,7 @@
                     url: "https://gtexportal.org/rest/v1/association/singleTissueEqtlByLocation",
                     tissueSiteDetailId: "Muscle_Skeletal",
                     name: "Muscle Skeletal",
-                    visibilityWindow: 1000000
+                    visibilityWindow: 100000
                 },
                 {
                     name: "Indexed GTF (Gencode)",
@@ -85,7 +85,8 @@
                     "type": "snp",
                     "format": "snp",
                     "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz",
-                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi"
+                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/annotations/snp150Common.txt.gz.tbi",
+                    visibilityWindow: 100000
                 },
                 {
                     "name": "Repeat Masker",
@@ -93,7 +94,7 @@
                     "format": "rmsk",
                     "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz",
                     "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg38/rmsk.txt.gz.tbi",
-                    "visibilityWindow": 1000000
+                    "visibilityWindow": 100000
                 },
                 {
                     name: "bigbed (Clinvar)",
@@ -104,6 +105,14 @@
                     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/annotations/hg38.phyloP100way.bw",
                     color: "blue",
                     altColor: "red"
+                },
+                {
+                    name: "Simple_repeat (useScore)",
+                    url: "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz",
+                    indexURL:"https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi",
+                    useScore: true,
+                    min: 0,
+                    max: 100
                 }
 
             ]

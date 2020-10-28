@@ -87,10 +87,17 @@ class TrackBase {
      */
     getState() {
 
-        const state = Object.assign({}, this.config);
+        // Create copy of config, minus transient properties (convention is name starts with '_')
+        const state = {};
+        for(let key of Object.keys(this.config)) {
+            if(!key.startsWith("_")) {
+                state[key] = this.config[key];
+            }
+        }
 
         // Update original config values with any changes
         for(let key of Object.keys(state)) {
+            if(key.startsWith("_")) continue;   // transient property
             const value = this[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
@@ -144,7 +151,8 @@ class TrackBase {
             switch (key.toLowerCase()) {
                 case "name":
                 case "usescore":
-                    tracklineConfg[key] = properties[key]
+                    tracklineConfg[useScore] = (
+                        properties[key] === 1 || properties[key] === "1" || properties[key] === "on" || properties[key] === true);
                     break;
                 case "visibility":
                     //0 - hide, 1 - dense, 2 - full, 3 - pack, and 4 - squish
@@ -235,7 +243,7 @@ class TrackBase {
      */
     static extractPopupData(feature, genomeId) {
 
-        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand']);
+        const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha']);
         const data = [];
 
         let alleles, alleleFreqs;
