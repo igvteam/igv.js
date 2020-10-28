@@ -55,9 +55,9 @@ class FeatureTrack extends TrackBase {
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
 
-        if(config.tmpFeatureSource) {
-            this.featureSource = config.tmpFeatureSource;
-            delete config.tmpFeatureSource;
+        if (config._featureSource) {
+            this.featureSource = config._featureSource;
+            delete config._featureSource;
         } else {
             this.featureSource = config.featureSource ?
                 config.featureSource :
@@ -112,6 +112,9 @@ class FeatureTrack extends TrackBase {
             // adjust label positions to make sure they're always visible
             monitorTrackDrag(this);
         }
+
+        //UCSC useScore option
+        this.useScore = config.useScore;
 
     }
 
@@ -262,8 +265,6 @@ class FeatureTrack extends TrackBase {
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
     popupData(clickState, features) {
-
-        let self = this;
 
         if (!features) features = this.clickedFeatures(clickState);
         const genomicLocation = clickState.genomicLocation;
@@ -439,6 +440,25 @@ function getColorForFeature(feature) {
     } else {
         color = this.defaultColor;   // Track default
     }
+
+    if (feature.alpha && feature.alpha !== 1) {
+        color = IGVColor.addAlpha(color, feature.alpha);
+    } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
+        // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
+        const min = this.config.min? this.config.min : 0; //getViewLimitMin(track);
+        const max = this.config.max? this.config.max : 1000; //getViewLimitMax(track);
+        const alpha = getAlpha(min, max, feature.score);
+        feature.alpha = alpha;    // Avoid computing again
+        color = IGVColor.addAlpha(color, alpha);
+    }
+
+
+    function getAlpha(min, max, score) {
+        const binWidth = (max - min) / 9;
+        const binNumber = Math.floor((score - min) / binWidth);
+        return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9);
+    }
+
     return color
 }
 
@@ -455,11 +475,6 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
     const browser = this.browser;
     let color = getColorForFeature.call(this, feature)
-
-    if (feature.alpha && feature.alpha !== 1) {
-        color = IGVColor.addAlpha(color, feature.alpha);
-    }
-
 
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
