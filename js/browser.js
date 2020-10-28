@@ -706,13 +706,15 @@ class Browser {
             if ("bedtype" === type) {
                 // Bed files must be read to determine track type
                 const featureSource = FeatureSource(config, this.genome);
-                config.tmpFeatureSource = featureSource;    // This is a temp variable, bit of a hack
+                config._featureSource = featureSource;    // This is a temp variable, bit of a hack
                 const trackType = await featureSource.trackType();
                 if (trackType) {
                     type = trackType;
                 } else {
                     type = "annotation";
                 }
+                // Record in config to make type persistent in session
+                config.type = type;
             }
         }
 
