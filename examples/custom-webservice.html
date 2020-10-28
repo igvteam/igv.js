@@ -2,116 +2,143 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    <meta content="" name="description">
-    <meta content="" name="author">
+    <meta content="Jim Robinson" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
-    <title>Custom Web Service Examples</title>
+    <title>igv.js</title>
 
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
 </head>
 
 <body>
 
 <h1>Custom Web Service Examples</h1>
-
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
-
-
-<script type="module">
-
-    import igv from '../dist/igv.esm.js'
-
-    // Simple wervice requiring no query parameter or result mappings.
-    const cytobands = {
-        name: "Cytobands",
-        type: "annotation",
-        displayMode: "collapsed",
-        sourceType: "custom",
-        source: {
-            url: "https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=$CHR&start=$START&end=$END",
-            contentType: "application/json"
-        }
-    }
-
-
-    // Example cBio web service - https://www.cbioportal.org/api/swagger-ui.html
-    // * "function" option used for url -- transforms chr name if neccessary
-    // * "POST" used to send input parameters
-    // * cBio json objects transformed to igv requirements for seg track using simple mappings.
-    const cbio1 = {
-        name: "P101MF - query by chromosome",
-        type: "seg",
-        sourceType: "custom",
-        source: {
-            url: function (options) {
-                const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
-            },
-            method: "POST",
-            contentType: "application/json",
-            body: JSON.stringify([{
-                sampleId: "PT101MF",
-                studyId: "sarc_mskcc"
-            }]),
-            mappings: {
-                chr: "chromosome",
-                value: "segmentMean",
-                sampleKey: "uniqueSampleKey",
-                sample: "sampleId"
+<p>These examples illustrate configuring a custom web service to fetch features for a track.
+<p>(1) In the first example we configure a simple web service that fetches bed records definig cytobads.  This service
+requires no parameter manipulation or result mapping.  Track configuration:
+<pre>
+         {
+            name: "Cytobands",
+            type: "annotation",
+            sourceType: "custom",
+            source: {
+                url: "https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=$CHR&start=$START&end=$END",
+                contentType: "application/json"
             }
         }
-    }
+</pre>
+</p>
+<div id="igvDiv1" style="padding-top: 50px;padding-bottom: 50px; height: auto; border:1px solid lightgray"></div>
 
-    // Example cBio web service - https://www.cbioportal.org/api/swagger-ui.html
-    // * "function" option used for url -- transforms chr name if neccessary
-    // * "POST" used to send input parameters
-    // * cBio json objects transformed to igv requirements for seg track using simple mappings.
-    const cbio2 = {
-        name: "P101MF - query by chromosome",
-        type: "seg",
-        sourceType: "custom",
-        source: {
-            url: function (options) {
-                const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
-                return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
-            },
-            method: "POST",
-            contentType: "application/json",
-            body: JSON.stringify([{
-                sampleId: "PT101MF",
-                studyId: "sarc_mskcc"
-            }]),
-            parser: function (response) {
-                const segmentArray = JSON.parse(response);
-                return segmentArray.map(function (segment) {
-                    return {
-                        chr: segment.chromosome,
-                        start: segment.start,
-                        end: segment.end,
-                        value: segment.segmentMean,
-                        sampleKey: segment.uniqueSampleKey,
-                        sample: segment.sampleId
-                    }
-                })
+<hr/>
+<p>(2) In the second example we configure configure a  <a href="https://www.cbioportal.org/api/swagger-ui.html">cBio web service</a> to
+    fetch copy number segments.  This service uses a combination of query and POST parameters to specify the requested
+    segments.  The source url is a function which checks and modifies the input chr name to conform to the
+    webservice requirements.  The returned json properties must be mapped to conform to igv.js expectations.  This
+    is specified in the "mapping" object.
+
+    Track configuration:
+<pre>
+         {
+            name: "P101MF - query by chromosome",
+            type: "seg",
+            sourceType: "custom",
+            source: {
+                url: function (options) {
+                    const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
+                    return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                },
+                method: "POST",
+                contentType: "application/json",
+                body: JSON.stringify([{
+                    sampleId: "PT101MF",
+                    studyId: "sarc_mskcc"
+                }]),
+                mappings: {
+                    chr: "chromosome",
+                    value: "segmentMean",
+                    sampleKey: "uniqueSampleKey",
+                    sample: "sampleId"
+                }
+            }
+</pre>
+</p>
+<div id="igvDiv2" style="padding-top: 50px;padding-bottom: 20px; height: auto; border:1px solid lightgray"></div>
+
+
+<script type="text/javascript">
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        // Simple wervice requiring no query parameter or result mappings.
+        const cytobands = {
+            name: "Cytobands",
+            type: "annotation",
+            sourceType: "custom",
+            displayMode: "COLLAPSED",
+            source: {
+                url: "https://lk85l6ycte.execute-api.us-east-1.amazonaws.com/dev/testservice/bands?chr=$CHR&start=$START&end=$END",
+                contentType: "application/json"
             }
         }
-    }
 
-    const options = {
-        genome: "hg38",
-        locus: "chr1",
-        tracks: [
-            cytobands,
-            cbio1,
-            cbio2
-        ]
-    }
+        const options1 = {
+            genome: "hg38",
+            locus: "chr1",
+            tracks: [
+                cytobands
+            ]
+        }
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (b) {
-        })
+        igv.createBrowser(document.getElementById("igvDiv1"), options1)
+            .then(function (browser) {
+            })
 
+
+        // Example using cBio web service - https://www.cbioportal.org/api/swagger-ui.html
+        // * "function" option used for url -- transforms chr name if neccessary
+        // * "POST" used to send input parameters
+        // * cBio json objects transformed to igv requirements for seg track using simple mappings.
+
+        const cbio1 = {
+            name: "P101MF copy number",
+            type: "seg",
+            sourceType: "custom",
+            displayMode: "FILL",
+            source: {
+                url: function (options) {
+                    const chr = options.chr.startsWith("chr") ? options.chr.substring(3) : options.chr;
+                    return `https://www.cbioportal.org/api/copy-number-segments/fetch?chromosome=${chr}&projection=SUMMARY`;
+                },
+                method: "POST",
+                contentType: "application/json",
+                body: JSON.stringify([{
+                    sampleId: "PT101MF",
+                    studyId: "sarc_mskcc"
+                }]),
+                mappings: {
+                    chr: "chromosome",
+                    value: "segmentMean",
+                    sampleKey: "uniqueSampleKey",
+                    sample: "sampleId"
+                }
+            }
+        }
+
+
+
+        const options2 = {
+            genome: "hg38",
+            locus: "chr1",
+            tracks: [
+                cbio1
+            ]
+        }
+
+        igv.createBrowser(document.getElementById("igvDiv2"), options2)
+            .then(function (browser) {
+            })
+    })
 
 </script>
 

@@ -1,97 +1,95 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title><!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="utf-8">
-            <meta content="IE=edge" http-equiv="X-UA-Compatible">
-            <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-            <meta content="" name="description">
-            <meta content="" name="author">
-            <link href=img/favicon.ico rel="shortcut icon">
-            <title>Functional URL</title>
+    <meta charset="utf-8">
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>igv.js</title>
 
-        </head>
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
+</head>
 
 <body>
 
 <h1>Functional URLs</h1>
 
-Example of using a function or promise for a track URL.
+This example illustrates various options for specifying a track url
+<ul>
+    <li>A string <pre>url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"</pre></li>
+    <li>A function<pre>url: function () {return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"}</pre></li>
+    <li>A promise<pre>url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")</pre></li>
+    <li>A function that returns a promise <pre>url: function () {return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")}</pre></li>
+    <li>A function that returns a thenable <pre>url: function () {return {then: function (resolve, reject) {
+                                    resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                                }
+                            }
+                        }</pre></li>
+</ul>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
+<script type="text/javascript">
 
-<script type="module">
+    document.addEventListener("DOMContentLoaded", function () {
 
-    import igv from '../dist/igv.esm.js'
-
-    var options =
-        {
-            genome: "hg19",
-            tracks: [
-                {
-                    name: "CTCF - string url",
-                    type: "wig",
-                    format: "bigwig",
-                    url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
-                },
-                {
-                    name: "CTCF - function url ",
-                    type: "wig",
-                    format: "bigwig",
-                    url: function () {
-                        return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
-                    }
-                },
-                {
-                    name: "CTCF - promise url",
-                    type: "wig",
-                    format: "bigwig",
-                    url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
-                },
-                {
-                    name: "CTCF - function that returns promise url",
-                    type: "wig",
-                    format: "bigwig",
-                    url: function() {
-                        return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
-                    }
-                },
-                {
-                    name: "CTCF - function that returns thenable ",
-                    type: "wig",
-                    format: "bigwig",
-                    url: function() {
-                        return {
-                            then: function(resolve, reject) {
-                                resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+        const options =
+            {
+                genome: "hg19",
+                tracks: [
+                    {
+                        name: "CTCF - string url",
+                        type: "wig",
+                        format: "bigwig",
+                        url: "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                    },
+                    {
+                        name: "CTCF - function url ",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return "https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig"
+                        }
+                    },
+                    {
+                        name: "CTCF - promise url",
+                        type: "wig",
+                        format: "bigwig",
+                        url: Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                    },
+                    {
+                        name: "CTCF - function that returns promise url",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return Promise.resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                        }
+                    },
+                    {
+                        name: "CTCF - function that returns thenable ",
+                        type: "wig",
+                        format: "bigwig",
+                        url: function () {
+                            return {
+                                then: function (resolve, reject) {
+                                    resolve("https://www.encodeproject.org/files/ENCFF563PAW/@@download/ENCFF563PAW.bigWig")
+                                }
                             }
                         }
                     }
-                }
-            ]
-        }
+                ]
+            }
 
-    var igvDiv = document.getElementById("igvDiv");
+        const igvDiv = document.getElementById("igvDiv");
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            console.log("Created IGV browser");
-            window.igvBrowser = browser;
-        })
-
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    })
 
 </script>
 
 </body>
 
-</html>
-</title>
-</head>
-<body>
-
-</body>
 </html>
