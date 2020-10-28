@@ -149,9 +149,8 @@ class TrackBase {
         let tokens;
         for (let key of Object.keys(properties)) {
             switch (key.toLowerCase()) {
-                case "name":
                 case "usescore":
-                    tracklineConfg[useScore] = (
+                    tracklineConfg.useScore = (
                         properties[key] === 1 || properties[key] === "1" || properties[key] === "on" || properties[key] === true);
                     break;
                 case "visibility":
@@ -202,6 +201,8 @@ class TrackBase {
                         tracklineConfg.autoscale = false;
                         tracklineConfg.dataRange = {min, max};
                     }
+                case "name":
+                    tracklineConfg[key] = properties[key];
             }
         }
 
