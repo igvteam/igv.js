@@ -70,7 +70,13 @@ class SegTrack extends TrackBase {
                 }
             );
 
-        this.sampleKeys = [];
+        if(config.samples) {
+            this.sampleKeys = config.samples;
+            this.explicitSamples = true;
+        } else {
+            this.sampleKeys = [];
+        }
+
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
@@ -164,6 +170,7 @@ class SegTrack extends TrackBase {
             // Create a map for fast id -> row lookup
             const samples = {};
             this.sampleKeys.forEach(function (id, index) {
+                console.log(id);
                 samples[id] = index;
             })
 
@@ -433,6 +440,8 @@ class SegTrack extends TrackBase {
 
     updateSampleKeys(featureList) {
 
+        if(this.explicitSamples) return;
+
         const samples = new Set(this.sampleKeys);
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample;
@@ -441,6 +450,7 @@ class SegTrack extends TrackBase {
                 this.sampleKeys.push(sampleKey);
             }
         }
+        console.log(JSON.stringify(this.sampleKeys))
     }
 }
 
