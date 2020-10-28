@@ -545,8 +545,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   width: calc(100% - #{$igv-viewport-container-shim-width});
   height: 100%;
 
-  overflow-x: hidden;
-  overflow-y: hidden;
+  //overflow-x: hidden;
+  //overflow-y: hidden;
 
   .igv-viewport {
     position: relative;
