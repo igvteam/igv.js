@@ -55,7 +55,7 @@ class ViewPort extends ViewportBase {
                 }
 
                 if (this.popover) this.popover.dispose()
-                this.popover = new Popover(this.browser.trackContainer)
+                this.popover = new Popover(this.trackView.$viewportContainer.get(0))
                 this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
@@ -642,7 +642,7 @@ function addMouseHandlers() {
             });
 
         if (self.popover) self.popover.dispose()
-        self.popover = new Popover(self.browser.trackContainer);
+        self.popover = new Popover(self.trackView.$viewportContainer.get(0));
         self.popover.presentMenu(e, menuItems);
 
     });
@@ -781,7 +781,7 @@ function addMouseHandlers() {
                         const content = getPopupContent(e, self);
                         if (content) {
                             if (self.popover) self.popover.dispose()
-                            self.popover = new Popover(self.browser.trackContainer)
+                            self.popover = new Popover(self.trackView.$viewportContainer.get(0))
                             self.popover.presentContentWithEvent(e, content)
                         }
                         clearTimeout(popupTimerID);

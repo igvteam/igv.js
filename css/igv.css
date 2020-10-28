@@ -639,9 +639,7 @@
   justify-content: flex-start;
   align-items: stretch;
   width: calc(100% - 112px);
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden; }
+  height: 100%; }
   .igv-viewport-container .igv-viewport {
     position: relative;
     height: 100%;
