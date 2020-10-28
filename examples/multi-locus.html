@@ -2,17 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
 
-    <!-- IGV JS-->
+    <!-- IGV JS -->
     <script src="../dist/igv.min.js"></script>
-
 </head>
 
 <body>
@@ -25,30 +20,29 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var options =
-        {
-            genome: "hg19",
-            locus: ["myc", "chr1:155,157,300-155,163,706"],
-            tracks: [
-                {
-                    type: 'alignment',
-                    format: 'bam',
-                    url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam',
-                    indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam.bai',
-                    name: 'HG01879'
-                }
+        const options =
+            {
+                genome: "hg19",
+                locus: ["myc", "chr1:155,157,300-155,163,706"],
+                tracks: [
+                    {
+                        type: 'alignment',
+                        format: 'bam',
+                        url: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam',
+                        indexURL: 'https://1000genomes.s3.amazonaws.com/phase3/data/HG01879/exome_alignment/HG01879.mapped.ILLUMINA.bwa.ACB.exome.20120522.bam.bai',
+                        name: 'HG01879'
+                    }
 
-            ]
-        };
+                ]
+            };
 
-        var igvDiv = document.getElementById("igv-div");
+        const igvDiv = document.getElementById("igv-div");
 
         igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
-
-    });
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    })
 
 </script>
 

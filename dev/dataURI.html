@@ -22,13 +22,13 @@
 
 <div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
 
-<script type="text/javascript">
+<script type="module">
 
-    document.addEventListener("DOMContentLoaded", function () {
+    import igv from "../js/index.js";
 
-        var igvDiv = document.getElementById("igvDiv");
+    var igvDiv = document.getElementById("igvDiv");
 
-        var options =
+    var options =
         {
             locus: 'CIC--DUX4',
             reference: {
@@ -57,11 +57,11 @@
         };
 
 
-        igv.createBrowser(igvDiv, options)
-                .then(function (browser) {
-                    console.log("Created IGV browser");
-                })
-    });
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
 
 </script>
 
