@@ -55,7 +55,7 @@ class ViewPort extends ViewportBase {
                 }
 
                 if (this.popover) this.popover.dispose()
-                this.popover = new Popover(this.browser.trackContainer)
+                this.popover = new Popover(this.trackView.$viewportContainer.get(0))
                 this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
@@ -642,7 +642,7 @@ function addMouseHandlers() {
             });
 
         if (self.popover) self.popover.dispose()
-        self.popover = new Popover(self.browser.trackContainer);
+        self.popover = new Popover(self.trackView.$viewportContainer.get(0));
         self.popover.presentMenu(e, menuItems);
 
     });
@@ -781,7 +781,7 @@ function addMouseHandlers() {
                         const content = getPopupContent(e, self);
                         if (content) {
                             if (self.popover) self.popover.dispose()
-                            self.popover = new Popover(self.browser.trackContainer)
+                            self.popover = new Popover(self.trackView.$viewportContainer.get(0))
                             self.popover.presentContentWithEvent(e, content)
                         }
                         clearTimeout(popupTimerID);
@@ -860,13 +860,12 @@ function addMouseHandlers() {
         const rows = nameValues.map(nameValue => {
 
             if (nameValue.name) {
-                const str = `<div><span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }</div>`
+                const str = `<span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }`
                 return `<div title="${ nameValue.value }">${ str }</div>`
             } else if ('<hr>' === nameValue) {
                 return nameValue
             } else {
-                const str = `<div>${ nameValue }</div>`
-                return `<div title="${ nameValue }">${ str }</div>`
+                return `<div title="${ nameValue }">${ nameValue }</div>`
             }
 
         })

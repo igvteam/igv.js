@@ -150,7 +150,7 @@ class TrackView {
 
     attachScrollbar($track, $viewportContainer, viewports) {
 
-        if ("hidden" === $viewportContainer.css("overflow-y")) {
+        if ("hidden" === $viewportContainer.find('.igv-viewport').css("overflow-y")) {
             this.scrollbar = new TrackScrollbar($viewportContainer, viewports)
             this.scrollbar.$outerScroll.insertAfter($viewportContainer)
         }
