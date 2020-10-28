@@ -23,7 +23,14 @@ class GCNVTrack extends TrackBase {
         this.paintAxis = paintAxis;
         this.graphType = config.graphType || "bar";
 
-        this.featureSource = FeatureSource(this.config, browser.genome);
+        //hack to avoid creating feature source multiple times.  If config.type is not set the file must be read
+        //to determine type, which results in creation of a feature source.
+        if (config._featureSource) {
+            this.featureSource = config._featureSource;
+            delete config._featureSource;
+        } else {
+            this.featureSource = FeatureSource(this.config, browser.genome);
+        }
     }
 
     async postInit() {
