@@ -860,13 +860,12 @@ function addMouseHandlers() {
         const rows = nameValues.map(nameValue => {
 
             if (nameValue.name) {
-                const str = `<div><span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }</div>`
+                const str = `<span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }`
                 return `<div title="${ nameValue.value }">${ str }</div>`
             } else if ('<hr>' === nameValue) {
                 return nameValue
             } else {
-                const str = `<div>${ nameValue }</div>`
-                return `<div title="${ nameValue }">${ str }</div>`
+                return `<div title="${ nameValue }">${ nameValue }</div>`
             }
 
         })
