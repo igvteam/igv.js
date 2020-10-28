@@ -16,9 +16,9 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.6.8/examples/cram-vcf.html)***
+***[Alignments](https://igv.org/web/release/2.6.8/examples/cram.html)***
 
-***[Interactions](https://igv.org/web/release/2.6.8/examples/arcs.html)***
+***[Interactions](https://igv.org/web/release/2.6.8/examples/bedpe.html)***
 
 ***[Copy number](https://igv.org/web/release/2.6.8/examples/copyNumber.html)***
 
