@@ -89,7 +89,7 @@ class TrackView {
         // color picker
 
         const trackColors = []
-        const color = track.color || track.config.color || track.defaultColor;
+        const color = track.color || track.defaultColor;
         if (StringUtils.isString(color)) {
             trackColors.push(color);
         }
