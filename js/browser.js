@@ -372,13 +372,8 @@ class Browser {
         await this.loadTrackList(session.tracks);
 
         if (false !== session.showIdeogram) {
-
-            if (undefined === this.ideoPanel) {
-                this.ideoPanel = new IdeogramTrack(this)
-                this.addTrack(this.ideoPanel);
-            }
-
-            //this.ideoPanel.trackView.updateViews();
+            this.ideoPanel = new IdeogramTrack(this)
+            this.addTrack(this.ideoPanel);
         }
 
 
@@ -840,21 +835,23 @@ class Browser {
      * API function
      */
     removeAllTracks(removeSequence) {
-        var self = this,
-            newTrackViews = [];
 
-        for (let tv of this.trackViews) {
+        const newTrackViews = [];
 
-            if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
-                self.trackContainer.removeChild(tv.trackDiv);
-                self.fireEvent('trackremoved', [tv.track]);
-                tv.dispose();
+        for (let trackView of this.trackViews) {
+
+            if ((removeSequence || trackView.track.id !== 'sequence') && trackView.track.id !== 'ruler') {
+                this.trackContainer.removeChild(trackView.trackDiv);
+                this.fireEvent('trackremoved', [trackView.track]);
+                trackView.dispose();
             } else {
-                newTrackViews.push(tv);
+                newTrackViews.push(trackView);
             }
         }
 
-        this.trackViews = newTrackViews;
+        this.ideoPanel = undefined
+
+        this.trackViews = newTrackViews
 
     }
 
