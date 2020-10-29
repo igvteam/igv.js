@@ -4,6 +4,7 @@ import MenuUtils from "./ui/menuUtils.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import IGVGraphics from "./igv-canvas.js";
 import {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange} from './igv-create.js';
+import { doAutoscale } from "./util/igvUtils.js";
 import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import embedCss from "./embedCss.js";
@@ -32,6 +33,7 @@ export default {
     version,
     xhr,
     setApiKey,
-    appendRightHandGutter
+    appendRightHandGutter,
+    doAutoscale
 }
 
