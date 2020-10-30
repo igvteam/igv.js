@@ -26,9 +26,8 @@
 import Cytoband from "./cytoband.js";
 import FastaSequence from "./fasta.js";
 import igvxhr from "../igvxhr.js";
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
-import {URIUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const splitLines = StringUtils.splitLines;
 
@@ -93,217 +92,217 @@ const GenomeUtils = {
 };
 
 
-var Genome = function (config, sequence, ideograms, aliases) {
+class Genome {
+    constructor(config, sequence, ideograms, aliases) {
 
-    this.config = config;
-    this.id = config.id;
-    this.sequence = sequence;
-    this.chromosomeNames = sequence.chromosomeNames;
-    this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
-    this.ideograms = ideograms;
+        this.config = config;
+        this.id = config.id;
+        this.sequence = sequence;
+        this.chromosomeNames = sequence.chromosomeNames;
+        this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
+        this.ideograms = ideograms;
 
-    this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
-    if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
-        constructWG(this, config);
-    } else {
-        this.wgChromosomeNames = sequence.chromosomeNames;
+        this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
+        if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
+            constructWG(this, config);
+        } else {
+            this.wgChromosomeNames = sequence.chromosomeNames;
+        }
+
+        /**
+         * Return the official chromosome name for the (possibly) alias.  Deals with
+         * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
+         * @param str
+         */
+        var chrAliasTable = {},
+            self = this;
+
+
+        // The standard mappings
+        chrAliasTable["all"] = "all";
+        this.chromosomeNames.forEach(function (name) {
+            var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
+            chrAliasTable[alias.toLowerCase()] = name;
+            if (name === "chrM") chrAliasTable["mt"] = "chrM";
+            if (name === "MT") chrAliasTable["chrm"] = "MT";
+            chrAliasTable[name.toLowerCase()] = name;
+        });
+
+        // Custom mappings
+        if (aliases) {
+            aliases.forEach(function (array) {
+                // Find the official chr name
+                var defName, i;
+
+                for (i = 0; i < array.length; i++) {
+                    if (self.chromosomes[array[i]]) {
+                        defName = array[i];
+                        break;
+                    }
+                }
+
+                if (defName) {
+                    array.forEach(function (alias) {
+                        if (alias !== defName) {
+                            chrAliasTable[alias.toLowerCase()] = defName;
+                            chrAliasTable[alias] = defName;      // Should not be needed
+                        }
+                    });
+                }
+
+            });
+        }
+
+        this.chrAliasTable = chrAliasTable;
+
+    }
+
+    showWholeGenomeView() {
+        return this.config.wholeGenomeView !== false;
+    }
+
+    toJSON() {
+        return Object.assign({}, this.config, {tracks: undefined});
+    }
+
+    getInitialLocus() {
+
+    }
+
+    getHomeChromosomeName() {
+        if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
+            return "all";
+        } else {
+            const chromosome = this.chromosomes[this.chromosomeNames[0]];
+            if (chromosome.rangeLocus) {
+                return chromosome.name + ":" + chromosome.rangeLocus;
+            } else {
+                return this.chromosomeNames[0];
+            }
+        }
+    }
+
+    getChromosomeName(str) {
+        var chr = this.chrAliasTable[str.toLowerCase()];
+        return chr ? chr : str;
+    }
+
+    getChromosome(chr) {
+        chr = this.getChromosomeName(chr);
+        return this.chromosomes[chr];
+    }
+
+    getCytobands(chr) {
+        return this.ideograms ? this.ideograms[chr] : null;
+    }
+
+    getLongestChromosome() {
+
+        var longestChr,
+            chromosomes = this.chromosomes;
+        for (let key in chromosomes) {
+            if (chromosomes.hasOwnProperty(key)) {
+                var chr = chromosomes[key];
+                if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
+                    longestChr = chr;
+                }
+            }
+            return longestChr;
+        }
+    }
+
+    getChromosomes() {
+        return this.chromosomes;
     }
 
     /**
-     * Return the official chromosome name for the (possibly) alias.  Deals with
-     * 1 <-> chr1,  chrM <-> MT,  IV <-> chr4, etc.
-     * @param str
+     * Return the genome coordinate in kb for the give chromosome and position.
+     * NOTE: This might return undefined if the chr is filtered from whole genome view.
      */
-    var chrAliasTable = {},
-        self = this;
+    getGenomeCoordinate(chr, bp) {
+
+        var offset = this.getCumulativeOffset(chr);
+        if (offset === undefined) return undefined;
+
+        return offset + bp;
+    }
+
+    /**
+     * Return the chromosome and coordinate in bp for the given genome coordinate
+     */
+    getChromosomeCoordinate(genomeCoordinate) {
+
+        if (this.cumulativeOffsets === undefined) {
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
+        }
+
+        let lastChr = undefined;
+        let lastCoord = 0;
+        for (let name of this.wgChromosomeNames) {
+
+            const cumulativeOffset = this.cumulativeOffsets[name];
+            if (cumulativeOffset > genomeCoordinate) {
+                const position = genomeCoordinate - lastCoord;
+                return {chr: lastChr, position: position};
+            }
+            lastChr = name;
+            lastCoord = cumulativeOffset;
+        }
+
+        // If we get here off the end
+        return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0};
+
+    };
 
 
-    // The standard mappings
-    chrAliasTable["all"] = "all";
-    this.chromosomeNames.forEach(function (name) {
-        var alias = name.startsWith("chr") ? name.substring(3) : "chr" + name;
-        chrAliasTable[alias.toLowerCase()] = name;
-        if (name === "chrM") chrAliasTable["mt"] = "chrM";
-        if (name === "MT") chrAliasTable["chrm"] = "MT";
-        chrAliasTable[name.toLowerCase()] = name;
-    });
+    /**
+     * Return the offset in genome coordinates (kb) of the start of the given chromosome
+     * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
+     */
+    getCumulativeOffset(chr) {
 
-    // Custom mappings
-    if (aliases) {
-        aliases.forEach(function (array) {
-            // Find the official chr name
-            var defName, i;
+        if (this.cumulativeOffsets === undefined) {
+            this.cumulativeOffsets = computeCumulativeOffsets.call(this);
+        }
 
-            for (i = 0; i < array.length; i++) {
-                if (self.chromosomes[array[i]]) {
-                    defName = array[i];
-                    break;
-                }
+        const queryChr = this.getChromosomeName(chr);
+        return this.cumulativeOffsets[queryChr];
+
+        function computeCumulativeOffsets() {
+
+            let self = this;
+            let acc = {};
+            let offset = 0;
+            for (let name of self.wgChromosomeNames) {
+
+                acc[name] = Math.floor(offset);
+
+                const chromosome = self.getChromosome(name);
+
+                offset += chromosome.bpLength;
             }
 
-            if (defName) {
-                array.forEach(function (alias) {
-                    if (alias !== defName) {
-                        chrAliasTable[alias.toLowerCase()] = defName;
-                        chrAliasTable[alias] = defName;      // Should not be needed
-                    }
-                });
-            }
-
-        });
-    }
-
-    this.chrAliasTable = chrAliasTable;
-
-}
-
-Genome.prototype.showWholeGenomeView = function () {
-    return this.config.wholeGenomeView !== false;
-}
-
-Genome.prototype.toJSON = function () {
-
-    return Object.assign({}, this.config, {tracks: undefined});
-}
-
-Genome.prototype.getInitialLocus = function () {
-
-
-}
-
-Genome.prototype.getHomeChromosomeName = function () {
-    if (this.showWholeGenomeView() && this.chromosomes.hasOwnProperty("all")) {
-        return "all";
-    } else {
-        const chromosome = this.chromosomes[this.chromosomeNames[0]];
-        if (chromosome.rangeLocus) {
-            return chromosome.name + ":" + chromosome.rangeLocus;
-        } else {
-            return this.chromosomeNames[0];
+            return acc;
         }
     }
-}
 
-Genome.prototype.getChromosomeName = function (str) {
-    var chr = this.chrAliasTable[str.toLowerCase()];
-    return chr ? chr : str;
-}
+    /**
+     * Return the nominal genome length, this is the length of the main chromosomes (no scaffolds, etc).
+     */
+    getGenomeLength() {
 
-Genome.prototype.getChromosome = function (chr) {
-    chr = this.getChromosomeName(chr);
-    return this.chromosomes[chr];
-}
+        let self = this;
 
-Genome.prototype.getCytobands = function (chr) {
-    return this.ideograms ? this.ideograms[chr] : null;
-}
-
-Genome.prototype.getLongestChromosome = function () {
-
-    var longestChr,
-        chromosomes = this.chromosomes;
-    for (let key in chromosomes) {
-        if (chromosomes.hasOwnProperty(key)) {
-            var chr = chromosomes[key];
-            if (longestChr === undefined || chr.bpLength > longestChr.bpLength) {
-                longestChr = chr;
-            }
+        if (!this.bpLength) {
+            let bpLength = 0;
+            self.wgChromosomeNames.forEach(function (cname) {
+                let c = self.chromosomes[cname];
+                bpLength += c.bpLength;
+            });
+            this.bpLength = bpLength;
         }
-        return longestChr;
+        return this.bpLength;
     }
-}
-
-Genome.prototype.getChromosomes = function () {
-    return this.chromosomes;
-}
-
-/**
- * Return the genome coordinate in kb for the give chromosome and position.
- * NOTE: This might return undefined if the chr is filtered from whole genome view.
- */
-Genome.prototype.getGenomeCoordinate = function (chr, bp) {
-
-    var offset = this.getCumulativeOffset(chr);
-    if (offset === undefined) return undefined;
-
-    return offset + bp;
-}
-
-/**
- * Return the chromosome and coordinate in bp for the given genome coordinate
- */
-Genome.prototype.getChromosomeCoordinate = function (genomeCoordinate) {
-
-    if (this.cumulativeOffsets === undefined) {
-        this.cumulativeOffsets = computeCumulativeOffsets.call(this);
-    }
-
-    let lastChr = undefined;
-    let lastCoord = 0;
-    for (let name of this.wgChromosomeNames) {
-
-        const cumulativeOffset = this.cumulativeOffsets[name];
-        if (cumulativeOffset > genomeCoordinate) {
-            const position = genomeCoordinate - lastCoord;
-            return {chr: lastChr, position: position};
-        }
-        lastChr = name;
-        lastCoord = cumulativeOffset;
-    }
-
-    // If we get here off the end
-    return {chr: this.chromosomeNames[this.chromosomeNames.length - 1], position: 0};
-
-};
-
-
-/**
- * Return the offset in genome coordinates (kb) of the start of the given chromosome
- * NOTE:  This might return undefined if the chromosome is filtered from whole genome view.
- */
-Genome.prototype.getCumulativeOffset = function (chr) {
-
-    if (this.cumulativeOffsets === undefined) {
-        this.cumulativeOffsets = computeCumulativeOffsets.call(this);
-    }
-
-    const queryChr = this.getChromosomeName(chr);
-    return this.cumulativeOffsets[queryChr];
-};
-
-function computeCumulativeOffsets() {
-
-    let self = this;
-    let acc = {};
-    let offset = 0;
-    for (let name of self.wgChromosomeNames) {
-
-        acc[name] = Math.floor(offset);
-
-        const chromosome = self.getChromosome(name);
-
-        offset += chromosome.bpLength;
-    }
-
-    return acc;
-}
-
-/**
- * Return the nominal genome length, this is the length of the main chromosomes (no scaffolds, etc).
- */
-Genome.prototype.getGenomeLength = function () {
-
-    let self = this;
-
-    if (!this.bpLength) {
-        let bpLength = 0;
-        self.wgChromosomeNames.forEach(function (cname) {
-            let c = self.chromosomes[cname];
-            bpLength += c.bpLength;
-        });
-        this.bpLength = bpLength;
-    }
-    return this.bpLength;
 }
 
 function loadCytobands(cytobandUrl, config) {
@@ -407,7 +406,6 @@ function loadAliases(aliasURL, config) {
         });
 
 }
-
 
 function constructWG(genome, config) {
 
