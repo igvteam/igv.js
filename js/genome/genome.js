@@ -218,6 +218,13 @@ Genome.prototype.getChromosomes = function () {
     return this.chromosomes;
 }
 
+Genome.prototype.isWholeChromosome = function (referenceFrame, width) {
+    const { bpLength } = this.getChromosome(referenceFrame.chr)
+    const number = bpLength / referenceFrame.bpPerPixel
+    const pixels = Math.round(number)
+    return pixels === width
+}
+
 /**
  * Return the genome coordinate in kb for the give chromosome and position.
  * NOTE: This might return undefined if the chr is filtered from whole genome view.
