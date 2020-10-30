@@ -375,13 +375,10 @@ class Browser {
 
         await this.loadTrackList(session.tracks);
 
-        if (false !== session.showIdeogram) {
-            if (undefined === this.ideoPanel) {
-                this.ideoPanel = new IdeogramTrack(this)
-                this.addTrack(this.ideoPanel);
-            }
+        if (undefined === this.ideogram && false !== session.showIdeogram) {
+            this.ideogram = new IdeogramTrack(this)
+            this.addTrack(this.ideogram);
         }
-
 
         if (this.rulerTrack) {
             this.rulerTrack.trackView.updateViews();
@@ -427,7 +424,12 @@ class Browser {
         this.referenceFrameList = referenceFrameList;
         if (this.referenceFrameList.length > 0) {
 
-            if (!this.rulerTrack && false !== this.config.showRuler) {
+            if (undefined === this.ideogram && false !== this.config.showIdeogram) {
+                this.ideogram = new IdeogramTrack(this)
+                this.addTrack(this.ideogram)
+            }
+
+            if (undefined === this.rulerTrack && false !== this.config.showRuler) {
                 this.rulerTrack = new RulerTrack(this);
                 this.addTrack(this.rulerTrack);
             }
@@ -843,6 +845,8 @@ class Browser {
     removeAllTracks(removeSequence) {
 
         const newTrackViews = [];
+
+        this.ideogram = undefined
 
         for (let trackView of this.trackViews) {
 
