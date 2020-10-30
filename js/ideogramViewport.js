@@ -165,10 +165,14 @@ function repaintContext({ ctx, width, height, genome, chr, referenceFrame, ideog
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
 
     if (chr.toLowerCase() === "all") {
-        return;
+        return
     }
 
     drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors});
+
+    if (genome.isWholeChromosome(referenceFrame, width)) {
+        return
+    }
 
     const chromosome = genome.getChromosome(chr);
 

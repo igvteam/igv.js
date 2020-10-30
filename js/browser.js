@@ -68,9 +68,13 @@ const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
-const trackManipulationHandleMarginWidth = 2
+const trackManipulationHandleMarginWidth = 0
+const trackManipulationHandleShim = trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
+const scrollbarOuterWidth = 14
+
+// igv.scss - $igv-viewport-container-shim-width
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
 
 class Browser {
 
