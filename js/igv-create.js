@@ -332,10 +332,6 @@ function setDefaults(config) {
         config.showRuler = true;
     }
 
-    if (config.showSequence === undefined) {
-        config.showSequence = true;
-    }
-
     if (config.flanking === undefined) {
         config.flanking = 1000;
     }
@@ -348,9 +344,6 @@ function setDefaults(config) {
         config.tracks = [];
     }
 
-    if (config.showSequence) {
-        config.tracks.push({type: "sequence", order: defaultSequenceTrackOrder});
-    }
 }
 
 
