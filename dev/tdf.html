@@ -7,7 +7,7 @@
 
 <body>
 
-<h1>Segmented Copy Number</h1>
+<h1>Coverage data</h1>
 
 <div>
     <button id="bmBtn">Bookmark</button>
@@ -22,11 +22,21 @@
     var options =
         {
             genome: "hg19",
-            locus: "BRAF",
+            locus: "chr7:140,418,903-140,426,450",
             tracks: [
                 {
                     name: "Coverage TDF",
                     url: "../test/data/tdf/BRAF_C.bam.tdf"
+                },
+                {
+                    name: "Normalized Coverage TDF",
+                    url: "../test/data/tdf/BRAF_C.bam.tdf",
+                    normalize: true
+                },
+                {
+                    name: "Scaled Coverage TDF",
+                    url: "../test/data/tdf/BRAF_C.bam.tdf",
+                    scaleFactor: 2.0
                 }
             ]
         }
