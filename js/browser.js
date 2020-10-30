@@ -68,13 +68,9 @@ const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
-const trackManipulationHandleMarginWidth = 0
-const trackManipulationHandleShim = trackManipulationHandleWidth + trackManipulationHandleMarginWidth
+const trackManipulationHandleMarginWidth = 2
 
-const scrollbarOuterWidth = 14
-
-// igv.scss - $igv-viewport-container-shim-width
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
 class Browser {
 
@@ -376,8 +372,13 @@ class Browser {
         await this.loadTrackList(session.tracks);
 
         if (false !== session.showIdeogram) {
-            this.ideoPanel = new IdeogramTrack(this)
-            this.addTrack(this.ideoPanel);
+
+            if (undefined === this.ideoPanel) {
+                this.ideoPanel = new IdeogramTrack(this)
+                this.addTrack(this.ideoPanel);
+            }
+
+            //this.ideoPanel.trackView.updateViews();
         }
 
 
@@ -839,23 +840,21 @@ class Browser {
      * API function
      */
     removeAllTracks(removeSequence) {
+        var self = this,
+            newTrackViews = [];
 
-        const newTrackViews = [];
+        for (let tv of this.trackViews) {
 
-        for (let trackView of this.trackViews) {
-
-            if ((removeSequence || trackView.track.id !== 'sequence') && trackView.track.id !== 'ruler') {
-                this.trackContainer.removeChild(trackView.trackDiv);
-                this.fireEvent('trackremoved', [trackView.track]);
-                trackView.dispose();
+            if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
+                self.trackContainer.removeChild(tv.trackDiv);
+                self.fireEvent('trackremoved', [tv.track]);
+                tv.dispose();
             } else {
-                newTrackViews.push(trackView);
+                newTrackViews.push(tv);
             }
         }
 
-        this.ideoPanel = undefined
-
-        this.trackViews = newTrackViews
+        this.trackViews = newTrackViews;
 
     }
 
