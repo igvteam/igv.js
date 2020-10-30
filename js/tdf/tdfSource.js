@@ -28,7 +28,7 @@ import TDFReader from "./tdfReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
 
 class TDFSource {
-    
+
     constructor(config, genome) {
 
         this.genome = genome;
@@ -38,17 +38,25 @@ class TDFSource {
 
     async getFeatures({chr, start, end, bpPerPixel}) {
 
-        await getRootGroup.call(this);
-
         const genomicInterval = new GenomicInterval(chr, start, end);
         const genome = this.genome;
+
+
+        if (!this.rootGroup) {
+            this.rootGroup = await this.reader.readRootGroup();
+            if(!this.normalizationFactor) {
+                const totalCount = this.rootGroup.totalCount;
+                if(totalCount) {
+                    this.normalizationFactor = 1.0e6 / totalCount;
+                }
+            }
+        }
 
         if (chr.toLowerCase() === "all") {
             return [];      // Whole genome view not yet supported
         }
 
         genomicInterval.bpPerPixel = bpPerPixel;
-        const group = await getRootGroup.call(this);
         const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
         let queryChr = this.reader.chrAliasTable[chr];
         let maxZoom = this.reader.maxZoom;
@@ -85,17 +93,8 @@ class TDFSource {
         features.sort(function (a, b) {
             return a.start - b.start;
         })
+
         return features;
-
-
-        async function getRootGroup() {
-            if (this.rootGroup) {
-                return this.rootGroup;
-            } else {
-                this.rootGroup = await this.reader.readRootGroup()
-                return this.rootGroup;
-            }
-        }
     }
 
     supportsWholeGenome() {

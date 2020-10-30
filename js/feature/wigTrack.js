@@ -65,6 +65,8 @@ class WigTrack extends TrackBase {
         this.windowFunction = config.windowFunction || "mean";
         this.paintAxis = paintAxis;
         this.graphType = config.graphType || "bar";
+        this.normalize = config.normalize;  // boolean, for use with "TDF" files
+        this.scaleFactor = config.scaleFactor;  // optional scale factor, ignored if normalize === true;
 
     }
 
@@ -74,7 +76,16 @@ class WigTrack extends TrackBase {
     }
 
     async getFeatures(chr, start, end, bpPerPixel) {
-        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, windowFunction: this.windowFunction});
+        const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, windowFunction: this.windowFunction});
+        const scaleFactor = this.normalize && this.featureSource.normalizationFactor ?
+            this.featureSource.normalizationFactor :
+            this.scaleFactor;
+        if(scaleFactor) {
+            for(let f of features) {
+                f.value *= scaleFactor;
+            }
+        }
+        return features;
     }
 
     menuItemList() {
