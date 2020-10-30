@@ -38,7 +38,7 @@ import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 let dragged
 let dragDestination
 
-const trackExclusionSet = new Set(['ruler', 'sequence', 'ideogram'])
+const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
 
 class TrackView {
 
@@ -652,7 +652,7 @@ function populateViewportContainer(browser, referenceFrameList, trackView) {
 
     trackView.updateViewportForMultiLocus();
 
-    if (false === trackExclusionSet.has(trackView.track.type)) {
+    if (false === scrollbarExclusionTypes.has(trackView.track.type)) {
         trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
     } else {
         const $shim = $('<div>', {class: 'igv-scrollbar-shim'})
