@@ -88,7 +88,7 @@
                 //     }                ]
             };
 
-        const missing_ideogram =
+        const session_config =
             {
                 "version": "2.7.0",
                 "reference": {
@@ -98,24 +98,11 @@
                     "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
                     "cytobandURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
                 },
-                "locus": "chr4:67,047,933-67,047,971",
+                "locus": "chr1:1-249,250,621",
                 "tracks": [
                     {
                         "type": "sequence",
                         "order": -900719925474.0991
-                    },
-                    {
-                        "sourceType": "gcs",
-                        "type": "alignment",
-                        "url": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam",
-                        "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12890_S1.bam.bai",
-                        "name": "NA12890",
-                        "format": "bam",
-                        "height": 300,
-                        "coverageTrackHeight": 50,
-                        "alleleFreqThreshold": 0.2,
-                        "color": "rgb(185, 185, 185)",
-                        "order": 4
                     },
                     {
                         "name": "Refseq Genes",
@@ -129,7 +116,7 @@
                 ]
             };
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), missing_ideogram)
+        browser = await igv.createBrowser(document.getElementById('igvDiv'), session_config)
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
