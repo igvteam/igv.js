@@ -161,7 +161,8 @@ class TDFReader {
                 dataType: dataType,
                 tileWidth: tileWidth,
                 tiles: tiles
-            };
+            }
+
             this.datasetCache[key] = dataset;
             return dataset;
         }
@@ -179,9 +180,14 @@ class TDFReader {
             const names = group["chromosomes"];
             const maxZoomString = group["maxZoom"];
 
-            // Now parse out interesting attributes.  This is a side effect, but the alternative is messy as well.
+            // Now parse out interesting attributes.
             if (maxZoomString) {
                 this.maxZoom = Number(maxZoomString);
+            }
+
+            const totalCountString = group["totalCount"];
+            if(totalCountString) {
+                group.totalCount = Number.parseFloat(totalCountString);
             }
 
             // Chromosome names
