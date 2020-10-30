@@ -68,9 +68,13 @@ const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
-const trackManipulationHandleMarginWidth = 2
+const trackManipulationHandleMarginWidth = 0
+const trackManipulationHandleShim = trackManipulationHandleWidth + trackManipulationHandleMarginWidth
 
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleWidth + trackManipulationHandleMarginWidth
+const scrollbarOuterWidth = 14
+
+// igv.scss - $igv-viewport-container-shim-width
+const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
 
 class Browser {
 
@@ -372,13 +376,10 @@ class Browser {
         await this.loadTrackList(session.tracks);
 
         if (false !== session.showIdeogram) {
-
             if (undefined === this.ideoPanel) {
                 this.ideoPanel = new IdeogramTrack(this)
                 this.addTrack(this.ideoPanel);
             }
-
-            //this.ideoPanel.trackView.updateViews();
         }
 
 
@@ -840,17 +841,17 @@ class Browser {
      * API function
      */
     removeAllTracks(removeSequence) {
-        var self = this,
-            newTrackViews = [];
 
-        for (let tv of this.trackViews) {
+        const newTrackViews = [];
 
-            if ((removeSequence || tv.track.id !== 'sequence') && tv.track.id !== 'ruler') {
-                self.trackContainer.removeChild(tv.trackDiv);
-                self.fireEvent('trackremoved', [tv.track]);
-                tv.dispose();
+        for (let trackView of this.trackViews) {
+
+            if ((removeSequence || trackView.track.id !== 'sequence') && trackView.track.id !== 'ruler') {
+                this.trackContainer.removeChild(trackView.trackDiv);
+                this.fireEvent('trackremoved', [trackView.track]);
+                trackView.dispose();
             } else {
-                newTrackViews.push(tv);
+                newTrackViews.push(trackView);
             }
         }
 
@@ -1471,7 +1472,11 @@ class Browser {
                 trackJson.push(config);
             }
         }
-        const locaTrackFiles = trackJson.filter(({type}) => 'sequence' !== type).filter(({url}) => FileUtils.isFilePath(url))
+
+        const locaTrackFiles = trackJson.filter((track) => {
+            track.url && FileUtils.isFilePath(track.url)
+        })
+
         if (locaTrackFiles.length > 0) {
             throw new Error(`Error. Sessions cannot include local file references.`);
         }
@@ -1807,5 +1812,4 @@ async function searchWebService(browser, locus, searchConfig) {
 
 export {isLocusString, searchWebService}
 export default Browser
-
 
