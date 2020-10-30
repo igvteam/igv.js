@@ -77,10 +77,14 @@ class WigTrack extends TrackBase {
 
     async getFeatures(chr, start, end, bpPerPixel) {
         const features = await this.featureSource.getFeatures({chr, start, end, bpPerPixel, windowFunction: this.windowFunction});
-        const scaleFactor = this.normalize && this.featureSource.normalizationFactor ?
-            this.featureSource.normalizationFactor :
-            this.scaleFactor;
-        if(scaleFactor) {
+        if(this.normalize && this.featureSource.normalizationFactor) {
+            const scaleFactor = this.featureSource.normalizationFactor;
+            for(let f of features) {
+                f.value *= scaleFactor;
+            }
+        }
+        if(this.scaleFactor) {
+            const scaleFactor = this.scaleFactor;
             for(let f of features) {
                 f.value *= scaleFactor;
             }
