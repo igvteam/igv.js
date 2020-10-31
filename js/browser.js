@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { Alert } from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import TrackView, {
     emptyViewportContainers,
     maxViewportContentHeight,
@@ -43,7 +43,7 @@ import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
 import igvxhr from "./igvxhr.js";
 import {createIcon} from "./igv-icons.js";
-import {buildOptions, doAutoscale, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
+import {buildOptions, doAutoscale, getFilename, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
@@ -210,7 +210,10 @@ class Browser {
         return false;
     };
 
-// Render browser display as SVG
+    /**
+     * Render browse display as SVG
+     * @returns {string}
+     */
     toSVG() {
 
         const {x, y, width, height} = this.trackContainer.getBoundingClientRect();
@@ -298,14 +301,13 @@ class Browser {
             const urlOrFile = options.url || options.file
 
             if (options.url && (options.url.startsWith("blob:") || options.url.startsWith("data:"))) {
-
-                var json = Browser.uncompressSession(options.url);
+                const json = Browser.uncompressSession(options.url);
                 return JSON.parse(json);
 
             } else {
                 let filename = options.filename
                 if (!filename) {
-                    filename = (options.url ? FileUtils.getFilename(options.url) : options.file.name)
+                    filename = (options.url ? await getFilename(options.url) : options.file.name)
                 }
 
                 if (filename.endsWith(".xml")) {
@@ -335,21 +337,25 @@ class Browser {
      */
     async loadSessionObject(session) {
 
-        this.removeAllTracks(true);
+        this.removeAllTracks();
 
         const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
+        if (undefined === this.ideogram && false !== this.config.showIdeogram) {
+            this.ideogram = new IdeogramTrack(this)
+            this.addTrack(this.ideogram)
+        }
+
+        if (undefined === this.rulerTrack && false !== this.config.showRuler) {
+            this.rulerTrack = new RulerTrack(this);
+            this.addTrack(this.rulerTrack);
+        }
+
+
         // Restore gtex selections.
         if (session.gtexSelections) {
-
-            const referenceFrames = {};
             for (let referenceFrame of this.referenceFrameList) {
-                referenceFrames[referenceFrame.locusSearchString] = referenceFrame;
-            }
-
-            for (let s of Object.getOwnPropertyNames(session.gtexSelections)) {
-                const referenceFrame = referenceFrames[s];
-                if (referenceFrame) {
+                for (let s of Object.keys(session.gtexSelections)) {
                     const gene = session.gtexSelections[s].gene;
                     const snp = session.gtexSelections[s].snp;
                     referenceFrame.selection = new GtexSelection(gene, snp);
@@ -364,18 +370,16 @@ class Browser {
             }
         }
 
-        if (!session.tracks) {
-            // eslint-disable-next-line require-atomic-updates
-            session.tracks = [];
-        }
-        if (session.tracks.filter(track => track.type === 'sequence').length === 0) {
-            // session.tracks.push({type: "sequence", order: -Number.MAX_SAFE_INTEGER})
-            session.tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
+        const tracks = session.tracks || [];
+
+        const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0;
+        if (pushSequenceTrack && false !== this.config.showSequence) {
+            tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        await this.loadTrackList(session.tracks);
+        await this.loadTrackList(tracks);
 
-        if (undefined === this.ideogram && false !== session.showIdeogram) {
+        if (undefined === this.ideogram && false !== this.config.showIdeogram) {
             this.ideogram = new IdeogramTrack(this)
             this.addTrack(this.ideogram);
         }
@@ -413,30 +417,13 @@ class Browser {
         }
         this.genome = genome;
 
-        let referenceFrameList
         try {
-            referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
+            this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
         } catch (error) {
             // Couldn't find initial locus
-            console.error(error);
-            referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
-        }
-        this.referenceFrameList = referenceFrameList;
-        if (this.referenceFrameList.length > 0) {
-
-            if (undefined === this.ideogram && false !== this.config.showIdeogram) {
-                this.ideogram = new IdeogramTrack(this)
-                this.addTrack(this.ideogram)
-            }
-
-            if (undefined === this.rulerTrack && false !== this.config.showRuler) {
-                this.rulerTrack = new RulerTrack(this);
-                this.addTrack(this.rulerTrack);
-            }
-
-        } else {
-            const errorString = 'Unrecognized locus ' + this.config.locus;
+            const errorString = 'Unrecognized locus ' + initialLocus;
             Alert.presentAlert(errorString, undefined);
+            this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
         }
 
         if (genomeConfig.tracks) {
@@ -690,12 +677,7 @@ class Browser {
             } else {
                 let filename = config.filename;
                 if (!filename) {
-                    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
-                        const json = await getDriveFileInfo(url)
-                        filename = json.originalFileName || json.name;
-                    } else {
-                        filename = FileUtils.getFilename(url);
-                    }
+                    filename = await getFilename(url);
                 }
                 config.format = TrackUtils.inferFileFormat(filename);
             }
@@ -842,15 +824,13 @@ class Browser {
     /**
      * API function
      */
-    removeAllTracks(removeSequence) {
+    removeAllTracks() {
 
         const newTrackViews = [];
 
-        this.ideogram = undefined
-
         for (let trackView of this.trackViews) {
-
-            if ((removeSequence || trackView.track.id !== 'sequence') && trackView.track.id !== 'ruler') {
+            const trackId = trackView.track.id;
+            if (trackId !== 'sequence' && trackId !== 'ruler' && trackId !== 'ideogram') {
                 this.trackContainer.removeChild(trackView.trackDiv);
                 this.fireEvent('trackremoved', [trackView.track]);
                 trackView.dispose();
@@ -860,7 +840,6 @@ class Browser {
         }
 
         this.trackViews = newTrackViews;
-
     }
 
     /**
