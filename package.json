@@ -56,7 +56,8 @@
     "rollup-plugin-node-resolve": "^5.2.0",
     "rollup-plugin-strip": "^1.2.2",
     "rollup-plugin-terser": "^7.0.2",
-    "w3c-xmlhttprequest": "^3.0.0"
+    "w3c-xmlhttprequest": "^3.0.0",
+    "xmldom": "^0.4.0"
   },
   "dependencies": {
     "igv-ui": "github:igvteam/igv-ui#60fc0fc7",
