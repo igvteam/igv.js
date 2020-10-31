@@ -6,6 +6,7 @@
 import {File} from "./File.js"
 import {XMLHttpRequestMock} from "./XMLHttpRequestMock.js"
 import {Document, DOMImplementation} from "./Document.js";
+import {DOMParser} from "./DOMParser.js"
 
 global.document = new Document();
 
@@ -25,5 +26,7 @@ global.navigator = {
     userAgent: "Node",
     vendor: "Node"
 }
+
+global.DOMParser = DOMParser;
 
 
