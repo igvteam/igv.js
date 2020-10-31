@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, TrackUtils, StringUtils, GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
 
 const extend = function (parent, child) {
 
@@ -98,7 +98,6 @@ const doAutoscale = function (features) {
     return {min: min, max: max};
 }
 
-
 const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 
     let ss = extent.start;
@@ -137,7 +136,6 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
     extent.end = Math.floor(ee);
 };
 
-
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -154,7 +152,6 @@ const isNumber = function (num) {
     }
     return false;
 };
-
 
 function inferTrackType(config) {
 
@@ -206,7 +203,6 @@ function inferTrackType(config) {
     }
 }
 
-
 function translateDeprecatedTypes(config) {
 
     if (config.featureType) {  // Translate deprecated "feature" type
@@ -238,6 +234,18 @@ function translateDeprecatedTypes(config) {
     }
 }
 
+async function getFilename(url) {
+    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
+        // This will fail if Google API key is not defined
+        if(GoogleAuth.getApiKey() === undefined) {
+            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
+        }
+        const json = await getDriveFileInfo(url)
+        return json.originalFileName || json.name;
+    } else {
+        return FileUtils.getFilename(url);
+    }
+}
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType}
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType, getFilename}
 
