@@ -25,6 +25,7 @@
 
 import oauth from "./oauth.js";
 import {unbgzf} from './bam/bgzf.js';
+import {getFilename} from "./util/igvUtils.js";
 import PromiseThrottle from "./util/promiseThrottle.js"
 import {FileUtils, GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
 
@@ -343,7 +344,7 @@ async function loadStringFromUrl(url, options) {
 
     options = options || {};
 
-    const fn = options.filename || FileUtils.getFilename(url);
+    const fn = options.filename || await getFilename(url);
     let compression = UNKNOWN;
     if (options.bgz) {
         compression = BGZF;
