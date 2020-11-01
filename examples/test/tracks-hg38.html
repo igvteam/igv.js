@@ -24,6 +24,7 @@
 <p>
     <button id="bookmarkButton">Bookmark</button>
     <button id="sessionButton">Session JSON</button>
+    <button id="svgButton">Save SVG</button>
 </p>
 
 <div id="igvDiv" style="padding-top: 20px;padding-bottom: 20px; height: auto"></div>
@@ -41,6 +42,7 @@
                     name: 'example track',
                     url: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz',
                     indexURL: 'https://s3.amazonaws.com/igv.org.demo/gcnv_track_example_data.chr22.bed.gz.tbi',
+                    order: -Number.MAX_VALUE
                     //height: 200,
                     // min: 0,
                     // max: 5,
@@ -109,7 +111,7 @@
                 {
                     name: "Simple_repeat (useScore)",
                     url: "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz",
-                    indexURL:"https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi",
+                    indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/rmsk/hg38_rmsk_Simple_repeat.bed.gz.tbi",
                     useScore: true,
                     min: 0,
                     max: 100
@@ -138,9 +140,16 @@
 
             document.getElementById("bookmarkButton").addEventListener("click",
                 () => window.history.pushState({}, "IGV", browser.sessionURL()))
+
+            document.getElementById("svgButton").addEventListener("click", () => {
+                let svg = browser.toSVG();
+                const path = 'tracks-hg38.svg';
+                const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
+                download(path, data);
+            })
         })
 
-    function download  (filename, data) {
+    function download(filename, data) {
 
         const element = document.createElement('a');
         element.setAttribute('href', data);

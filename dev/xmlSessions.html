@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <link href=../img/favicon.ico rel="shortcut icon">
+    <title>XML Session</title>
+
+</head>
+
+<body>
+
+<h2>XML (IGV Desktop) Sessions Examples</h2>
+
+<p>
+    <b>Look for console errors and compare with
+        <a target="_blank" href="https://drive.google.com/file/d/1swKWsxGGrWMPBg8reg5oyI-AfC8kFfXM/view?usp=sharing">xml-session.png</a>
+    </b>
+</p>
+
+<h4>Merged tracks</h4>
+<div id="igvDiv" style=",margin-top: 20px;margin-bottom: 20px; height: auto"></div>
+
+<h4>Group autoscale</h4>
+<div id="igvDiv2" style="margin-top: 20px;margin-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from '../js/index.js'
+
+    // Merged session
+    igv.createBrowser(document.getElementById('igvDiv'), {genome: "mm10"})
+        .then(function (browser) {
+            browser.loadSession({
+                url: "https://s3.amazonaws.com/igv.org.test/session/merged_session.xml"
+            })
+        })
+
+    // Group autoscale session
+    igv.createBrowser(document.getElementById('igvDiv2'), {genome: "mm10"})
+        .then(function (browser) {
+            browser.loadSession({
+                url: "https://s3.amazonaws.com/igv.org.test/session/group_autoscale_session.xml"
+            })
+        })
+
+
+</script>
+
+</body>
+
+</html>
