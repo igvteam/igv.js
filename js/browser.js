@@ -341,6 +341,8 @@ class Browser {
 
         const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
+        // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
+        // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
         if (undefined === this.ideogram && false !== this.config.showIdeogram) {
             this.ideogram = new IdeogramTrack(this)
             this.addTrack(this.ideogram)
@@ -379,9 +381,8 @@ class Browser {
 
         await this.loadTrackList(tracks);
 
-        if (undefined === this.ideogram && false !== this.config.showIdeogram) {
-            this.ideogram = new IdeogramTrack(this)
-            this.addTrack(this.ideogram);
+        if (this.ideogram) {
+            this.ideogram.trackView.updateViews();
         }
 
         if (this.rulerTrack) {
@@ -775,20 +776,31 @@ class Browser {
 
     reorderTracks() {
 
-        var myself = this;
-
         this.trackViews.sort(function (a, b) {
-            var aOrder = a.track.order || 0;
-            var bOrder = b.track.order || 0;
-            return aOrder - bOrder;
+
+            const firstSortOrder = tv => {
+                return 'ideogram' === tv.track.id ? 1 :
+                    'ruler' === tv.track.id ? 2 :
+                        3
+            }
+
+            const aOrder1 = firstSortOrder(a);
+            const bOrder1 = firstSortOrder(b);
+            if(aOrder1 === bOrder1) {
+                const aOrder2 = a.track.order || 0;
+                const bOrder2 = b.track.order || 0;
+                return aOrder2 - bOrder2;
+            } else {
+                return aOrder1 - bOrder1;
+            }
         });
 
         // Reattach the divs to the dom in the correct order
         $(this.trackContainer).children("igv-track").detach();
 
-        this.trackViews.forEach(function (trackView) {
-            myself.trackContainer.appendChild(trackView.trackDiv);
-        });
+        for(let trackView of this.trackViews) {
+            this.trackContainer.appendChild(trackView.trackDiv);
+        }
 
     }
 
