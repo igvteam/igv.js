@@ -47,14 +47,14 @@ class XMLSession {
 
         const resourceMap = new Map();
         Array.from(resourceElements).forEach(function (r, idx) {
-            var res = {
+            var config = {
                 url: r.getAttribute("path"),
                 indexURL: r.getAttribute("index"),
                 order: idx
             };
-            resourceMap.set(res.url, res);
+            resourceMap.set(config.url, config);
             if (!hasTrackElements) {
-                tracks.push(res);
+                tracks.push(config);
             }
         });
 
@@ -76,15 +76,20 @@ class XMLSession {
                     tracks.push(mergedTrack);
 
                     Array.from(subtracks).forEach(function (t) {
-
                         t.processed = true;
                         const id = t.getAttribute("id");
-                        const res = resourceMap.get(id);
-                        if (res) {
-                            mergedTrack.tracks.push(res);
-                            extractTrackAttributes(t, res);
-                            res.autoscale = false;
-                            mergedTrack.height = res.height;      //
+                        const config = resourceMap.get(id);
+                        if (config) {
+                            mergedTrack.tracks.push(config);
+                            extractTrackAttributes(t, config);
+                            config.autoscale = false;
+                            mergedTrack.height = config.height;
+
+                            // Add alpha for merged track colors.  Alpha is not recorded by IGV desktop in XML session
+                            //const color = t.getAttribute("color");
+                            //if (color) {
+                            //    config.color = "rgba(" + color + ",0.5)";
+                            //}
                         }
                     })
                 } else if (!track.processed) {
