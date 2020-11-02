@@ -28,6 +28,7 @@ import {unbgzf} from './bam/bgzf.js';
 import {getFilename} from "./util/igvUtils.js";
 import PromiseThrottle from "./util/promiseThrottle.js"
 import {FileUtils, GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
+import version from "./version.js";
 
 var NONE = 0;
 var GZIP = 1;
@@ -532,7 +533,7 @@ if (typeof window !== "undefined") {
     console.log("startup")
     const href = window.document.location.href;
     if (!href.includes("localhost") && !href.includes("127.0.0.1")) {
-        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
+        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + version();
         igvxhr.load(url).then(function (ignore) {
         })
     }
