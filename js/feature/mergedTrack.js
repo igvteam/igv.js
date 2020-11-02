@@ -112,14 +112,21 @@ class MergedTrack extends TrackBase {
         }
     }
 
-    popupData(config) {
-        var popupDataFromAllTracks = [];
-        for (var i = 0, len = this.tracks.length; i < len; i++) {
-            var popupData = this.tracks[i].popupData(config);
-            popupDataFromAllTracks.push(...popupData);
-        }
+    popupData(clickState, features) {
 
-        return popupDataFromAllTracks
+        const featuresArray = features || clickState.viewport.getCachedFeatures();
+
+        if(featuresArray && featuresArray.length === this.tracks.length) {
+            // Array of feature arrays, 1 for each track
+            const popupData = [];
+            for(let i=0; i<this.tracks.length; i++) {
+                if(i > 0) popupData.push("<hr/>");
+                popupData.push(`<b>${this.tracks[i].name}</b>`);
+                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
+                popupData.push(...trackPopupData);
+            }
+            return popupData;
+        }
     }
 }
 
