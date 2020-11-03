@@ -323,6 +323,7 @@ class BAMTrack extends TrackBase {
             click: () => {
                 this.alignmentTrack.displayMode = "SQUISHED";
                 this.config.displayMode = "SQUISHED";
+                this.trackView.checkContentHeight();
                 this.trackView.repaintViews();
             }
         });
