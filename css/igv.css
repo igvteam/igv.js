@@ -853,7 +853,7 @@
 .igv-multi-locus-panel-label-div {
   position: absolute;
   left: 50%;
-  top: 25%;
+  top: 15%;
   transform: translate(-50%, -25%);
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
