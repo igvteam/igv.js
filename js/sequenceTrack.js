@@ -153,7 +153,7 @@ class SequenceTrack {
 
         const threeFrame = [[], [], []];
 
-        for (let fnum of [0, 1, 2]) {
+        for (let fNum of [0, 1, 2]) {
             var idx = fNum;
             var obj, st;
 
