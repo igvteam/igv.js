@@ -1259,7 +1259,7 @@ class Browser {
 
         for (let trackView of this.trackViews) {
             trackView.updateViewportForMultiLocus();
-            trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports);
+            // trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports);
         }
 
         if (this.rulerTrack) {
