@@ -842,7 +842,7 @@ class Browser {
 
         for (let trackView of this.trackViews) {
             const trackId = trackView.track.id;
-            if (trackId !== 'sequence' && trackId !== 'ruler' && trackId !== 'ideogram') {
+            if (trackId !== 'ruler' && trackId !== 'ideogram') {
                 this.trackContainer.removeChild(trackView.trackDiv);
                 this.fireEvent('trackremoved', [trackView.track]);
                 trackView.dispose();
