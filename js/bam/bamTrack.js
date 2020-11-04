@@ -24,7 +24,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamSource from "./bamSource.js";
 import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
@@ -48,16 +48,11 @@ class BAMTrack extends TrackBase {
 
     constructor(config, browser) {
 
-        // Override default track height for bams
-        if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
 
         super(config, browser);
 
         this.type = "alignment";   // Not sure this is used for anything
 
-        if (config.coverageTrackHeight === undefined) {
-            config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
-        }
         if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
@@ -92,6 +87,20 @@ class BAMTrack extends TrackBase {
                 this.assignSort(config.sort);
             }
         }
+
+        // Invoke height setter last to allocated to coverage and alignment tracks
+        this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT);
+    }
+
+    set height(h) {
+        this._height = h;
+        if (this.coverageTrack && this.showAlignments) {
+            this.alignmentTrack.height = this.showCoverage ? h - this.coverageTrack.height : h;
+        }
+    }
+
+    get height() {
+        return this._height;
     }
 
     sort(options) {
@@ -155,20 +164,17 @@ class BAMTrack extends TrackBase {
 
 
     /**
-     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
-     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     * Compute the pixel height required to display all content.  This is not the same as the viewport height
+     * (track.height) which might include a scrollbar.
      *
      * @param alignmentContainer
      * @returns {number}
      */
     computePixelHeight(alignmentContainer) {
-        const h =
-            (this.showCoverage ? this.coverageTrack.height : 0) +
+        return (this.showCoverage ? this.coverageTrack.height : 0) +
             (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
             15;
-        return h;
-
-    };
+    }
 
     draw(options) {
 
@@ -212,6 +218,7 @@ class BAMTrack extends TrackBase {
 
     menuItemList() {
 
+
         // Start with overage track items
         let menuItems = ["<hr/>"];
         menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
@@ -234,16 +241,23 @@ class BAMTrack extends TrackBase {
             menuItems.push(this.colorByCB(item, selected));
         }
 
-        // Show / hide alignments and coverage
+        // Show coverage / alignment options
+        const adjustTrackHeight = () => {
+            if (!this.autoHeight) {
+                const h = 15 +
+                    (this.showCoverage ? this.coverageTrack.height : 0) +
+                    (this.showAlignments ? this.alignmentTrack.height : 0);
+                this.trackView.setTrackHeight(h);
+            }
+        }
+
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
             object: createCheckbox("Show Coverage", this.showCoverage),
             click: () => {
                 this.showCoverage = !this.showCoverage;
-                const ah = this.autoHeight;
-                this.autoHeight = true;
+                adjustTrackHeight();
                 this.trackView.checkContentHeight();
-                this.autoHeight = ah;
                 this.trackView.repaintViews();
             }
         });
@@ -251,10 +265,8 @@ class BAMTrack extends TrackBase {
             object: createCheckbox("Show Alignments", this.showAlignments),
             click: () => {
                 this.showAlignments = !this.showAlignments;
-                const ah = this.autoHeight;
-                this.autoHeight = true;
+                adjustTrackHeight();
                 this.trackView.checkContentHeight();
-                this.autoHeight = ah;
                 this.trackView.repaintViews();
             }
         });
@@ -314,6 +326,7 @@ class BAMTrack extends TrackBase {
             click: () => {
                 this.alignmentTrack.displayMode = "EXPANDED";
                 this.config.displayMode = "EXPANDED";
+                this.trackView.checkContentHeight();
                 this.trackView.repaintViews();
             }
         });
@@ -440,7 +453,8 @@ class CoverageTrack {
     constructor(config, parent) {
         this.parent = parent;
         this.featureSource = parent.featureSource;
-        this.height = config.coverageTrackHeight;
+        this.height = config.coverageTrackHeight !== undefined ? config.coverageTrackHeight : DEFAULT_COVERAGE_TRACK_HEIGHT;
+
         this.paintAxis = paintAxis;
         this.top = 0;
 
@@ -642,6 +656,12 @@ class AlignmentTrack {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height);
     }
 
+    /**
+     * Compute the pixel height required to display all content.
+     *
+     * @param alignmentContainer
+     * @returns {number|*}
+     */
     computePixelHeight(alignmentContainer) {
 
         if (alignmentContainer.packedAlignmentRows) {
@@ -651,10 +671,9 @@ class AlignmentTrack {
                 this.alignmentRowHeight;
             return h + (alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
         } else {
-            return this.height;
+            return 0;
         }
-
-    };
+    }
 
     draw(options) {
 

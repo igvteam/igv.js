@@ -245,7 +245,7 @@ class TrackView {
         }
     }
 
-    setTrackHeight(newHeight, update, force) {
+    setTrackHeight(newHeight, force) {
 
         if (!force) {
             if (this.track.minHeight) {
