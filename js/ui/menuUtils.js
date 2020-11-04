@@ -252,7 +252,7 @@ function trackHeightMenuItem(trackView) {
                 if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
                     trackView.track.minHeight = number;
                 }
-                trackView.setTrackHeight(number, true, true);
+                trackView.setTrackHeight(number, true);
 
                 // Explicitly setting track height turns off autoHeight
                 trackView.track.autoHeight = false;
