@@ -312,12 +312,9 @@ class Browser {
 
                 if (filename.endsWith(".xml")) {
 
-                    const knownGenomes = await GenomeUtils.getKnownGenomes()
-
+                    const knownGenomes = GenomeUtils.KNOWN_GENOMES;
                     const string = await igvxhr.loadString(urlOrFile)
-
                     return new XMLSession(string, knownGenomes);
-
 
                 } else if (filename.endsWith(".json")) {
                     return igvxhr.loadJson(urlOrFile);
@@ -452,11 +449,10 @@ class Browser {
             }
 
             if (genomeID) {
-                const knownGenomes = await GenomeUtils.getKnownGenomes()
-
-                var reference = knownGenomes[genomeID];
+                const knownGenomes = GenomeUtils.KNOWN_GENOMES;
+                const reference = knownGenomes[genomeID];
                 if (!reference) {
-                    this.present("Unknown genome id: " + genomeID, undefined);
+                    Alert.presentAlert("Unknown genome id: " + genomeID, undefined);
                 }
                 return reference;
             } else {
@@ -786,7 +782,7 @@ class Browser {
 
             const aOrder1 = firstSortOrder(a);
             const bOrder1 = firstSortOrder(b);
-            if(aOrder1 === bOrder1) {
+            if (aOrder1 === bOrder1) {
                 const aOrder2 = a.track.order || 0;
                 const bOrder2 = b.track.order || 0;
                 return aOrder2 - bOrder2;
@@ -798,7 +794,7 @@ class Browser {
         // Reattach the divs to the dom in the correct order
         $(this.trackContainer).children("igv-track").detach();
 
-        for(let trackView of this.trackViews) {
+        for (let trackView of this.trackViews) {
             this.trackContainer.appendChild(trackView.trackDiv);
         }
 

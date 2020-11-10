@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {Alert,InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
 import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
@@ -41,7 +41,6 @@ import NavbarManager from "./navbarManager.js";
 import igvxhr from "./igvxhr.js";
 import oauth from "./oauth.js";
 import {createIcon} from "./igv-icons.js";
-import {defaultSequenceTrackOrder} from "./sequenceTrack.js";
 
 let allBrowsers = [];
 
@@ -56,12 +55,10 @@ async function createBrowser(parentDiv, config) {
 
     if (undefined === config) config = {};
 
-    // Explicit list, or path to genomes.json file which defines the list, of pre-defined genomes.
-    // The list is shared among all browser instances
-    GenomeUtils.genomeList =
-        config.genomeList ||
-        config.genomes ||
-        "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+    // Initialize pre-defined genomes.  The genome list is shared among all browser instances
+    if (!GenomeUtils.KNOWN_GENOMES) {
+        await GenomeUtils.initializeGenomes(config);
+    }
 
     setDefaults(config);
 
@@ -188,14 +185,14 @@ function createStandardControls(browser, config) {
 
     browser.navbarManager = new NavbarManager(browser);
 
-    const $navBar = $('<div>', { class: 'igv-navbar' });
+    const $navBar = $('<div>', {class: 'igv-navbar'});
     browser.$navigation = $navBar;
 
-    const $navbarLeftContainer = $('<div>', { class: 'igv-navbar-left-container' });
+    const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'});
     $navBar.append($navbarLeftContainer);
 
     // IGV logo
-    const $logo = $('<div>', { class: 'igv-logo' });
+    const $logo = $('<div>', {class: 'igv-logo'});
     $navbarLeftContainer.append($logo);
 
     const logoSvg = logo();
@@ -203,11 +200,11 @@ function createStandardControls(browser, config) {
     logoSvg.css("height", "32px");
     $logo.append(logoSvg);
 
-    browser.$current_genome = $('<div>', { class: 'igv-current-genome' });
+    browser.$current_genome = $('<div>', {class: 'igv-current-genome'});
     $navbarLeftContainer.append(browser.$current_genome);
     browser.$current_genome.text('');
 
-    const $genomicLocation = $('<div>', { class: 'igv-navbar-genomic-location' });
+    const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'});
     $navbarLeftContainer.append($genomicLocation);
 
     // chromosome select widget

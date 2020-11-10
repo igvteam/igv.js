@@ -528,16 +528,4 @@ function getGlobalObject() {
     }
 }
 
-//Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-if (typeof window !== "undefined") {
-    console.log("startup")
-    const href = window.document.location.href;
-    if (!href.includes("localhost") && !href.includes("127.0.0.1")) {
-        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + version();
-        igvxhr.load(url).then(function (ignore) {
-        })
-    }
-}
-
-
 export default igvxhr
