@@ -29,10 +29,8 @@ import igvxhr from "../igvxhr.js";
 import {StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
+const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json";
 const splitLines = StringUtils.splitLines;
-
-
-let KNOWN_GENOMES;
 
 const GenomeUtils = {
 
@@ -56,33 +54,38 @@ const GenomeUtils = {
         return new Genome(options, sequence, cytobands, aliases);
     },
 
-    getKnownGenomes: async function () {
+    initializeGenomes: async function (config) {
 
-        const genomeList = GenomeUtils.genomeList;
+        if (!GenomeUtils.KNOWN_GENOMES) {
 
-        if (KNOWN_GENOMES) {
-            return KNOWN_GENOMES;
-        } else if (!genomeList) {
-            return {};
-        } else if (typeof genomeList === 'string') {
-            const jsonArray = await igvxhr.loadJson(genomeList, {})
-            return processJson(jsonArray);
+            const table = {};
 
-        } else {
-            return processJson(genomeList);
-        }
+            // Get default genomes
+            if(config.loadDefaultGenomes !== false) {
+                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}`;  // prevent caching
+                const jsonArray = await igvxhr.loadJson(url, {});
+                processJson(jsonArray);
+            }
 
-        function processJson(jsonArray) {
+            // Add user-defined genomes
+            const genomeList = config.genomeList || config.genomes;
+            if (genomeList) {
+                if (typeof genomeList === 'string') {
+                    const jsonArray = await igvxhr.loadJson(genomeList, {})
+                    processJson(jsonArray);
+                } else {
+                    processJson(genomeList);
+                }
+            }
 
-            var table = {};
+            GenomeUtils.KNOWN_GENOMES = table;
 
-            jsonArray.forEach(function (json) {
-                table[json.id] = json;
-            });
-
-            KNOWN_GENOMES = table;
-
-            return table;
+            function processJson(jsonArray) {
+                jsonArray.forEach(function (json) {
+                    table[json.id] = json;
+                });
+                return table;
+            }
         }
     },
 
