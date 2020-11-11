@@ -33,102 +33,103 @@ import IntervalTree from "../intervalTree.js";
  * @constructor
  */
 
-const FeatureCache = function (featureList, genome, range) {
+class FeatureCache {
 
-    this.treeMap = this.buildTreeMap(featureList, genome);
-    this.range = range;
-    this.count = featureList.length;
-}
+    constructor(featureList, genome, range) {
 
-FeatureCache.prototype.containsRange = function (genomicRange) {
-    // No range means cache contains all features
-    return (this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
-}
+        this.treeMap = this.buildTreeMap(featureList, genome);
+        this.range = range;
+        this.count = featureList.length;
+    }
 
-FeatureCache.prototype.queryFeatures = function (chr, start, end) {
+    containsRange(genomicRange) {
+        // No range means cache contains all features
+        return (this.range === undefined || this.range.contains(genomicRange.chr, genomicRange.start, genomicRange.end));
+    }
 
-    const tree = this.treeMap[chr];
+    queryFeatures(chr, start, end) {
 
-    if (!tree) return [];
+        const tree = this.treeMap[chr];
 
-    const intervals = tree.findOverlapping(start, end);
+        if (!tree) return [];
 
-    if (intervals.length === 0) {
-        return [];
-    } else {
-        // Trim the list of features in the intervals to those
-        // overlapping the requested range.
-        // Assumption: features are sorted by start position
+        const intervals = tree.findOverlapping(start, end);
 
-        const featureList = [];
-        const all = this.allFeatures[chr];
-        if (all) {
-            for (let interval of intervals) {
-                const indexRange = interval.value;
-                for (let i = indexRange.start; i < indexRange.end; i++) {
-                    let feature = all[i];
-                    if (feature.start > end) break;
-                    else if (feature.end >= start) {
-                        featureList.push(feature);
+        if (intervals.length === 0) {
+            return [];
+        } else {
+            // Trim the list of features in the intervals to those
+            // overlapping the requested range.
+            // Assumption: features are sorted by start position
+
+            const featureList = [];
+            const all = this.allFeatures[chr];
+            if (all) {
+                for (let interval of intervals) {
+                    const indexRange = interval.value;
+                    for (let i = indexRange.start; i < indexRange.end; i++) {
+                        let feature = all[i];
+                        if (feature.start > end) break;
+                        else if (feature.end >= start) {
+                            featureList.push(feature);
+                        }
                     }
                 }
+                featureList.sort(function (a, b) {
+                    return a.start - b.start;
+                });
             }
-            featureList.sort(function (a, b) {
-                return a.start - b.start;
-            });
+            return featureList;
         }
-        return featureList;
+    };
+
+    /**
+     * Returns all features, unsorted.
+     *
+     * @returns {Array}
+     */
+    getAllFeatures() {
+        return this.allFeatures;
     }
-};
 
-/**
- * Returns all features, unsorted.
- *
- * @returns {Array}
- */
-FeatureCache.prototype.getAllFeatures = function () {
+    buildTreeMap(featureList, genome) {
 
-    return this.allFeatures;
+        const treeMap = {};
+        const chromosomes = [];
+        this.allFeatures = {};
 
+        if (featureList) {
+            for (let feature of featureList) {
+
+                let chr = feature.chr;
+                // Translate to "official" name
+                if (genome) {
+                    chr = genome.getChromosomeName(chr);
+                }
+
+                let geneList = this.allFeatures[chr];
+                if (!geneList) {
+                    chromosomes.push(chr);
+                    geneList = [];
+                    this.allFeatures[chr] = geneList;
+                }
+                geneList.push(feature);
+            }
+
+
+            // Now build interval tree for each chromosome
+            for (let chr of chromosomes) {
+                const chrFeatures = this.allFeatures[chr];
+                chrFeatures.sort(function (f1, f2) {
+                    return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
+                });
+                treeMap[chr] = buildIntervalTree(chrFeatures);
+            }
+        }
+
+        return treeMap;
+    }
 }
-
-FeatureCache.prototype.buildTreeMap = function (featureList, genome) {
-
-    const treeMap = {};
-    const chromosomes = [];
-    this.allFeatures = {};
-
-    if (featureList) {
-        for (let feature of featureList) {
-
-            let chr = feature.chr;
-            // Translate to "official" name
-            if (genome) {
-                chr = genome.getChromosomeName(chr);
-            }
-
-            let geneList = this.allFeatures[chr];
-            if (!geneList) {
-                chromosomes.push(chr);
-                geneList = [];
-                this.allFeatures[chr] = geneList;
-            }
-            geneList.push(feature);
-        }
-
-
-        // Now build interval tree for each chromosome
-        for (let chr of chromosomes) {
-            const chrFeatures = this.allFeatures[chr];
-            chrFeatures.sort(function (f1, f2) {
-                return (f1.start === f2.start ? 0 : (f1.start > f2.start ? 1 : -1));
-            });
-            treeMap[chr] = buildIntervalTree(chrFeatures);
-        }
-    }
-
-    return treeMap;
-};
 
 /**
  * Build an interval tree from the feature list for fast interval based queries.   We lump features in groups

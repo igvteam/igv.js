@@ -170,7 +170,6 @@ class SegTrack extends TrackBase {
             // Create a map for fast id -> row lookup
             const samples = {};
             this.sampleKeys.forEach(function (id, index) {
-                console.log(id);
                 samples[id] = index;
             })
 
@@ -450,7 +449,6 @@ class SegTrack extends TrackBase {
                 this.sampleKeys.push(sampleKey);
             }
         }
-        console.log(JSON.stringify(this.sampleKeys))
     }
 }
 

@@ -60,8 +60,8 @@ class TextFeatureSource {
             if (config.mappings) {
                 mapProperties(features, config.mappings)
             }
+            this.queryable = false;
             this.featureCache = new FeatureCache(features, genome);
-            this.static = true;
         } else if (config.reader) {
             this.reader = config.reader;
             this.queryable = config.queryable !== undefined ? config.queryable : true;
@@ -136,6 +136,9 @@ class TextFeatureSource {
      * Required function for all data source objects.  Fetches features for the
      * range requested.
      *
+     * This function is quite complex due to the variety of reader types backing it, some indexed, some queryable,
+     * some not.  The whole scheme could use a refactoring.
+     *
      * @param chr
      * @param start
      * @param end
@@ -143,81 +146,85 @@ class TextFeatureSource {
      */
     async getFeatures({chr, start, end, bpPerPixel, visibilityWindow}) {
 
-        const reader = this.reader;
         const genome = this.genome;
         const queryChr = genome ? genome.getChromosomeName(chr) : chr;
-        let intervalStart = start;
-        let intervalEnd = end;
-        let genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
+        const isWholeGenome = ("all" === queryChr.toLowerCase());
 
-        if (this.config.disableCache !== true &&
-            this.featureCache &&
-            (this.static || this.featureCache.containsRange(genomicInterval))) {
-            return this.featureCache.queryFeatures(queryChr, start, end);
-        } else {
-
-            // Use visibility window to potentially expand query interval.
-            // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
-            // indicating whole chromosome should be read at once.
-            if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
-                // Whole chromosome
-                intervalStart = 0;
-                intervalEnd = Number.MAX_SAFE_INTEGER;
-            } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
-                const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
-                intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
-                intervalEnd = start + expansionWindow;
-            }
-            genomicInterval = new GenomicInterval(queryChr, intervalStart, intervalEnd);
-
-            let features = await reader.readFeatures(queryChr, genomicInterval.start, genomicInterval.end)
-            if (this.queryable === undefined) {
-                this.queryable = reader.indexed;
-            }
-
-            if (features) {
-                this.ingestFeatures(features, genomicInterval);
-            } else {
-                this.featureCache = new FeatureCache([], genomicInterval);     // Empty cache
-            }
+        // Various conditions that can create a feature load
+        // * view is "whole genome" but no features are loaded
+        // * cache is disabled
+        // * cache does not contain requested range
+        if ((isWholeGenome && !this.getWGFeatures) ||
+            this.config.disableCache ||
+            !this.featureCache ||
+            !this.featureCache.containsRange(new GenomicInterval(queryChr, start, end))) {
+            await this.loadFeatures(start, end, visibilityWindow, queryChr)
         }
 
-        const isQueryable = this.queryable;
-
-        if ("all" === chr.toLowerCase()) {
-            if (isQueryable) {   // queryable sources don't support whole genome view
-                return [];
-            } else {
-                if (this.wgFeatures) {
-                    return this.wgFeatures;
+        if (isWholeGenome) {
+            if(!this.wgFeatures) {
+                if (this.queryable) {   // queryable sources don't support whole genome view
+                    this.wgFeatures = [];
                 } else {
                     this.wgFeatures = this.getWGFeatures(this.featureCache.getAllFeatures());
-                    return this.wgFeatures;
                 }
             }
+            return this.wgFeatures;
         } else {
             return this.featureCache.queryFeatures(queryChr, start, end);
         }
     }
 
-    ingestFeatures(featureList, genomicInterval) {
 
-        if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
-            featureList = (new GFFHelper(this.config)).combineFeatures(featureList);
+    async loadFeatures(start, end, visibilityWindow, queryChr) {
+
+        const reader = this.reader;
+        let intervalStart = start;
+        let intervalEnd = end;
+
+        // Use visibility window to potentially expand query interval.
+        // This can save re-queries as we zoom out.  Visibility window <= 0 is a special case
+        // indicating whole chromosome should be read at once.
+        if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
+            // Whole chromosome
+            intervalStart = 0;
+            intervalEnd = Number.MAX_SAFE_INTEGER;
+        } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
+            const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
+            intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
+            intervalEnd = start + expansionWindow;
         }
 
-        // Assign overlapping features to rows
-        if (this.config.format !== "wig" && this.config.type !== "junctions") {
-            const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER;
-            packFeatures(featureList, maxRows);
+        let features = await reader.readFeatures(queryChr, intervalStart, intervalEnd)
+        if (this.queryable === undefined) {
+            this.queryable = reader.indexed;
         }
 
-        // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
-        this.featureCache = new FeatureCache(featureList, this.genome, genomicInterval);
+        const genomicInterval = this.queryable ?
+            new GenomicInterval(queryChr, intervalStart, intervalEnd) :
+            undefined;
 
-        // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
-        if (this.config.searchable) {
-            this.addFeaturesToDB(featureList);
+        if (features) {
+
+            if ("gtf" === this.config.format || "gff3" === this.config.format || "gff" === this.config.format) {
+                features = (new GFFHelper(this.config)).combineFeatures(features);
+            }
+
+            // Assign overlapping features to rows
+            if (this.config.format !== "wig" && this.config.type !== "junctions") {
+                const maxRows = this.config.maxRows || Number.MAX_SAFE_INTEGER;
+                packFeatures(features, maxRows);
+            }
+
+            // Note - replacing previous cache with new one.  genomicInterval is optional (might be undefined => includes all features)
+            this.featureCache = new FeatureCache(features, this.genome, genomicInterval);
+
+            // If track is marked "searchable"< cache features by name -- use this with caution, memory intensive
+            if (this.config.searchable) {
+                this.addFeaturesToDB(features);
+            }
+        } else {
+            this.featureCache = new FeatureCache([], genomicInterval);     // Empty cache
         }
     }
 
@@ -233,8 +240,7 @@ class TextFeatureSource {
         }
     }
 
-
-// TODO -- filter by pixel size
+    // TODO -- filter by pixel size
     getWGFeatures(allFeatures) {
 
         const genome = this.genome;
