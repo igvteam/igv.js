@@ -13,6 +13,9 @@ const oauth = {
     setToken: function (token, host) {
         host = host || DEFAULT_HOST;
         this.oauthTokens[host] = token;
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = token;    // legacy support
+        }
     },
 
     getToken: function (host) {
@@ -35,6 +38,9 @@ const oauth = {
             if (regex.test(host)) {
                 this.oauthTokens[key] = undefined;
             }
+        }
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = undefined;    // legacy support
         }
     },
 
