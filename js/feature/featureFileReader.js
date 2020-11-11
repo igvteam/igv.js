@@ -82,8 +82,10 @@ class FeatureFileReader {
         if (index) {
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
+            this.indexed = false;
             return this.loadFeaturesFromDataURI();
         } else {
+            this.indexed = false;
             return this.loadFeaturesNoIndex()
         }
 
@@ -133,7 +135,6 @@ class FeatureFileReader {
             }
         }
     }
-
 
     getParser(format, decode, config) {
         switch (format) {
