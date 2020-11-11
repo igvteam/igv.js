@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils, TrackUtils, StringUtils, GoogleAuth} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, TrackUtils, StringUtils, GoogleAuth, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
 
 const extend = function (parent, child) {
 
@@ -240,7 +240,7 @@ async function getFilename(url) {
         if(GoogleAuth.getApiKey() === undefined) {
             throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
         }
-        const json = await getDriveFileInfo(url)
+        const json = await GoogleDrive.getDriveFileInfo(url)
         return json.originalFileName || json.name;
     } else {
         return FileUtils.getFilename(url);
