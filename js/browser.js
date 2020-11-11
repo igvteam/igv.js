@@ -1486,7 +1486,7 @@ class Browser {
     sessionURL() {
         const path = window.location.href.slice();
         const idx = path.indexOf("?");
-        const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=data:" + this.compressedSession();
+        const surl = (idx > 0 ? path.substring(0, idx) : path) + "?sessionURL=blob:" + this.compressedSession();
         return surl;
     }
 
