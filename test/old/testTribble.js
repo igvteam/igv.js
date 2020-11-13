@@ -19,7 +19,7 @@ function testTribble() {
             }
         }
     };
-    
+
     asyncTest("Tribble index", function () {
 
         var config,

@@ -1,14 +1,9 @@
 import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testGFF", function () {
-
-const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     test("GFF query", async function () {
 

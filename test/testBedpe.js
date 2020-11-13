@@ -2,14 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testBedpe", function () {
-
-const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     test("No header line -- column 7 score", async function () {
         const chr = "chr12";
@@ -25,7 +20,7 @@ const genome = {
         assert.ok(features);
         assert.equal(features.length, 3);
 
-        for(let f of features) {
+        for (let f of features) {
             assert.ok(!isNaN(f.score));
         }
     })
@@ -44,7 +39,7 @@ const genome = {
         assert.ok(features);
         assert.equal(features.length, 5)
 
-        for(let f of features) {
+        for (let f of features) {
             assert.ok(isNaN(f.value));
         }
     })
@@ -63,7 +58,7 @@ const genome = {
         assert.ok(features);
         assert.equal(features.length, 11)
 
-        for(let f of features) {
+        for (let f of features) {
             assert.ok(f.name);
             assert.ok(!isNaN(f.score));
         }
@@ -81,8 +76,8 @@ const genome = {
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
-        assert.equal(features.length,6)
-        for(let f of features) {
+        assert.equal(features.length, 6)
+        for (let f of features) {
             assert.ok(f.name);
             assert.ok(f.score > 0);
         }
@@ -101,13 +96,13 @@ const genome = {
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
-        assert.equal(features.length,2)
+        assert.equal(features.length, 2)
 
         const extras = features[0].extras;
         assert.equal(extras.length, 2);
     })
 
-    test("Inter chr", async function() {
+    test("Inter chr", async function () {
 
         const reader = new FeatureFileReader({
             format: 'bedpe',
@@ -120,7 +115,7 @@ const genome = {
         // Test complementary trvotfd
         const chr1Y = features.filter(f => f.chr1 === "chr1" && f.chr2 === "chrY");
         assert.equal(chr1Y.length, 2);
-        if(chr1Y[0].chr === "chr1") {
+        if (chr1Y[0].chr === "chr1") {
             assert.equal(chr1Y[1].chr, "chrY")
         } else {
             assert.equal(chr1Y[0].chr, "chrY")
@@ -140,8 +135,8 @@ const genome = {
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
-        assert.equal(features.length,4)
-        for(let f of features) {
+        assert.equal(features.length, 4)
+        for (let f of features) {
             assert.ok(f.name);
             assert.equal(f.score, 0);
             assert.ok(f.value > 0);
@@ -161,8 +156,8 @@ const genome = {
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
-        assert.equal(features.length,6)
-        for(let f of features) {
+        assert.equal(features.length, 6)
+        for (let f of features) {
             assert.ok(f.name);
             assert.ok(f.score > 0);
         }

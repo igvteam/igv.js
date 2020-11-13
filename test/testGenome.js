@@ -4,7 +4,7 @@ import {assert} from 'chai';
 
 suite("testGenome", function () {
 
-test("Genome coordinates", async function () {
+    test("Genome coordinates", async function () {
 
         this.timeout(100000);
 

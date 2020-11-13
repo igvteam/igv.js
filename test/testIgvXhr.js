@@ -4,7 +4,7 @@ import {assert} from 'chai';
 
 suite("testIgvXhr", function () {
 
-const range = {start: 25, size: 100};
+    const range = {start: 25, size: 100};
 
     function verifyBytes(arrayBuffer) {
         assert.ok(arrayBuffer);
