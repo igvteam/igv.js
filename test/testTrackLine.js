@@ -1,16 +1,11 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai';
 import WigTrack from "../js/feature/wigTrack";
+import {genome} from "./utils/Genome.js";
 
 suite("testTrackLine", function () {
 
-const browser = {
-        genome: {
-            getChromosomeName: function (chr) {
-                return chr.startsWith("chr") ? chr : "chr" + chr;
-            }
-        }
-    }
+    const browser = {genome}
 
     //track type=wiggle_0 name="fixedStep" description="fixedStep format" visibility=full autoScale=off viewLimits=0:1000 color=0,200,100 maxHeightPixels=100:50:20 graphType=points priority=20
     test("trackline settings", async function () {

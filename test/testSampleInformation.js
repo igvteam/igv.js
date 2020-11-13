@@ -4,7 +4,7 @@ import {assert} from 'chai';
 
 suite("testRnaStruct", function () {
 
-test('Load Plink', async function () {
+    test('Load Plink', async function () {
         const sampleInformation = await loadPlinkFile(require.resolve('./data/misc/pedigree.fam'));
         const attributes = sampleInformation.getAttributes('SS0012979');
         assert.ok(attributes);

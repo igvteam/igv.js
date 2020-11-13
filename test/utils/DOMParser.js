@@ -1,4 +1,4 @@
-const { DOMParser } = require('xmldom')
+const {DOMParser} = require('xmldom')
 
 // Possibly nothing to do, if xmldom is compatible with browser DOMParser
 

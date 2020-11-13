@@ -4,7 +4,7 @@ import {assert} from 'chai';
 
 suite("testTrackLine", function () {
 
-const browser = {
+    const browser = {
         genome: {
             getChromosomeName: function (chr) {
                 return chr.startsWith("chr") ? chr : "chr" + chr;
