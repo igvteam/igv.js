@@ -7,7 +7,7 @@ import {assert} from 'chai';
 
 suite("testTabix", function () {
 
-test("bgzip", async function () {
+    test("bgzip", async function () {
         const url = require.resolve("./data/bed/missing_linefeed.bed.gz");
         const data = await igvxhr.load(url,
             {
@@ -72,11 +72,11 @@ test("bgzip", async function () {
         const features = await reader.readFeatures(chr, beg, end);
         assert.ok(features);
 
-         const len = features.length;
+        const len = features.length;
         assert.ok(len > 0);
         for (let i = 1; i < len - 1; i++) {
             const f = features[i];
-            assert.ok(f.chr === chr );
+            assert.ok(f.chr === chr);
         }
     })
 })
