@@ -7,7 +7,7 @@ import {assert} from 'chai';
 
 suite("testVariant", function () {
 
-test("Test gcvf non-ref variants", async function () {
+    test("Test gcvf non-ref variants", async function () {
         const url = require.resolve("./data/vcf/gvcf_non_ref.vcf");
         const data = await igvxhr.loadString(url)
         const parser = new VcfParser();

@@ -2,14 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testBed", function () {
-
-    const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     test("Empty lines", async function () {
         const config = {
@@ -200,8 +195,8 @@ suite("testBed", function () {
 
         const featureSource = FeatureSource({
             format: 'broadPeak',
-            url: require.resolve("./data/peak/test.broadPeak")
-        });
+            url: require.resolve("./data/peak/test.broadPeak"),
+        }, genome);
         const chr = "chr22";
         const start = 16847690;
         const end = 20009819;
@@ -302,7 +297,7 @@ suite("testBed", function () {
 
         const featureSource = FeatureSource({
             url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")
-        });
+        }, genome);
 
         const trackType = await featureSource.trackType();
         const header = await featureSource.getHeader();

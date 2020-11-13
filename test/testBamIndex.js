@@ -5,7 +5,7 @@ import {assert} from 'chai';
 
 suite("testBamIndex", function () {
 
-test("load bam index", async function () {
+    test("load bam index", async function () {
         this.timeout(100000);
         const url = require.resolve("./data/bam/na12889.bam.bai");
         const bamIndex = await loadIndex(url, {}, false)

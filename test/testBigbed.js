@@ -5,7 +5,7 @@ import {assert} from 'chai';
 
 suite("testBigBed", function () {
 
-test("bed9+2 features", async function () {
+    test("bed9+2 features", async function () {
         const url = require.resolve("./data/bb/myBigBed2.bb");
         const chr = "chr7";
         const start = 0;
@@ -35,7 +35,7 @@ test("bed9+2 features", async function () {
         const bwSource = new BWSource({url: url});
 
         const trackType = await bwSource.trackType();
-        assert.equal(trackType,  "interact");
+        assert.equal(trackType, "interact");
 
         const features = await bwSource.getFeatures({chr, start, end, bpPerPixel: 1});
         assert.ok(features);

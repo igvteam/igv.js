@@ -2,14 +2,9 @@ import "./utils/mockObjects.js";
 import {createFile} from "./utils/File.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testAED", function () {
-
-    const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     test("AED - UTF8 with BOM", async function () {
 
