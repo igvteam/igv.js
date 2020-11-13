@@ -17,7 +17,7 @@ test("bgzip", async function () {
         assert.ok(result)
     })
 
-    test("CSI", async function () {
+    test("CSI index", async function () {
 
         const refID = 0,
             beg = 1226000,
@@ -33,7 +33,7 @@ test("bgzip", async function () {
 
     })
 
-    test("CSI query", async function () {
+    test("CSI query - vcf", async function () {
 
         const chr = "chr1",
             beg = 1226000,
@@ -54,6 +54,29 @@ test("bgzip", async function () {
         for (let i = 1; i < len - 1; i++) {
             const f = features[i];
             assert.ok(f.chr === chr && f.end >= beg && f.start <= end);
+        }
+    })
+
+    test("CSI query - gtf", async function () {
+
+        const chr = "10",
+            beg = 400000,
+            end = 500000;
+
+        const reader = new FeatureFileReader({
+            format: "gtf",
+            url: require.resolve("./data/tabix/sorted.genes.gtf.gz"),
+            indexURL: require.resolve("./data/tabix/sorted.genes.gtf.gz.tbi")
+        });
+        await reader.readHeader();
+        const features = await reader.readFeatures(chr, beg, end);
+        assert.ok(features);
+
+         const len = features.length;
+        assert.ok(len > 0);
+        for (let i = 1; i < len - 1; i++) {
+            const f = features[i];
+            assert.ok(f.chr === chr );
         }
     })
 })
