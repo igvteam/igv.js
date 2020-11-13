@@ -159,17 +159,19 @@ class BamIndex {
             const chunks = [];
 
             // Find chunks in overlapping bins.  Leaf bins (< 4681) are not pruned
-            overlappingBins.forEach(function (bin) {
-                if (ba.binIndex[bin]) {
-                    const binChunks = ba.binIndex[bin],
-                        nchnk = binChunks.length
-                    for (let c = 0; c < nchnk; ++c) {
-                        const cs = binChunks[c][0]
-                        const ce = binChunks[c][1]
-                        chunks.push({minv: cs, maxv: ce, bin: bin});
+            for (let binRange of overlappingBins) {
+                for (let bin = binRange[0]; bin <= binRange[1]; bin++) {
+                    if (ba.binIndex[bin]) {
+                        const binChunks = ba.binIndex[bin],
+                            nchnk = binChunks.length
+                        for (let c = 0; c < nchnk; ++c) {
+                            const cs = binChunks[c][0]
+                            const ce = binChunks[c][1]
+                            chunks.push({minv: cs, maxv: ce, bin: bin});
+                        }
                     }
                 }
-            });
+            }
 
             // Use the linear index to find minimum file position of chunks that could contain alignments in the region
             const nintv = ba.linearIndex.length;
@@ -251,11 +253,17 @@ function reg2bins(beg, end) {
     if (end >= 1 << 29) end = 1 << 29;
     --end;
     list.push(0);
-    for (k = 1 + (beg >> 26); k <= 1 + (end >> 26); ++k) list.push(k);
-    for (k = 9 + (beg >> 23); k <= 9 + (end >> 23); ++k) list.push(k);
-    for (k = 73 + (beg >> 20); k <= 73 + (end >> 20); ++k) list.push(k);
-    for (k = 585 + (beg >> 17); k <= 585 + (end >> 17); ++k) list.push(k);
-    for (k = 4681 + (beg >> 14); k <= 4681 + (end >> 14); ++k) list.push(k);
+    list.push([1 + (beg >> 26), 1 + (end >> 26)]);
+    list.push([9 + (beg >> 23), 9 + (end >> 23)]);
+    list.push([73 + (beg >> 20), 73 + (end >> 20)]);
+    list.push([585 + (beg >> 17), 585 + (end >> 17)]);
+    list.push([4681 + (beg >> 14), 4681 + (end >> 14)]);
+
+    // for (k = 1 + (beg >> 26); k <= 1 + (end >> 26); ++k) list.push(k);
+    // for (k = 9 + (beg >> 23); k <= 9 + (end >> 23); ++k) list.push(k);
+    // for (k = 73 + (beg >> 20); k <= 73 + (end >> 20); ++k) list.push(k);
+    // for (k = 585 + (beg >> 17); k <= 585 + (end >> 17); ++k) list.push(k);
+    // for (k = 4681 + (beg >> 14); k <= 4681 + (end >> 14); ++k) list.push(k);
     return list;
 }
 
