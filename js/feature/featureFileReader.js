@@ -80,6 +80,7 @@ class FeatureFileReader {
 
         const index = await this.getIndex();
         if (index) {
+            this.indexed = true;
             return this.loadFeaturesWithIndex(chr, start, end);
         } else if (this.dataURI) {
             this.indexed = false;
