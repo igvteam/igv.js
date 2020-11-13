@@ -807,5 +807,5 @@ class TrackScrollbar {
     }
 }
 
-export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer,appendRightHandGutter}
+export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer,createTrackGearPopover}
 export default TrackView
