@@ -9,7 +9,7 @@ import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import embedCss from "./embedCss.js";
 import version from "./version.js"
-import { appendRightHandGutter } from "./trackView.js";
+import { createTrackGearPopover } from "./trackView.js";
 const xhr = igvxhr;
 const setApiKey = igvxhr.setApiKey;
 
@@ -33,7 +33,7 @@ export default {
     version,
     xhr,
     setApiKey,
-    appendRightHandGutter,
+    createTrackGearPopover,
     doAutoscale
 }
 
