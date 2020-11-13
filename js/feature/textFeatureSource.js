@@ -188,7 +188,7 @@ class TextFeatureSource {
         if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
             // Whole chromosome
             intervalStart = 0;
-            intervalEnd = Number.MAX_SAFE_INTEGER;
+            intervalEnd = this.genome.getChromosome(queryChr).bpLength;
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
             intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
