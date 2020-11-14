@@ -164,9 +164,6 @@
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-            document.getElementById("bmBtn").addEventListener("click", () => {
-                window.history.pushState({}, "IGV", browser.sessionURL());
-            })
         })
 
 </script>
