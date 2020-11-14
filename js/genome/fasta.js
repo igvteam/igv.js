@@ -342,3 +342,4 @@ function decodeDataUri(dataUri) {
 }
 
 export default FastaSequence;
+export {decodeDataUri};
