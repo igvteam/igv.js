@@ -32,7 +32,7 @@ import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {createCheckbox} from "../igv-icons.js";
 import MenuUtils from "../ui/menuUtils.js";
-import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
+import {PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 
@@ -472,6 +472,7 @@ class CoverageTrack {
 
         const pixelTop = options.pixelTop;
         const pixelBottom = pixelTop + options.pixelHeight;
+        const nucleotideColors = this.parent.browser.nucleotideColors;
 
         if (pixelTop > this.height) {
             return; //scrolled out of view
@@ -539,7 +540,6 @@ class CoverageTrack {
 
                 const refBase = sequence[i];
                 if (item.isMismatch(refBase)) {
-
                     IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]});
                     IGVGraphics.fillRect(ctx, x, y, w, h);
 
@@ -552,7 +552,6 @@ class CoverageTrack {
                         const hh = (count / this.dataRange.max) * this.height;
                         y = (this.height - hh) - accumulatedHeight;
                         accumulatedHeight += hh;
-
                         IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[nucleotide]});
                         IGVGraphics.fillRect(ctx, x, y, w, hh);
                     }
@@ -686,6 +685,7 @@ class AlignmentTrack {
         const packedAlignmentRows = alignmentContainer.packedAlignmentRows
         const showSoftClips = this.parent.showSoftClips;
         const showAllBases = this.parent.showAllBases;
+        const nucleotideColors = this.browser.nucleotideColors;
 
         let referenceSequence = alignmentContainer.sequence;
         if (referenceSequence) {
@@ -959,7 +959,7 @@ class AlignmentTrack {
                             let baseColor;
                             if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                                 const readQual = qual[seqOffset + i];
-                                baseColor = shadedBaseColor(readQual, readChar, i + block.start);
+                                baseColor = shadedBaseColor(readQual, nucleotideColors[readChar]);
                             } else {
                                 baseColor = nucleotideColors[readChar];
                             }
@@ -1249,7 +1249,7 @@ function sortAlignmentRows(options, alignmentContainer) {
 
 }
 
-function shadedBaseColor(qual, nucleotide) {
+function shadedBaseColor(qual, baseColor) {
 
     const minQ = 5;   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
     const maxQ = 20;  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
@@ -1263,17 +1263,8 @@ function shadedBaseColor(qual, nucleotide) {
     // Round alpha to nearest 0.1
     alpha = Math.round(alpha * 10) / 10.0;
 
-    let baseColor;
-    if (alpha >= 1) {
-        baseColor = nucleotideColors[nucleotide];
-    } else {
-        const foregroundColor = nucleotideColorComponents[nucleotide];
-        if (!foregroundColor) {
-            return undefined;
-        }
-
-        const backgroundColor = [255, 255, 255];   // White
-        baseColor = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";
+    if (alpha < 1) {
+        baseColor = IGVColor.addAlpha(baseColor, alpha);
     }
     return baseColor;
 }

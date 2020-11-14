@@ -57,6 +57,7 @@ import {
     URIUtils
 } from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
+import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -133,6 +134,10 @@ class Browser {
         this.crossDomainProxy = options.crossDomainProxy;
         this.formats = options.formats;
         this.trackDefaults = options.trackDefaults;
+        this.nucleotideColors = options.nucleotideColors || defaultNucleotideColors;
+        for(let key of Object.keys(this.nucleotideColors)) {
+            this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
+        }
 
         if (options.search) {
             this.searchConfig = {
