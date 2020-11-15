@@ -585,7 +585,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     const windowX = Math.round(options.viewportContainerX);
     // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
     // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
-    const windowX1 = windowX + browser.viewportWidth();
+    const windowX1 = windowX + options.viewportWidth;
 
     if (options.drawLabel) {
         renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
