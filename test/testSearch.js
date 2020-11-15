@@ -53,15 +53,20 @@ suite("testSearch", function () {
 
     test("webservice", async function () {
 
+        this.timeout(10000);
+
         // myc =>  chr8:127,735,434-127,742,951 (+), chr8:127,736,231-127,742,951 (+)
         const gene = "myc";
         const locus = await searchWebService(browser, gene, browser.searchConfig);
         assert.equal(locus.chr, "chr8");
         assert.equal(locus.start, 127735432);
         assert.equal(locus.end, 127742951);
+        assert.equal(locus.locusSearchString, gene);
     });
 
     test("search (main function)", async function () {
+
+        this.timeout(10000);
 
         const s1 = "chr1:100-200";
         const s2 = "myc";
@@ -73,16 +78,19 @@ suite("testSearch", function () {
         assert.equal(locus1.chr, "chr1");
         assert.equal(locus1.start, 99);
         assert.equal(locus1.end, 200);
+        assert.equal(locus1.locusSearchString, s1);
 
         const locus2 = results[1];
         assert.equal(locus2.chr, "chr8");
         assert.equal(locus2.start, 127735432);
         assert.equal(locus2.end, 127742951);
+        assert.equal(locus2.locusSearchString, s2);
 
         const locus3 = results[2];
         assert.equal(locus3.chr, "chr1");
         assert.equal(locus3.start, 155185820);
         assert.equal(locus3.end, 155192900);
+        assert.equal(locus3.locusSearchString, s3);
     })
 
     test("search with spaces", async function () {
@@ -101,6 +109,8 @@ suite("testSearch", function () {
 
 
     test("custom webservice", async function () {
+
+        this.timeout(10000);
 
         browser.genome = macacaGenome;
         browser.searchConfig = {

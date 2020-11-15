@@ -1,7 +1,15 @@
-import igvxhr from "./igvxhr"
+import igvxhr from "./igvxhr.js"
 import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 async function search(browser, string) {
+
+    if (undefined === string || '' === string.trim()) {
+        return
+    }
+
+    if (string && string.trim().toLowerCase() === "all" || string === "*") {
+        string = "all";
+    }
 
     const loci = string.split(' ')
 
@@ -23,13 +31,19 @@ async function search(browser, string) {
 
     for (let locus of loci) {
         const locusObject = await searchLocus(locus)
-        if (locusObject) list.push(locusObject);
+        if (locusObject) {
+            locusObject.locusSearchString = locus;
+            list.push(locusObject);
+        }
     }
 
     // If nothing is found, consider possibility that loci name itself has spaces
     if(list.length === 0) {
         const locusObject = await searchLocus(string);
-        if (locusObject) list.push(locusObject);
+        if (locusObject) {
+            locusObject.locusSearchString = string;
+            list.push(locusObject);
+        }
     }
 
 
@@ -101,9 +115,7 @@ async function searchWebService(browser, locus, searchConfig) {
     const result = await igvxhr.loadString(path);
 
     const locusObject = processSearchResult(browser, result, searchConfig);
-    if (locusObject) {
-        locusObject.locusSearchString = locus
-    }
+
     return locusObject;
 }
 
@@ -130,6 +142,7 @@ function processSearchResult(browser, result, searchConfig) {
         const startField = searchConfig.startField || "start";
         const endField = searchConfig.endField || "end";
         const coords = searchConfig.coords || 1;
+
 
         let result;
         if (Array.isArray(results)) {
@@ -158,7 +171,19 @@ function processSearchResult(browser, result, searchConfig) {
         if (undefined === end) {
             end = start + 1
         }
-        return {chr, start, end};
+
+        const locusObject = {chr, start, end};
+
+        // Some GTEX hacks
+        const type = result.type ? result.type : "gene";
+        if(searchConfig.geneField && type === "gene") {
+            locusObject.gene = result[searchConfig.geneField];
+        }
+        if(searchConfig.snpField  && type === "snp") {
+            locusObject.snp = result[searchConfig.snpField];
+        }
+
+        return locusObject;
     }
 }
 
