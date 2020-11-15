@@ -1,17 +1,14 @@
 import igvxhr from "./igvxhr"
 import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
-async function search(browser, loci) {
+async function search(browser, string) {
 
-    if(!Array.isArray(loci)) {
-        loci = [loci];
-    }
+    const loci = string.split(' ')
 
     let searchConfig = browser.searchConfig;
     let list = [];
 
-    // Try locus string first  (e.g.  chr1:100-200)
-    for (let locus of loci) {
+     const searchLocus =  async (locus) => {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
@@ -21,9 +18,20 @@ async function search(browser, loci) {
         if (!locusObject) {
             locusObject = await searchWebService(browser, locus, searchConfig)
         }
+        return locusObject
+    }
 
+    for (let locus of loci) {
+        const locusObject = await searchLocus(locus)
         if (locusObject) list.push(locusObject);
     }
+
+    // If nothing is found, consider possibility that loci name itself has spaces
+    if(list.length === 0) {
+        const locusObject = await searchLocus(string);
+        if (locusObject) list.push(locusObject);
+    }
+
 
     return 0 === list.length ? undefined : list;
 }
@@ -207,8 +215,9 @@ function parseSearchResults(browser, data) {
 
 }
 
-export default search
-
 // Export some functions for unit testing
 export {parseLocusString, searchWebService}
+
+export default search
+
 

@@ -19,7 +19,10 @@ suite("testSearch", function () {
             geneField: "gene",
             snpField: "snp"
         },
-        featureDB: {"MUC1": {chr: "chr1", start: 155185820, end: 155192900}}  // coords are a little off on purpose, for test
+        featureDB: {
+            "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
+            "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
+        }
     }
 
     test("locus strings", function () {
@@ -64,7 +67,7 @@ suite("testSearch", function () {
         const s2 = "myc";
         const s3 = "muc1";
 
-        const results = await search(browser, [s1, s2, s3]);
+        const results = await search(browser, `${s1} ${s2} ${s3}`);
 
         const locus1 = results[0];
         assert.equal(locus1.chr, "chr1");
@@ -80,6 +83,19 @@ suite("testSearch", function () {
         assert.equal(locus3.chr, "chr1");
         assert.equal(locus3.start, 155185820);
         assert.equal(locus3.end, 155192900);
+    })
+
+    test("search with spaces", async function () {
+
+
+        const s4 = "foo bar";
+
+        const results = await search(browser, s4);
+
+        const locus4 = results[0];
+        assert.equal(locus4.chr, "chrX");
+        assert.equal(locus4.start, 1);
+        assert.equal(locus4.end, 2);
 
     })
 
