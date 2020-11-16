@@ -58,6 +58,7 @@ import {
 } from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
+import search from "./search.js"
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -135,7 +136,7 @@ class Browser {
         this.formats = options.formats;
         this.trackDefaults = options.trackDefaults;
         this.nucleotideColors = options.nucleotideColors || defaultNucleotideColors;
-        for(let key of Object.keys(this.nucleotideColors)) {
+        for (let key of Object.keys(this.nucleotideColors)) {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
 
@@ -1286,50 +1287,37 @@ class Browser {
         return result;
     };
 
+    /**
+     * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
+     */
     async goto(chr, start, end) {
         return this.search(chr + ":" + start + "-" + end);
     }
 
     async search(string, init) {
 
-        if (undefined === string || '' === string) {
-            return
-        }
+        const locusObjects = await search(this, string);
+        if (locusObjects && (await locusObjects).length > 0) {
 
-        if (string && string.trim().toLowerCase() === "all" || string === "*") {
-            string = "all";
-        }
-
-        const loci = string.split(' ')
-
-        let referenceFrameList = await createReferenceFrameList(this, loci)
-        if (undefined === referenceFrameList) {
-            // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-            referenceFrameList = await createReferenceFrameList(this, [string])
-        }
-
-        if (referenceFrameList && referenceFrameList.length > 0) {
+            const referenceFrameList = createReferenceFrameList(this, locusObjects)
 
             this.referenceFrameList = referenceFrameList
-
             emptyViewportContainers(this.trackViews)
-
             for (let trackView of this.trackViews) {
                 populateViewportContainer(this, referenceFrameList, trackView);
             }
 
+            this.updateUIWithReferenceFrameListChange(referenceFrameList);
+
+            if (!init) {
+                this.updateViews();
+            }
+
+            return referenceFrameList;
         } else {
             throw new Error(`Unrecognized locus ${string}`)
         }
-
-        this.updateUIWithReferenceFrameListChange(referenceFrameList);
-
-        if (!init) {
-            this.updateViews();
-        }
-
-        return referenceFrameList;
-    };
+    }
 
     async loadSampleInformation(url) {
         var name = url;

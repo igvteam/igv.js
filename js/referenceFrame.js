@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import {isLocusString, searchWebService} from './browser.js'
 import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {validateLocusExtent} from "./util/igvUtils.js";
 import GtexSelection from "./gtex/gtexSelection.js";
@@ -112,208 +111,37 @@ class ReferenceFrame {
     }
 }
 
-async function createReferenceFrameList(browser, loci) {
+function createReferenceFrameList(browser, loci) {
 
     const viewportWidth = browser.calculateViewportWidth(loci.length)
+    return loci.map(locusObject => {
 
-    let searchConfig = browser.searchConfig;
-    let list = [];
-
-    // Try locus string first  (e.g.  chr1:100-200)
-    for (let locus of loci) {
-
-        const candidate = isLocusString(browser, locus)
-        if (candidate) {
-            candidate.viewportWidth = viewportWidth
-            const referenceFrame = createReferenceFrame(candidate)
-            list.push(referenceFrame)
-        } else {
-            const feature = browser.featureDB[locus.toUpperCase()]
-            if (feature) {
-                const referenceFrame = createReferenceFrame({browser: browser, feature, locus, viewportWidth})
-                list.push(referenceFrame)
-            } else {
-                // Try webservice
-                let searchServiceResponse = await searchWebService(browser, locus, searchConfig)
-                if (searchServiceResponse && '' !== searchServiceResponse.result) {
-                    const referenceFrame = createReferenceFrame({
-                        browser: browser,
-                        searchServiceResponse,
-                        searchConfig,
-                        viewportWidth
-                    })
-                    list.push(referenceFrame)
-                }
-            }
+        // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end
+        if (browser.flanking && locusObject.gene) {
+            locusObject.start = Math.max(0, locusObject.start - browser.flanking)
+            locusObject.end += browser.flanking
         }
 
-    }
+        // Validate the range.  This potentionally modifies start & end of locusObject.
+        const chromosome = browser.genome.getChromosome(locusObject.chr)
+        validateLocusExtent(chromosome.bpLength, locusObject, browser.minimumBases())
 
-    if (0 === list.length) {
-        return undefined
-    } else {
+        const referenceFrame = new ReferenceFrame(
+            browser.genome,
+            locusObject.chr,
+            locusObject.start,
+            locusObject.end,
+            (locusObject.end - locusObject.start) / viewportWidth)
 
-        if (list.length < loci.length) {
-            const viewportWidth = browser.calculateViewportWidth(list.length)
-            for (let referenceFrame of list) {
-                updateBPP(referenceFrame, viewportWidth)
-            }
+        referenceFrame.locusSearchString = locusObject.locusSearchString
+
+        // GTEX hack
+        if (locusObject.gene || locusObject.snp) {
+            referenceFrame.selection = new GtexSelection(locusObject.gene, locusObject.snp);
         }
 
-        return list
-    }
-
-}
-
-function updateBPP(referenceFrame, viewportWidth) {
-    referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.initialStart) / viewportWidth
-    referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
-}
-
-function createReferenceFrame(params) {
-
-    let referenceFrame = undefined
-
-    if (params.browser && params.chr) {
-        referenceFrame = initializeWithLocus(params)
-    } else if (params.browser && params.feature && params.locus) {
-
-        const {chr, start, end} = params.feature
-
-        const chromosome = params.browser.genome.getChromosome(chr)
-        validateLocusExtent(chromosome.bpLength, {start, end}, params.browser.minimumBases())
-
-        referenceFrame = new ReferenceFrame(params.browser.genome, chr, start, end, (end - start) / params.viewportWidth)
-        referenceFrame.locusSearchString = params.locus
-
-    } else if (params.browser && params.searchServiceResponse && params.searchConfig) {
-
-        referenceFrame = processSearchResult(params.browser, params.searchServiceResponse, params.searchConfig, params.viewportWidth)
-    } else if (params.referenceFrame) {
-        referenceFrame = params.referenceFrame
-        referenceFrame.locusSearchString = referenceFrame.presentLocus(params.viewportWidth)
-    }
-
-    return referenceFrame
-}
-
-function initializeWithLocus(params) {
-
-    const chromosome = params.browser.genome.getChromosome(params.chr)
-    validateLocusExtent(chromosome.bpLength, {start: params.start, end: params.end}, params.browser.minimumBases())
-
-    const referenceFrame = new ReferenceFrame(params.browser.genome, params.chr, params.start, params.end, (params.end - params.start) / params.viewportWidth)
-    referenceFrame.locusSearchString = params.locus
-    return referenceFrame
-}
-
-function processSearchResult(browser, searchServiceResponse, searchConfig, viewportWidth) {
-
-    let results
-
-    if ('plain' === searchConfig.type) {
-        results = parseSearchResults(browser, searchServiceResponse.result)
-    } else {
-        results = JSON.parse(searchServiceResponse.result)
-    }
-
-    if (searchConfig.resultsField) {
-        results = results[searchConfig.resultsField]
-    }
-
-    if (!results || 0 === results.length) {
-        console.error('ERROR attempting to construct ReferenceFrame')
-        return undefined
-    } else {
-
-        let result;
-        if (Array.isArray(results)) {
-            // Ignoring all but first result for now
-            // TODO -- present all and let user select if results.length > 1
-            result = results[0]
-        } else {
-            // When processing search results from Ensembl REST API
-            // Example: https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/BRCA2?content-type=application/json
-            result = results
-        }
-
-        if (!(result.hasOwnProperty(searchConfig.chromosomeField) && (result.hasOwnProperty(searchConfig.startField)))) {
-            console.error("Search service results must include chromosome and start fields: " + result)
-        }
-
-        let start = result[searchConfig.startField] - searchConfig.coords
-        let end = result[searchConfig.endField]
-
-        if (undefined === end) {
-            end = start + 1
-        }
-
-        if (browser.flanking) {
-            start = Math.max(0, start - browser.flanking)
-            end += browser.flanking
-        }
-
-        const chromosome = browser.genome.getChromosome(result[searchConfig.chromosomeField])
-        const referenceFrame = new ReferenceFrame(browser.genome, chromosome.name, start, end, (end - start) / viewportWidth)
-
-        referenceFrame.locusSearchString = searchServiceResponse.locusSearchString
-        referenceFrame.gene = result.gene
-        referenceFrame.selection = new GtexSelection(result[searchConfig.geneField], result[searchConfig.snpField])
         return referenceFrame
-    }
-}
-
-/**
- * Parse the igv line-oriented (non json) search results.
- * Example
- *    EGFR    chr7:55,086,724-55,275,031    refseq
- *
- */
-function parseSearchResults(browser, data) {
-
-    const linesTrimmed = []
-    const results = []
-    const lines = StringUtils.splitLines(data);
-
-    lines.forEach(function (item) {
-        if ("" === item) {
-            // do nothing
-        } else {
-            linesTrimmed.push(item);
-        }
     });
-
-    linesTrimmed.forEach(function (line) {
-
-        var tokens = line.split("\t"),
-            source,
-            locusTokens,
-            rangeTokens,
-            obj;
-
-        if (tokens.length >= 3) {
-
-            locusTokens = tokens[1].split(":");
-            rangeTokens = locusTokens[1].split("-");
-            source = tokens[2].trim();
-
-            obj =
-                {
-                    gene: tokens[0],
-                    chromosome: browser.genome.getChromosomeName(locusTokens[0].trim()),
-                    start: parseInt(rangeTokens[0].replace(/,/g, '')),
-                    end: parseInt(rangeTokens[1].replace(/,/g, '')),
-                    type: ("gtex" === source ? "snp" : "gene")
-                };
-
-            results.push(obj);
-
-        }
-
-    });
-
-    return results;
-
 }
 
 function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
@@ -324,7 +152,6 @@ function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, ali
     referenceFrame.start = alignmentCC - (referenceFrame.bpPerPixel * (viewportWidth / 2))
     referenceFrame.initialEnd = referenceFrame.start + (referenceFrame.bpPerPixel * viewportWidth)
     referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
-
 }
 
 function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewportWidth, alignmentStart, alignmentLength) {
@@ -336,6 +163,7 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
     const ee = ss + (bpp * viewportWidth);
 
     const referenceFrame = new ReferenceFrame(genome, chromosomeName, ss, ee, bpp)
+
     referenceFrame.locusSearchString = referenceFrame.presentLocus(viewportWidth)
 
     return referenceFrame
