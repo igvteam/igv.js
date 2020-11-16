@@ -256,11 +256,11 @@ async function loadURL(url, options) {
         }
 
 
-        function handleError(message) {
+        function handleError(error) {
             if (reject) {
-                reject(new Error(message));
+                reject(error);
             } else {
-                throw new Error(message);
+                throw error;
             }
         }
 
@@ -272,7 +272,14 @@ async function loadURL(url, options) {
                 const response = await load(url, options);
                 resolve(response);
             } catch (e) {
-                handleError(e);
+                if(e.error) {
+                    const msg = e.error.startsWith("popup_blocked") ?
+                        "Google login popup blocked by browser." :
+                        e.error;
+                    alert(msg);
+                } else {
+                    handleError(e);
+                }
             }
         }
     })
