@@ -3,8 +3,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
-import C2S from "./canvas2svg.js";
+import { Popover, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import ViewportBase from "./viewportBase.js";
@@ -216,6 +215,7 @@ class ViewPort extends ViewportBase {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE);
+                Alert.presentAlert(error);
                 console.error(error)
             }
         } finally {

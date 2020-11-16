@@ -654,10 +654,11 @@ class Browser {
                     "404": "Not found"
                 };
             console.error(error);
-            let msg = error.message || error.toString();
+            let msg = error.message || error.error ||  error.toString();
             if (httpMessages.hasOwnProperty(msg)) {
-                msg = httpMessages[msg] + ": " + config.url;
+                msg = httpMessages[msg];
             }
+            msg += (": " + config.url);
             Alert.presentAlert(msg, undefined);
         } finally {
             if (!noSpinner) {
