@@ -16,7 +16,7 @@ async function search(browser, string) {
     let searchConfig = browser.searchConfig;
     let list = [];
 
-     const searchLocus =  async (locus) => {
+    const searchLocus = async (locus) => {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
@@ -38,7 +38,7 @@ async function search(browser, string) {
     }
 
     // If nothing is found, consider possibility that loci name itself has spaces
-    if(list.length === 0) {
+    if (list.length === 0) {
         const locusObject = await searchLocus(string);
         if (locusObject) {
             locusObject.locusSearchString = string;
@@ -115,7 +115,9 @@ async function searchWebService(browser, locus, searchConfig) {
     const result = await igvxhr.loadString(path);
 
     const locusObject = processSearchResult(browser, result, searchConfig);
-
+    if(locusObject) {
+        locusObject.locusSearchString = locus;
+    }
     return locusObject;
 }
 
@@ -176,10 +178,10 @@ function processSearchResult(browser, result, searchConfig) {
 
         // Some GTEX hacks
         const type = result.type ? result.type : "gene";
-        if(searchConfig.geneField && type === "gene") {
+        if (searchConfig.geneField && type === "gene") {
             locusObject.gene = result[searchConfig.geneField];
         }
-        if(searchConfig.snpField  && type === "snp") {
+        if (searchConfig.snpField && type === "snp") {
             locusObject.snp = result[searchConfig.snpField];
         }
 
