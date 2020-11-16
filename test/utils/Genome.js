@@ -30,6 +30,8 @@ const sizes = {
 
 const genome = {
 
+    id: "hg38",
+
     getChromosomeName: function (chr) {
         return chr.startsWith("chr") ? chr : "chr" + chr;
     },
@@ -37,10 +39,8 @@ const genome = {
     getChromosome: function (chr) {
 
         const name = this.getChromosomeName(chr);
-        const bpLength = sizes[name] || Number.MAX_SAFE_INTEGER;
-        return {
-            bpLength: bpLength
-        }
+        const bpLength = sizes[name];
+        return bpLength ? {name, bpLength} : undefined;
     }
 }
 

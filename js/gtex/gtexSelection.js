@@ -23,32 +23,33 @@
  * THE SOFTWARE.
  */
 
-const GtexSelection = function (gene, snp) {
+class GtexSelection {
 
-    this.geneColors = {};
-    this.gene = null;
-    this.snp = null;
-    this.genesCount = 0;
+    constructor(gene, snp) {
+        this.geneColors = {};
+        this.gene = null;
+        this.snp = null;
+        this.genesCount = 0;
 
-    if (gene) {
-        this.gene = gene.toUpperCase();
-        this.geneColors[this.gene] = brewer[this.genesCount++];
+        if (gene) {
+            this.gene = gene.toUpperCase();
+            this.geneColors[this.gene] = brewer[this.genesCount++];
 
+        }
+        if (snp) {
+            this.snp = snp.toUpperCase();
+        }
     }
-    if (snp) {
-        this.snp = snp.toUpperCase();
+
+    addGene(geneName) {
+        if (!this.geneColors[geneName.toUpperCase()]) {
+            this.geneColors[geneName.toUpperCase()] = brewer[this.genesCount++];
+        }
     }
 
-}
-
-GtexSelection.prototype.addGene = function (geneName) {
-    if (!this.geneColors[geneName.toUpperCase()]) {
-        this.geneColors[geneName.toUpperCase()] = brewer[this.genesCount++];
+    colorForGene(geneName) {
+        return this.geneColors[geneName.toUpperCase()];
     }
-}
-
-GtexSelection.prototype.colorForGene = function (geneName) {
-    return this.geneColors[geneName.toUpperCase()];
 }
 
 var brewer = new Array();
