@@ -114,37 +114,34 @@ class ReferenceFrame {
 function createReferenceFrameList(browser, loci) {
 
     const viewportWidth = browser.calculateViewportWidth(loci.length)
-    return loci.map(locusObject => createReferenceFrame(browser, locusObject, viewportWidth));
+    return loci.map(locusObject => {
 
-}
+        // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end
+        if (browser.flanking && locusObject.gene) {
+            locusObject.start = Math.max(0, locusObject.start - browser.flanking)
+            locusObject.end += browser.flanking
+        }
 
-function createReferenceFrame(browser, locusObject, viewportWidth) {
+        // Validate the range.  This potentionally modifies start & end of locusObject.
+        const chromosome = browser.genome.getChromosome(locusObject.chr)
+        validateLocusExtent(chromosome.bpLength, locusObject, browser.minimumBases())
 
-    // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end
-    if (browser.flanking && locusObject.gene) {
-        locusObject.start = Math.max(0, locusObject.start - browser.flanking)
-        locusObject.end += browser.flanking
-    }
+        const referenceFrame = new ReferenceFrame(
+            browser.genome,
+            locusObject.chr,
+            locusObject.start,
+            locusObject.end,
+            (locusObject.end - locusObject.start) / viewportWidth)
 
-    // Validate the range.  This potentionally modifies start & end of locusObject.
-    const chromosome = browser.genome.getChromosome(locusObject.chr)
-    validateLocusExtent(chromosome.bpLength, locusObject, browser.minimumBases())
+        referenceFrame.locusSearchString = locusObject.locusSearchString
 
-    const referenceFrame = new ReferenceFrame(
-        browser.genome,
-        locusObject.chr,
-        locusObject.start,
-        locusObject.end,
-        (locusObject.end - locusObject.start) / viewportWidth)
+        // GTEX hack
+        if (locusObject.gene || locusObject.snp) {
+            referenceFrame.selection = new GtexSelection(locusObject.gene, locusObject.snp);
+        }
 
-    referenceFrame.locusSearchString = locusObject.locusSearchString
-
-    // GTEX hack
-    if (locusObject.gene || locusObject.snp) {
-        referenceFrame.selection = new GtexSelection(locusObject.gene, locusObject.snp);
-    }
-
-    return referenceFrame
+        return referenceFrame
+    });
 }
 
 function adjustReferenceFrame(referenceFrame, viewportWidth, alignmentStart, alignmentLength) {
