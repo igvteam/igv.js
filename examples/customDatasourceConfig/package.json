@@ -1,0 +1,16 @@
+{
+  "name": "custom-datasource-config",
+  "version": "1.0.0",
+  "description": "Example use of custom datasource configurator",
+  "author": {
+    "name": "Douglass Turner"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/igvteam/igv.js.git"
+  },
+  "dependencies": {
+    "data-modal": "github:igvteam/data-modal#dat_custom_datasource_configurator"
+  }
+}
