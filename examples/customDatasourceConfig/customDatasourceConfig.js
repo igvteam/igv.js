@@ -1,4 +1,6 @@
-import { ModalTable, GenericMapDatasource, exampleCustomConfigurator } from './node_modules/data-modal/js/index.js'
+import { ModalTable, GenericMapDatasource } from './node_modules/data-modal/js/index.js'
+import { customConfigurator } from './config.js'
+import igv from '../../js/index.js'
 
 const customModalConfig =
     {
@@ -6,9 +8,12 @@ const customModalConfig =
         title: 'Custom Modal',
         pageLength: 100,
         selectionStyle: 'multi',
-        selectHandler: selectionList => console.log(selectionList)
+        selectHandler: async (selectionList) => {
+
+                await igv.browser.loadTrackList(selectionList)
+        }
     }
 
 const customModal = new ModalTable(customModalConfig)
-const customDatasource = new GenericMapDatasource(exampleCustomConfigurator())
+const customDatasource = new GenericMapDatasource(customConfigurator())
 customModal.setDatasource(customDatasource)

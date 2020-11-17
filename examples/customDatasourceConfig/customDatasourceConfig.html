@@ -31,20 +31,42 @@
 <body>
 
 <br/><br/>
-<hr/>
-<br/><br/>
 
 <div class="container">
     <div class="row justify-content-md-center">
         <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#customModal">
-            CUSTOM
+            CUSTOM DATASOURCE CONFIGURATION
         </button>
+    </div>
+
+    <br/><br/>
+    <hr/>
+    <br/><br/>
+
+    <div id="igv-container">
     </div>
 </div>
 
-<br/><br/>
-<hr/>
-<br/><br/>
+<script type="module">
+
+    import igv from '../../js/index.js'
+
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const config =
+            {
+                locus: "chr1:155,160,475-155,184,282",
+                genome: "hg19"
+            };
+
+        igv.createBrowser(document.getElementById('igv-container'), config)
+            .then(function (browser) {
+                igv.browser = browser;
+            })
+
+    });
+
+</script>
 
 </body>
 
