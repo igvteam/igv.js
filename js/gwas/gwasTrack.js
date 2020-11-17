@@ -175,8 +175,8 @@ class GWASTrack extends TrackBase {
             const n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight);
             for (let p = this.dataRange.min; p < this.dataRange.max; p += n) {
                 const yp = pixelHeight - Math.round((p - this.dataRange.min) / yScale);
-                IGVGraphics.strokeLine(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 2, font); // Offset numbers down by 2 pixels;
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font); // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 4, font); // Offset numbers down by 2 pixels;
             }
         }
 
