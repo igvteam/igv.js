@@ -5,6 +5,7 @@
 /igv.js.iml
 /node_modules/.bin/cake
 /node_modules
+/examples/customDatasourceConfig/node_modules
 /tmp/
 /cBio/
 /miRNA/
