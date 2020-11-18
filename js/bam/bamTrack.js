@@ -1009,7 +1009,7 @@ class AlignmentTrack {
         const viewport = clickState.viewport;
         const showSoftClips = this.parent.showSoftClips;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        const clickedAlignment = clickedObject && clickedObject.paired ?
+        const clickedAlignment = clickedObject && (typeof clickedObject.alignmentContaining === 'function') ?
             clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
             clickedObject;
         const isSingleAlignment = clickedAlignment && (typeof clickedObject.isPaired === 'function');
@@ -1064,13 +1064,13 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        if (isSingleAlignment && clickedAlignment.isMateMapped()) {
+        if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
             list.push({
                 label: 'View mate in split screen',
                 click: () => {
                     if (clickedAlignment.mate) {
-                        this.highlightedAlignmentReadNamed = clickedObject.readName;
-                        this.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
+                        this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                        this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, clickState.viewport.referenceFrame);
                     }
                 },
                 init: undefined
