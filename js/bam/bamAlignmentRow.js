@@ -36,7 +36,7 @@ class BamAlignmentRow {
         this.score = undefined;
     }
 
-    findAlignment(chr, genomicLocation) {
+    findAlignment(genomicLocation) {
 
         const alignmentContains = (a, genomicLocation) => {
             return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
@@ -46,7 +46,7 @@ class BamAlignmentRow {
         let centerAlignment;
         for (let i = 0; i < this.alignments.length; i++) {
             const a = this.alignments[i];
-            if (a.chr === chr && genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
+            if (genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
                         centerAlignment = a.firstAlignment;
@@ -62,18 +62,17 @@ class BamAlignmentRow {
 
         return centerAlignment;
 
-
     }
 
     updateScore(options, alignmentContainer) {
         this.score = this.calculateScore(options, alignmentContainer);
     }
 
-    calculateScore({chr, position, option, direction, tag}, alignmentContainer) {
+    calculateScore({position, option, direction, tag}, alignmentContainer) {
 
         if (!option) option = "BASE";
 
-        const alignment = this.findAlignment(chr, position);
+        const alignment = this.findAlignment(position);
 
         if (undefined === alignment) {
             return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
