@@ -187,6 +187,19 @@ class BamAlignment {
 
     }
 
+    /**
+     * Does alignment (or alignment extended by soft clips) contain the genomic location?
+     *
+     * @param genomicLocation
+     * @param showSoftClips
+     * @returns {boolean|boolean}
+     */
+    containsLocation(genomicLocation, showSoftClips) {
+        const s = showSoftClips ? this.scStart : this.start;
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
+        return (genomicLocation >= s && genomicLocation <= (s + l));
+    }
+
     popupData(genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the
@@ -278,7 +291,6 @@ class BamAlignment {
             return bool ? 'Yes' : 'No';
         }
     }
-
 
     readBaseAt(genomicLocation) {
 
