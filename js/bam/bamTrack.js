@@ -35,7 +35,6 @@ import MenuUtils from "../ui/menuUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
-
 const alignmentStartGap = 5;
 const downsampleRowHeight = 5;
 const DEFAULT_COVERAGE_TRACK_HEIGHT = 50;
@@ -1008,8 +1007,12 @@ class AlignmentTrack {
     contextMenuItemList(clickState) {
 
         const viewport = clickState.viewport;
+        const showSoftClips = this.parent.showSoftClips;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
+        const clickedAlignment = clickedObject && (typeof clickedObject.alignmentContaining === 'function') ?
+            clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
+            clickedObject;
+        const isSingleAlignment = clickedAlignment && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
         const sortByOption = (option) => {
@@ -1061,13 +1064,13 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        if (isSingleAlignment && clickedObject.isMateMapped()) {
+        if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
             list.push({
                 label: 'View mate in split screen',
                 click: () => {
-                    if (clickedObject.mate) {
-                        this.highlightedAlignmentReadNamed = clickedObject.readName;
-                        this.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
+                    if (clickedAlignment.mate) {
+                        this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                        this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, clickState.viewport.referenceFrame);
                     }
                 },
                 init: undefined
@@ -1077,7 +1080,7 @@ class AlignmentTrack {
         list.push({
             label: 'View read sequence',
             click: () => {
-                const alignment = clickedObject;
+                const alignment = clickedAlignment;
                 if (!alignment) return;
 
                 const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
@@ -1116,16 +1119,8 @@ class AlignmentTrack {
                 }
             }
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
-
-            let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            let clicked = alignmentRow.alignments.filter(function (alignment) {
-
-                const s = showSoftClips ? alignment.scStart : alignment.start;
-                const l = showSoftClips ? alignment.scLengthOnRef : alignment.lengthOnRef;
-
-                return (genomicLocation >= s && genomicLocation <= (s + l));
-            });
-
+            const alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips));
             if (clicked.length > 0) return clicked[0];
         }
 
