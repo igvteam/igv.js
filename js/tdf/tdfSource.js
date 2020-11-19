@@ -30,8 +30,8 @@ import GenomicInterval from "../genome/genomicInterval.js";
 class TDFSource {
 
     constructor(config, browser) {
-
-        this.genome = browser.genome;
+        const genome = browser.genome;
+        this.genome = genome;
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new TDFReader(config, genome);
     }
@@ -44,9 +44,9 @@ class TDFSource {
 
         if (!this.rootGroup) {
             this.rootGroup = await this.reader.readRootGroup();
-            if(!this.normalizationFactor) {
+            if (!this.normalizationFactor) {
                 const totalCount = this.rootGroup.totalCount;
-                if(totalCount) {
+                if (totalCount) {
                     this.normalizationFactor = 1.0e6 / totalCount;
                 }
             }
