@@ -47,7 +47,7 @@ class TextFeatureSource {
 
     constructor(config, browser) {
 
-        const genome = browser.genome;
+        const genome = browser ? browser.genome : undefined;
         this.config = config || {};
         this.browser = browser;
         this.genome = genome;
@@ -164,7 +164,7 @@ class TextFeatureSource {
         }
 
         if (isWholeGenome) {
-            if(!this.wgFeatures) {
+            if (!this.wgFeatures) {
                 if (this.queryable) {   // queryable sources don't support whole genome view
                     this.wgFeatures = [];
                 } else {
@@ -189,8 +189,9 @@ class TextFeatureSource {
         // indicating whole chromosome should be read at once.
         if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
             // Whole chromosome
+            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
             intervalStart = 0;
-            intervalEnd = this.genome.getChromosome(queryChr).bpLength;
+            intervalEnd = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER;
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
             intervalStart = Math.max(0, (start + end - expansionWindow) / 2);

@@ -16,7 +16,7 @@ suite("testAED", function () {
                     indexed: false,
                     url: createFile(require.resolve('./data/aed/utf8-bom.aed'))
                 },
-                genome);
+                {genome});
 
         // Must get file header first
         const features = await featureSource.getFeatures({chr, start, end});
