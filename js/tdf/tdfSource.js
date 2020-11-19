@@ -29,8 +29,7 @@ import GenomicInterval from "../genome/genomicInterval.js";
 
 class TDFSource {
 
-    constructor(config, browser) {
-        const genome = browser.genome;
+    constructor(config, genome) {
         this.genome = genome;
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new TDFReader(config, genome);

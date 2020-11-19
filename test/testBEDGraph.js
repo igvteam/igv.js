@@ -15,7 +15,7 @@ suite("testBedGraph", function () {
                     format: 'bedgraph',
                     url: require.resolve('./data/wig/bedgraph-example-uscs.bedgraph')
                 },
-                genome);
+                {genome});
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
