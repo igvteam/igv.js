@@ -219,7 +219,7 @@ class TrackView {
     appendRightHandGutter($parent) {
         let $div = $('<div class="igv-right-hand-gutter">');
         $parent.append($div);
-        this.createMenuPopup($div);
+        this.createTrackGearPopup($div);
     }
 
     dataRange() {
@@ -535,20 +535,20 @@ class TrackView {
         return rpV;
     }
 
-    createMenuPopup($parent) {
+    createTrackGearPopup($parent) {
 
         let $container = $("<div>", {class: 'igv-trackgear-container'});
         $parent.append($container);
 
         $container.append(createIcon('cog'));
 
-        this.menuPopup = new MenuPopup($parent);
-        this.menuPopup.$popover.hide();
+        this.trackGearPopup = new MenuPopup($parent);
+        this.trackGearPopup.$popover.hide();
 
         $container.click(e => {
             e.preventDefault();
             e.stopPropagation();
-            this.menuPopup.presentMenuList(-(this.menuPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
         });
     }
 
