@@ -28,8 +28,7 @@ import pack from "../feature/featurePacker.js";
 
 class BWSource {
 
-    constructor(config, browser) {
-        const genome = browser.genome;
+    constructor(config, genome) {
         this.reader = new BWReader(config, genome);
         this.genome = genome;
         this.format = config.format || "bigwig";

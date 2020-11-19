@@ -31,10 +31,11 @@ import TDFSource from "../tdf/tdfSource.js"
 function FeatureSource(config, browser) {
 
     const format = config.format ? config.format.toLowerCase() : undefined;
+    const genome = browser ? browser.genome : undefined;
     if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
-        return new BWSource(config, browser);
+        return new BWSource(config, genome);
     } else if ("tdf" === format) {
-        return new TDFSource(config, browser);
+        return new TDFSource(config, genome);
     } else {
         return new TextFeatureSource(config, browser);
     }
