@@ -30,14 +30,14 @@ import {UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js"
 
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
-const TrackGearPopover = function ($parent) {
+const MenuPopup = function ($parent) {
 
     // popover container
-    this.$popover = $('<div>', {class: 'igv-trackgear-popover'});
+    this.$popover = $('<div>', {class: 'igv-menu-popup'});
     $parent.append(this.$popover);
 
     // popover header
-    let $popoverHeader = $('<div>', {class: 'igv-trackgear-popover-header'});
+    let $popoverHeader = $('<div>', {class: 'igv-menu-popup-header'});
     this.$popover.append($popoverHeader);
 
     UIUtils.attachDialogCloseHandlerWithParent($popoverHeader[0], () => this.$popover.hide());
@@ -55,7 +55,7 @@ const TrackGearPopover = function ($parent) {
 
 };
 
-TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
+MenuPopup.prototype.presentMenuList = function (dx, dy, list) {
 
     hideAllTrackGearMenus()
 
@@ -76,10 +76,10 @@ TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
                 $e.removeClass('igv-track-menu-border-top');
             }
 
-            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-trackgear-popover-check-container')) {
+            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) {
                 // do nothing
             } else if ($e.is('div')) {
-                $e.addClass('igv-trackgear-popover-shim');
+                $e.addClass('igv-menu-popup-shim');
             }
 
             this.$popoverContent.append($e);
@@ -92,7 +92,7 @@ TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
     }
 };
 
-TrackGearPopover.prototype.dispose = function () {
+MenuPopup.prototype.dispose = function () {
     this.$popover.empty();
     this.$popoverContent.empty();
     Object.keys(this).forEach(function (key) {
@@ -100,7 +100,7 @@ TrackGearPopover.prototype.dispose = function () {
     })
 };
 
-const hideAllTrackGearMenus = () => $('.igv-trackgear-popover').hide()
+const hideAllTrackGearMenus = () => $('.igv-menu-popup').hide()
 
-export default TrackGearPopover;
+export default MenuPopup;
 
