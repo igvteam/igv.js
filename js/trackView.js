@@ -28,7 +28,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import FeatureUtils from "./feature/featureUtils.js";
 import RulerTrack from "./rulerTrack.js";
-import TrackGearPopover from "./ui/trackGearPopover.js";
+import MenuPopup from "./ui/menuPopup.js";
 import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
@@ -219,7 +219,7 @@ class TrackView {
     appendRightHandGutter($parent) {
         let $div = $('<div class="igv-right-hand-gutter">');
         $parent.append($div);
-        this.createTrackGearPopover($div);
+        this.createTrackGearPopup($div);
     }
 
     dataRange() {
@@ -535,20 +535,20 @@ class TrackView {
         return rpV;
     }
 
-    createTrackGearPopover($parent) {
+    createTrackGearPopup($parent) {
 
-        let $trackGearContainer = $("<div>", {class: 'igv-trackgear-container'});
-        $parent.append($trackGearContainer);
+        let $container = $("<div>", {class: 'igv-trackgear-container'});
+        $parent.append($container);
 
-        $trackGearContainer.append(createIcon('cog'));
+        $container.append(createIcon('cog'));
 
-        this.trackGearPopover = new TrackGearPopover($parent);
-        this.trackGearPopover.$popover.hide();
+        this.trackGearPopup = new MenuPopup($parent);
+        this.trackGearPopup.$popover.hide();
 
-        $trackGearContainer.click(e => {
+        $container.click(e => {
             e.preventDefault();
             e.stopPropagation();
-            this.trackGearPopover.presentMenuList(-(this.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
         });
     }
 
