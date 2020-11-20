@@ -87,7 +87,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
 @import "igv-generic-container";
 @import "igv-generic-dialog-container";
-@import "igv-trackgear-popup";
+@import "igv-menu-popup";
 @import "igv-user-feedback";
 
 .igv-root {
@@ -942,6 +942,19 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   z-index: 256;
   background-color: $igv-ruler-sweeper-color;
 
+}
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: $igv-trackgear-grey-color;
+}
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444;
 }
 
 // track label
