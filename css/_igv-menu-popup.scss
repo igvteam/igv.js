@@ -37,6 +37,11 @@
       background: white;
     }
 
+    > div.context-menu {
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
     > div:last-child {
       border-bottom-left-radius: $igv-trackgear-popover-border-radius;
       border-bottom-right-radius: $igv-trackgear-popover-border-radius;

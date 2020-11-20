@@ -117,12 +117,15 @@ MenuPopup.prototype.dispose = function () {
 
 function createMenuElements(itemList, popover) {
 
-    const list  = itemList.map(function (item, i) {
+    return itemList.map( item => {
+
         let elem;
 
-        if (typeof item === 'string') {
-            elem = DOMUtils.div();
-            elem.innerHTML = item;
+        if (typeof item === 'string' && '<hr/>' === item) {
+            elem = document.createElement('hr')
+        } else  if (typeof item === 'string') {
+            elem = DOMUtils.div({ class:'context-menu'})
+            elem.innerHTML = item
         } else if (typeof item === 'Node') {
             elem = item;
         } else {
@@ -139,7 +142,7 @@ function createMenuElements(itemList, popover) {
                     //defaultColor: 'aqua',
                     colorHandler: (color) => item.click(color)
                 })
-                elem = DOMUtils.div();
+                elem = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
                     elem.innerHTML = item.label;
                 }
@@ -155,10 +158,8 @@ function createMenuElements(itemList, popover) {
                     e.preventDefault();
                     e.stopPropagation();
                 })
-            }
-
-            else {
-                elem = DOMUtils.div();
+            } else {
+                elem = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
                     elem.innerHTML = item.label;
                 }
@@ -186,7 +187,6 @@ function createMenuElements(itemList, popover) {
         return { object: elem, init: item.init };
     })
 
-    return list;
 }
 
 function present(e, popover) {
