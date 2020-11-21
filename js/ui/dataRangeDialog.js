@@ -136,7 +136,7 @@ class DataRangeDialog {
         const min = parseFloat(this.$minimum_input.val());
         const max = parseFloat(this.$maximum_input.val());
         if (isNaN(min) || isNaN(max)) {
-            Alert.presentAlert("Must input numeric values", undefined);
+            Alert.presentAlert(new Error('Must input numeric values'), undefined);
         } else {
             config.trackView.setDataRange(min, max);
         }
