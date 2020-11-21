@@ -9,6 +9,7 @@ import {createIcon} from "./igv-icons.js";
 import ViewportBase from "./viewportBase.js";
 import {FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
 import MenuPopup from "./ui/menuPopup.js";
+import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
