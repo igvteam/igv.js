@@ -89,7 +89,8 @@ class ShardedBamReader {
 
                 .catch(function (error) {
                     console.error(error);
-                    Alert.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                    const str = `Error reading BAM or index file for: ${ tmp ? tmp.url : '' }`
+                    Alert.presentAlert(new Error(str))
                     self.bamReaders[queryChr] = "none";
                     return new AlignmentContainer(chr, start, end);   // Empty alignment container
                 })

@@ -425,8 +425,8 @@ class Browser {
             this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
         } catch (error) {
             // Couldn't find initial locus
-            const errorString = 'Unrecognized locus ' + initialLocus;
-            Alert.presentAlert(errorString, undefined);
+            error.message()
+            Alert.presentAlert(new Error(`Unrecognized locus ${ initialLocus }`), undefined);
             this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
         }
 
@@ -458,7 +458,7 @@ class Browser {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES;
                 const reference = knownGenomes[genomeID];
                 if (!reference) {
-                    Alert.presentAlert("Unknown genome id: " + genomeID, undefined);
+                    Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
                 }
                 return reference;
             } else {
@@ -625,7 +625,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                Alert.presentAlert("Unknown file type: " + config.url || config, undefined);
+                Alert.presentAlert(new Error(`Unknown file type: ${ config.url || config }`), undefined);
                 return newTrack;
             }
 
@@ -659,7 +659,7 @@ class Browser {
                 msg = httpMessages[msg];
             }
             msg += (": " + config.url);
-            Alert.presentAlert(msg, undefined);
+            Alert.presentAlert(new Error(msg), undefined);
         } finally {
             if (!noSpinner) {
                 this.stopSpinner();
