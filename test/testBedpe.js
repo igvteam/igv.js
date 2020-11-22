@@ -14,7 +14,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/GSM1872886_GM12878_CTCF_PET.bedpe.txt'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -33,7 +33,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/hiccups_loops.bedpe'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -52,7 +52,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/inter_chr_simulated.bedpe'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -72,7 +72,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/sv_calls.10X.bedpe'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -92,7 +92,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/large_sv_calls.10X.bedpe'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -131,7 +131,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/interactExample1.txt'),
                 format: 'interact'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -152,7 +152,7 @@ suite("testBedpe", function () {
                 url: require.resolve('./data/bedpe/sv_calls.10X.bedpe'),
                 format: 'bedpe'
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);

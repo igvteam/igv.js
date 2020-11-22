@@ -45,11 +45,8 @@ import pack from "../feature/featurePacker.js";
  */
 class TextFeatureSource {
 
-    constructor(config, browser) {
-
-        const genome = browser ? browser.genome : undefined;
+    constructor(config, genome) {
         this.config = config || {};
-        this.browser = browser;
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
         this.visibilityWindow = config.visibilityWindow;
@@ -234,11 +231,10 @@ class TextFeatureSource {
     addFeaturesToDB(featureList) {
         for (let feature of featureList) {
             if (feature.name) {
-                //TODO igv.browser => igv.Globals or igv.FeatureDB
-                this.browser.featureDB[feature.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.name.toUpperCase()] = feature;
             }
             if (feature.gene && feature.gene.name) {
-                this.browser.featureDB[feature.gene.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
             }
         }
     }
