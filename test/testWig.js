@@ -10,7 +10,7 @@ suite("testWig", function () {
         const path = require.resolve("./data/wig/fixedStep-example.wig"),
             featureSource = FeatureSource(
                 {format: 'wig', url: path},
-                {genome}),
+                genome),
             chr = "chr19",
             start = 49300000,
             end = 49400000;
@@ -29,7 +29,7 @@ suite("testWig", function () {
         const url = require.resolve("./data/wig/variableStep-example.wig");
         const wigFeatureSource = FeatureSource(
             {format: 'wig', url: url},
-            {genome});
+            genome);
         //variableStep chrom=chr19 span=150
         const wigStarts = [49304701, 49304901, 49305401, 49305601, 49305901, 49306081, 49306301, 49306691, 49307871];
         const values = [10.0, 12.5, 15.0, 17.5, 20.0, 17.5, 15.0, 12.5, 10.0];

@@ -15,7 +15,7 @@ suite("testSeg", function () {
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
         const featureSource = FeatureSource(
             {format: 'seg', url: url, indexed: false},
-            {genome});
+            genome);
         const chr = "chr1";
         const start = 0;
         const end = 747751863;
@@ -41,7 +41,7 @@ suite("testSeg", function () {
 
         const genome = await GenomeUtils.loadGenome(reference)
         const url = dataURL + "seg/segmented_data_080520.seg.gz";
-        const featureSource = FeatureSource({format: 'seg', url: url, indexed: false}, {genome});
+        const featureSource = FeatureSource({format: 'seg', url: url, indexed: false}, genome);
         const chr = "all";
         const features = await featureSource.getFeatures({chr})
 
