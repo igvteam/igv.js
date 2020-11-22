@@ -105,6 +105,7 @@ class Genome {
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
+        this.featureDB = {};   // Hash of name -> feature, used for search function.
 
         this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
         if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {

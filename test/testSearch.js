@@ -7,6 +7,11 @@ import search from "../js/search.js";
 
 suite("testSearch", function () {
 
+    genome.featureDB =  {
+        "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
+        "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
+    }
+
     const browser = {
         genome: genome,
         searchConfig : {
@@ -19,10 +24,6 @@ suite("testSearch", function () {
             geneField: "gene",
             snpField: "snp"
         },
-        featureDB: {
-            "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
-            "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
-        }
     }
 
     test("locus strings", function () {

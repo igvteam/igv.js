@@ -15,7 +15,7 @@ suite("testGFF", function () {
                 format: 'gff3',
                 filterTypes: []
             },
-            {genome});
+            genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -30,7 +30,7 @@ suite("testGFF", function () {
                 url: require.resolve('./data/gff/multi_line_feature.gff3'),
                 format: 'gff3'
             },
-            {genome});
+            genome);
 
         const chr1Features = await featureSource.getFeatures({chr: "chr1", start: 500000, end: 600000});
         assert.ok(chr1Features);

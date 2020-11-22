@@ -28,16 +28,15 @@ import BWSource from "../bigwig/bwSource.js"
 import TDFSource from "../tdf/tdfSource.js"
 
 
-function FeatureSource(config, browser) {
+function FeatureSource(config, genome) {
 
     const format = config.format ? config.format.toLowerCase() : undefined;
-    const genome = browser ? browser.genome : undefined;
     if ('bigwig' === format || 'bigbed' === format || 'bb' === format) {
         return new BWSource(config, genome);
     } else if ("tdf" === format) {
         return new TDFSource(config, genome);
     } else {
-        return new TextFeatureSource(config, browser);
+        return new TextFeatureSource(config, genome);
     }
 }
 
