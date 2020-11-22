@@ -61,7 +61,7 @@ class FeatureTrack extends TrackBase {
         } else {
             this.featureSource = config.featureSource ?
                 config.featureSource :
-                FeatureSource(config, browser);
+                FeatureSource(config, browser.genome);
         }
 
         // Set default heights
@@ -144,7 +144,8 @@ class FeatureTrack extends TrackBase {
     async getFeatures(chr, start, end, bpPerPixel) {
         const visibilityWindow = this.visibilityWindow;
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
-    }
+    };
+
 
     /**
      * The required height in pixels required for the track content.   This is not the visible track height, which
@@ -174,7 +175,7 @@ class FeatureTrack extends TrackBase {
 
         }
 
-    }
+    };
 
     draw(options) {
 
@@ -236,7 +237,7 @@ class FeatureTrack extends TrackBase {
             console.log("No feature list");
         }
 
-    }
+    };
 
     clickedFeatures(clickState) {
 

@@ -3,15 +3,18 @@ import FeatureFileReader from "../js/feature/featureFileReader.js";
 import FeatureSource from "../js/feature/featureSource.js";
 import {assert} from 'chai';
 import {genome} from "./utils/Genome.js";
+import GenomeUtils from "../js/genome/genome";
 
 suite("testBed", function () {
+
+
 
     test("Empty lines", async function () {
         const config = {
             format: "bed",
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed"),
         }
-        const reader = FeatureSource(config, {genome});
+        const reader = FeatureSource(config, genome);
         const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129})
         assert.ok(features);
         assert.equal(features.length, 6);
@@ -22,12 +25,11 @@ suite("testBed", function () {
             format: "bed",
             url: require.resolve("./data/bed/basic_feature_3_columns_empty_lines.bed.gz"),
         }
-        const reader = FeatureSource(config, {genome});
+        const reader = FeatureSource(config, genome);
         const features = await reader.getFeatures({chr: "chr1", start: 0, end: 128756129});
         assert.ok(features);
         assert.equal(features.length, 6);
     })
-
 
     test("GWAS Catalog format", async function () {
         const config = {
@@ -150,7 +152,7 @@ suite("testBed", function () {
                     indexed: false,
                     url: require.resolve('./data/bed/basic_feature_3_columns.bed')
                 },
-                {genome});
+                genome);
 
         // Must get file header first
         await featureSource.getHeader();
@@ -166,7 +168,7 @@ suite("testBed", function () {
                 indexed: false,
                 url: require.resolve('./data/bed/basic_feature_3_columns.bed')
             },
-            {genome});
+            genome);
 
         const header = await featureSource.getHeader();
         assert.ok(header);
@@ -183,7 +185,7 @@ suite("testBed", function () {
                     format: 'bed',
                     url: require.resolve('./data/bed/basic_feature_3_columns.bed.gzipped')
                 },
-                {genome});
+                genome);
 
         const features = await featureSource.getFeatures({chr, start, end});
         assert.ok(features);
@@ -196,7 +198,7 @@ suite("testBed", function () {
         const featureSource = FeatureSource({
             format: 'broadPeak',
             url: require.resolve("./data/peak/test.broadPeak"),
-        }, {genome});
+        }, genome);
         const chr = "chr22";
         const start = 16847690;
         const end = 20009819;
@@ -217,7 +219,7 @@ suite("testBed", function () {
                 format: 'refflat',
                 url: require.resolve("./data/bed/myc_refFlat.txt")
             },
-            {genome});
+            genome);
 
         const chr = "chr1";
         const start = 1;
@@ -240,7 +242,7 @@ suite("testBed", function () {
                 format: 'genePred',
                 url: require.resolve("./data/bed/genePred_myc_hg38.txt")
             },
-            {genome});
+            genome);
 
         const chr = "chr8";
         const start = 1;
@@ -263,7 +265,7 @@ suite("testBed", function () {
                 format: 'refgene',
                 url: require.resolve("./data/bed/myc_refGene_genePredExt.txt")
             },
-            {genome});
+            genome);
 
         const chr = "chr1";
         const start = 1;
@@ -297,7 +299,7 @@ suite("testBed", function () {
 
         const featureSource = FeatureSource({
             url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")
-        }, {genome});
+        }, genome);
 
         const trackType = await featureSource.trackType();
         const header = await featureSource.getHeader();
@@ -318,11 +320,51 @@ suite("testBed", function () {
             format: "bed",
             url: require.resolve("./data/bed/basic_feature_3_columns.bed"),
         }
-        const featureSource = FeatureSource(config, {genome});
+        const featureSource = FeatureSource(config, genome);
         const features = await featureSource.getFeatures({chr: "1", start: 67658429, end: 67659549});
         assert.ok(features);
         assert.equal(features.length, 4);
 
+    })
+
+    test("Searchable annotations", async function () {
+
+        const config =                 {
+            format: "bed",
+            delimiter: "\t",
+            url: require.resolve("./data/bed/names_with_spaces.bed"),
+            indexed: false,
+            searchable: true,
+        }
+        const featureSource = FeatureSource(config, genome);
+        await featureSource.getFeatures({chr: "1", start: 0, end: Number.MAX_SAFE_INTEGER});
+
+        const found = genome.featureDB["KAN2 MARKER"]
+        assert.ok(found);
+
+    })
+
+    test("Whole genome", async function () {
+
+        this.timeout(20000);
+
+        // Need an actual genome object for this test, not a mock object
+        const genome = await GenomeUtils.loadGenome({
+            id: "hg38",
+            name: "Human (GRCh38/hg38)",
+            fastaURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa",
+            indexURL: "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg38/hg38.fa.fai"
+        })
+
+        const featureSource = FeatureSource({
+                format: 'refgene',
+                url: require.resolve("./data/bed/myc_refGene_genePredExt.txt")
+            },
+            genome);
+
+        const chr = "all";
+        const features = await featureSource.getFeatures({chr});
+        assert.equal(23, features.length);   // # of features over this region
     })
 
 })

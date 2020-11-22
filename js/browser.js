@@ -103,7 +103,6 @@ class Browser {
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
-        this.featureDB = {};   // Hash of name -> feature, used for search function.
         this.constants = {
             dragThreshold: 3,
             scrollThreshold: 5,
