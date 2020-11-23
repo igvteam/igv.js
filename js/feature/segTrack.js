@@ -30,6 +30,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
+import {randomColor} from "../util/colorPalletes.js"
 
 class SegTrack extends TrackBase {
 
@@ -145,31 +146,16 @@ class SegTrack extends TrackBase {
     };
 
 
-    draw(options) {
+    draw({ context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
-        const self = this;
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        const v2 = IGVMath.log2(2);
+        if (features && features.length > 0) {
 
-        const ctx = options.context;
-        const pixelTop = options.pixelTop;
-        const pixelWidth = options.pixelWidth;
-        const pixelHeight = options.pixelHeight;
-        const pixelBottom = pixelTop + pixelHeight;
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            if (this.isLog === undefined) checkForLog(features);
 
-        const featureList = options.features;
 
-        if (featureList && featureList.length > 0) {
-
-            if (self.isLog === undefined) checkForLog(featureList);
-
-            const bpPerPixel = options.bpPerPixel;
-            const bpStart = options.bpStart;
-            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-            const xScale = bpPerPixel;
-
-            this.updateSampleKeys(featureList);
+            this.updateSampleKeys(features);
 
             // Create a map for fast id -> row lookup
             const samples = {};
@@ -183,7 +169,7 @@ class SegTrack extends TrackBase {
             switch (this.displayMode) {
 
                 case "FILL":
-                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    sampleHeight = pixelHeight / this.sampleKeys.length;
                     border = 0
                     break;
 
@@ -198,9 +184,9 @@ class SegTrack extends TrackBase {
 
             }
 
-            for (let segment of featureList) {
-
-                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const pixelBottom = pixelTop + pixelHeight;
+            for (let segment of features) {
 
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
@@ -215,52 +201,49 @@ class SegTrack extends TrackBase {
                 }
 
                 let value = segment.value;
-                if (!self.isLog) {
+                if (!this.isLog) {
                     value = IGVMath.log2(value / 2);
                 }
 
 
                 const segmentStart = Math.max(segment.start, bpStart);
-                // const segmentStart = segment.start;
-                const px = Math.round((segmentStart - bpStart) / xScale);
+
+                const x = Math.round((segmentStart - bpStart) / bpPerPixel);
 
                 const segmentEnd = Math.min(segment.end, bpEnd);
-                // const segmentEnd = segment.end;
-                const px1 = Math.round((segmentEnd - bpStart) / xScale);
 
-                const pw = Math.max(1, px1 - px);
+                const x1 = Math.round((segmentEnd - bpStart) / bpPerPixel);
 
-                // const sign = px < 0 ? '-' : '+';
-                // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
+                const w = Math.max(1, x1 - x);
 
                 let color;
                 if (value < -0.1) {
-                    color = self.negColorScale.getColor(value);
+                    color = this.negColorScale.getColor(value);
                 } else if (value > 0.1) {
-                    color = self.posColorScale.getColor(value);
+                    color = this.posColorScale.getColor(value);
                 } else {
                     color = "white";
                 }
-                ctx.fillStyle = color;
+
+                // context.fillStyle = color
+                context.fillStyle = randomColor()
 
                 // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
-                let sh = sampleHeight;
+                let h = sampleHeight;
                 if (sampleHeight < 0.25) {
                     const f = 0.1 + 2 * Math.abs(value);
-                    sh = Math.min(1, f * sampleHeight);
+                    h = Math.min(1, f * sampleHeight);
                 }
-
-                segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
-                ctx.fillRect(px, y, pw, sh - 2 * border);
-
-                //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+                h -= 2 * border
+                segment.pixelRect = { x, y, w, h };
+                context.fillRect(x, y, w, h);
 
             }
         } else {
             console.log("No feature list");
         }
 
-
+        const self = this
         function checkForLog(featureList) {
 
             if (self.isLog === undefined) {
@@ -344,6 +327,7 @@ class SegTrack extends TrackBase {
         return filterByRow(allFeatures, clickState.y);
 
         function filterByRow(features, y) {
+
             return features.filter(function (feature) {
                 const rect = feature.pixelRect;
                 return rect && y >= rect.y && y <= (rect.y + rect.h);
@@ -361,9 +345,11 @@ class SegTrack extends TrackBase {
         const items = [];
 
         for (let f of featureList) {
+        }
+        featureList.forEach(function (f) {
             extractPopupData(f, items);
 
-        }
+        });
 
         return items;
 

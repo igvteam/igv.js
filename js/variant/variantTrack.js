@@ -157,29 +157,21 @@ class VariantTrack extends TrackBase {
 
     };
 
-    draw(options) {
+    draw({ context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features }) {
 
-        const ctx = options.context
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
         const callSets = this.callSets;
         const nCalls = this.getCallsetsLength();
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
-        const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
-
         if (callSets && nCalls > 0 && "COLLAPSED" !== this.displayMode) {
-            IGVGraphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
+            IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
         }
 
-        const featureList = options.features
-
-        if (featureList) {
-            for (let variant of featureList) {
+        if (features) {
+            const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
+            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+            for (let variant of features) {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
@@ -199,14 +191,14 @@ class VariantTrack extends TrackBase {
                 }
 
                 if ("NONVARIANT" === variant.type) {
-                    ctx.fillStyle = this.nonRefColor;
+                    context.fillStyle = this.nonRefColor;
                 } else if ("MIXED" === variant.type) {
-                    ctx.fillStyle = this.mixedColor;
+                    context.fillStyle = this.mixedColor;
                 } else {
-                    ctx.fillStyle = this.color || this.defaultColor;
+                    context.fillStyle = this.color || this.defaultColor;
                 }
 
-                ctx.fillRect(px, py, pw, vh);
+                context.fillRect(px, py, pw, vh);
 
                 if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
@@ -230,16 +222,16 @@ class VariantTrack extends TrackBase {
                             }
 
                             if (noCall) {
-                                ctx.fillStyle = this.noCallColor;
+                                context.fillStyle = this.noCallColor;
                             } else if (allRef) {
-                                ctx.fillStyle = this.homrefColor;
+                                context.fillStyle = this.homrefColor;
                             } else if (allVar) {
-                                ctx.fillStyle = this.homvarColor;
+                                context.fillStyle = this.homvarColor;
                             } else {
-                                ctx.fillStyle = this.hetvarColor;
+                                context.fillStyle = this.hetvarColor;
                             }
 
-                            ctx.fillRect(px, py, pw, callHeight);
+                            context.fillRect(px, py, pw, callHeight);
 
                         }
                         callsDrawn++;
