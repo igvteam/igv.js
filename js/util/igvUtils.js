@@ -238,7 +238,7 @@ async function getFilename(url) {
     if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
         // This will fail if Google API key is not defined
         if(GoogleAuth.getApiKey() === undefined) {
-            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
+            throw new Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
         }
         const json = await GoogleDrive.getDriveFileInfo(url)
         return json.originalFileName || json.name;

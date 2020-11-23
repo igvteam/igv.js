@@ -45,9 +45,9 @@ class CSIIndex {
 
         if (magic !== CSI1_MAGIC) {
             if (magic === CSI2_MAGIC) {
-                throw Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js");
+                throw new Error("CSI version 2 is not supported.  Please enter an issue at https://github.com/igvteam/igv.js");
             } else {
-                throw Error("Not a CSI index");
+                throw new Error("Not a CSI index");
             }
         }
 

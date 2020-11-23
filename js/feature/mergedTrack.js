@@ -31,7 +31,7 @@ class MergedTrack extends TrackBase {
     constructor(config, browser) {
 
         if (!config.tracks) {
-            throw Error("Error: no tracks defined for merged track" + config);
+            throw new Error("Error: no tracks defined for merged track" + config);
         }
 
         super(config, browser);

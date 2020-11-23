@@ -9,7 +9,7 @@ function decodeGcnv(tokens, header) {
 
     const columnNames = header.columnNames;
     if(!columnNames) {
-        throw Error("Sample names are not defined.   Missing column headers?");
+        throw new Error("Sample names are not defined.   Missing column headers?");
     }
     const sampleCount = columnNames.length - 3;
 

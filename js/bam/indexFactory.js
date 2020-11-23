@@ -42,9 +42,9 @@ async function loadIndex(indexURL, config, genome) {
         case TRIBBLE_MAGIC:
             return parseTribbleIndex(arrayBuffer, genome);
         case CSI2_MAGIC:
-            throw Error("CSI version 2 is not supported.");
+            throw new Error("CSI version 2 is not supported.");
         default:
-            throw Error(`Unrecognized index type: ${indexURL}`);
+            throw new Error(`Unrecognized index type: ${indexURL}`);
     }
 }
 

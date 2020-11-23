@@ -112,7 +112,7 @@ async function load(url, options) {
             }
         }
     } else {
-        throw Error(`url must be either a 'File', 'string', 'function', or 'Promise'.  Actual type: ${urlType}`);
+        throw new Error(`url must be either a 'File', 'string', 'function', or 'Promise'.  Actual type: ${urlType}`);
     }
 }
 
@@ -416,7 +416,7 @@ async function fetchGoogleAccessToken(url) {
         const googleToken = await GoogleAuth.getAccessToken(scope);
         return googleToken ? googleToken.access_token : undefined;
     } else {
-        throw Error(
+        throw new Error(
             `Authorization is required, but Google oAuth has not been initalized. Contact your site administrator for assistance.`)
     }
 }

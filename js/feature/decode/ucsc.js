@@ -22,7 +22,7 @@ function decodeBed(tokens, header) {
     const start = parseInt(tokens[1]);
     const end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
     if (isNaN(start) || isNaN(end)) {
-        throw Error(`Unparsable bed record: ${tokens.join('\t')}`);
+        throw new Error(`Unparsable bed record: ${tokens.join('\t')}`);
     }
     const feature = {chr: chr, start: start, end: end, score: 1000};
 

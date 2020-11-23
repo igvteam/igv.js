@@ -116,11 +116,11 @@ class TrackBase {
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
         for(let key of Object.keys(state)) {
             if(typeof state[key] === 'function') {
-                throw Error(`Property ${key} of track '${this.name} is a function. Functions cannot be saved in sessions.` );
+                throw new Error(`Property ${key} of track '${this.name} is a function. Functions cannot be saved in sessions.` );
             } if(state[key] instanceof Promise) {
-                throw Error(`Property ${key} of track '${this.name} is a local File. File objects cannot be saved in sessions.`);
+                throw new Error(`Property ${key} of track '${this.name} is a local File. File objects cannot be saved in sessions.`);
             } if(state[key] instanceof File) {
-                throw Error(`Property ${key} of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
+                throw new Error(`Property ${key} of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
             }
         }
 

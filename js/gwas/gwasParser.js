@@ -12,7 +12,7 @@ class GWASParser {
             if (config.columns.chromosome === undefined ||
                 config.columns.position === undefined ||
                 config.columns.value === undefined) {
-                throw Error("columns property must define chrCol, posCol, and valueCol");
+                throw new Error("columns property must define chrCol, posCol, and valueCol");
             }
             this.posCol = config.columns.position - 1;
             this.chrCol = config.columns.chromosome - 1;

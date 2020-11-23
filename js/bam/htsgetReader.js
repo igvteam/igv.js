@@ -41,7 +41,7 @@ class HtsgetReader {
     async readAlignments(chr, start, end, retryCount) {
 
         if (this.config.format && this.config.format.toUpperCase() !== "BAM") {
-            throw  Error(`htsget format ${this.config.format} is not supported`);
+            throw  new Error(`htsget format ${this.config.format} is not supported`);
         }
 
         const genome = this.genome;
