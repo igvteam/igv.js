@@ -73,49 +73,32 @@
         const options =
             {
                 genome: "hg19",
-                locus: "chr1",
-                // locus: 'chr8:100,117,313-100,120,998',
+                // locus: "chr1",
+
+                // vcf friendly locs
+                locus: 'chr8:128,562,838-128,863,257',
+
                 // locus: 'myc',
                 // locus: [ 'ace', 'myc' ],
                 // locus: [ 'egfr', 'myc', 'ace' ],
 
-                // use for one-feature BED track
-                // locus: 'chr1:999999-1000000',
-                // tracks:
-                // [
-                //     {
-                //         "url": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz?versionId=null",
-                //         "indexURL": "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi?versionId=null",
-                //         "name": "1KG Sites"
-                //     }                ]
-            };
+                tracks:
+                    [
+                        {
+                            format: "vcf",
+                            indexURL: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+                            name: "1KG Phase 3 SVs",
+                            type: "variant",
+                            url: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+                            visibilityWindow: 10000000                        },
+                        {
+                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                            "indexed": false,
+                            "isLog": true,
+                            "name": "Random SEG File"
+                        }
 
-        const session_config =
-            {
-                "version": "2.7.0",
-                "reference": {
-                    "id": "hg19",
-                    "name": "Human (CRCh37/hg19)",
-                    "fastaURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
-                    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
-                    "cytobandURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
-                },
-                "locus": "chr1:1-249,250,621",
-                "tracks": [
-                    {
-                        "type": "sequence",
-                        "order": -900719925474.0991
-                    },
-                    {
-                        "name": "Refseq Genes",
-                        "format": "refgene",
-                        "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/hg19/ncbiRefGene.txt.gz",
-                        "indexed": false,
-                        "visibilityWindow": -1,
-                        "removable": false,
-                        "order": 1000000
-                    }
-                ]
+                    ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
