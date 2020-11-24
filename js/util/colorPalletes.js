@@ -1,3 +1,4 @@
+import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 
 const appleCrayonPalette =
     {
@@ -248,4 +249,38 @@ function random(min, max) {
 //     }
 // }
 
-export {appleCrayonPalette, PaletteColorTable, randomColor};
+function randomRGBConstantAlpha(min, max, alpha) {
+
+    min = IGVMath.clamp(min, 0, 255)
+    max = IGVMath.clamp(max, 0, 255)
+
+    const r = Math.round(Math.random() * (max - min) + min).toString(10)
+    const g = Math.round(Math.random() * (max - min) + min).toString(10)
+    const b = Math.round(Math.random() * (max - min) + min).toString(10)
+    return `rgba(${ r },${ g },${ b }, ${ alpha })`
+
+}
+
+function randomRGB(min, max) {
+
+    min = IGVMath.clamp(min, 0, 255)
+    max = IGVMath.clamp(max, 0, 255)
+
+    const r = Math.round(Math.random() * (max - min) + min).toString(10)
+    const g = Math.round(Math.random() * (max - min) + min).toString(10)
+    const b = Math.round(Math.random() * (max - min) + min).toString(10)
+    return `rgb(${ r },${ g },${ b })`
+
+}
+
+function randomGrey(min, max) {
+
+    min = IGVMath.clamp(min, 0, 255)
+    max = IGVMath.clamp(max, 0, 255)
+
+    const value = Math.round(Math.random() * (max - min) + min).toString(10)
+    return `rgb(${ value },${ value },${ value })`
+
+}
+
+export {appleCrayonPalette, PaletteColorTable, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha };
