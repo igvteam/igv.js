@@ -148,7 +148,7 @@ class SegTrack extends TrackBase {
 
     draw({ context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
-        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255,255,255)"});
 
         if (features && features.length > 0) {
 
@@ -184,6 +184,7 @@ class SegTrack extends TrackBase {
 
             }
 
+            const drawnFeatures = []
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             const pixelBottom = pixelTop + pixelHeight;
             for (let segment of features) {
@@ -195,6 +196,7 @@ class SegTrack extends TrackBase {
                 segment.row = samples[sampleKey];
                 const y = pixelTop + segment.row * sampleHeight + border;
                 const bottom = y + sampleHeight;
+
 
                 if (bottom < pixelTop || y > pixelBottom) {
                     continue;
@@ -236,11 +238,17 @@ class SegTrack extends TrackBase {
 
                 // context.fillStyle = color
                 // context.fillStyle = randomColor()
-                context.fillStyle = randomGrey(100, 200)
+                context.fillStyle = randomGrey(200, 255)
+                context.fillRect(x, y, w, h)
 
-                context.fillRect(x, y, w, h);
+                drawnFeatures.push(segment)
 
             }
+
+            if (drawnFeatures.length > 0) {
+                drawText(context, drawnFeatures)
+            }
+            
         } else {
             console.log("No feature list");
         }
@@ -440,6 +448,43 @@ class SegTrack extends TrackBase {
             }
         }
     }
+}
+
+const defaultFont =
+    {
+        // font: '6px sans-serif',
+        font: '8px sans-serif',
+        textAlign: 'start',
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
+    };
+
+function configureFont(context, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
+    context.font = font
+    context.textAlign = textAlign
+    context.textBaseline = textBaseline
+    context.fillStyle = fillStyle
+}
+
+function drawText(context, features) {
+
+    configureFont(context, defaultFont)
+
+    const hitlist = {}
+    for (let feature of features) {
+
+        if (hitlist[ feature.row ]) {
+            // skip
+        } else {
+            hitlist[ feature.row ] = feature
+            const { y, h } = feature.pixelRect
+            const string = feature.sampleKey || feature.sample
+            context.fillText(string, 0, y + h)
+        }
+
+    }
+
 }
 
 export default SegTrack
