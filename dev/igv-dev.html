@@ -76,26 +76,31 @@
                 // locus: "chr1",
 
                 // vcf friendly locs
-                locus: 'chr8:128,562,838-128,863,257',
+                // locus: 'chr8:128,562,838-128,863,257',
 
+                locus: 'all',
                 // locus: 'myc',
                 // locus: [ 'ace', 'myc' ],
                 // locus: [ 'egfr', 'myc', 'ace' ],
 
                 tracks:
                     [
+                        // {
+                        //     format: "vcf",
+                        //     indexURL: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
+                        //     name: "1KG Phase 3 SVs",
+                        //     type: "variant",
+                        //     url: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
+                        //     visibilityWindow: 10000000
+                        // },
                         {
-                            format: "vcf",
-                            indexURL: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz.tbi",
-                            name: "1KG Phase 3 SVs",
-                            type: "variant",
-                            url: "https://1000genomes.s3.amazonaws.com/phase3/integrated_sv_map/ALL.wgs.integrated_sv_map_v2.20130502.svs.genotypes.vcf.gz",
-                            visibilityWindow: 10000000                        },
-                        {
-                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                            "indexed": false,
-                            "isLog": true,
-                            "name": "Random SEG File"
+                            name: "A SEG File",
+                            url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                            indexed: false,
+                            isLog: true,
+                            displayMode: 'EXPANDED',
+                            height: 512
+
                         }
 
                     ]

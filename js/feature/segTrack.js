@@ -30,7 +30,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
-import {randomColor} from "../util/colorPalletes.js"
+import { randomColor, randomGrey, randomRGB, randomRGBConstantAlpha } from "../util/colorPalletes.js"
 
 class SegTrack extends TrackBase {
 
@@ -225,9 +225,6 @@ class SegTrack extends TrackBase {
                     color = "white";
                 }
 
-                // context.fillStyle = color
-                context.fillStyle = randomColor()
-
                 // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                 let h = sampleHeight;
                 if (sampleHeight < 0.25) {
@@ -236,6 +233,11 @@ class SegTrack extends TrackBase {
                 }
                 h -= 2 * border
                 segment.pixelRect = { x, y, w, h };
+
+                // context.fillStyle = color
+                // context.fillStyle = randomColor()
+                context.fillStyle = randomGrey(100, 200)
+
                 context.fillRect(x, y, w, h);
 
             }
