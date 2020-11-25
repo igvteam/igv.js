@@ -66,7 +66,8 @@ const multiLocusGapMarginWidth = 2
 
 const multiLocusGapWidth = (2 * multiLocusGapMarginWidth) + multiLocusGapDivWidth
 
-const leftHandGutterWidth = 50
+// const leftHandGutterWidth = 50
+const leftHandGutterWidth = 0
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12

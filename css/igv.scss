@@ -46,7 +46,8 @@ $igv-scrollbar-inner-border-width: 1px;
 $igv-scrollbar-inner-left: 2px;
 $igv-scrollbar-inner-width: $igv-scrollbar-outer-width - 2 * ($igv-scrollbar-inner-left + $igv-scrollbar-inner-border-width);
 
-$igv-left-hand-gutter-width: 50px;
+//$igv-left-hand-gutter-width: 50px;
+$igv-left-hand-gutter-width: 0px;
 $igv-right-hand-gutter-width: 36px;
 
 $igv-track-manipulation-handle-width: 12px;

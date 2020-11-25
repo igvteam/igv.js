@@ -573,7 +573,7 @@
       height: 100%;
       background-color: white; }
     .igv-root .igv-ideogram-container .igv-ideogram-content:first-child {
-      margin-left: 50px; }
+      margin-left: 0px; }
     .igv-root .igv-ideogram-container .igv-ideogram-content-border-right {
       border-right-color: #292929;
       border-right-style: solid;
@@ -615,7 +615,7 @@
   align-items: stretch; }
 
 .igv-left-hand-gutter {
-  width: 50px;
+  width: 0px;
   height: 100%; }
 
 .igv-right-hand-gutter {
@@ -631,7 +631,7 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: stretch;
-  width: calc(100% - 112px);
+  width: calc(100% - 62px);
   height: 100%; }
   .igv-viewport-container .igv-viewport {
     position: relative;
