@@ -35,8 +35,10 @@ class IdeogramViewport extends ViewportBase {
 
         super(trackView, $viewportContainer, referenceFrame, width)
 
-        this.$canvas.on('click', e => this.handleClick(e, this.canvas));
+    }
 
+    initializationHelper() {
+        this.$canvas.on('click', e => this.handleClick(e, this.canvas));
     }
 
     setWidth(width) {
