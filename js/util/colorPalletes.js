@@ -261,6 +261,26 @@ function randomRGBConstantAlpha(min, max, alpha) {
 
 }
 
+function rgbaColor(r, g, b, a) {
+    r = IGVMath.clamp(r, 0, 255)
+    g = IGVMath.clamp(g, 0, 255)
+    b = IGVMath.clamp(b, 0, 255)
+    a = IGVMath.clamp(a, 0.0, 1.0)
+    return `rgba(${r}, ${g}, ${b}, ${a})`
+}
+
+function rgbColor(r, g, b) {
+    r = IGVMath.clamp(r, 0, 255);
+    g = IGVMath.clamp(g, 0, 255);
+    b = IGVMath.clamp(b, 0, 255);
+    return `rgb(${r}, ${g}, ${b})`
+}
+
+function greyScale(value) {
+    value = IGVMath.clamp(value, 0, 255);
+    return `rgb(${value}, ${value}, ${value})`
+}
+
 function randomRGB(min, max) {
 
     min = IGVMath.clamp(min, 0, 255)
@@ -283,4 +303,4 @@ function randomGrey(min, max) {
 
 }
 
-export {appleCrayonPalette, PaletteColorTable, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha };
+export {appleCrayonPalette, PaletteColorTable, randomColor, rgbaColor, rgbColor, greyScale, randomGrey, randomRGB, randomRGBConstantAlpha };

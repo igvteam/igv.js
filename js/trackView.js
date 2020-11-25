@@ -33,6 +33,7 @@ import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
+import SampleNameViewport, { sampleNameViewportWidth } from './sampleNameViewport.js';
 
 let dragged
 let dragDestination
@@ -67,6 +68,8 @@ class TrackView {
 
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
+
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, browser.referenceFrameList, sampleNameViewportWidth)
 
         // viewport container DOM elements
         populateViewportContainer(browser, browser.referenceFrameList, this)

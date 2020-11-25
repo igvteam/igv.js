@@ -236,9 +236,9 @@ class SegTrack extends TrackBase {
                 h -= 2 * border
                 segment.pixelRect = { x, y, w, h };
 
-                // context.fillStyle = color
+                context.fillStyle = color
                 // context.fillStyle = randomColor()
-                context.fillStyle = randomGrey(200, 255)
+                // context.fillStyle = randomGrey(200, 255)
                 context.fillRect(x, y, w, h)
 
                 drawnFeatures.push(segment)
@@ -246,9 +246,9 @@ class SegTrack extends TrackBase {
             }
 
             if (drawnFeatures.length > 0) {
-                drawText(context, drawnFeatures)
+                this.trackView.sampleNameViewport.draw(drawnFeatures, pixelHeight)
             }
-            
+
         } else {
             console.log("No feature list");
         }
@@ -448,43 +448,6 @@ class SegTrack extends TrackBase {
             }
         }
     }
-}
-
-const defaultFont =
-    {
-        // font: '6px sans-serif',
-        font: '8px sans-serif',
-        textAlign: 'start',
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle:'black'
-    };
-
-function configureFont(context, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
-    context.font = font
-    context.textAlign = textAlign
-    context.textBaseline = textBaseline
-    context.fillStyle = fillStyle
-}
-
-function drawText(context, features) {
-
-    configureFont(context, defaultFont)
-
-    const hitlist = {}
-    for (let feature of features) {
-
-        if (hitlist[ feature.row ]) {
-            // skip
-        } else {
-            hitlist[ feature.row ] = feature
-            const { y, h } = feature.pixelRect
-            const string = feature.sampleKey || feature.sample
-            context.fillText(string, 0, y + h)
-        }
-
-    }
-
 }
 
 export default SegTrack
