@@ -33,6 +33,7 @@ import GWASParser from "../gwas/gwasParser.js";
 import AEDParser from "../aed/AEDParser.js";
 import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import {loadIndex} from "../bam/indexFactory.js";
+import {TribbleIndex} from "./tribble.js"
 
 const isString = StringUtils.isString;
 
@@ -106,7 +107,14 @@ class FeatureFileReader {
                 }
 
                 // Load the file header (not HTTP header) for an indexed file.
-                let maxSize = "vcf" === this.config.format ? 65000 : 1000
+                let maxSize = "vcf" === this.config.format ? 65000 : 1000;
+                if ("vcf" === this.config.format && index instanceof TribbleIndex) {
+                    maxSize = Object.values(index.chrIndex)
+                        .flatMap(chr => chr.blocks)
+                        .map(block => block.min)
+                        .reduce((previous, current) =>
+                            Math.min(previous, current), Number.MAX_SAFE_INTEGER);
+                }
                 const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
 
                 if (index.tabix) {
