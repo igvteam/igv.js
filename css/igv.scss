@@ -46,13 +46,14 @@ $igv-scrollbar-inner-border-width: 1px;
 $igv-scrollbar-inner-left: 2px;
 $igv-scrollbar-inner-width: $igv-scrollbar-outer-width - 2 * ($igv-scrollbar-inner-left + $igv-scrollbar-inner-border-width);
 
-//$igv-left-hand-gutter-width: 50px;
 $igv-left-hand-gutter-width: 0px;
+//$igv-left-hand-gutter-width: 50px;
 $igv-right-hand-gutter-width: 36px;
 
 $igv-track-manipulation-handle-width: 12px;
 $igv-track-manipulation-handle-margin-width: 0;
 $igv-track-manipulation-handle-shim: $igv-track-manipulation-handle-width + $igv-track-manipulation-handle-margin-width;
+
 $igv-viewport-container-shim-width: $igv-left-hand-gutter-width + $igv-right-hand-gutter-width + $igv-track-manipulation-handle-shim + $igv-scrollbar-outer-width;
 
 $igv-multi-locus-gap-div-width: 1px;
