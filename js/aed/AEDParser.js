@@ -41,7 +41,8 @@ var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespac
 
 class AEDParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
+        const decode = config ? config.decode : undefined;
         this.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
         if (decode) {

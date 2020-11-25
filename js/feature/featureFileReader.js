@@ -62,8 +62,8 @@ class FeatureFileReader {
             uriParts = URIUtils.parseUri(this.config.url);
             this.filename = config.filename || uriParts.file;
         }
-        this.format = this.config.format;
-        this.parser = this.getParser(this.format, this.config.decode, this.config);
+
+        this.parser = this.getParser(this.config);
 
         if (this.config.format === "vcf" && !this.config.indexURL) {
             console.warn("Warning: index file not specified.  The entire vcf file will be loaded.");
@@ -90,7 +90,7 @@ class FeatureFileReader {
             return this.loadFeaturesNoIndex()
         }
 
-     }
+    }
 
     async readHeader() {
 
@@ -137,8 +137,10 @@ class FeatureFileReader {
         }
     }
 
-    getParser(format, decode, config) {
-        switch (format) {
+
+    getParser(config) {
+
+        switch (config.format) {
             case "vcf":
                 return new VcfParser(config);
             case "seg" :
@@ -146,9 +148,9 @@ class FeatureFileReader {
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :
-                return new AEDParser(format, decode, config);
+                return new AEDParser(config);
             default:
-                return new FeatureParser(format, decode, config);
+                return new FeatureParser(config);
         }
     }
 
