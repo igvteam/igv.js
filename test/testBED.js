@@ -7,7 +7,15 @@ import GenomeUtils from "../js/genome/genome";
 
 suite("testBed", function () {
 
-
+    test("Space delimited", async function () {
+        const config = {
+            format: "bed",
+            url: require.resolve("./data/bed/space_delimited.bed"),
+        }
+        const reader = FeatureSource(config, genome);
+        const features = await reader.getFeatures({chr: "chr2", start: 0, end: 128756129})
+        assert.equal(features.length, 5);
+    })
 
     test("Empty lines", async function () {
         const config = {
