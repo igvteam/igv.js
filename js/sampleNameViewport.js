@@ -1,8 +1,8 @@
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import {appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
+import $ from "./vendor/jquery-3.3.1.slim";
 
-let drawn = false
 const sampleNameViewportWidth = 128
 
 class SampleNameViewport extends ViewportBase {
@@ -18,16 +18,11 @@ class SampleNameViewport extends ViewportBase {
         IGVGraphics.fillRect(this.ctx, 0, 0, width, height, { 'fillStyle': appleCrayonPalette[ 'snow' ] })
     }
 
-    draw(features, height) {
-
-        // if (false === drawn) {
-        //
-        //     drawn = !drawn
-        //
-        //
-        // }
+    draw(features, canvasTop, height) {
 
         this.canvas.height = height
+        this.canvas.style.top = `${ canvasTop }px`
+        this.ctx.translate(0, -canvasTop)
 
         // for (let y = 0; y < height; y++) {
         //     IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, 1, { 'fillStyle': randomGrey(100, 200) })
@@ -39,11 +34,11 @@ class SampleNameViewport extends ViewportBase {
         for (let feature of features) {
             if (hitlist[ feature.row ]) {
                 // skip
+                console.log('skip')
             } else {
-                const i = features.indexOf(feature)
                 hitlist[ feature.row ] = feature
                 const { y, h } = feature.pixelRect
-                IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, h, { 'fillStyle': 0 === i % 2 ? appleCrayonPalette['snow'] : greyScale(245)})
+                IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, h, { 'fillStyle': greyScale(0 === features.indexOf(feature) % 2 ? 255 : 245)})
                 const string = feature.sampleKey || feature.sample
                 this.ctx.fillText(string, 0, y + h)
             }
