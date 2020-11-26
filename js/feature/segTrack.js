@@ -148,8 +148,6 @@ class SegTrack extends TrackBase {
 
     draw({ context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
-        console.log(`${Date.now()} - seg track draw`)
-
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255,255,255)"});
 
         if (features && features.length > 0) {
@@ -248,7 +246,10 @@ class SegTrack extends TrackBase {
             }
 
             if (drawnFeatures.length > 0) {
-                this.trackView.sampleNameViewport.draw(drawnFeatures, pixelHeight)
+
+                console.log(`seg track draw - y ${ pixelTop } - height ${ pixelHeight }`)
+
+                this.trackView.sampleNameViewport.draw(drawnFeatures, pixelTop, pixelHeight)
             }
 
         } else {
