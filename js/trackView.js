@@ -34,6 +34,7 @@ import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
 import SampleNameViewport, { sampleNameViewportWidth } from './sampleNameViewport.js';
+import TrackScrollbar from './trackScrollbar.js';
 
 let dragged
 let dragDestination
@@ -649,7 +650,7 @@ function populateViewportContainer(browser, referenceFrameList, trackView) {
     trackView.updateViewportForMultiLocus();
 
     if (false === scrollbarExclusionTypes.has(trackView.track.type)) {
-        trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports)
+        trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, [...trackView.viewports, trackView.sampleNameViewport])
     } else {
         const $shim = $('<div>', {class: 'igv-scrollbar-shim'})
         $shim.insertAfter(trackView.$viewportContainer)
@@ -698,112 +699,6 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights);
 }
 
-class TrackScrollbar {
+export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer}
 
-    constructor($viewportContainer, viewports) {
-
-        let lastY;
-
-        // Define mouse events first, use arrow function so "this" is in scope
-
-        const mouseMove = (event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            const page = DOMUtils.pageCoordinates(event);
-            this.moveScrollerBy(page.y - lastY);
-            lastY = page.y;
-        }
-
-        const mouseUp = (event) => {
-            $(document).off(this.namespace);
-        }
-
-        const mouseDown = (event) => {
-            event.preventDefault();
-            const page = DOMUtils.pageCoordinates(event);
-            lastY = page.y;
-            $(document).on('mousemove' + namespace, mouseMove);
-            $(document).on('mouseup' + namespace, mouseUp);
-            $(document).on('mouseleave' + namespace, mouseUp);
-
-            // prevents start of horizontal track panning)
-            event.stopPropagation();
-        }
-
-
-        const namespace = '.trackscrollbar' + DOMUtils.guid();
-        this.namespace = namespace;
-
-        this.$outerScroll = $('<div class="igv-scrollbar-outer-div">');
-        this.$innerScroll = $('<div>');
-
-        this.$outerScroll.append(this.$innerScroll);
-
-        this.$viewportContainer = $viewportContainer;
-        this.viewports = viewports;
-
-        this.$innerScroll.on("mousedown", mouseDown);
-
-        this.$innerScroll.on("click", (event) => {
-            event.stopPropagation();
-        });
-
-        this.$outerScroll.on("click", (event) => {
-            this.moveScrollerBy(event.offsetY - this.$innerScroll.height() / 2);
-            event.stopPropagation();
-
-        });
-    }
-
-    moveScrollerBy(delta) {
-        const y = this.$innerScroll.position().top + delta;
-        this.moveScrollerTo(y);
-    }
-
-    moveScrollerTo(y) {
-
-        const outerScrollHeight = this.$outerScroll.height();
-        const innerScrollHeight = this.$innerScroll.height();
-
-        const newTop = Math.min(Math.max(0, y), outerScrollHeight - innerScrollHeight);
-
-        const contentDivHeight = maxViewportContentHeight(this.viewports);
-        const contentTop = -Math.round(newTop * (contentDivHeight / this.$viewportContainer.height()));
-
-        this.$innerScroll.css("top", newTop + "px");
-
-        for (let viewport of this.viewports) {
-            viewport.setTop(contentTop)
-        }
-
-    }
-
-    dispose() {
-        $(window).off(this.namespace);
-        this.$innerScroll.off();
-    }
-
-    update() {
-
-        const viewportContainerHeight = this.$viewportContainer.height();
-
-        const viewportContentHeight = maxViewportContentHeight(this.viewports);
-
-        const innerScrollHeight = Math.round((viewportContainerHeight / viewportContentHeight) * viewportContainerHeight);
-
-        if (viewportContentHeight > viewportContainerHeight) {
-            this.$innerScroll.show();
-            this.$innerScroll.height(innerScrollHeight);
-        } else {
-            this.$innerScroll.hide();
-        }
-    }
-}
-
-export {
-    maxViewportContentHeight,
-    updateViewportShims,
-    emptyViewportContainers,
-    populateViewportContainer
-}
 export default TrackView
