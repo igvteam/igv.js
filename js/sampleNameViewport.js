@@ -2,8 +2,9 @@ import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import {appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
 
-
+let drawn = false
 const sampleNameViewportWidth = 128
+
 class SampleNameViewport extends ViewportBase {
 
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -18,6 +19,13 @@ class SampleNameViewport extends ViewportBase {
     }
 
     draw(features, height) {
+
+        // if (false === drawn) {
+        //
+        //     drawn = !drawn
+        //
+        //
+        // }
 
         this.canvas.height = height
 
@@ -43,7 +51,12 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
+    setTop(contentTop) {
+        this.$content.css('top', `${ contentTop }px`);
+    }
+
 }
+
 const defaultFont =
     {
         // font: '6px sans-serif',
