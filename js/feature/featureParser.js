@@ -58,33 +58,25 @@ class FeatureParser {
 
     constructor(config) {
 
-        const format = config.format;
-        const decode = config.decode
-
-        this.header = {};
-        this.decode = decode;
         this.config = config;
-
-        if (format !== undefined) {
-            // See if this is a custom format
-            const customFormat = TrackUtils.getFormat(format);
-            if (customFormat !== undefined) {
-                this.decode = decodeCustom;
-                this.header.format = customFormat;
-                this.delimiter = customFormat.delimiter || "\t";
-            }
-            this.header.format = format.toLowerCase();
-            if(!this.decode) {
-                this.decode = this.getDecoder(this.header.format);
-            }
-            this.delimiter = this.config.delimiter || getDelimiter(this.header.format);
+        this.header = {}
+        if (config.nameField) {
+            this.header.nameField = config.nameField;
         }
 
-        //if(this.decode = decodeGtexGWAS) this.skipRows = 1;
-
-        this.header.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
+        if (config.decode) {
+            this.decode = config.decode;
+            this.delimiter = config.delimiter || "\t";
+        } else if (config.format) {
+            this.header.format = config.format.toLowerCase();
+            this.setDecoder();
+        }
+
+        if(!this.delimiter)  {
+            this.delimiter = "\t";
+        }
     }
 
     /**
@@ -124,7 +116,8 @@ class FeatureParser {
                 const tokens = line.split(this.delimiter || "\t");
                 try {
                     // All directives that could change the format, and thus decoder, should have been read by now.
-                    const decoder = this.getDecoder();
+                    this.setDecoder();
+                    const decoder = this.decode;
                     if (!line.startsWith("#") && decoder(tokens, header)) {
                         if (columnNames && columnNames.length === tokens.length) {
                             header.columnNames = columnNames;
@@ -163,7 +156,7 @@ class FeatureParser {
         const dataWrapper = getDataWrapper(data);
         const nextLine = dataWrapper.nextLine.bind(dataWrapper);
         const allFeatures = [];
-        const decode = this.getDecoder();
+        const decode = this.decode;
         const format = this.header.format;
         const delimiter = this.delimiter || "\t";
         let i = 0;
@@ -202,8 +195,7 @@ class FeatureParser {
 
     }
 
-    getDecoder(header) {
-
+    setDecoder() {
         if (!this.decode) {
             switch (this.header.format) {
                 case "narrowpeak":
@@ -265,16 +257,16 @@ class FeatureParser {
                     break;
                 case "bedpe":
                     this.decode = decodeBedpe;
-                    this.delimiter = this.config.delimiter || "/t";
+                    this.delimiter = this.config.delimiter || "\t";
                     break;
                 case "bedpe-domain":
                     this.decode = decodeBedpeDomain;
                     this.headerLine = true;
-                    this.delimiter = this.config.delimiter || "/t";
+                    this.delimiter = this.config.delimiter || "\t";
                     break;
                 case "bedpe-loop":
                     this.decode = decodeBedpe;
-                    this.delimiter = this.config.delimiter || "/t";
+                    this.delimiter = this.config.delimiter || "\t";
                     this.header = {colorColumn: 7};
                     break;
                 case "interact":
@@ -305,10 +297,7 @@ class FeatureParser {
                     }
             }
         }
-
-        return this.decode;
     }
-
 }
 
 function parseTrackLine(line) {
@@ -391,70 +380,6 @@ function parseVariableStep(line) {
     const chrom = tokens[1].split("=")[1];
     const span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
     return {format: "variableStep", chrom, span}
-}
-
-function getDecoder(format) {
-
-    switch (format) {
-        case "narrowpeak":
-        case "broadpeak":
-        case "regionpeak":
-        case "peaks":
-            return decodePeak;
-        case "bedgraph":
-            return decodeBedGraph;
-        case "wig":
-            return decodeWig;
-        case "gff3" :
-        case "gff" :
-        case "gtf" :
-            return decodeGFF;
-        case "fusionjuncspan":
-            return decodeFusionJuncSpan;
-        case "gtexgwas":
-            return decodeGtexGWAS;
-        case "refflat":
-            return decodeReflat;
-        case "genepred":
-            return decodeGenePred;
-        case "genepredext":
-            return decodeGenePredExt;
-        case "ensgene":
-            return decodeGenePred;
-        case "refgene":
-            return decodeGenePredExt;
-        case "bed":
-            return decodeBed;
-        case "bedpe":
-            return decodeBedpe;
-        case "bedpe-domain":
-            return decodeBedpeDomain;
-        case "bedpe-loop":
-            return decodeBedpe;
-        case "interact":
-            return decodeInteract;
-        case "snp":
-            return decodeSNP;
-        case "rmsk":
-            return decodeRepeatMasker;
-        case "gcnv":
-            return decodeGcnv;
-        default:
-            const customFormat = TrackUtils.getFormat(format);
-            if (customFormat !== undefined) {
-                this.decode = decodeCustom;
-                this.header.format = customFormat;
-                this.delimiter = customFormat.delimiter || "\t";
-            } else {
-                return decodeBed;
-            }
-    }
-
-}
-
-
-function getDelimiter(format) {
-    return spaceDelimited.has(format) ? /\s+/ : "\t";
 }
 
 const spaceDelimited = new Set([
