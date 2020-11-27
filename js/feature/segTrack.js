@@ -493,4 +493,5 @@ function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
 
 }
 export { drawSegTrackSampleNames }
+
 export default SegTrack

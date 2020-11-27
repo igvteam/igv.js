@@ -2,6 +2,7 @@ import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import {appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
 import {drawSegTrackSampleNames} from './feature/segTrack.js'
+import {drawVariantTrackSampleNames} from './variant/variantTrack.js'
 
 const sampleNameViewportWidth = 128
 
@@ -19,8 +20,10 @@ class SampleNameViewport extends ViewportBase {
     }
 
     draw(features, canvasTop, height) {
-        if (this.trackView.track.config.format) {
+        if ('seg' === this.trackView.track.config.format) {
             drawSegTrackSampleNames(this.ctx, features, canvasTop, height)
+        } else if ('vcf' === this.trackView.track.config.format) {
+            drawVariantTrackSampleNames(this.ctx, features, canvasTop, height)
         }
     }
 
