@@ -30,7 +30,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
-import { randomColor, randomGrey, randomRGB, randomRGBConstantAlpha } from "../util/colorPalletes.js"
+import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
 
 class SegTrack extends TrackBase {
 
@@ -246,9 +246,6 @@ class SegTrack extends TrackBase {
             }
 
             if (drawnFeatures.length > 0) {
-
-                console.log(`seg track draw - y ${ pixelTop } - height ${ pixelHeight }`)
-
                 this.trackView.sampleNameViewport.draw(drawnFeatures, pixelTop, pixelHeight)
             }
 
@@ -453,4 +450,47 @@ class SegTrack extends TrackBase {
     }
 }
 
+const defaultFont =
+    {
+        // font: '6px sans-serif',
+        font: '10px sans-serif',
+        textAlign: 'start',
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
+    };
+
+function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
+    ctx.font = font
+    ctx.textAlign = textAlign
+    ctx.textBaseline = textBaseline
+    ctx.fillStyle = fillStyle
+}
+
+function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
+
+    ctx.canvas.height = height
+    ctx.canvas.style.top = `${ canvasTop }px`
+    ctx.translate(0, -canvasTop)
+
+    // for (let y = 0; y < height; y++) {
+    //     IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, 1, { 'fillStyle': randomGrey(100, 200) })
+    // }
+
+    configureFont(ctx, defaultFont)
+
+    const hitlist = {}
+    for (let feature of features) {
+        if (hitlist[ feature.row ]) {
+        } else {
+            hitlist[ feature.row ] = feature
+            const { y, h } = feature.pixelRect
+            IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': greyScale(0 === features.indexOf(feature) % 2 ? 255 : 245)})
+            const string = feature.sampleKey || feature.sample
+            ctx.fillText(string, 0, y + h)
+        }
+    }
+
+}
+export { drawSegTrackSampleNames }
 export default SegTrack

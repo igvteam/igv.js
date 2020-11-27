@@ -168,6 +168,8 @@ class VariantTrack extends TrackBase {
         }
 
         if (features) {
+
+            const pixelRect = {}
             const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
             const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
@@ -175,19 +177,19 @@ class VariantTrack extends TrackBase {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
-                const py = topMargin + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
-                const vh = this.variantHeight;
+                const y = topMargin + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
+                const h = this.variantHeight;
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
-                let px = Math.round((variant.start - bpStart) / bpPerPixel);
-                let px1 = Math.round((variant.end - bpStart) / bpPerPixel);
-                let pw = Math.max(1, px1 - px);
-                if (pw < 3) {
-                    pw = 3;
-                    px -= 1;
-                } else if (pw > 5) {
-                    px += 1;
-                    pw -= 2;
+                let x = Math.round((variant.start - bpStart) / bpPerPixel);
+                let x1 = Math.round((variant.end - bpStart) / bpPerPixel);
+                let w = Math.max(1, x1 - x);
+                if (w < 3) {
+                    w = 3;
+                    x -= 1;
+                } else if (w > 5) {
+                    x += 1;
+                    w -= 2;
                 }
 
                 if ("NONVARIANT" === variant.type) {
@@ -198,7 +200,7 @@ class VariantTrack extends TrackBase {
                     context.fillStyle = this.color || this.defaultColor;
                 }
 
-                context.fillRect(px, py, pw, vh);
+                context.fillRect(x, y, w, h);
 
                 if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
@@ -231,7 +233,7 @@ class VariantTrack extends TrackBase {
                                 context.fillStyle = this.hetvarColor;
                             }
 
-                            context.fillRect(px, py, pw, callHeight);
+                            context.fillRect(x, py, w, callHeight);
 
                         }
                         callsDrawn++;

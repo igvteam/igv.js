@@ -379,7 +379,7 @@ class ViewPort extends ViewportBase {
                 selection: this.selection,
                 viewportWidth: pixelWidth,
                 viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth()
+                viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
@@ -474,7 +474,7 @@ class ViewPort extends ViewportBase {
                 bpPerPixel,
                 viewportWidth: width,
                 viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth(),
+                viewportContainerWidth: this.browser.getViewportContainerWidth(),
                 selection: this.selection
             };
 
