@@ -30,6 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
 
 const isString = StringUtils.isString;
 
@@ -169,7 +170,8 @@ class VariantTrack extends TrackBase {
 
         if (features) {
 
-            const pixelRect = {}
+            const drawnFeatures = []
+
             const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
             const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
@@ -200,7 +202,10 @@ class VariantTrack extends TrackBase {
                     context.fillStyle = this.color || this.defaultColor;
                 }
 
-                context.fillRect(x, y, w, h);
+                context.fillRect(x, y, w, h)
+
+                variant.pixelRect = { x, y, w, h }
+                drawnFeatures.push(variant)
 
                 if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
@@ -233,7 +238,10 @@ class VariantTrack extends TrackBase {
                                 context.fillStyle = this.hetvarColor;
                             }
 
-                            context.fillRect(x, py, w, callHeight);
+                            context.fillRect(x, py, w, callHeight)
+
+                            callSet.pixelRect = { x, y:py, w, h:callHeight }
+                            drawnFeatures.push(callSet)
 
                         }
                         callsDrawn++;
@@ -241,6 +249,11 @@ class VariantTrack extends TrackBase {
 
                 }
             }
+
+            if (drawnFeatures.length > 0) {
+                this.trackView.sampleNameViewport.draw(drawnFeatures, pixelTop, pixelHeight)
+            }
+
         } else {
             console.log("No feature list");
         }
@@ -452,5 +465,21 @@ class VariantTrack extends TrackBase {
 
     }
 }
+
+function drawVariantTrackSampleNames(ctx, features, canvasTop, height) {
+
+    ctx.canvas.height = height
+    ctx.canvas.style.top = `${ canvasTop }px`
+    ctx.translate(0, -canvasTop)
+
+    for (let feature of features) {
+        const { y, h } = feature.pixelRect
+        IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': randomRGB(200, 255)})
+        ctx.fillText(feature.names, 0, y + h)
+    }
+
+}
+
+export { drawVariantTrackSampleNames }
 
 export default VariantTrack
