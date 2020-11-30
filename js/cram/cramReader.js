@@ -24,6 +24,7 @@
  * THE SOFTWARE.
  */
 
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js";
 import BamUtils from "../bam/bamUtils.js";
@@ -44,319 +45,301 @@ const CRAM_MATE_MAPPED_FLAG = 0x2;
  * @param config
  * @constructor
  */
-const CramReader = function (config, genome, browser) {
+class CramReader {
 
-    const self = this;
+    constructor(config, genome, browser) {
 
-    this.config = config;
-    this.browser = browser;
-    this.genome = genome;
+        this.config = config;
+        this.browser = browser;
+        this.genome = genome;
 
-    this.cramFile = new gmodCRAM.CramFile({
-        filehandle: new FileHandler(config.url, config),
-        seqFetch: config.seqFetch || seqFetch.bind(this),
-        checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
-    });
-
-    const indexFileHandle = new FileHandler(config.indexURL, config);
-    this.indexedCramFile = new gmodCRAM.IndexedCramFile({
-        cram: this.cramFile,
-        index: new gmodCRAM.CraiIndex({
-            filehandle: indexFileHandle
-        }),
-        fetchSizeLimit: 30000000
-    });
-
-    BamUtils.setReaderDefaults(this, config);
-
-}
-
-
-function seqFetch(seqID, start, end) {
-
-    const sequence = this.genome.sequence;
-    const genome = this.genome;
-
-    return this.getHeader()
-        .then(function (header) {
-            const chr = genome.getChromosomeName(header.chrNames[seqID])
-            return sequence.getSequence(chr, start - 1, end);
+        this.cramFile = new gmodCRAM.CramFile({
+            filehandle: new FileHandler(config.url, config),
+            seqFetch: config.seqFetch || seqFetch.bind(this),
+            checkSequenceMD5: config.checkSequenceMD5 !== undefined ? config.checkSequenceMD5 : true
         });
-}
 
+        const indexFileHandle = new FileHandler(config.indexURL, config);
+        this.indexedCramFile = new gmodCRAM.IndexedCramFile({
+            cram: this.cramFile,
+            index: new gmodCRAM.CraiIndex({
+                filehandle: indexFileHandle
+            }),
+            fetchSizeLimit: 30000000
+        });
 
-/**
- * Parse the sequence dictionary from the SAM header and build chr name tables.  This function
- * is public so it can be unit tested.
- *
- * @returns {PromiseLike<chrName, chrToIndex, chrAliasTable}>}
- */
+        BamUtils.setReaderDefaults(this, config);
 
-CramReader.prototype.getHeader = function () {
+        function seqFetch(seqID, start, end) {
 
-    if (this.header) {
-        return Promise.resolve(this.header);
-    } else {
-        const self = this;
-        const genome = this.genome;
+            const sequence = this.genome.sequence;
+            const genome = this.genome;
 
-        return this.cramFile.getSamHeader()
-
-            .then(function (samHeader) {
-
-                const chrToIndex = {};
-                const chrNames = [];
-                const chrAliasTable = {};
-                const readGroups = [];
-
-                for (let line of samHeader) {
-
-                    if ('SQ' === line.tag) {
-                        for (let d of line.data) {
-                            if (d.tag === "SN") {
-                                const seq = d.value;
-                                chrToIndex[seq] = chrNames.length;
-                                chrNames.push(seq);
-                                if (genome) {
-                                    const alias = genome.getChromosomeName(seq);
-                                    chrAliasTable[alias] = seq;
-                                }
-                                break;
-                            }
-                        }
-                    } else if ('RG' === line.tag) {
-                        readGroups.push(line.data);
-                    }
-                }
-
-                self.header = {
-                    chrNames: chrNames,
-                    chrToIndex: chrToIndex,
-                    chrAliasTable: chrAliasTable,
-                    readGroups: readGroups
-                }
-
-                return self.header;
-            });
+            return this.getHeader()
+                .then(function (header) {
+                    const chr = genome.getChromosomeName(header.chrNames[seqID])
+                    return sequence.getSequence(chr, start - 1, end);
+                });
+        }
     }
-}
 
 
-CramReader.prototype.readAlignments = function (chr, bpStart, bpEnd) {
+    /**
+     * Parse the sequence dictionary from the SAM header and build chr name tables.  This function
+     * is public so it can be unit tested.
+     *
+     * @returns {PromiseLike<chrName, chrToIndex, chrAliasTable}>}
+     */
 
-    var self = this;
-    const browser = this.browser
+    async getHeader() {
 
-    return this.getHeader()
+        if (!this.header) {
+            const genome = this.genome;
+            const samHeader = await this.cramFile.getSamHeader();
+            const chrToIndex = {};
+            const chrNames = [];
+            const chrAliasTable = {};
+            const readGroups = [];
 
-        .then(function (header) {
-
-            const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
-            const chrIdx = header.chrToIndex[queryChr];
-            const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd, self.samplingWindowSize, self.samplingDepth, self.pairsSupported, self.alleleFreqThreshold);
-
-            if (chrIdx === undefined) {
-                return Promise.resolve(alignmentContainer);
-
-            } else {
-                return self.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd)
-
-                    .then(function (records) {
-
-                        for (let record of records) {
-
-                            const refID = record.sequenceId;
-                            const pos = record.alignmentStart;
-                            const alignmentEnd = pos + record.lengthOnRef;
-
-                            if (refID < 0) {
-                                continue;   // unmapped read
-                            } else if (refID > chrIdx || pos > bpEnd) {
-                                return;    // off right edge, we're done
-                            } else if (refID < chrIdx) {
-                                continue;   // Sequence to left of start, not sure this is possible
+            for (let line of samHeader) {
+                if ('SQ' === line.tag) {
+                    for (let d of line.data) {
+                        if (d.tag === "SN") {
+                            const seq = d.value;
+                            chrToIndex[seq] = chrNames.length;
+                            chrNames.push(seq);
+                            if (genome) {
+                                const alias = genome.getChromosomeName(seq);
+                                chrAliasTable[alias] = seq;
                             }
-                            if (alignmentEnd < bpStart) {
-                                continue;
-                            }  // Record out-of-range "to the left", skip to next one
-
-                            const alignment = decodeCramRecord(record, header.chrNames);
-
-                            //  if (filter.pass(alignment)) {
-                            alignmentContainer.push(alignment);
-                            //  }
-                        }
-
-                        alignmentContainer.finish();
-                        return alignmentContainer;
-                    })
-                    .catch(function (error) {
-                        let message = error.message;
-                        if (message && message.indexOf("MD5") >= 0) {
-                            message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
-                        }
-                        browser.alert.present(message)
-                        throw error
-                    })
-            }
-
-            function decodeCramRecord(record, chrNames) {
-
-                const alignment = new BamAlignment();
-
-                alignment.chr = chrNames[record.sequenceId];
-                alignment.start = record.alignmentStart - 1;
-                alignment.lengthOnRef = record.lengthOnRef;
-                alignment.flags = record.flags;
-                alignment.strand = !(record.flags & READ_STRAND_FLAG);
-                alignment.fragmentLength = record.templateLength || record.templateSize;
-                alignment.mq = record.mappingQuality;
-                alignment.end = record.alignmentStart + record.lengthOnRef;
-                alignment.readGroupId = record.readGroupId;
-
-                if (record.mate && record.mate.sequenceId !== undefined) {
-                    const strand = record.mate.flags !== undefined ?
-                        !(record.mate.flags & CRAM_MATE_STRAND_FLAG) :
-                        !(record.flags & MATE_STRAND_FLAG);
-
-                    alignment.mate = {
-                        chr: chrNames[record.mate.sequenceId],
-                        position: record.mate.alignmentStart,
-                        strand: strand
-                    };
-                }
-
-                alignment.seq = record.getReadBases();
-                alignment.qual = record.qualityScores;
-                alignment.tagDict = record.tags;
-                alignment.readName = record.readName;
-
-                // TODO -- cigar encoded in tag?
-                // BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
-
-                makeBlocks(record, alignment);
-
-                if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
-                    alignment.fragmentLength = -alignment.fragmentLength
-                }
-
-                BamUtils.setPairOrientation(alignment);
-
-                return alignment;
-
-            }
-
-            function makeBlocks(cramRecord, alignment) {
-
-                const blocks = [];
-                let insertions;
-                let gaps;
-                let basesUsed = 0;
-                let cigarString = '';
-
-                alignment.scStart = alignment.start;
-                alignment.scLengthOnRef = alignment.lengthOnRef;
-
-                if (cramRecord.readFeatures) {
-
-                    for (let feature of cramRecord.readFeatures) {
-
-                        const code = feature.code;
-                        const data = feature.data;
-                        const readPos = feature.pos - 1;
-                        const refPos = feature.refPos - 1;
-
-                        switch (code) {
-                            case 'S' :
-                            case 'I':
-                            case 'i':
-                            case 'N':
-                            case 'D':
-                                if (readPos > basesUsed) {
-                                    const len = readPos - basesUsed;
-                                    blocks.push(new AlignmentBlock({
-                                        start: refPos - len,
-                                        seqOffset: basesUsed,
-                                        len: len,
-                                        type: 'M'
-                                    }));
-                                    basesUsed += len;
-                                    cigarString += len + 'M';
-                                }
-
-                                if ('S' === code) {
-                                    let scPos = refPos;
-                                    alignment.scLengthOnRef += data.length;
-                                    if (readPos === 0) {
-                                        alignment.scStart -= data.length;
-                                        scPos -= data.length;
-                                    }
-                                    const len = data.length;
-                                    blocks.push(new AlignmentBlock({
-                                        start: scPos,
-                                        seqOffset: basesUsed,
-                                        len: len,
-                                        type: 'S'
-                                    }));
-                                    basesUsed += len;
-                                    cigarString += len + code;
-                                } else if ('I' === code || 'i' === code) {
-                                    if (insertions === undefined) {
-                                        insertions = [];
-                                    }
-                                    const len = 'i' === code ? 1 : data.length;
-                                    insertions.push(new AlignmentBlock({
-                                        start: refPos - 1,
-                                        len: len,
-                                        seqOffset: basesUsed,
-                                        type: 'I'
-                                    }));
-                                    basesUsed += len;
-                                    cigarString += len + code;
-                                } else if ('D' === code || 'N' === code) {
-                                    if(!gaps) {
-                                        gaps = [];
-                                    }
-                                    gaps.push({
-                                        start: refPos,
-                                        len: data,
-                                        type: code
-                                    })
-                                    cigarString += data + code;
-                                }
-                                break;
-
-                            case 'H':
-                            case 'P':
-                                cigarString += data + code;
-                                break;
-                            default :
-                            //  Ignore
+                            break;
                         }
                     }
+                } else if ('RG' === line.tag) {
+                    readGroups.push(line.data);
                 }
-
-                // Last block
-                const len = cramRecord.readLength - basesUsed;
-                if (len > 0) {
-                    blocks.push(new AlignmentBlock({
-                        start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
-                        seqOffset: basesUsed,
-                        len: len,
-                        type: 'M'
-                    }));
-
-                    cigarString += len + 'M';
-                }
-
-                alignment.blocks = blocks;
-                alignment.insertions = insertions;
-                alignment.gaps = gaps;
-                alignment.cigar = cigarString;
-
             }
 
-        });
+            this.header = {
+                chrNames: chrNames,
+                chrToIndex: chrToIndex,
+                chrAliasTable: chrAliasTable,
+                readGroups: readGroups
+            }
+        }
+
+        return this.header;
+    }
+
+    async readAlignments(chr, bpStart, bpEnd) {
+
+        const browser = this.browser
+        const header = await this.getHeader();
+        const queryChr = header.chrAliasTable.hasOwnProperty(chr) ? header.chrAliasTable[chr] : chr;
+        const chrIdx = header.chrToIndex[queryChr];
+        const alignmentContainer = new AlignmentContainer(chr, bpStart, bpEnd,
+            this.samplingWindowSize, this.samplingDepth, this.pairsSupported, this.alleleFreqThreshold);
+
+        if (chrIdx === undefined) {
+            return alignmentContainer;
+
+        } else {
+
+            try {
+                const records = await this.indexedCramFile.getRecordsForRange(chrIdx, bpStart, bpEnd);
+
+                for (let record of records) {
+                    const refID = record.sequenceId;
+                    const pos = record.alignmentStart;
+                    const alignmentEnd = pos + record.lengthOnRef;
+
+                    if (refID < 0) {
+                        continue;   // unmapped read
+                    } else if (refID > chrIdx || pos > bpEnd) {
+                        return;    // off right edge, we're done
+                    } else if (refID < chrIdx) {
+                        continue;   // Sequence to left of start, not sure this is possible
+                    }
+                    if (alignmentEnd < bpStart) {
+                        continue;
+                    }  // Record out-of-range "to the left", skip to next one
+
+                    const alignment = decodeCramRecord(record, header.chrNames);
+
+                    //  if (filter.pass(alignment)) {
+                    alignmentContainer.push(alignment);
+                    //  }
+                }
+
+                alignmentContainer.finish();
+                return alignmentContainer;
+            } catch (error) {
+                let message = error.message;
+                if (message && message.indexOf("MD5") >= 0) {
+                    message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
+                }
+                Alert.presentAlert(new Error(message))
+                throw error
+            }
+        }
+
+        function decodeCramRecord(record, chrNames) {
+
+            const alignment = new BamAlignment();
+
+            alignment.chr = chrNames[record.sequenceId];
+            alignment.start = record.alignmentStart - 1;
+            alignment.lengthOnRef = record.lengthOnRef;
+            alignment.flags = record.flags;
+            alignment.strand = !(record.flags & READ_STRAND_FLAG);
+            alignment.fragmentLength = record.templateLength || record.templateSize;
+            alignment.mq = record.mappingQuality;
+            alignment.end = record.alignmentStart + record.lengthOnRef;
+            alignment.readGroupId = record.readGroupId;
+
+            if (record.mate && record.mate.sequenceId !== undefined) {
+                const strand = record.mate.flags !== undefined ?
+                    !(record.mate.flags & CRAM_MATE_STRAND_FLAG) :
+                    !(record.flags & MATE_STRAND_FLAG);
+
+                alignment.mate = {
+                    chr: chrNames[record.mate.sequenceId],
+                    position: record.mate.alignmentStart,
+                    strand: strand
+                };
+            }
+
+            alignment.seq = record.getReadBases();
+            alignment.qual = record.qualityScores;
+            alignment.tagDict = record.tags;
+            alignment.readName = record.readName;
+
+            // TODO -- cigar encoded in tag?
+            // BamUtils.bam_tag2cigar(ba, blockEnd, p, lseq, alignment, cigarArray);
+
+            makeBlocks(record, alignment);
+
+            if (alignment.mate && alignment.start > alignment.mate.position && alignment.fragmentLength > 0) {
+                alignment.fragmentLength = -alignment.fragmentLength
+            }
+
+            BamUtils.setPairOrientation(alignment);
+
+            return alignment;
+
+        }
+
+        function makeBlocks(cramRecord, alignment) {
+
+            const blocks = [];
+            let insertions;
+            let gaps;
+            let basesUsed = 0;
+            let cigarString = '';
+
+            alignment.scStart = alignment.start;
+            alignment.scLengthOnRef = alignment.lengthOnRef;
+
+            if (cramRecord.readFeatures) {
+
+                for (let feature of cramRecord.readFeatures) {
+
+                    const code = feature.code;
+                    const data = feature.data;
+                    const readPos = feature.pos - 1;
+                    const refPos = feature.refPos - 1;
+
+                    switch (code) {
+                        case 'S' :
+                        case 'I':
+                        case 'i':
+                        case 'N':
+                        case 'D':
+                            if (readPos > basesUsed) {
+                                const len = readPos - basesUsed;
+                                blocks.push(new AlignmentBlock({
+                                    start: refPos - len,
+                                    seqOffset: basesUsed,
+                                    len: len,
+                                    type: 'M'
+                                }));
+                                basesUsed += len;
+                                cigarString += len + 'M';
+                            }
+
+                            if ('S' === code) {
+                                let scPos = refPos;
+                                alignment.scLengthOnRef += data.length;
+                                if (readPos === 0) {
+                                    alignment.scStart -= data.length;
+                                    scPos -= data.length;
+                                }
+                                const len = data.length;
+                                blocks.push(new AlignmentBlock({
+                                    start: scPos,
+                                    seqOffset: basesUsed,
+                                    len: len,
+                                    type: 'S'
+                                }));
+                                basesUsed += len;
+                                cigarString += len + code;
+                            } else if ('I' === code || 'i' === code) {
+                                if (insertions === undefined) {
+                                    insertions = [];
+                                }
+                                const len = 'i' === code ? 1 : data.length;
+                                insertions.push(new AlignmentBlock({
+                                    start: refPos - 1,
+                                    len: len,
+                                    seqOffset: basesUsed,
+                                    type: 'I'
+                                }));
+                                basesUsed += len;
+                                cigarString += len + code;
+                            } else if ('D' === code || 'N' === code) {
+                                if (!gaps) {
+                                    gaps = [];
+                                }
+                                gaps.push({
+                                    start: refPos,
+                                    len: data,
+                                    type: code
+                                })
+                                cigarString += data + code;
+                            }
+                            break;
+
+                        case 'H':
+                        case 'P':
+                            cigarString += data + code;
+                            break;
+                        default :
+                        //  Ignore
+                    }
+                }
+            }
+
+            // Last block
+            const len = cramRecord.readLength - basesUsed;
+            if (len > 0) {
+                blocks.push(new AlignmentBlock({
+                    start: cramRecord.alignmentStart + cramRecord.lengthOnRef - len - 1,
+                    seqOffset: basesUsed,
+                    len: len,
+                    type: 'M'
+                }));
+
+                cigarString += len + 'M';
+            }
+
+            alignment.blocks = blocks;
+            alignment.insertions = insertions;
+            alignment.gaps = gaps;
+            alignment.cigar = cigarString;
+
+        }
+
+    }
 }
 
 class FileHandler {

@@ -3,12 +3,13 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
-import C2S from "./canvas2svg.js";
+import { Popover, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import ViewportBase from "./viewportBase.js";
 import {FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import MenuPopup from "./ui/menuPopup.js";
+import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -22,6 +23,9 @@ class ViewPort extends ViewportBase {
 
     initializationHelper() {
 
+        this.menuPopup = new MenuPopup(this.trackView.$viewportContainer)
+        this.menuPopup.$popover.hide()
+
         addMouseHandlers.call(this);
         this.$spinner = $('<div class="igv-viewport-spinner">');
         this.$spinner.append(createIcon("spinner"));
@@ -30,9 +34,6 @@ class ViewPort extends ViewportBase {
 
         const { track } = this.trackView
         if ('sequence' !== track.type) {
-            this.popover = new Popover(this.browser.trackContainer);
-            let str = track.name.toLowerCase().split(' ').join('_');
-            this.popover.id = `${ str }_${ this.browser.referenceFrameList.indexOf(this.referenceFrame) }`;
             this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
         }
 
@@ -51,14 +52,15 @@ class ViewPort extends ViewportBase {
                 e.stopPropagation();
                 if (typeof track.description === 'function') {
                     str = track.description();
-
                 } else if (track.description) {
-                    str = track.description;
-
+                    str = `<div title="${ track.description }"><div>${ track.description }</div></div>`
                 } else {
-                    str = track.name;
+                    str = `<div title="${ track.name }"><div>${ track.name }</div></div>`
                 }
-                this.popover.presentContentWithEvent(e, str);
+
+                if (this.popover) this.popover.dispose()
+                this.popover = new Popover(this.trackView.$viewportContainer.get(0))
+                this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
                 // Prevent bubbling
@@ -218,6 +220,7 @@ class ViewPort extends ViewportBase {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE);
+                Alert.presentAlert(error);
                 console.error(error)
             }
         } finally {
@@ -627,24 +630,11 @@ function addMouseHandlers() {
         if (menuItems.length > 0) {
             menuItems.push({label: $('<HR>')});
         }
-        menuItems.push(
-            {
-                label: 'Save Image (PNG)',
-                click: function () {
-                    self.saveImage();
-                }
-            });
 
-        menuItems.push(
-            {
-                label: 'Save Image (SVG)',
-                click: function () {
-                    self.saveSVG();
-                }
-            });
+        menuItems.push({ label: 'Save Image (PNG)', click: () => self.saveImage() });
+        menuItems.push({ label: 'Save Image (SVG)', click: () => self.saveSVG()   });
 
-        if (self.popover) self.popover.presentMenu(e, menuItems);
-
+        self.menuPopup.presentTrackContextMenu(e, menuItems)
     });
 
 
@@ -778,9 +768,11 @@ function addMouseHandlers() {
 
                 popupTimerID = setTimeout(function () {
 
-                        var content = getPopupContent(e, self);
+                        const content = getPopupContent(e, self);
                         if (content) {
-                            self.popover.presentContentWithEvent(e, content);
+                            if (self.popover) self.popover.dispose()
+                            self.popover = new Popover(self.trackView.$viewportContainer.get(0))
+                            self.popover.presentContentWithEvent(e, content)
                         }
                         clearTimeout(popupTimerID);
                         popupTimerID = undefined;
@@ -804,6 +796,7 @@ function addMouseHandlers() {
         }
 
         return {
+            event: e,
             viewport: viewport,
             referenceFrame: referenceFrame,
             genomicLocation: genomicLocation,
@@ -852,22 +845,22 @@ function addMouseHandlers() {
     /**
      * Format markup for popover text from an array of name value pairs [{name, value}]
      */
-    function formatPopoverText(nameValueArray) {
+    function formatPopoverText(nameValues) {
 
-        var markup = "<table class=\"igv-popover-table\">";
-
-        nameValueArray.forEach(function (nameValue) {
+        const rows = nameValues.map(nameValue => {
 
             if (nameValue.name) {
-                markup += "<tr><td class=\"igv-popover-td\">" + "<div class=\"igv-popover-name-value\">" + "<span class=\"igv-popover-name\">" + nameValue.name + "</span>" + "<span class=\"igv-popover-value\">" + nameValue.value + "</span>" + "</div>" + "</td></tr>";
+                const str = `<span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }`
+                return `<div title="${ nameValue.value }">${ str }</div>`
+            } else if ('<hr>' === nameValue) {
+                return nameValue
             } else {
-                // not a name/value pair
-                markup += "<tr><td>" + nameValue.toString() + "</td></tr>";
+                return `<div title="${ nameValue }">${ nameValue }</div>`
             }
-        });
 
-        markup += "</table>";
-        return markup;
+        })
+
+        return rows.join('')
     }
 }
 

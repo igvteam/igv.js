@@ -121,23 +121,22 @@ class FeatureTrack extends TrackBase {
     }
 
     async postInit() {
+        if (typeof this.featureSource.getHeader === "function") {
+            this.header = await this.featureSource.getHeader();
+        }
 
-    if (typeof this.featureSource.getHeader === "function") {
-        this.header = await this.featureSource.getHeader();
+        // Set properties from track line
+        if (this.header) {
+            this.setTrackProperties(this.header)
+        }
+
+        if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
+            this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
+            this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
+        }
+
+        return this;
     }
-
-    // Set properties from track line
-    if (this.header) {
-        this.setTrackProperties(this.header)
-    }
-
-    if (this.visibilityWindow === undefined && typeof this.featureSource.defaultVisibilityWindow === 'function') {
-        this.visibilityWindow = await this.featureSource.defaultVisibilityWindow();
-        this.featureSource.visibilityWindow = this.visibilityWindow;   // <- this looks odd
-    }
-
-    return this;
-}
 
     supportsWholeGenome() {
         return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
@@ -252,29 +251,29 @@ class FeatureTrack extends TrackBase {
 
     clickedFeatures(clickState) {
 
-    const y = clickState.y - this.margin;
-    const allFeatures = super.clickedFeatures(clickState);
+        const y = clickState.y - this.margin;
+        const allFeatures = super.clickedFeatures(clickState);
 
-    let row;
-    switch (this.displayMode) {
-        case 'SQUISHED':
-            row = Math.floor(y / this.squishedRowHeight);
-            break;
-        case 'EXPANDED':
-            row = Math.floor(y / this.expandedRowHeight);
-            break;
-        default:
-            row = undefined;
+        let row;
+        switch (this.displayMode) {
+            case 'SQUISHED':
+                row = Math.floor(y / this.squishedRowHeight);
+                break;
+            case 'EXPANDED':
+                row = Math.floor(y / this.expandedRowHeight);
+                break;
+            default:
+                row = undefined;
+        }
+
+        return allFeatures.filter(function (feature) {
+            return (row === undefined || feature.row === undefined || row === feature.row);
+        })
     }
 
-    return allFeatures.filter(function (feature) {
-        return (row === undefined || feature.row === undefined || row === feature.row);
-    })
-}
-
-/**
- * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
- */
+    /**
+     * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
+     */
     popupData(clickState, features) {
 
         if (!features) features = this.clickedFeatures(clickState);

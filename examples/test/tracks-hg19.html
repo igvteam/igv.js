@@ -34,13 +34,13 @@
     const options =
         {
             genome: "hg19",
-            locus: "chr1:155,084,471-155,215,286",
+            locus: "chr1:155,138,124-155,153,715",
             tracks:
                 [
                     {
                         name: "Phase 3 WGS variants",
                         url: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz",
-                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi",
+                        indexURL: "https://s3.amazonaws.com/1000genomes/release/20130502/ALL.wgs.phase3_shapeit2_mvncall_integrated_v5b.20130502.sites.vcf.gz.tbi"
                     },
                     {
                         name: "ENCODE bigwig",
@@ -52,19 +52,19 @@
                         name: "Bigbed with color (green)",
                     },
                     {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k4me3StdSig.bigWig',
+                        url: 'https://www.encodeproject.org/files/ENCFF000ASF/@@download/ENCFF000ASF.bigWig',
                         name: 'Group Autoscale 1 of 3',
                         color: 'rgb(200,0,0)',
                         autoscaleGroup: '1'
                     },
                     {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k27me3StdSig.bigWig',
+                        url: 'https://www.encodeproject.org/files/ENCFF000ASJ/@@download/ENCFF000ASJ.bigWig',
                         name: 'Group Autoscale 2 of 3',
                         color: 'rgb(0,0,150)',
                         autoscaleGroup: '1'
                     },
                     {
-                        url: 'http://hgdownload.cse.ucsc.edu/goldenPath/hg19/encodeDCC/wgEncodeBroadHistone/wgEncodeBroadHistoneGm12878H3k36me3StdSig.bigWig',
+                        url: 'https://www.encodeproject.org/files/ENCFF000ATA/@@download/ENCFF000ATA.bigWig',
                         name: 'Group Autoscale 3 of 3',
                         color: 'rgb(0,150,0)',
                         autoscaleGroup: '1'
@@ -164,9 +164,6 @@
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
             console.log("Created IGV browser");
-            document.getElementById("bmBtn").addEventListener("click", () => {
-                window.history.pushState({}, "IGV", browser.sessionURL());
-            })
         })
 
 </script>

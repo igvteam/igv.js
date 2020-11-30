@@ -61,268 +61,283 @@ const ELEMENT_SIZE = {
  * blocks
  */
 
-function BamAlignment() {
-    this.hidden = false;
-}
+class BamAlignment {
 
-BamAlignment.prototype.isMapped = function () {
-    return (this.flags & READ_UNMAPPED_FLAG) === 0;
-}
-
-BamAlignment.prototype.isPaired = function () {
-    return (this.flags & READ_PAIRED_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isProperPair = function () {
-    return (this.flags & PROPER_PAIR_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isFirstOfPair = function () {
-    return (this.flags & FIRST_OF_PAIR_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isSecondOfPair = function () {
-    return (this.flags & SECOND_OF_PAIR_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isSecondary = function () {
-    return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isSupplementary = function () {
-    return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isFailsVendorQualityCheck = function () {
-    return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isDuplicate = function () {
-    return (this.flags & DUPLICATE_READ_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isMateMapped = function () {
-    return (this.flags & MATE_UNMAPPED_FLAG) === 0;
-}
-
-BamAlignment.prototype.isNegativeStrand = function () {
-    return (this.flags & READ_STRAND_FLAG) !== 0;
-}
-
-BamAlignment.prototype.isMateNegativeStrand = function () {
-    return (this.flags & MATE_STRAND_FLAG) !== 0;
-}
-
-BamAlignment.prototype.tags = function () {
-
-    if (!this.tagDict) {
-        if (this.tagBA) {
-            this.tagDict = decodeTags(this.tagBA);
-            this.tagBA = undefined;
-        } else {
-            this.tagDict = {};  // Mark so we don't try again.  The record has no tags
-        }
+    constructor() {
+        this.hidden = false;
     }
-    return this.tagDict;
 
-    function decodeTags(ba) {
+    isMapped() {
+        return (this.flags & READ_UNMAPPED_FLAG) === 0;
+    }
 
-        let p = 0;
-        const len = ba.length;
-        const tags = {};
+    isPaired() {
+        return (this.flags & READ_PAIRED_FLAG) !== 0;
+    }
 
-        while (p < len) {
-            const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
-            p += 2;
+    isProperPair() {
+        return (this.flags & PROPER_PAIR_FLAG) !== 0;
+    }
 
-            const type = String.fromCharCode(ba[p++]);
-            let value;
-            if (type === 'A') {
-                value = String.fromCharCode(ba[p]);
-                p++;
-            } else if (type === 'i' || type === 'I') {
-                value = readInt(ba, p);
-                p += 4;
-            } else if (type === 'c' || type === 'C') {
-                value = ba[p];
-                p++;
-            } else if (type === 's' || type === 'S') {
-                value = readShort(ba, p);
+    isFirstOfPair() {
+        return (this.flags & FIRST_OF_PAIR_FLAG) !== 0;
+    }
+
+    isSecondOfPair() {
+        return (this.flags & SECOND_OF_PAIR_FLAG) !== 0;
+    }
+
+    isSecondary() {
+        return (this.flags & SECONDARY_ALIGNMNET_FLAG) !== 0;
+    }
+
+    isSupplementary() {
+        return (this.flags & SUPPLEMENTARY_ALIGNMENT_FLAG) !== 0;
+    }
+
+    isFailsVendorQualityCheck() {
+        return (this.flags & READ_FAILS_VENDOR_QUALITY_CHECK_FLAG) !== 0;
+    }
+
+    isDuplicate() {
+        return (this.flags & DUPLICATE_READ_FLAG) !== 0;
+    }
+
+    isMateMapped() {
+        return (this.flags & MATE_UNMAPPED_FLAG) === 0;
+    }
+
+    isNegativeStrand() {
+        return (this.flags & READ_STRAND_FLAG) !== 0;
+    }
+
+    isMateNegativeStrand() {
+        return (this.flags & MATE_STRAND_FLAG) !== 0;
+    }
+
+    tags() {
+
+        if (!this.tagDict) {
+            if (this.tagBA) {
+                this.tagDict = decodeTags(this.tagBA);
+                this.tagBA = undefined;
+            } else {
+                this.tagDict = {};  // Mark so we don't try again.  The record has no tags
+            }
+        }
+        return this.tagDict;
+
+        function decodeTags(ba) {
+
+            let p = 0;
+            const len = ba.length;
+            const tags = {};
+
+            while (p < len) {
+                const tag = String.fromCharCode(ba[p]) + String.fromCharCode(ba[p + 1]);
                 p += 2;
-            } else if (type === 'f') {
-                value = readFloat(ba, p);
-                p += 4;
-            } else if (type === 'Z') {
-                value = '';
-                for (; ;) {
-                    var cc = ba[p++];
-                    if (cc === 0) {
-                        break;
-                    } else {
-                        value += String.fromCharCode(cc);
+
+                const type = String.fromCharCode(ba[p++]);
+                let value;
+                if (type === 'A') {
+                    value = String.fromCharCode(ba[p]);
+                    p++;
+                } else if (type === 'i' || type === 'I') {
+                    value = readInt(ba, p);
+                    p += 4;
+                } else if (type === 'c' || type === 'C') {
+                    value = ba[p];
+                    p++;
+                } else if (type === 's' || type === 'S') {
+                    value = readShort(ba, p);
+                    p += 2;
+                } else if (type === 'f') {
+                    value = readFloat(ba, p);
+                    p += 4;
+                } else if (type === 'Z') {
+                    value = '';
+                    for (; ;) {
+                        var cc = ba[p++];
+                        if (cc === 0) {
+                            break;
+                        } else {
+                            value += String.fromCharCode(cc);
+                        }
                     }
-                }
-            } else if (type === 'B') {
-                const elementType = String.fromCharCode(ba[p++]);
-                let elementSize = ELEMENT_SIZE[elementType];
-                if(elementSize === undefined) {
-                    tags[tag] = `Error: unknown element type '${elementType}'`;
+                } else if (type === 'B') {
+                    const elementType = String.fromCharCode(ba[p++]);
+                    let elementSize = ELEMENT_SIZE[elementType];
+                    if (elementSize === undefined) {
+                        tags[tag] = `Error: unknown element type '${elementType}'`;
+                        break;
+                    }
+                    const numElements = readInt(ba, p);
+                    p += (4 + numElements * elementSize);
+                    value = '[not shown]';
+                } else {
+                    //'Unknown type ' + type;
+                    value = 'Error unknown type: ' + type;
+                    tags[tag] = value;
                     break;
                 }
-                const numElements = readInt(ba, p);
-                p += (4 + numElements * elementSize);
-                value = '[not shown]';
-            } else {
-                //'Unknown type ' + type;
-                value = 'Error unknown type: ' + type;
                 tags[tag] = value;
-                break;
             }
-            tags[tag] = value;
+            return tags;
         }
-        return tags;
+
     }
 
-}
-
-BamAlignment.prototype.popupData = function (genomicLocation) {
-
-    // if the user clicks on a base next to an insertion, show just the
-    // inserted bases in a popup (like in desktop IGV).
-    const nameValues = [];
-
-    // Consert genomic location to int
-    genomicLocation = Math.floor(genomicLocation);
-
-    if (this.insertions) {
-
-        const seq = this.seq;
-
-        for (let insertion of this.insertions) {
-            var ins_start = insertion.start;
-            if (genomicLocation === ins_start || genomicLocation === ins_start - 1) {
-                nameValues.push({name: 'Insertion', value: seq.substr(insertion.seqOffset, insertion.len)});
-                nameValues.push({name: 'Location', value: ins_start});
-                return nameValues;
-            }
-        }
+    /**
+     * Does alignment (or alignment extended by soft clips) contain the genomic location?
+     *
+     * @param genomicLocation
+     * @param showSoftClips
+     * @returns {boolean|boolean}
+     */
+    containsLocation(genomicLocation, showSoftClips) {
+        const s = showSoftClips ? this.scStart : this.start;
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
+        return (genomicLocation >= s && genomicLocation <= (s + l));
     }
 
-    nameValues.push({name: 'Read Name', value: this.readName});
+    popupData(genomicLocation) {
 
-    // Sample
-    // Read group
-    nameValues.push("<hr>");
+        // if the user clicks on a base next to an insertion, show just the
+        // inserted bases in a popup (like in desktop IGV).
+        const nameValues = [];
 
-    // Add 1 to genomic location to map from 0-based computer units to user-based units
-    nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true});
-    nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true});
-    nameValues.push({name: 'Cigar', value: this.cigar});
-    nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
-    nameValues.push({name: 'Mapping Quality', value: this.mq});
-    nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())});
-    nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())});
-    nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())});
-    nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});
+        // Consert genomic location to int
+        genomicLocation = Math.floor(genomicLocation);
 
-    if (this.isPaired()) {
+        if (this.insertions) {
+
+            const seq = this.seq;
+
+            for (let insertion of this.insertions) {
+                var ins_start = insertion.start;
+                if (genomicLocation === ins_start || genomicLocation === ins_start - 1) {
+                    nameValues.push({name: 'Insertion', value: seq.substr(insertion.seqOffset, insertion.len)});
+                    nameValues.push({name: 'Location', value: ins_start});
+                    return nameValues;
+                }
+            }
+        }
+
+        nameValues.push({name: 'Read Name', value: this.readName});
+
+        // Sample
+        // Read group
         nameValues.push("<hr>");
-        nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
-        nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
-        if (this.pairOrientation) {
-            nameValues.push({name: 'Pair Orientation', value: this.pairOrientation});
-        }
-        if (this.isMateMapped()) {
-            nameValues.push({name: 'Mate Chromosome', value: this.mate.chr});
-            nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)});
-            nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
-            nameValues.push({name: 'Insert Size', value: this.fragmentLength});
-            // Mate Start
-            // Mate Strand
-            // Insert Size
-        }
-        // First in Pair
-        // Pair Orientation
 
-    }
+        // Add 1 to genomic location to map from 0-based computer units to user-based units
+        nameValues.push({name: 'Alignment Start', value: StringUtils.numberFormatter(1 + this.start), borderTop: true});
+        nameValues.push({name: 'Read Strand', value: (true === this.strand ? '(+)' : '(-)'), borderTop: true});
+        nameValues.push({name: 'Cigar', value: this.cigar});
+        nameValues.push({name: 'Mapped', value: yesNo(this.isMapped())});
+        nameValues.push({name: 'Mapping Quality', value: this.mq});
+        nameValues.push({name: 'Secondary', value: yesNo(this.isSecondary())});
+        nameValues.push({name: 'Supplementary', value: yesNo(this.isSupplementary())});
+        nameValues.push({name: 'Duplicate', value: yesNo(this.isDuplicate())});
+        nameValues.push({name: 'Failed QC', value: yesNo(this.isFailsVendorQualityCheck())});
 
-    nameValues.push("<hr>");
-
-    const tagDict = this.tags();
-    let isFirst = true;
-    for (let key in tagDict) {
-
-        if (tagDict.hasOwnProperty(key)) {
-
-            if (isFirst) {
-                nameValues.push({name: key, value: tagDict[key], borderTop: true});
-                isFirst = false;
-            } else {
-                nameValues.push({name: key, value: tagDict[key]});
+        if (this.isPaired()) {
+            nameValues.push("<hr>");
+            nameValues.push({name: 'First in Pair', value: !this.isSecondOfPair(), borderTop: true});
+            nameValues.push({name: 'Mate is Mapped', value: yesNo(this.isMateMapped())});
+            if (this.pairOrientation) {
+                nameValues.push({name: 'Pair Orientation', value: this.pairOrientation});
             }
+            if (this.isMateMapped()) {
+                nameValues.push({name: 'Mate Chromosome', value: this.mate.chr});
+                nameValues.push({name: 'Mate Start', value: (this.mate.position + 1)});
+                nameValues.push({name: 'Mate Strand', value: (true === this.mate.strand ? '(+)' : '(-)')});
+                nameValues.push({name: 'Insert Size', value: this.fragmentLength});
+                // Mate Start
+                // Mate Strand
+                // Insert Size
+            }
+            // First in Pair
+            // Pair Orientation
 
+        }
+
+        nameValues.push("<hr>");
+
+        const tagDict = this.tags();
+        let isFirst = true;
+        for (let key in tagDict) {
+
+            if (tagDict.hasOwnProperty(key)) {
+
+                if (isFirst) {
+                    nameValues.push({name: key, value: tagDict[key], borderTop: true});
+                    isFirst = false;
+                } else {
+                    nameValues.push({name: key, value: tagDict[key]});
+                }
+
+            }
+        }
+
+        nameValues.push("<hr>");
+        nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)});
+        nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
+        nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
+
+        return nameValues;
+
+
+        function yesNo(bool) {
+            return bool ? 'Yes' : 'No';
         }
     }
 
-    nameValues.push("<hr>");
-    nameValues.push({name: 'Genomic Location: ', value: StringUtils.numberFormatter(1 + genomicLocation)});
-    nameValues.push({name: 'Read Base:', value: this.readBaseAt(genomicLocation)});
-    nameValues.push({name: 'Base Quality:', value: this.readBaseQualityAt(genomicLocation)});
+    readBaseAt(genomicLocation) {
 
-    return nameValues;
-
-
-    function yesNo(bool) {
-        return bool ? 'Yes' : 'No';
-    }
-}
-
-
-BamAlignment.prototype.readBaseAt = function (genomicLocation) {
-
-    const block = blockAtGenomicLocation(this.blocks, genomicLocation);
-    if (block) {
-        if ("*" === this.seq) {
-            return "*";
-        } else {
-            const idx = block.seqIndexAt(genomicLocation);
-            // if (idx >= 0 && idx < this.seq.length) {
-            return this.seq[idx];
-            //  }
-        }
-    } else {
-        return undefined;
-    }
-}
-
-BamAlignment.prototype.readBaseQualityAt = function (genomicLocation) {
-
-    const block = blockAtGenomicLocation(this.blocks, genomicLocation);
-    if (block) {
-        if ("*" === this.qual) {
-            return 30;
-        } else {
-            const idx = block.seqIndexAt(genomicLocation);
-            if (idx >= 0 && this.qual && idx < this.qual.length) {
-                return this.qual[idx];
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
+        if (block) {
+            if ("*" === this.seq) {
+                return "*";
             } else {
+                const idx = block.seqIndexAt(genomicLocation);
+                // if (idx >= 0 && idx < this.seq.length) {
+                return this.seq[idx];
+                //  }
+            }
+        } else {
+            return undefined;
+        }
+    }
+
+    readBaseQualityAt(genomicLocation) {
+
+        const block = blockAtGenomicLocation(this.blocks, genomicLocation);
+        if (block) {
+            if ("*" === this.qual) {
                 return 30;
+            } else {
+                const idx = block.seqIndexAt(genomicLocation);
+                if (idx >= 0 && this.qual && idx < this.qual.length) {
+                    return this.qual[idx];
+                } else {
+                    return 30;
+                }
             }
+        } else {
+            return undefined;
         }
-    } else {
-        return undefined;
     }
-}
 
-BamAlignment.prototype.gapSizeAt = function (genomicLocation) {
-    if (this.gaps) {
-        for (let gap of this.gaps) {
-            if (genomicLocation >= gap.start && genomicLocation < gap.start + gap.len) {
-                return gap.len;
+    gapSizeAt(genomicLocation) {
+        if (this.gaps) {
+            for (let gap of this.gaps) {
+                if (genomicLocation >= gap.start && genomicLocation < gap.start + gap.len) {
+                    return gap.len;
+                }
             }
         }
+        return 0;
     }
-    return 0;
 }
 
 function blockAtGenomicLocation(blocks, genomicLocation) {

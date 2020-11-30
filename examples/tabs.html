@@ -4,11 +4,8 @@
     <!-- Adapted from https://www.elated.com/res/File/articles/development/javascript/document-object-model/javascript-tabs/javascript-tabs.html -->
 
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href=img/favicon.ico>
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
 
     <!-- IGV JS-->
@@ -119,7 +116,7 @@
         var tabs = [];
 
         // Grab the tab links and content divs from the page
-        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function(item) {
+        var liItems = Array.from(document.getElementById('tabs').childNodes).filter(function (item) {
             return item.nodeName === 'LI'
         });
 

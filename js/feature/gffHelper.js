@@ -25,6 +25,7 @@
  */
 
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+
 /**
  * Created by jrobinson on 4/7/16.
  */
@@ -47,9 +48,9 @@ for (let cltn of [transcriptTypes, cdsTypes, codonTypes, utrTypes, exonTypes]) {
 class GFFHelper {
     constructor(options) {
         this.format = options.format;
-        if (options.filterTypes) {
-            this.filterTypes = new Set(options.filterTypes)
-        }
+        this.filterTypes = options.filterTypes === undefined ?
+            new Set(['chromosome']) :
+            new Set(options.filterTypes);
     }
 
     combineFeatures(features) {
@@ -218,7 +219,7 @@ class GFFHelper {
                     combinedFeatures.push(gffTranscript);
                     consumedFeatures.add(f);
                     const g = geneMap[f.parent];
-                    if(g) {
+                    if (g) {
                         gffTranscript.gene = geneMap[f.parent];
                         consumedFeatures.add(g);
                     }
@@ -438,7 +439,10 @@ GFFTranscript.prototype.popupData = function (genomicLocation) {
             pd.push({name: key, value: value});
         }
     }
-    pd.push({name: 'position', value: `${this.chr}:${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`})
+    pd.push({
+        name: 'position',
+        value: `${this.chr}:${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`
+    })
 
 
     // If clicked over an exon add its attributes

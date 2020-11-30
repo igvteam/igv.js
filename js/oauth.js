@@ -4,50 +4,53 @@
 // The variable oauth.google.access_token, which becomes igv.oauth.google.access_token on ES5 conversion is
 // supported for backward compatibility
 
+const DEFAULT_HOST = "googleapis"
 
 const oauth = {
 
     oauthTokens: {},
 
     setToken: function (token, host) {
-        if (!host) {
-            this.google.access_token = token;
-        } else {
-            this.oauthTokens[host] = token;
+        host = host || DEFAULT_HOST;
+        this.oauthTokens[host] = token;
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = token;    // legacy support
         }
     },
 
     getToken: function (host) {
+        host = host || DEFAULT_HOST;
         let token;
-        if (!host) {
-            token = this.google.access_token;
-        } else {
-            for (let key in this.oauthTokens) {
-                const regex = wildcardToRegExp(key);
-                if (regex.test(host)) {
-                    token = this.oauthTokens[key];
-                    break;
-                }
+        for (let key of Object.keys(this.oauthTokens)) {
+            const regex = wildcardToRegExp(key);
+            if (regex.test(host)) {
+                token = this.oauthTokens[key];
+                break;
             }
         }
         return token;
     },
 
     removeToken: function (host) {
-        if (!host) {
-            delete oauth.google["access_token"];
-        } else {
-            delete this.oauthTokens[host];
+        host = host || DEFAULT_HOST;
+        for (let key of Object.keys(this.oauthTokens)) {
+            const regex = wildcardToRegExp(key);
+            if (regex.test(host)) {
+                this.oauthTokens[key] = undefined;
+            }
+        }
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = undefined;    // legacy support
         }
     },
 
     // Special object for google -- legacy support
     google: {
         setToken: function (token) {
-            this.access_token = token;
+            oauth.setToken(token);
         }
     }
-};
+}
 
 
 /**

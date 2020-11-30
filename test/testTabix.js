@@ -1,14 +1,11 @@
+import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {unbgzf} from "../js/bam/bgzf.js";
 import igvxhr from "../js/igvxhr.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
-
 
 suite("testTabix", function () {
-
-    createMockObjects();
 
     test("bgzip", async function () {
         const url = require.resolve("./data/bed/missing_linefeed.bed.gz");
@@ -20,7 +17,7 @@ suite("testTabix", function () {
         assert.ok(result)
     })
 
-    test("CSI", async function () {
+    test("CSI index", async function () {
 
         const refID = 0,
             beg = 1226000,
@@ -36,7 +33,7 @@ suite("testTabix", function () {
 
     })
 
-    test("CSI query", async function () {
+    test("CSI query - vcf", async function () {
 
         const chr = "chr1",
             beg = 1226000,
@@ -57,6 +54,31 @@ suite("testTabix", function () {
         for (let i = 1; i < len - 1; i++) {
             const f = features[i];
             assert.ok(f.chr === chr && f.end >= beg && f.start <= end);
+        }
+    })
+
+    test("CSI query - gtf", async function () {
+
+        this.timeout(200000);
+
+        const chr = "10",
+            beg = 400000,
+            end = 500000;
+
+        const reader = new FeatureFileReader({
+            format: "gff3",
+            url: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz",
+            indexURL: "https://s3.amazonaws.com/igv.org.genomes/hg38/Homo_sapiens.GRCh38.94.chr.gff3.gz.csi"
+        });
+        await reader.readHeader();
+        const features = await reader.readFeatures(chr, beg, end);
+        assert.ok(features);
+
+        const len = features.length;
+        assert.ok(len > 0);
+        for (let i = 1; i < len - 1; i++) {
+            const f = features[i];
+            assert.ok(f.chr === chr);
         }
     })
 })

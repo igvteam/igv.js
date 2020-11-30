@@ -1,14 +1,12 @@
+import "./utils/mockObjects.js"
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testGenome", function () {
 
-    createMockObjects();
-
     test("Genome coordinates", async function () {
 
-        this.timeout(100000);
+        this.timeout(200000);
 
         const reference = {
             id: "hg19",

@@ -2,31 +2,26 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <title>Embed</title>
 
     <!-- IGV JS -->
-    <script src="dist/igv.min.js"></script>
+    <script src="./dist/igv.min.js"></script>
 </head>
 
 
 <body>
+
+<!-- This page contains an undecorated igv.js instance.  Its purpose is to serve as an iFrame src for embedding igv.js view -->
 
 <div id="igvDiv"/>
 
 <script type="text/javascript">
 
     document.addEventListener("DOMContentLoaded", function () {
-
         var div = document.getElementById('igvDiv');
-
         var config = {
             queryParametersSupported: true
         };
-
         igv.createBrowser(div, config);
 
     })

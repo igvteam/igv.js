@@ -1,10 +1,8 @@
+import "./utils/mockObjects.js"
 import FeatureFileReader from '../js/feature/featureFileReader.js';
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 
 suite("testTrackLine", function () {
-
-    createMockObjects();
 
     const browser = {
         genome: {

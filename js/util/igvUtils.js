@@ -23,7 +23,7 @@
  * THE SOFTWARE.
  */
 
-import {FileUtils,TrackUtils} from "../../node_modules/igv-utils/src/index.js";
+import {FileUtils, TrackUtils, StringUtils, GoogleAuth, GoogleDrive} from "../../node_modules/igv-utils/src/index.js";
 
 const extend = function (parent, child) {
 
@@ -98,7 +98,6 @@ const doAutoscale = function (features) {
     return {min: min, max: max};
 }
 
-
 const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
 
     let ss = extent.start;
@@ -137,7 +136,6 @@ const validateLocusExtent = function (chromosomeLengthBP, extent, minimumBP) {
     extent.end = Math.floor(ee);
 };
 
-
 /*!
  * is-number <https://github.com/jonschlinkert/is-number>
  *
@@ -155,71 +153,55 @@ const isNumber = function (num) {
     return false;
 };
 
-
 function inferTrackType(config) {
 
     translateDeprecatedTypes(config);
 
-    if (undefined === config.sourceType && config.url) {
-        config.sourceType = "file";
+    if (config.type) {
+        return config.type;
     }
 
-    if ("file" === config.sourceType) {
+    let format;
+    if ("file" === config.sourceType || (undefined === config.sourceType && config.url)) {
         if (undefined === config.format) {
             const path = FileUtils.isFilePath(config.url) ? config.url.name : config.url;
-            config.format = TrackUtils.inferFileFormat(path);
+            format = TrackUtils.inferFileFormat(path);
         } else {
-            config.format = config.format.toLowerCase();
+            format = config.format.toLowerCase();
         }
     }
 
-    if (undefined === config.type) {
-
-        if (config.format) {
-
-            switch (config.format.toLowerCase()) {
-                case "bw":
-                case "bigwig":
-                case "wig":
-                case "bedgraph":
-                case "tdf":
-                    config.type = "wig";
-                    break;
-                case "vcf":
-                    config.type = "variant";
-                    break;
-                case "seg":
-                    config.type = "seg";
-                    break;
-                case "bam":
-                case "cram":
-                    config.type = "alignment";
-                    break;
-                case "bedpe":
-                case "bedpe-loop":
-                    config.type = "interaction";
-                    break;
-                case "bp":
-                    config.type = "arc";
-                    break;
-                case "gwas":
-                    config.type = "gwas";
-                    break;
-                case "bed":
-                case "bigbed":
-                case "bb":
-                    config.type = "bedtype";
-                    break;
-                default:
-                    config.type = "annotation";
-
-            }
+    if (format) {
+        switch (format) {
+            case "bw":
+            case "bigwig":
+            case "wig":
+            case "bedgraph":
+            case "tdf":
+               return "wig";
+            case "vcf":
+                return "variant";
+            case "seg":
+                return "seg";
+            case "bam":
+            case "cram":
+                return "alignment";
+            case "bedpe":
+            case "bedpe-loop":
+                return "interaction";
+            case "bp":
+                return "arc";
+            case "gwas":
+                return "gwas";
+            case "bed":
+            case "bigbed":
+            case "bb":
+                return "bedtype";
+            default:
+                return "annotation";
         }
-
     }
-    return config.type;
 }
-
 
 function translateDeprecatedTypes(config) {
 
@@ -252,6 +234,18 @@ function translateDeprecatedTypes(config) {
     }
 }
 
+async function getFilename(url) {
+    if (StringUtils.isString(url) && url.startsWith("https://drive.google.com")) {
+        // This will fail if Google API key is not defined
+        if(GoogleAuth.getApiKey() === undefined) {
+            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
+        }
+        const json = await GoogleDrive.getDriveFileInfo(url)
+        return json.originalFileName || json.name;
+    } else {
+        return FileUtils.getFilename(url);
+    }
+}
 
-export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType}
+export {extend, isSimpleType, buildOptions, validateLocusExtent, doAutoscale, isNumber, inferTrackType, getFilename}
 

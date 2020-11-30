@@ -191,11 +191,6 @@
     "name": "quoted color"
   },
   {
-    "url": "../test/data/bed/oneFeature.bed",
-    "indexed": false,
-    "name": "1 feature bed"
-  },
-  {
     "url": "../test/data/bed/4_columns.bed",
     "format": "bed",
     "name": "4 column bed with track line"
@@ -205,6 +200,11 @@
     "type": "annotation",
     "format": "bed",
     "url": "../test/data/bed/basic_feature_3_columns.bed.gzipped"
+  },
+  {
+    "url": "../test/data/bed/oneFeatureWithVerboseAnnotationName.bed",
+    "indexed": false,
+    "name": "This is a really long name for a one feature BED file"
   },
   {
     "url": "../test/data/bed/oneFeature.bed",

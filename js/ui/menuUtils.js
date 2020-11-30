@@ -6,6 +6,7 @@ import {createCheckbox} from "../igv-icons.js"
  * @param trackView
  */
 const MenuUtils = {
+
     trackMenuItemList: function (trackView) {
 
         const vizWindowTypes = new Set(['alignment', 'annotation', 'variant', 'eqtl', 'snp']);
@@ -19,8 +20,9 @@ const MenuUtils = {
             menuItems.push(trackHeightMenuItem(trackView));
         }
 
-        if (doProvideColoSwatchWidget(trackView.track)) {
-            menuItems.push(colorPickerMenuItem(trackView))
+        if (this.showColorPicker(trackView.track)) {
+            menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
+            menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}));
         }
 
         if (trackView.track.menuItemList) {
@@ -53,7 +55,7 @@ const MenuUtils = {
         };
         menuItems.push({object: $e, click: clickHandler});
 
-        if( trackView.track.logScale !== undefined) {
+        if (trackView.track.logScale !== undefined) {
             menuItems.push({
                     object: createCheckbox("Log scale", trackView.track.logScale),
                     click: () => {
@@ -68,7 +70,7 @@ const MenuUtils = {
                 object: createCheckbox("Autoscale", trackView.track.autoscale),
                 click: () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
-                    trackView.repaintViews();
+                    trackView.updateViews();
                 }
             }
         )
@@ -132,17 +134,20 @@ const MenuUtils = {
         }
 
         return list;
+    },
+
+    showColorPicker(track) {
+        return (
+            undefined === track.type ||
+            "bedtype" === track.type ||
+            "alignment" === track.type ||
+            "annotation" === track.type ||
+            "variant" === track.type ||
+            "wig" === track.type);
     }
 
 }
 
-function doProvideColoSwatchWidget(track) {
-    return (
-        "alignment" === track.type ||
-        "annotation" === track.type ||
-        "variant" === track.type ||
-        "wig" === track.type);
-}
 
 function visibilityWindowMenuItem(trackView) {
 
@@ -191,22 +196,15 @@ function trackRemovalMenuItem(trackView) {
 
 }
 
-function colorPickerMenuItem(trackView) {
-    var $e,
-        clickHandler;
+function colorPickerMenuItem({trackView, label, option}) {
 
-    $e = $('<div>');
-    $e.text('Set track color');
-
-    clickHandler = function () {
-        trackView.presentColorPicker();
-    };
+    const $e = $('<div>');
+    $e.text(label);
 
     return {
         object: $e,
-        click: clickHandler
-    };
-
+        click: () => trackView.presentColorPicker(option)
+    }
 }
 
 function trackRenameMenuItem(trackView) {
@@ -254,7 +252,7 @@ function trackHeightMenuItem(trackView) {
                 if (trackView.track.maxHeight !== undefined && trackView.track.maxHeight < number) {
                     trackView.track.minHeight = number;
                 }
-                trackView.setTrackHeight(number, true, true);
+                trackView.setTrackHeight(number, true);
 
                 // Explicitly setting track height turns off autoHeight
                 trackView.track.autoHeight = false;

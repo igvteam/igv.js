@@ -23,75 +23,80 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import Alert from "../ui/alert.js";
+
+import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamReader from "./bamReader.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 
-const ShardedBamReader = function (config, genome) {
+class ShardedBamReader {
 
-    this.config = config;
-    this.genome = genome;
+    constructor(config, genome) {
 
-    const bamReaders = {};
-    const chrAliasTable = {};
+        this.config = config;
+        this.genome = genome;
 
-    config.sources.sequences.forEach(function (chr) {
+        const bamReaders = {};
+        const chrAliasTable = {};
 
-        bamReaders[chr] = null;   // Placeholder
+        config.sources.sequences.forEach(function (chr) {
 
-        if (genome) {
-            const alias = genome.getChromosomeName(chr);
-            chrAliasTable[alias] = chr;
-        }
-    });
+            bamReaders[chr] = null;   // Placeholder
 
-    this.chrAliasTable = chrAliasTable;
+            if (genome) {
+                const alias = genome.getChromosomeName(chr);
+                chrAliasTable[alias] = chr;
+            }
+        });
 
-    this.bamReaders = bamReaders;
+        this.chrAliasTable = chrAliasTable;
 
-    BamUtils.setReaderDefaults(this, config);
-};
+        this.bamReaders = bamReaders;
 
-ShardedBamReader.prototype.readAlignments = function (chr, start, end) {
+        BamUtils.setReaderDefaults(this, config);
+    }
 
-    const genome = this.genome;
-    const self = this;
+    async readAlignments(chr, start, end) {
 
-    const queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
+        const genome = this.genome;
+        const self = this;
 
-    if (!this.bamReaders.hasOwnProperty(queryChr) || "none" === this.bamReaders[queryChr]) {
-        return Promise.resolve(new AlignmentContainer(chr, start, end));
-    } else {
+        const queryChr = self.chrAliasTable.hasOwnProperty(chr) ? self.chrAliasTable[chr] : chr;
 
-        let reader = self.bamReaders[queryChr];
-        let tmp;
+        if (!this.bamReaders.hasOwnProperty(queryChr) || "none" === this.bamReaders[queryChr]) {
+            return Promise.resolve(new AlignmentContainer(chr, start, end));
+        } else {
 
-        if (!reader) {
+            let reader = self.bamReaders[queryChr];
+            let tmp;
 
-            tmp = {
-                url: self.config.sources.url.replace("$CHR", queryChr)
+            if (!reader) {
+
+                tmp = {
+                    url: self.config.sources.url.replace("$CHR", queryChr)
+                }
+
+                if (self.config.sources.indexURL) {
+                    tmp.indexURL = self.config.sources.indexURL.replace("$CHR", queryChr);
+                }
+
+                const bamConfig = Object.assign(self.config, tmp);
+                reader = new BamReader(bamConfig);
+                self.bamReaders[queryChr] = reader;
             }
 
-            if (self.config.sources.indexURL) {
-                tmp.indexURL = self.config.sources.indexURL.replace("$CHR", queryChr);
-            }
+            return reader.readAlignments(queryChr, start, end)
 
-            const bamConfig = Object.assign(self.config, tmp);
-            reader = new BamReader(bamConfig);
-            self.bamReaders[queryChr] = reader;
+                .catch(function (error) {
+                    console.error(error);
+                    const str = `Error reading BAM or index file for: ${ tmp ? tmp.url : '' }`
+                    Alert.presentAlert(new Error(str))
+                    self.bamReaders[queryChr] = "none";
+                    return new AlignmentContainer(chr, start, end);   // Empty alignment container
+                })
+
         }
-
-        return reader.readAlignments(queryChr, start, end)
-
-            .catch(function (error) {
-                console.error(error);
-                igv.browser.alert.present("Error reading BAM or index file for: " + tmp ? tmp.url : "");
-                self.bamReaders[queryChr] = "none";
-                return new AlignmentContainer(chr, start, end);   // Empty alignment container
-            })
-
     }
 }
 
-export default ShardedBamReader;
+export default ShardedBamReader

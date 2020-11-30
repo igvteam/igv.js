@@ -1,11 +1,9 @@
+import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src";
 
 
 suite("testBamIndex", function () {
-
-    createMockObjects();
 
     test("load bam index", async function () {
         this.timeout(100000);

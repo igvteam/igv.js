@@ -24,7 +24,6 @@
  */
 
 import IGVGraphics from "./igv-canvas.js";
-import {nucleotideColors} from "./util/colorPalletes.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER * 1e-4
 const complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
@@ -153,7 +152,7 @@ class SequenceTrack {
 
         const threeFrame = [[], [], []];
 
-        for (let fnum of [0, 1, 2]) {
+        for (let fNum of [0, 1, 2]) {
             var idx = fNum;
             var obj, st;
 
@@ -294,7 +293,7 @@ class SequenceTrack {
         if (this.color) {
             return this.color;
         } else if ("dna" === this.sequenceType) {
-            return nucleotideColors[index] || 'gray';
+            return this.browser.nucleotideColors[index] || 'gray';
         } else {
             return 'rgb(0, 0, 150)';
         }

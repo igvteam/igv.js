@@ -27,77 +27,78 @@
 import TDFReader from "./tdfReader.js";
 import GenomicInterval from "../genome/genomicInterval.js";
 
-const TDFSource = function (config, genome) {
+class TDFSource {
 
-    this.genome = genome;
-    this.windowFunction = config.windowFunction || "mean";
-    this.reader = new TDFReader(config, genome);
-};
-
-TDFSource.prototype.getFeatures = async function ({chr, start, end, bpPerPixel}) {
-
-    await getRootGroup.call(this);
-
-    const genomicInterval = new GenomicInterval(chr, start, end);
-    const genome = this.genome;
-
-    if (chr.toLowerCase() === "all") {
-        return [];      // Whole genome view not yet supported
+    constructor(config, genome) {
+        this.genome = genome;
+        this.windowFunction = config.windowFunction || "mean";
+        this.reader = new TDFReader(config, genome);
     }
 
-    genomicInterval.bpPerPixel = bpPerPixel;
-    const group = await getRootGroup.call(this);
-    const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
-    let queryChr = this.reader.chrAliasTable[chr];
-    let maxZoom = this.reader.maxZoom;
-    if (queryChr === undefined) queryChr = chr;
-    if (maxZoom === undefined) maxZoom = -1;
+    async getFeatures({chr, start, end, bpPerPixel}) {
 
-    const wf = zoom > maxZoom ? "raw" : this.windowFunction;
-    const dataset = await this.reader.readDataset(queryChr, wf, zoom);
-    if (dataset == null) {
-        return [];
-    }
+        const genomicInterval = new GenomicInterval(chr, start, end);
+        const genome = this.genome;
 
-    const tileWidth = dataset.tileWidth;
-    const startTile = Math.floor(start / tileWidth);
-    const endTile = Math.floor(end / tileWidth);
-    const NTRACKS = 1;   // TODO read this
-    const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
-    const features = [];
-    for (let tile of tiles) {
-        switch (tile.type) {
-            case "bed":
-                decodeBedTile(tile, chr, start, end, bpPerPixel, features);
-                break;
-            case "variableStep":
-                decodeVaryTile(tile, chr, start, end, bpPerPixel, features);
-                break;
-            case "fixedStep":
-                decodeFixedTile(tile, chr, start, end, bpPerPixel, features);
-                break;
-            default:
-                throw ("Unknown tile type: " + tile.type);
+
+        if (!this.rootGroup) {
+            this.rootGroup = await this.reader.readRootGroup();
+            if (!this.normalizationFactor) {
+                const totalCount = this.rootGroup.totalCount;
+                if (totalCount) {
+                    this.normalizationFactor = 1.0e6 / totalCount;
+                }
+            }
         }
-    }
-    features.sort(function (a, b) {
-        return a.start - b.start;
-    })
-    return features;
 
-
-    async function getRootGroup() {
-        if (this.rootGroup) {
-            return this.rootGroup;
-        } else {
-            this.rootGroup = await this.reader.readRootGroup()
-            return this.rootGroup;
+        if (chr.toLowerCase() === "all") {
+            return [];      // Whole genome view not yet supported
         }
-    }
-}
 
-TDFSource.prototype.supportsWholeGenome = function () {
-    return false;
+        genomicInterval.bpPerPixel = bpPerPixel;
+        const zoom = zoomLevelForScale(chr, bpPerPixel, genome);
+        let queryChr = this.reader.chrAliasTable[chr];
+        let maxZoom = this.reader.maxZoom;
+        if (queryChr === undefined) queryChr = chr;
+        if (maxZoom === undefined) maxZoom = -1;
+
+        const wf = zoom > maxZoom ? "raw" : this.windowFunction;
+        const dataset = await this.reader.readDataset(queryChr, wf, zoom);
+        if (dataset == null) {
+            return [];
+        }
+
+        const tileWidth = dataset.tileWidth;
+        const startTile = Math.floor(start / tileWidth);
+        const endTile = Math.floor(end / tileWidth);
+        const NTRACKS = 1;   // TODO read this
+        const tiles = await this.reader.readTiles(dataset.tiles.slice(startTile, endTile + 1), NTRACKS);
+        const features = [];
+        for (let tile of tiles) {
+            switch (tile.type) {
+                case "bed":
+                    decodeBedTile(tile, chr, start, end, bpPerPixel, features);
+                    break;
+                case "variableStep":
+                    decodeVaryTile(tile, chr, start, end, bpPerPixel, features);
+                    break;
+                case "fixedStep":
+                    decodeFixedTile(tile, chr, start, end, bpPerPixel, features);
+                    break;
+                default:
+                    throw ("Unknown tile type: " + tile.type);
+            }
+        }
+        features.sort(function (a, b) {
+            return a.start - b.start;
+        })
+
+        return features;
+    }
+
+    supportsWholeGenome() {
+        return false;
+    }
 }
 
 function decodeBedTile(tile, chr, bpStart, bpEnd, bpPerPixel, features) {

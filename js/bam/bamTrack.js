@@ -24,14 +24,15 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import BamSource from "./bamSource.js";
 import PairedAlignment from "./pairedAlignment.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {createCheckbox} from "../igv-icons.js";
-import {nucleotideColorComponents, nucleotideColors, PaletteColorTable} from "../util/colorPalletes.js";
-import {extend} from "../util/igvUtils.js";
+import MenuUtils from "../ui/menuUtils.js";
+import {PaletteColorTable} from "../util/colorPalletes.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const alignmentStartGap = 5;
@@ -42,21 +43,15 @@ const DEFAULT_ALIGNMENT_COLOR = "rgb(185, 185, 185)";
 const DEFAULT_COVERAGE_COLOR = "rgb(150, 150, 150)";
 const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 
+class BAMTrack extends TrackBase {
 
-const BAMTrack = extend(TrackBase,
+    constructor(config, browser) {
 
-    function (config, browser) {
+
+        super(config, browser);
 
         this.type = "alignment";   // Not sure this is used for anything
 
-        // Override default track height for bams
-        if (config.height === undefined) config.height = DEFAULT_TRACK_HEIGHT;
-
-        TrackBase.call(this, config, browser);
-
-        if (config.coverageTrackHeight === undefined) {
-            config.coverageTrackHeight = DEFAULT_COVERAGE_TRACK_HEIGHT;
-        }
         if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
@@ -68,9 +63,7 @@ const BAMTrack = extend(TrackBase,
 
         this.coverageTrack = new CoverageTrack(config, this);
         this.alignmentTrack = new AlignmentTrack(config, this);
-
         this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
-
         this.visibilityWindow = config.visibilityWindow || 30000;
         this.viewAsPairs = config.viewAsPairs;
         this.pairsSupported = config.pairsSupported !== false;
@@ -83,372 +76,402 @@ const BAMTrack = extend(TrackBase,
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
-        // Transient object, maintains the last sort option per viewport.
-        this.sortObjects = {};
-
+        // The sort object can be an array in the case of multi-locus view, however if multiple sort positions
+        // are present for a given reference frame the last one will take precedence
         if (config.sort) {
             if (Array.isArray(config.sort)) {
-                for (let sort of config.sort) {
-                    assignSort(this.sortObjects, sort);
-                }
+                // Legacy support
+                this.assignSort(config.sort[0]);
             } else {
-                assignSort(this.sortObjects, config.sort);
+                this.assignSort(config.sort);
             }
-            config.sort = undefined;
         }
 
-        // Assign sort objects to a genomic state
-        function assignSort(currentSorts, sort) {
+        // Invoke height setter last to allocated to coverage and alignment tracks
+        this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT);
+    }
 
-            const range = StringUtils.parseLocusString(sort.locus);
-            if (browser && browser.genome) range.chr = browser.genome.getChromosomeName(range.chr);
+    set height(h) {
+        this._height = h;
+        if (this.coverageTrack && this.showAlignments) {
+            this.alignmentTrack.height = this.showCoverage ? h - this.coverageTrack.height : h;
+        }
+    }
 
-            // Loop through current genomic states, assign sort to first matching state
-            for (let rf of browser.referenceFrameList) {
-                // We would like to use actual viewport width to calculate ref frame end, but viewport is not assigned at this point.
-                const rfEnd = rf.start + (rf.initialEnd - rf.initialStart);
-                if (rf.chr === range.chr && range.start >= rf.start && range.start <= rfEnd) {
+    get height() {
+        return this._height;
+    }
 
-                    currentSorts[rf.id] = {
-                        chr: range.chr,
-                        position: range.start,
-                        sortOption: sort.option || "NUCLEOTIDE",
-                        direction: sort.direction === undefined ? true : "ASC" === sort.direction,
-                        tag: sort.tag ? sort.tag.toUpperCase() : undefined
-                    }
+    sort(options) {
+        options = this.assignSort(options);
 
-                    break;
+        for (let vp of this.trackView.viewports) {
+            if (vp.containsPosition(options.chr, options.position)) {
+                const alignmentContainer = vp.getCachedFeatures();
+                if (alignmentContainer) {
+                    sortAlignmentRows(options, alignmentContainer);
+                    vp.repaint();
                 }
             }
-
-        }
-    });
-
-BAMTrack.prototype.getFeatures = async function (chr, bpStart, bpEnd, bpPerPixel, viewport) {
-
-    const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
-
-    if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
-        if (undefined === this.minFragmentLength) {
-            this.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
-        }
-        if (undefined === this.maxFragmentLength) {
-            this.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
         }
     }
 
-    const sort = this.sortObjects[viewport.referenceFrame.id];
-    if (sort) {
-        if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
-            this.alignmentTrack.sortAlignmentRows(sort, alignmentContainer);
-            this.trackView.repaintViews();
+    /**
+     * Fix syntax problems for sort options.
+     * @param options
+     */
+    assignSort(options) {
+        // convert old syntax
+        if (options.locus) {
+            const range = StringUtils.parseLocusString(options.locus);
+            options.chr = range.chr;
+            options.position = range.start;
         } else {
-            delete this.sortObjects[viewport.referenceFrame.id];
+            options.position--;
         }
+        options.direction = options.direction === "ASC" || options.direction === true;
+
+        // chr aliasing
+        options.chr = this.browser.genome.getChromosomeName(options.chr);
+        this.sortObject = options;
+
+        return this.sortObject;
     }
 
-    return alignmentContainer;
-}
+    async getFeatures(chr, bpStart, bpEnd, bpPerPixel, viewport) {
 
-BAMTrack.filters = {
+        const alignmentContainer = await this.featureSource.getAlignments(chr, bpStart, bpEnd)
 
-    noop: function () {
-        return function (alignment) {
-            return false;
-        };
-    },
-
-    strand: function (strand) {
-        return function (alignment) {
-            return alignment.strand === strand;
-        };
-    },
-
-    mappingQuality: function (lower, upper) {
-        return function (alignment) {
-            if (lower && alignment.mq < lower) {
-                return true;
+        if (alignmentContainer.alignments && alignmentContainer.alignments.length > 99) {
+            if (undefined === this.minFragmentLength) {
+                this.minFragmentLength = alignmentContainer.pairedEndStats.lowerFragmentLength;
             }
-            if (upper && alignment.mq > upper) {
-                return true;
+            if (undefined === this.maxFragmentLength) {
+                this.maxFragmentLength = alignmentContainer.pairedEndStats.upperFragmentLength;
             }
-            return false;
+        }
+
+        const sort = this.sortObject;
+        if (sort) {
+            if (sort.chr === chr && sort.position >= bpStart && sort.position <= bpEnd) {
+                sortAlignmentRows(sort, alignmentContainer);
+            }
+        }
+
+        return alignmentContainer;
+    }
+
+
+    /**
+     * Compute the pixel height required to display all content.  This is not the same as the viewport height
+     * (track.height) which might include a scrollbar.
+     *
+     * @param alignmentContainer
+     * @returns {number}
+     */
+    computePixelHeight(alignmentContainer) {
+        return (this.showCoverage ? this.coverageTrack.height : 0) +
+            (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
+            15;
+    }
+
+    draw(options) {
+
+        IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        if (true === this.showCoverage && this.coverageTrack.height > 0) {
+            this.trackView.controlCanvas.style.display = 'block'
+            this.coverageTrack.draw(options);
+        } else {
+            this.trackView.controlCanvas.style.display = 'none'
+        }
+
+        if (true === this.showAlignments) {
+            this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
+            this.alignmentTrack.draw(options);
         }
     }
-}
 
+    paintAxis(ctx, pixelWidth, pixelHeight) {
 
-/**
- * Optional method to compute pixel height to accomodate the list of features.  The implementation below
- * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
- *
- * @param alignmentContainer
- * @returns {number}
- */
-BAMTrack.prototype.computePixelHeight = function (alignmentContainer) {
-    const h =
-        (this.showCoverage ? this.coverageTrack.height : 0) +
-        (this.showAlignments ? this.alignmentTrack.computePixelHeight(alignmentContainer) : 0) +
-        15;
-    return h;
-
-};
-
-BAMTrack.prototype.draw = function (options) {
-
-    IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-    if (true === this.showCoverage && this.coverageTrack.height > 0) {
-        this.trackView.controlCanvas.style.display = 'block'
-        this.coverageTrack.draw(options);
-    } else {
-        this.trackView.controlCanvas.style.display = 'none'
-    }
-
-    if (true === this.showAlignments) {
-        this.alignmentTrack.setTop(this.coverageTrack, this.showCoverage)
-        this.alignmentTrack.draw(options);
-    }
-}
-
-BAMTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
-
-    if (this.browser.isMultiLocusMode()) {
-        ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-    } else {
-        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
-    }
-}
-
-BAMTrack.prototype.contextMenuItemList = function (config) {
-    return this.alignmentTrack.contextMenuItemList(config);
-}
-
-BAMTrack.prototype.popupData = function (config) {
-
-    if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
-        return this.coverageTrack.popupData(config);
-    } else {
-        return this.alignmentTrack.popupData(config);
-    }
-
-}
-
-BAMTrack.prototype.menuItemList = function () {
-
-    const menuItems = [];
-
-    // Color by items
-    const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-    $e.text('Color by');
-    menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
-
-    const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
-    if (this.alignmentTrack.hasPairs) {
-        colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
-        colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
-        colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'});
-    }
-    const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '');
-    colorByMenuItems.push({key: 'tag', label: tagLabel});
-    for (let item of colorByMenuItems) {
-        const selected = (this.alignmentTrack.colorBy === item.key);
-        menuItems.push(colorByCB.call(this, item, selected));
-    }
-
-    // Show / hide alignments and coverage
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-    menuItems.push({
-        object: createCheckbox("Show Coverage", this.showCoverage),
-        click: () => {
-            this.showCoverage = !this.showCoverage;
-            const ah = this.autoHeight;
-            this.autoHeight = true;
-            this.trackView.checkContentHeight();
-            this.autoHeight = ah;
-            this.trackView.repaintViews();
+        if (this.browser.isMultiLocusMode()) {
+            ctx.clearRect(0, 0, pixelWidth, pixelHeight);
+        } else {
+            this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
         }
-    });
-    menuItems.push({
-        object: createCheckbox("Show Alignments", this.showAlignments),
-        click: () => {
-            this.showAlignments = !this.showAlignments;
-            const ah = this.autoHeight;
-            this.autoHeight = true;
-            this.trackView.checkContentHeight();
-            this.autoHeight = ah;
-            this.trackView.repaintViews();
+    }
+
+    contextMenuItemList(config) {
+        return this.alignmentTrack.contextMenuItemList(config);
+    }
+
+    popupData(config) {
+
+        if (true === this.showCoverage && config.y >= this.coverageTrack.top && config.y < this.coverageTrack.height) {
+            return this.coverageTrack.popupData(config);
+        } else {
+            return this.alignmentTrack.popupData(config);
         }
-    });
 
-    // Show all bases
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-    menuItems.push({
-        object: createCheckbox("Show all bases", this.showAllBases),
-        click: () => {
-            this.showAllBases = !this.showAllBases;
-            this.config.showAllBases = this.showAllBases;
-            this.trackView.repaintViews();
+    }
+
+    menuItemList() {
+
+
+        // Start with overage track items
+        let menuItems = ["<hr/>"];
+        menuItems = menuItems.concat(MenuUtils.numericDataMenuItems(this.trackView));
+
+        // Color by items
+        const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $e.text('Color by');
+        menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+
+        const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
+        if (this.alignmentTrack.hasPairs) {
+            colorByMenuItems.push({key: 'firstOfPairStrand', label: 'first-of-pair strand'});
+            colorByMenuItems.push({key: 'pairOrientation', label: 'pair orientation'});
+            colorByMenuItems.push({key: 'fragmentLength', label: 'insert size (TLEN)'});
         }
-    });
+        const tagLabel = 'tag' + (this.alignmentTrack.colorByTag ? ' (' + this.alignmentTrack.colorByTag + ')' : '');
+        colorByMenuItems.push({key: 'tag', label: tagLabel});
+        for (let item of colorByMenuItems) {
+            const selected = (this.alignmentTrack.colorBy === item.key);
+            menuItems.push(this.colorByCB(item, selected));
+        }
 
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        // Show coverage / alignment options
+        const adjustTrackHeight = () => {
+            if (!this.autoHeight) {
+                const h = 15 +
+                    (this.showCoverage ? this.coverageTrack.height : 0) +
+                    (this.showAlignments ? this.alignmentTrack.height : 0);
+                this.trackView.setTrackHeight(h);
+            }
+        }
 
-    // View as pairs
-    if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         menuItems.push({
-            object: createCheckbox("View as pairs", this.viewAsPairs),
+            object: createCheckbox("Show Coverage", this.showCoverage),
             click: () => {
-                this.viewAsPairs = !this.viewAsPairs;
-                this.config.viewAsPairs = this.viewAsPairs;
-                this.featureSource.setViewAsPairs(this.viewAsPairs);
+                this.showCoverage = !this.showCoverage;
+                adjustTrackHeight();
+                this.trackView.checkContentHeight();
+                this.trackView.repaintViews();
+            }
+        });
+        menuItems.push({
+            object: createCheckbox("Show Alignments", this.showAlignments),
+            click: () => {
+                this.showAlignments = !this.showAlignments;
+                adjustTrackHeight();
+                this.trackView.checkContentHeight();
+                this.trackView.repaintViews();
+            }
+        });
+
+        // Show all bases
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        menuItems.push({
+            object: createCheckbox("Show all bases", this.showAllBases),
+            click: () => {
+                this.showAllBases = !this.showAllBases;
+                this.config.showAllBases = this.showAllBases;
+                this.trackView.repaintViews();
+            }
+        });
+
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
+        // View as pairs
+        if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+            menuItems.push({
+                object: createCheckbox("View as pairs", this.viewAsPairs),
+                click: () => {
+                    this.viewAsPairs = !this.viewAsPairs;
+                    this.config.viewAsPairs = this.viewAsPairs;
+                    this.featureSource.setViewAsPairs(this.viewAsPairs);
+                    const alignmentContainers = this.getCachedAlignmentContainers();
+                    for (let ac of alignmentContainers) {
+                        ac.setViewAsPairs(this.viewAsPairs);
+                    }
+                    this.trackView.repaintViews();
+                }
+            });
+        }
+
+        // Soft clips
+        menuItems.push({
+            object: createCheckbox("Show soft clips", this.showSoftClips),
+            click: () => {
+                this.showSoftClips = !this.showSoftClips;
+                this.config.showSoftClips = this.showSoftClips;
+                this.featureSource.setShowSoftClips(this.showSoftClips);
                 const alignmentContainers = this.getCachedAlignmentContainers();
                 for (let ac of alignmentContainers) {
-                    ac.setViewAsPairs(this.viewAsPairs);
+                    ac.setShowSoftClips(this.showSoftClips);
                 }
                 this.trackView.repaintViews();
             }
         });
-    }
 
-    // Soft clips
-    menuItems.push({
-        object: createCheckbox("Show soft clips", this.showSoftClips),
-        click: () => {
-            this.showSoftClips = !this.showSoftClips;
-            this.config.showSoftClips = this.showSoftClips;
-            this.featureSource.setShowSoftClips(this.showSoftClips);
-            const alignmentContainers = this.getCachedAlignmentContainers();
-            for (let ac of alignmentContainers) {
-                ac.setShowSoftClips(this.showSoftClips);
+        // Display mode
+        const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+        $displayModeLabel.text('Display mode');
+        menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+
+        menuItems.push({
+            object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
+            click: () => {
+                this.alignmentTrack.displayMode = "EXPANDED";
+                this.config.displayMode = "EXPANDED";
+                this.trackView.checkContentHeight();
+                this.trackView.repaintViews();
             }
-            this.trackView.repaintViews();
-        }
-    });
+        });
 
-    // Display mode
-    const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-    $displayModeLabel.text('Display mode');
-    menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
+        menuItems.push({
+            object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
+            click: () => {
+                this.alignmentTrack.displayMode = "SQUISHED";
+                this.config.displayMode = "SQUISHED";
+                this.trackView.checkContentHeight();
+                this.trackView.repaintViews();
+            }
+        });
 
-    menuItems.push({
-        object: createCheckbox("expand", this.alignmentTrack.displayMode === "EXPANDED"),
-        click: () => {
-            this.alignmentTrack.displayMode = "EXPANDED";
-            this.config.displayMode = "EXPANDED";
-            this.trackView.repaintViews();
-        }
-    });
-
-    menuItems.push({
-        object: createCheckbox("squish", this.alignmentTrack.displayMode === "SQUISHED"),
-        click: () => {
-            this.alignmentTrack.displayMode = "SQUISHED";
-            this.config.displayMode = "SQUISHED";
-            this.trackView.repaintViews();
-        }
-    });
-
-    return menuItems;
-}
-
-/**
- * Create a "color by" checkbox menu item, optionally initially checked
- * @param menuItem
- * @param showCheck
- * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
- */
-function colorByCB(menuItem, showCheck) {
-    const $e = createCheckbox(menuItem.label, showCheck);
-    const clickHandler = (ev) => {
-
-        if (menuItem.key === this.alignmentTrack.colorBy) {
-            this.alignmentTrack.colorBy = 'none';
-            this.config.colorBy = 'none';
-            this.trackView.repaintViews();
-
-        } else if ('tag' === menuItem.key) {
-
-            this.browser.inputDialog.present({
-                label: 'Tag Name',
-                value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
-                callback:  (tag) => {
-                    this.alignmentTrack.colorBy = 'tag';
-                    this.config.colorBy = 'tag';
-
-                    if (tag !== this.alignmentTrack.colorByTag) {
-                        this.alignmentTrack.colorByTag = tag;
-                        this.config.colorByTag = tag;
-                        this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
-                        $('#color-by-tag').text(self.alignmentTrack.colorByTag);
-                    }
-
-                    this.trackView.repaintViews();
-                }
-            }, ev)
-
-        } else {
-
-            this.alignmentTrack.colorBy = menuItem.key;
-            this.config.colorBy = menuItem.key;
-            this.trackView.repaintViews();
-        }
-
-    };
-
-    return {name: undefined, object: $e, click: clickHandler, init: undefined}
-}
-
-/**
- * Called when the track is removed.  Do any needed cleanup here
- */
-BAMTrack.prototype.dispose = function () {
-    this.trackView = undefined;
-}
-
-/**
- * Return the current state of the track.  Used to create sessions and bookmarks.
- *
- * @returns {*|{}}
- */
-BAMTrack.prototype.getState = function () {
-
-    const config = Object.assign({}, this.config);
-
-    config.sort = undefined;
-
-    for (let referenceFrame of this.browser.referenceFrameList) {
-
-        const s = this.sortObjects[ referenceFrame.id ];
-
-        if (s) {
-            config.sort = config.sort || [];
-            config.sort.push({ locus: s.chr + ":" + (s.position + 1), option: s.sortOption, direction: s.direction ? "ASC" : "DESC", tag: s.tag });
-        }
+        return menuItems;
     }
 
-    return config;
+
+    /**
+     * Create a "color by" checkbox menu item, optionally initially checked
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    colorByCB(menuItem, showCheck) {
+        const $e = createCheckbox(menuItem.label, showCheck);
+        const clickHandler = (ev) => {
+
+            if (menuItem.key === this.alignmentTrack.colorBy) {
+                this.alignmentTrack.colorBy = 'none';
+                this.config.colorBy = 'none';
+                this.trackView.repaintViews();
+
+            } else if ('tag' === menuItem.key) {
+                this.browser.inputDialog.present({
+                    label: 'Tag Name',
+                    value: this.alignmentTrack.colorByTag ? this.alignmentTrack.colorByTag : '',
+                    callback: (tag) => {
+                        this.alignmentTrack.colorBy = 'tag';
+                        this.config.colorBy = 'tag';
+
+                        if (tag !== this.alignmentTrack.colorByTag) {
+                            this.alignmentTrack.colorByTag = tag;
+                            this.config.colorByTag = tag;
+                            this.alignmentTrack.tagColors = new PaletteColorTable("Set1");
+                            $('#color-by-tag').text(self.alignmentTrack.colorByTag);
+                        }
+
+                        this.trackView.repaintViews();
+                    }
+                }, ev)
+
+            } else {
+                this.alignmentTrack.colorBy = menuItem.key;
+                this.config.colorBy = menuItem.key;
+                this.trackView.repaintViews();
+            }
+
+        };
+
+        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    }
+
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    dispose() {
+        this.trackView = undefined;
+    }
+
+    /**
+     * Return the current state of the track.  Used to create sessions and bookmarks.
+     *
+     * @returns {*|{}}
+     */
+    getState() {
+
+        const config = super.getState();
+
+        if (this.sortObject) {
+            config.sort = {
+                chr: this.sortObject.chr,
+                position: this.sortObject.position + 1,
+                option: this.sortObject.option,
+                direction: this.sortObject.direction ? "ASC" : "DESC"
+            }
+        }
+
+        return config;
+    }
+
+    getCachedAlignmentContainers() {
+        return this.trackView.viewports.map(vp => vp.getCachedFeatures())
+    }
+
+    get dataRange() {
+        return this.coverageTrack.dataRange;
+    }
+
+    set dataRange(dataRange) {
+        this.coverageTrack.dataRange = dataRange;
+    }
+
+    get logScale() {
+        return this.coverageTrack.logScale;
+    }
+
+    set logScale(logScale) {
+        this.coverageTrack.logScale = logScale;
+    }
+
+    get autoscale() {
+        return this.coverageTrack.autoscale;
+    }
+
+    set autoscale(autoscale) {
+        this.coverageTrack.autoscale = autoscale;
+    }
 }
 
-BAMTrack.prototype.getCachedAlignmentContainers = function () {
-    return this.trackView.viewports.map(vp => vp.getCachedFeatures())
-}
 
 class CoverageTrack {
 
     constructor(config, parent) {
         this.parent = parent;
         this.featureSource = parent.featureSource;
-        this.height = config.coverageTrackHeight;
-        this.dataRange = {min: 0};   // Leav max undefined
+        this.height = config.coverageTrackHeight !== undefined ? config.coverageTrackHeight : DEFAULT_COVERAGE_TRACK_HEIGHT;
+
         this.paintAxis = paintAxis;
         this.top = 0;
+
+        this.autoscale = config.autoscale || config.max === undefined;
+        if (!this.autoscale) {
+            this.dataRange = {
+                min: config.min || 0,
+                max: config.max
+            }
+        }
+
     }
 
     draw(options) {
 
         const pixelTop = options.pixelTop;
         const pixelBottom = pixelTop + options.pixelHeight;
+        const nucleotideColors = this.parent.browser.nucleotideColors;
 
         if (pixelTop > this.height) {
             return; //scrolled out of view
@@ -457,7 +480,6 @@ class CoverageTrack {
         const ctx = options.context;
         const alignmentContainer = options.features;
         const coverageMap = alignmentContainer.coverageMap;
-        this.dataRange.max = coverageMap.maximum;
 
         let sequence;
         if (coverageMap.refSeq) {
@@ -517,7 +539,6 @@ class CoverageTrack {
 
                 const refBase = sequence[i];
                 if (item.isMismatch(refBase)) {
-
                     IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[refBase]});
                     IGVGraphics.fillRect(ctx, x, y, w, h);
 
@@ -530,7 +551,6 @@ class CoverageTrack {
                         const hh = (count / this.dataRange.max) * this.height;
                         y = (this.height - hh) - accumulatedHeight;
                         accumulatedHeight += hh;
-
                         IGVGraphics.setProperties(ctx, {fillStyle: nucleotideColors[nucleotide]});
                         IGVGraphics.fillRect(ctx, x, y, w, hh);
                     }
@@ -634,19 +654,24 @@ class AlignmentTrack {
         this.top = (0 === coverageTrack.height || false === showCoverage) ? 0 : (5 + coverageTrack.height);
     }
 
+    /**
+     * Compute the pixel height required to display all content.
+     *
+     * @param alignmentContainer
+     * @returns {number|*}
+     */
     computePixelHeight(alignmentContainer) {
 
         if (alignmentContainer.packedAlignmentRows) {
-            const h =  alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0;
+            const h = alignmentContainer.hasDownsampledIntervals() ? downsampleRowHeight + alignmentStartGap : 0;
             const alignmentRowHeight = this.displayMode === "SQUISHED" ?
                 this.squishedRowHeight :
                 this.alignmentRowHeight;
             return h + (alignmentRowHeight * alignmentContainer.packedAlignmentRows.length) + 5;
         } else {
-            return this.height;
+            return 0;
         }
-
-    };
+    }
 
     draw(options) {
 
@@ -659,6 +684,7 @@ class AlignmentTrack {
         const packedAlignmentRows = alignmentContainer.packedAlignmentRows
         const showSoftClips = this.parent.showSoftClips;
         const showAllBases = this.parent.showAllBases;
+        const nucleotideColors = this.browser.nucleotideColors;
 
         let referenceSequence = alignmentContainer.sequence;
         if (referenceSequence) {
@@ -932,7 +958,7 @@ class AlignmentTrack {
                             let baseColor;
                             if (!isSoftClip && qual !== undefined && qual.length > seqOffset + i) {
                                 const readQual = qual[seqOffset + i];
-                                baseColor = shadedBaseColor(readQual, readChar, i + block.start);
+                                baseColor = shadedBaseColor(readQual, nucleotideColors[readChar]);
                             } else {
                                 baseColor = nucleotideColors[readChar];
                             }
@@ -973,118 +999,101 @@ class AlignmentTrack {
 
     };
 
-    sortAlignmentRows(options, alignmentContainer) {
-
-        const direction = options.direction
-        if (alignmentContainer === null) {
-            alignmentContainer = this.featureSource.alignmentContainer;
-        }
-        for (let row of alignmentContainer.packedAlignmentRows) {
-            row.updateScore(options, alignmentContainer);
-        }
-
-        alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
-            const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
-            return true === direction ? i : -i;
-        });
-
-    };
-
     popupData(config) {
-
         const clickedObject = this.getClickedObject(config.viewport, config.y, config.genomicLocation);
-
         return clickedObject ? clickedObject.popupData(config.genomicLocation) : undefined;
     };
 
     contextMenuItemList(clickState) {
 
-        const self = this;
         const viewport = clickState.viewport;
+        const showSoftClips = this.parent.showSoftClips;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
+        const clickedAlignment = clickedObject && (typeof clickedObject.alignmentContaining === 'function') ?
+            clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
+            clickedObject;
+        const isSingleAlignment = clickedAlignment && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
+        const sortByOption = (option) => {
+            const cs = this.parent.sortObject;
+            const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true;
+            const newSortObject = {
+                chr: viewport.referenceFrame.chr,
+                position: Math.floor(clickState.genomicLocation),
+                sortOption: option,
+                direction: direction
+            }
+            this.parent.sortObject = newSortObject;
+            sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
+            viewport.repaint();
+        }
         list.push('<b>Sort by...</b>')
-        list.push({label: '&nbsp; base', click: () => sortByOption("NUCLEOTIDE")});
+        list.push({label: '&nbsp; base', click: () => sortByOption("BASE")});
         list.push({label: '&nbsp; read strand', click: () => sortByOption("STRAND")});
         list.push({label: '&nbsp; insert size', click: () => sortByOption("INSERT_SIZE")});
         list.push({label: '&nbsp; gap size', click: () => sortByOption("GAP_SIZE")});
         list.push({label: '&nbsp; chromosome of mate', click: () => sortByOption("MATE_CHR")});
         list.push({label: '&nbsp; mapping quality', click: () => sortByOption("MQ")});
-        list.push({label: '&nbsp; tag', click: sortByTag});
+        list.push({
+            label: '&nbsp; tag', click: () => {
+                const cs = this.parent.sortObject;
+                const direction = (cs && cs.position === Math.floor(clickState.genomicLocation)) ? !cs.direction : true;
+                const config =
+                    {
+                        label: 'Tag Name',
+                        value: this.sortByTag ? this.sortByTag : '',
+                        callback: (tag) => {
+                            if (tag) {
+                                const newSortObject = {
+                                    chr: viewport.referenceFrame.chr,
+                                    position: Math.floor(clickState.genomicLocation),
+                                    sortOption: "TAG",
+                                    tag: tag,
+                                    direction: direction
+                                }
+                                this.sortByTag = tag;
+                                this.parent.sortObject = newSortObject;
+                                sortAlignmentRows(newSortObject, viewport.getCachedFeatures());
+                                viewport.repaint();
+                            }
+                        }
+                    };
+                this.browser.inputDialog.present(config, clickState.event);
+            }
+        });
         list.push('<hr/>');
 
-        if (isSingleAlignment && clickedObject.isMateMapped()) {
-            list.push({label: 'View mate in split screen', click: viewMateInSplitScreen, init: undefined});
+        if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
+            list.push({
+                label: 'View mate in split screen',
+                click: () => {
+                    if (clickedAlignment.mate) {
+                        this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                        this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, clickState.viewport.referenceFrame);
+                    }
+                },
+                init: undefined
+            });
         }
-        list.push({label: 'View read sequence', click: viewReadSequence});
+
+        list.push({
+            label: 'View read sequence',
+            click: () => {
+                const alignment = clickedAlignment;
+                if (!alignment) return;
+
+                const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
+                if (!seqstring || "*" === seqstring) {
+                    Alert.presentAlert("Read sequence: *")
+                } else {
+                    Alert.presentAlert(seqstring);
+                }
+            }
+        });
         list.push('<hr/>');
         return list;
 
-
-        function sortByOption(option) {
-            sortRows({
-                chr: viewport.referenceFrame.chr,
-                position: Math.floor(clickState.genomicLocation),
-                sortOption: option
-            })
-        }
-
-        function sortByTag() {
-            const config =
-                {
-                    label: 'Tag Name',
-                    input: self.sortByTag ? self.sortByTag : '',
-                    click: function () {
-                        const tag = self.browser.inputDialog.$input.val().trim();
-                        self.sortByTag = tag;
-                        sortRows({
-                            chr: viewport.referenceFrame.chr,
-                            position: Math.floor(clickState.genomicLocation),
-                            sortOption: "TAG",
-                            tag: tag
-                        })
-                    }
-                };
-            self.browser.inputDialog.configure(config);
-            self.browser.inputDialog.present($(self.parent.trackView.trackDiv));
-        }
-
-        function sortRows(options) {
-
-            if (!clickState.viewport.tile) {
-                return;
-            }
-
-            const currentSorts = self.parent.sortObjects;
-            const cs = currentSorts[viewport.referenceFrame.id];
-            options.direction = cs ? !cs.direction : true;
-
-            self.sortAlignmentRows(options, clickState.viewport.getCachedFeatures());
-            self.parent.trackView.repaintViews();
-
-            currentSorts[viewport.referenceFrame.id] = options;
-        }
-
-        function viewMateInSplitScreen() {
-            if (clickedObject.mate) {
-                self.highlightedAlignmentReadNamed = clickedObject.readName;
-                self.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
-            }
-        }
-
-        function viewReadSequence() {
-            const alignment = clickedObject;
-            if (!alignment) return;
-
-            const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-            if (!seqstring || "*" === seqstring) {
-                self.browser.alert.present("Read sequence: *")
-            } else {
-                self.browser.alert.present(seqstring);
-            }
-        }
 
     };
 
@@ -1110,16 +1119,8 @@ class AlignmentTrack {
                 }
             }
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
-
-            let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            let clicked = alignmentRow.alignments.filter(function (alignment) {
-
-                const s = showSoftClips ? alignment.scStart : alignment.start;
-                const l = showSoftClips ? alignment.scLengthOnRef : alignment.lengthOnRef;
-
-                return (genomicLocation >= s && genomicLocation <= (s + l));
-            });
-
+            const alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips));
             if (clicked.length > 0) return clicked[0];
         }
 
@@ -1154,26 +1155,23 @@ class AlignmentTrack {
 
     getAlignmentColor(alignment) {
 
-        const self = this;
-        let color = self.parent.color;
-        const option = self.colorBy;
-        let tagValue;
+        let color = this.parent.color;   // The default color if nothing else applies
+        const option = this.colorBy;
         switch (option) {
-
             case "strand":
-                color = alignment.strand ? self.posStrandColor : self.negStrandColor;
+                color = alignment.strand ? this.posStrandColor : this.negStrandColor;
                 break;
 
             case "firstOfPairStrand":
 
                 if (alignment instanceof PairedAlignment) {
-                    color = alignment.firstOfPairStrand() ? self.posStrandColor : self.negStrandColor;
+                    color = alignment.firstOfPairStrand() ? this.posStrandColor : this.negStrandColor;
                 } else if (alignment.isPaired()) {
 
                     if (alignment.isFirstOfPair()) {
-                        color = alignment.strand ? self.posStrandColor : self.negStrandColor;
+                        color = alignment.strand ? this.posStrandColor : this.negStrandColor;
                     } else if (alignment.isSecondOfPair()) {
-                        color = alignment.strand ? self.negStrandColor : self.posStrandColor;
+                        color = alignment.strand ? this.negStrandColor : this.posStrandColor;
                     } else {
                         console.error("ERROR. Paired alignments are either first or second.")
                     }
@@ -1184,10 +1182,10 @@ class AlignmentTrack {
 
                 if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                     color = getChrColor(alignment.mate.chr);
-                } else if (self.pairOrientation && alignment.pairOrientation) {
-                    var oTypes = orientationTypes[self.pairOrientation];
+                } else if (this.pairOrientation && alignment.pairOrientation) {
+                    var oTypes = orientationTypes[this.pairOrientation];
                     if (oTypes) {
-                        var pairColor = self.pairColors[oTypes[alignment.pairOrientation]];
+                        var pairColor = this.pairColors[oTypes[alignment.pairOrientation]];
                         if (pairColor) color = pairColor;
                     }
                 }
@@ -1198,32 +1196,32 @@ class AlignmentTrack {
 
                 if (alignment.mate && alignment.isMateMapped() && alignment.mate.chr !== alignment.chr) {
                     color = getChrColor(alignment.mate.chr);
-                } else if (self.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < self.parent.minFragmentLength) {
-                    color = self.smallFragmentLengthColor;
-                } else if (self.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > self.parent.maxFragmentLength) {
-                    color = self.largeFragmentLengthColor;
+                } else if (this.parent.minFragmentLength && Math.abs(alignment.fragmentLength) < this.parent.minFragmentLength) {
+                    color = this.smallFragmentLengthColor;
+                } else if (this.parent.maxFragmentLength && Math.abs(alignment.fragmentLength) > this.parent.maxFragmentLength) {
+                    color = this.largeFragmentLengthColor;
                 }
 
                 break;
 
             case "tag":
-                tagValue = alignment.tags()[self.colorByTag];
+                const tagValue = alignment.tags()[this.colorByTag];
                 if (tagValue !== undefined) {
-                    if (self.bamColorTag === self.colorByTag) {
+                    if (this.bamColorTag === this.colorByTag) {
                         // UCSC style color option
                         color = "rgb(" + tagValue + ")";
                     } else {
 
-                        if (!self.tagColors) {
-                            self.tagColors = new PaletteColorTable("Set1");
+                        if (!this.tagColors) {
+                            this.tagColors = new PaletteColorTable("Set1");
                         }
-                        color = self.tagColors.getColor(tagValue);
+                        color = this.tagColors.getColor(tagValue);
                     }
                 }
                 break;
 
             default:
-                color = self.parent.color;
+                color = this.parent.color;
         }
 
         return color;
@@ -1231,7 +1229,22 @@ class AlignmentTrack {
     }
 }
 
-function shadedBaseColor(qual, nucleotide) {
+function sortAlignmentRows(options, alignmentContainer) {
+
+    const direction = options.direction
+
+    for (let row of alignmentContainer.packedAlignmentRows) {
+        row.updateScore(options, alignmentContainer);
+    }
+
+    alignmentContainer.packedAlignmentRows.sort(function (rowA, rowB) {
+        const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
+        return true === direction ? i : -i;
+    });
+
+}
+
+function shadedBaseColor(qual, baseColor) {
 
     const minQ = 5;   //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MIN),
     const maxQ = 20;  //prefs.getAsInt(PreferenceManager.SAM_BASE_QUALITY_MAX);
@@ -1245,17 +1258,8 @@ function shadedBaseColor(qual, nucleotide) {
     // Round alpha to nearest 0.1
     alpha = Math.round(alpha * 10) / 10.0;
 
-    let baseColor;
-    if (alpha >= 1) {
-        baseColor = nucleotideColors[nucleotide];
-    } else {
-        const foregroundColor = nucleotideColorComponents[nucleotide];
-        if (!foregroundColor) {
-            return undefined;
-        }
-
-        const backgroundColor = [255, 255, 255];   // White
-        baseColor = "rgba(" + foregroundColor[0] + "," + foregroundColor[1] + "," + foregroundColor[2] + "," + alpha + ")";
+    if (alpha < 1) {
+        baseColor = IGVColor.addAlpha(baseColor, alpha);
     }
     return baseColor;
 }

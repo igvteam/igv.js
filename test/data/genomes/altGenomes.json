@@ -1,0 +1,36 @@
+[
+  {
+    "id": "_dm6",
+    "name": "D. melanogaster (dm6)",
+    "fastaURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/dm6/dm6.fa",
+    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.broadinstitute.org/genomes/seq/dm6/dm6.fa.fai",
+    "cytobandURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/dm6/cytoBandIdeo.txt.gz",
+    "tracks": [
+      {
+        "name": "Refseq Genes",
+        "format": "refgene",
+        "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/dm6/ncbiRefSeq.txt.gz",
+        "indexed": false,
+        "order": 1000000,
+        "removable": false,
+        "visibilityWindow": -1
+      }
+    ]
+  },
+  {
+    "id": "_sacCer3",
+    "name": "S. cerevisiae (sacCer3)",
+    "fastaURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa",
+    "indexURL": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/sacCer3/sacCer3.fa.fai",
+    "tracks": [
+      {
+        "name": "Ensembl Genes",
+        "type": "annotation",
+        "format": "ensgene",
+        "displayMode": "EXPANDED",
+        "url": "https://s3.dualstack.us-east-1.amazonaws.com/igv.org.genomes/sacCer3/ensGene.txt.gz",
+        "indexed": false
+      }
+    ]
+  }
+]

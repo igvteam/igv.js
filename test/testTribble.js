@@ -1,17 +1,9 @@
-
+import "./utils/mockObjects.js"
 import {assert} from 'chai';
-import {createMockObjects} from "@igvteam/test-utils/src"
 import {loadIndex} from "../js/bam/indexFactory.js"
+import {genome} from "./utils/Genome.js";
 
 suite("testTribble", function () {
-
-    createMockObjects();
-
-    const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     test("tribble", async function () {
         this.timeout(10000);

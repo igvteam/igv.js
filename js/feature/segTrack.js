@@ -29,20 +29,19 @@ import IGVGraphics from "../igv-canvas.js";
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
-import {extend, isSimpleType} from "../util/igvUtils.js";
+import {isSimpleType} from "../util/igvUtils.js";
 
-const SegTrack = extend(TrackBase,
+class SegTrack extends TrackBase {
 
-    function (config, browser) {
+    constructor(config, browser) {
 
-        TrackBase.call(this, config, browser);
+        super(config, browser);
 
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 12;
-
 
         this.posColorScale = config.posColorScale ||
             new GradientColorScale(
@@ -71,374 +70,386 @@ const SegTrack = extend(TrackBase,
                 }
             );
 
-        this.sampleKeys = [];
+        if(config.samples) {
+            this.sampleKeys = config.samples;
+            this.explicitSamples = true;
+        } else {
+            this.sampleKeys = [];
+        }
+
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = FeatureSource(this.config, browser.genome);
 
+        this.initialSort = config.sort;
 
-        // TODO this sort doens't look right, no samples have yet been loaded
-        if (config.sort) {
-            const sort = config.sort;
-            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
+    }
+
+    async postInit() {
+        if (typeof this.featureSource.getHeader === "function") {
+            this.header = await this.featureSource.getHeader();
+        }
+        // Set properties from track line
+        if (this.header) {
+            this.setTrackProperties(this.header)
+        }
+    }
+
+
+    menuItemList() {
+
+        const self = this;
+
+        const menuItems = [];
+        const lut =
+            {
+                "SQUISHED": "Squish",
+                "EXPANDED": "Expand",
+                "FILL": "Fill",
+            };
+
+        menuItems.push("<hr/>");
+        menuItems.push("Sample Height");
+
+        ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
+            menuItems.push(
+                {
+                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        self.displayMode = displayMode;
+                        self.config.displayMode = displayMode;
+                        self.trackView.checkContentHeight();
+                        self.trackView.repaintViews();
+                    }
+                });
+        })
+
+        return menuItems;
+
+    };
+
+
+    async getFeatures(chr, start, end) {
+        const features = await this.featureSource.getFeatures({chr, start, end});
+        if (this.initialSort) {
+            const sort = this.initialSort;
+            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
+            this.initialSort = undefined;  // Sample order is sorted,
+        }
+        return features;
+    };
+
+
+    draw(options) {
+
+        const self = this;
+
+        const v2 = IGVMath.log2(2);
+
+        const ctx = options.context;
+        const pixelTop = options.pixelTop;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const pixelBottom = pixelTop + pixelHeight;
+        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        const featureList = options.features;
+
+        if (featureList && featureList.length > 0) {
+
+            if (self.isLog === undefined) checkForLog(featureList);
+
+            const bpPerPixel = options.bpPerPixel;
+            const bpStart = options.bpStart;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const xScale = bpPerPixel;
+
+            this.updateSampleKeys(featureList);
+
+            // Create a map for fast id -> row lookup
+            const samples = {};
+            this.sampleKeys.forEach(function (id, index) {
+                samples[id] = index;
+            })
+
+
+            let sampleHeight;
+            let border;
+            switch (this.displayMode) {
+
+                case "FILL":
+                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    border = 0
+                    break;
+
+                case "SQUISHED":
+                    sampleHeight = this.squishedRowHeight;
+                    border = 0;
+                    break;
+
+                default:   // EXPANDED
+                    sampleHeight = this.expandedRowHeight;
+                    border = 1;
+
+            }
+
+            const pixelBottom = options.pixelTop + options.pixelHeight;
+            for (let segment of featureList) {
+
+                if (segment.end < bpStart) continue;
+                if (segment.start > bpEnd) break;
+
+                const sampleKey = segment.sampleKey || segment.sample
+                segment.row = samples[sampleKey];
+                const y = pixelTop + segment.row * sampleHeight + border;
+                const bottom = y + sampleHeight;
+
+                if (bottom < pixelTop || y > pixelBottom) {
+                    continue;
+                }
+
+                let value = segment.value;
+                if (!self.isLog) {
+                    value = IGVMath.log2(value / 2);
+                }
+
+
+                const segmentStart = Math.max(segment.start, bpStart);
+                // const segmentStart = segment.start;
+                const px = Math.round((segmentStart - bpStart) / xScale);
+
+                const segmentEnd = Math.min(segment.end, bpEnd);
+                // const segmentEnd = segment.end;
+                const px1 = Math.round((segmentEnd - bpStart) / xScale);
+
+                const pw = Math.max(1, px1 - px);
+
+                // const sign = px < 0 ? '-' : '+';
+                // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
+
+                let color;
+                if (value < -0.1) {
+                    color = self.negColorScale.getColor(value);
+                } else if (value > 0.1) {
+                    color = self.posColorScale.getColor(value);
+                } else {
+                    color = "white";
+                }
+                ctx.fillStyle = color;
+
+                // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
+                let sh = sampleHeight;
+                if (sampleHeight < 0.25) {
+                    const f = 0.1 + 2 * Math.abs(value);
+                    sh = Math.min(1, f * sampleHeight);
+                }
+
+                segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
+                ctx.fillRect(px, y, pw, sh - 2 * border);
+
+                //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+
+            }
+        } else {
+            console.log("No feature list");
         }
 
-    });
 
-SegTrack.prototype.postInit = async function () {
-    if (typeof this.featureSource.getHeader === "function") {
-        this.header = await this.featureSource.getHeader();
-    }
-    // Set properties from track line
-    if (this.header) {
-        this.setTrackProperties(this.header)
-    }
+        function checkForLog(featureList) {
 
-}
-
-
-SegTrack.prototype.menuItemList = function () {
-
-    const self = this;
-
-    const menuItems = [];
-    const lut =
-        {
-            "SQUISHED": "Squish",
-            "EXPANDED": "Expand",
-            "FILL": "Fill",
-        };
-
-    menuItems.push("<hr/>");
-    menuItems.push("Sample Height");
-
-    ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
-        menuItems.push(
-            {
-                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                click: function () {
-                    self.displayMode = displayMode;
-                    self.config.displayMode = displayMode;
-                    self.trackView.checkContentHeight();
-                    self.trackView.repaintViews();
+            if (self.isLog === undefined) {
+                self.isLog = false;
+                for (let feature of featureList) {
+                    if (feature.value < 0) {
+                        self.isLog = true;
+                        return;
+                    }
                 }
-            });
-    })
+            }
+        }
 
-    return menuItems;
+    };
 
-};
+    /**
+     * Optional method to compute pixel height to accomodate the list of features.  The implementation below
+     * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
+     *
+     * @param features
+     * @returns {number}
+     */
+    computePixelHeight(features) {
 
+        if (!features) return 0;
 
-SegTrack.prototype.getFeatures = function (chr, start, end) {
-    return this.featureSource.getFeatures({chr, start, end});
-};
+        const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
+        this.updateSampleKeys(features);
+        return this.sampleKeys.length * sampleHeight;
+    }
 
+    /**
+     * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
+     */
+    async sortSamples(chr, start, end, direction, featureList) {
 
-SegTrack.prototype.draw = function (options) {
-
-    const self = this;
-
-    const v2 = IGVMath.log2(2);
-
-    const ctx = options.context;
-    const pixelTop = options.pixelTop;
-    const pixelWidth = options.pixelWidth;
-    const pixelHeight = options.pixelHeight;
-    const pixelBottom = pixelTop + pixelHeight;
-    IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-    const featureList = options.features;
-
-    if (featureList && featureList.length > 0) {
-
-        if (self.isLog === undefined) checkForLog(featureList);
-
-        const bpPerPixel = options.bpPerPixel;
-        const bpStart = options.bpStart;
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-        const xScale = bpPerPixel;
+        if (!featureList) {
+            featureList = await this.featureSource.getFeatures({chr, start, end});
+        }
+        if (!featureList) return;
 
         this.updateSampleKeys(featureList);
 
-        // Create a map for fast id -> row lookup
-        const samples = {};
-        this.sampleKeys.forEach(function (id, index) {
-            samples[id] = index;
-        })
+        const scores = {};
+        const bpLength = end - start + 1;
 
-
-        let sampleHeight;
-        let border;
-        switch (this.displayMode) {
-
-            case "FILL":
-                sampleHeight = options.pixelHeight / this.sampleKeys.length;
-                border = 0
-                break;
-
-            case "SQUISHED":
-                sampleHeight = this.squishedRowHeight;
-                border = 0;
-                break;
-
-            default:   // EXPANDED
-                sampleHeight = this.expandedRowHeight;
-                border = 1;
-
-        }
-
-        const pixelBottom = options.pixelTop + options.pixelHeight;
+        // Compute weighted average score for each sample
         for (let segment of featureList) {
 
-            if (segment.end < bpStart) continue;
-            if (segment.start > bpEnd) break;
+            if (segment.end < start) continue;
+            if (segment.start > end) break;
+
+            const min = Math.max(start, segment.start);
+            const max = Math.min(end, segment.end);
+            const f = (max - min) / bpLength;
 
             const sampleKey = segment.sampleKey || segment.sample
-            segment.row = samples[sampleKey];
-            const y = pixelTop + segment.row * sampleHeight + border;
-            const bottom = y + sampleHeight;
+            const s = scores[sampleKey] || 0;
+            scores[sampleKey] = s + f * segment.value;
+        }
 
-            if (bottom < pixelTop || y > pixelBottom) {
-                continue;
-            }
+        // Now sort sample names by score
+        const d2 = (direction === "ASC" ? 1 : -1);
+        this.sampleKeys.sort(function (a, b) {
+            let s1 = scores[a];
+            let s2 = scores[b];
+            if (!s1) s1 = d2 * Number.MAX_VALUE;
+            if (!s2) s2 = d2 * Number.MAX_VALUE;
+            if (s1 === s2) return 0;
+            else if (s1 > s2) return d2;
+            else return d2 * -1;
+        });
 
-            let value = segment.value;
-            if (!self.isLog) {
-                value = IGVMath.log2(value / 2);
-            }
+        this.trackView.repaintViews();
+        // self.trackView.$viewport.scrollTop(0);
+    };
 
+    clickedFeatures(clickState) {
 
-            const segmentStart = Math.max(segment.start, bpStart);
-            // const segmentStart = segment.start;
-            const px = Math.round((segmentStart - bpStart) / xScale);
+        const allFeatures = super.clickedFeatures(clickState);
+        return filterByRow(allFeatures, clickState.y);
 
-            const segmentEnd = Math.min(segment.end, bpEnd);
-            // const segmentEnd = segment.end;
-            const px1 = Math.round((segmentEnd - bpStart) / xScale);
+        function filterByRow(features, y) {
 
-            const pw = Math.max(1, px1 - px);
-
-            // const sign = px < 0 ? '-' : '+';
-            // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
-
-            let color;
-            if (value < -0.1) {
-                color = self.negColorScale.getColor(value);
-            } else if (value > 0.1) {
-                color = self.posColorScale.getColor(value);
-            } else {
-                color = "white";
-            }
-            ctx.fillStyle = color;
-
-            // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
-            let sh = sampleHeight;
-            if (sampleHeight < 0.25) {
-                const f = 0.1 + 2 * Math.abs(value);
-                sh = Math.min(1, f * sampleHeight);
-            }
-
-            segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
-            ctx.fillRect(px, y, pw, sh - 2 * border);
-
-            //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+            return features.filter(function (feature) {
+                const rect = feature.pixelRect;
+                return rect && y >= rect.y && y <= (rect.y + rect.h);
+            });
 
         }
-    } else {
-        console.log("No feature list");
     }
 
+    popupData(clickState, featureList) {
 
-    function checkForLog(featureList) {
+        const self = this;
 
-        if (self.isLog === undefined) {
-            self.isLog = false;
-            for (let feature of featureList) {
-                if (feature.value < 0) {
-                    self.isLog = true;
-                    return;
+        if (!featureList) featureList = this.clickedFeatures(clickState);
+
+        const items = [];
+
+        for (let f of featureList) {
+        }
+        featureList.forEach(function (f) {
+            extractPopupData(f, items);
+
+        });
+
+        return items;
+
+        function extractPopupData(feature, data) {
+
+            const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
+
+            // hack for whole genome properties
+            let f
+            if (feature.hasOwnProperty('realChr')) {
+                f = Object.assign({}, feature);
+                f.chr = feature.realChr;
+                f.start = feature.realStart;
+                f.end = feature.realEnd;
+                delete f.realChr;
+                delete f.realStart;
+                delete f.realEnd;
+            } else {
+                f = feature;
+            }
+
+
+            for (let property of Object.keys(f)) {
+
+                if (!filteredProperties.has(property) && isSimpleType(f[property])) {
+                    data.push({name: property, value: f[property]});
                 }
             }
         }
     }
 
-};
+    contextMenuItemList(clickState) {
 
-/**
- * Optional method to compute pixel height to accomodate the list of features.  The implementation below
- * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
- *
- * @param features
- * @returns {number}
- */
-SegTrack.prototype.computePixelHeight = function (features) {
+        const referenceFrame = clickState.viewport.referenceFrame;
+        const genomicLocation = clickState.genomicLocation;
 
-    if (!features) return 0;
+        // Define a region 5 "pixels" wide in genomic coordinates
+        const sortDirection = this.config.sort ?
+            (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
+            "DESC";
+        const bpWidth = referenceFrame.toBP(2.5);
 
-    const sampleHeight = ("SQUISHED" === this.displayMode) ? this.squishedRowHeight : this.expandedRowHeight;
-    this.updateSampleKeys(features);
-    return this.sampleKeys.length * sampleHeight;
-};
-
-/**
- * Sort samples by the average value over the genomic range in the direction indicated (1 = ascending, -1 descending)
- */
-SegTrack.prototype.sortSamples = async function (chr, start, end, direction) {
-
-    const featureList = await this.featureSource.getFeatures({chr, start, end});
-    if (!featureList) return;
-
-    this.updateSampleKeys(featureList);
-
-    const scores = {};
-    const bpLength = end - start + 1;
-
-    // Compute weighted average score for each sample
-    for (let segment of featureList) {
-
-        if (segment.end < start) continue;
-        if (segment.start > end) break;
-
-        const min = Math.max(start, segment.start);
-        const max = Math.min(end, segment.end);
-        const f = (max - min) / bpLength;
-
-        const sampleKey = segment.sampleKey || segment.sample
-        const s = scores[sampleKey] || 0;
-        scores[sampleKey] = s + f * segment.value;
-    }
-
-    // Now sort sample names by score
-    const d2 = (direction === "ASC" ? 1 : -1);
-    this.sampleKeys.sort(function (a, b) {
-        let s1 = scores[a];
-        let s2 = scores[b];
-        if (!s1) s1 = d2 * Number.MAX_VALUE;
-        if (!s2) s2 = d2 * Number.MAX_VALUE;
-        if (s1 === s2) return 0;
-        else if (s1 > s2) return d2;
-        else return d2 * -1;
-    });
-
-    this.trackView.repaintViews();
-    // self.trackView.$viewport.scrollTop(0);
-};
-
-SegTrack.prototype.clickedFeatures = function (clickState) {
-
-    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
-    return filterByRow(allFeatures, clickState.y);
-
-    function filterByRow(features, y) {
-
-        return features.filter(function (feature) {
-            const rect = feature.pixelRect;
-            return rect && y >= rect.y && y <= (rect.y + rect.h);
-        });
-
-    }
-}
-
-SegTrack.prototype.popupData = function (clickState, featureList) {
-
-    const self = this;
-
-    if (!featureList) featureList = this.clickedFeatures(clickState);
-
-    const items = [];
-
-    for (let f of featureList) {
-    }
-    featureList.forEach(function (f) {
-        extractPopupData(f, items);
-
-    });
-
-    return items;
-
-    function extractPopupData(feature, data) {
-
-        const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
-
-        // hack for whole genome properties
-        let f
-        if (feature.hasOwnProperty('realChr')) {
-            f = Object.assign({}, feature);
-            f.chr = feature.realChr;
-            f.start = feature.realStart;
-            f.end = feature.realEnd;
-            delete f.realChr;
-            delete f.realStart;
-            delete f.realEnd;
-        } else {
-            f = feature;
+        const sortHandler = (sort) => {
+            const viewport = clickState.viewport;
+            const features = viewport.getCachedFeatures();
+            this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
         }
 
+        return [
+            {
+                label: 'Sort by value', click: (e) => {
 
-        for (let property of Object.keys(f)) {
 
-            if (!filteredProperties.has(property) && isSimpleType(f[property])) {
-                data.push({name: property, value: f[property]});
+                    const sort = {
+                        direction: sortDirection,
+                        chr: clickState.viewport.referenceFrame.chr,
+                        start: genomicLocation - bpWidth,
+                        end: genomicLocation + bpWidth
+
+                    };
+
+                    sortHandler(sort);
+
+                    this.config.sort = sort;
+
+                }
+            }];
+
+    }
+
+    supportsWholeGenome() {
+        return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
+    }
+
+
+    updateSampleKeys(featureList) {
+
+        if(this.explicitSamples) return;
+
+        const samples = new Set(this.sampleKeys);
+        for (let feature of featureList) {
+            const sampleKey = feature.sampleKey || feature.sample;
+            if (!samples.has(sampleKey)) {
+                samples.add(sampleKey);
+                this.sampleKeys.push(sampleKey);
             }
         }
     }
 }
 
-SegTrack.prototype.contextMenuItemList = function (clickState) {
-
-    const self = this;
-    const referenceFrame = clickState.viewport.referenceFrame;
-    const genomicLocation = clickState.genomicLocation;
-
-    // Define a region 5 "pixels" wide in genomic coordinates
-    const sortDirection = this.config.sort ?
-        (this.config.sort.direction === "ASC" ? "DESC" : "ASC") :      // Toggle from previous sort
-        "DESC";
-    const bpWidth = referenceFrame.toBP(2.5);
-
-    function sortHandler(sort) {
-        self.sortSamples(sort.chr, sort.start, sort.end, sort.direction);
-    }
-
-    return [
-        {
-            label: 'Sort by value', click: function (e) {
-
-
-                const sort = {
-                    direction: sortDirection,
-                    chr: clickState.viewport.referenceFrame.chr,
-                    start: genomicLocation - bpWidth,
-                    end: genomicLocation + bpWidth
-
-                };
-
-                sortHandler(sort);
-
-                self.config.sort = sort;
-
-            }
-        }];
-
-};
-
-SegTrack.prototype.supportsWholeGenome = function () {
-    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
-}
-
-
-SegTrack.prototype.updateSampleKeys = function (featureList) {
-
-    const samples = new Set(this.sampleKeys);
-    for (let feature of featureList) {
-        const sampleKey = feature.sampleKey || feature.sample;
-        if (!samples.has(sampleKey)) {
-            samples.add(sampleKey);
-            this.sampleKeys.push(sampleKey);
-        }
-    }
-}
-
-export default SegTrack;
+export default SegTrack

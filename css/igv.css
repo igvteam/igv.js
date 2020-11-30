@@ -1,85 +1,3 @@
-.igv-alert-dialog-container {
-  box-sizing: content-box;
-  position: absolute;
-  z-index: 2048;
-  top: 50%;
-  left: 50%;
-  width: 400px;
-  height: 200px;
-  border-color: #7F7F7F;
-  border-radius: 4px;
-  border-style: solid;
-  border-width: thin;
-  outline: none;
-  font-family: "Open Sans", sans-serif;
-  font-size: 15px;
-  font-weight: 400;
-  background-color: white;
-  display: flex;
-  flex-flow: column;
-  flex-wrap: nowrap;
-  justify-content: space-between;
-  align-items: center; }
-  .igv-alert-dialog-container > div:first-child {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-    height: 24px;
-    cursor: move;
-    border-top-left-radius: 4px;
-    border-top-right-radius: 4px;
-    border-bottom-color: #7F7F7F;
-    border-bottom-style: solid;
-    border-bottom-width: thin;
-    background-color: #eee; }
-    .igv-alert-dialog-container > div:first-child div:first-child {
-      padding-left: 8px; }
-  .igv-alert-dialog-container #igv-alert-dialog-body {
-    color: #373737;
-    width: 100%;
-    height: calc(100% - 24px - 64px);
-    overflow-y: scroll; }
-    .igv-alert-dialog-container #igv-alert-dialog-body #igv-alert-dialog-body-copy {
-      cursor: pointer;
-      margin: 16px;
-      width: auto;
-      height: auto;
-      overflow-wrap: break-word;
-      word-break: break-word;
-      background-color: white;
-      border: unset; }
-  .igv-alert-dialog-container > div:last-child {
-    width: 100%;
-    margin-bottom: 10px;
-    background-color: white;
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: center;
-    align-items: center; }
-    .igv-alert-dialog-container > div:last-child div {
-      margin: unset;
-      width: 40px;
-      height: 30px;
-      line-height: 30px;
-      text-align: center;
-      color: white;
-      font-family: "Open Sans", sans-serif;
-      font-size: small;
-      font-weight: 400;
-      border-color: #2B81AF;
-      border-style: solid;
-      border-width: thin;
-      border-radius: 4px;
-      background-color: #2B81AF; }
-    .igv-alert-dialog-container > div:last-child div:hover {
-      cursor: pointer;
-      border-color: #25597f;
-      background-color: #25597f; }
-
 .igv-generic-container {
   position: absolute;
   top: 0;
@@ -292,93 +210,7 @@
       cursor: pointer;
       background-color: #25597f; }
 
-.igv-popover {
-  position: absolute;
-  top: 0;
-  left: 0;
-  min-width: 128px;
-  z-index: 4096;
-  font-family: "Open Sans", sans-serif;
-  font-size: small;
-  font-weight: 400;
-  color: #4b4b4b;
-  background-color: white;
-  border-radius: 4px;
-  border-color: #7F7F7F;
-  border-style: solid;
-  border-width: thin;
-  display: none; }
-
-.igv-popover-header {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  align-items: center;
-  width: 100%;
-  height: 24px;
-  cursor: move;
-  border-top-left-radius: 4px;
-  border-top-right-radius: 4px;
-  border-bottom-color: #7F7F7F;
-  border-bottom-style: solid;
-  border-bottom-width: thin;
-  background-color: #eee; }
-  .igv-popover-header div {
-    margin-right: 4px;
-    height: 12px;
-    width: 12px;
-    color: #7F7F7F; }
-  .igv-popover-header div:hover {
-    cursor: pointer;
-    color: #444; }
-
-.igv-popover-track-popup-content {
-  position: relative;
-  top: 0;
-  left: 0;
-  max-height: 384px;
-  overflow-x: hidden;
-  overflow-y: auto;
-  background-color: white; }
-  .igv-popover-track-popup-content div {
-    margin-left: 4px;
-    background-color: white; }
-  .igv-popover-track-popup-content div:hover {
-    cursor: pointer;
-    background-color: #efefef; }
-
-.igv-popover-name-value {
-  cursor: default;
-  text-wrap: none;
-  white-space: nowrap;
-  max-width: 384px; }
-
-.igv-popover-name {
-  font-weight: bold;
-  padding-right: 4px;
-  float: left; }
-
-.igv-popover-value {
-  padding-left: 4px;
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-  max-width: 256px;
-  display: inline-block; }
-
-.igv-trackgear-container {
-  position: relative;
-  width: 20px;
-  height: 20px;
-  margin-left: 4px;
-  color: #7F7F7F; }
-
-.igv-trackgear-container:hover {
-  cursor: pointer;
-  color: #444; }
-
-.igv-trackgear-popover {
+.igv-menu-popup {
   position: absolute;
   top: 0;
   left: 0;
@@ -400,24 +232,27 @@
   justify-content: flex-start;
   align-items: flex-end;
   text-align: left; }
-  .igv-trackgear-popover > div:not(:first-child) {
+  .igv-menu-popup > div:not(:first-child) {
     width: 100%; }
-    .igv-trackgear-popover > div:not(:first-child) > div {
+    .igv-menu-popup > div:not(:first-child) > div {
       background: white; }
-    .igv-trackgear-popover > div:not(:first-child) > div:last-child {
+    .igv-menu-popup > div:not(:first-child) > div.context-menu {
+      padding-left: 4px;
+      padding-right: 4px; }
+    .igv-menu-popup > div:not(:first-child) > div:last-child {
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
       border-bottom-color: transparent;
       border-bottom-style: solid;
       border-bottom-width: thin; }
-    .igv-trackgear-popover > div:not(:first-child) > div:hover {
+    .igv-menu-popup > div:not(:first-child) > div:hover {
       background: #efefef; }
 
-.igv-trackgear-popover-shim {
+.igv-menu-popup-shim {
   padding-left: 8px;
   padding-right: 8px; }
 
-.igv-trackgear-popover-header {
+.igv-menu-popup-header {
   position: relative;
   width: 100%;
   height: 24px;
@@ -434,16 +269,16 @@
   flex-wrap: nowrap;
   justify-content: flex-end;
   align-items: center; }
-  .igv-trackgear-popover-header div {
+  .igv-menu-popup-header div {
     margin-right: 4px;
     height: 12px;
     width: 12px;
     color: #7F7F7F; }
-  .igv-trackgear-popover-header div:hover {
+  .igv-menu-popup-header div:hover {
     cursor: pointer;
     color: #444; }
 
-.igv-trackgear-popover-check-container {
+.igv-menu-popup-check-container {
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -452,14 +287,14 @@
   width: 100%;
   height: 20px;
   background-color: transparent; }
-  .igv-trackgear-popover-check-container div {
+  .igv-menu-popup-check-container div {
     padding-top: 2px;
     padding-left: 8px; }
-  .igv-trackgear-popover-check-container div:first-child {
+  .igv-menu-popup-check-container div:first-child {
     position: relative;
     width: 12px;
     height: 12px; }
-    .igv-trackgear-popover-check-container div:first-child svg {
+    .igv-menu-popup-check-container div:first-child svg {
       position: absolute;
       width: 12px;
       height: 12px; }
@@ -515,6 +350,7 @@
 
 .igv-root {
   position: relative;
+  padding-top: 4px;
   margin-left: 10px;
   margin-right: 10px;
   display: flex;
@@ -743,8 +579,7 @@
       border-right-style: solid;
       border-right-width: 1px; }
   .igv-root .igv-track-container {
-    position: relative;
-    user-select: none; }
+    position: relative; }
 
 .igv-multi-locus-separator {
   pointer-events: none;
@@ -796,10 +631,8 @@
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: stretch;
-  width: calc(100% - 100px);
-  height: 100%;
-  overflow-x: hidden;
-  overflow-y: hidden; }
+  width: calc(100% - 112px);
+  height: 100%; }
   .igv-viewport-container .igv-viewport {
     position: relative;
     height: 100%;
@@ -821,30 +654,32 @@
   position: relative;
   display: block; }
 
-.igv-scrollbar-outer-div {
-  position: absolute;
-  top: 0;
-  right: 0;
+.igv-scrollbar-shim {
+  position: relative;
   width: 14px;
   height: 100%;
   background-color: white; }
-  .igv-scrollbar-outer-div div {
+
+.igv-scrollbar-outer-div {
+  position: relative;
+  width: 14px;
+  height: 100%;
+  background-color: white; }
+  .igv-scrollbar-outer-div > div {
     cursor: pointer;
     position: absolute;
     top: 0;
     left: 2px;
     width: 8px;
-    border-style: solid;
     border-width: 1px;
+    border-style: solid;
     border-color: #c4c4c4;
     border-top-left-radius: 4px;
     border-top-right-radius: 4px;
     border-bottom-left-radius: 4px;
     border-bottom-right-radius: 4px;
-    background-color: white; }
-  .igv-scrollbar-outer-div div:hover,
-  .igv-scrollbar-outer-div div:focus,
-  .igv-scrollbar-outer-div div:active {
+    background-color: transparent; }
+  .igv-scrollbar-outer-div > div:hover {
     background-color: #c4c4c4; }
 
 .igv-viewport-border-right {
@@ -866,7 +701,7 @@
   cursor: pointer;
   width: 12px;
   height: 100%;
-  margin-left: 2px;
+  margin-left: 0;
   font-size: medium;
   border-color: #c4c4c4;
   border-style: solid;
@@ -1011,7 +846,7 @@
 .igv-multi-locus-panel-label-div {
   position: absolute;
   left: 50%;
-  top: 25%;
+  top: 15%;
   transform: translate(-50%, -25%);
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
@@ -1065,6 +900,17 @@
   height: 100%;
   z-index: 256;
   background-color: rgba(68, 134, 247, 0.25); }
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: #7F7F7F; }
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444; }
 
 .igv-track-label {
   position: absolute;

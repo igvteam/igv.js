@@ -2,16 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-    <meta name="description" content="">
-    <meta name="author" content="">
-    <link rel="shortcut icon" href="https://igv.org/web/img/favicon.ico">
-
+    <meta content="Jim Robinson" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
 
-    <!-- IGV JS-->
-    <script src="../dist/igv.js"></script>
+    <!-- IGV JS -->
+    <script src="../dist/igv.min.js"></script>
 
 </head>
 
@@ -25,11 +21,11 @@
 
     document.addEventListener("DOMContentLoaded", function () {
 
-        var version = igv.version();
+        const version = igv.version();
         console.log("Using IGV version: " + version);
 
-        var igvDiv = document.getElementById("igv-div");
-        var options =
+        const igvDiv = document.getElementById("igv-div");
+        const options =
             {
                 genome: "hg19",
                 tracks: [
@@ -37,21 +33,21 @@
                         name: "Segmented Copy Number",
                         type: "seg",
                         format: "seg",
-                        url: "https://www.dropbox.com/s/fzklgxu01o4tngb/GBM-TP.seg.gz?dl=0"
+                        url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
                     },
                     {
                         name: "Indexed",
                         type: "seg",
                         format: "seg",
-                        url: "https://www.dropbox.com/s/fzklgxu01o4tngb/GBM-TP.seg.gz?dl=0",
-                        indexURL: "https://www.dropbox.com/s/dql6zetjp8o4s9s/GBM-TP.seg.gz.tbi?dl=0"
+                        url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
                     },
                     {
                         name: "Indexed with visibility window",
                         type: "seg",
                         format: "seg",
-                        url: "https://www.dropbox.com/s/fzklgxu01o4tngb/GBM-TP.seg.gz?dl=0",
-                        indexURL: "https://www.dropbox.com/s/dql6zetjp8o4s9s/GBM-TP.seg.gz.tbi?dl=0",
+                        url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                        indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
                         visibilityWindow: "100000000"
                     },
                 ]
@@ -62,8 +58,7 @@
             .then(function (browser) {
                 console.log("Created IGV browser");
             })
-
-    });
+    })
 
 </script>
 

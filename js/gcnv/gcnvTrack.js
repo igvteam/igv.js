@@ -5,6 +5,7 @@ import {isSimpleType} from "../util/igvUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import deepCopy from "../util/deepCopy.js"
 
 const X_PIXEL_DIFF_THRESHOLD = 1;
 
@@ -283,23 +284,23 @@ class GCNVTrack extends TrackBase {
         return [];
     }
 
-        popupData(clickState, featureList) {
+    popupData(clickState, featureList) {
 
-            if (!featureList) featureList = this.clickedFeatures(clickState);
+        if (!featureList) featureList = this.clickedFeatures(clickState);
 
-            const items = [];
-            featureList.forEach(function (f) {
-                for (let property of Object.keys(f)) {
-                    if (isSimpleType(f[property])) {
-                        items.push({name: property, value: f[property]});
-                    }
+        const items = [];
+        featureList.forEach(function (f) {
+            for (let property of Object.keys(f)) {
+                if (isSimpleType(f[property])) {
+                    items.push({name: property, value: f[property]});
                 }
-            });
+            }
+        });
 
-            return items;
-        }
+        return items;
+    }
 
-        supportsWholeGenome() {
+    supportsWholeGenome() {
         return false;
     }
 }

@@ -25,8 +25,9 @@
 
 import oauth from "./oauth.js";
 import {unbgzf} from './bam/bgzf.js';
+import {getFilename} from "./util/igvUtils.js";
 import PromiseThrottle from "./util/promiseThrottle.js"
-import {FileUtils, GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
+import {GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
 
 var NONE = 0;
 var GZIP = 1;
@@ -139,6 +140,15 @@ async function loadURL(url, options) {
                 }
             }
             url = addApiKey(url);
+
+            if (GoogleUtils.isGoogleDriveURL(url)) {
+                addTeamDrive(url);
+            }
+
+            // If we have an access token try it, but don't force a signIn or request for scopes yet
+            if (!oauthToken) {
+                oauthToken = getCurrentGoogleAccessToken();
+            }
         }
 
         const headers = options.headers || {};
@@ -209,16 +219,8 @@ async function loadURL(url, options) {
                 ((xhr.status === 404 || xhr.status === 401 || xhr.status === 403) &&
                     GoogleUtils.isGoogleURL(url)) &&
                 !options.retries) {
+                tryGoogleAuth();
 
-                try {
-                    const accessToken = await fetchGoogleAccessToken(url);
-                    options.retries = 1;
-                    options.oauthToken = accessToken;
-                    const response = await load(url, options);
-                    resolve(response);
-                } catch (e) {
-                    handleError(e);
-                }
             } else {
                 if (xhr.status === 403) {
                     handleError("Access forbidden: " + url)
@@ -232,6 +234,9 @@ async function loadURL(url, options) {
         };
 
         xhr.onerror = function (event) {
+            if (GoogleUtils.isGoogleURL(url) && !options.retries) {
+                tryGoogleAuth();
+            }
             handleError("Error accessing resource: " + url + " Status: " + xhr.status);
         }
 
@@ -251,11 +256,30 @@ async function loadURL(url, options) {
         }
 
 
-        function handleError(message) {
+        function handleError(error) {
             if (reject) {
-                reject(new Error(message));
+                reject(error);
             } else {
-                throw new Error(message);
+                throw error;
+            }
+        }
+
+        async function tryGoogleAuth() {
+            try {
+                const accessToken = await fetchGoogleAccessToken(url);
+                options.retries = 1;
+                options.oauthToken = accessToken;
+                const response = await load(url, options);
+                resolve(response);
+            } catch (e) {
+                if(e.error) {
+                    const msg = e.error.startsWith("popup_blocked") ?
+                        "Google login popup blocked by browser." :
+                        e.error;
+                    alert(msg);
+                } else {
+                    handleError(e);
+                }
             }
         }
     })
@@ -306,7 +330,7 @@ async function loadStringFromFile(localfile, options) {
 }
 
 async function blobToArrayBuffer(blob) {
-    if(typeof blob.arrayBuffer === 'function') {
+    if (typeof blob.arrayBuffer === 'function') {
         return blob.arrayBuffer();
     }
     return new Promise(function (resolve, reject) {
@@ -323,7 +347,7 @@ async function blobToArrayBuffer(blob) {
 }
 
 async function blobToText(blob) {
-    if(typeof blob.text === 'function') {
+    if (typeof blob.text === 'function') {
         return blob.text();
     }
     return new Promise(function (resolve, reject) {
@@ -343,7 +367,7 @@ async function loadStringFromUrl(url, options) {
 
     options = options || {};
 
-    const fn = options.filename || FileUtils.getFilename(url);
+    const fn = options.filename || await getFilename(url);
     let compression = UNKNOWN;
     if (options.bgz) {
         compression = BGZF;
@@ -371,16 +395,12 @@ function getOauthToken(url) {
     if (token) {
         return token;
     } else if (host === undefined) {
+        const googleToken = getCurrentGoogleAccessToken();
         if (googleToken && googleToken.expires_at > Date.now()) {
             return googleToken.access_token;
         }
     }
 }
-
-/**
- * Cached token from user signin -- not to be confused with explicitly set token from application (oauth.google.access_token)
- */
-let googleToken;
 
 /**
  * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we know
@@ -390,13 +410,27 @@ let googleToken;
  * @returns the oauth token
  */
 async function fetchGoogleAccessToken(url) {
-    if (gapi && gapi.auth2 && gapi.auth2.getAuthInstance()) {
+    console.log("Fetch token for " + url);
+    if (GoogleAuth.isInitialized()) {
         const scope = GoogleAuth.getScopeForURL(url);
-        googleToken = await GoogleAuth.getAccessToken(scope);
-        return googleToken.access_token;
+        const googleToken = await GoogleAuth.getAccessToken(scope);
+        return googleToken ? googleToken.access_token : undefined;
     } else {
         throw Error(
             `Authorization is required, but Google oAuth has not been initalized. Contact your site administrator for assistance.`)
+    }
+}
+
+/**
+ * Return the current google access token, if one exists.  Do not triger signOn or request additional scopes.
+ * @returns {undefined|access_token}
+ */
+function getCurrentGoogleAccessToken() {
+    if (GoogleAuth.isInitialized()) {
+        const googleToken = GoogleAuth.getCurrentAccessToken();
+        return googleToken ? googleToken.access_token : undefined;
+    } else {
+        return undefined;
     }
 }
 
@@ -419,6 +453,15 @@ function addApiKey(url) {
         url = url + paramSeparator + "key=" + apiKey;
     }
     return url;
+}
+
+function addTeamDrive(url) {
+    if (url.includes("supportsTeamDrive")) {
+        return url;
+    } else {
+        const paramSeparator = url.includes("?") ? "&" : "?"
+        url = url + paramSeparator + "supportsTeamDrive=true";
+    }
 }
 
 /**
@@ -525,17 +568,5 @@ function getGlobalObject() {
         return window;
     }
 }
-
-//Increments an anonymous usage count.  Count is anonymous, needed for our continued funding.  Please don't delete
-if (typeof window !== "undefined") {
-    console.log("startup")
-    const href = window.document.location.href;
-    if (!href.includes("localhost") && !href.includes("127.0.0.1")) {
-        const url = "https://data.broadinstitute.org/igv/projects/current/counter_igvjs.php?version=" + "0";
-        igvxhr.load(url).then(function (ignore) {
-        })
-    }
-}
-
 
 export default igvxhr

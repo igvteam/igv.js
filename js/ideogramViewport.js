@@ -140,7 +140,6 @@ class IdeogramViewport extends ViewportBase {
                 width: this.$canvas.width(),
                 height: this.$canvas.height(),
                 genome: this.browser.genome,
-                chr: this.referenceFrame.chr,
                 referenceFrame: this.referenceFrame,
                 ideogramWidth: this.$content.width()
             };
@@ -151,26 +150,20 @@ class IdeogramViewport extends ViewportBase {
 
 }
 
-function repaintContext({ ctx, width, height, genome, chr, referenceFrame, ideogramWidth }) {
+function repaintContext({ ctx, width, height, genome, referenceFrame, ideogramWidth }) {
 
-    if (!(width > 0 && height > 0)) {
-        return;
-    }
+    const chr = referenceFrame.chr;
+    const chromosome = genome.getChromosome(chr);
 
-    if (!(genome && referenceFrame && genome.getChromosome(chr) && height > 0)) {
+    if (!chromosome || width <= 0 || height <= 0 || (chr.toLowerCase() === "all")) {
         return;
     }
 
     const stainColors = [];
     IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
 
-    if (chr.toLowerCase() === "all") {
-        return;
-    }
 
     drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors});
-
-    const chromosome = genome.getChromosome(chr);
 
     const widthBP = Math.round(referenceFrame.bpPerPixel * ideogramWidth);
     const xBP = referenceFrame.start;
@@ -181,7 +174,6 @@ function repaintContext({ ctx, width, height, genome, chr, referenceFrame, ideog
     if (cytobands && cytobands.length > 0) {
         chrLength = Math.max(chrLength, cytobands[cytobands.length - 1].end)
     }
-
 
     if (widthBP < chrLength) {
 

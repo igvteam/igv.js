@@ -35,92 +35,95 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
-const BamSource = function (config, browser) {
+class BamSource {
 
-    const genome = browser.genome;
+    constructor(config, browser) {
 
-    this.config = config;
-    this.genome = genome;
-    this.alignmentContainer = undefined;
+        const genome = browser.genome;
 
-    if (isString(config.url) && config.url.startsWith("data:")) {
-        if ("cram" === config.format) {
-            throw "CRAM data uris are not supported"
+        this.config = config;
+        this.genome = genome;
+        this.alignmentContainer = undefined;
+
+        if (isString(config.url) && config.url.startsWith("data:")) {
+            if ("cram" === config.format) {
+                throw "CRAM data uris are not supported"
+            }
+            this.config.indexed = false;
         }
-        this.config.indexed = false;
-    }
 
-    if ("ga4gh" === config.sourceType) {
-        this.bamReader = new Ga4ghAlignmentReader(config, genome);
-    } else if ("pysam" === config.sourceType) {
-        this.bamReader = new BamWebserviceReader(config, genome)
-    } else if ("htsget" === config.sourceType) {
-        this.bamReader = new HtsgetReader(config, genome);
-    } else if ("shardedBam" === config.sourceType) {
-        this.bamReader = new ShardedBamReader(config, genome);
-    } else if ("cram" === config.format) {
-        this.bamReader = new CramReader(config, genome, browser);
-    } else {
-        if (this.config.indexed === false) {
-            this.bamReader = new BamReaderNonIndexed(config, genome);
+        if ("ga4gh" === config.sourceType) {
+            this.bamReader = new Ga4ghAlignmentReader(config, genome);
+        } else if ("pysam" === config.sourceType) {
+            this.bamReader = new BamWebserviceReader(config, genome)
+        } else if ("htsget" === config.sourceType) {
+            this.bamReader = new HtsgetReader(config, genome);
+        } else if ("shardedBam" === config.sourceType) {
+            this.bamReader = new ShardedBamReader(config, genome);
+        } else if ("cram" === config.format) {
+            this.bamReader = new CramReader(config, genome, browser);
         } else {
-            this.bamReader = new BamReader(config, genome);
-        }
-    }
-
-    this.viewAsPairs = config.viewAsPairs;
-    this.showSoftClips = config.showSoftClips;
-};
-
-BamSource.prototype.setViewAsPairs = function (bool) {
-    var self = this;
-
-    if (this.viewAsPairs !== bool) {
-        this.viewAsPairs = bool;
-        // if (this.alignmentContainer) {
-        //     this.alignmentContainer.setViewAsPairs(bool);
-        // }
-    }
-}
-
-BamSource.prototype.setShowSoftClips = function (bool) {
-    if (this.showSoftClips !== bool) {
-        this.showSoftClips = bool;
-    }
-}
-
-BamSource.prototype.getAlignments = async function (chr, bpStart, bpEnd) {
-
-    const genome = this.genome;
-    const showSoftClips = this.showSoftClips;
-
-    if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
-        return this.alignmentContainer;
-
-    } else {
-        const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
-        let alignments = alignmentContainer.alignments;
-        if (!this.viewAsPairs) {
-            alignments = unpairAlignments([{alignments: alignments}]);
-        }
-        const hasAlignments = alignments.length > 0;
-        alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
-        alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
-
-        this.alignmentContainer = alignmentContainer;
-
-        if (hasAlignments) {
-            const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
-            if (sequence) {
-                alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
-                alignmentContainer.sequence = sequence;           // TODO -- fix this
-                return alignmentContainer;
+            if (this.config.indexed === false) {
+                this.bamReader = new BamReaderNonIndexed(config, genome);
             } else {
-                console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+                this.bamReader = new BamReader(config, genome);
             }
         }
-        return alignmentContainer
+
+        this.viewAsPairs = config.viewAsPairs;
+        this.showSoftClips = config.showSoftClips;
+    }
+
+    setViewAsPairs(bool) {
+        var self = this;
+
+        if (this.viewAsPairs !== bool) {
+            this.viewAsPairs = bool;
+            // if (this.alignmentContainer) {
+            //     this.alignmentContainer.setViewAsPairs(bool);
+            // }
+        }
+    }
+
+    setShowSoftClips(bool) {
+        if (this.showSoftClips !== bool) {
+            this.showSoftClips = bool;
+        }
+    }
+
+    async getAlignments(chr, bpStart, bpEnd) {
+
+        const genome = this.genome;
+        const showSoftClips = this.showSoftClips;
+
+        if (this.alignmentContainer && this.alignmentContainer.contains(chr, bpStart, bpEnd)) {
+            return this.alignmentContainer;
+
+        } else {
+            const alignmentContainer = await this.bamReader.readAlignments(chr, bpStart, bpEnd)
+            let alignments = alignmentContainer.alignments;
+            if (!this.viewAsPairs) {
+                alignments = unpairAlignments([{alignments: alignments}]);
+            }
+            const hasAlignments = alignments.length > 0;
+            alignmentContainer.packedAlignmentRows = packAlignmentRows(alignments, alignmentContainer.start, alignmentContainer.end, showSoftClips);
+            alignmentContainer.alignments = undefined;  // Don't need to hold onto these anymore
+
+            this.alignmentContainer = alignmentContainer;
+
+            if (hasAlignments) {
+                const sequence = await genome.sequence.getSequence(chr, alignmentContainer.start, alignmentContainer.end)
+                if (sequence) {
+                    alignmentContainer.coverageMap.refSeq = sequence;    // TODO -- fix this
+                    alignmentContainer.sequence = sequence;           // TODO -- fix this
+                    return alignmentContainer;
+                } else {
+                    console.error("No sequence for: " + chr + ":" + alignmentContainer.start + "-" + alignmentContainer.end)
+                }
+            }
+            return alignmentContainer
+        }
     }
 }
 
-export default BamSource;
+export default BamSource

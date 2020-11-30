@@ -25,104 +25,110 @@
  */
 
 import TrackBase from "../trackBase.js";
-import {extend, inferTrackType} from "../util/igvUtils.js";
+import {inferTrackType} from "../util/igvUtils.js";
 
-const MergedTrack = extend(TrackBase, function (config, browser) {
+class MergedTrack extends TrackBase {
+    constructor(config, browser) {
 
         if (!config.tracks) {
             throw Error("Error: no tracks defined for merged track" + config);
         }
 
-        TrackBase.call(this, config, browser);
-    }
-)
-
-MergedTrack.prototype.postInit = async function () {
-    this.tracks = [];
-    for(let tconf of this.config.tracks) {
-        if (!tconf.type) inferTrackType(tconf);
-        tconf.isMergedTrack = true;
-        const t = await this.browser.createTrack(tconf);
-        if (t) {
-            t.autoscale = false;     // Scaling done from merged track
-            this.tracks.push(t);
-        } else {
-            console.warn("Could not create track " + tconf);
-        }
+        super(config, browser);
     }
 
-    Object.defineProperty(this, "height", {
-        get() {
-            return this._height;
-        },
-        set(h) {
-            this._height = h;
-            for (let t of this.tracks) {
-                t.height = h;
-                t.config.height = h;
+
+    async postInit() {
+        this.tracks = [];
+        for (let tconf of this.config.tracks) {
+            if (!tconf.type) inferTrackType(tconf);
+            tconf.isMergedTrack = true;
+            const t = await this.browser.createTrack(tconf);
+            if (t) {
+                t.autoscale = false;     // Scaling done from merged track
+                this.tracks.push(t);
+            } else {
+                console.warn("Could not create track " + tconf);
             }
         }
-    });
 
-    this.height = this.config.height || 100;
-}
+        Object.defineProperty(this, "height", {
+            get() {
+                return this._height;
+            },
+            set(h) {
+                this._height = h;
+                for (let t of this.tracks) {
+                    t.height = h;
+                    t.config.height = h;
+                }
+            }
+        });
 
-
-MergedTrack.prototype.getFeatures = function (chr, bpStart, bpEnd, bpPerPixel) {
-
-    var promises = this.tracks.map(function (t) {
-        return t.getFeatures(chr, bpStart, bpEnd, bpPerPixel);
-    })
-    return Promise.all(promises);
-
-}
-
-MergedTrack.prototype.draw = function (options) {
-
-    var i, len, mergedFeatures, trackOptions, dataRange;
-
-    mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
-
-    dataRange = autoscale(options.referenceFrame.chr, mergedFeatures);
-
-    //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-    for (i = 0, len = this.tracks.length; i < len; i++) {
-
-        trackOptions = Object.assign({}, options);
-        trackOptions.features = mergedFeatures[i];
-        this.tracks[i].dataRange = dataRange;
-        this.tracks[i].draw(trackOptions);
+        this.height = this.config.height || 100;
     }
 
-}
 
-MergedTrack.prototype.paintAxis = function (ctx, pixelWidth, pixelHeight) {
+    async getFeatures(chr, bpStart, bpEnd, bpPerPixel) {
 
-    var i, len, autoscale, track;
+        const promises = this.tracks.map((t) => t.getFeatures(chr, bpStart, bpEnd, bpPerPixel));
+        return Promise.all(promises);
+    }
 
-    autoscale = true;   // Hardcoded for now
+    draw(options) {
 
-    for (i = 0, len = this.tracks.length; i < len; i++) {
+        var i, len, mergedFeatures, trackOptions, dataRange;
 
-        track = this.tracks[i];
+        mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
 
-        if (typeof track.paintAxis === 'function') {
-            track.paintAxis(ctx, pixelWidth, pixelHeight);
-            if (autoscale) break;
+        dataRange = autoscale(options.referenceFrame.chr, mergedFeatures);
+
+        //IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        for (i = 0, len = this.tracks.length; i < len; i++) {
+
+            trackOptions = Object.assign({}, options);
+            trackOptions.features = mergedFeatures[i];
+            this.tracks[i].dataRange = dataRange;
+            this.tracks[i].draw(trackOptions);
+        }
+
+    }
+
+    paintAxis(ctx, pixelWidth, pixelHeight) {
+
+        var i, len, autoscale, track;
+
+        autoscale = true;   // Hardcoded for now
+
+        for (i = 0, len = this.tracks.length; i < len; i++) {
+
+            track = this.tracks[i];
+
+            if (typeof track.paintAxis === 'function') {
+                track.paintAxis(ctx, pixelWidth, pixelHeight);
+                if (autoscale) break;
+            }
+        }
+    }
+
+    popupData(clickState, features) {
+
+        const featuresArray = features || clickState.viewport.getCachedFeatures();
+
+        if(featuresArray && featuresArray.length === this.tracks.length) {
+            // Array of feature arrays, 1 for each track
+            const popupData = [];
+            for(let i=0; i<this.tracks.length; i++) {
+                if(i > 0) popupData.push("<hr/>");
+                popupData.push(`<b>${this.tracks[i].name}</b>`);
+                const trackPopupData = this.tracks[i].popupData(clickState, featuresArray[i]);
+                popupData.push(...trackPopupData);
+            }
+            return popupData;
         }
     }
 }
-
-MergedTrack.prototype.popupData = function (config) {
-    var popupDataFromAllTracks = [];
-    for (var i = 0, len = this.tracks.length; i < len; i++) {
-        var popupData = this.tracks[i].popupData(config);
-        popupDataFromAllTracks.push(...popupData);
-    }
-
-    return popupDataFromAllTracks
-};
 
 function autoscale(chr, featureArrays) {
 

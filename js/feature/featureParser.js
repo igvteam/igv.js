@@ -56,18 +56,27 @@ import {decodeGcnv} from "../gcnv/gcnvDecoder.js";
  */
 class FeatureParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
 
-        this.header = {};
-        this.decode = decode;
         this.config = config;
-
-        if (format !== undefined) {
-            this.header.format = format.toLowerCase();
+        this.header = {}
+        if (config.nameField) {
+            this.header.nameField = config.nameField;
         }
-        this.header.nameField = config ? config.nameField : undefined;
+
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
+        if (config.decode) {
+            this.decode = config.decode;
+            this.delimiter = config.delimiter || "\t";
+        } else if (config.format) {
+            this.header.format = config.format.toLowerCase();
+            this.setDecoder();
+        }
+
+        if(!this.delimiter)  {
+            this.delimiter = "\t";
+        }
     }
 
     /**
@@ -107,8 +116,9 @@ class FeatureParser {
                 const tokens = line.split(this.delimiter || "\t");
                 try {
                     // All directives that could change the format, and thus decoder, should have been read by now.
-                    const decoder = this.getDecoder();
-                    if (!line.startsWith("#") && decoder(tokens,header)) {
+                    this.setDecoder();
+                    const decoder = this.decode;
+                    if (!line.startsWith("#") && decoder(tokens, header)) {
                         if (columnNames && columnNames.length === tokens.length) {
                             header.columnNames = columnNames;
                             for (let n = 0; n < columnNames.length; n++) {
@@ -146,7 +156,7 @@ class FeatureParser {
         const dataWrapper = getDataWrapper(data);
         const nextLine = dataWrapper.nextLine.bind(dataWrapper);
         const allFeatures = [];
-        const decode = this.getDecoder();
+        const decode = this.decode;
         const format = this.header.format;
         const delimiter = this.delimiter || "\t";
         let i = 0;
@@ -185,8 +195,7 @@ class FeatureParser {
 
     }
 
-    getDecoder(header) {
-
+    setDecoder() {
         if (!this.decode) {
             switch (this.header.format) {
                 case "narrowpeak":
@@ -194,7 +203,7 @@ class FeatureParser {
                 case "regionpeak":
                 case "peaks":
                     this.decode = decodePeak;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "bedgraph":
                     this.decode = decodeBedGraph;
@@ -202,7 +211,7 @@ class FeatureParser {
                     break;
                 case "wig":
                     this.decode = decodeWig;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "gff3" :
                 case "gff" :
@@ -213,7 +222,7 @@ class FeatureParser {
                 case "fusionjuncspan":
                     // bhaas, needed for FusionInspector view
                     this.decode = decodeFusionJuncSpan;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "gtexgwas":
                     this.skipRows = 1;
@@ -222,24 +231,24 @@ class FeatureParser {
                     break;
                 case "refflat":
                     this.decode = decodeReflat;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "genepred":
                     this.decode = decodeGenePred;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "genepredext":
                     this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "ensgene":
                     this.decode = decodeGenePred
                     this.header.shift = 1;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "refgene":
                     this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     this.header.shift = 1;
                     break;
                 case "bed":
@@ -248,21 +257,21 @@ class FeatureParser {
                     break;
                 case "bedpe":
                     this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || "\t";
                     break;
                 case "bedpe-domain":
                     this.decode = decodeBedpeDomain;
                     this.headerLine = true;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || "\t";
                     break;
                 case "bedpe-loop":
                     this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || "\t";
                     this.header = {colorColumn: 7};
                     break;
                 case "interact":
                     this.decode = decodeInteract;
-                    this.delimiter = /\s+/;
+                    this.delimiter = this.config.delimiter || /\s+/;
                     break;
                 case "snp":
                     this.decode = decodeSNP;
@@ -284,14 +293,11 @@ class FeatureParser {
                         this.delimiter = customFormat.delimiter || "\t";
                     } else {
                         this.decode = decodeBed;
-                        this.delimiter = /\s+/;
+                        this.delimiter = this.config.delimiter || /\s+/;
                     }
             }
         }
-
-        return this.decode;
     }
-
 }
 
 function parseTrackLine(line) {
@@ -320,9 +326,9 @@ function parseTrackLine(line) {
         if (kv.length === 2) {
             const key = kv[0].trim();
             const value = kv[1].trim();
-            if(properties.hasOwnProperty(key)) {
+            if (properties.hasOwnProperty(key)) {
                 let currentValue = properties[key];
-                if(Array.isArray(currentValue)) {
+                if (Array.isArray(currentValue)) {
                     currentValue.push(value);
                 } else {
                     properties[key] = [currentValue, value];
@@ -332,9 +338,9 @@ function parseTrackLine(line) {
             }
         }
     }
-    if("interact" == properties["type"]) {
+    if ("interact" == properties["type"]) {
         properties["format"] = "interact";
-    } else if("gcnv" === properties["type"]) {
+    } else if ("gcnv" === properties["type"]) {
         properties["format"] = "gcnv";
     }
     return properties;
@@ -375,5 +381,22 @@ function parseVariableStep(line) {
     const span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
     return {format: "variableStep", chrom, span}
 }
+
+const spaceDelimited = new Set([
+    "narrowpeak",
+    "broadpeak",
+    "regionpeak",
+    "peaks",
+    "fusionjuncspan",
+    "bedgraph",
+    "wig",
+    "refflat",
+    "genepred",
+    "genepredext",
+    "ensgene",
+    "refgene",
+    "bed",
+    "interact"
+])
 
 export default FeatureParser;

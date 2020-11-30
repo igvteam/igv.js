@@ -282,12 +282,12 @@ class BWReader {
 
     setDefaultVisibilityWindow(header) {
         if (this.type === "bigwig") {
-            this.setDefaultVisibilityWindow =  -1;
+            this.visibilityWindow =  -1;
         } else {
             // bigbed
             let genomeSize = this.genome ? this.genome.getGenomeLength() : 3088286401;
             // Estimate window size to return ~ 1,000 features, assuming even distribution across the genome
-            this.setDefaultVisibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount);
+            this.visibilityWindow = header.dataCount < 1000 ? -1 : 1000 * (genomeSize / header.dataCount);
 
         }
     }
