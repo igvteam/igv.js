@@ -1438,24 +1438,38 @@ class Browser {
         }
 
         const trackJson = [];
+        const errors = [];
         for (let {track} of this.trackViews) {
-
-            let config;
-            if (typeof track.getState === "function") {
-                config = track.getState();
-            } else {
-                config = track.config;
-            }
-
-            if (config) {
-                // null backpointer to browser
-                if (config.browser) {
-                    delete config.browser;
+            try {
+                let config;
+                if (typeof track.getState === "function") {
+                    config = track.getState();
+                } else {
+                    config = track.config;
                 }
-                config.order = track.order; //order++;
-                trackJson.push(config);
+
+                if (config) {
+                    // null backpointer to browser
+                    if (config.browser) {
+                        delete config.browser;
+                    }
+                    config.order = track.order; //order++;
+                    trackJson.push(config);
+                }
+            } catch (e) {
+                errors.push(e);
             }
         }
+
+        if(errors.length > 0) {
+            let n = 1;
+            let message = 'Errors encountered saving session:';
+            for(let e of errors) {
+                message += ` (${n++}) ${e.toString()}.`;
+            }
+            throw Error(message);
+        }
+
 
         const locaTrackFiles = trackJson.filter((track) => {
             track.url && FileUtils.isFilePath(track.url)
