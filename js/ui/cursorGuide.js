@@ -29,8 +29,6 @@ import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
-    const self = this;
-
     this.browser = browser;
 
     this.$guide = $('<div class="igv-cursor-tracking-guide">');
@@ -46,20 +44,13 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
         let $viewport = undefined;
 
-        if ($parent.hasClass('igv-viewport-content')) {
-            $viewport = $parent.parent();
-        } else if ($parent.hasClass('igv-viewport') && $child.hasClass('igv-viewport-content')) {
-            $viewport = $parent;
-        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport')) {
-            $viewport = $child;
+        if ($parent.hasClass('igv-viewport-content') && 'sample-name' !== $parent.parent().data('viewport-type')) {
+            $viewport = $parent.parent()
+            // console.log(`cursor guide - parent(viewport-content) child(canvas)`)
         }
 
-        const [ childClass, parentClass ] = [ $child.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
-
         if ($viewport) {
-
-            // console.log(`target class ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
-
+            
             const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
 
             if (result) {
@@ -82,13 +73,7 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
         $controlParent.append(this.$button);
         this.$button.text('cursor guide');
 
-        this.$button.on('click', function () {
-            if (true === browser.cursorGuideVisible) {
-                self.doHide();
-            } else {
-                self.doShow();
-            }
-        });
+        this.$button.on('click', () => true === browser.cursorGuideVisible ? this.doHide() : this.doShow());
 
     }
 
@@ -109,7 +94,7 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
     const viewport = browser.getViewportWithGUID(guid);
 
     if (undefined === viewport) {
-        console.log('ERROR: No viewport found');
+        // console.log(`${ Date.now() } ERROR - cursor guide - no viewport found`);
         return undefined;
     }
 

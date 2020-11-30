@@ -13,6 +13,9 @@ class SampleNameViewport extends ViewportBase {
     }
 
     initializationHelper() {
+
+        this.$viewport.data('viewport-type', 'sample-name');
+
         this.canvas.height = this.$content.height()
         this.ctx = this.canvas.getContext("2d")
         const { width, height } = this.canvas
