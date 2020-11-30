@@ -29,7 +29,6 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {IGVColor} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
-import {extend} from "../util/igvUtils.js";
 import {PaletteColorTable} from "../util/colorPalletes.js";
 import GtexUtils from "../gtex/gtexUtils.js";
 
@@ -46,24 +45,26 @@ someMotifValues.forEach(motif => {
 // rendering context with values that only need to be computed once per render, rather than for each splice junction
 const junctionRenderingContext = {}
 
-const FeatureTrack = extend(TrackBase,
+class FeatureTrack extends TrackBase {
 
-    function (config, browser) {
+    constructor(config, browser) {
 
-       // this.type = "feature";
-
-        TrackBase.call(this, config, browser);
+        super(config, browser);
 
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
-        if (config.maxRows === undefined) {
-            config.maxRows = 500;
-        }
-        this.maxRows = config.maxRows;
+        this.maxRows = config.maxRows === undefined ? 1000 : config.maxRows;
+
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-        this.featureSource = config.featureSource ?
-            config.featureSource :
-            FeatureSource(config, browser.genome);
+
+        if (config._featureSource) {
+            this.featureSource = config._featureSource;
+            delete config._featureSource;
+        } else {
+            this.featureSource = config.featureSource ?
+                config.featureSource :
+                FeatureSource(config, browser.genome);
+        }
 
         // Set default heights
         this.autoHeight = config.autoHeight;
@@ -114,9 +115,12 @@ const FeatureTrack = extend(TrackBase,
             monitorTrackDrag(this);
         }
 
-    });
+        //UCSC useScore option
+        this.useScore = config.useScore;
 
-FeatureTrack.prototype.postInit = async function () {
+    }
+
+    async postInit() {
 
     if (typeof this.featureSource.getHeader === "function") {
         this.header = await this.featureSource.getHeader();
@@ -135,14 +139,14 @@ FeatureTrack.prototype.postInit = async function () {
     return this;
 }
 
-FeatureTrack.prototype.supportsWholeGenome = function () {
-    return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
-}
+    supportsWholeGenome() {
+        return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
+    }
 
-FeatureTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel) {
-    const visibilityWindow = this.visibilityWindow;
-    return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
-};
+    async getFeatures(chr, start, end, bpPerPixel) {
+        const visibilityWindow = this.visibilityWindow;
+        return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow});
+    };
 
 
 /**
@@ -152,105 +156,104 @@ FeatureTrack.prototype.getFeatures = async function (chr, start, end, bpPerPixel
  * @param features
  * @returns {*}
  */
-FeatureTrack.prototype.computePixelHeight = function (features) {
+    computePixelHeight(features) {
 
-    if (this.type === 'spliceJunctions') {
-        return this.height;
-    } else if (this.displayMode === "COLLAPSED") {
-        return this.margin + this.expandedRowHeight;
-    } else {
-        let maxRow = 0;
-        if (features && (typeof features.forEach === "function")) {
-            for (let feature of features) {
-                if (feature.row && feature.row > maxRow) {
-                    maxRow = feature.row;
-                }
-            }
-        }
-
-        const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
-        return height;
-
-    }
-
-};
-
-FeatureTrack.prototype.draw = function (options) {
-
-    const featureList = options.features;
-    const ctx = options.context;
-    const bpPerPixel = options.bpPerPixel;
-    const bpStart = options.bpStart;
-    const pixelWidth = options.pixelWidth;
-    const pixelHeight = options.pixelHeight;
-    const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-
-
-    if (!this.config.isMergedTrack) {
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-    }
-
-    if (featureList) {
-
-        const rowFeatureCount = [];
-        options.rowLastX = [];
-        for (let feature of featureList) {
-            const row = feature.row || 0;
-            if (rowFeatureCount[row] === undefined) {
-                rowFeatureCount[row] = 1;
-            } else {
-                rowFeatureCount[row]++;
-            }
-            options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
-        }
-
-        if (this.config.type == 'spliceJunctions') {
-            const vp = this.browser.trackViews[0].viewports[0]
-            junctionRenderingContext.referenceFrame = vp.referenceFrame;
-            junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-            junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(vp.contentDiv).width());
-
-            // For a given viewport, records where features that are < 2px in width have been rendered already.
-            // This prevents wasteful rendering of multiple such features onto the same pixels.
-            junctionRenderingContext.featureZoomOutTracker = {}
-        }
-
-        let lastPxEnd = [];
-        for (let feature of featureList) {
-            if (feature.end < bpStart) continue;
-            if (feature.start > bpEnd) break;
-
-            const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
-            const featureDensity = pixelWidth / rowFeatureCount[row];
-            options.drawLabel = options.labelAllFeatures || featureDensity > 10;
-            const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
-            const last = lastPxEnd[row];
-            if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
-                this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
-
-                if (this.config.type !== 'spliceJunctions') {
-                    // Ensure a visible gap between features
-                    const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
-                    if (last && pxStart - last <= 0) {
-                        ctx.globalAlpha = 0.5
-                        IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
-                        ctx.globalAlpha = 1.0
+        if (this.type === 'spliceJunctions') {
+            return this.height;
+        } else if (this.displayMode === "COLLAPSED") {
+            return this.margin + this.expandedRowHeight;
+        } else {
+            let maxRow = 0;
+            if (features && (typeof features.forEach === "function")) {
+                for (let feature of features) {
+                    if (feature.row && feature.row > maxRow) {
+                        maxRow = feature.row;
                     }
-                    lastPxEnd[row] = pxEnd;
                 }
             }
+
+            const height = this.margin + (maxRow + 1) * ("SQUISHED" === this.displayMode ? this.squishedRowHeight : this.expandedRowHeight);
+            return height;
+
+        }
+    };
+
+    draw(options) {
+
+        const featureList = options.features;
+        const ctx = options.context;
+        const bpPerPixel = options.bpPerPixel;
+        const bpStart = options.bpStart;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+
+
+        if (!this.config.isMergedTrack) {
+            IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
         }
 
-    } else {
-        console.log("No feature list");
-    }
+        if (featureList) {
 
-};
+            const rowFeatureCount = [];
+            options.rowLastX = [];
+            for (let feature of featureList) {
+                const row = feature.row || 0;
+                if (rowFeatureCount[row] === undefined) {
+                    rowFeatureCount[row] = 1;
+                } else {
+                    rowFeatureCount[row]++;
+                }
+                options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
+            }
 
-FeatureTrack.prototype.clickedFeatures = function (clickState) {
+            if (this.config.type == 'spliceJunctions') {
+                const vp = this.browser.trackViews[0].viewports[0]
+                junctionRenderingContext.referenceFrame = vp.referenceFrame;
+                junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
+                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(vp.contentDiv).width());
+
+                // For a given viewport, records where features that are < 2px in width have been rendered already.
+                // This prevents wasteful rendering of multiple such features onto the same pixels.
+                junctionRenderingContext.featureZoomOutTracker = {}
+            }
+
+            let lastPxEnd = [];
+            for (let feature of featureList) {
+                if (feature.end < bpStart) continue;
+                if (feature.start > bpEnd) break;
+
+                const row = this.displayMode === 'COLLAPSED' ? 0 : feature.row;
+                const featureDensity = pixelWidth / rowFeatureCount[row];
+                options.drawLabel = options.labelAllFeatures || featureDensity > 10;
+                const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
+                const last = lastPxEnd[row];
+                if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
+                    this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
+
+                    if (this.config.type !== 'spliceJunctions') {
+                        // Ensure a visible gap between features
+                        const pxStart = Math.floor((feature.start - bpStart) / bpPerPixel)
+                        if (last && pxStart - last <= 0) {
+                            ctx.globalAlpha = 0.5
+                            IGVGraphics.strokeLine(ctx, pxStart, 0, pxStart, pixelHeight, {'strokeStyle': "rgb(255, 255, 255)"})
+                            ctx.globalAlpha = 1.0
+                        }
+                        lastPxEnd[row] = pxEnd;
+                    }
+                }
+            }
+
+        } else {
+            console.log("No feature list");
+        }
+
+    };
+
+    clickedFeatures(clickState) {
 
     const y = clickState.y - this.margin;
-    const allFeatures = TrackBase.prototype.clickedFeatures.call(this, clickState);
+    const allFeatures = super.clickedFeatures(clickState);
 
     let row;
     switch (this.displayMode) {
@@ -272,172 +275,170 @@ FeatureTrack.prototype.clickedFeatures = function (clickState) {
 /**
  * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
  */
-FeatureTrack.prototype.popupData = function (clickState, features) {
+    popupData(clickState, features) {
 
-    let self = this;
+        if (!features) features = this.clickedFeatures(clickState);
+        const genomicLocation = clickState.genomicLocation;
 
-    if (!features) features = this.clickedFeatures(clickState);
-    const genomicLocation = clickState.genomicLocation;
-
-    const data = [];
-    for (let feature of features) {
-        let featureData = []
-        if (this.config.type === 'spliceJunctions') {
-            if (!feature.isVisible || !feature.attributes) {
-                continue
-            }
-
-            featureData.push(
-              {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ' strand)'})
-
-            if (feature.attributes.annotated_junction) {
-                if (feature.attributes.annotated_junction === 'true') {
-                    featureData.push({name: 'Known Junction', value: ''})
-                } else {
-                    featureData.push({name: 'Novel Junction', value: ''})
-                }
-                featureData.push("<hr />")
-            }
-            featureData.push(
-              {name: (feature.end - feature.start).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), value: 'bp length'})
-
-            if (feature.attributes.uniquely_mapped) {
-                featureData.push(
-                    {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
-            }
-            if (feature.attributes.multi_mapped) {
-                featureData.push(
-                    {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
-            }
-            if (feature.attributes.uniquely_mapped && feature.attributes.multi_mapped) {
-                featureData.push(
-                    {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
-            }
-            if (feature.attributes.maximum_spliced_alignment_overhang) {
-                featureData.push({name: feature.attributes.maximum_spliced_alignment_overhang, value: 'bp maximum overhang'})
-            }
-
-            if (feature.attributes.num_samples_with_this_junction) {
-                featureData.push({
-                    name: feature.attributes.num_samples_with_this_junction,
-                    value: (feature.attributes.num_samples_total ? 'out of ' + feature.attributes.num_samples_total + ' ' : '') + 'samples have this junction'
-                })
-                if (feature.attributes.percent_samples_with_this_junction) {
-                    featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
+        const data = [];
+        for (let feature of features) {
+            let featureData = []
+            if (this.config.type === 'spliceJunctions') {
+                if (!feature.isVisible || !feature.attributes) {
+                    continue
                 }
 
-            }
-            if (feature.attributes.info) {
-                featureData.push({name: ' ', value: feature.attributes.info.replace("_", " ")})
+                featureData.push(
+                  {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ' strand)'})
+
+                if (feature.attributes.annotated_junction) {
+                    if (feature.attributes.annotated_junction === 'true') {
+                        featureData.push({name: 'Known Junction', value: ''})
+                    } else {
+                        featureData.push({name: 'Novel Junction', value: ''})
+                    }
+                    featureData.push("<hr />")
+                }
+                featureData.push(
+                  {name: (feature.end - feature.start).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), value: 'bp length'})
+
+                if (feature.attributes.uniquely_mapped) {
+                    featureData.push(
+                        {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
+                }
+                if (feature.attributes.multi_mapped) {
+                    featureData.push(
+                        {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
+                }
+                if (feature.attributes.uniquely_mapped && feature.attributes.multi_mapped) {
+                    featureData.push(
+                        {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
+                }
+                if (feature.attributes.maximum_spliced_alignment_overhang) {
+                    featureData.push({name: feature.attributes.maximum_spliced_alignment_overhang, value: 'bp maximum overhang'})
+                }
+
+                if (feature.attributes.num_samples_with_this_junction) {
+                    featureData.push({
+                        name: feature.attributes.num_samples_with_this_junction,
+                        value: (feature.attributes.num_samples_total ? 'out of ' + feature.attributes.num_samples_total + ' ' : '') + 'samples have this junction'
+                    })
+                    if (feature.attributes.percent_samples_with_this_junction) {
+                        featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
+                    }
+
+                }
+                if (feature.attributes.info) {
+                    featureData.push({name: ' ', value: feature.attributes.info.replace("_", " ")})
+                }
+
+                //add any other keys not already processed above
+                for (let key of Object.keys(feature.attributes)) {
+                    if (![
+                        "line_width", "color", "left_shape", "right_shape", "info",
+                        "annotated_junction", "uniquely_mapped", "multi_mapped", "maximum_spliced_alignment_overhang",
+                        "num_samples_with_this_junction", "percent_samples_with_this_junction", "num_samples_total",
+                        ].includes(key)) {
+                        featureData.push({name: key.replace(/_/g, " "), value: feature.attributes[key].replace(/_/g, " ")})
+                    }
+                }
+            } else {
+             featureData = (typeof feature.popupData === "function") ?
+                feature.popupData(genomicLocation) :
+                TrackBase.extractPopupData(feature, this.getGenomeId());
             }
 
-            //add any other keys not already processed above
-            for (let key of Object.keys(feature.attributes)) {
-                if (![
-                    "line_width", "color", "left_shape", "right_shape", "info",
-                    "annotated_junction", "uniquely_mapped", "multi_mapped", "maximum_spliced_alignment_overhang",
-                    "num_samples_with_this_junction", "percent_samples_with_this_junction", "num_samples_total",
-                    ].includes(key)) {
-                    featureData.push({name: key.replace(/_/g, " "), value: feature.attributes[key].replace(/_/g, " ")})
+            if (featureData) {
+                if (data.length > 0) {
+                    data.push("<HR>");
                 }
+
+                Array.prototype.push.apply(data, featureData);
             }
-        } else {
-         featureData = (typeof feature.popupData === "function") ?
-            feature.popupData(genomicLocation) :
-            TrackBase.extractPopupData(feature, this.getGenomeId());
         }
 
-        if (featureData) {
-            if (data.length > 0) {
-                data.push("<HR>");
-            }
+        return data;
 
-            Array.prototype.push.apply(data, featureData);
-        }
     }
 
-    return data;
 
-};
+    menuItemList() {
 
+        const self = this;
+        const menuItems = [];
 
-FeatureTrack.prototype.menuItemList = function () {
-
-    const self = this;
-    const menuItems = [];
-
-    if (this.render === renderSnp) {
-        (["function", "class"]).forEach(function (colorScheme) {
-            menuItems.push({
-                object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
-                click: function () {
-                    self.colorBy = colorScheme;
-                    self.trackView.repaintViews();
-                }
+        if (this.render === renderSnp) {
+            (["function", "class"]).forEach(function (colorScheme) {
+                menuItems.push({
+                    object: createCheckbox('Color by ' + colorScheme, colorScheme === self.colorBy),
+                    click: function () {
+                        self.colorBy = colorScheme;
+                        self.trackView.repaintViews();
+                    }
+                });
             });
-        });
+
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+
+        }
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
+        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+            const lut =
+                {
+                    "COLLAPSED": "Collapse",
+                    "SQUISHED": "Squish",
+                    "EXPANDED": "Expand"
+                };
+
+            menuItems.push(
+                {
+                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
+                    click: function () {
+                        self.displayMode = displayMode;
+                        self.config.displayMode = displayMode;
+                        self.trackView.checkContentHeight();
+                        self.trackView.repaintViews();
+                    }
+                });
+        });
+
+        return menuItems;
+
+    };
+
+
+    description() {
+
+        // if('snp' === this.type) {
+        if (renderSnp === this.render) {
+            let desc = "<html>" + this.name + "<hr>";
+            desc += '<em>Color By Function:</em><br>';
+            desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
+            desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
+            desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
+            desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
+            desc += '<em>Color By Class:</em><br>';
+            desc += '<span style="color:red">Red</span>: Deletion<br>';
+            desc += '<span style="color:green">Green</span>: MNP<br>';
+            desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
+            desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
+            desc += "</html>";
+            return desc;
+        } else {
+            return this.name;
+        }
+
+    };
+
+    /**
+     * Called when the track is removed.  Do any needed cleanup here
+     */
+    dispose() {
+       this.trackView = undefined;
     }
-
-    menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
-
-    ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
-        const lut =
-            {
-                "COLLAPSED": "Collapse",
-                "SQUISHED": "Squish",
-                "EXPANDED": "Expand"
-            };
-
-        menuItems.push(
-            {
-                object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                click: function () {
-                    self.displayMode = displayMode;
-                    self.config.displayMode = displayMode;
-                    self.trackView.checkContentHeight();
-                    self.trackView.repaintViews();
-                }
-            });
-    });
-
-    return menuItems;
-
-};
-
-
-FeatureTrack.prototype.description = function () {
-
-    // if('snp' === this.type) {
-    if (renderSnp === this.render) {
-        let desc = "<html>" + this.name + "<hr>";
-        desc += '<em>Color By Function:</em><br>';
-        desc += '<span style="color:red">Red</span>: Coding-Non-Synonymous, Splice Site<br>';
-        desc += '<span style="color:green">Green</span>: Coding-Synonymous<br>';
-        desc += '<span style="color:blue">Blue</span>: Untranslated<br>';
-        desc += '<span style="color:black">Black</span>: Intron, Locus, Unknown<br><br>';
-        desc += '<em>Color By Class:</em><br>';
-        desc += '<span style="color:red">Red</span>: Deletion<br>';
-        desc += '<span style="color:green">Green</span>: MNP<br>';
-        desc += '<span style="color:blue">Blue</span>: Microsatellite, Named<br>';
-        desc += '<span style="color:black">Black</span>: Indel, Insertion, SNP';
-        desc += "</html>";
-        return desc;
-    } else {
-        return this.name;
-    }
-
-};
-
-/**
- * Called when the track is removed.  Do any needed cleanup here
- */
-FeatureTrack.prototype.dispose = function () {
-    this.trackView = undefined;
 }
-
 
 /**
  * Monitors track drag events, updates label position to ensure that they're always visible.
@@ -492,6 +493,49 @@ function calculateFeatureCoordinates(feature, bpStart, xScale) {
 }
 
 /**
+ * Return color for feature.  Called in the context of a FeatureTrack instance.
+ * @param feature
+ * @returns {string}
+ */
+function getColorForFeature(feature) {
+    let color;
+    if (this.altColor && "-" === feature.strand) {
+        color = this.altColor;
+    } else if (this.color) {
+        color = this.color;   // Explicit setting via menu, or possibly track line if !config.color
+    } else if (this.config.colorBy) {
+        const colorByValue = feature[this.config.colorBy.field];
+        if (colorByValue) {
+            color = this.config.colorBy.pallete[colorByValue];  // This is an undocumented option, and its not clear if its used
+        }
+    } else if (feature.color) {
+        color = feature.color;   // Explicit color for feature
+    } else {
+        color = this.defaultColor;   // Track default
+    }
+
+    if (feature.alpha && feature.alpha !== 1) {
+        color = IGVColor.addAlpha(color, feature.alpha);
+    } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
+        // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
+        const min = this.config.min? this.config.min : 0; //getViewLimitMin(track);
+        const max = this.config.max? this.config.max : 1000; //getViewLimitMax(track);
+        const alpha = getAlpha(min, max, feature.score);
+        feature.alpha = alpha;    // Avoid computing again
+        color = IGVColor.addAlpha(color, alpha);
+    }
+
+
+    function getAlpha(min, max, score) {
+        const binWidth = (max - min) / 9;
+        const binNumber = Math.floor((score - min) / binWidth);
+        return Math.min(1.0, 0.2 + (binNumber * 0.8) / 9);
+    }
+
+    return color
+}
+
+/**
  *
  * @param feature
  * @param bpStart  genomic location of the left edge of the current canvas
@@ -503,21 +547,8 @@ function calculateFeatureCoordinates(feature, bpStart, xScale) {
 function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
     const browser = this.browser;
+    let color = getColorForFeature.call(this, feature)
 
-    let color = this.color;  // default
-
-    if (feature.alpha && feature.alpha !== 1) {
-        color = IGVColor.addAlpha(this.color, feature.alpha);
-    }
-
-    if (this.config.colorBy) {
-        const colorByValue = feature[this.config.colorBy.field];
-        if (colorByValue) {
-            color = this.config.colorBy.pallete[colorByValue];
-        }
-    } else if (feature.color) {
-        color = feature.color;
-    }
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
 
@@ -627,7 +658,7 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
     const windowX = Math.round(options.viewportContainerX);
     // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
     // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
-    const windowX1 = windowX + browser.viewportWidth();
+    const windowX1 = windowX + options.viewportWidth;
 
     if (options.drawLabel) {
         renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
@@ -650,7 +681,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
     if (name === undefined) name = feature.id || feature.ID
-    if (name === undefined) return;
+    if (!name || name === '.') return;
 
     // feature outside of viewable window
     let boxX;
@@ -664,6 +695,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
         boxX1 = Math.min(featureX1, windowX1);
     }
 
+    let color = getColorForFeature.call(this, feature);
     let geneColor;
     let gtexSelection = false;
     if (referenceFrame.selection && GtexUtils.gtexLoaded) {
@@ -676,8 +708,8 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     if (this.displayMode !== "SQUISHED") {
         const geneFontStyle = {
             textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
-            fillStyle: geneColor || feature.color || this.color,
-            strokeStyle: geneColor || feature.color || this.color
+            fillStyle: geneColor || color,
+            strokeStyle: geneColor || color
         };
 
         let transform;
@@ -1011,6 +1043,7 @@ const locusSet = new Set(['near-gene-3', 'near-gene-5']);
 const intronSet = new Set(['intron']);
 
 /**
+ * Renderer for a UCSC snp track
  *
  * @param snp
  * @param bpStart  genomic location of the left edge of the current canvas
