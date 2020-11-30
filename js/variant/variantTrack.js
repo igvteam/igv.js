@@ -468,15 +468,17 @@ class VariantTrack extends TrackBase {
 
 function drawVariantTrackSampleNames(ctx, features, canvasTop, height) {
 
-    ctx.canvas.height = height
-    ctx.canvas.style.top = `${ canvasTop }px`
-    ctx.translate(0, -canvasTop)
+    console.log(`draw variant track sample names - features(${ features.length })`)
 
-    for (let feature of features) {
-        const { y, h } = feature.pixelRect
-        IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': randomRGB(200, 255)})
-        ctx.fillText(feature.names, 0, y + h)
-    }
+    // ctx.canvas.height = height
+    // ctx.canvas.style.top = `${ canvasTop }px`
+    // ctx.translate(0, -canvasTop)
+    //
+    // for (let feature of features) {
+    //     const { y, h } = feature.pixelRect
+    //     IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': randomRGB(200, 255)})
+    //     ctx.fillText(feature.names, 0, y + h)
+    // }
 
 }
 
