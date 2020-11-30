@@ -246,7 +246,7 @@ class SegTrack extends TrackBase {
             }
 
             if (drawnFeatures.length > 0) {
-                this.trackView.sampleNameViewport.draw(drawnFeatures, pixelTop, pixelHeight)
+                this.drawSampleNames(drawnFeatures, pixelTop, pixelHeight, drawSegTrackSampleNames)
             }
 
         } else {
@@ -268,7 +268,7 @@ class SegTrack extends TrackBase {
         }
 
     };
-
+    
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.
@@ -492,6 +492,7 @@ function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
     }
 
 }
+
 export { drawSegTrackSampleNames }
 
 export default SegTrack
