@@ -50,7 +50,7 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
         }
 
         if ($viewport) {
-            
+
             const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
 
             if (result) {

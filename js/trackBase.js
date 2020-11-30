@@ -88,6 +88,10 @@ class TrackBase {
         this.visibilityWindow = config.visibilityWindow;
     }
 
+    drawSampleNames(features, canvasTop, height, sampleNameRenderer) {
+        this.trackView.sampleNameViewport.draw(features, canvasTop, height, sampleNameRenderer)
+    }
+
     /**
      * Update track properties from the config object.
      *
