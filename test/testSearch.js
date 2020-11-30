@@ -111,7 +111,7 @@ suite("testSearch", function () {
 
     test("custom webservice", async function () {
 
-        this.timeout(10000);
+        this.timeout(30000);
 
         browser.genome = macacaGenome;
         browser.searchConfig = {
