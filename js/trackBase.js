@@ -85,7 +85,17 @@ class TrackBase {
         this.minHeight = config.minHeight || Math.min(25, this.height);
         this.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
-        this.visibilityWindow = config.visibilityWindow;
+        this.visibilityWindow = config.visibilityWindow
+
+        this.trackView = undefined
+    }
+
+    drawTrackNameAsSampleName(name) {
+
+        if (this.trackView) {
+            this.trackView.sampleNameViewport.drawTrackName(name)
+        }
+
     }
 
     drawSampleNames(features, canvasTop, height, sampleNameRenderer) {

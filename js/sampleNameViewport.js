@@ -20,6 +20,10 @@ class SampleNameViewport extends ViewportBase {
         IGVGraphics.fillRect(this.ctx, 0, 0, width, height, { 'fillStyle': appleCrayonPalette[ 'sky' ] })
     }
 
+    drawTrackName(name) {
+        console.log(`sample name viewport - track name ${ name }`)
+    }
+
     draw(features, canvasTop, height, sampleNameRenderer) {
         sampleNameRenderer(this.ctx, features, canvasTop, height)
     }

@@ -64,15 +64,6 @@ class ViewportBase {
 
     }
 
-    setTrackLabel(label) {}
-
-    startSpinner() {}
-    stopSpinner(){}
-
-    checkZoomIn() {
-        return true
-    }
-
     showMessage(message) {
         if (!this.messageDiv) {
             this.messageDiv = document.createElement('div');
@@ -86,6 +77,34 @@ class ViewportBase {
     hideMessage(message) {
         if (this.messageDiv)
             this.messageDiv.style.display = 'none'
+    }
+
+    setTrackLabel(label) {}
+
+    startSpinner() {}
+
+    stopSpinner(){}
+
+    checkZoomIn() {
+        return true
+    }
+
+    shift() {}
+
+    setTop(contentTop) {}
+
+    async loadFeatures () {
+        return undefined
+    }
+
+    setContentHeight(contentHeight) {}
+
+    isLoading() {
+        return false
+    }
+
+    saveSVG() {
+
     }
 
     async renderSVGContext(context, offset) {
@@ -129,10 +148,6 @@ class ViewportBase {
 
     }
 
-    saveSVG() {
-
-    }
-
     isVisible() {
         return this.$viewport.width()
     }
@@ -142,23 +157,9 @@ class ViewportBase {
         this.canvas.style.width = (`${ width }px`);
         this.canvas.setAttribute('width', width);
     }
-    
+
     getWidth() {
         return this.$viewport.width();
-    }
-
-    shift() {}
-
-    setTop(contentTop) {}
-
-    async loadFeatures () {
-        return undefined
-    }
-
-    setContentHeight(contentHeight) {}
-
-    isLoading() {
-        return false
     }
 
     getContentHeight() {
