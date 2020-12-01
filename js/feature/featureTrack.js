@@ -187,6 +187,8 @@ class FeatureTrack extends TrackBase {
 
     draw(options) {
 
+        this.drawTrackNameAsSampleName(this.name)
+
         const featureList = options.features;
         const ctx = options.context;
         const bpPerPixel = options.bpPerPixel;
