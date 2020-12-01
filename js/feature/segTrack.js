@@ -451,23 +451,25 @@ class SegTrack extends TrackBase {
     }
 }
 
-function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
+function drawSegTrackSampleNames(ctx, features, canvasTop, width, height) {
 
-    ctx.canvas.height = height
+    ctx.canvas.style.width = (`${ width }px`)
+    ctx.canvas.style.height = (`${ height }px`)
+
+    ctx.canvas.width = Math.floor(window.devicePixelRatio * width)
+    ctx.canvas.height = Math.floor(window.devicePixelRatio * height)
+
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
     ctx.canvas.style.top = `${ canvasTop }px`
     ctx.translate(0, -canvasTop)
-
-    // for (let y = 0; y < height; y++) {
-    //     IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, 1, { 'fillStyle': randomGrey(100, 200) })
-    // }
-
+    
     const hitlist = {}
     for (let feature of features) {
         if (hitlist[ feature.row ]) {
         } else {
             hitlist[ feature.row ] = feature
             const { y, h } = feature.pixelRect
-            IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': greyScale(0 === features.indexOf(feature) % 2 ? 255 : 245)})
             const string = feature.sampleKey || feature.sample
             ctx.fillText(string, 0, y + h)
         }

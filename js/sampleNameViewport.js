@@ -17,14 +17,12 @@ class SampleNameViewport extends ViewportBase {
 
         // multi-sample canvas
         this.ctx = this.canvas.getContext('2d')
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
         // mono-sample canvas
         const $mono_sample_canvas = $('<canvas>', { class:'igv-mono-sample-canvas' })
         this.$viewport.append($mono_sample_canvas)
 
         this.mono_sample_ctx = $mono_sample_canvas.get(0).getContext('2d')
-        this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
 
     }
 
@@ -33,11 +31,15 @@ class SampleNameViewport extends ViewportBase {
         // hide multi-sample canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
-        this.mono_sample_ctx.canvas.style.width = (`${ this.$viewport.width() }px`)
-        this.mono_sample_ctx.canvas.setAttribute('width', this.$viewport.width())
+        const w = this.$viewport.width()
+        const h = this.$viewport.height()
 
-        this.mono_sample_ctx.canvas.style.height = (`${ this.$viewport.height() }px`)
-        this.mono_sample_ctx.canvas.setAttribute('height', this.$viewport.height())
+        this.mono_sample_ctx.canvas.style.width = (`${ w }px`)
+        this.mono_sample_ctx.canvas.style.height = (`${ h }px`)
+
+        this.mono_sample_ctx.canvas.width = Math.floor(window.devicePixelRatio * w)
+        this.mono_sample_ctx.canvas.height = Math.floor(window.devicePixelRatio * h)
+        this.mono_sample_ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
 
         // IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGBAlpha('strawberry', 0.75) })
         IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGB('snow') })
@@ -45,7 +47,7 @@ class SampleNameViewport extends ViewportBase {
         configureFont(this.mono_sample_ctx, defaultFont)
         const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.mono_sample_ctx.measureText(name)
 
-        this.mono_sample_ctx.fillText(name, (this.mono_sample_ctx.canvas.width - width)/2, this.mono_sample_ctx.canvas.height/2)
+        this.mono_sample_ctx.fillText(name, (w - width)/2, h/2)
 
     }
 
@@ -54,8 +56,9 @@ class SampleNameViewport extends ViewportBase {
         // hide mono-sample canvas
         this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
 
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
         configureFont(this.ctx, defaultFont)
-        sampleNameRenderer(this.ctx, features, canvasTop, height)
+        sampleNameRenderer(this.ctx, features, canvasTop, this.$viewport.width(), height)
     }
 
     setTop(contentTop) {
@@ -67,6 +70,7 @@ class SampleNameViewport extends ViewportBase {
 const defaultFont =
     {
         // font: '6px sans-serif',
+        // font: '8px sans-serif',
         font: '10px sans-serif',
         textAlign: 'start',
         textBaseline: 'bottom',
@@ -74,7 +78,7 @@ const defaultFont =
         fillStyle:'black'
     };
 
-function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
+function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
     ctx.font = font
     ctx.textAlign = textAlign
     ctx.textBaseline = textBaseline
