@@ -33,7 +33,7 @@ const appleCrayonPalette =
         lemon: "#fffa03",
         lime: "#83f902",
         spring: "#05f802",
-        seam_foam: "#03f987",
+        sea_foam: "#03f987",
         turquoise: "#00fdff",
         aqua: "#008cff",
         blueberry: "#002eff",
@@ -53,7 +53,69 @@ const appleCrayonPalette =
         lavender: "#d278ff",
         bubblegum: "#ff7aff",
         carnation: "#ff7fd3"
-    };
+    }
+
+const appleCrayonRGBPalette =
+    {
+        cantaloupe: { r:255, g:206, b:110 },
+        honeydew:   { r:206, g:250, b:110 },
+        spindrift:  { r:104, g:251, b:208 },
+        sky:        { r:106, g:207, b:255 },
+        lavender:   { r:210, g:120, b:255 },
+        carnation:  { r:255, g:127, b:211 },
+        licorice:   { r:0, g:0, b:0 },
+        snow:       { r:255, g:255, b:255 },
+        salmon:     { r:255, g:114, b:110 },
+        banana:     { r:255, g:251, b:109 },
+        flora:      { r:104, g:249, b:110 },
+        ice:        { r:104, g:253, b:255 },
+        orchid:     { r:110, g:118, b:255 },
+        bubblegum:  { r:255, g:122, b:255 },
+        lead:       { r:30, g:30, b:30 },
+        mercury:    { r:232, g:232, b:232 },
+        tangerine:  { r:255, g:136, b:2 },
+        lime:       { r:131, g:249, b:2 },
+        sea_foam:  { r:3, g:249, b:135 },
+        aqua:       { r:0, g:140, b:255 },
+        grape:      { r:137, g:49, b:255 },
+        strawberry: { r:255, g:41, b:135 },
+        tungsten:   { r:58, g:58, b:58 },
+        silver:     { r:208, g:208, b:208 },
+        maraschino: { r:255, g:33, b:1 },
+        lemon:      { r:255, g:250, b:3 },
+        spring:     { r:5, g:248, b:2 },
+        turquoise:  { r:0, g:253, b:255 },
+        blueberry:  { r:0, g:46, b:255 },
+        magenta:    { r:255, g:57, b:255 },
+        iron:       { r:84, g:84, b:83 },
+        magnesium:  { r:184, g:184, b:184 },
+        mocha:      { r:137, g:72, b:0 },
+        fern:       { r:69, g:132, b:1 },
+        moss:       { r:1, g:132, b:72 },
+        ocean:      { r:0, g:74, b:136 },
+        eggplant:   { r:73, g:26, b:136 },
+        maroon:     { r:137, g:22, b:72 },
+        steel:      { r:110, g:110, b:110 },
+        aluminum:   { r:160, g:159, b:160 },
+        cayenne:    { r:137, g:17, b:0 },
+        aspargus:   { r:136, g:133, b:1 },
+        clover:     { r:2, g:132, b:1 },
+        teal:       { r:0, g:134, b:136 },
+        midnight:   { r:0, g:24, b:136 },
+        plum:       { r:137, g:30, b:136 },
+        tin:        { r:135, g:134, b:135 },
+        nickel:     { r:136, g:135, b:135 }
+    }
+
+function appleCrayonRGB(name) {
+    const { r, g, b } = appleCrayonRGBPalette[ name ]
+    return `rgb(${ r },${ g },${ b })`
+}
+
+function appleCrayonRGBAlpha(name, alpha) {
+    const { r, g, b } = appleCrayonRGBPalette[ name ]
+    return `rgba(${ r },${ g },${ b },${ alpha })`
+}
 
 const colorPalettes = {
 
@@ -303,4 +365,4 @@ function randomGrey(min, max) {
 
 }
 
-export {appleCrayonPalette, PaletteColorTable, randomColor, rgbaColor, rgbColor, greyScale, randomGrey, randomRGB, randomRGBConstantAlpha };
+export {appleCrayonRGB, appleCrayonRGBAlpha, appleCrayonPalette, PaletteColorTable, randomColor, rgbaColor, rgbColor, greyScale, randomGrey, randomRGB, randomRGBConstantAlpha };

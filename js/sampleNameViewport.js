@@ -1,6 +1,7 @@
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
-import {appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
+import { appleCrayonRGB, appleCrayonRGBAlpha, appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
+import $ from "./vendor/jquery-3.3.1.slim";
 
 const sampleNameViewportWidth = 128
 
@@ -12,23 +13,47 @@ class SampleNameViewport extends ViewportBase {
 
     initializationHelper() {
 
-        this.$viewport.data('viewport-type', 'sample-name');
+        this.$viewport.data('viewport-type', 'sample-name')
 
-        this.canvas.height = this.$content.height()
-        this.ctx = this.canvas.getContext("2d")
-        const { width, height } = this.canvas
-        IGVGraphics.fillRect(this.ctx, 0, 0, width, height, { 'fillStyle': appleCrayonPalette[ 'sky' ] })
+        // multi-sample canvas
+        this.ctx = this.canvas.getContext('2d')
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+
+        // mono-sample canvas
+        const $mono_sample_canvas = $('<canvas>', { class:'igv-mono-sample-canvas' })
+        this.$viewport.append($mono_sample_canvas)
+
+        this.mono_sample_ctx = $mono_sample_canvas.get(0).getContext('2d')
+        this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
+
     }
 
     drawTrackName(name) {
 
-        configureFont(this.ctx, defaultFont)
-        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.ctx.measureText(name)
+        // hide multi-sample canvas
+        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
 
-        console.log(`sample name viewport - track name ${ name } width ${ Math.round(width) } h0 ${ Math.round(actualBoundingBoxAscent) } h1 ${ Math.round(actualBoundingBoxDescent) }`)
+        this.mono_sample_ctx.canvas.style.width = (`${ this.$viewport.width() }px`)
+        this.mono_sample_ctx.canvas.setAttribute('width', this.$viewport.width())
+
+        this.mono_sample_ctx.canvas.style.height = (`${ this.$viewport.height() }px`)
+        this.mono_sample_ctx.canvas.setAttribute('height', this.$viewport.height())
+
+        // IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGBAlpha('strawberry', 0.75) })
+        IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGB('snow') })
+
+        configureFont(this.mono_sample_ctx, defaultFont)
+        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.mono_sample_ctx.measureText(name)
+
+        this.mono_sample_ctx.fillText(name, (this.mono_sample_ctx.canvas.width - width)/2, this.mono_sample_ctx.canvas.height/2)
+
     }
 
     draw(features, canvasTop, height, sampleNameRenderer) {
+
+        // hide mono-sample canvas
+        this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
+
         configureFont(this.ctx, defaultFont)
         sampleNameRenderer(this.ctx, features, canvasTop, height)
     }
