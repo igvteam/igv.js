@@ -121,6 +121,7 @@ class FeatureTrack extends TrackBase {
     }
 
     async postInit() {
+
         if (typeof this.featureSource.getHeader === "function") {
             this.header = await this.featureSource.getHeader();
         }
@@ -136,6 +137,7 @@ class FeatureTrack extends TrackBase {
         }
 
         return this;
+
     }
 
     supportsWholeGenome() {
@@ -207,10 +209,9 @@ class FeatureTrack extends TrackBase {
             }
 
             if (this.config.type == 'spliceJunctions') {
-                const vp = this.browser.trackViews[0].viewports[0]
-                junctionRenderingContext.referenceFrame = vp.referenceFrame;
+                junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
                 junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
-                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(vp.contentDiv).width());
+                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
 
                 // For a given viewport, records where features that are < 2px in width have been rendered already.
                 // This prevents wasteful rendering of multiple such features onto the same pixels.
