@@ -103,6 +103,7 @@ class FeatureTrack extends TrackBase {
             this.render = renderFusionJuncSpan;
         } else if ('spliceJunctions' === config.type) {
             this.render = renderJunctions;
+            this.displayMode = "COLLAPSED"  // needed for this.clickedFeatures(..) to work
         } else if ('snp' === config.type) {
             this.render = renderSnp;
             // colors ordered based on priority least to greatest
