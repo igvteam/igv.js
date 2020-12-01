@@ -451,23 +451,6 @@ class SegTrack extends TrackBase {
     }
 }
 
-const defaultFont =
-    {
-        // font: '6px sans-serif',
-        font: '10px sans-serif',
-        textAlign: 'start',
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle:'black'
-    };
-
-function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
-    ctx.font = font
-    ctx.textAlign = textAlign
-    ctx.textBaseline = textBaseline
-    ctx.fillStyle = fillStyle
-}
-
 function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
 
     ctx.canvas.height = height
@@ -477,8 +460,6 @@ function drawSegTrackSampleNames(ctx, features, canvasTop, height) {
     // for (let y = 0; y < height; y++) {
     //     IGVGraphics.fillRect(this.ctx, 0, y, this.canvas.width, 1, { 'fillStyle': randomGrey(100, 200) })
     // }
-
-    configureFont(ctx, defaultFont)
 
     const hitlist = {}
     for (let feature of features) {

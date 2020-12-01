@@ -21,10 +21,15 @@ class SampleNameViewport extends ViewportBase {
     }
 
     drawTrackName(name) {
-        console.log(`sample name viewport - track name ${ name }`)
+
+        configureFont(this.ctx, defaultFont)
+        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.ctx.measureText(name)
+
+        console.log(`sample name viewport - track name ${ name } width ${ Math.round(width) } h0 ${ Math.round(actualBoundingBoxAscent) } h1 ${ Math.round(actualBoundingBoxDescent) }`)
     }
 
     draw(features, canvasTop, height, sampleNameRenderer) {
+        configureFont(this.ctx, defaultFont)
         sampleNameRenderer(this.ctx, features, canvasTop, height)
     }
 
@@ -32,6 +37,23 @@ class SampleNameViewport extends ViewportBase {
         this.$content.css('top', `${ contentTop }px`);
     }
 
+}
+
+const defaultFont =
+    {
+        // font: '6px sans-serif',
+        font: '10px sans-serif',
+        textAlign: 'start',
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
+    };
+
+function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
+    ctx.font = font
+    ctx.textAlign = textAlign
+    ctx.textBaseline = textBaseline
+    ctx.fillStyle = fillStyle
 }
 
 export { sampleNameViewportWidth }
