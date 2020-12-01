@@ -148,13 +148,13 @@ class FeatureTrack extends TrackBase {
     };
 
 
-/**
- * The required height in pixels required for the track content.   This is not the visible track height, which
- * can be smaller (with a scrollbar) or larger.
- *
- * @param features
- * @returns {*}
- */
+    /**
+     * The required height in pixels required for the track content.   This is not the visible track height, which
+     * can be smaller (with a scrollbar) or larger.
+     *
+     * @param features
+     * @returns {*}
+     */
     computePixelHeight(features) {
 
         if (this.type === 'spliceJunctions') {
