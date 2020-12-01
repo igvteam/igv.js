@@ -584,6 +584,14 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   display: block;
 }
 
+.igv-mono-sample-canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 8888;
+}
+
 .igv-scrollbar-shim {
 
   position: relative;

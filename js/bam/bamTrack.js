@@ -178,6 +178,8 @@ class BAMTrack extends TrackBase {
 
     draw(options) {
 
+        this.drawTrackNameAsSampleName(this.name)
+
         IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (true === this.showCoverage && this.coverageTrack.height > 0) {
