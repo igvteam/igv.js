@@ -281,71 +281,14 @@ class FeatureTrack extends TrackBase {
 
         const data = [];
         for (let feature of features) {
-            let featureData = []
             if (this.config.type === 'spliceJunctions') {
                 if (!feature.isVisible || !feature.attributes) {
                     continue
                 }
-
-                featureData.push(
-                  {name: feature.chr + ":" + feature.start + "-" + feature.end, value: '('+feature.strand + ' strand)'})
-
-                if (feature.attributes.annotated_junction) {
-                    if (feature.attributes.annotated_junction === 'true') {
-                        featureData.push({name: 'Known Junction', value: ''})
-                    } else {
-                        featureData.push({name: 'Novel Junction', value: ''})
-                    }
-                    featureData.push("<hr />")
-                }
-                featureData.push(
-                  {name: (feature.end - feature.start).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","), value: 'bp length'})
-
-                if (feature.attributes.uniquely_mapped) {
-                    featureData.push(
-                        {name: feature.attributes.uniquely_mapped, value: 'uniquely mapped reads'})
-                }
-                if (feature.attributes.multi_mapped) {
-                    featureData.push(
-                        {name: feature.attributes.multi_mapped, value: 'multi-mapped reads'})
-                }
-                if (feature.attributes.uniquely_mapped && feature.attributes.multi_mapped) {
-                    featureData.push(
-                        {name: parseInt(feature.attributes.uniquely_mapped) + parseInt(feature.attributes.multi_mapped), value: 'total reads'})
-                }
-                if (feature.attributes.maximum_spliced_alignment_overhang) {
-                    featureData.push({name: feature.attributes.maximum_spliced_alignment_overhang, value: 'bp maximum overhang'})
-                }
-
-                if (feature.attributes.num_samples_with_this_junction) {
-                    featureData.push({
-                        name: feature.attributes.num_samples_with_this_junction,
-                        value: (feature.attributes.num_samples_total ? 'out of ' + feature.attributes.num_samples_total + ' ' : '') + 'samples have this junction'
-                    })
-                    if (feature.attributes.percent_samples_with_this_junction) {
-                        featureData.push({name: feature.attributes.percent_samples_with_this_junction.toFixed(1), value: '% of samples have this junction'})
-                    }
-
-                }
-                if (feature.attributes.info) {
-                    featureData.push({name: ' ', value: feature.attributes.info.replace("_", " ")})
-                }
-
-                //add any other keys not already processed above
-                for (let key of Object.keys(feature.attributes)) {
-                    if (![
-                        "line_width", "color", "left_shape", "right_shape", "info",
-                        "annotated_junction", "uniquely_mapped", "multi_mapped", "maximum_spliced_alignment_overhang",
-                        "num_samples_with_this_junction", "percent_samples_with_this_junction", "num_samples_total",
-                        ].includes(key)) {
-                        featureData.push({name: key.replace(/_/g, " "), value: feature.attributes[key].replace(/_/g, " ")})
-                    }
-                }
-            } else {
-             featureData = (typeof feature.popupData === "function") ?
-                feature.popupData(genomicLocation) :
-                TrackBase.extractPopupData(feature, this.getGenomeId());
             }
+            const featureData = (typeof feature.popupData === "function") ?
+              feature.popupData(genomicLocation) :
+              TrackBase.extractPopupData(feature, this.getGenomeId());
 
             if (featureData) {
                 if (data.length > 0) {
