@@ -53,11 +53,10 @@ class AEDParser {
         this.delimiter = "\t";
     }
 
-    parseHeader(data) {
+    async parseHeader(dataWrapper) {
         let line;
         let header;
-        const dataWrapper = getDataWrapper(data);
-        while (line = dataWrapper.nextLine()) {
+        while (line = await dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track") || line.startsWith("#track")) {
                     let h = parseTrackLine(line);
@@ -86,12 +85,8 @@ class AEDParser {
         return header;
     }
 
-    parseFeatures(data) {
+    async parseFeatures(dataWrapper) {
 
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLineNoTrim.bind(dataWrapper);
         const allFeatures = [];
         let cnt = 0;
         const decode = this.decode;
@@ -100,7 +95,7 @@ class AEDParser {
         let line;
         let wig;
 
-        while ((line = nextLine()) !== undefined) {
+        while ((line =  dataWrapper.nextLineNoTrim()) !== undefined) {
             i++;
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;

@@ -8,9 +8,10 @@
  */
 function decodeCustom(tokens, header) {
 
-    if (tokens.length < header.format.fields.length) return undefined;
+    const format = header.customFormat;
 
-    const format = header.format;         // "this" refers to FeatureParser instance
+    if (tokens.length < format.fields.length) return undefined;
+
     const coords = format.coords || 0;
 
     const chr = tokens[format.chr];
