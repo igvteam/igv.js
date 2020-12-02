@@ -3,6 +3,7 @@ import VcfParser from "../js/variant/vcfParser.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
 import igvxhr from "../js/igvxhr.js"
 import {assert} from 'chai';
+import getDataWrapper from "../js/feature/dataWrapper.js";
 
 
 suite("testVariant", function () {
@@ -11,8 +12,12 @@ suite("testVariant", function () {
         const url = require.resolve("./data/vcf/gvcf_non_ref.vcf");
         const data = await igvxhr.loadString(url)
         const parser = new VcfParser();
-        const header = await parser.parseHeader(data);
-        const variants = await parser.parseFeatures(data);
+
+        let dataWrapper = getDataWrapper(data);
+        const header = await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const variants = await parser.parseFeatures(dataWrapper);
         assert.equal(variants.length, 4);
         for (let v of variants) {
             assert.equal(v.type, "NONVARIANT");
@@ -23,8 +28,11 @@ suite("testVariant", function () {
         const url = require.resolve("./data/vcf/gvcf_mixed.vcf");
         const data = await igvxhr.loadString(url)
         const parser = new VcfParser();
-        const header = await parser.parseHeader(data);
-        const variants = await parser.parseFeatures(data);
+        let dataWrapper = getDataWrapper(data);
+        const header = await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const variants = await parser.parseFeatures(dataWrapper);
         assert.equal(variants.length, 5);
         for (let v of variants) {
             assert.equal(v.type, "MIXED");
@@ -54,8 +62,12 @@ suite("testVariant", function () {
         const url = require.resolve("./data/vcf/example.vcf");  // Example from 4.2 spec
         const data = await igvxhr.loadString(url, {});
         const parser = new VcfParser();
-        parser.parseHeader(data);
-        const featureList = parser.parseFeatures(data);
+
+        let dataWrapper = getDataWrapper(data);
+        await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const featureList = await parser.parseFeatures(dataWrapper);
         const len = featureList.length;
         assert.equal(6, len);   // # of features on chr 1 (determined by greping file)
 
@@ -90,8 +102,11 @@ suite("testVariant", function () {
         const url = require.resolve("./data/vcf/cnv.vcf");
         const data = await igvxhr.loadString(url, {});
         const parser = new VcfParser();
-        parser.parseHeader(data);
-        const featureList = parser.parseFeatures(data);
+        let dataWrapper = getDataWrapper(data);
+        await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const featureList = await parser.parseFeatures(dataWrapper);
 
         // deletion
         // 1	69091	CNVR1.1	N	<DEL>	6.95	LOWBFSCORE	CN=0;SVTYPE=DEL;END=70008;EXPECTED=31;OBSERVED=0;RATIO=0;BF=6.95	GT	1/1
@@ -108,8 +123,11 @@ suite("testVariant", function () {
         const url = require.resolve("./data/vcf/SKBR3_Sniffles_variants_tra.vcf");
         const data = await igvxhr.loadString(url, {});
         const parser = new VcfParser();
-        parser.parseHeader(data);
-        const featureList = parser.parseFeatures(data);
+        let dataWrapper = getDataWrapper(data);
+        await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const featureList = await parser.parseFeatures(dataWrapper);
 
         // 1	564466	26582	N	<TRA>	.	PASS	PRECISE;SVMETHOD=Snifflesv1.0.2;CHR2=MT;END=3916;STD_quant_start=198.695999;STD_quant_stop=234.736235;Kurtosis_quant_start=0.913054;Kurtosis_quant_stop=-0.183504;SVTYPE=TRA;SUPTYPE=SR;SVLEN=-1199826434;STRANDS=-+;STRANDS2=2,9,2,9;RE=11	GT:DR:DV	./.:.:11
         const tra = featureList[0];

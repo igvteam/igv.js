@@ -303,25 +303,6 @@ suite("testBed", function () {
         assert.equal(trackType, "interact");
     })
 
-    test("gcnv", async function () {
-
-        const featureSource = FeatureSource({
-            url: require.resolve("./data/bed/gcnv_track_example_data.chr22.bed")
-        }, genome);
-
-        const trackType = await featureSource.trackType();
-        const header = await featureSource.getHeader();
-
-        assert.equal(header.format, "gcnv");
-        assert.equal(trackType, "gcnv");
-        assert.equal(header.columnNames.length, 172);
-        assert.equal(header.highlight.length, 2);
-
-        const features = await featureSource.getFeatures({chr: "chr22", start: 0, end: Number.MAX_SAFE_INTEGER});
-        assert.equal(features.length, 10);
-
-    })
-
     test("Chr aliasing", async function () {
 
         const config = {

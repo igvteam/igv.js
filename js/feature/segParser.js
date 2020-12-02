@@ -44,9 +44,10 @@ const sampleKeyColumn = 0,
     endColumn = 3;
 
 class SegParser {
-    parseHeader(data) {
-        const lines = StringUtils.splitLines(data);
-        for (let line of lines) {
+
+    async parseHeader(dataWrapper) {
+        let line;
+        while((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("#")) {
                 // skip
             } else {
@@ -58,16 +59,15 @@ class SegParser {
         return this.header;
     }
 
-    parseFeatures(data) {
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
+    async parseFeatures(dataWrapper) {
+
         const allFeatures = [];
         if (!this.header) {
-            this.header = this.parseHeader(nextLine());  // This will only work for non-indexed files
+            this.header = await this.parseHeader(await dataWrapper.nextLine());  // This will only work for non-indexed files
         }
         const dataColumn = this.header.headings.length - 1;
         let line;
-        while ((line = nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split("\t");
             if (tokens.length > dataColumn) {
                 allFeatures.push({

@@ -25,9 +25,8 @@ class GWASParser {
         }
     }
 
-    parseHeader(data) {
-        const dataWrapper = getDataWrapper(data);
-        const headerLine = dataWrapper.nextLine();
+    async parseHeader(dataWrapper) {
+        const headerLine = await dataWrapper.nextLine();
         return this.parseHeaderLine(headerLine);
     }
 
@@ -61,9 +60,8 @@ class GWASParser {
         return this.columns;
     }
 
-    parseFeatures(data) {
-        if (!data) return null;
-        const dataWrapper = getDataWrapper(data);
+    async parseFeatures(dataWrapper) {
+
         const allFeatures = [];
         const headerLine = dataWrapper.nextLine();
         if (!this.columns) {

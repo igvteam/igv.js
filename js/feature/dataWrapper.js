@@ -24,23 +24,25 @@
  * THE SOFTWARE.
  */
 
-function getDataWrapper (data) {
+function getDataWrapper(data) {
 
-        if (typeof(data) == 'string' || data instanceof String) {
-            return new StringDataWrapper(data);
-        } else {
-            return new ByteArrayDataWrapper(data);
-        }
+    if (typeof (data) == 'string' || data instanceof String) {
+        return new StringDataWrapper(data);
+    } else {
+        return new ByteArrayDataWrapper(data);
     }
+}
 
 
 // Data might be a string, or an UInt8Array
-    var StringDataWrapper = function (string) {
+class StringDataWrapper {
+
+    constructor(string) {
         this.data = string;
         this.ptr = 0;
     }
 
-    StringDataWrapper.prototype.nextLine = function () {
+    nextLine() {
         //return this.split(/\r\n|\n|\r/gm);
         var start = this.ptr,
             idx = this.data.indexOf('\n', start);
@@ -48,8 +50,7 @@ function getDataWrapper (data) {
         if (idx > 0) {
             this.ptr = idx + 1;   // Advance pointer for next line
             return idx === start ? "" : this.data.substring(start, idx).trim();
-        }
-        else {
+        } else {
             // Last line
             this.ptr = this.data.length;
             return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
@@ -58,34 +59,36 @@ function getDataWrapper (data) {
 
     // For use in applications where whitespace carries meaning
     // Returns "" for an empty row (not undefined like nextLine), since this is needed in AED
-    StringDataWrapper.prototype.nextLineNoTrim = function () {
+    nextLineNoTrim() {
         var start = this.ptr,
             idx = this.data.indexOf('\n', start),
             data = this.data;
 
         if (idx > 0) {
             this.ptr = idx + 1;   // Advance pointer for next line
-            if(idx > start && data.charAt(idx-1) === '\r') {
+            if (idx > start && data.charAt(idx - 1) === '\r') {
                 // Trim CR manually in CR/LF sequence
                 return data.substring(start, idx - 1);
             }
             return data.substring(start, idx);
-        }
-        else {
+        } else {
             var length = data.length;
             this.ptr = length;
             // Return undefined only at the very end of the data
             return (start >= length) ? undefined : data.substring(start);
         }
     }
+}
 
-    var ByteArrayDataWrapper = function (array) {
+class ByteArrayDataWrapper {
+
+    constructor(array) {
         this.data = array;
         this.length = this.data.length;
         this.ptr = 0;
     }
 
-    ByteArrayDataWrapper.prototype.nextLine = function () {
+    nextLine() {
 
         var c, result;
         result = "";
@@ -104,7 +107,10 @@ function getDataWrapper (data) {
     }
 
     // The ByteArrayDataWrapper does not do any trimming by default, can reuse the function
-    ByteArrayDataWrapper.prototype.nextLineNoTrim = ByteArrayDataWrapper.prototype.nextLine;
+    nextLineNoTrim() {
+        return this.nextLine();
+    }
 
+}
 
 export default getDataWrapper;
