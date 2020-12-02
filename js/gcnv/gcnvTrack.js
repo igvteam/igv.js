@@ -5,7 +5,6 @@ import {isSimpleType} from "../util/igvUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
-import deepCopy from "../util/deepCopy.js"
 
 const X_PIXEL_DIFF_THRESHOLD = 1;
 

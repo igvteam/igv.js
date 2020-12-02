@@ -570,3 +570,4 @@ function getGlobalObject() {
 }
 
 export default igvxhr
+export {arrayBufferToString}
