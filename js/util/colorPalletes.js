@@ -112,7 +112,7 @@ function appleCrayonRGB(name) {
     return `rgb(${ r },${ g },${ b })`
 }
 
-function appleCrayonRGBAlpha(name, alpha) {
+function appleCrayonRGBA(name, alpha) {
     const { r, g, b } = appleCrayonRGBPalette[ name ]
     return `rgba(${ r },${ g },${ b },${ alpha })`
 }
@@ -365,4 +365,4 @@ function randomGrey(min, max) {
 
 }
 
-export {appleCrayonRGB, appleCrayonRGBAlpha, appleCrayonPalette, PaletteColorTable, randomColor, rgbaColor, rgbColor, greyScale, randomGrey, randomRGB, randomRGBConstantAlpha };
+export {appleCrayonRGB, appleCrayonRGBA, appleCrayonPalette, PaletteColorTable, randomColor, rgbaColor, rgbColor, greyScale, randomGrey, randomRGB, randomRGBConstantAlpha };

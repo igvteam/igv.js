@@ -935,6 +935,10 @@ class Browser {
 
         }
 
+        // console.log(`${ Date.now() } - browser - resize`)
+
+        if (this.centerGuide) this.centerGuide.resize();
+
         for (let trackView of this.trackViews) {
             trackView.resize(viewportWidth)
         }

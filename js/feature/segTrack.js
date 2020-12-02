@@ -451,27 +451,24 @@ class SegTrack extends TrackBase {
     }
 }
 
-function drawSegTrackSampleNames(ctx, features, canvasTop, width, height) {
-
-    ctx.canvas.style.width = (`${ width }px`)
-    ctx.canvas.style.height = (`${ height }px`)
-
-    ctx.canvas.width = Math.floor(window.devicePixelRatio * width)
-    ctx.canvas.height = Math.floor(window.devicePixelRatio * height)
-
-    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+const fudge = 4
+function drawSegTrackSampleNames(ctx, features, canvasTop, canvasWidth, canvasHeight) {
 
     ctx.canvas.style.top = `${ canvasTop }px`
     ctx.translate(0, -canvasTop)
-    
-    const hitlist = {}
+
+    const hitList = {}
     for (let feature of features) {
-        if (hitlist[ feature.row ]) {
+        if (hitList[ feature.row ]) {
+            // nadda
         } else {
-            hitlist[ feature.row ] = feature
-            const { y, h } = feature.pixelRect
+
+            hitList[ feature.row ] = feature
+
             const string = feature.sampleKey || feature.sample
-            ctx.fillText(string, 0, y + h)
+
+            const { y, h } = feature.pixelRect
+            ctx.fillText(string, canvasWidth - fudge, y + h)
         }
     }
 
