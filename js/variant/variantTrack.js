@@ -466,9 +466,9 @@ class VariantTrack extends TrackBase {
     }
 }
 
-function drawVariantTrackSampleNames(ctx, features, canvasTop, height) {
+function drawVariantTrackSampleNames(ctx, features, canvasTop) {
 
-    console.log(`draw variant track sample names - features(${ features.length })`)
+    console.log(`variant track - draw sample names - features(${ features.length })`)
 
     // ctx.canvas.height = height
     // ctx.canvas.style.top = `${ canvasTop }px`
