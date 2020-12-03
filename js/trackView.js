@@ -649,12 +649,14 @@ function populateViewportContainer(browser, referenceFrameList, trackView) {
 
     trackView.updateViewportForMultiLocus();
 
-    if (false === scrollbarExclusionTypes.has(trackView.track.type)) {
-        trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, [...trackView.viewports, trackView.sampleNameViewport])
-    } else {
-        const $shim = $('<div>', {class: 'igv-scrollbar-shim'})
-        $shim.insertAfter(trackView.$viewportContainer)
-    }
+    trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, [...trackView.viewports, trackView.sampleNameViewport])
+
+    // if (false === scrollbarExclusionTypes.has(trackView.track.type)) {
+    //     trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, [...trackView.viewports, trackView.sampleNameViewport])
+    // } else {
+    //     const $shim = $('<div>', {class: 'igv-scrollbar-shim'})
+    //     $shim.insertAfter(trackView.$viewportContainer)
+    // }
 }
 
 function updateViewportShims(viewports, $viewportContainer) {
