@@ -1,22 +1,13 @@
 import "./utils/mockObjects.js"
 import TDFReader from "../js/tdf/tdfReader.js";
 import TDFSource from "../js/tdf/tdfSource.js";
+import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testTDF", function () {
 
-const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
-
-    // The TDF file uses chr1, chr2, ... convention.  Define genome as 1,2,3... to test chromosome aliasing
-    const genome = {
-        getChromosome: function (name) {
-            return {bpLength: 51304566};
-        },
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr.substr(3) : +chr;
-        }
-    }
-
+    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
     test("TDF source get features (zoom)", async function () {
         this.timeout(10000);
@@ -26,7 +17,7 @@ const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
             end = 24375399,
             bpPerPixel = 51304566 / (Math.pow(2, 6) * 700);
 
-        const tdfSource = new TDFSource({url: url}, genome);
+        const tdfSource = FeatureSource({format: 'tdf', url: url}, genome);
         const features = await tdfSource.getFeatures({chr, start, end, bpPerPixel});
         assert.ok(features);
     })
@@ -70,7 +61,7 @@ const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
 
     test("TDF variable step tile", async function () {
-        this.timeout(10000);
+        this.timeout(20000);
         const url = dataURL + "tdf/gstt1_sample.bam.tdf";
         const tdfReader = new TDFReader({url: url}, genome);
         const dataset = await tdfReader.readDataset("chr22", "mean", 6);
@@ -86,7 +77,7 @@ const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 
 
     test("TDF bed tile", async function () {
-        this.timeout(10000);
+        this.timeout(20000);
         const url = dataURL + "tdf/gstt1_sample.bam.tdf";
         const tdfReader = new TDFReader({url: url}, genome);
         const dataset = await tdfReader.readDataset("chr22", "raw");

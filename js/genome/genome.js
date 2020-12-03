@@ -28,6 +28,7 @@ import FastaSequence from "./fasta.js";
 import igvxhr from "../igvxhr.js";
 import {StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import version from "../version.js";
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json";
 const splitLines = StringUtils.splitLines;
@@ -62,7 +63,7 @@ const GenomeUtils = {
 
             // Get default genomes
             if(config.loadDefaultGenomes !== false) {
-                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}`;  // prevent caching
+                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
                 const jsonArray = await igvxhr.loadJson(url, {});
                 processJson(jsonArray);
             }
@@ -104,6 +105,7 @@ class Genome {
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
+        this.featureDB = {};   // Hash of name -> feature, used for search function.
 
         this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
         if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {

@@ -29,4 +29,6 @@ global.navigator = {
 
 global.DOMParser = DOMParser;
 
+global.atob = require('atob')
+
 

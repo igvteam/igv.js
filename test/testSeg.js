@@ -2,14 +2,9 @@ import "./utils/mockObjects.js"
 import FeatureSource from "../js/feature/featureSource.js";
 import GenomeUtils from "../js/genome/genome.js";
 import {assert} from 'chai';
+import {genome} from "./utils/Genome.js";
 
 suite("testSeg", function () {
-
-const genome = {
-        getChromosomeName: function (chr) {
-            return chr.startsWith("chr") ? chr : "chr" + chr;
-        }
-    }
 
     const dataURL = "https://data.broadinstitute.org/igvdata/test/data/";
 

@@ -29,7 +29,6 @@ import IGVGraphics from "../igv-canvas.js";
 import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
 import GtexUtils from "./gtexUtils.js";
-import deepCopy from "../util/deepCopy.js"
 
 class EqtlTrack extends TrackBase {
 
@@ -77,10 +76,9 @@ class EqtlTrack extends TrackBase {
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
 
-        var track = this,
-            yScale = (track.dataRange.max - track.dataRange.min) / pixelHeight;
+        const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight;
 
-        var font = {
+        const font = {
             'font': 'normal 10px Arial',
             'textAlign': 'right',
             'strokeStyle': "black"
@@ -90,29 +88,21 @@ class EqtlTrack extends TrackBase {
 
         // Determine a tick spacing such that there is at least 10 pixels between ticks
 
-        var n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight);
+        const n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight);
 
-
-        for (var p = 4; p <= track.dataRange.max; p += n) {
-
-            var x1,
-                x2,
-                y1,
-                y2,
-                ref;
+        for (let p = 4; p <= this.dataRange.max; p += n) {
 
             // TODO: Dashes may not actually line up with correct scale. Ask Jim about this
 
-            ref = 0.85 * pixelWidth;
-            x1 = ref - 5;
-            x2 = ref;
+            const ref = 0.85 * pixelWidth;
+            const x1 = ref - 5;
+            const x2 = ref;
+            const y = pixelHeight - (p - this.dataRange.min) / yScale;
 
-            y1 = y2 = pixelHeight - Math.round((p - track.dataRange.min) / yScale);
+            IGVGraphics.strokeLine(ctx, x1, y, x2, y, font); // Offset dashes up by 2 pixel
 
-            IGVGraphics.strokeLine(ctx, x1, y1, x2, y2, font); // Offset dashes up by 2 pixel
-
-            if (y1 > 8) {
-                IGVGraphics.fillText(ctx, p, x1 - 1, y1 + 2, font);
+            if (y > 8) {
+                IGVGraphics.fillText(ctx, p, x1 - 1, y + 2, font);
             } // Offset numbers down by 2 pixels;
         }
 
@@ -134,61 +124,36 @@ class EqtlTrack extends TrackBase {
 
     draw(options) {
 
-        var self = this,
-            featureList = options.features,
-            ctx = options.context,
-            bpPerPixel = options.bpPerPixel,
-            bpStart = options.bpStart,
-            pixelWidth = options.pixelWidth,
-            pixelHeight = options.pixelHeight,
-            bpEnd = bpStart + pixelWidth * bpPerPixel + 1,
-            yScale = (self.dataRange.max - self.dataRange.min) / pixelHeight,
-            selection = options.referenceFrame.selection;
+        const ctx = options.context;
 
-        // Background
-        if (this.background) IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+
+        if (this.background) {
+            IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': this.background});
+        }
         IGVGraphics.strokeLine(ctx, 0, pixelHeight - 1, pixelWidth, pixelHeight - 1, {'strokeStyle': this.divider});
 
-        if (ctx) {
 
-            var len = featureList.length;
+        ctx.save();
 
-            ctx.save();
+        const drawEqtls = (drawSelected) => {
 
-            // Draw in two passes, with "selected" eqtls drawn last
-            drawEqtls(false);
-            drawEqtls(true);
+            const radius = drawSelected ? 2 * this.dotSize : this.dotSize;
+            const bpStart = options.bpStart;
+            const yScale = (this.dataRange.max - this.dataRange.min) / pixelHeight;
+            const selection = options.referenceFrame.selection;
 
-            ctx.restore();
+            for (let eqtl of options.features) {
 
-        }
-
-
-        function drawEqtls(drawSelected) {
-
-            var radius = drawSelected ? 2 * self.dotSize : self.dotSize,
-                eqtl,
-                i,
-                px,
-                py,
-                color,
-                isSelected,
-                snp,
-                geneName,
-                capped;
-
-            for (i = 0; i < len; i++) {
-
-                eqtl = featureList[i];
-                px = (Math.round(eqtl.position - bpStart + 0.5)) / bpPerPixel;
+                const px = (eqtl.start - bpStart + 0.5) / options.bpPerPixel;
                 if (px < 0) continue;
                 else if (px > pixelWidth) break;
 
+                const snp = eqtl.snp.toUpperCase();
+                const geneName = eqtl[this.geneField].toUpperCase();
 
-                snp = eqtl.snp.toUpperCase();
-                geneName = eqtl[self.geneField].toUpperCase();
-
-                isSelected = selection &&
+                const isSelected = selection &&
                     (selection.snp === snp || selection.gene === geneName);
 
                 if (!drawSelected || isSelected) {
@@ -199,21 +164,23 @@ class EqtlTrack extends TrackBase {
                         selection.addGene(geneName);
                     }
 
-                    var mLogP = -Math.log(eqtl[self.pValueField]) / Math.LN10;
-                    if (mLogP >= self.dataRange.min) {
-
-                        if (mLogP > self.dataRange.max) {
-                            mLogP = self.dataRange.max;
+                    var mLogP = -Math.log(eqtl[this.pValueField]) / Math.LN10;
+                    if (mLogP >= this.dataRange.min) {
+                        let capped;
+                        if (mLogP > this.dataRange.max) {
+                            mLogP = this.dataRange.max;
                             capped = true;
                         } else {
                             capped = false;
 
                         }
 
-                        py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - self.dataRange.min) / yScale));
+                        const py = Math.max(0 + radius, pixelHeight - Math.round((mLogP - this.dataRange.min) / yScale));
                         eqtl.px = px;
                         eqtl.py = py;
+                        eqtl.radius = radius;
 
+                        let color;
                         if (drawSelected && selection) {
                             color = selection.colorForGene(geneName);
                             IGVGraphics.setProperties(ctx, {fillStyle: color, strokeStyle: "black"});
@@ -229,34 +196,36 @@ class EqtlTrack extends TrackBase {
             }
         }
 
-    };
+
+        // Draw in two passes, with "selected" eqtls drawn last
+        drawEqtls(false);
+        drawEqtls(true);
+
+        ctx.restore();
+
+
+    }
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
      */
-    popupData(config) {
+    popupData(clckState) {
 
-        let features = config.viewport.getCachedFeatures();
+        let features = clckState.viewport.getCachedFeatures();
         if (!features || features.length === 0) return [];
 
-        let genomicLocation = config.genomicLocation,
-            xOffset = config.x,
-            yOffset = config.y,
-            referenceFrame = config.viewport.referenceFrame,
-            tolerance = 2 * this.dotSize * referenceFrame.bpPerPixel,
-            dotSize = this.dotSize,
-            tissue = this.name,
-            popupData = [];
+        const tolerance = 3;
+        const tissue = this.name;
+        const popupData = [];
 
-        features.forEach(function (feature) {
-            if (feature.end >= genomicLocation - tolerance &&
-                feature.start <= genomicLocation + tolerance &&
-                feature.py - yOffset < 2 * dotSize) {
+        for (let feature of features) {
+            // Hit test --use square vs circle for efficiency (no sqrt)
+            if (Math.abs(feature.px - clckState.canvasX) < (feature.radius + tolerance) &&
+                Math.abs(feature.py - clckState.canvasY) < (feature.radius + tolerance)) {
 
                 if (popupData.length > 0) {
                     popupData.push("<hr>");
                 }
-
                 popupData.push(
                     {name: "snp id", value: feature.snp},
                     {name: "gene id", value: feature.geneId},
@@ -265,10 +234,9 @@ class EqtlTrack extends TrackBase {
                     {name: "tissue", value: tissue});
 
             }
-        });
+        }
+
         return popupData;
-
-
     }
 
     menuItemList() {

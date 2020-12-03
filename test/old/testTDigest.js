@@ -17,7 +17,7 @@ function runTDigestTests() {
 
     })
 
-    function printExamples () {
+    function printExamples() {
 
 // Note:  Convenience methd, no real tests here.
 

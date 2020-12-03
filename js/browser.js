@@ -57,6 +57,8 @@ import {
     URIUtils
 } from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
+import {defaultNucleotideColors} from "./util/nucleotideColors.js"
+import search from "./search.js"
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -101,7 +103,6 @@ class Browser {
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
-        this.featureDB = {};   // Hash of name -> feature, used for search function.
         this.constants = {
             dragThreshold: 3,
             scrollThreshold: 5,
@@ -133,6 +134,10 @@ class Browser {
         this.crossDomainProxy = options.crossDomainProxy;
         this.formats = options.formats;
         this.trackDefaults = options.trackDefaults;
+        this.nucleotideColors = options.nucleotideColors || defaultNucleotideColors;
+        for (let key of Object.keys(this.nucleotideColors)) {
+            this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
+        }
 
         if (options.search) {
             this.searchConfig = {
@@ -419,8 +424,8 @@ class Browser {
             this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
         } catch (error) {
             // Couldn't find initial locus
-            const errorString = 'Unrecognized locus ' + initialLocus;
-            Alert.presentAlert(errorString, undefined);
+            error.message()
+            Alert.presentAlert(new Error(`Unrecognized locus ${ initialLocus }`), undefined);
             this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
         }
 
@@ -452,7 +457,7 @@ class Browser {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES;
                 const reference = knownGenomes[genomeID];
                 if (!reference) {
-                    Alert.presentAlert("Unknown genome id: " + genomeID, undefined);
+                    Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
                 }
                 return reference;
             } else {
@@ -619,7 +624,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                Alert.presentAlert("Unknown file type: " + config.url || config, undefined);
+                Alert.presentAlert(new Error(`Unknown file type: ${ config.url || config }`), undefined);
                 return newTrack;
             }
 
@@ -648,11 +653,12 @@ class Browser {
                     "404": "Not found"
                 };
             console.error(error);
-            let msg = error.message || error.toString();
+            let msg = error.message || error.error ||  error.toString();
             if (httpMessages.hasOwnProperty(msg)) {
-                msg = httpMessages[msg] + ": " + config.url;
+                msg = httpMessages[msg];
             }
-            Alert.presentAlert(msg, undefined);
+            msg += (": " + config.url);
+            Alert.presentAlert(new Error(msg), undefined);
         } finally {
             if (!noSpinner) {
                 this.stopSpinner();
@@ -1281,50 +1287,37 @@ class Browser {
         return result;
     };
 
+    /**
+     * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
+     */
     async goto(chr, start, end) {
         return this.search(chr + ":" + start + "-" + end);
     }
 
     async search(string, init) {
 
-        if (undefined === string || '' === string) {
-            return
-        }
+        const locusObjects = await search(this, string);
+        if (locusObjects && (await locusObjects).length > 0) {
 
-        if (string && string.trim().toLowerCase() === "all" || string === "*") {
-            string = "all";
-        }
-
-        const loci = string.split(' ')
-
-        let referenceFrameList = await createReferenceFrameList(this, loci)
-        if (undefined === referenceFrameList) {
-            // If nothing is found and there are spaces, consider the possibility that the search term itself has spaces
-            referenceFrameList = await createReferenceFrameList(this, [string])
-        }
-
-        if (referenceFrameList && referenceFrameList.length > 0) {
+            const referenceFrameList = createReferenceFrameList(this, locusObjects)
 
             this.referenceFrameList = referenceFrameList
-
             emptyViewportContainers(this.trackViews)
-
             for (let trackView of this.trackViews) {
                 populateViewportContainer(this, referenceFrameList, trackView);
             }
 
+            this.updateUIWithReferenceFrameListChange(referenceFrameList);
+
+            if (!init) {
+                this.updateViews();
+            }
+
+            return referenceFrameList;
         } else {
             throw new Error(`Unrecognized locus ${string}`)
         }
-
-        this.updateUIWithReferenceFrameListChange(referenceFrameList);
-
-        if (!init) {
-            this.updateViews();
-        }
-
-        return referenceFrameList;
-    };
+    }
 
     async loadSampleInformation(url) {
         var name = url;
@@ -1445,24 +1438,38 @@ class Browser {
         }
 
         const trackJson = [];
+        const errors = [];
         for (let {track} of this.trackViews) {
-
-            let config;
-            if (typeof track.getState === "function") {
-                config = track.getState();
-            } else {
-                config = track.config;
-            }
-
-            if (config) {
-                // null backpointer to browser
-                if (config.browser) {
-                    delete config.browser;
+            try {
+                let config;
+                if (typeof track.getState === "function") {
+                    config = track.getState();
+                } else {
+                    config = track.config;
                 }
-                config.order = track.order; //order++;
-                trackJson.push(config);
+
+                if (config) {
+                    // null backpointer to browser
+                    if (config.browser) {
+                        delete config.browser;
+                    }
+                    config.order = track.order; //order++;
+                    trackJson.push(config);
+                }
+            } catch (e) {
+                errors.push(e);
             }
         }
+
+        if(errors.length > 0) {
+            let n = 1;
+            let message = 'Errors encountered saving session:';
+            for(let e of errors) {
+                message += ` (${n++}) ${e.toString()}.`;
+            }
+            throw Error(message);
+        }
+
 
         const locaTrackFiles = trackJson.filter((track) => {
             track.url && FileUtils.isFilePath(track.url)

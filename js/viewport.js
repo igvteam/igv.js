@@ -3,12 +3,13 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { Popover } from '../node_modules/igv-ui/dist/igv-ui.js';
-import C2S from "./canvas2svg.js";
+import { Popover, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import ViewportBase from "./viewportBase.js";
 import {FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import MenuPopup from "./ui/menuPopup.js";
+import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -21,6 +22,9 @@ class ViewPort extends ViewportBase {
     }
 
     initializationHelper() {
+
+        this.menuPopup = new MenuPopup(this.trackView.$viewportContainer)
+        this.menuPopup.$popover.hide()
 
         addMouseHandlers.call(this);
         this.$spinner = $('<div class="igv-viewport-spinner">');
@@ -216,6 +220,7 @@ class ViewPort extends ViewportBase {
             // Track might have been removed during load
             if (this.trackView && this.trackView.disposed !== true) {
                 this.showMessage(NOT_LOADED_MESSAGE);
+                Alert.presentAlert(error);
                 console.error(error)
             }
         } finally {
@@ -625,26 +630,11 @@ function addMouseHandlers() {
         if (menuItems.length > 0) {
             menuItems.push({label: $('<HR>')});
         }
-        menuItems.push(
-            {
-                label: 'Save Image (PNG)',
-                click: function () {
-                    self.saveImage();
-                }
-            });
 
-        menuItems.push(
-            {
-                label: 'Save Image (SVG)',
-                click: function () {
-                    self.saveSVG();
-                }
-            });
+        menuItems.push({ label: 'Save Image (PNG)', click: () => self.saveImage() });
+        menuItems.push({ label: 'Save Image (SVG)', click: () => self.saveSVG()   });
 
-        if (self.popover) self.popover.dispose()
-        self.popover = new Popover(self.trackView.$viewportContainer.get(0));
-        self.popover.presentMenu(e, menuItems);
-
+        self.menuPopup.presentTrackContextMenu(e, menuItems)
     });
 
 

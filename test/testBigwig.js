@@ -1,17 +1,20 @@
 import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import BWReader from "../js/bigwig/bwReader.js";
+import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai';
 
 suite("testBigWig", function () {
 
-const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
+    const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
     test("No data", async function () {
 
         this.timeout(10000);
-        const bw = new BWSource(
-            {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
+        const bw = FeatureSource (
+            {
+                format: 'bigwig',
+                url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
         const features = await bw.getFeatures({chr: 'NoSuchChromosome', start: 0, end: 100});
         assert.equal(0, features.length);
@@ -20,7 +23,7 @@ const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
     test("Many chromosomes", async function () {
 
-        this.timeout(10000);
+        this.timeout(20000);
         const bw = new BWSource(
             {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
@@ -92,7 +95,7 @@ const dataURL = "https://data.broadinstitute.org/igvdata/test/data/"
 
     test("Wig features", async function () {
 
-        this.timeout(10000);
+        this.timeout(20000);
         //chr21:19,146,376-19,193,466
         const url = dataURL + "bigwig/bigWigExample.bw",
             chr = "chr21",

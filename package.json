@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.7.0",
+  "version": "2.7.2",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
@@ -44,6 +44,7 @@
     "@babel/plugin-transform-runtime": "^7.11.5",
     "@babel/preset-env": "^7.11.5",
     "@rollup/plugin-commonjs": "^11.0.2",
+    "atob": "^2.1.2",
     "btoa": "^1.2.1",
     "chai": "^4.2.0",
     "core-js": "^3.6.4",
@@ -61,7 +62,7 @@
     "xmldom": "^0.4.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui#136661f5",
+    "igv-ui": "github:igvteam/igv-ui#23d667e6",
     "igv-utils": "github:igvteam/igv-utils#0e7dbafb"
   }
 }

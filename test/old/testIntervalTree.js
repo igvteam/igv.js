@@ -56,10 +56,10 @@ function runIntervalTreeTests() {
         var url = "data/peak/test.broadPeak",
             featureSource;
 
-        featureSource = new igv.FeatureSource({ type: 'bed', url: url });
+        featureSource = new igv.FeatureSource({type: 'bed', url: url});
         ok(featureSource);
 
-        featureSource.getFeatures("chr22", 16847690, 16857344, function(featureList) {
+        featureSource.getFeatures("chr22", 16847690, 16857344, function (featureList) {
 
             //var prettyNumbers = [];
             //featureList.forEach(function(f, i, fs){

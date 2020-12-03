@@ -4,9 +4,9 @@ import {assert} from 'chai';
 
 suite("testGenome", function () {
 
-test("Genome coordinates", async function () {
+    test("Genome coordinates", async function () {
 
-        this.timeout(100000);
+        this.timeout(200000);
 
         const reference = {
             id: "hg19",

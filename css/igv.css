@@ -210,18 +210,7 @@
       cursor: pointer;
       background-color: #25597f; }
 
-.igv-trackgear-container {
-  position: relative;
-  width: 20px;
-  height: 20px;
-  margin-left: 4px;
-  color: #7F7F7F; }
-
-.igv-trackgear-container:hover {
-  cursor: pointer;
-  color: #444; }
-
-.igv-trackgear-popover {
+.igv-menu-popup {
   position: absolute;
   top: 0;
   left: 0;
@@ -243,24 +232,27 @@
   justify-content: flex-start;
   align-items: flex-end;
   text-align: left; }
-  .igv-trackgear-popover > div:not(:first-child) {
+  .igv-menu-popup > div:not(:first-child) {
     width: 100%; }
-    .igv-trackgear-popover > div:not(:first-child) > div {
+    .igv-menu-popup > div:not(:first-child) > div {
       background: white; }
-    .igv-trackgear-popover > div:not(:first-child) > div:last-child {
+    .igv-menu-popup > div:not(:first-child) > div.context-menu {
+      padding-left: 4px;
+      padding-right: 4px; }
+    .igv-menu-popup > div:not(:first-child) > div:last-child {
       border-bottom-left-radius: 4px;
       border-bottom-right-radius: 4px;
       border-bottom-color: transparent;
       border-bottom-style: solid;
       border-bottom-width: thin; }
-    .igv-trackgear-popover > div:not(:first-child) > div:hover {
+    .igv-menu-popup > div:not(:first-child) > div:hover {
       background: #efefef; }
 
-.igv-trackgear-popover-shim {
+.igv-menu-popup-shim {
   padding-left: 8px;
   padding-right: 8px; }
 
-.igv-trackgear-popover-header {
+.igv-menu-popup-header {
   position: relative;
   width: 100%;
   height: 24px;
@@ -277,16 +269,16 @@
   flex-wrap: nowrap;
   justify-content: flex-end;
   align-items: center; }
-  .igv-trackgear-popover-header div {
+  .igv-menu-popup-header div {
     margin-right: 4px;
     height: 12px;
     width: 12px;
     color: #7F7F7F; }
-  .igv-trackgear-popover-header div:hover {
+  .igv-menu-popup-header div:hover {
     cursor: pointer;
     color: #444; }
 
-.igv-trackgear-popover-check-container {
+.igv-menu-popup-check-container {
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
@@ -295,14 +287,14 @@
   width: 100%;
   height: 20px;
   background-color: transparent; }
-  .igv-trackgear-popover-check-container div {
+  .igv-menu-popup-check-container div {
     padding-top: 2px;
     padding-left: 8px; }
-  .igv-trackgear-popover-check-container div:first-child {
+  .igv-menu-popup-check-container div:first-child {
     position: relative;
     width: 12px;
     height: 12px; }
-    .igv-trackgear-popover-check-container div:first-child svg {
+    .igv-menu-popup-check-container div:first-child svg {
       position: absolute;
       width: 12px;
       height: 12px; }
@@ -908,6 +900,17 @@
   height: 100%;
   z-index: 256;
   background-color: rgba(68, 134, 247, 0.25); }
+
+.igv-trackgear-container {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  margin-left: 4px;
+  color: #7F7F7F; }
+
+.igv-trackgear-container:hover {
+  cursor: pointer;
+  color: #444; }
 
 .igv-track-label {
   position: absolute;
