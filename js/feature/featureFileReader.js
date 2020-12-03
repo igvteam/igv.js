@@ -33,7 +33,6 @@ import GWASParser from "../gwas/gwasParser.js";
 import AEDParser from "../aed/AEDParser.js";
 import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import {loadIndex} from "../bam/indexFactory.js";
-import {TribbleIndex} from "./tribble.js"
 import getDataWrapper from "./dataWrapper.js";
 import TabixBufferedLineReader from "../util/tabixBufferedLineReader.js";
 
