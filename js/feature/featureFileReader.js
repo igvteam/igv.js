@@ -34,7 +34,7 @@ import AEDParser from "../aed/AEDParser.js";
 import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import {loadIndex} from "../bam/indexFactory.js";
 import getDataWrapper from "./dataWrapper.js";
-import TabixBufferedLineReader from "../util/tabixBufferedLineReader.js";
+import BGZipLineReader from "../util/BGZipLineReader.js";
 
 
 const isString = StringUtils.isString;
@@ -111,7 +111,7 @@ class FeatureFileReader {
 
                 let dataWrapper;
                 if (index.tabix) {
-                    dataWrapper = new TabixBufferedLineReader(this.config);
+                    dataWrapper = new BGZipLineReader(this.config);
                 } else {
                    // Tribble
                    const maxSize = Object.values(index.chrIndex)
