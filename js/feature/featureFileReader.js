@@ -110,9 +110,6 @@ class FeatureFileReader {
                     throw new Error("Unable to load index: " + this.config.indexURL);
                 }
 
-                // Load the file header (not HTTP header) for an indexed file.
-                const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
-
                 let dataWrapper;
                 if (index.tabix) {
                     dataWrapper = new TabixBufferedLineReader(this.config);
