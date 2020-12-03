@@ -163,4 +163,4 @@ class TribbleIndex {
     }
 }
 
-export {parseTribbleIndex, loadTribbleIndex, TribbleIndex};
+export {parseTribbleIndex, loadTribbleIndex};
