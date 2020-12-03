@@ -159,5 +159,40 @@ suite("testVariant", function () {
 
     })
 
+    test("parse svtype = BND ", async function () {
+
+        const url = require.resolve("./data/vcf/svtype_BND.vcf");
+        const data = await igvxhr.loadString(url, {});
+        const parser = new VcfParser();
+        let dataWrapper = getDataWrapper(data);
+        await parser.parseHeader(dataWrapper);
+
+        dataWrapper = getDataWrapper(data)
+        const featureList = await parser.parseFeatures(dataWrapper);
+
+        assert.equal(featureList.length, 6);
+    })
+
+    test("track svtype = BND", async function () {
+
+        const config = {
+            url: require.resolve("./data/vcf/svtype_BND.vcf"),
+            indexed: false
+        };
+
+        const browser = {genome};
+
+        const track = await Browser.prototype.createTrack.call(browser, config);
+        assert.equal(track.type, "variant");
+
+        const chr = "2";
+        const start = 321681;
+        const end = 321682;
+        const features = await track.getFeatures(chr, start, end);
+
+        assert.equal(features.length, 2);
+
+    })
+
 })
 
