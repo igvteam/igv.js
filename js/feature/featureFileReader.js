@@ -116,7 +116,7 @@ class FeatureFileReader {
                    // Tribble
                    const maxSize = Object.values(index.chrIndex)
                         .flatMap(chr => chr.blocks)
-                        .map(block => block.min)
+                        .map(block => block.max)
                         .reduce((previous, current) =>
                             Math.min(previous, current), Number.MAX_SAFE_INTEGER);
                 
