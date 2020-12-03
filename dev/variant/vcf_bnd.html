@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href="https://igv.org/web/img/favicon.ico" rel="shortcut icon">
+
+    <title>vcf-cnv</title>
+
+</head>
+
+<body>
+
+<p>
+
+<div id="igvDiv" style="padding-top: 10px;padding-bottom: 10px; border:1px solid lightgray"></div>
+
+<script type="module">
+
+    import igv from "../../js";
+
+/*
+    2	321681	bnd_W	G	G]17:198982]	6	PASS	SVTYPE=BND
+    2	321682	bnd_V	T	]13:123456]T	6	PASS	SVTYPE=BND
+    13	123456	bnd_U	C	C[2:321682[	6	PASS	SVTYPE=BND
+    13	123457	bnd_X	A	[17:198983[A	6	PASS	SVTYPE=BND
+    17	198982	bnd_Y	A	A]2:321681]	6	PASS	SVTYPE=BND
+    17	198983	bnd_Z	C	[13:123457[C	6	PASS	SVTYPE=BND
+*/
+
+    var options =
+        {
+            genome: "hg38",
+            locus: ["2:321681", "13:123456", "17:198982"],
+            tracks:
+                [
+                    {
+                        name: "VCF",
+                        type: "variant",
+                        format: "vcf",
+                        url: "../../test/data/vcf/svtype_BND.vcf",
+                        indexed: false,
+                        displayMode: "EXPANDED"
+                    }
+                ]
+
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
+
+</script>
+
+</body>
+
+</html>
