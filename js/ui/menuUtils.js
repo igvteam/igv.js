@@ -68,9 +68,9 @@ const MenuUtils = {
 
         menuItems.push({
                 object: createCheckbox("Autoscale", trackView.track.autoscale),
-                click: () => {
+                click: async () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
-                    trackView.updateViews();
+                    await trackView.updateViews();
                 }
             }
         )
@@ -153,7 +153,7 @@ function visibilityWindowMenuItem(trackView) {
 
     const click = e => {
 
-        const callback = () => {
+        const callback = async () => {
 
             let value = trackView.browser.inputDialog.input.value
             value = '' === value || undefined === value ? -1 : value.trim()
@@ -161,7 +161,7 @@ function visibilityWindowMenuItem(trackView) {
             trackView.track.visibilityWindow = Number.parseInt(value);
             trackView.track.config.visibilityWindow = Number.parseInt(value);
 
-            trackView.updateViews();
+            await trackView.updateViews();
         }
 
         const config =

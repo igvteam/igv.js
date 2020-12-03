@@ -288,7 +288,7 @@ class TrackView {
         }
     }
 
-    resize() {
+    async resize() {
 
         const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
 
@@ -299,7 +299,7 @@ class TrackView {
         const $leftHandGutter = $(this.leftHandGutter);
         this.resizeControlCanvas($leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
 
-        this.updateViews(true);
+        await this.updateViews(true);
     }
 
     /**

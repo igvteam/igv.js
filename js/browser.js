@@ -384,11 +384,11 @@ class Browser {
         await this.loadTrackList(tracks);
 
         if (this.ideogram) {
-            this.ideogram.trackView.updateViews();
+            await this.ideogram.trackView.updateViews();
         }
 
         if (this.rulerTrack) {
-            this.rulerTrack.trackView.updateViews();
+            await this.rulerTrack.trackView.updateViews();
         }
 
         this.updateLocusSearchWidget(this.referenceFrameList[0]);
@@ -584,7 +584,7 @@ class Browser {
         await this.updateViews(undefined, undefined, true);
     }
 
-    removeROI(roiToRemove) {
+    async removeROI(roiToRemove) {
         for (let i = 0; i < this.roi.length; i++) {
             if (this.roi[i].name === roiToRemove.name) {
                 this.roi.splice(i, 1);
@@ -592,14 +592,13 @@ class Browser {
             }
         }
         for (let tv of this.trackViews) {
-            tv.updateViews(undefined, undefined, true);
+            await tv.updateViews(undefined, undefined, true);
         }
     }
-
-    clearROIs() {
+    async clearROIs() {
         this.roi = [];
         for (let tv of this.trackViews) {
-            tv.updateViews(undefined, undefined, true);
+            await tv.updateViews(undefined, undefined, true);
         }
     }
 
@@ -772,7 +771,7 @@ class Browser {
         this.reorderTracks();
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
-            return trackView.updateViews();
+            await trackView.updateViews();
         }
     }
 
@@ -909,7 +908,7 @@ class Browser {
 
         if (this.centerGuide) this.centerGuide.resize();
         for (let trackView of this.trackViews) {
-            trackView.resize();
+            await trackView.resize();
         }
 
         if (this.referenceFrameList && this.referenceFrameList.length > 0) {
