@@ -79,6 +79,8 @@ class MergedTrack extends TrackBase {
 
     draw(options) {
 
+        this.drawTrackNameAsSampleName(this.name)
+
         var i, len, mergedFeatures, trackOptions, dataRange;
 
         mergedFeatures = options.features;    // Array of feature arrays, 1 for each track
