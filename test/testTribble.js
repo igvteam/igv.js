@@ -2,7 +2,6 @@ import {assert} from 'chai';
 import "./utils/mockObjects.js"
 import {genome} from "./utils/Genome.js";
 import {loadIndex} from "../js/bam/indexFactory.js"
-import FeatureSource from "../js/feature/featureSource.js"
 import Browser from "../js/browser.js"
 
 suite("testTribble", function () {
@@ -17,11 +16,11 @@ suite("testTribble", function () {
     test("vcf indexed", async function () {
 
         const config = {
-            url: "https://s3.amazonaws.com/igv.org.demo/SRP32_v4.sorted.0.vcf",
-            indexURL: "https://s3.amazonaws.com/igv.org.demo/SRP32_v4.sorted.0.vcf.idx"
+            url: require.resolve("./data/vcf/SRP32_v4.sorted.0.vcf"),
+            indexURL: require.resolve("./data/vcf/SRP32_v4.sorted.0.vcf.idx")
         };
 
-        const browser = {};
+        const browser = {genome};
 
         const track = await Browser.prototype.createTrack.call(browser, config);
         assert.equal(track.type, "variant");
@@ -34,6 +33,8 @@ suite("testTribble", function () {
         assert.equal(features.length, 3);
 
     })
+
+
 })
 
 
