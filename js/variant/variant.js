@@ -137,6 +137,12 @@ class Variant {
                         this.end = this.end === undefined ? alleleEnd : Math.max(this.end, alleleEnd);
                     }
                 }
+
+                // Default to single base representation @ position for variant types not otherwise handled
+                if(this.start === undefined) {
+                    this.start = this.pos - 1;
+                    this.end = this.pos;
+                }
             }
         }
     }
