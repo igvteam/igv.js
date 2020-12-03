@@ -1,7 +1,7 @@
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2016-2018 The Regents of the University of California 
+ * Copyright (c) 2016-2018 The Regents of the University of California
  * Author: Jim Robinson
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -114,6 +114,9 @@ class InteractionTrack extends TrackBase {
     }
 
     draw(options) {
+
+        this.drawTrackNameAsSampleName(this.name)
+
         if (this.arcType === "proportional") {
             this.drawProportional(options);
         } else {

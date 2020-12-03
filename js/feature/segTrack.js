@@ -247,11 +247,16 @@ class SegTrack extends TrackBase {
 
             }
 
-            if (drawnFeatures.length > 0) {
+            if (drawnFeatures.length > 0 && 'EXPANDED' === this.displayMode) {
                 this.drawSampleNames(drawnFeatures, pixelTop, pixelHeight, drawSegTrackSampleNames)
+            } else {
+                this.drawTrackNameAsSampleName(this.name)
             }
 
         } else {
+
+            this.drawTrackNameAsSampleName(this.name)
+
             console.log("No feature list");
         }
 
