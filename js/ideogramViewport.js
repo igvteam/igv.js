@@ -42,15 +42,16 @@ class IdeogramViewport extends ViewportBase {
     }
 
     setWidth(width) {
-        this.$viewport.width(width);
 
-        this.ctx.canvas.style.width = `${ width }px`;
-        this.ctx.canvas.width = window.devicePixelRatio * width;
+        this.$viewport.width(width)
 
-        this.ctx.canvas.style.height = `${ this.$viewport.height() }px`;
-        this.ctx.canvas.height = window.devicePixelRatio * this.$viewport.height();
+        this.ctx.canvas.style.width = `${ width }px`
+        this.ctx.canvas.width = window.devicePixelRatio * width
 
-        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+        this.ctx.canvas.style.height = `${ this.$viewport.height() }px`
+        this.ctx.canvas.height = window.devicePixelRatio * this.$viewport.height()
+
+        this.ctx.scale(window.devicePixelRatio, window.devicePixelRatio)
 
     }
 
@@ -84,14 +85,6 @@ class IdeogramViewport extends ViewportBase {
         }
 
         this.browser.updateViews()
-
-    }
-
-    checkZoomIn() {
-        return true
-    }
-
-    setTop (contentTop) {
 
     }
 
