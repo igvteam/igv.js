@@ -592,18 +592,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   z-index: 8888;
 }
 
-.igv-scrollbar-shim {
-
-  position: relative;
-
-  width: $igv-scrollbar-outer-width;
-  height: 100%;
-
-  //background-color: deeppink;
-  background-color: white;
-
-}
-
 .igv-scrollbar-outer-div {
 
   position: relative;
@@ -611,8 +599,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   width: $igv-scrollbar-outer-width;
   height: 100%;
 
-  background-color: salmon;
-  //background-color: white;
+  //background-color: salmon;
+  background-color: white;
 
   >div {
 

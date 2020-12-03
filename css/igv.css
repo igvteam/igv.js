@@ -661,17 +661,11 @@
   left: 0;
   z-index: 8888; }
 
-.igv-scrollbar-shim {
-  position: relative;
-  width: 14px;
-  height: 100%;
-  background-color: white; }
-
 .igv-scrollbar-outer-div {
   position: relative;
   width: 14px;
   height: 100%;
-  background-color: salmon; }
+  background-color: white; }
   .igv-scrollbar-outer-div > div {
     cursor: pointer;
     position: absolute;
