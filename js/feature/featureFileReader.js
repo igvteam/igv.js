@@ -36,6 +36,7 @@ import {loadIndex} from "../bam/indexFactory.js";
 import getDataWrapper from "./dataWrapper.js";
 import TabixBufferedLineReader from "../util/tabixBufferedLineReader.js";
 
+
 const isString = StringUtils.isString;
 
 /**
@@ -108,14 +109,17 @@ class FeatureFileReader {
                     throw new Error("Unable to load index: " + this.config.indexURL);
                 }
 
-                // Load the file header (not HTTP header) for an indexed file.
-                let maxSize = "vcf" === this.config.format ? 65000 : 1000
-                const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
-
                 let dataWrapper;
                 if (index.tabix) {
                     dataWrapper = new TabixBufferedLineReader(this.config);
                 } else {
+                   // Tribble
+                   const maxSize = Object.values(index.chrIndex)
+                        .flatMap(chr => chr.blocks)
+                        .map(block => block.min)
+                        .reduce((previous, current) =>
+                            Math.min(previous, current), Number.MAX_SAFE_INTEGER);
+                
                     const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
                     const data = await igvxhr.loadString(this.config.url, options)
                     dataWrapper = getDataWrapper(data);
