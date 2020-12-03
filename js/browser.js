@@ -906,10 +906,25 @@ class Browser {
 
     async resize() {
 
-        if (this.centerGuide) this.centerGuide.resize();
-        for (let trackView of this.trackViews) {
-            await trackView.resize();
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+
+        for (let referenceFrame of this.referenceFrameList) {
+
+            const viewportWidthBP = referenceFrame.toBP(viewportWidth)
+            const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+
+            if (viewportWidthBP > bpLength) {
+                // console.log(`viewport-length-bp ${ StringUtils.numberFormatter(Math.round(viewportWidthBP))} chr-length-bp ${ StringUtils.numberFormatter(Math.round(bpLength)) }`)
+                referenceFrame.bpPerPixel = bpLength/viewportWidth
+            }
+
         }
+
+        for (let trackView of this.trackViews) {
+            await trackView.resize(viewportWidth)
+        }
+
+        if (this.centerGuide) this.centerGuide.resize();
 
         if (this.referenceFrameList && this.referenceFrameList.length > 0) {
             this.updateLocusSearchWidget(this.referenceFrameList[0]);

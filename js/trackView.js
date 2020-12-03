@@ -288,9 +288,7 @@ class TrackView {
         }
     }
 
-    async resize() {
-
-        const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
+    async resize(viewportWidth) {
 
         for (let viewport of this.viewports) {
             viewport.setWidth(viewportWidth);
