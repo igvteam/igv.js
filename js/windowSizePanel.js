@@ -41,8 +41,8 @@ class WindowSizePanel {
         this.$container.hide();
     }
 
-    updateWithReferenceFrame(referenceFrame) {
-        this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
+    updatePanel(referenceFrameList) {
+        this.$container.text(1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrameList[ 0 ].bpPerPixel)) : '');
     }
 }
 
