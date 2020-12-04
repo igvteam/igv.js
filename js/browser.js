@@ -921,7 +921,7 @@ class Browser {
         }
 
         for (let trackView of this.trackViews) {
-            await trackView.resize(viewportWidth)
+            trackView.resize(viewportWidth)
         }
 
         if (this.centerGuide) this.centerGuide.resize();
@@ -931,7 +931,7 @@ class Browser {
             this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
         }
 
-        this.updateViews();
+        await this.updateViews();
 
         for (let {viewports, $viewportContainer} of this.trackViews) {
             updateViewportShims(viewports, $viewportContainer)
