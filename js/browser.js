@@ -771,7 +771,7 @@ class Browser {
         this.reorderTracks();
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
-            trackView.updateViews();
+            return trackView.updateViews();
         }
     }
 
