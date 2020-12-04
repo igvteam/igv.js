@@ -68,9 +68,9 @@ const MenuUtils = {
 
         menuItems.push({
                 object: createCheckbox("Autoscale", trackView.track.autoscale),
-                click: async () => {
+                click: () => {
                     trackView.track.autoscale = !trackView.track.autoscale;
-                    await trackView.updateViews();
+                    trackView.updateViews();
                 }
             }
         )
