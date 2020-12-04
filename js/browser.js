@@ -949,8 +949,14 @@ class Browser {
             referenceFrame = this.referenceFrameList[0];
         }
         if (referenceFrame) {
-            this.updateLocusSearchWidget([ referenceFrame ]);
-            this.windowSizePanel.updatePanel([referenceFrame]);
+
+            if (this.referenceFrameList.length > 1) {
+                this.updateLocusSearchWidget(this.referenceFrameList);
+                this.windowSizePanel.updatePanel(this.referenceFrameList);
+            } else {
+                this.updateLocusSearchWidget([ referenceFrame ]);
+                this.windowSizePanel.updatePanel([referenceFrame]);
+            }
         }
 
         if (this.centerGuide) {
@@ -1686,7 +1692,13 @@ class Browser {
                 if (self.dragObject) {
                     const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
                     if (viewChanged) {
-                        self.updateLocusSearchWidget([ self.vpMouseDown.referenceFrame ]);
+
+                        if (self.referenceFrameList.length > 1) {
+                            self.updateLocusSearchWidget(self.referenceFrameList);
+                        } else {
+                            self.updateLocusSearchWidget([ self.vpMouseDown.referenceFrame ]);
+                        }
+
                         self.updateViews();
                     }
                     self.fireEvent('trackdrag');
