@@ -595,6 +595,7 @@ class Browser {
             tv.updateViews(undefined, undefined, true);
         }
     }
+    
     clearROIs() {
         this.roi = [];
         for (let tv of this.trackViews) {
