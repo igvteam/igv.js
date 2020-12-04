@@ -233,27 +233,31 @@ class ViewPort extends ViewportBase {
 
     async repaint() {
 
-        var self = this;
-        const tile = this.tile;
-        if (!tile) {
+        if (undefined === this.tile) {
             return;
         }
 
+        let { features, roiFeatures, bpPerPixel, startBP, endBP } = this.tile
+
         const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
-        const features = tile.features;
-        const roiFeatures = tile.roiFeatures;
-        const bpPerPixel = isWGV ? this.referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
-        const bpStart = isWGV ? 0 : tile.startBP;
-        const bpEnd = isWGV ? this.referenceFrame.initialEnd : tile.endBP;
-        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        let pixelWidth
+
+        if (isWGV) {
+            bpPerPixel = this.referenceFrame.initialEnd / this.$viewport.width()
+            startBP = 0
+            endBP = this.referenceFrame.initialEnd
+            pixelWidth = this.$viewport.width()
+        } else {
+            pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel)
+        }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const viewportHeight = this.$viewport.height();
-        const minHeight = roiFeatures ? Math.max(self.getContentHeight(), viewportHeight) : self.getContentHeight();  // Need to fill viewport for ROIs.
+        const minHeight = roiFeatures ? Math.max(this.getContentHeight(), viewportHeight) : this.getContentHeight();  // Need to fill viewport for ROIs.
         let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
-            if (self.canvas) {
-                $(self.canvas).remove();
+            if (this.canvas) {
+                $(this.canvas).remove();
             }
             return;
         }
@@ -267,7 +271,7 @@ class ViewPort extends ViewportBase {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         }
 
-        const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
         const ctx = newCanvas.getContext("2d");
@@ -292,14 +296,14 @@ class ViewPort extends ViewportBase {
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
-                bpStart,
-                bpEnd,
+                bpStart: startBP,
+                bpEnd: endBP,
                 bpPerPixel,
                 referenceFrame: this.referenceFrame,
-                selection: self.selection,
-                viewport: self,
-                viewportWidth: self.$viewport.width(),
-                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - bpStart),
+                selection: this.selection,
+                viewport: this,
+                viewportWidth: this.$viewport.width(),
+                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
@@ -307,12 +311,12 @@ class ViewPort extends ViewportBase {
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
-        if (self.canvas) {
-            $(self.canvas).remove();
+        if (this.canvas) {
+            $(this.canvas).remove();
         }
-        $(self.contentDiv).append(newCanvas);
-        self.canvas = newCanvas;
-        self.ctx = ctx;
+        $(this.contentDiv).append(newCanvas);
+        this.canvas = newCanvas;
+        this.ctx = ctx;
     }
 
     draw(drawConfiguration, features, roiFeatures) {
