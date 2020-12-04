@@ -43,23 +43,6 @@ class StringDataWrapper {
     }
 
     nextLine() {
-        //return this.split(/\r\n|\n|\r/gm);
-        var start = this.ptr,
-            idx = this.data.indexOf('\n', start);
-
-        if (idx > 0) {
-            this.ptr = idx + 1;   // Advance pointer for next line
-            return idx === start ? "" : this.data.substring(start, idx).trim();
-        } else {
-            // Last line
-            this.ptr = this.data.length;
-            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
-        }
-    }
-
-    // For use in applications where whitespace carries meaning
-    // Returns "" for an empty row (not undefined like nextLine), since this is needed in AED
-    nextLineNoTrim() {
         var start = this.ptr,
             idx = this.data.indexOf('\n', start),
             data = this.data;
@@ -104,11 +87,6 @@ class ByteArrayDataWrapper {
 
         this.ptr = i + 1;
         return result;
-    }
-
-    // The ByteArrayDataWrapper does not do any trimming by default, can reuse the function
-    nextLineNoTrim() {
-        return this.nextLine();
     }
 
 }
