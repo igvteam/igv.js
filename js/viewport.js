@@ -304,7 +304,7 @@ class ViewPort extends ViewportBase {
                 viewport: this,
                 viewportWidth: this.$viewport.width(),
                 viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
-                viewportContainerWidth: this.browser.viewportContainerWidth()
+                viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
