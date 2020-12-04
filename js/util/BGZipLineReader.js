@@ -67,10 +67,6 @@ class BGZipLineReader {
         }
     }
 
-    // BGZipLineReader does not do any trimming by default, can reuse the function
-    async nextLineNoTrim() {
-        return this.nextLine();
-    }
 }
 
 export default BGZipLineReader
