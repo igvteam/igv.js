@@ -75,7 +75,7 @@ class IdeogramViewport extends ViewportBase {
         this.referenceFrame.initialEnd = ee;
         this.referenceFrame.bpPerPixel = (ee - ss) / width;
 
-        this.browser.updateLocusSearchWidget(this.referenceFrame);
+        this.browser.updateLocusSearchWidget([ this.referenceFrame ]);
         this.browser.updateViews()
 
     }
