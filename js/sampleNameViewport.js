@@ -31,7 +31,7 @@ class SampleNameViewport extends ViewportBase {
         const w = this.$viewport.width()
         const h = this.$viewport.height()
 
-        configureHighDPICanvas(this.mono_sample_ctx, w, h)
+        IGVGraphics.configureHighDPICanvas(this.mono_sample_ctx, w, h)
 
         IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
@@ -47,7 +47,7 @@ class SampleNameViewport extends ViewportBase {
         // hide mono-sample canvas
         this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
 
-        configureHighDPICanvas(this.ctx, this.$viewport.width(), height)
+        IGVGraphics.configureHighDPICanvas(this.ctx, this.$viewport.width(), height)
 
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
@@ -59,21 +59,6 @@ class SampleNameViewport extends ViewportBase {
     setTop(contentTop) {
         this.$content.css('top', `${ contentTop }px`);
     }
-
-}
-
-function configureHighDPICanvas(ctx, w, h) {
-
-    const scaleFactor = window.devicePixelRatio
-    // const scaleFactor = 1
-
-    ctx.canvas.style.width = (`${ w }px`)
-    ctx.canvas.width = Math.floor(scaleFactor * w)
-
-    ctx.canvas.style.height = (`${ h }px`)
-    ctx.canvas.height = Math.floor(scaleFactor * h)
-
-    ctx.scale(scaleFactor, scaleFactor)
 
 }
 

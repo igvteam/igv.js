@@ -24,7 +24,7 @@
  */
 
 import IGVGraphics from "./igv-canvas.js";
-import { IGVColor } from "../node_modules/igv-utils/src/index.js";
+import { IGVColor, StringUtils } from "../node_modules/igv-utils/src/index.js";
 import { greyScale, appleCrayonPalette, randomGrey, randomRGB } from "./util/colorPalletes.js"
 
 class IdeogramTrack {
@@ -54,6 +54,14 @@ class IdeogramTrack {
 
     draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
 
+        IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
+
+        // for (let x = 0; x < pixelWidth; x++) {
+        //     IGVGraphics.fillRect(context, x, 0, 1, pixelHeight, { 'fillStyle': randomRGB(150, 250) })
+        // }
+
+        // return
+
         const chr = referenceFrame.chr;
         const chromosome = referenceFrame.genome.getChromosome(chr);
 
@@ -62,17 +70,13 @@ class IdeogramTrack {
         }
 
         const stainColors = [];
-        IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, { fillStyle: appleCrayonPalette[ 'honeydew' ] })
-
-        return
-
-
-
 
         drawIdeogram({ ctx: context, chr, referenceFrame, genome: referenceFrame.genome, width: pixelWidth, height: pixelHeight, stainColors });
 
         const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth);
         const xBP = referenceFrame.start;
+
+        console.log(`ideogram track - xBP ${ StringUtils.numberFormatter(xBP) }`)
 
         // Total chromosome length can be > chromosome.bpLength for partial fastas.
         let chrLength = chromosome.bpLength;
@@ -142,7 +146,7 @@ function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainCol
         return;
     }
 
-    IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
+    IGVGraphics.fillRect(ctx, 0, 0, width, height, { fillStyle: IGVColor.greyScale(255) });
 
     cytobands = genome.getCytobands(chr);
     if (cytobands) {

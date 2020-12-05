@@ -654,6 +654,12 @@
   position: relative;
   display: block; }
 
+.igv-ideogram-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block; }
+
 .igv-mono-sample-canvas {
   display: block;
   position: absolute;
