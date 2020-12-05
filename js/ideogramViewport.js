@@ -42,49 +42,10 @@ class IdeogramViewport extends ViewPort {
         const canvas = this.$ideogramCanvas.get(0)
         this.ideogram_ctx = canvas.getContext('2d')
 
-        // this.$ideogramCanvas.on('click.ideogram', e => {
-        //     this.handleClick(e, canvas)
-        // })
-
         this.$viewport.on('click.ideogram', e => {
-            console.log(`${ Date.now() } - ideogram viewport click`)
-            this.handleClick(e, canvas, this.browser, this.referenceFrame)
+            // console.log(`${ Date.now() } - ideogram viewport click`)
+            clickHandler(e, canvas, this.browser, this.referenceFrame)
         })
-
-    }
-
-    handleClick(e, canvas, browser, referenceFrame) {
-
-        const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-        const { bpLength } = browser.genome.getChromosome(referenceFrame.chr);
-        const locusLength = referenceFrame.bpPerPixel * width;
-        const chrCoveragePercentage = locusLength / bpLength;
-
-        let xPercentage = xNormalized;
-        if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
-            xPercentage = chrCoveragePercentage / 2.0;
-        }
-
-        if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
-            xPercentage = 1.0 - chrCoveragePercentage / 2.0;
-        }
-
-        const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
-        const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
-
-        referenceFrame.start = ss;
-        referenceFrame.initialEnd = ee;
-        referenceFrame.bpPerPixel = (ee - ss) / width;
-
-        if (browser.referenceFrameList > 1) {
-            browser.updateLocusSearchWidget(browser.referenceFrameList)
-        } else {
-            browser.updateLocusSearchWidget([ referenceFrame ])
-        }
-
-        browser.updateViews()
-
-        this.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
 
     }
 
@@ -153,6 +114,35 @@ class IdeogramViewport extends ViewPort {
         repaintContext(config);
 
     }
+
+}
+
+function clickHandler(e, canvas, browser, referenceFrame) {
+
+    const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
+    const { bpLength } = browser.genome.getChromosome(referenceFrame.chr);
+    const locusLength = referenceFrame.bpPerPixel * width;
+    const chrCoveragePercentage = locusLength / bpLength;
+
+    let xPercentage = xNormalized;
+    if (xPercentage - (chrCoveragePercentage / 2.0) < 0) {
+        xPercentage = chrCoveragePercentage / 2.0;
+    }
+
+    if (xPercentage + (chrCoveragePercentage / 2.0) > 1.0) {
+        xPercentage = 1.0 - chrCoveragePercentage / 2.0;
+    }
+
+    const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
+    const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
+
+    referenceFrame.start = ss;
+    referenceFrame.initialEnd = ee;
+    referenceFrame.bpPerPixel = (ee - ss) / width;
+
+    browser.updateLocusSearchWidget(browser.referenceFrameList > 1 ? browser.referenceFrameList : [ referenceFrame ])
+
+    browser.updateViews(referenceFrame, browser.trackViews, true)
 
 }
 

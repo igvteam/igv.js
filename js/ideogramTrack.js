@@ -75,9 +75,7 @@ class IdeogramTrack {
 
         const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth);
         const xBP = referenceFrame.start;
-
-        console.log(`ideogram track - xBP ${ StringUtils.numberFormatter(xBP) }`)
-
+        
         // Total chromosome length can be > chromosome.bpLength for partial fastas.
         let chrLength = chromosome.bpLength;
         const cytobands = referenceFrame.genome.getCytobands(chr);

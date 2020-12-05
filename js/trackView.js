@@ -39,8 +39,6 @@ import TrackScrollbar from './trackScrollbar.js';
 let dragged
 let dragDestination
 
-const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram'])
-
 class TrackView {
 
     constructor(browser, $container, track) {
@@ -156,6 +154,10 @@ class TrackView {
         if ("hidden" === $viewportContainer.find('.igv-viewport').css("overflow-y")) {
             this.scrollbar = new TrackScrollbar($viewportContainer, viewports)
             this.scrollbar.$outerScroll.insertAfter($viewportContainer)
+
+            if ('ruler' === this.track.type || 'ideogram' === this.track.type) {
+                this.scrollbar.disableMouseHandlers()
+            }
         }
 
     }

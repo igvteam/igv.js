@@ -950,10 +950,10 @@ class Browser {
         }
     }
 
-    async updateViews(referenceFrame, views, force) {
+    async updateViews(referenceFrame, trackViews, force) {
 
-        if (!views) {
-            views = this.trackViews;
+        if (!trackViews) {
+            trackViews = this.trackViews;
         }
 
         if (!referenceFrame && this.referenceFrameList && 1 === this.referenceFrameList.length) {
@@ -976,14 +976,14 @@ class Browser {
 
         // Don't autoscale while dragging.
         if (this.dragObject) {
-            for (let trackView of views) {
+            for (let trackView of trackViews) {
                 await trackView.updateViews(force);
             }
         } else {
             // Group autoscale
             const groupAutoscaleTracks = {};
             const otherTracks = [];
-            for (let trackView of views) {
+            for (let trackView of trackViews) {
                 const group = trackView.track.autoscaleGroup;
                 if (group) {
                     var l = groupAutoscaleTracks[group];

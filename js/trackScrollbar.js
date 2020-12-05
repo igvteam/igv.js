@@ -2,6 +2,8 @@ import $ from './vendor/jquery-3.3.1.slim.js'
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js'
 import {maxViewportContentHeight} from './trackView.js';
 
+const namespace = '.trackscrollbar' + DOMUtils.guid()
+
 class TrackScrollbar {
 
     constructor($viewportContainer, viewports) {
@@ -21,8 +23,6 @@ class TrackScrollbar {
         const mouseUp = (event) => {
             $(document).off(this.namespace);
         }
-
-        const namespace = '.trackscrollbar' + DOMUtils.guid();
 
         const mouseDown = (event) => {
             event.preventDefault();
@@ -58,6 +58,12 @@ class TrackScrollbar {
             event.stopPropagation();
 
         });
+    }
+
+    disableMouseHandlers () {
+        $(document).off(namespace)
+        this.$innerScroll.off()
+        this.$outerScroll.off()
     }
 
     moveScrollerBy(delta) {
