@@ -96,11 +96,9 @@ suite("testSearch", function () {
 
     test("search with spaces", async function () {
 
-
+        this.timeout(20000);
         const s4 = "foo bar";
-
         const results = await search(browser, s4);
-
         const locus4 = results[0];
         assert.equal(locus4.chr, "chrX");
         assert.equal(locus4.start, 1);
@@ -112,7 +110,7 @@ suite("testSearch", function () {
     //
     // test("custom webservice", async function () {
     //
-    //     this.timeout(30000);
+    //
     //
     //     browser.genome = macacaGenome;
     //     browser.searchConfig = {
