@@ -25,7 +25,7 @@
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import C2S from "./canvas2svg.js";
-import {FileUtils, DOMUtils, IGVColor} from "../node_modules/igv-utils/src/index.js";
+import {FileUtils, DOMUtils } from "../node_modules/igv-utils/src/index.js";
 import ViewPort from "./viewport.js";
 
 class IdeogramViewport extends ViewPort {
@@ -35,19 +35,29 @@ class IdeogramViewport extends ViewPort {
     }
 
     initializationHelper() {
-        this.$canvas.on('click', e => this.handleClick(e, this.canvas))
+
+        this.$ideogramCanvas = $('<canvas>', { class: 'igv-ideogram-canvas' })
+        this.$ideogramCanvas.insertBefore(this.$canvas)
+
+        const canvas = this.$ideogramCanvas.get(0)
+        this.ideogram_ctx = canvas.getContext('2d')
+
+        // this.$ideogramCanvas.on('click.ideogram', e => {
+        //     this.handleClick(e, canvas)
+        // })
+
+        this.$viewport.on('click.ideogram', e => {
+            console.log(`${ Date.now() } - ideogram viewport click`)
+            this.handleClick(e, canvas, this.browser, this.referenceFrame)
+        })
+
     }
 
-    draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
-        // this.trackView.track.draw({ context: this.ctx, referenceFrame, pixelWidth: this.ctx.canvas.width, pixelHeight: this.ctx.canvas.height });
-        this.trackView.track.draw({ context, referenceFrame, pixelWidth, pixelHeight });
-    }
-
-    handleClick(e, canvas) {
+    handleClick(e, canvas, browser, referenceFrame) {
 
         const { xNormalized, width } = DOMUtils.translateMouseCoordinates(e, canvas);
-        const { bpLength } = this.browser.genome.getChromosome(this.referenceFrame.chr);
-        const locusLength = this.referenceFrame.bpPerPixel * width;
+        const { bpLength } = browser.genome.getChromosome(referenceFrame.chr);
+        const locusLength = referenceFrame.bpPerPixel * width;
         const chrCoveragePercentage = locusLength / bpLength;
 
         let xPercentage = xNormalized;
@@ -62,18 +72,26 @@ class IdeogramViewport extends ViewPort {
         const ss = Math.round((xPercentage - (chrCoveragePercentage / 2.0)) * bpLength);
         const ee = Math.round((xPercentage + (chrCoveragePercentage / 2.0)) * bpLength);
 
-        this.referenceFrame.start = ss;
-        this.referenceFrame.initialEnd = ee;
-        this.referenceFrame.bpPerPixel = (ee - ss) / width;
+        referenceFrame.start = ss;
+        referenceFrame.initialEnd = ee;
+        referenceFrame.bpPerPixel = (ee - ss) / width;
 
-        if (this.browser.referenceFrameList > 1) {
-            this.browser.updateLocusSearchWidget(this.browser.referenceFrameList)
+        if (browser.referenceFrameList > 1) {
+            browser.updateLocusSearchWidget(browser.referenceFrameList)
         } else {
-            this.browser.updateLocusSearchWidget([ this.referenceFrame ])
+            browser.updateLocusSearchWidget([ referenceFrame ])
         }
 
-        this.browser.updateViews()
+        browser.updateViews()
 
+        this.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
+
+    }
+
+    draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
+
+        this.$canvas.hide()
+        this.trackView.track.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
     }
 
     // TODO: Not needed. No menus on ideogram track

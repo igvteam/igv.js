@@ -584,6 +584,13 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   display: block;
 }
 
+.igv-ideogram-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
 .igv-mono-sample-canvas {
   display: block;
   position: absolute;
