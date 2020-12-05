@@ -12,6 +12,10 @@ class RulerViewport extends ViewPort {
 
     initializationHelper() {
 
+        if (this.trackView.scrollbar) {
+            this.trackView.scrollbar.disableMouseHandlers()
+        }
+
         this.rulerSweeper = new RulerSweeper(this)
 
         appendMultiPanelCloseButton(this.browser, this.$viewport, this.referenceFrame)
