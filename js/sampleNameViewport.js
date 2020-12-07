@@ -23,7 +23,50 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
+    async renderSVGContext(context, { deltaX, deltaY }) {
+
+        // console.log('SampleNameViewport - renderSVGContext(context, offset)')
+
+        let id = this.trackView.track.name || this.trackView.track.id
+        id = id.replace(/\W/g, '')
+
+        const yScrollDelta = this.featureMap ? this.$content.position().top : 0
+        // const yScrollDelta = 0
+
+        const dx = deltaX
+        const dy = deltaY + yScrollDelta
+        const { width, height } = this.$viewport.get(0).getBoundingClientRect()
+
+        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta)
+
+        this.drawSVGWithContext(context, width, height)
+
+    }
+
+    drawSVGWithContext(context, width, height) {
+
+        context.save()
+
+        IGVGraphics.fillRect(context, 0, 0, width, height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+
+        configureFont(context, fontConfig)
+
+        if (this.trackName) {
+            const { width: textWidth, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
+            context.fillText(this.trackName, Math.round(width - 4), Math.round((height + actualBoundingBoxAscent)/2))
+        } else if (this.featureMap) {
+            this.sampleNameRenderer(context, this.featureMap, 0, width, height)
+        }
+
+        context.restore()
+
+    }
+
     drawTrackName(name) {
+
+        this.featureMap = undefined
+        this.sampleNameRenderer = undefined
+        this.trackName = name
 
         // Hide multi-sample canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
@@ -42,7 +85,11 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    draw(featureMap, canvasTop, height, sampleNameRenderer) {
+    drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
+
+        this.trackName = undefined
+        this.featureMap = featureMap
+        this.sampleNameRenderer = sampleNameRenderer
 
         // hide mono-sample canvas
         this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)

@@ -146,7 +146,7 @@ class SegTrack extends TrackBase {
     };
 
 
-    draw({ context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
+    draw({ context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
         const self = this
 
@@ -248,23 +248,23 @@ class SegTrack extends TrackBase {
 
                 if (false === featureMap.has(key)) {
                     featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
-                    configureFont(context, fontConfig)
-                    context.fillText(featureMap.get(key).name, x + 4, y + h)
+                    // configureFont(context, fontConfig)
+                    // context.fillText(featureMap.get(key).name, x + 4, y + h)
                 }
 
             }
 
-            if (featureMap.size > 0 && 'EXPANDED' === this.displayMode) {
-                this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
-            } else {
-                this.drawTrackNameAsSampleName(this.name)
+            if (false === renderSVG) {
+                if (featureMap.size > 0 && 'EXPANDED' === this.displayMode) {
+                    this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
+                } else {
+                    this.drawTrackNameAsSampleName(this.name)
+                }
+
             }
 
-        } else {
-
+        } else if (false === renderSVG) {
             this.drawTrackNameAsSampleName(this.name)
-
-            console.log("No feature list");
         }
 
         function checkForLog(featureList) {

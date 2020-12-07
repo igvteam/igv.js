@@ -220,7 +220,7 @@ class Browser {
      * Render browse display as SVG
      * @returns {string}
      */
-    toSVG() {
+    async toSVG() {
 
         let { x, y, width, height } = this.trackContainer.getBoundingClientRect();
         const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
@@ -253,7 +253,7 @@ class Browser {
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y});
+            await trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y})
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
@@ -263,9 +263,9 @@ class Browser {
 
     };
 
-    saveSVGtoFile(config) {
+    async saveSVGtoFile(config) {
 
-        let svg = this.toSVG();
+        let svg = await this.toSVG();
 
         if (config.$container) {
 

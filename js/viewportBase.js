@@ -97,6 +97,14 @@ class ViewportBase {
         return undefined
     }
 
+    async repaint() {
+        console.log('ViewportBase - repaint()')
+    }
+
+    draw(drawConfiguration, features, roiFeatures) {
+        console.log('ViewportBase - draw(drawConfiguration, features, roiFeatures)')
+    }
+
     setContentHeight(contentHeight) {
     }
 
@@ -112,8 +120,8 @@ class ViewportBase {
         console.log('ViewportBase - renderSVGContext(context, offset)')
     }
 
-    drawSVGWithContect(context) {
-        console.log('ViewportBase - drawSVGWithContect(context)')
+    drawSVGWithContext(context) {
+        console.log('ViewportBase - drawSVGWithContext(context)')
     }
 
     isVisible() {
