@@ -1,7 +1,7 @@
+import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
-import { appleCrayonRGB, appleCrayonRGBA, appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes'
-import $ from "./vendor/jquery-3.3.1.slim";
+import { appleCrayonRGB, appleCrayonRGBA, appleCrayonPalette, greyScale, randomGrey } from './util/colorPalletes.js'
 
 const sampleNameViewportWidth = 128
 
