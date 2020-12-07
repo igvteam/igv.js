@@ -462,7 +462,7 @@ class ViewPort extends ViewportBase {
         const top = -$(this.contentDiv).position().top;
         const config =
             {
-                context: context,
+                context,
                 viewport: this,
                 referenceFrame: this.referenceFrame,
                 top: top,

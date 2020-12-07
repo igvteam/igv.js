@@ -186,8 +186,7 @@ class SegTrack extends TrackBase {
 
             }
 
-            const drawnFeatures = []
-            const featureDictionary = {}
+            const featureMap = new Map()
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             const pixelBottom = pixelTop + pixelHeight;
             for (let segment of features) {
@@ -246,22 +245,17 @@ class SegTrack extends TrackBase {
 
                 // diagnostic - test sort, etc.
                 const key = y.toString()
-                if (undefined === featureDictionary[ key ]) {
 
-                    const string = segment.sampleKey || segment.sample
-                    featureDictionary[ key ] = string
-
+                if (false === featureMap.has(key)) {
+                    featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
                     configureFont(context, fontConfig)
-                    
-                    context.fillText(string, x + 4, y + h)
+                    context.fillText(featureMap.get(key).name, x + 4, y + h)
                 }
-
-                drawnFeatures.push(segment)
 
             }
 
-            if (drawnFeatures.length > 0 && 'EXPANDED' === this.displayMode) {
-                this.drawSampleNames(drawnFeatures, pixelTop, pixelHeight, drawSegTrackSampleNames)
+            if (featureMap.size > 0 && 'EXPANDED' === this.displayMode) {
+                this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
             } else {
                 this.drawTrackNameAsSampleName(this.name)
             }
@@ -486,24 +480,9 @@ function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillSt
 }
 
 const fudge = 4
-function drawSegTrackSampleNames(ctx, features, canvasTop, canvasWidth, canvasHeight) {
-
-    ctx.canvas.style.top = `${ canvasTop }px`
-    ctx.translate(0, -canvasTop)
-
-    const hitList = {}
-    for (let feature of features) {
-        if (hitList[ feature.row ]) {
-            // nadda
-        } else {
-
-            hitList[ feature.row ] = feature
-
-            const string = feature.sampleKey || feature.sample
-
-            const { y, h } = feature.pixelRect
-            ctx.fillText(string, canvasWidth - fudge, y + h)
-        }
+function drawSegTrackSampleNames(ctx, featureMap, canvasTop, canvasWidth, canvasHeight) {
+    for (let { x, y, w, h, name } of featureMap.values()) {
+        ctx.fillText(name, canvasWidth - fudge, y + h)
     }
 
 }

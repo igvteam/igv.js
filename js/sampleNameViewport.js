@@ -42,7 +42,7 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    draw(features, canvasTop, height, sampleNameRenderer) {
+    draw(featureMap, canvasTop, height, sampleNameRenderer) {
 
         // hide mono-sample canvas
         this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
@@ -53,7 +53,10 @@ class SampleNameViewport extends ViewportBase {
 
         configureFont(this.ctx, fontConfig)
 
-        sampleNameRenderer(this.ctx, features, canvasTop, this.$viewport.width(), height)
+        this.ctx.canvas.style.top = `${ canvasTop }px`
+        this.ctx.translate(0, -canvasTop)
+
+        sampleNameRenderer(this.ctx, featureMap, canvasTop, this.$viewport.width(), height)
     }
 
     setTop(contentTop) {

@@ -56,12 +56,6 @@ class IdeogramTrack {
 
         IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
 
-        // for (let x = 0; x < pixelWidth; x++) {
-        //     IGVGraphics.fillRect(context, x, 0, 1, pixelHeight, { 'fillStyle': randomRGB(150, 250) })
-        // }
-
-        // return
-
         const chr = referenceFrame.chr;
         const chromosome = referenceFrame.genome.getChromosome(chr);
 
@@ -75,7 +69,7 @@ class IdeogramTrack {
 
         const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth);
         const xBP = referenceFrame.start;
-        
+
         // Total chromosome length can be > chromosome.bpLength for partial fastas.
         let chrLength = chromosome.bpLength;
         const cytobands = referenceFrame.genome.getCytobands(chr);

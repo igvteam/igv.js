@@ -43,7 +43,6 @@ class IdeogramViewport extends ViewPort {
         this.ideogram_ctx = canvas.getContext('2d')
 
         this.$viewport.on('click.ideogram', e => {
-            // console.log(`${ Date.now() } - ideogram viewport click`)
             clickHandler(e, canvas, this.browser, this.referenceFrame)
         })
 
@@ -52,67 +51,7 @@ class IdeogramViewport extends ViewPort {
     draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
 
         this.$canvas.hide()
-        this.trackView.track.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
-    }
-
-    // TODO: Not needed. No menus on ideogram track
-    saveSVG() {
-
-        const { width, height } = this.$viewport.get(0).getBoundingClientRect()
-
-        const context = new C2S(
-            {
-                width,
-                height,
-                viewbox:
-                    {
-                        x: 0,
-                        y: -$(this.contentDiv).position().top,
-                        width,
-                        height
-                    }
-
-            });
-
-        this.drawSVGWithContect(context, width, height)
-
-        const svg = context.getSerializedSvg(true);
-        const data = URL.createObjectURL(new Blob([ svg ], { type: "application/octet-stream" }));
-        FileUtils.download(`${ this.trackView.track.id }.svg`, data);
-
-    }
-
-    drawSVGWithContect(context, width, height) {
-
-        const config =
-        {
-            ctx: context,
-            width,
-            height,
-            genome: this.browser.genome,
-            referenceFrame: this.referenceFrame,
-            ideogramWidth: this.$content.width()
-        }
-
-        context.save();
-        repaintContext(config)
-        context.restore();
-    }
-
-    DEPRICATE_repaint() {
-
-        let config =
-            {
-                ctx: this.ctx,
-                width: this.$canvas.width(),
-                height: this.$canvas.height(),
-                genome: this.browser.genome,
-                referenceFrame: this.referenceFrame,
-                ideogramWidth: this.$content.width()
-            };
-
-        repaintContext(config);
-
+        this.trackView.track.draw({context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height()})
     }
 
 }
