@@ -48,7 +48,7 @@ class IdeogramViewport extends ViewPort {
 
     }
 
-    drawSVGWithContect(context, width, height) {
+    drawSVGWithContext(context, width, height) {
         context.save()
         this.trackView.track.draw({ context, referenceFrame: this.referenceFrame, pixelWidth: width, pixelHeight: height })
         context.restore()

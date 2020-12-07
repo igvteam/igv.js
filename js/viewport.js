@@ -292,6 +292,7 @@ class ViewPort extends ViewportBase {
         const drawConfiguration =
             {
                 context: ctx,
+                renderSVG: false,
                 features,
                 pixelWidth,
                 pixelHeight,
@@ -452,7 +453,7 @@ class ViewPort extends ViewportBase {
             }
 
         const context = new C2S(config);
-        this.drawSVGWithContect(context, width, height)
+        this.drawSVGWithContext(context, width, height)
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
@@ -486,13 +487,11 @@ class ViewPort extends ViewportBase {
         const yScrollDelta = $(this.contentDiv).position().top;
         const dx = offset.deltaX + (index * context.multiLocusGap);
         const dy = offset.deltaY + yScrollDelta;
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
+        const { top, width, height } = this.$viewport.get(0).getBoundingClientRect();
 
         context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
 
-        // console.log(`ViewportBase render SVG. context.addGroup( id ${ id } dx ${ dx } dy ${ dy } width ${ width } height ${ height } -yScrollDelta ${ -yScrollDelta })`)
-
-        this.drawSVGWithContect(context, width, height)
+        this.drawSVGWithContext(context, width, height)
 
     }
 
@@ -516,7 +515,7 @@ class ViewPort extends ViewportBase {
 
     }
 
-    drawSVGWithContect(context, width, height) {
+    drawSVGWithContext(context, width, height) {
 
         let {start, bpPerPixel} = this.referenceFrame;
 
@@ -526,6 +525,7 @@ class ViewPort extends ViewportBase {
         const config =
             {
                 context,
+                renderSVG: true,
                 viewport: this,
                 referenceFrame: this.referenceFrame,
                 top: top,
