@@ -222,18 +222,17 @@ class Browser {
      */
     toSVG() {
 
-        const {x, y, width, height} = this.trackContainer.getBoundingClientRect();
+        let { x, y, width, height } = this.trackContainer.getBoundingClientRect();
         const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
 
-        const w = width + (this.referenceFrameList.length - 1) * multiLocusGapWidth;
+        width += (this.referenceFrameList.length - 1) * multiLocusGapWidth
 
-        const h_output = height;
         const h_render = 8000;
 
         let svgContext = new C2S(
             {
 
-                width: w,
+                width,
                 height: h_render,
 
                 backdropColor: 'white',
@@ -244,7 +243,7 @@ class Browser {
                     {
                         x: 0,
                         y: 0,
-                        width: w,
+                        width,
                         height: h_render
                     }
 
@@ -258,7 +257,7 @@ class Browser {
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
-        svgContext.setHeight(h_output);
+        svgContext.setHeight(height);
 
         return svgContext.getSerializedSvg(true);
 

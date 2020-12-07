@@ -23,10 +23,10 @@
  * THE SOFTWARE.
  */
 
-import $ from "./vendor/jquery-3.3.1.slim.js";
-import C2S from "./canvas2svg.js";
-import {FileUtils, DOMUtils } from "../node_modules/igv-utils/src/index.js";
-import ViewPort from "./viewport.js";
+import $ from "./vendor/jquery-3.3.1.slim.js"
+import IGVGraphics from './igv-canvas.js'
+import { DOMUtils } from "../node_modules/igv-utils/src/index.js"
+import ViewPort from "./viewport.js"
 
 class IdeogramViewport extends ViewPort {
 
@@ -48,10 +48,19 @@ class IdeogramViewport extends ViewPort {
 
     }
 
+    drawSVGWithContect(context, width, height) {
+        context.save()
+        this.trackView.track.draw({ context, referenceFrame: this.referenceFrame, pixelWidth: width, pixelHeight: height })
+        context.restore()
+    }
+
     draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
 
         this.$canvas.hide()
-        this.trackView.track.draw({context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height()})
+
+        IGVGraphics.configureHighDPICanvas(this.ideogram_ctx, this.$viewport.width(), this.$viewport.height())
+
+        this.trackView.track.draw({ context: this.ideogram_ctx, referenceFrame, pixelWidth: this.$viewport.width(), pixelHeight: this.$viewport.height() })
     }
 
 }

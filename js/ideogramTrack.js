@@ -54,8 +54,6 @@ class IdeogramTrack {
 
     draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
 
-        IGVGraphics.configureHighDPICanvas(context, pixelWidth, pixelHeight)
-
         const chr = referenceFrame.chr;
         const chromosome = referenceFrame.genome.getChromosome(chr);
 

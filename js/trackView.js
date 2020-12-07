@@ -68,7 +68,8 @@ class TrackView {
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
 
-        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, browser.referenceFrameList, sampleNameViewportWidth)
+        // this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, browser.referenceFrameList, sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
 
         // viewport container DOM elements
         populateViewportContainer(browser, browser.referenceFrameList, this)
@@ -133,20 +134,30 @@ class TrackView {
 
     renderSVGContext(context, offset) {
 
-        for (let viewport of this.viewports) {
+        const list = [ this.sampleNameViewport, ...this.viewports ]
 
-            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
-            const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
+        let sampleNameViewportWidth = undefined
+        for (let viewport of list) {
 
-            let o =
-                {
-                    deltaX: offset.deltaX + index * width,
-                    deltaY: offset.deltaY + y
-                };
+            const { y, width } = viewport.$viewport.get(0).getBoundingClientRect()
 
-            viewport.renderSVGContext(context, o);
+            if (0 === list.indexOf(viewport)) {
+                console.log('trackView.renderSVGContext(sampleNameViewport)')
+                viewport.renderSVGContext(context, offset)
+                sampleNameViewportWidth = width
+            } else {
+
+                const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame)
+
+                let o =
+                    {
+                        deltaX: sampleNameViewportWidth + index * width + offset.deltaX,
+                        deltaY: y + offset.deltaY
+                    };
+
+                viewport.renderSVGContext(context, o)
+            }
         }
-
     }
 
     attachScrollbar($track, $viewportContainer, viewports) {
