@@ -26,7 +26,7 @@
 import oauth from "./oauth.js";
 import {unbgzf} from './bam/bgzf.js';
 import {getFilename} from "./util/igvUtils.js";
-import PromiseThrottle from "./util/promiseThrottle.js"
+import Throttle from "./util/throttle.js"
 import {GoogleAuth, GoogleUtils, URIUtils, Zlib} from "../node_modules/igv-utils/src/index.js"
 
 var NONE = 0;
@@ -35,9 +35,8 @@ var BGZF = 2;
 var UNKNOWN = 3;
 let RANGE_WARNING_GIVEN = false;
 
-const promiseThrottle = new PromiseThrottle({
-    requestsPerSecond: 10,
-    promiseImplementation: Promise
+const googleThrottle = new Throttle({
+    requestsPerSecond: 5
 })
 
 const igvxhr = {
@@ -104,7 +103,7 @@ async function load(url, options) {
                 url = GoogleUtils.driveDownloadURL(url);
             }
             if (GoogleUtils.isGoogleDriveURL(url)) {
-                return promiseThrottle.add(function () {
+                return googleThrottle.add(async function () {
                     return loadURL(url, options)
                 })
             } else {
