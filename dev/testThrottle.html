@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+<script type="module">
+
+    import Throttle from "../js/util/throttle.js"
+
+    const throttle = new Throttle({requestsPerSecond: 1});
+
+    let count = 10;
+    while(count--) {
+        let c = count;
+        const p = async function () {
+            console.log(c);
+            return c;
+        }
+        throttle.add(p)
+    }
+
+</script>
+
+</body>
+</html>
