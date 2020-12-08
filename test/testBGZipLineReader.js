@@ -4,27 +4,6 @@ import {assert} from 'chai';
 
 suite("testBGZipLineReader", function () {
 
-    test("long lines", async function () {
-        this.timeout(10000);
-        const config = {
-            url: 'https://www.dropbox.com/s/04ozbw88ea4wkbz/gcnv_large.bed.gz?dl=0'
-        };
-
-        const reader = new BGZipLineReader(config);
-        const headerLine = await reader.nextLine();
-        const columnCount = headerLine.split("\t").length;
-
-        let lineCount = 0;
-        let line;
-        while((line = await reader.nextLine())) {
-            const tokens = line.split("\t");
-            assert.equal(tokens.length, columnCount);
-            lineCount++;
-        }
-        assert.equal(lineCount, 2);
-
-    })
-
     test("long lines - local file", async function () {
 
         const config = {
