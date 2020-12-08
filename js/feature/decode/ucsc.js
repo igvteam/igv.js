@@ -102,8 +102,8 @@ function decodeBed(tokens, header) {
                 return feature;
             }
 
-            const exonSizes = tokens[10].split(',');
-            const exonStarts = tokens[11].split(',');
+            const exonSizes = tokens[10].replace(/,$/, '').split(',');
+            const exonStarts = tokens[11].replace(/,$/, '').split(',');
             if (!(exonSizes.length === exonStarts.length && exonCount === exonSizes.length)) {
                 return feature;
             }
