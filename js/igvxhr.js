@@ -36,7 +36,7 @@ var UNKNOWN = 3;
 let RANGE_WARNING_GIVEN = false;
 
 const googleThrottle = new Throttle({
-    requestsPerSecond: 5
+    requestsPerSecond: 9
 })
 
 const igvxhr = {
