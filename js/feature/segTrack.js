@@ -480,7 +480,7 @@ function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillSt
 }
 
 const fudge = 4
-function drawSegTrackSampleNames(ctx, featureMap, canvasTop, canvasWidth, canvasHeight) {
+function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
     for (let { x, y, w, h, name } of featureMap.values()) {
         ctx.fillText(name, canvasWidth - fudge, y + h)
     }

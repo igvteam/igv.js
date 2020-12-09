@@ -31,13 +31,11 @@ class SampleNameViewport extends ViewportBase {
         id = id.replace(/\W/g, '')
 
         const yScrollDelta = this.featureMap ? this.$content.position().top : 0
-        // const yScrollDelta = 0
-
-        const dx = deltaX
         const dy = deltaY + yScrollDelta
+
         const { width, height } = this.$viewport.get(0).getBoundingClientRect()
 
-        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta)
+        context.addTrackGroupWithTranslationAndClipRect(id, deltaX, dy, width, height, -yScrollDelta)
 
         this.drawSVGWithContext(context, width, height)
 
@@ -55,7 +53,7 @@ class SampleNameViewport extends ViewportBase {
             const { width: textWidth, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
             context.fillText(this.trackName, Math.round(width - 4), Math.round((height + actualBoundingBoxAscent)/2))
         } else if (this.featureMap) {
-            this.sampleNameRenderer(context, this.featureMap, 0, width, height)
+            this.sampleNameRenderer(context, this.featureMap, width, height)
         }
 
         context.restore()
@@ -103,7 +101,7 @@ class SampleNameViewport extends ViewportBase {
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
 
-        sampleNameRenderer(this.ctx, featureMap, canvasTop, this.$viewport.width(), height)
+        sampleNameRenderer(this.ctx, featureMap, this.$viewport.width(), height)
     }
 
     setTop(contentTop) {
