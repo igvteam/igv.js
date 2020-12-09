@@ -445,7 +445,7 @@ class ViewPort extends ViewportBase {
                 viewbox:
                     {
                         x: 0,
-                        y: -$(this.contentDiv).position().top,
+                        y: -this.$content.position().top,
                         width,
                         height
                     }
@@ -460,7 +460,7 @@ class ViewPort extends ViewportBase {
         FileUtils.download(`${str}.svg`, data);
     }
 
-    async renderSVGContext(context, offset) {
+    async renderSVGContext(context, { deltaX, deltaY }) {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
@@ -476,18 +476,20 @@ class ViewPort extends ViewportBase {
         // If present, paint axis canvas. Only in first multi-locus panel.
         if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
 
-            const bbox = this.trackView.controlCanvas.getBoundingClientRect();
-            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
+            const { width, height } = this.trackView.controlCanvas.getBoundingClientRect();
+            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), deltaX - width, deltaY, width, height, 0);
 
             context.save();
-            this.trackView.track.paintAxis(context, bbox.width, bbox.height);
+            this.trackView.track.paintAxis(context, width, height);
             context.restore();
         }
 
-        const yScrollDelta = $(this.contentDiv).position().top;
-        const dx = offset.deltaX + (index * context.multiLocusGap);
-        const dy = offset.deltaY + yScrollDelta;
-        const { top, width, height } = this.$viewport.get(0).getBoundingClientRect();
+        const dx = deltaX + (index * context.multiLocusGap);
+
+        const yScrollDelta = this.$content.position().top;
+        const dy = deltaY + yScrollDelta;
+
+        const { width, height } = this.$viewport.get(0).getBoundingClientRect();
 
         context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
 
