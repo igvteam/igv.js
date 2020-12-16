@@ -23,7 +23,6 @@
  * THE SOFTWARE.
  */
 
-import getDataWrapper from "./dataWrapper.js";
 import {TrackUtils} from "../../node_modules/igv-utils/src/index.js";
 import {decodeBedpe, decodeBedpeDomain, fixBedPE} from './decode/bedpe.js';
 import {decodeInteract} from "./decode/interact.js";
@@ -56,18 +55,27 @@ import {decodeGcnv} from "../gcnv/gcnvDecoder.js";
  */
 class FeatureParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
 
-        this.header = {};
-        this.decode = decode;
         this.config = config;
-
-        if (format !== undefined) {
-            this.header.format = format.toLowerCase();
+        this.header = {}
+        if (config.nameField) {
+            this.header.nameField = config.nameField;
         }
-        this.header.nameField = config ? config.nameField : undefined;
+
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
+        if (config.decode) {
+            this.decode = config.decode;
+            this.delimiter = config.delimiter || "\t";
+        } else if (config.format) {
+            this.header.format = config.format.toLowerCase();
+            this.setDecoder(this.header.format);
+        }
+
+        if (!this.delimiter) {
+            this.delimiter = "\t";
+        }
     }
 
     /**
@@ -78,14 +86,12 @@ class FeatureParser {
      * @param data
      * @returns {{}}
      */
-    parseHeader(data) {
+    async parseHeader(dataWrapper) {
 
-        const dataWrapper = getDataWrapper(data);
         let header = this.header;
         let columnNames;
         let line;
-        let skipRows = 0;
-        while ((line = dataWrapper.nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("track") || line.startsWith("#track")) {
                 let h = parseTrackLine(line);
                 Object.assign(header, h);
@@ -96,62 +102,61 @@ class FeatureParser {
                 Object.assign(header, h);
             } else if (line.startsWith("##gff-version 3")) {
                 header.format = "gff3";
-                header["format"] = "gff3";
             } else if (line.startsWith("#gffTags")) {
-                header["gffTags"] = true;
+                header.gffTags = true;
             } else if (line.startsWith("fixedStep") || line.startsWith("variableStep")) {
                 // Wig directives -- we are in the data section
                 break;
-            } else {
-                // If the line can be parsed as a feature assume we are beyond the header, if any
+            } else if (line.startsWith("#")) {
                 const tokens = line.split(this.delimiter || "\t");
+                if (tokens.length > 1) {
+                    columnNames = tokens;   // Possible column names
+                }
+            } else {
+                // All directives that could change the format, and thus decoder, should have been read by now.
+                this.setDecoder(header.format);
+
+                // If the line can be parsed as a feature assume we are beyond the header, if any
                 try {
-                    // All directives that could change the format, and thus decoder, should have been read by now.
-                    const decoder = this.getDecoder();
-                    if (!line.startsWith("#") && decoder(tokens,header)) {
-                        if (columnNames && columnNames.length === tokens.length) {
-                            header.columnNames = columnNames;
-                            for (let n = 0; n < columnNames.length; n++) {
-                                if (columnNames[n] === "color" || columnNames[n] === "colour") {
-                                    header.colorColumn = n;
-                                } else if (columnNames[n] === "thickness") {
-                                    header.thicknessColumn = n;
-                                }
-                            }
-                        }
+                    const tokens = line.split(this.delimiter || "\t");
+                    const tmpHeader = Object.assign({columnNames}, header);
+                    if (this.decode(tokens, tmpHeader)) {
                         break;
                     } else {
                         if (tokens.length > 1) {
-                            header.columnNames = tokens;  // Possible column names
+                            columnNames = tokens; // possible column names
                         }
                     }
                 } catch (e) {
-                    if (tokens.length > 1) {
-                        header.columnNames = tokens;  // Possible column names
-                    }
+                    // Not a feature
                 }
             }
-            skipRows++;
         }
 
-        this.skipRows = skipRows;
+        if (columnNames) {
+            header.columnNames = columnNames;
+            for (let n = 0; n < columnNames.length; n++) {
+                if (columnNames[n] === "color" || columnNames[n] === "colour") {
+                    header.colorColumn = n;
+                } else if (columnNames[n] === "thickness") {
+                    header.thicknessColumn = n;
+                }
+            }
+        }
+
         this.header = header;    // Directives might be needed for parsing lines
         return header;
     }
 
-    parseFeatures(data) {
+    async parseFeatures(dataWrapper) {
 
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
         const allFeatures = [];
-        const decode = this.getDecoder();
+        const decode = this.decode;
         const format = this.header.format;
         const delimiter = this.delimiter || "\t";
         let i = 0;
         let line;
-        while ((line = nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows) continue;
 
@@ -185,113 +190,109 @@ class FeatureParser {
 
     }
 
-    getDecoder(header) {
+    setDecoder(format) {
 
-        if (!this.decode) {
-            switch (this.header.format) {
-                case "narrowpeak":
-                case "broadpeak":
-                case "regionpeak":
-                case "peaks":
-                    this.decode = decodePeak;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedgraph":
-                    this.decode = decodeBedGraph;
-                    this.delimiter = /\s+/;
-                    break;
-                case "wig":
-                    this.decode = decodeWig;
-                    this.delimiter = /\s+/;
-                    break;
-                case "gff3" :
-                case "gff" :
-                case "gtf" :
-                    this.decode = decodeGFF;
-                    this.delimiter = "\t";
-                    break;
-                case "fusionjuncspan":
-                    // bhaas, needed for FusionInspector view
-                    this.decode = decodeFusionJuncSpan;
-                    this.delimiter = /\s+/;
-                    break;
-                case "gtexgwas":
-                    this.skipRows = 1;
-                    this.decode = decodeGtexGWAS;
-                    this.delimiter = "\t";
-                    break;
-                case "refflat":
-                    this.decode = decodeReflat;
-                    this.delimiter = /\s+/;
-                    break;
-                case "genepred":
-                    this.decode = decodeGenePred;
-                    this.delimiter = /\s+/;
-                    break;
-                case "genepredext":
-                    this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
-                    break;
-                case "ensgene":
-                    this.decode = decodeGenePred
-                    this.header.shift = 1;
-                    this.delimiter = /\s+/;
-                    break;
-                case "refgene":
-                    this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
-                    this.header.shift = 1;
-                    break;
-                case "bed":
+        switch (format) {
+            case "narrowpeak":
+            case "broadpeak":
+            case "regionpeak":
+            case "peaks":
+                this.decode = decodePeak;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "bedgraph":
+                this.decode = decodeBedGraph;
+                this.delimiter = /\s+/;
+                break;
+            case "wig":
+                this.decode = decodeWig;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "gff3" :
+            case "gff" :
+            case "gtf" :
+                this.decode = decodeGFF;
+                this.delimiter = "\t";
+                break;
+            case "fusionjuncspan":
+                // bhaas, needed for FusionInspector view
+                this.decode = decodeFusionJuncSpan;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "gtexgwas":
+                this.skipRows = 1;
+                this.decode = decodeGtexGWAS;
+                this.delimiter = "\t";
+                break;
+            case "refflat":
+                this.decode = decodeReflat;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "genepred":
+                this.decode = decodeGenePred;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "genepredext":
+                this.decode = decodeGenePredExt;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "ensgene":
+                this.decode = decodeGenePred
+                this.header.shift = 1;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "refgene":
+                this.decode = decodeGenePredExt;
+                this.delimiter = this.config.delimiter || /\s+/;
+                this.header.shift = 1;
+                break;
+            case "bed":
+                this.decode = decodeBed;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "bedpe":
+                this.decode = decodeBedpe;
+                this.delimiter = this.config.delimiter || "\t";
+                break;
+            case "bedpe-domain":
+                this.decode = decodeBedpeDomain;
+                this.headerLine = true;
+                this.delimiter = this.config.delimiter || "\t";
+                break;
+            case "bedpe-loop":
+                this.decode = decodeBedpe;
+                this.delimiter = this.config.delimiter || "\t";
+                this.header = {colorColumn: 7};
+                break;
+            case "interact":
+                this.decode = decodeInteract;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "snp":
+                this.decode = decodeSNP;
+                this.delimiter = "\t";
+                break;
+            case "rmsk":
+                this.decode = decodeRepeatMasker;
+                this.delimiter = "\t";
+                break;
+            case "gcnv":
+                this.decode = decodeGcnv;
+                this.delimiter = "\t";
+                break;
+            default:
+                const customFormat = TrackUtils.getFormat(format);
+                if (customFormat !== undefined) {
+                    this.decode = decodeCustom;
+                    this.header.customFormat = customFormat;
+                    this.delimiter = customFormat.delimiter || "\t";
+                } else {
                     this.decode = decodeBed;
                     this.delimiter = this.config.delimiter || /\s+/;
-                    break;
-                case "bedpe":
-                    this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedpe-domain":
-                    this.decode = decodeBedpeDomain;
-                    this.headerLine = true;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedpe-loop":
-                    this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
-                    this.header = {colorColumn: 7};
-                    break;
-                case "interact":
-                    this.decode = decodeInteract;
-                    this.delimiter = /\s+/;
-                    break;
-                case "snp":
-                    this.decode = decodeSNP;
-                    this.delimiter = "\t";
-                    break;
-                case "rmsk":
-                    this.decode = decodeRepeatMasker;
-                    this.delimiter = "\t";
-                    break;
-                case "gcnv":
-                    this.decode = decodeGcnv;
-                    this.delimiter = "\t";
-                    break;
-                default:
-                    const customFormat = TrackUtils.getFormat(this.header.format);
-                    if (customFormat !== undefined) {
-                        this.decode = decodeCustom;
-                        this.header.format = customFormat;
-                        this.delimiter = customFormat.delimiter || "\t";
-                    } else {
-                        this.decode = decodeBed;
-                        this.delimiter = /\s+/;
-                    }
-            }
+                }
         }
 
-        return this.decode;
     }
-
 }
 
 function parseTrackLine(line) {
@@ -320,9 +321,9 @@ function parseTrackLine(line) {
         if (kv.length === 2) {
             const key = kv[0].trim();
             const value = kv[1].trim();
-            if(properties.hasOwnProperty(key)) {
+            if (properties.hasOwnProperty(key)) {
                 let currentValue = properties[key];
-                if(Array.isArray(currentValue)) {
+                if (Array.isArray(currentValue)) {
                     currentValue.push(value);
                 } else {
                     properties[key] = [currentValue, value];
@@ -332,9 +333,9 @@ function parseTrackLine(line) {
             }
         }
     }
-    if("interact" == properties["type"]) {
+    if ("interact" == properties["type"]) {
         properties["format"] = "interact";
-    } else if("gcnv" === properties["type"]) {
+    } else if ("gcnv" === properties["type"]) {
         properties["format"] = "gcnv";
     }
     return properties;
@@ -375,5 +376,22 @@ function parseVariableStep(line) {
     const span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
     return {format: "variableStep", chrom, span}
 }
+
+const spaceDelimited = new Set([
+    "narrowpeak",
+    "broadpeak",
+    "regionpeak",
+    "peaks",
+    "fusionjuncspan",
+    "bedgraph",
+    "wig",
+    "refflat",
+    "genepred",
+    "genepredext",
+    "ensgene",
+    "refgene",
+    "bed",
+    "interact"
+])
 
 export default FeatureParser;

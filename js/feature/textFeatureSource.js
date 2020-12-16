@@ -46,7 +46,6 @@ import pack from "../feature/featurePacker.js";
 class TextFeatureSource {
 
     constructor(config, genome) {
-
         this.config = config || {};
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
@@ -162,7 +161,7 @@ class TextFeatureSource {
         }
 
         if (isWholeGenome) {
-            if(!this.wgFeatures) {
+            if (!this.wgFeatures) {
                 if (this.queryable) {   // queryable sources don't support whole genome view
                     this.wgFeatures = [];
                 } else {
@@ -187,8 +186,9 @@ class TextFeatureSource {
         // indicating whole chromosome should be read at once.
         if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
             // Whole chromosome
+            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
             intervalStart = 0;
-            intervalEnd = this.genome.getChromosome(queryChr).bpLength;
+            intervalEnd = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER;
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
             intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
@@ -231,11 +231,10 @@ class TextFeatureSource {
     addFeaturesToDB(featureList) {
         for (let feature of featureList) {
             if (feature.name) {
-                //TODO igv.browser => igv.Globals or igv.FeatureDB
-                this.config.browser.featureDB[feature.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.name.toUpperCase()] = feature;
             }
             if (feature.gene && feature.gene.name) {
-                this.config.browser.featureDB[feature.gene.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
             }
         }
     }

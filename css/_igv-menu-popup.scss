@@ -1,0 +1,134 @@
+
+.igv-menu-popup {
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  min-width: 132px;
+
+  z-index: 4096;
+
+  cursor: pointer;
+
+  font-family: $igv-trackgear-default-font-face;
+  font-size: small;
+  font-weight: 400;
+  color: $igv-trackgear-font-color;
+
+  background: white;
+
+  border-radius: $igv-trackgear-popover-border-radius;
+  border-color: $igv-trackgear-grey-color;
+  border-style: solid;
+  border-width: thin;
+
+  display: flex;
+  flex-flow: column;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: flex-end;
+
+  text-align: left;
+
+  > div:not(:first-child) {
+    width: 100%;
+
+    > div {
+      background: white;
+    }
+
+    > div.context-menu {
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+
+    > div:last-child {
+      border-bottom-left-radius: $igv-trackgear-popover-border-radius;
+      border-bottom-right-radius: $igv-trackgear-popover-border-radius;
+      border-bottom-color: transparent;
+      border-bottom-style: solid;
+      border-bottom-width: thin;
+    }
+
+    > div:hover {
+      background: #efefef;
+    }
+
+  }
+
+}
+
+.igv-menu-popup-shim {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.igv-menu-popup-header {
+
+  position: relative;
+  width: 100%;
+  height: 24px;
+  cursor: move;
+
+  border-top-color: transparent;
+  border-top-left-radius: $igv-trackgear-popover-border-radius;
+  border-top-right-radius: $igv-trackgear-popover-border-radius;
+
+  border-bottom-color: $igv-trackgear-grey-color;
+  border-bottom-style: solid;
+  border-bottom-width: thin;
+
+  background-color: #eee;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  align-items: center;
+
+  div {
+    margin-right: 4px;
+    height: 12px;
+    width: 12px;
+    color: $igv-trackgear-grey-color;
+  }
+
+  div:hover {
+    cursor: pointer;
+    color: #444;
+  }
+
+}
+
+.igv-menu-popup-check-container {
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  width: 100%;
+  height: 20px;
+
+  background-color: transparent;
+
+  div {
+    padding-top: 2px;
+    padding-left: 8px;
+  }
+
+  div:first-child {
+    position: relative;
+    width: 12px;
+    height: 12px;
+
+    svg {
+      position: absolute;
+      width: 12px;
+      height: 12px;
+    }
+
+  }
+
+}

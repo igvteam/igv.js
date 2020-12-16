@@ -76,6 +76,22 @@ class PairedAlignment {
 
     }
 
+    containsLocation(genomicLocation, showSoftClips) {
+        const s = showSoftClips ? this.scStart : this.start;
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
+        return (genomicLocation >= s && genomicLocation <= (s + l));
+    }
+
+    alignmentContaining(genomicLocation, showSoftClips) {
+        if(this.firstAlignment.containsLocation(genomicLocation, showSoftClips)){
+            return this.firstAlignment;
+        } else if(this.secondAlignment && this.secondAlignment.containsLocation(genomicLocation, showSoftClips)) {
+            return this.secondAlignment;
+        } else {
+            return undefined;
+        }
+    }
+
     popupData(genomicLocation) {
 
         let nameValues = this.firstAlignment.popupData(genomicLocation);

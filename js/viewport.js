@@ -3,11 +3,13 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import { Popover, Alert } from '../node_modules/igv-ui/dist/igv-ui.js';
+import {Alert, Popover} from '../node_modules/igv-ui/dist/igv-ui.js';
 import GenomeUtils from "./genome/genome.js";
 import {createIcon} from "./igv-icons.js";
 import ViewportBase from "./viewportBase.js";
-import {FileUtils, DOMUtils} from "../node_modules/igv-utils/src/index.js";
+import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
+import MenuPopup from "./ui/menuPopup.js";
+import C2S from "./canvas2svg.js"
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -21,15 +23,18 @@ class ViewPort extends ViewportBase {
 
     initializationHelper() {
 
-        addMouseHandlers.call(this);
+        this.menuPopup = new MenuPopup(this.trackView.$viewportContainer)
+        this.menuPopup.$popover.hide()
+
+        this.addMouseHandlers();
         this.$spinner = $('<div class="igv-viewport-spinner">');
         this.$spinner.append(createIcon("spinner"));
         this.$viewport.append(this.$spinner);
         this.stopSpinner();
 
-        const { track } = this.trackView
+        const {track} = this.trackView
         if ('sequence' !== track.type) {
-            this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
+            this.$zoomInNotice = this.createZoomInNotice(this.$content);
         }
 
         if (track.name) {
@@ -48,9 +53,9 @@ class ViewPort extends ViewportBase {
                 if (typeof track.description === 'function') {
                     str = track.description();
                 } else if (track.description) {
-                    str = `<div title="${ track.description }"><div>${ track.description }</div></div>`
+                    str = `<div title="${track.description}"><div>${track.description}</div></div>`
                 } else {
-                    str = `<div title="${ track.name }"><div>${ track.name }</div></div>`
+                    str = `<div title="${track.name}"><div>${track.name}</div></div>`
                 }
 
                 if (this.popover) this.popover.dispose()
@@ -104,12 +109,26 @@ class ViewPort extends ViewportBase {
 
     checkZoomIn() {
 
-        if (!(viewIsReady.call(this))) {
+        const showZoomInNotice = () => {
+            const referenceFrame = this.referenceFrame;
+            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+                return true;
+            } else {
+                const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
+                    this.trackView.track.getVisibilityWindow() :
+                    this.trackView.track.visibilityWindow;
+                return (
+                    visibilityWindow !== undefined && visibilityWindow > 0 &&
+                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
+            }
+        }
+
+        if (!(this.viewIsReady())) {
             return false;
         }
 
         if (this.$zoomInNotice) {
-            if (showZoomInNotice.call(this)) {
+            if (showZoomInNotice()) {
                 // Out of visibility window
                 if (this.canvas) {
                     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -132,19 +151,7 @@ class ViewPort extends ViewportBase {
         return true;
 
 
-        function showZoomInNotice() {
-            const referenceFrame = this.referenceFrame;
-            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
-                return true;
-            } else {
-                const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
-                    this.trackView.track.getVisibilityWindow() :
-                    this.trackView.track.visibilityWindow;
-                return (
-                    visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
-            }
-        }
+
     }
 
     shift() {
@@ -226,27 +233,31 @@ class ViewPort extends ViewportBase {
 
     async repaint() {
 
-        var self = this;
-        const tile = this.tile;
-        if (!tile) {
+        if (undefined === this.tile) {
             return;
         }
 
+        let { features, roiFeatures, bpPerPixel, startBP, endBP } = this.tile
+
         const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
-        const features = tile.features;
-        const roiFeatures = tile.roiFeatures;
-        const bpPerPixel = isWGV ? this.referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
-        const bpStart = isWGV ? 0 : tile.startBP;
-        const bpEnd = isWGV ? this.referenceFrame.initialEnd : tile.endBP;
-        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        let pixelWidth
+
+        if (isWGV) {
+            bpPerPixel = this.referenceFrame.initialEnd / this.$viewport.width()
+            startBP = 0
+            endBP = this.referenceFrame.initialEnd
+            pixelWidth = this.$viewport.width()
+        } else {
+            pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel)
+        }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const viewportHeight = this.$viewport.height();
-        const minHeight = roiFeatures ? Math.max(self.getContentHeight(), viewportHeight) : self.getContentHeight();  // Need to fill viewport for ROIs.
+        const minHeight = roiFeatures ? Math.max(this.getContentHeight(), viewportHeight) : this.getContentHeight();  // Need to fill viewport for ROIs.
         let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
-            if (self.canvas) {
-                $(self.canvas).remove();
+            if (this.canvas) {
+                $(this.canvas).remove();
             }
             return;
         }
@@ -260,7 +271,7 @@ class ViewPort extends ViewportBase {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         }
 
-        const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
         const ctx = newCanvas.getContext("2d");
@@ -285,14 +296,14 @@ class ViewPort extends ViewportBase {
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
-                bpStart,
-                bpEnd,
+                bpStart: startBP,
+                bpEnd: endBP,
                 bpPerPixel,
                 referenceFrame: this.referenceFrame,
-                selection: self.selection,
-                viewport: self,
-                viewportWidth: self.$viewport.width(),
-                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - bpStart),
+                selection: this.selection,
+                viewport: this,
+                viewportWidth: this.$viewport.width(),
+                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
@@ -300,12 +311,12 @@ class ViewPort extends ViewportBase {
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
-        if (self.canvas) {
-            $(self.canvas).remove();
+        if (this.canvas) {
+            $(this.canvas).remove();
         }
-        $(self.contentDiv).append(newCanvas);
-        self.canvas = newCanvas;
-        self.ctx = ctx;
+        $(this.contentDiv).append(newCanvas);
+        this.canvas = newCanvas;
+        this.ctx = ctx;
     }
 
     draw(drawConfiguration, features, roiFeatures) {
@@ -371,7 +382,7 @@ class ViewPort extends ViewportBase {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
-        draw.call(this, drawConfiguration, features, roiFeatures);
+        this.draw(drawConfiguration, features, roiFeatures);
 
         return ctx.getSerializedSvg(true);
 
@@ -416,7 +427,7 @@ class ViewPort extends ViewportBase {
 
     saveSVG() {
 
-        const { width, height } = this.$viewport.get(0).getBoundingClientRect();
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
         const config =
             {
@@ -437,7 +448,7 @@ class ViewPort extends ViewportBase {
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-        FileUtils.download(`${ str }.svg`, data);
+        FileUtils.download(`${str}.svg`, data);
     }
 
     drawSVGWithContect(context, width, height) {
@@ -468,10 +479,10 @@ class ViewPort extends ViewportBase {
 
         const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        draw.call(this, config, features, roiFeatures);
+        this.draw(config, features, roiFeatures);
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            renderTrackLabelSVG.call(this, context);
+            this.renderTrackLabelSVG(context);
         }
 
         context.restore();
@@ -515,61 +526,323 @@ class ViewPort extends ViewportBase {
             return undefined;
         }
     }
-}
 
-function createZoomInNotice($parent) {
+    renderTrackLabelSVG(context) {
 
-    const $notice = $('<div class="zoom-in-notice-container">');
-    $parent.append($notice);
+        const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
-    const $e = $('<div>');
-    $notice.append($e);
-    $e.text('Zoom in to see features');
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        context.fillStyle = "white";
+        context.fillRect(x, y, width, height);
 
-    $notice.hide();
+        context.font = "12px Arial";
+        context.fillStyle = 'rgb(68, 68, 68)';
 
-    return $notice;
-}
+        const dx = 0.25 * (width - stringWidth);
+        const dy = 0.7 * (height - 12);
+        context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
 
+        context.strokeStyle = 'rgb(68, 68, 68)';
+        context.strokeRect(x, y, width, height);
 
-function draw(drawConfiguration, features, roiFeatures) {
-    if (features) {
-        drawConfiguration.features = features;
-        this.trackView.track.draw(drawConfiguration);
     }
 
-    if (roiFeatures) {
-        for (let r of roiFeatures) {
-            drawConfiguration.features = r.features;
-            r.track.draw(drawConfiguration);
+
+    createZoomInNotice($parent) {
+
+        const $notice = $('<div class="zoom-in-notice-container">');
+        $parent.append($notice);
+
+        const $e = $('<div>');
+        $notice.append($e);
+        $e.text('Zoom in to see features');
+
+        $notice.hide();
+
+        return $notice;
+    }
+
+    viewIsReady() {
+        return this.browser && this.browser.referenceFrameList && this.referenceFrame;
+    }
+
+
+    addMouseHandlers() {
+
+        const self = this;
+        const browser = this.browser;
+
+        let lastMouseX;
+        let mouseDownCoords;
+
+        let popupTimerID;
+
+        let lastClickTime = 0;
+
+        this.$viewport.on("contextmenu", function (e) {
+
+            // Ignore if we are doing a drag.  This can happen with touch events.
+            if (self.browser.dragObject) {
+                return false;
+            }
+            const clickState = createClickState(e, self);
+
+            if (undefined === clickState) {
+                return false;
+            }
+
+
+            e.preventDefault();
+
+            // Track specific items
+            let menuItems = [];
+            if (typeof self.trackView.track.contextMenuItemList === "function") {
+                menuItems = self.trackView.track.contextMenuItemList(clickState);
+            }
+
+            // Add items common to all tracks
+            if (menuItems.length > 0) {
+                menuItems.push({label: $('<HR>')});
+            }
+
+            menuItems.push({label: 'Save Image (PNG)', click: () => self.saveImage()});
+            menuItems.push({label: 'Save Image (SVG)', click: () => self.saveSVG()});
+
+            self.menuPopup.presentTrackContextMenu(e, menuItems)
+        });
+
+
+        /**
+         * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
+         */
+        this.$viewport.on('mousedown', function (e) {
+            self.enableClick = true;
+            browser.mouseDownOnViewport(e, self);
+            mouseDownCoords = DOMUtils.pageCoordinates(e);
+        });
+
+        this.$viewport.on('touchstart', function (e) {
+            self.enableClick = true;
+            browser.mouseDownOnViewport(e, self);
+            mouseDownCoords = DOMUtils.pageCoordinates(e);
+        });
+
+        /**
+         * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
+         * those, it is a click.
+         */
+        this.$viewport.on('mouseup', handleMouseUp);
+
+        this.$viewport.on('touchend', handleMouseUp);
+
+        this.$viewport.on('click', function (e) {
+            if (self.enableClick) {
+                handleClick(e);
+            }
+        });
+
+        function handleMouseUp(e) {
+
+
+            // Any mouse up cancels drag and scrolling
+            if (self.browser.dragObject || self.browser.isScrolling) {
+                self.browser.cancelTrackPan();
+                e.preventDefault();
+                e.stopPropagation();
+
+                self.enableClick = false;   // Until next mouse down
+
+                return;
+            }
+
+            self.browser.cancelTrackPan();
+            self.browser.endTrackDrag();
+        }
+
+        function handleClick(e) {
+
+            if (3 === e.which || e.ctrlKey) {
+                return;
+            }
+
+            // Close any currently open popups
+            $('.igv-popover').hide();
+
+
+            if (browser.dragObject || browser.isScrolling) {
+                return;
+            }
+
+            // // Interpret mouseDown + mouseUp < 5 pixels as a click.
+            // if(!mouseDownCoords) {
+            //     return;
+            // }
+            // const coords = pageCoordinates(e);
+            // const dx = coords.x - mouseDownCoords.x;
+            // const dy = coords.y - mouseDownCoords.y;
+            // const dist2 = dx*dx + dy*dy;
+            // if(dist2 > 25) {
+            //     mouseDownCoords = undefined;
+            //     return;
+            // }
+
+            // Treat as a mouse click, its either a single or double click.
+            // Handle here and stop propogation / default
+            e.preventDefault();
+            e.stopPropagation();
+
+            const mouseX = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
+            const mouseXCanvas = DOMUtils.translateMouseCoordinates(e, self.canvas).x;
+            const referenceFrame = self.referenceFrame;
+            const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+
+            const time = Date.now();
+
+            if (time - lastClickTime < browser.constants.doubleClickDelay) {
+
+                // double-click
+                if (popupTimerID) {
+                    window.clearTimeout(popupTimerID);
+                    popupTimerID = undefined;
+                }
+
+                const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+
+                let string;
+
+                if ('all' === self.referenceFrame.chr.toLowerCase()) {
+
+                    const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
+
+                    if (1 === browser.referenceFrameList.length) {
+                        string = chr;
+                    } else {
+                        let loci = browser.referenceFrameList.map(function (g) {
+                            return g.locusSearchString;
+                        });
+                        loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
+                        string = loci.join(' ');
+                    }
+
+                    browser.search(string);
+
+                } else {
+                    browser.zoomWithScaleFactor(0.5, centerBP, self)
+                }
+
+
+            } else {
+                // single-click
+
+                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
+
+                    self.trackView.track.shiftClick(xBP, e);
+
+                } else if (typeof self.trackView.track.popupData === "function") {
+
+                    popupTimerID = setTimeout(function () {
+
+                            const content = getPopupContent(e, self);
+                            if (content) {
+                                if (self.popover) self.popover.dispose()
+                                self.popover = new Popover(self.trackView.$viewportContainer.get(0))
+                                self.popover.presentContentWithEvent(e, content)
+                            }
+                            clearTimeout(popupTimerID);
+                            popupTimerID = undefined;
+                        },
+                        browser.constants.doubleClickDelay);
+                }
+            }
+
+            lastClickTime = time;
+        }
+
+        function createClickState(e, viewport) {
+
+            const referenceFrame = viewport.referenceFrame;
+            const viewportCoords = DOMUtils.translateMouseCoordinates(e, viewport.contentDiv);
+            const canvasCoords = DOMUtils.translateMouseCoordinates(e, viewport.canvas);
+            const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
+
+            if (undefined === genomicLocation || null === viewport.tile) {
+                return undefined;
+            }
+
+            return {
+                event: e,
+                viewport: viewport,
+                referenceFrame: referenceFrame,
+                genomicLocation: genomicLocation,
+                x: viewportCoords.x,
+                y: viewportCoords.y,
+                canvasX: canvasCoords.x,
+                canvasY: canvasCoords.y
+            }
+
+        }
+
+        /**
+         * Return markup for popup info window
+         *
+         * @param e
+         * @param viewport
+         * @returns {*}
+         */
+        function getPopupContent(e, viewport) {
+
+            const clickState = createClickState(e, viewport);
+
+            if (undefined === clickState) {
+                return;
+            }
+
+            let track = viewport.trackView.track;
+            const dataList = track.popupData(clickState);
+
+            const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
+
+            let content;
+            if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
+                // Indicates handler did not handle the result, or the handler wishes default behavior to occur
+                if (dataList && dataList.length > 0) {
+                    content = formatPopoverText(dataList);
+                }
+
+            } else if (typeof popupClickHandlerResult === 'string') {
+                content = popupClickHandlerResult;
+            }
+
+            return content;
+        }
+
+        /**
+         * Format markup for popover text from an array of name value pairs [{name, value}]
+         */
+        function formatPopoverText(nameValues) {
+
+            const rows = nameValues.map(nameValue => {
+
+                if (nameValue.name) {
+                    const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
+                    return `<div title="${nameValue.value}">${str}</div>`
+                } else if ('<hr>' === nameValue) {
+                    return nameValue
+                } else {
+                    return `<div title="${nameValue}">${nameValue}</div>`
+                }
+
+            })
+
+            return rows.join('')
         }
     }
+
+
 }
 
 
-function viewIsReady() {
-    return this.browser && this.browser.referenceFrameList && this.referenceFrame;
-}
 
-function renderTrackLabelSVG(context) {
-
-    const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-
-    const {width: stringWidth} = context.measureText(this.$trackLabel.text());
-    context.fillStyle = "white";
-    context.fillRect(x, y, width, height);
-
-    context.font = "12px Arial";
-    context.fillStyle = 'rgb(68, 68, 68)';
-
-    const dx = 0.25 * (width - stringWidth);
-    const dy = 0.7 * (height - 12);
-    context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
-
-    context.strokeStyle = 'rgb(68, 68, 68)';
-    context.strokeRect(x, y, width, height);
-
-}
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
     this.chr = chr;
@@ -587,292 +860,6 @@ Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
 Tile.prototype.overlapsRange = function (chr, start, end) {
     return this.chr === chr && end >= this.startBP && start <= this.endBP;
 };
-
-function addMouseHandlers() {
-
-    const self = this;
-    const browser = this.browser;
-
-    let lastMouseX;
-    let mouseDownCoords;
-
-    let popupTimerID;
-
-    let lastClickTime = 0;
-
-    this.$viewport.on("contextmenu", function (e) {
-
-        // Ignore if we are doing a drag.  This can happen with touch events.
-        if (self.browser.dragObject) {
-            return false;
-        }
-        const clickState = createClickState(e, self);
-
-        if (undefined === clickState) {
-            return false;
-        }
-
-
-        e.preventDefault();
-
-        // Track specific items
-        let menuItems = [];
-        if (typeof self.trackView.track.contextMenuItemList === "function") {
-            menuItems = self.trackView.track.contextMenuItemList(clickState);
-        }
-
-        // Add items common to all tracks
-        if (menuItems.length > 0) {
-            menuItems.push({label: $('<HR>')});
-        }
-        menuItems.push(
-            {
-                label: 'Save Image (PNG)',
-                click: function () {
-                    self.saveImage();
-                }
-            });
-
-        menuItems.push(
-            {
-                label: 'Save Image (SVG)',
-                click: function () {
-                    self.saveSVG();
-                }
-            });
-
-        if (self.popover) self.popover.dispose()
-        self.popover = new Popover(self.trackView.$viewportContainer.get(0));
-        self.popover.presentMenu(e, menuItems);
-
-    });
-
-
-    /**
-     * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
-     */
-    this.$viewport.on('mousedown', function (e) {
-        self.enableClick = true;
-        browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = DOMUtils.pageCoordinates(e);
-    });
-
-    this.$viewport.on('touchstart', function (e) {
-        self.enableClick = true;
-        browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = DOMUtils.pageCoordinates(e);
-    });
-
-    /**
-     * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
-     * those, it is a click.
-     */
-    this.$viewport.on('mouseup', handleMouseUp);
-
-    this.$viewport.on('touchend', handleMouseUp);
-
-    this.$viewport.on('click', function (e) {
-        if (self.enableClick) {
-            handleClick(e);
-        }
-    });
-
-    function handleMouseUp(e) {
-
-
-        // Any mouse up cancels drag and scrolling
-        if (self.browser.dragObject || self.browser.isScrolling) {
-            self.browser.cancelTrackPan();
-            e.preventDefault();
-            e.stopPropagation();
-
-            self.enableClick = false;   // Until next mouse down
-
-            return;
-        }
-
-        self.browser.cancelTrackPan();
-        self.browser.endTrackDrag();
-    }
-
-    function handleClick(e) {
-
-        if (3 === e.which || e.ctrlKey) {
-            return;
-        }
-
-        // Close any currently open popups
-        $('.igv-popover').hide();
-
-
-        if (browser.dragObject || browser.isScrolling) {
-            return;
-        }
-
-        // // Interpret mouseDown + mouseUp < 5 pixels as a click.
-        // if(!mouseDownCoords) {
-        //     return;
-        // }
-        // const coords = pageCoordinates(e);
-        // const dx = coords.x - mouseDownCoords.x;
-        // const dy = coords.y - mouseDownCoords.y;
-        // const dist2 = dx*dx + dy*dy;
-        // if(dist2 > 25) {
-        //     mouseDownCoords = undefined;
-        //     return;
-        // }
-
-        // Treat as a mouse click, its either a single or double click.
-        // Handle here and stop propogation / default
-        e.preventDefault();
-        e.stopPropagation();
-
-        const mouseX = DOMUtils.translateMouseCoordinates(e, self.$viewport.get(0)).x;
-        const mouseXCanvas = DOMUtils.translateMouseCoordinates(e, self.canvas).x;
-        const referenceFrame = self.referenceFrame;
-        const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
-
-        const time = Date.now();
-
-        if (time - lastClickTime < browser.constants.doubleClickDelay) {
-
-            // double-click
-            if (popupTimerID) {
-                window.clearTimeout(popupTimerID);
-                popupTimerID = undefined;
-            }
-
-            const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
-
-            let string;
-
-            if ('all' === self.referenceFrame.chr.toLowerCase()) {
-
-                const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
-
-                if (1 === browser.referenceFrameList.length) {
-                    string = chr;
-                } else {
-                    let loci = browser.referenceFrameList.map(function (g) {
-                        return g.locusSearchString;
-                    });
-                    loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
-                    string = loci.join(' ');
-                }
-
-                browser.search(string);
-
-            } else {
-                browser.zoomWithScaleFactor(0.5, centerBP, self)
-            }
-
-
-        } else {
-            // single-click
-
-            if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-
-                self.trackView.track.shiftClick(xBP, e);
-
-            } else if (typeof self.trackView.track.popupData === "function") {
-
-                popupTimerID = setTimeout(function () {
-
-                        const content = getPopupContent(e, self);
-                        if (content) {
-                            if (self.popover) self.popover.dispose()
-                            self.popover = new Popover(self.trackView.$viewportContainer.get(0))
-                            self.popover.presentContentWithEvent(e, content)
-                        }
-                        clearTimeout(popupTimerID);
-                        popupTimerID = undefined;
-                    },
-                    browser.constants.doubleClickDelay);
-            }
-        }
-
-        lastClickTime = time;
-    }
-
-    function createClickState(e, viewport) {
-
-        const referenceFrame = viewport.referenceFrame;
-        const viewportCoords = DOMUtils.translateMouseCoordinates(e, viewport.contentDiv);
-        const canvasCoords = DOMUtils.translateMouseCoordinates(e, viewport.canvas);
-        const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
-
-        if (undefined === genomicLocation || null === viewport.tile) {
-            return undefined;
-        }
-
-        return {
-            event: e,
-            viewport: viewport,
-            referenceFrame: referenceFrame,
-            genomicLocation: genomicLocation,
-            x: viewportCoords.x,
-            y: viewportCoords.y,
-            canvasX: canvasCoords.x,
-            canvasY: canvasCoords.y
-        }
-
-    }
-
-    /**
-     * Return markup for popup info window
-     *
-     * @param e
-     * @param viewport
-     * @returns {*}
-     */
-    function getPopupContent(e, viewport) {
-
-        const clickState = createClickState(e, viewport);
-
-        if (undefined === clickState) {
-            return;
-        }
-
-        let track = viewport.trackView.track;
-        const dataList = track.popupData(clickState);
-
-        const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
-
-        let content;
-        if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
-            // Indicates handler did not handle the result, or the handler wishes default behavior to occur
-            if (dataList && dataList.length > 0) {
-                content = formatPopoverText(dataList);
-            }
-
-        } else if (typeof popupClickHandlerResult === 'string') {
-            content = popupClickHandlerResult;
-        }
-
-        return content;
-    }
-
-    /**
-     * Format markup for popover text from an array of name value pairs [{name, value}]
-     */
-    function formatPopoverText(nameValues) {
-
-        const rows = nameValues.map(nameValue => {
-
-            if (nameValue.name) {
-                const str = `<span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }`
-                return `<div title="${ nameValue.value }">${ str }</div>`
-            } else if ('<hr>' === nameValue) {
-                return nameValue
-            } else {
-                return `<div title="${ nameValue }">${ nameValue }</div>`
-            }
-
-        })
-
-        return rows.join('')
-    }
-}
 
 
 /**

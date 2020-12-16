@@ -8132,7 +8132,7 @@ const $ = jQuery;
 
 function createCheckbox(name, initialState) {
 
-    let $container = $('<div>', {class: 'igv-trackgear-popover-check-container'});
+    let $container = $('<div>', {class: 'igv-menu-popup-check-container'});
 
     let $div = $('<div>');
     $container.append($div);
@@ -14701,6 +14701,34 @@ if(typeof document !== 'undefined') {
     }
 }
 
+function div$1(options) {
+    return create$1("div", options);
+}
+
+function create$1(tag, options) {
+    const elem = document.createElement(tag);
+    if (options) {
+        if (options.class) {
+            elem.classList.add(options.class);
+        }
+        if (options.id) {
+            elem.id = options.id;
+        }
+        if(options.style) {
+            applyStyle$1(elem, options.style);
+        }
+    }
+    return elem;
+}
+
+function hide$1(elem) {
+    const cssStyle = getComputedStyle(elem);
+    if(cssStyle.display !== "none") {
+        elem._initialDisplay = cssStyle.display;
+    }
+    elem.style.display = "none";
+}
+
 function offset$1(elem) {
     // Return zeros for disconnected and hidden (display: none) elements (gh-2310)
     // Support: IE <=11 only
@@ -14734,6 +14762,12 @@ const relativeDOMBBox = (parentElement, childElement) => {
     const { x: x_c, y: y_c, width: width_c, height: height_c } = childElement.getBoundingClientRect();
     return { x: (x_c - x_p), y: (y_c - y_p), width: width_c, height:height_c };
 };
+
+function applyStyle$1(elem, style) {
+    for (let key of Object.keys(style)) {
+        elem.style[key] = style[key];
+    }
+}
 
 function guid  () {
     return ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).slice(-4);
@@ -21850,7 +21884,7 @@ class DataRangeDialog {
         const min = parseFloat(this.$minimum_input.val());
         const max = parseFloat(this.$maximum_input.val());
         if (isNaN(min) || isNaN(max)) {
-            Alert.presentAlert("Must input numeric values", undefined);
+            Alert.presentAlert(new Error('Must input numeric values'), undefined);
         } else {
             config.trackView.setDataRange(min, max);
         }
@@ -23669,7 +23703,7 @@ ctx.prototype.globalCompositeOperation = function () {
 ctx.prototype.setTransform = function () {
 };
 
-var C2S$1 = ctx;
+var C2S = ctx;
 
 /*
  * The MIT License (MIT)
@@ -23742,7 +23776,12 @@ class IdeogramViewport extends ViewportBase {
         this.referenceFrame.initialEnd = ee;
         this.referenceFrame.bpPerPixel = (ee - ss) / width;
 
-        this.browser.updateLocusSearchWidget(this.referenceFrame);
+        if (this.browser.referenceFrameList > 1) {
+            this.browser.updateLocusSearchWidget(this.browser.referenceFrameList);
+        } else {
+            this.browser.updateLocusSearchWidget([ this.referenceFrame ]);
+        }
+
         this.browser.updateViews();
 
     }
@@ -23760,7 +23799,7 @@ class IdeogramViewport extends ViewportBase {
 
         const { width, height } = this.$viewport.get(0).getBoundingClientRect();
 
-        const context = new C2S$1(
+        const context = new C2S(
             {
                 width,
                 height,
@@ -24553,7 +24592,7 @@ var UNKNOWN = 3;
 let RANGE_WARNING_GIVEN = false;
 
 const googleThrottle = new Throttle({
-    requestsPerSecond: 10
+    requestsPerSecond: 9
 });
 
 const igvxhr = {
@@ -24621,7 +24660,6 @@ async function load$1(url, options) {
             }
             if (isGoogleDriveURL(url)) {
                 return googleThrottle.add(async function () {
-                    console.log("Throttle " + url);
                     return loadURL(url, options)
                 })
             } else {
@@ -25416,6 +25454,11 @@ function decodeDataUri(dataUri) {
     return s;
 }
 
+const _version = "2.7.4-jb";
+function version$1() {
+    return _version;
+}
+
 /*
  * The MIT License (MIT)
  *
@@ -25474,7 +25517,7 @@ const GenomeUtils = {
 
             // Get default genomes
             if(config.loadDefaultGenomes !== false) {
-                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}`;  // prevent caching
+                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version$1()}`;  // prevent caching
                 const jsonArray = await igvxhr.loadJson(url, {});
                 processJson(jsonArray);
             }
@@ -25516,6 +25559,7 @@ class Genome {
         this.chromosomeNames = sequence.chromosomeNames;
         this.chromosomes = sequence.chromosomes;  // An object (functions as a dictionary)
         this.ideograms = ideograms;
+        this.featureDB = {};   // Hash of name -> feature, used for search function.
 
         this.wholeGenomeView = config.wholeGenomeView === undefined || config.wholeGenomeView;
         if (this.wholeGenomeView && Object.keys(sequence.chromosomes).length > 1) {
@@ -25861,6 +25905,207 @@ function constructWG(genome, config) {
 
 }
 
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper;
+
+const MenuPopup = function ($parent) {
+
+    // popover container
+    this.$popover = $('<div>', {class: 'igv-menu-popup'});
+    $parent.append(this.$popover);
+
+    // popover header
+    let $popoverHeader = $('<div>', {class: 'igv-menu-popup-header'});
+    this.$popover.append($popoverHeader);
+
+    attachDialogCloseHandlerWithParent$1($popoverHeader.get(0), () => this.$popover.hide());
+
+    this.$popoverContent = $('<div>');
+    this.$popover.append(this.$popoverContent);
+
+    makeDraggable$1(this.$popover.get(0), $popoverHeader.get(0));
+
+    $popoverHeader.on('click.menu-popup-dismiss', function (e) {
+        e.stopPropagation();
+        e.preventDefault();
+        // absorb click to prevent it leaking through to parent DOM element
+    });
+
+};
+
+MenuPopup.prototype.presentMenuList = function (dx, dy, list) {
+
+    hideAllMenuPopups();
+
+    if (list.length > 0) {
+
+        this.$popoverContent.empty();
+
+        list = trackMenuItemListHelper(list, this.$popover);
+
+        for (let item of list) {
+
+            if (item.init) {
+                item.init();
+            }
+
+            let $e = item.object;
+            if (0 === list.indexOf(item)) {
+                $e.removeClass('igv-track-menu-border-top');
+            }
+
+            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-menu-popup-check-container')) ; else if ($e.is('div')) {
+                $e.addClass('igv-menu-popup-shim');
+            }
+
+            this.$popoverContent.append($e);
+
+        }
+
+        this.$popover.css({left: (dx + 'px'), top: (dy + 'px')});
+        this.$popover.show();
+
+    }
+};
+
+MenuPopup.prototype.presentTrackContextMenu = function(e, menuItems) {
+
+    this.$popoverContent.empty();
+
+    const menuElements = createMenuElements$1(menuItems, this.$popover.get(0));
+    for (let item of menuElements) {
+        this.$popoverContent.get(0).appendChild(item.object);
+    }
+
+    present$1(e, this.$popover.get(0));
+
+    this.$popover.show();
+
+};
+
+MenuPopup.prototype.dispose = function () {
+    this.$popover.empty();
+    this.$popoverContent.empty();
+    Object.keys(this).forEach(function (key) {
+        this[key] = undefined;
+    });
+};
+
+function createMenuElements$1(itemList, popover) {
+
+    return itemList.map( item => {
+
+        let elem;
+
+        if (typeof item === 'string' && '<hr/>' === item) {
+            elem = document.createElement('hr');
+        } else  if (typeof item === 'string') {
+            elem = div$1({ class:'context-menu'});
+            elem.innerHTML = item;
+        } else if (typeof item === 'Node') {
+            elem = item;
+        } else {
+            if (typeof item.init === 'function') {
+                item.init();
+            }
+
+            if ("checkbox" === item.type) {
+                elem = Icon.createCheckbox("Show all bases", item.value);
+            } else if("color" === item.type) {
+                const colorPicker = new ColorPicker({
+                    parent: popover.parentElement,
+                    width: 364,
+                    //defaultColor: 'aqua',
+                    colorHandler: (color) => item.click(color)
+                });
+                elem = div$1({ class:'context-menu'});
+                if (typeof item.label === 'string') {
+                    elem.innerHTML = item.label;
+                }
+                const clickHandler =  e => {
+                    colorPicker.show();
+                    hide$1(popover);
+                    e.preventDefault();
+                    e.stopPropagation();
+                };
+                elem.addEventListener('click', clickHandler);
+                elem.addEventListener('touchend', clickHandler);
+                elem.addEventListener('mouseup', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+            } else {
+                elem = div$1({ class:'context-menu'});
+                if (typeof item.label === 'string') {
+                    elem.innerHTML = item.label;
+                }
+            }
+
+            if (item.click && "color" !== item.type) {
+                elem.addEventListener('click', handleClick);
+                elem.addEventListener('touchend', handleClick);
+                elem.addEventListener('mouseup', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                });
+
+                // eslint-disable-next-line no-inner-declarations
+                function handleClick(e) {
+                    item.click();
+                    hide$1(popover);
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            }
+        }
+
+
+        return { object: elem, init: item.init };
+    })
+
+}
+
+function present$1(e, popover) {
+
+    const { x, y } = translateMouseCoordinates$1(e, popover.parentNode);
+
+    // parent bbox
+    const { width } = popover.parentNode.getBoundingClientRect();
+    const { width: w } = popover.getBoundingClientRect();
+
+    const xmax = x + w;
+
+    popover.style.left = `${ xmax > width ? (x - (xmax - width)) : x }px`;
+    popover.style.top  = `${ y }px`;
+
+}
+
+const hideAllMenuPopups = () => $('.igv-menu-popup').hide();
+
 /**
  * Created by dat on 9/16/16.
  */
@@ -25877,15 +26122,18 @@ class ViewPort extends ViewportBase {
 
     initializationHelper() {
 
-        addMouseHandlers.call(this);
+        this.menuPopup = new MenuPopup(this.trackView.$viewportContainer);
+        this.menuPopup.$popover.hide();
+
+        this.addMouseHandlers();
         this.$spinner = $('<div class="igv-viewport-spinner">');
         this.$spinner.append(createIcon("spinner"));
         this.$viewport.append(this.$spinner);
         this.stopSpinner();
 
-        const { track } = this.trackView;
+        const {track} = this.trackView;
         if ('sequence' !== track.type) {
-            this.$zoomInNotice = createZoomInNotice.call(this, this.$content);
+            this.$zoomInNotice = this.createZoomInNotice(this.$content);
         }
 
         if (track.name) {
@@ -25904,9 +26152,9 @@ class ViewPort extends ViewportBase {
                 if (typeof track.description === 'function') {
                     str = track.description();
                 } else if (track.description) {
-                    str = `<div title="${ track.description }"><div>${ track.description }</div></div>`;
+                    str = `<div title="${track.description}"><div>${track.description}</div></div>`;
                 } else {
-                    str = `<div title="${ track.name }"><div>${ track.name }</div></div>`;
+                    str = `<div title="${track.name}"><div>${track.name}</div></div>`;
                 }
 
                 if (this.popover) this.popover.dispose();
@@ -25960,12 +26208,26 @@ class ViewPort extends ViewportBase {
 
     checkZoomIn() {
 
-        if (!(viewIsReady.call(this))) {
+        const showZoomInNotice = () => {
+            const referenceFrame = this.referenceFrame;
+            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
+                return true;
+            } else {
+                const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
+                    this.trackView.track.getVisibilityWindow() :
+                    this.trackView.track.visibilityWindow;
+                return (
+                    visibilityWindow !== undefined && visibilityWindow > 0 &&
+                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
+            }
+        };
+
+        if (!(this.viewIsReady())) {
             return false;
         }
 
         if (this.$zoomInNotice) {
-            if (showZoomInNotice.call(this)) {
+            if (showZoomInNotice()) {
                 // Out of visibility window
                 if (this.canvas) {
                     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -25988,19 +26250,7 @@ class ViewPort extends ViewportBase {
         return true;
 
 
-        function showZoomInNotice() {
-            const referenceFrame = this.referenceFrame;
-            if (this.referenceFrame.chr.toLowerCase() === "all" && !this.trackView.track.supportsWholeGenome()) {
-                return true;
-            } else {
-                const visibilityWindow = typeof this.trackView.track.getVisibilityWindow === 'function' ?
-                    this.trackView.track.getVisibilityWindow() :
-                    this.trackView.track.visibilityWindow;
-                return (
-                    visibilityWindow !== undefined && visibilityWindow > 0 &&
-                    (referenceFrame.bpPerPixel * this.$viewport.width() > visibilityWindow));
-            }
-        }
+
     }
 
     shift() {
@@ -26082,27 +26332,31 @@ class ViewPort extends ViewportBase {
 
     async repaint() {
 
-        var self = this;
-        const tile = this.tile;
-        if (!tile) {
+        if (undefined === this.tile) {
             return;
         }
 
+        let { features, roiFeatures, bpPerPixel, startBP, endBP } = this.tile;
+
         const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr);
-        const features = tile.features;
-        const roiFeatures = tile.roiFeatures;
-        const bpPerPixel = isWGV ? this.referenceFrame.initialEnd / this.$viewport.width() : tile.bpPerPixel;
-        const bpStart = isWGV ? 0 : tile.startBP;
-        const bpEnd = isWGV ? this.referenceFrame.initialEnd : tile.endBP;
-        const pixelWidth = isWGV ? this.$viewport.width() : Math.ceil((bpEnd - bpStart) / bpPerPixel);
+        let pixelWidth;
+
+        if (isWGV) {
+            bpPerPixel = this.referenceFrame.initialEnd / this.$viewport.width();
+            startBP = 0;
+            endBP = this.referenceFrame.initialEnd;
+            pixelWidth = this.$viewport.width();
+        } else {
+            pixelWidth = Math.ceil((endBP - startBP) / bpPerPixel);
+        }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
         const viewportHeight = this.$viewport.height();
-        const minHeight = roiFeatures ? Math.max(self.getContentHeight(), viewportHeight) : self.getContentHeight();  // Need to fill viewport for ROIs.
+        const minHeight = roiFeatures ? Math.max(this.getContentHeight(), viewportHeight) : this.getContentHeight();  // Need to fill viewport for ROIs.
         let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
-            if (self.canvas) {
-                $(self.canvas).remove();
+            if (this.canvas) {
+                $(this.canvas).remove();
             }
             return;
         }
@@ -26116,7 +26370,7 @@ class ViewPort extends ViewportBase {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio;
         }
 
-        const pixelXOffset = Math.round((bpStart - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
+        const pixelXOffset = Math.round((startBP - this.referenceFrame.start) / this.referenceFrame.bpPerPixel);
 
         const newCanvas = $('<canvas class="igv-canvas">').get(0);
         const ctx = newCanvas.getContext("2d");
@@ -26141,14 +26395,14 @@ class ViewPort extends ViewportBase {
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
-                bpStart,
-                bpEnd,
+                bpStart: startBP,
+                bpEnd: endBP,
                 bpPerPixel,
                 referenceFrame: this.referenceFrame,
-                selection: self.selection,
-                viewport: self,
-                viewportWidth: self.$viewport.width(),
-                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - bpStart),
+                selection: this.selection,
+                viewport: this,
+                viewportWidth: this.$viewport.width(),
+                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
@@ -26156,12 +26410,12 @@ class ViewPort extends ViewportBase {
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight};
 
-        if (self.canvas) {
-            $(self.canvas).remove();
+        if (this.canvas) {
+            $(this.canvas).remove();
         }
-        $(self.contentDiv).append(newCanvas);
-        self.canvas = newCanvas;
-        self.ctx = ctx;
+        $(this.contentDiv).append(newCanvas);
+        this.canvas = newCanvas;
+        this.ctx = ctx;
     }
 
     draw(drawConfiguration, features, roiFeatures) {
@@ -26227,7 +26481,7 @@ class ViewPort extends ViewportBase {
                 viewportContainerWidth: this.browser.viewportContainerWidth()
             };
 
-        draw.call(this, drawConfiguration, features, roiFeatures);
+        this.draw(drawConfiguration, features, roiFeatures);
 
         return ctx.getSerializedSvg(true);
 
@@ -26272,7 +26526,7 @@ class ViewPort extends ViewportBase {
 
     saveSVG() {
 
-        const { width, height } = this.$viewport.get(0).getBoundingClientRect();
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
         const config =
             {
@@ -26293,7 +26547,7 @@ class ViewPort extends ViewportBase {
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-        download(`${ str }.svg`, data);
+        download(`${str}.svg`, data);
     }
 
     drawSVGWithContect(context, width, height) {
@@ -26324,10 +26578,10 @@ class ViewPort extends ViewportBase {
 
         const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        draw.call(this, config, features, roiFeatures);
+        this.draw(config, features, roiFeatures);
 
         if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            renderTrackLabelSVG.call(this, context);
+            this.renderTrackLabelSVG(context);
         }
 
         context.restore();
@@ -26371,61 +26625,321 @@ class ViewPort extends ViewportBase {
             return undefined;
         }
     }
-}
 
-function createZoomInNotice($parent) {
+    renderTrackLabelSVG(context) {
 
-    const $notice = $('<div class="zoom-in-notice-container">');
-    $parent.append($notice);
+        const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
 
-    const $e = $('<div>');
-    $notice.append($e);
-    $e.text('Zoom in to see features');
+        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        context.fillStyle = "white";
+        context.fillRect(x, y, width, height);
 
-    $notice.hide();
+        context.font = "12px Arial";
+        context.fillStyle = 'rgb(68, 68, 68)';
 
-    return $notice;
-}
+        const dx = 0.25 * (width - stringWidth);
+        const dy = 0.7 * (height - 12);
+        context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
 
+        context.strokeStyle = 'rgb(68, 68, 68)';
+        context.strokeRect(x, y, width, height);
 
-function draw(drawConfiguration, features, roiFeatures) {
-    if (features) {
-        drawConfiguration.features = features;
-        this.trackView.track.draw(drawConfiguration);
     }
 
-    if (roiFeatures) {
-        for (let r of roiFeatures) {
-            drawConfiguration.features = r.features;
-            r.track.draw(drawConfiguration);
+
+    createZoomInNotice($parent) {
+
+        const $notice = $('<div class="zoom-in-notice-container">');
+        $parent.append($notice);
+
+        const $e = $('<div>');
+        $notice.append($e);
+        $e.text('Zoom in to see features');
+
+        $notice.hide();
+
+        return $notice;
+    }
+
+    viewIsReady() {
+        return this.browser && this.browser.referenceFrameList && this.referenceFrame;
+    }
+
+
+    addMouseHandlers() {
+
+        const self = this;
+        const browser = this.browser;
+        let mouseDownCoords;
+
+        let popupTimerID;
+
+        let lastClickTime = 0;
+
+        this.$viewport.on("contextmenu", function (e) {
+
+            // Ignore if we are doing a drag.  This can happen with touch events.
+            if (self.browser.dragObject) {
+                return false;
+            }
+            const clickState = createClickState(e, self);
+
+            if (undefined === clickState) {
+                return false;
+            }
+
+
+            e.preventDefault();
+
+            // Track specific items
+            let menuItems = [];
+            if (typeof self.trackView.track.contextMenuItemList === "function") {
+                menuItems = self.trackView.track.contextMenuItemList(clickState);
+            }
+
+            // Add items common to all tracks
+            if (menuItems.length > 0) {
+                menuItems.push({label: $('<HR>')});
+            }
+
+            menuItems.push({label: 'Save Image (PNG)', click: () => self.saveImage()});
+            menuItems.push({label: 'Save Image (SVG)', click: () => self.saveSVG()});
+
+            self.menuPopup.presentTrackContextMenu(e, menuItems);
+        });
+
+
+        /**
+         * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
+         */
+        this.$viewport.on('mousedown', function (e) {
+            self.enableClick = true;
+            browser.mouseDownOnViewport(e, self);
+            mouseDownCoords = pageCoordinates$1(e);
+        });
+
+        this.$viewport.on('touchstart', function (e) {
+            self.enableClick = true;
+            browser.mouseDownOnViewport(e, self);
+            mouseDownCoords = pageCoordinates$1(e);
+        });
+
+        /**
+         * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
+         * those, it is a click.
+         */
+        this.$viewport.on('mouseup', handleMouseUp);
+
+        this.$viewport.on('touchend', handleMouseUp);
+
+        this.$viewport.on('click', function (e) {
+            if (self.enableClick) {
+                handleClick(e);
+            }
+        });
+
+        function handleMouseUp(e) {
+
+
+            // Any mouse up cancels drag and scrolling
+            if (self.browser.dragObject || self.browser.isScrolling) {
+                self.browser.cancelTrackPan();
+                e.preventDefault();
+                e.stopPropagation();
+
+                self.enableClick = false;   // Until next mouse down
+
+                return;
+            }
+
+            self.browser.cancelTrackPan();
+            self.browser.endTrackDrag();
+        }
+
+        function handleClick(e) {
+
+            if (3 === e.which || e.ctrlKey) {
+                return;
+            }
+
+            // Close any currently open popups
+            $('.igv-popover').hide();
+
+
+            if (browser.dragObject || browser.isScrolling) {
+                return;
+            }
+
+            // // Interpret mouseDown + mouseUp < 5 pixels as a click.
+            // if(!mouseDownCoords) {
+            //     return;
+            // }
+            // const coords = pageCoordinates(e);
+            // const dx = coords.x - mouseDownCoords.x;
+            // const dy = coords.y - mouseDownCoords.y;
+            // const dist2 = dx*dx + dy*dy;
+            // if(dist2 > 25) {
+            //     mouseDownCoords = undefined;
+            //     return;
+            // }
+
+            // Treat as a mouse click, its either a single or double click.
+            // Handle here and stop propogation / default
+            e.preventDefault();
+            e.stopPropagation();
+
+            const mouseX = translateMouseCoordinates$1(e, self.$viewport.get(0)).x;
+            const mouseXCanvas = translateMouseCoordinates$1(e, self.canvas).x;
+            const referenceFrame = self.referenceFrame;
+            const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
+
+            const time = Date.now();
+
+            if (time - lastClickTime < browser.constants.doubleClickDelay) {
+
+                // double-click
+                if (popupTimerID) {
+                    window.clearTimeout(popupTimerID);
+                    popupTimerID = undefined;
+                }
+
+                const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
+
+                let string;
+
+                if ('all' === self.referenceFrame.chr.toLowerCase()) {
+
+                    const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
+
+                    if (1 === browser.referenceFrameList.length) {
+                        string = chr;
+                    } else {
+                        let loci = browser.referenceFrameList.map(function (g) {
+                            return g.locusSearchString;
+                        });
+                        loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
+                        string = loci.join(' ');
+                    }
+
+                    browser.search(string);
+
+                } else {
+                    browser.zoomWithScaleFactor(0.5, centerBP, self);
+                }
+
+
+            } else {
+                // single-click
+
+                if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
+
+                    self.trackView.track.shiftClick(xBP, e);
+
+                } else if (typeof self.trackView.track.popupData === "function") {
+
+                    popupTimerID = setTimeout(function () {
+
+                            const content = getPopupContent(e, self);
+                            if (content) {
+                                if (self.popover) self.popover.dispose();
+                                self.popover = new Popover(self.trackView.$viewportContainer.get(0));
+                                self.popover.presentContentWithEvent(e, content);
+                            }
+                            clearTimeout(popupTimerID);
+                            popupTimerID = undefined;
+                        },
+                        browser.constants.doubleClickDelay);
+                }
+            }
+
+            lastClickTime = time;
+        }
+
+        function createClickState(e, viewport) {
+
+            const referenceFrame = viewport.referenceFrame;
+            const viewportCoords = translateMouseCoordinates$1(e, viewport.contentDiv);
+            const canvasCoords = translateMouseCoordinates$1(e, viewport.canvas);
+            const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
+
+            if (undefined === genomicLocation || null === viewport.tile) {
+                return undefined;
+            }
+
+            return {
+                event: e,
+                viewport: viewport,
+                referenceFrame: referenceFrame,
+                genomicLocation: genomicLocation,
+                x: viewportCoords.x,
+                y: viewportCoords.y,
+                canvasX: canvasCoords.x,
+                canvasY: canvasCoords.y
+            }
+
+        }
+
+        /**
+         * Return markup for popup info window
+         *
+         * @param e
+         * @param viewport
+         * @returns {*}
+         */
+        function getPopupContent(e, viewport) {
+
+            const clickState = createClickState(e, viewport);
+
+            if (undefined === clickState) {
+                return;
+            }
+
+            let track = viewport.trackView.track;
+            const dataList = track.popupData(clickState);
+
+            const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
+
+            let content;
+            if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
+                // Indicates handler did not handle the result, or the handler wishes default behavior to occur
+                if (dataList && dataList.length > 0) {
+                    content = formatPopoverText(dataList);
+                }
+
+            } else if (typeof popupClickHandlerResult === 'string') {
+                content = popupClickHandlerResult;
+            }
+
+            return content;
+        }
+
+        /**
+         * Format markup for popover text from an array of name value pairs [{name, value}]
+         */
+        function formatPopoverText(nameValues) {
+
+            const rows = nameValues.map(nameValue => {
+
+                if (nameValue.name) {
+                    const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`;
+                    return `<div title="${nameValue.value}">${str}</div>`
+                } else if ('<hr>' === nameValue) {
+                    return nameValue
+                } else {
+                    return `<div title="${nameValue}">${nameValue}</div>`
+                }
+
+            });
+
+            return rows.join('')
         }
     }
+
+
 }
 
 
-function viewIsReady() {
-    return this.browser && this.browser.referenceFrameList && this.referenceFrame;
-}
 
-function renderTrackLabelSVG(context) {
-
-    const {x, y, width, height} = relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
-
-    const {width: stringWidth} = context.measureText(this.$trackLabel.text());
-    context.fillStyle = "white";
-    context.fillRect(x, y, width, height);
-
-    context.font = "12px Arial";
-    context.fillStyle = 'rgb(68, 68, 68)';
-
-    const dx = 0.25 * (width - stringWidth);
-    const dy = 0.7 * (height - 12);
-    context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
-
-    context.strokeStyle = 'rgb(68, 68, 68)';
-    context.strokeRect(x, y, width, height);
-
-}
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
     this.chr = chr;
@@ -26443,290 +26957,6 @@ Tile.prototype.containsRange = function (chr, start, end, bpPerPixel) {
 Tile.prototype.overlapsRange = function (chr, start, end) {
     return this.chr === chr && end >= this.startBP && start <= this.endBP;
 };
-
-function addMouseHandlers() {
-
-    const self = this;
-    const browser = this.browser;
-    let mouseDownCoords;
-
-    let popupTimerID;
-
-    let lastClickTime = 0;
-
-    this.$viewport.on("contextmenu", function (e) {
-
-        // Ignore if we are doing a drag.  This can happen with touch events.
-        if (self.browser.dragObject) {
-            return false;
-        }
-        const clickState = createClickState(e, self);
-
-        if (undefined === clickState) {
-            return false;
-        }
-
-
-        e.preventDefault();
-
-        // Track specific items
-        let menuItems = [];
-        if (typeof self.trackView.track.contextMenuItemList === "function") {
-            menuItems = self.trackView.track.contextMenuItemList(clickState);
-        }
-
-        // Add items common to all tracks
-        if (menuItems.length > 0) {
-            menuItems.push({label: $('<HR>')});
-        }
-        menuItems.push(
-            {
-                label: 'Save Image (PNG)',
-                click: function () {
-                    self.saveImage();
-                }
-            });
-
-        menuItems.push(
-            {
-                label: 'Save Image (SVG)',
-                click: function () {
-                    self.saveSVG();
-                }
-            });
-
-        if (self.popover) self.popover.dispose();
-        self.popover = new Popover(self.trackView.$viewportContainer.get(0));
-        self.popover.presentMenu(e, menuItems);
-
-    });
-
-
-    /**
-     * Mouse click down,  notify browser for potential drag (pan), and record position for potential click.
-     */
-    this.$viewport.on('mousedown', function (e) {
-        self.enableClick = true;
-        browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = pageCoordinates$1(e);
-    });
-
-    this.$viewport.on('touchstart', function (e) {
-        self.enableClick = true;
-        browser.mouseDownOnViewport(e, self);
-        mouseDownCoords = pageCoordinates$1(e);
-    });
-
-    /**
-     * Mouse is released.  Ignore if this is a context menu click, or the end of a drag action.   If neither of
-     * those, it is a click.
-     */
-    this.$viewport.on('mouseup', handleMouseUp);
-
-    this.$viewport.on('touchend', handleMouseUp);
-
-    this.$viewport.on('click', function (e) {
-        if (self.enableClick) {
-            handleClick(e);
-        }
-    });
-
-    function handleMouseUp(e) {
-
-
-        // Any mouse up cancels drag and scrolling
-        if (self.browser.dragObject || self.browser.isScrolling) {
-            self.browser.cancelTrackPan();
-            e.preventDefault();
-            e.stopPropagation();
-
-            self.enableClick = false;   // Until next mouse down
-
-            return;
-        }
-
-        self.browser.cancelTrackPan();
-        self.browser.endTrackDrag();
-    }
-
-    function handleClick(e) {
-
-        if (3 === e.which || e.ctrlKey) {
-            return;
-        }
-
-        // Close any currently open popups
-        $('.igv-popover').hide();
-
-
-        if (browser.dragObject || browser.isScrolling) {
-            return;
-        }
-
-        // // Interpret mouseDown + mouseUp < 5 pixels as a click.
-        // if(!mouseDownCoords) {
-        //     return;
-        // }
-        // const coords = pageCoordinates(e);
-        // const dx = coords.x - mouseDownCoords.x;
-        // const dy = coords.y - mouseDownCoords.y;
-        // const dist2 = dx*dx + dy*dy;
-        // if(dist2 > 25) {
-        //     mouseDownCoords = undefined;
-        //     return;
-        // }
-
-        // Treat as a mouse click, its either a single or double click.
-        // Handle here and stop propogation / default
-        e.preventDefault();
-        e.stopPropagation();
-
-        const mouseX = translateMouseCoordinates$1(e, self.$viewport.get(0)).x;
-        const mouseXCanvas = translateMouseCoordinates$1(e, self.canvas).x;
-        const referenceFrame = self.referenceFrame;
-        const xBP = Math.floor((referenceFrame.start) + referenceFrame.toBP(mouseXCanvas));
-
-        const time = Date.now();
-
-        if (time - lastClickTime < browser.constants.doubleClickDelay) {
-
-            // double-click
-            if (popupTimerID) {
-                window.clearTimeout(popupTimerID);
-                popupTimerID = undefined;
-            }
-
-            const centerBP = Math.round(referenceFrame.start + referenceFrame.toBP(mouseX));
-
-            let string;
-
-            if ('all' === self.referenceFrame.chr.toLowerCase()) {
-
-                const chr = browser.genome.getChromosomeCoordinate(centerBP).chr;
-
-                if (1 === browser.referenceFrameList.length) {
-                    string = chr;
-                } else {
-                    let loci = browser.referenceFrameList.map(function (g) {
-                        return g.locusSearchString;
-                    });
-                    loci[browser.referenceFrameList.indexOf(self.referenceFrame)] = chr;
-                    string = loci.join(' ');
-                }
-
-                browser.search(string);
-
-            } else {
-                browser.zoomWithScaleFactor(0.5, centerBP, self);
-            }
-
-
-        } else {
-            // single-click
-
-            if (e.shiftKey && typeof self.trackView.track.shiftClick === "function") {
-
-                self.trackView.track.shiftClick(xBP, e);
-
-            } else if (typeof self.trackView.track.popupData === "function") {
-
-                popupTimerID = setTimeout(function () {
-
-                        const content = getPopupContent(e, self);
-                        if (content) {
-                            if (self.popover) self.popover.dispose();
-                            self.popover = new Popover(self.trackView.$viewportContainer.get(0));
-                            self.popover.presentContentWithEvent(e, content);
-                        }
-                        clearTimeout(popupTimerID);
-                        popupTimerID = undefined;
-                    },
-                    browser.constants.doubleClickDelay);
-            }
-        }
-
-        lastClickTime = time;
-    }
-
-    function createClickState(e, viewport) {
-
-        const referenceFrame = viewport.referenceFrame;
-        const viewportCoords = translateMouseCoordinates$1(e, viewport.contentDiv);
-        const canvasCoords = translateMouseCoordinates$1(e, viewport.canvas);
-        const genomicLocation = ((referenceFrame.start) + referenceFrame.toBP(viewportCoords.x));
-
-        if (undefined === genomicLocation || null === viewport.tile) {
-            return undefined;
-        }
-
-        return {
-            event: e,
-            viewport: viewport,
-            referenceFrame: referenceFrame,
-            genomicLocation: genomicLocation,
-            x: viewportCoords.x,
-            y: viewportCoords.y,
-            canvasX: canvasCoords.x,
-            canvasY: canvasCoords.y
-        }
-
-    }
-
-    /**
-     * Return markup for popup info window
-     *
-     * @param e
-     * @param viewport
-     * @returns {*}
-     */
-    function getPopupContent(e, viewport) {
-
-        const clickState = createClickState(e, viewport);
-
-        if (undefined === clickState) {
-            return;
-        }
-
-        let track = viewport.trackView.track;
-        const dataList = track.popupData(clickState);
-
-        const popupClickHandlerResult = browser.fireEvent('trackclick', [track, dataList]);
-
-        let content;
-        if (undefined === popupClickHandlerResult || true === popupClickHandlerResult) {
-            // Indicates handler did not handle the result, or the handler wishes default behavior to occur
-            if (dataList && dataList.length > 0) {
-                content = formatPopoverText(dataList);
-            }
-
-        } else if (typeof popupClickHandlerResult === 'string') {
-            content = popupClickHandlerResult;
-        }
-
-        return content;
-    }
-
-    /**
-     * Format markup for popover text from an array of name value pairs [{name, value}]
-     */
-    function formatPopoverText(nameValues) {
-
-        const rows = nameValues.map(nameValue => {
-
-            if (nameValue.name) {
-                const str = `<span>${ nameValue.name }</span>&nbsp&nbsp&nbsp${ nameValue.value }`;
-                return `<div title="${ nameValue.value }">${ str }</div>`
-            } else if ('<hr>' === nameValue) {
-                return nameValue
-            } else {
-                return `<div title="${ nameValue }">${ nameValue }</div>`
-            }
-
-        });
-
-        return rows.join('')
-    }
-}
 
 
 /**
@@ -27777,104 +28007,6 @@ class Tick {
  * THE SOFTWARE.
  */
 
-
-const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper;
-
-const TrackGearPopover = function ($parent) {
-
-    // popover container
-    this.$popover = $('<div>', {class: 'igv-trackgear-popover'});
-    $parent.append(this.$popover);
-
-    // popover header
-    let $popoverHeader = $('<div>', {class: 'igv-trackgear-popover-header'});
-    this.$popover.append($popoverHeader);
-
-    attachDialogCloseHandlerWithParent$1($popoverHeader[0], () => this.$popover.hide());
-
-    this.$popoverContent = $('<div>');
-    this.$popover.append(this.$popoverContent);
-
-    makeDraggable$1(this.$popover.get(0), $popoverHeader.get(0));
-
-    $popoverHeader.on('click.track_gear_popover', function (e) {
-        e.stopPropagation();
-        e.preventDefault();
-        // absorb click to prevent it leaking through to parent DOM element
-    });
-
-};
-
-TrackGearPopover.prototype.presentMenuList = function (dx, dy, list) {
-
-    hideAllTrackGearMenus();
-
-    if (list.length > 0) {
-
-        this.$popoverContent.empty();
-
-        list = trackMenuItemListHelper(list, this.$popover);
-
-        for (let item of list) {
-
-            if (item.init) {
-                item.init();
-            }
-
-            let $e = item.object;
-            if (0 === list.indexOf(item)) {
-                $e.removeClass('igv-track-menu-border-top');
-            }
-
-            if ($e.hasClass('igv-track-menu-border-top') || $e.hasClass('igv-trackgear-popover-check-container')) ; else if ($e.is('div')) {
-                $e.addClass('igv-trackgear-popover-shim');
-            }
-
-            this.$popoverContent.append($e);
-
-        }
-
-        this.$popover.css({left: (dx + 'px'), top: (dy + 'px')});
-        this.$popover.show();
-
-    }
-};
-
-TrackGearPopover.prototype.dispose = function () {
-    this.$popover.empty();
-    this.$popoverContent.empty();
-    Object.keys(this).forEach(function (key) {
-        this[key] = undefined;
-    });
-};
-
-const hideAllTrackGearMenus = () => $('.igv-trackgear-popover').hide();
-
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
 const scrollbarExclusionTypes = new Set(['ruler', 'sequence', 'ideogram']);
 
 class TrackView {
@@ -28050,6 +28182,13 @@ class TrackView {
         }
     }
 
+
+    appendRightHandGutter($parent) {
+        let $div = $('<div class="igv-right-hand-gutter">');
+        $parent.append($div);
+        this.createTrackGearPopup($div);
+    }
+
     dataRange() {
         return this.track.dataRange ? this.track.dataRange : undefined;
     }
@@ -28116,9 +28255,7 @@ class TrackView {
         }
     }
 
-    resize() {
-
-        const viewportWidth = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length);
+    resize(viewportWidth) {
 
         for (let viewport of this.viewports) {
             viewport.setWidth(viewportWidth);
@@ -28361,6 +28498,23 @@ class TrackView {
             }
         });
         return rpV;
+    }
+
+    createTrackGearPopup($parent) {
+
+        let $container = $("<div>", {class: 'igv-trackgear-container'});
+        $parent.append($container);
+
+        $container.append(createIcon('cog'));
+
+        this.trackGearPopup = new MenuPopup($parent);
+        this.trackGearPopup.$popover.hide();
+
+        $container.click(e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+        });
     }
 
     /**
@@ -28630,114 +28784,6 @@ class TrackScrollbar {
         }
     }
 }
-
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2016-2017 The Regents of the University of California
- * Author: Jim Robinson
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-function getDataWrapper (data) {
-
-        if (typeof(data) == 'string' || data instanceof String) {
-            return new StringDataWrapper(data);
-        } else {
-            return new ByteArrayDataWrapper(data);
-        }
-    }
-
-
-// Data might be a string, or an UInt8Array
-    var StringDataWrapper = function (string) {
-        this.data = string;
-        this.ptr = 0;
-    };
-
-    StringDataWrapper.prototype.nextLine = function () {
-        //return this.split(/\r\n|\n|\r/gm);
-        var start = this.ptr,
-            idx = this.data.indexOf('\n', start);
-
-        if (idx > 0) {
-            this.ptr = idx + 1;   // Advance pointer for next line
-            return idx === start ? "" : this.data.substring(start, idx).trim();
-        }
-        else {
-            // Last line
-            this.ptr = this.data.length;
-            return (start >= this.data.length) ? undefined : this.data.substring(start).trim();
-        }
-    };
-
-    // For use in applications where whitespace carries meaning
-    // Returns "" for an empty row (not undefined like nextLine), since this is needed in AED
-    StringDataWrapper.prototype.nextLineNoTrim = function () {
-        var start = this.ptr,
-            idx = this.data.indexOf('\n', start),
-            data = this.data;
-
-        if (idx > 0) {
-            this.ptr = idx + 1;   // Advance pointer for next line
-            if(idx > start && data.charAt(idx-1) === '\r') {
-                // Trim CR manually in CR/LF sequence
-                return data.substring(start, idx - 1);
-            }
-            return data.substring(start, idx);
-        }
-        else {
-            var length = data.length;
-            this.ptr = length;
-            // Return undefined only at the very end of the data
-            return (start >= length) ? undefined : data.substring(start);
-        }
-    };
-
-    var ByteArrayDataWrapper = function (array) {
-        this.data = array;
-        this.length = this.data.length;
-        this.ptr = 0;
-    };
-
-    ByteArrayDataWrapper.prototype.nextLine = function () {
-
-        var c, result;
-        result = "";
-
-        if (this.ptr >= this.length) return undefined;
-
-        for (var i = this.ptr; i < this.length; i++) {
-            c = String.fromCharCode(this.data[i]);
-            if (c === '\r') continue;
-            if (c === '\n') break;
-            result = result + c;
-        }
-
-        this.ptr = i + 1;
-        return result;
-    };
-
-    // The ByteArrayDataWrapper does not do any trimming by default, can reuse the function
-    ByteArrayDataWrapper.prototype.nextLineNoTrim = ByteArrayDataWrapper.prototype.nextLine;
 
 /**
  * Decoder for bedpe records.
@@ -29622,9 +29668,10 @@ function decodeGtexGWAS(tokens, header) {
  */
 function decodeCustom(tokens, header) {
 
-    if (tokens.length < header.format.fields.length) return undefined;
+    const format = header.customFormat;
 
-    const format = header.format;         // "this" refers to FeatureParser instance
+    if (tokens.length < format.fields.length) return undefined;
+
     const coords = format.coords || 0;
 
     const chr = tokens[format.chr];
@@ -29678,6 +29725,7 @@ function decodeGcnv(tokens, header) {
         }
     } else {
         // TODO Throw error?
+        console.warn(`${chr}:${start}-${end} row contains ${values.length} sample columns instead of the expected ${sampleCount} columns. Skipping...`);
         return undefined;
     }
 }
@@ -29719,18 +29767,27 @@ function decodeGcnv(tokens, header) {
  */
 class FeatureParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
 
-        this.header = {};
-        this.decode = decode;
         this.config = config;
-
-        if (format !== undefined) {
-            this.header.format = format.toLowerCase();
+        this.header = {};
+        if (config.nameField) {
+            this.header.nameField = config.nameField;
         }
-        this.header.nameField = config ? config.nameField : undefined;
+
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
 
+        if (config.decode) {
+            this.decode = config.decode;
+            this.delimiter = config.delimiter || "\t";
+        } else if (config.format) {
+            this.header.format = config.format.toLowerCase();
+            this.setDecoder(this.header.format);
+        }
+
+        if (!this.delimiter) {
+            this.delimiter = "\t";
+        }
     }
 
     /**
@@ -29741,14 +29798,12 @@ class FeatureParser {
      * @param data
      * @returns {{}}
      */
-    parseHeader(data) {
+    async parseHeader(dataWrapper) {
 
-        const dataWrapper = getDataWrapper(data);
         let header = this.header;
         let columnNames;
         let line;
-        let skipRows = 0;
-        while ((line = dataWrapper.nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("track") || line.startsWith("#track")) {
                 let h = parseTrackLine(line);
                 Object.assign(header, h);
@@ -29757,53 +29812,61 @@ class FeatureParser {
                 Object.assign(header, h);
             } else if (line.startsWith("##gff-version 3")) {
                 header.format = "gff3";
-                header["format"] = "gff3";
             } else if (line.startsWith("#gffTags")) {
-                header["gffTags"] = true;
+                header.gffTags = true;
             } else if (line.startsWith("fixedStep") || line.startsWith("variableStep")) {
                 // Wig directives -- we are in the data section
                 break;
-            } else {
-                // If the line can be parsed as a feature assume we are beyond the header, if any
+            } else if (line.startsWith("#")) {
                 const tokens = line.split(this.delimiter || "\t");
+                if (tokens.length > 1) {
+                    columnNames = tokens;   // Possible column names
+                }
+            } else {
+                // All directives that could change the format, and thus decoder, should have been read by now.
+                this.setDecoder(header.format);
+
+                // If the line can be parsed as a feature assume we are beyond the header, if any
                 try {
-                    // All directives that could change the format, and thus decoder, should have been read by now.
-                    const decoder = this.getDecoder();
-                    if (!line.startsWith("#") && decoder(tokens,header)) {
-                        if (columnNames && columnNames.length === tokens.length) ;
+                    const tokens = line.split(this.delimiter || "\t");
+                    const tmpHeader = Object.assign({columnNames}, header);
+                    if (this.decode(tokens, tmpHeader)) {
                         break;
                     } else {
                         if (tokens.length > 1) {
-                            header.columnNames = tokens;  // Possible column names
+                            columnNames = tokens; // possible column names
                         }
                     }
                 } catch (e) {
-                    if (tokens.length > 1) {
-                        header.columnNames = tokens;  // Possible column names
-                    }
+                    // Not a feature
                 }
             }
-            skipRows++;
         }
 
-        this.skipRows = skipRows;
+        if (columnNames) {
+            header.columnNames = columnNames;
+            for (let n = 0; n < columnNames.length; n++) {
+                if (columnNames[n] === "color" || columnNames[n] === "colour") {
+                    header.colorColumn = n;
+                } else if (columnNames[n] === "thickness") {
+                    header.thicknessColumn = n;
+                }
+            }
+        }
+
         this.header = header;    // Directives might be needed for parsing lines
         return header;
     }
 
-    parseFeatures(data) {
+    async parseFeatures(dataWrapper) {
 
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
         const allFeatures = [];
-        const decode = this.getDecoder();
+        const decode = this.decode;
         const format = this.header.format;
         const delimiter = this.delimiter || "\t";
         let i = 0;
         let line;
-        while ((line = nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows) continue;
 
@@ -29837,113 +29900,109 @@ class FeatureParser {
 
     }
 
-    getDecoder(header) {
+    setDecoder(format) {
 
-        if (!this.decode) {
-            switch (this.header.format) {
-                case "narrowpeak":
-                case "broadpeak":
-                case "regionpeak":
-                case "peaks":
-                    this.decode = decodePeak;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedgraph":
-                    this.decode = decodeBedGraph;
-                    this.delimiter = /\s+/;
-                    break;
-                case "wig":
-                    this.decode = decodeWig;
-                    this.delimiter = /\s+/;
-                    break;
-                case "gff3" :
-                case "gff" :
-                case "gtf" :
-                    this.decode = decodeGFF;
-                    this.delimiter = "\t";
-                    break;
-                case "fusionjuncspan":
-                    // bhaas, needed for FusionInspector view
-                    this.decode = decodeFusionJuncSpan;
-                    this.delimiter = /\s+/;
-                    break;
-                case "gtexgwas":
-                    this.skipRows = 1;
-                    this.decode = decodeGtexGWAS;
-                    this.delimiter = "\t";
-                    break;
-                case "refflat":
-                    this.decode = decodeReflat;
-                    this.delimiter = /\s+/;
-                    break;
-                case "genepred":
-                    this.decode = decodeGenePred;
-                    this.delimiter = /\s+/;
-                    break;
-                case "genepredext":
-                    this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
-                    break;
-                case "ensgene":
-                    this.decode = decodeGenePred;
-                    this.header.shift = 1;
-                    this.delimiter = /\s+/;
-                    break;
-                case "refgene":
-                    this.decode = decodeGenePredExt;
-                    this.delimiter = /\s+/;
-                    this.header.shift = 1;
-                    break;
-                case "bed":
+        switch (format) {
+            case "narrowpeak":
+            case "broadpeak":
+            case "regionpeak":
+            case "peaks":
+                this.decode = decodePeak;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "bedgraph":
+                this.decode = decodeBedGraph;
+                this.delimiter = /\s+/;
+                break;
+            case "wig":
+                this.decode = decodeWig;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "gff3" :
+            case "gff" :
+            case "gtf" :
+                this.decode = decodeGFF;
+                this.delimiter = "\t";
+                break;
+            case "fusionjuncspan":
+                // bhaas, needed for FusionInspector view
+                this.decode = decodeFusionJuncSpan;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "gtexgwas":
+                this.skipRows = 1;
+                this.decode = decodeGtexGWAS;
+                this.delimiter = "\t";
+                break;
+            case "refflat":
+                this.decode = decodeReflat;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "genepred":
+                this.decode = decodeGenePred;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "genepredext":
+                this.decode = decodeGenePredExt;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "ensgene":
+                this.decode = decodeGenePred;
+                this.header.shift = 1;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "refgene":
+                this.decode = decodeGenePredExt;
+                this.delimiter = this.config.delimiter || /\s+/;
+                this.header.shift = 1;
+                break;
+            case "bed":
+                this.decode = decodeBed;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "bedpe":
+                this.decode = decodeBedpe;
+                this.delimiter = this.config.delimiter || "\t";
+                break;
+            case "bedpe-domain":
+                this.decode = decodeBedpeDomain;
+                this.headerLine = true;
+                this.delimiter = this.config.delimiter || "\t";
+                break;
+            case "bedpe-loop":
+                this.decode = decodeBedpe;
+                this.delimiter = this.config.delimiter || "\t";
+                this.header = {colorColumn: 7};
+                break;
+            case "interact":
+                this.decode = decodeInteract;
+                this.delimiter = this.config.delimiter || /\s+/;
+                break;
+            case "snp":
+                this.decode = decodeSNP;
+                this.delimiter = "\t";
+                break;
+            case "rmsk":
+                this.decode = decodeRepeatMasker;
+                this.delimiter = "\t";
+                break;
+            case "gcnv":
+                this.decode = decodeGcnv;
+                this.delimiter = "\t";
+                break;
+            default:
+                const customFormat = getFormat(format);
+                if (customFormat !== undefined) {
+                    this.decode = decodeCustom;
+                    this.header.customFormat = customFormat;
+                    this.delimiter = customFormat.delimiter || "\t";
+                } else {
                     this.decode = decodeBed;
                     this.delimiter = this.config.delimiter || /\s+/;
-                    break;
-                case "bedpe":
-                    this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedpe-domain":
-                    this.decode = decodeBedpeDomain;
-                    this.headerLine = true;
-                    this.delimiter = /\s+/;
-                    break;
-                case "bedpe-loop":
-                    this.decode = decodeBedpe;
-                    this.delimiter = /\s+/;
-                    this.header = {colorColumn: 7};
-                    break;
-                case "interact":
-                    this.decode = decodeInteract;
-                    this.delimiter = /\s+/;
-                    break;
-                case "snp":
-                    this.decode = decodeSNP;
-                    this.delimiter = "\t";
-                    break;
-                case "rmsk":
-                    this.decode = decodeRepeatMasker;
-                    this.delimiter = "\t";
-                    break;
-                case "gcnv":
-                    this.decode = decodeGcnv;
-                    this.delimiter = "\t";
-                    break;
-                default:
-                    const customFormat = getFormat(this.header.format);
-                    if (customFormat !== undefined) {
-                        this.decode = decodeCustom;
-                        this.header.format = customFormat;
-                        this.delimiter = customFormat.delimiter || "\t";
-                    } else {
-                        this.decode = decodeBed;
-                        this.delimiter = /\s+/;
-                    }
-            }
+                }
         }
 
-        return this.decode;
     }
-
 }
 
 function parseTrackLine(line) {
@@ -29972,9 +30031,9 @@ function parseTrackLine(line) {
         if (kv.length === 2) {
             const key = kv[0].trim();
             const value = kv[1].trim();
-            if(properties.hasOwnProperty(key)) {
+            if (properties.hasOwnProperty(key)) {
                 let currentValue = properties[key];
-                if(Array.isArray(currentValue)) {
+                if (Array.isArray(currentValue)) {
                     currentValue.push(value);
                 } else {
                     properties[key] = [currentValue, value];
@@ -29984,9 +30043,9 @@ function parseTrackLine(line) {
             }
         }
     }
-    if("interact" == properties["type"]) {
+    if ("interact" == properties["type"]) {
         properties["format"] = "interact";
-    } else if("gcnv" === properties["type"]) {
+    } else if ("gcnv" === properties["type"]) {
         properties["format"] = "gcnv";
     }
     return properties;
@@ -30026,6 +30085,99 @@ function parseVariableStep(line) {
     const chrom = tokens[1].split("=")[1];
     const span = tokens.length > 2 ? parseInt(tokens[2].split("=")[1], 10) : 1;
     return {format: "variableStep", chrom, span}
+}
+
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2016-2017 The Regents of the University of California
+ * Author: Jim Robinson
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+function getDataWrapper(data) {
+
+    if (typeof (data) == 'string' || data instanceof String) {
+        return new StringDataWrapper(data);
+    } else {
+        return new ByteArrayDataWrapper(data);
+    }
+}
+
+
+// Data might be a string, or an UInt8Array
+class StringDataWrapper {
+
+    constructor(string) {
+        this.data = string;
+        this.ptr = 0;
+    }
+
+    nextLine() {
+        var start = this.ptr,
+            idx = this.data.indexOf('\n', start),
+            data = this.data;
+
+        if (idx > 0) {
+            this.ptr = idx + 1;   // Advance pointer for next line
+            if (idx > start && data.charAt(idx - 1) === '\r') {
+                // Trim CR manually in CR/LF sequence
+                return data.substring(start, idx - 1);
+            }
+            return data.substring(start, idx);
+        } else {
+            var length = data.length;
+            this.ptr = length;
+            // Return undefined only at the very end of the data
+            return (start >= length) ? undefined : data.substring(start);
+        }
+    }
+}
+
+class ByteArrayDataWrapper {
+
+    constructor(array) {
+        this.data = array;
+        this.length = this.data.length;
+        this.ptr = 0;
+    }
+
+    nextLine() {
+
+        var c, result;
+        result = "";
+
+        if (this.ptr >= this.length) return undefined;
+
+        for (var i = this.ptr; i < this.length; i++) {
+            c = String.fromCharCode(this.data[i]);
+            if (c === '\r') continue;
+            if (c === '\n') break;
+            result = result + c;
+        }
+
+        this.ptr = i + 1;
+        return result;
+    }
+
 }
 
 /*
@@ -30071,9 +30223,10 @@ const sampleKeyColumn = 0,
     endColumn = 3;
 
 class SegParser {
-    parseHeader(data) {
-        const lines = splitLines(data);
-        for (let line of lines) {
+
+    async parseHeader(dataWrapper) {
+        let line;
+        while((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("#")) ; else {
                 const tokens = line.split("\t");
                 this.header = {headings: tokens};
@@ -30083,16 +30236,15 @@ class SegParser {
         return this.header;
     }
 
-    parseFeatures(data) {
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLine.bind(dataWrapper);
+    async parseFeatures(dataWrapper) {
+
         const allFeatures = [];
         if (!this.header) {
-            this.header = this.parseHeader(nextLine());  // This will only work for non-indexed files
+            this.header = await this.parseHeader(await dataWrapper.nextLine());  // This will only work for non-indexed files
         }
         const dataColumn = this.header.headings.length - 1;
         let line;
-        while ((line = nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split("\t");
             if (tokens.length > dataColumn) {
                 allFeatures.push({
@@ -30223,11 +30375,11 @@ class TrackBase {
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
         for(let key of Object.keys(state)) {
             if(typeof state[key] === 'function') {
-                throw Error(`Property ${key} of track '${this.name} is a function. Functions cannot be saved in sessions.` );
-            } if(state[key] instanceof Promise) {
-                throw Error(`Property ${key} of track '${this.name} is a local File. File objects cannot be saved in sessions.`);
+                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.` );
             } if(state[key] instanceof File) {
-                throw Error(`Property ${key} of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
+                throw Error(`Property '${key}' of track '${this.name} is a local File. Local file references cannot be saved in sessions.`);
+            } if(state[key] instanceof Promise) {
+                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
             }
         }
 
@@ -30579,6 +30731,12 @@ class Variant {
                         this.end = this.end === undefined ? alleleEnd : Math.max(this.end, alleleEnd);
                     }
                 }
+
+                // Default to single base representation @ position for variant types not otherwise handled
+                if(this.start === undefined) {
+                    this.start = this.pos - 1;
+                    this.end = this.pos;
+                }
             }
         }
     }
@@ -30793,94 +30951,157 @@ function createGAVariant(json) {
  * THE SOFTWARE.
  */
 
-
 /**
  * Parser for VCF files.
  */
-const VcfParser = function () {
 
-};
+class VcfParser {
 
-VcfParser.prototype.parseHeader = function (data) {
-
-
-    const header = {};
-    const dataWrapper = getDataWrapper(data);
-
-    // First line must be file format
-    let line = dataWrapper.nextLine();
-    if (line.startsWith("##fileformat")) {
-        header.version = line.substr(13);
-    } else {
-        throw new Error("Invalid VCF file: missing fileformat line");
+    construtor() {
     }
 
-    while ((line = dataWrapper.nextLine()) !== undefined) {
+    async parseHeader(dataWrapper) {
 
-        if (line.startsWith("#")) {
+        const header = {};
 
-            let id;
-            const values = {};
+        // First line must be file format
+        let line = await dataWrapper.nextLine();
+        if (line.startsWith("##fileformat")) {
+            header.version = line.substr(13);
+        } else {
+            throw new Error("Invalid VCF file: missing fileformat line");
+        }
 
-            if (line.startsWith("##")) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
 
-                if (line.startsWith("##INFO") || line.startsWith("##FILTER") || line.startsWith("##FORMAT")) {
+            if (line.startsWith("#")) {
 
-                    const ltIdx = line.indexOf("<");
-                    const gtIdx = line.lastIndexOf(">");
+                let id;
+                const values = {};
 
-                    if (!(ltIdx > 2 && gtIdx > 0)) {
-                        console.log("Malformed VCF header line: " + line);
-                        continue;
-                    }
+                if (line.startsWith("##")) {
 
-                    const type = line.substring(2, ltIdx - 1);
-                    if (!header[type]) header[type] = {};
+                    if (line.startsWith("##INFO") || line.startsWith("##FILTER") || line.startsWith("##FORMAT")) {
 
-                    //##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
-                    // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
-                    // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
+                        const ltIdx = line.indexOf("<");
+                        const gtIdx = line.lastIndexOf(">");
 
-                    const tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+                        if (!(ltIdx > 2 && gtIdx > 0)) {
+                            console.log("Malformed VCF header line: " + line);
+                            continue;
+                        }
 
-                    for (let token of tokens) {
-                        var kv = token.split("=");
-                        if (kv.length > 1) {
-                            if (kv[0] === "ID") {
-                                id = kv[1];
-                            } else {
-                                values[kv[0]] = kv[1];
+                        const type = line.substring(2, ltIdx - 1);
+                        if (!header[type]) header[type] = {};
+
+                        //##INFO=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
+                        // ##FILTER=<ID=NOCALL,Description="Generic filter. Filtering details stored in FR info tag.">
+                        // ##FORMAT=<ID=AF,Number=A,Type=Float,Description="Allele frequency based on Flow Evaluator observation counts">
+
+                        const tokens = splitStringRespectingQuotes(line.substring(ltIdx + 1, gtIdx - 1), ",");
+
+                        for (let token of tokens) {
+                            var kv = token.split("=");
+                            if (kv.length > 1) {
+                                if (kv[0] === "ID") {
+                                    id = kv[1];
+                                } else {
+                                    values[kv[0]] = kv[1];
+                                }
                             }
                         }
-                    }
 
-                    if (id) {
-                        header[type][id] = values;
+                        if (id) {
+                            header[type][id] = values;
+                        }
+                    }
+                } else if (line.startsWith("#CHROM")) {
+                    const tokens = line.split("\t");
+
+                    if (tokens.length > 8) {
+
+                        // call set names -- use column index for id
+                        header.callSets = [];
+                        for (let j = 9; j < tokens.length; j++) {
+                            header.callSets.push({id: j, name: tokens[j]});
+                        }
                     }
                 }
-            } else if (line.startsWith("#CHROM")) {
+
+            } else {
+                break;
+            }
+
+        }
+
+        this.header = header;  // Will need to intrepret genotypes and info field
+
+        return header;
+    }
+
+
+    /**
+     * Parse data as a collection of Variant objects.
+     *
+     * @param data
+     * @returns {Array}
+     */
+    async parseFeatures(dataWrapper) {
+
+        const allFeatures = [];
+        const callSets = this.header.callSets;
+        const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0);
+        let line;
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
+
+            if (line && !line.startsWith("#")) {
                 const tokens = line.split("\t");
+                if (tokens.length === nExpectedColumns) {
+                    const variant = createVCFVariant(tokens);
+                    variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
+                    allFeatures.push(variant);
 
-                if (tokens.length > 8) {
+                    if (tokens.length > 9) {
 
-                    // call set names -- use column index for id
-                    header.callSets = [];
-                    for (let j = 9; j < tokens.length; j++) {
-                        header.callSets.push({id: j, name: tokens[j]});
+                        // Format
+                        const callFields = extractCallFields(tokens[8].split(":"));
+
+                        variant.calls = {};
+                        for (let index = 9; index < tokens.length; index++) {
+
+                            const token = tokens[index];
+
+                            var callSet = callSets[index - 9],
+                                call = {
+                                    callSetName: callSet.name,
+                                    info: {}
+                                };
+
+                            variant.calls[callSet.id] = call;
+
+                            token.split(":").forEach(function (callToken, idx) {
+
+                                switch (idx) {
+                                    case callFields.genotypeIndex:
+                                        call.genotype = [];
+                                        callToken.split(/[\|\/]/).forEach(function (s) {
+                                            call.genotype.push('.' === s ? s : parseInt(s));
+                                        });
+                                        break;
+
+                                    default:
+                                        call.info[callFields.fields[idx]] = callToken;
+                                }
+                            });
+                        }
                     }
                 }
             }
-
-        } else {
-            break;
         }
 
+        return allFeatures;
     }
-
-    this.header = header;  // Will need to intrepret genotypes and info field
-
-    return header;
-};
+}
 
 function extractCallFields(tokens) {
 
@@ -30895,69 +31116,6 @@ function extractCallFields(tokens) {
     }
     return callFields;
 }
-
-/**
- * Parse data as a collection of Variant objects.
- *
- * @param data
- * @returns {Array}
- */
-VcfParser.prototype.parseFeatures = function (data) {
-
-    const allFeatures = [];
-    const callSets = this.header.callSets;
-    const dataWrapper = getDataWrapper(data);
-    const nExpectedColumns = 8 + (callSets ? callSets.length + 1: 0);
-    let line;
-    while ((line = dataWrapper.nextLine()) !== undefined) {
-
-        if (line && !line.startsWith("#")) {
-            const tokens = line.split("\t");
-            if (tokens.length === nExpectedColumns) {
-                const variant = createVCFVariant(tokens);
-                variant.header = this.header;       // Keep a pointer to the header to interpret fields for popup text
-                allFeatures.push(variant);
-
-                if (tokens.length > 9) {
-
-                    // Format
-                    const callFields = extractCallFields(tokens[8].split(":"));
-
-                    variant.calls = {};
-                    for (let index = 9; index < tokens.length; index++) {
-
-                        const token = tokens[index];
-
-                        var callSet = callSets[index - 9],
-                            call = {
-                                callSetName: callSet.name,
-                                info: {}
-                            };
-
-                        variant.calls[callSet.id] = call;
-
-                        token.split(":").forEach(function (callToken, idx) {
-
-                            switch (idx) {
-                                case callFields.genotypeIndex:
-                                    call.genotype = [];
-                                    callToken.split(/[\|\/]/).forEach(function (s) {
-                                        call.genotype.push('.' === s ? s : parseInt(s));
-                                    });
-                                    break;
-
-                                default:
-                                    call.info[callFields.fields[idx]] = callToken;
-                            }
-                        });
-                    }
-                }
-            }
-        }
-    }
-
-    return allFeatures;
-};
 
 /**
  * Parser for IGV desktop GWAS files.  See http://software.broadinstitute.org/software/igv/GWAS
@@ -30984,9 +31142,8 @@ class GWASParser {
         }
     }
 
-    parseHeader(data) {
-        const dataWrapper = getDataWrapper(data);
-        const headerLine = dataWrapper.nextLine();
+    async parseHeader(dataWrapper) {
+        const headerLine = await dataWrapper.nextLine();
         return this.parseHeaderLine(headerLine);
     }
 
@@ -31020,9 +31177,8 @@ class GWASParser {
         return this.columns;
     }
 
-    parseFeatures(data) {
-        if (!data) return null;
-        const dataWrapper = getDataWrapper(data);
+    async parseFeatures(dataWrapper) {
+
         const allFeatures = [];
         const headerLine = dataWrapper.nextLine();
         if (!this.columns) {
@@ -31120,7 +31276,8 @@ var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespac
 
 class AEDParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
+        const decode = config ? config.decode : undefined;
         this.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
         if (decode) {
@@ -31131,11 +31288,10 @@ class AEDParser {
         this.delimiter = "\t";
     }
 
-    parseHeader(data) {
+    async parseHeader(dataWrapper) {
         let line;
         let header;
-        const dataWrapper = getDataWrapper(data);
-        while (line = dataWrapper.nextLine()) {
+        while (line = await dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track") || line.startsWith("#track")) {
                     let h = parseTrackLine$1(line);
@@ -31164,12 +31320,8 @@ class AEDParser {
         return header;
     }
 
-    parseFeatures(data) {
+    async parseFeatures(dataWrapper) {
 
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLineNoTrim.bind(dataWrapper);
         const allFeatures = [];
         const decode = this.decode;
         const delimiter = this.delimiter || "\t";
@@ -31177,7 +31329,7 @@ class AEDParser {
         let line;
         let wig;
 
-        while ((line = nextLine()) !== undefined) {
+        while ((line =  dataWrapper.nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
@@ -32418,6 +32570,73 @@ async function loadIndex(indexURL, config, genome) {
     }
 }
 
+class BGZipLineReader {
+
+    constructor(config) {
+        this.config = config;
+        this.filePtr = 0;
+        this.bufferPtr = 0;
+        this.buffer;
+    }
+
+    async nextLine() {
+
+        let result = undefined;
+
+        try {
+            while (true) {
+                const length = this.buffer ? this.buffer.length : 0;
+                while (this.bufferPtr < length) {
+                    const c = String.fromCharCode(this.buffer[this.bufferPtr++]);
+                    if (c === '\r') continue;
+                    if (c === '\n') {
+                        return result;
+                    }
+                    result = result ? result + c : c;
+                }
+                if (this.eof) {
+                    return result;
+                } else {
+                    await this.readNextBlock();
+                }
+            }
+        } catch (e) {
+            console.warn(e);
+            this.eof = true;
+            return result;
+        }
+    }
+
+    async readNextBlock() {
+
+        const bsizeOptions = buildOptions(this.config, {
+            range: {
+                start: this.filePtr,
+                size: 26
+            }
+        });
+        const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions);
+        const bufferSize = bgzBlockSize(abuffer);
+        //console.log(`next block ${this.filePtr}  ${bufferSize}`);
+
+        if (bufferSize === 0) {
+            this.eof = true;
+            this.buffer = undefined;
+        } else {
+
+            const options = buildOptions(this.config, {range: {start: this.filePtr, size: bufferSize}});
+            const data = await igvxhr.loadArrayBuffer(this.config.url, options);
+            if (data.byteLength < bufferSize) {
+                this.eof = true; // Assumption
+            }
+            this.buffer = unbgzf(data);
+            this.bufferPtr = 0;
+            this.filePtr += data.byteLength; //data.byteLength;
+        }
+    }
+
+}
+
 /*
  * The MIT License (MIT)
  *
@@ -32442,6 +32661,7 @@ async function loadIndex(indexURL, config, genome) {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+
 
 const isString$1 = isString;
 
@@ -32471,8 +32691,8 @@ class FeatureFileReader {
             uriParts = parseUri(this.config.url);
             this.filename = config.filename || uriParts.file;
         }
-        this.format = this.config.format;
-        this.parser = this.getParser(this.format, this.config.decode, this.config);
+
+        this.parser = this.getParser(this.config);
 
         if (this.config.format === "vcf" && !this.config.indexURL) {
             console.warn("Warning: index file not specified.  The entire vcf file will be loaded.");
@@ -32499,7 +32719,7 @@ class FeatureFileReader {
             return this.loadFeaturesNoIndex()
         }
 
-     }
+    }
 
     async readHeader() {
 
@@ -32515,39 +32735,45 @@ class FeatureFileReader {
                     throw new Error("Unable to load index: " + this.config.indexURL);
                 }
 
-                // Load the file header (not HTTP header) for an indexed file.
-                let maxSize = "vcf" === this.config.format ? 65000 : 1000;
-                const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
-
+                let dataWrapper;
                 if (index.tabix) {
-                    const bsizeOptions = buildOptions(this.config, {
-                        range: {
-                            start: dataStart,
-                            size: 26
-                        }
-                    });
-                    const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions);
-                    const bsize = bgzBlockSize(abuffer);
-                    maxSize = dataStart + bsize;
+                    dataWrapper = new BGZipLineReader(this.config);
+                } else {
+                   // Tribble
+                   const maxSize = Object.values(index.chrIndex)
+                        .flatMap(chr => chr.blocks)
+                        .map(block => block.max)
+                        .reduce((previous, current) =>
+                            Math.min(previous, current), Number.MAX_SAFE_INTEGER);
+                
+                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                    const data = await igvxhr.loadString(this.config.url, options);
+                    dataWrapper = getDataWrapper(data);
                 }
-                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-                const data = await igvxhr.loadString(this.config.url, options);
-                this.header = this.parser.parseHeader(data);  // Cache header, might be needed to parse features
+
+
+                this.header = await this.parser.parseHeader(dataWrapper);  // Cache header, might be needed to parse features
                 return this.header;
 
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const options = buildOptions(this.config);
                 const data = await igvxhr.loadString(this.config.url, options);
-                this.header = this.parser.parseHeader(data);
-                this.features = this.parser.parseFeatures(data);   // Temporarily cache features
+                let dataWrapper = getDataWrapper(data);
+                this.header = await this.parser.parseHeader(dataWrapper);
+
+                // Reset data wrapper and parse features
+                dataWrapper = getDataWrapper(data);
+                this.features = await this.parser.parseFeatures(dataWrapper);   // cache features
                 return this.header;
             }
         }
     }
 
-    getParser(format, decode, config) {
-        switch (format) {
+
+    getParser(config) {
+
+        switch (config.format) {
             case "vcf":
                 return new VcfParser(config);
             case "seg" :
@@ -32555,9 +32781,9 @@ class FeatureFileReader {
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :
-                return new AEDParser(format, decode, config);
+                return new AEDParser(config);
             default:
-                return new FeatureParser(format, decode, config);
+                return new FeatureParser(config);
         }
     }
 
@@ -32572,9 +32798,11 @@ class FeatureFileReader {
             const options = buildOptions(this.config);    // Add oauth token, if any
             const data = await igvxhr.loadString(this.config.url, options);
             if (!this.header) {
-                this.header = this.parser.parseHeader(data);
+                const dataWrapper = getDataWrapper(data);
+                this.header = await this.parser.parseHeader(dataWrapper);
             }
-            const features = this.parser.parseFeatures(data);   // <= PARSING DONE HERE
+            const dataWrapper = getDataWrapper(data);
+            const features = await this.parser.parseFeatures(dataWrapper);   // <= PARSING DONE HERE
             return features;
         }
     }
@@ -32636,7 +32864,8 @@ class FeatureFileReader {
                 }
 
                 const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                const slicedFeatures = parser.parseFeatures(slicedData);
+                const dataWrapper = getDataWrapper(slicedData);
+                const slicedFeatures = await parser.parseFeatures(dataWrapper);
 
                 // Filter features not in requested range.
                 let inInterval = false;
@@ -32700,11 +32929,14 @@ class FeatureFileReader {
             return tmp;
         } else {
             const plain = decodeDataURI(this.dataURI);
-            this.header = this.parser.parseHeader(plain);
+            let dataWrapper = getDataWrapper(plain);
+            this.header = await this.parser.parseHeader(dataWrapper);
             if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
                 this.format = 'gff3';
             }
-            this.features = this.parser.parseFeatures(plain);
+
+            dataWrapper = getDataWrapper(plain);
+            this.features = await this.parser.parseFeatures(dataWrapper);
             return this.features;
         }
     }
@@ -34153,7 +34385,6 @@ function pack(featureList, maxRows) {
 class TextFeatureSource {
 
     constructor(config, genome) {
-
         this.config = config || {};
         this.genome = genome;
         this.sourceType = (config.sourceType === undefined ? "file" : config.sourceType);
@@ -34267,7 +34498,7 @@ class TextFeatureSource {
         }
 
         if (isWholeGenome) {
-            if(!this.wgFeatures) {
+            if (!this.wgFeatures) {
                 if (this.queryable) {   // queryable sources don't support whole genome view
                     this.wgFeatures = [];
                 } else {
@@ -34292,8 +34523,9 @@ class TextFeatureSource {
         // indicating whole chromosome should be read at once.
         if ((!visibilityWindow || visibilityWindow <= 0) && this.expandQuery !== false) {
             // Whole chromosome
+            const chromosome = this.genome ? this.genome.getChromosome(queryChr) : undefined;
             intervalStart = 0;
-            intervalEnd = this.genome.getChromosome(queryChr).bpLength;
+            intervalEnd = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER;
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow);
             intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
@@ -34336,11 +34568,10 @@ class TextFeatureSource {
     addFeaturesToDB(featureList) {
         for (let feature of featureList) {
             if (feature.name) {
-                //TODO igv.browser => igv.Globals or igv.FeatureDB
-                this.config.browser.featureDB[feature.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.name.toUpperCase()] = feature;
             }
             if (feature.gene && feature.gene.name) {
-                this.config.browser.featureDB[feature.gene.name.toUpperCase()] = feature;
+                this.genome.featureDB[feature.gene.name.toUpperCase()] = feature;
             }
         }
     }
@@ -35919,7 +36150,6 @@ function createBed(binaryParser, nTracks, type) {
 class TDFSource {
 
     constructor(config, genome) {
-
         this.genome = genome;
         this.windowFunction = config.windowFunction || "mean";
         this.reader = new TDFReader(config, genome);
@@ -35933,9 +36163,9 @@ class TDFSource {
 
         if (!this.rootGroup) {
             this.rootGroup = await this.reader.readRootGroup();
-            if(!this.normalizationFactor) {
+            if (!this.normalizationFactor) {
                 const totalCount = this.rootGroup.totalCount;
-                if(totalCount) {
+                if (totalCount) {
                     this.normalizationFactor = 1.0e6 / totalCount;
                 }
             }
@@ -36337,15 +36567,17 @@ const GtexUtils = {
  */
 
 
-var JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
+let JUNCTION_MOTIF_PALETTE = new PaletteColorTable("Dark2");
 
 // Lock in color-to-motif mapping so it's independent of data loading order. This list may not include all possible
 // motif values as this varies depending on the RNA-seq pipeline. The current list is based on STAR v2.4 docs.
-var someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
+const someMotifValues = ['GT/AG', 'CT/AC', 'GC/AG', 'CT/GC', 'AT/AC', 'GT/AT', 'non-canonical'];
 someMotifValues.forEach(motif => {
     JUNCTION_MOTIF_PALETTE.getColor(motif);
 });
 
+// rendering context with values that only need to be computed once per render, rather than for each splice junction
+const junctionRenderingContext = {};
 
 class FeatureTrack extends TrackBase {
 
@@ -36405,6 +36637,7 @@ class FeatureTrack extends TrackBase {
             this.render = renderFusionJuncSpan;
         } else if ('spliceJunctions' === config.type) {
             this.render = renderJunctions;
+            this.displayMode = "COLLAPSED";  // needed for this.clickedFeatures(..) to work
         } else if ('snp' === config.type) {
             this.render = renderSnp;
             // colors ordered based on priority least to greatest
@@ -36439,6 +36672,7 @@ class FeatureTrack extends TrackBase {
         }
 
         return this;
+
     }
 
     supportsWholeGenome() {
@@ -36478,7 +36712,6 @@ class FeatureTrack extends TrackBase {
             return height;
 
         }
-
     };
 
     draw(options) {
@@ -36510,6 +36743,16 @@ class FeatureTrack extends TrackBase {
                 options.rowLastX[row] = -Number.MAX_SAFE_INTEGER;
             }
 
+            if (this.config.type == 'spliceJunctions') {
+                junctionRenderingContext.referenceFrame = options.viewport.referenceFrame;
+                junctionRenderingContext.referenceFrameStart = junctionRenderingContext.referenceFrame.start;
+                junctionRenderingContext.referenceFrameEnd = junctionRenderingContext.referenceFrameStart + junctionRenderingContext.referenceFrame.toBP($(options.viewport.contentDiv).width());
+
+                // For a given viewport, records where features that are < 2px in width have been rendered already.
+                // This prevents wasteful rendering of multiple such features onto the same pixels.
+                junctionRenderingContext.featureZoomOutTracker = {};
+            }
+
             let lastPxEnd = [];
             for (let feature of featureList) {
                 if (feature.end < bpStart) continue;
@@ -36521,7 +36764,6 @@ class FeatureTrack extends TrackBase {
                 const pxEnd = Math.ceil((feature.end - bpStart) / bpPerPixel);
                 const last = lastPxEnd[row];
                 if (!last || pxEnd > last || this.config.type === 'spliceJunctions') {
-
                     this.render.call(this, feature, bpStart, bpPerPixel, pixelHeight, ctx, options);
 
                     if (this.config.type !== 'spliceJunctions') {
@@ -36575,15 +36817,20 @@ class FeatureTrack extends TrackBase {
 
         const data = [];
         for (let feature of features) {
-
+            if (this.config.type === 'spliceJunctions') {
+                if (!feature.isVisible || !feature.attributes) {
+                    continue
+                }
+            }
             const featureData = (typeof feature.popupData === "function") ?
-                feature.popupData(genomicLocation) :
-                TrackBase.extractPopupData(feature, this.getGenomeId());
+              feature.popupData(genomicLocation) :
+              TrackBase.extractPopupData(feature, this.getGenomeId());
 
             if (featureData) {
                 if (data.length > 0) {
                     data.push("<HR>");
                 }
+
                 Array.prototype.push.apply(data, featureData);
             }
         }
@@ -36667,7 +36914,7 @@ class FeatureTrack extends TrackBase {
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
-        this.trackView = undefined;
+       this.trackView = undefined;
     }
 }
 
@@ -37044,6 +37291,19 @@ function renderFusionJuncSpan(feature, bpStart, xScale, pixelHeight, ctx) {
  * @param ctx  the canvas 2d context
  */
 function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
+    // cache whether this junction is rendered or filtered out. Use later to exclude non-rendered junctions from click detection.
+    feature.isVisible = false;
+
+    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
+    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
+    const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
+    if (junctionRightPx - junctionLeftPx <= 3) {
+        if (junctionMiddlePx in junctionRenderingContext.featureZoomOutTracker) {
+            return
+        }
+        junctionRenderingContext.featureZoomOutTracker[junctionMiddlePx] = true;
+    }
+
     // TODO: cache filter and pixel calculations by doing them earlier when features are initially parsed?
     if (this.config.hideAnnotatedJunctions && feature.attributes.annotated_junction === "true") {
         return
@@ -37057,21 +37317,60 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     if (this.config.hideStrand === feature.strand) {
         return
     }
-    const uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
-    if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
-        return
+
+    // check if splice junction is inside viewport
+    if (this.config.minJunctionEndsVisible) {
+        let numJunctionEndsVisible = 0;
+        if (feature.start >= junctionRenderingContext.referenceFrameStart && feature.start <= junctionRenderingContext.referenceFrameEnd) {
+            numJunctionEndsVisible += 1;
+        }
+        if (feature.end >= junctionRenderingContext.referenceFrameStart && feature.end <= junctionRenderingContext.referenceFrameEnd) {
+            numJunctionEndsVisible += 1;
+        }
+        if (numJunctionEndsVisible < this.config.minJunctionEndsVisible) {
+            return
+        }
     }
-    const multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
-    const totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
-    if (totalReadCount < this.config.minTotalReads) {
-        return
+
+    let uniquelyMappedReadCount;
+    let multiMappedReadCount;
+    let totalReadCount;
+    if (feature.attributes.uniquely_mapped) {
+        uniquelyMappedReadCount = parseInt(feature.attributes.uniquely_mapped);
+        if (uniquelyMappedReadCount < this.config.minUniquelyMappedReads) {
+            return
+        }
+        multiMappedReadCount = parseInt(feature.attributes.multi_mapped);
+        totalReadCount = uniquelyMappedReadCount + multiMappedReadCount;
+        if (totalReadCount < this.config.minTotalReads) {
+            return
+        }
+        if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
+            return
+        }
+        if (feature.attributes.maximum_spliced_alignment_overhang && parseInt(feature.attributes.maximum_spliced_alignment_overhang) < this.config.minSplicedAlignmentOverhang) {
+            return
+        }
     }
-    if (totalReadCount > 0 && multiMappedReadCount / totalReadCount > this.config.maxFractionMultiMappedReads) {
-        return
-    }
-    const maximumSplicedAlignmentOverhang = parseInt(feature.attributes.maximum_spliced_alignment_overhang);
-    if (maximumSplicedAlignmentOverhang < this.config.minSplicedAlignmentOverhang) {
-        return
+
+    let numSamplesWithThisJunction;
+    if (feature.attributes.num_samples_with_this_junction) {
+        numSamplesWithThisJunction = parseInt(feature.attributes.num_samples_with_this_junction);
+        if (this.config.minSamplesWithThisJunction && numSamplesWithThisJunction < this.config.minSamplesWithThisJunction) {
+            return
+        }
+        if (this.config.maxSamplesWithThisJunction && numSamplesWithThisJunction > this.config.maxSamplesWithThisJunction) {
+            return
+        }
+        if (feature.attributes.num_samples_total) {
+            feature.attributes.percent_samples_with_this_junction = 100*numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total);
+            if (this.config.minPercentSamplesWithThisJunction) {
+                if (feature.attributes.percent_samples_with_this_junction < this.config.minPercentSamplesWithThisJunction ||
+                    feature.attributes.percent_samples_with_this_junction > this.config.maxPercentSamplesWithThisJunction) {
+                    return
+                }
+            }
+        }
     }
 
     const py = this.margin;
@@ -37083,36 +37382,39 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     const bezierBottomY = bottomY - 10;
 
     // draw the junction arc
-    const junctionLeftPx = Math.round((feature.start - bpStart) / xScale);
-    const junctionRightPx = Math.round((feature.end - bpStart) / xScale);
-    const junctionMiddlePx = (junctionLeftPx + junctionRightPx) / 2;
     const bezierControlLeftPx = (junctionLeftPx + junctionMiddlePx) / 2;
     const bezierControlRightPx = (junctionMiddlePx + junctionRightPx) / 2;
 
-    let lineWidth;
-    if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
-        lineWidth = uniquelyMappedReadCount;
-    } else if (this.config.thicknessBasedOn === 'numReads') {
-        lineWidth = totalReadCount;
-    } else if (this.config.thicknessBasedOn === 'isAnnotatedJunction') {
-        lineWidth = feature.attributes.annotated_junction === "true" ? 20 : 100;
+    let lineWidth = 1;
+    if (feature.attributes.line_width) {
+        lineWidth = parseFloat(feature.attributes.line_width);
+    } else {
+        if (this.config.thicknessBasedOn === undefined || this.config.thicknessBasedOn === 'numUniqueReads') {
+            lineWidth = uniquelyMappedReadCount;
+        } else if (this.config.thicknessBasedOn === 'numReads') {
+            lineWidth = totalReadCount;
+        } else if (this.config.thicknessBasedOn === 'numSamplesWithThisJunction') {
+            if (numSamplesWithThisJunction !== undefined) {
+                lineWidth = numSamplesWithThisJunction;
+            }
+        }
+        lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
     }
-    lineWidth = 1 + Math.log(lineWidth + 1) / Math.log(12);
 
     let bounceHeight;
     if (this.config.bounceHeightBasedOn === undefined || this.config.bounceHeightBasedOn === 'random') {
         // randomly but deterministically stagger topY coordinates to reduce overlap
         bounceHeight = (feature.start + feature.end) % 7;
     } else if (this.config.bounceHeightBasedOn === 'distance') {
-        bounceHeight = (feature.end - feature.start) / 1000;
+        bounceHeight = 6 * (feature.end - feature.start) / (junctionRenderingContext.referenceFrameEnd - junctionRenderingContext.referenceFrameStart);
     } else if (this.config.bounceHeightBasedOn === 'thickness') {
         bounceHeight = 2 * lineWidth;
     }
     topY += rowHeight * Math.max(7 - bounceHeight, 0) / 10;
 
     let color;
-    if (feature.color) {
-        color = feature.color;  // Explicit setting
+    if (feature.attributes.color) {
+        color = feature.attributes.color;  // Explicit setting
     } else if (this.config.colorBy === undefined || this.config.colorBy === 'numUniqueReads') {
         color = uniquelyMappedReadCount > this.config.colorByNumReadsThreshold ? 'blue' : '#AAAAAA';  // color gradient?
     } else if (this.config.colorBy === 'numReads') {
@@ -37123,29 +37425,52 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
         color = feature.strand === "+" ? '#b0b0ec' : '#ecb0b0';
     } else if (this.config.colorBy === 'motif') {
         color = JUNCTION_MOTIF_PALETTE.getColor(feature.attributes.motif);
+    } else {
+        color = '#AAAAAA';
     }
 
-    let label = '';
-    if (this.config.labelUniqueReadCount === undefined && this.config.labelMultiMappedReadCount === undefined && this.config.labelTotalReadCount === undefined) {
+    let label = "";
+    if (feature.attributes.label) {
+        label = feature.attributes.label.replace(/_/g, " ");
+    } else if (this.config.labelWith === undefined || this.config.labelWith === 'uniqueReadCount') {
         //default label
-        label += uniquelyMappedReadCount + (multiMappedReadCount == 0 ? '' : '(+' + multiMappedReadCount + ')');
-    } else {
-        if (this.config.labelTotalReadCount) {
-            label += totalReadCount;
-        } else if (this.config.labelUniqueReadCount) {
-            label += uniquelyMappedReadCount;
+        label = uniquelyMappedReadCount;
+    } else if(this.config.labelWith === 'totalReadCount') {
+        label = totalReadCount;
+    } else if(this.config.labelWith === 'numSamplesWithThisJunction') {
+        if (numSamplesWithThisJunction !== undefined) {
+            label = numSamplesWithThisJunction;
         }
-        if (this.config.labelMultiMappedReadCount && multiMappedReadCount > 0) {
+    } else if(this.config.labelWith === 'percentSamplesWithThisJunction') {
+        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
+            label = feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%';
+        }
+    } else if(this.config.labelWith === 'motif') {
+        if(feature.attributes.motif !== undefined) {
+            label += feature.attributes.motif;
+        }
+    }
+
+    if (this.config.labelWithInParen === 'uniqueReadCount') {
+        label += ' (' + uniquelyMappedReadCount + ')';
+    } else if(this.config.labelWithInParen === 'totalReadCount') {
+        label += ' (' + totalReadCount + ')';
+    } else if(this.config.labelWithInParen === 'multiMappedReadCount') {
+        if (multiMappedReadCount > 0) {
             label += ' (+' + multiMappedReadCount + ')';
         }
-    }
-
-    if (this.config.labelAnnotatedJunction && feature.attributes.annotated_junction === "true") {
-        label += this.config.labelAnnotatedJunction;
-    }
-
-    if (this.config.labelMotif && feature.attributes.motif) {
-        label += ` ${feature.attributes.motif}`;
+    } else if(this.config.labelWithInParen === 'numSamplesWithThisJunction') {
+        if(numSamplesWithThisJunction !== undefined) {
+            label += ' (' + numSamplesWithThisJunction + ')';
+        }
+    } else if(this.config.labelWithInParen === 'percentSamplesWithThisJunction') {
+        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
+            label += ' (' + feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%)';
+        }
+    } else if(this.config.labelWithInParen === 'motif') {
+        if(feature.attributes.motif !== undefined) {
+            label += ` ${feature.attributes.motif}`;
+        }
     }
 
     // data source: STAR splice junctions (eg. SJ.out.tab file converted to bed).
@@ -37153,7 +37478,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     // feature.score:  unique spanning read counts
     // feature.name:   unique + multi-mapped spanning read counts
     //example feature:  { chr: "chr17", start: 39662344, end: 39662803, name: "59", row: 0, score: 38, strand: "+"}
-
+    feature.isVisible = true;
     ctx.beginPath();
     ctx.moveTo(junctionLeftPx, bezierBottomY);
     ctx.bezierCurveTo(bezierControlLeftPx, topY, bezierControlRightPx, topY, junctionRightPx, bezierBottomY);
@@ -37161,6 +37486,28 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     ctx.lineWidth = lineWidth;
     ctx.strokeStyle = color;
     ctx.stroke();
+
+    const drawArrowhead = (ctx, x, y, size) => {
+        //TODO draw better arrow heads: https://stackoverflow.com/questions/21052972/curved-thick-arrows-on-canvas
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x - size / 2, y - size);
+        ctx.lineTo(x + size / 2, y - size);
+        ctx.lineTo(x, y);
+        ctx.closePath();
+        ctx.fill();
+    };
+
+    if (feature.attributes.left_shape || feature.attributes.right_shape) {
+        ctx.fillStyle = color;
+        const arrowSize = ctx.lineWidth > 2 ? 10 : 7;
+        if (feature.attributes.left_shape) {
+            drawArrowhead(ctx, junctionLeftPx, bezierBottomY, arrowSize);
+        }
+        if (feature.attributes.right_shape) {
+            drawArrowhead(ctx, junctionRightPx, bezierBottomY, arrowSize);
+        }
+    }
 
     ctx.fillText(label, junctionMiddlePx - ctx.measureText(label).width / 2, (7 * topY + cy) / 8);
 }
@@ -37264,7 +37611,7 @@ function renderSnp(snp, bpStart, xScale, pixelHeight, ctx) {
  * THE SOFTWARE.
  */
 
-const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER * 1e-4;
+const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
 const complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
 const translationDict = {
     'TTT': 'F',
@@ -38672,6 +39019,22 @@ class PairedAlignment {
 
     }
 
+    containsLocation(genomicLocation, showSoftClips) {
+        const s = showSoftClips ? this.scStart : this.start;
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
+        return (genomicLocation >= s && genomicLocation <= (s + l));
+    }
+
+    alignmentContaining(genomicLocation, showSoftClips) {
+        if(this.firstAlignment.containsLocation(genomicLocation, showSoftClips)){
+            return this.firstAlignment;
+        } else if(this.secondAlignment && this.secondAlignment.containsLocation(genomicLocation, showSoftClips)) {
+            return this.secondAlignment;
+        } else {
+            return undefined;
+        }
+    }
+
     popupData(genomicLocation) {
 
         let nameValues = this.firstAlignment.popupData(genomicLocation);
@@ -38735,7 +39098,7 @@ class BamAlignmentRow {
         this.score = undefined;
     }
 
-    findAlignment(chr, genomicLocation) {
+    findAlignment(genomicLocation) {
 
         const alignmentContains = (a, genomicLocation) => {
             return genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef;
@@ -38745,7 +39108,7 @@ class BamAlignmentRow {
         let centerAlignment;
         for (let i = 0; i < this.alignments.length; i++) {
             const a = this.alignments[i];
-            if (a.chr === chr && genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
+            if (genomicLocation >= a.start && genomicLocation < a.start + a.lengthOnRef) {
                 if (a.paired) {
                     if (a.firstAlignment && alignmentContains(a.firstAlignment, genomicLocation)) {
                         centerAlignment = a.firstAlignment;
@@ -38761,25 +39124,24 @@ class BamAlignmentRow {
 
         return centerAlignment;
 
-
     }
 
     updateScore(options, alignmentContainer) {
         this.score = this.calculateScore(options, alignmentContainer);
     }
 
-    calculateScore({chr, position, option, direction, tag}, alignmentContainer) {
+    calculateScore({position, sortOption, direction, tag}, alignmentContainer) {
 
-        if (!option) option = "BASE";
+        if (!sortOption) sortOption = "BASE";
 
-        const alignment = this.findAlignment(chr, position);
+        const alignment = this.findAlignment(position);
 
         if (undefined === alignment) {
             return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
         }
 
         let mate;
-        switch (option) {
+        switch (sortOption) {
             case "NUCLEOTIDE":
             case "BASE": {
                 const readBase = alignment.readBaseAt(position);
@@ -39642,6 +40004,19 @@ class BamAlignment {
 
     }
 
+    /**
+     * Does alignment (or alignment extended by soft clips) contain the genomic location?
+     *
+     * @param genomicLocation
+     * @param showSoftClips
+     * @returns {boolean|boolean}
+     */
+    containsLocation(genomicLocation, showSoftClips) {
+        const s = showSoftClips ? this.scStart : this.start;
+        const l = showSoftClips ? this.scLengthOnRef : this.lengthOnRef;
+        return (genomicLocation >= s && genomicLocation <= (s + l));
+    }
+
     popupData(genomicLocation) {
 
         // if the user clicks on a base next to an insertion, show just the
@@ -39733,7 +40108,6 @@ class BamAlignment {
             return bool ? 'Yes' : 'No';
         }
     }
-
 
     readBaseAt(genomicLocation) {
 
@@ -40854,7 +41228,8 @@ class ShardedBamReader {
 
                 .catch(function (error) {
                     console.error(error);
-                    Alert.presentAlert("Error reading BAM or index file for: " + tmp ? tmp.url : "");
+                    const str = `Error reading BAM or index file for: ${ tmp ? tmp.url : '' }`;
+                    Alert.presentAlert(new Error(str));
                     self.bamReaders[queryChr] = "none";
                     return new AlignmentContainer(chr, start, end);   // Empty alignment container
                 })
@@ -41325,7 +41700,7 @@ class CramReader {
                 if (message && message.indexOf("MD5") >= 0) {
                     message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?";
                 }
-                Alert.presentAlert(message);
+                Alert.presentAlert(new Error(message));
                 throw error
             }
         }
@@ -42223,7 +42598,6 @@ class BamSource {
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-
 
 const alignmentStartGap = 5;
 const downsampleRowHeight = 5;
@@ -43195,8 +43569,12 @@ class AlignmentTrack {
     contextMenuItemList(clickState) {
 
         const viewport = clickState.viewport;
+        const showSoftClips = this.parent.showSoftClips;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        const isSingleAlignment = clickedObject && !clickedObject.paired && (typeof clickedObject.isPaired === 'function');
+        const clickedAlignment = clickedObject && (typeof clickedObject.alignmentContaining === 'function') ?
+            clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
+            clickedObject;
+        const isSingleAlignment = clickedAlignment && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
         const sortByOption = (option) => {
@@ -43248,13 +43626,13 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        if (isSingleAlignment && clickedObject.isMateMapped()) {
+        if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
             list.push({
                 label: 'View mate in split screen',
                 click: () => {
-                    if (clickedObject.mate) {
-                        this.highlightedAlignmentReadNamed = clickedObject.readName;
-                        this.browser.presentSplitScreenMultiLocusPanel(clickedObject, clickState.viewport.referenceFrame);
+                    if (clickedAlignment.mate) {
+                        this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                        this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, clickState.viewport.referenceFrame);
                     }
                 },
                 init: undefined
@@ -43264,7 +43642,7 @@ class AlignmentTrack {
         list.push({
             label: 'View read sequence',
             click: () => {
-                const alignment = clickedObject;
+                const alignment = clickedAlignment;
                 if (!alignment) return;
 
                 const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
@@ -43303,16 +43681,8 @@ class AlignmentTrack {
                 }
             }
         } else if (packedAlignmentsIndex < packedAlignmentRows.length) {
-
-            let alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
-            let clicked = alignmentRow.alignments.filter(function (alignment) {
-
-                const s = showSoftClips ? alignment.scStart : alignment.start;
-                const l = showSoftClips ? alignment.scLengthOnRef : alignment.lengthOnRef;
-
-                return (genomicLocation >= s && genomicLocation <= (s + l));
-            });
-
+            const alignmentRow = packedAlignmentRows[packedAlignmentsIndex];
+            const clicked = alignmentRow.alignments.filter(alignment => alignment.containsLocation(genomicLocation, showSoftClips));
             if (clicked.length > 0) return clicked[0];
         }
 
@@ -44236,6 +44606,7 @@ class VariantTrack extends TrackBase {
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
+        this.type = config.type || "variant";
 
         this.nRows = 1;  // Computed dynamically
 
@@ -45125,8 +45496,8 @@ class GWASTrack extends TrackBase {
             const n = Math.ceil((this.dataRange.max - this.dataRange.min) * 10 / pixelHeight);
             for (let p = this.dataRange.min; p < this.dataRange.max; p += n) {
                 const yp = pixelHeight - Math.round((p - this.dataRange.min) / yScale);
-                IGVGraphics.strokeLine(ctx, 45, yp - 2, 50, yp - 2, font); // Offset dashes up by 2 pixel
-                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 2, font); // Offset numbers down by 2 pixels;
+                IGVGraphics.strokeLine(ctx, 45, yp, 50, yp, font); // Offset dashes up by 2 pixel
+                IGVGraphics.fillText(ctx, Math.floor(p), 44, yp + 4, font); // Offset numbers down by 2 pixels;
             }
         }
 
@@ -45289,14 +45660,8 @@ class GCNVTrack extends TrackBase {
     }
 
     draw(options) {
-        let self = this;
 
-        const features = options.features;
-        const ctx = options.context;
-        const bpPerPixel = options.bpPerPixel;
-        const bpStart = options.bpStart;
-        const pixelWidth = options.pixelWidth;
-        const pixelHeight = options.pixelHeight;
+        const {features, context, bpPerPixel, bpStart, pixelWidth, pixelHeight} = options;
 
         ///let baselineColor;
         //if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
@@ -45304,7 +45669,7 @@ class GCNVTrack extends TrackBase {
         //}
 
         const yScale = (yValue) => {
-            return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
+            return ((this.dataRange.max - yValue) / (this.dataRange.max - this.dataRange.min)) * pixelHeight
         };
 
         const getX = function (bpPosition) {
@@ -45314,9 +45679,9 @@ class GCNVTrack extends TrackBase {
             return x;
         };
 
-        const drawGuideLines = function (options) {
-            if (self.config.hasOwnProperty('guideLines')) {
-                for (let line of self.config.guideLines) {
+        const drawGuideLines = (options) => {
+            if (this.config.hasOwnProperty('guideLines')) {
+                for (let line of this.config.guideLines) {
                     if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
                         let y = yScale(line.y);
                         let props = {
@@ -45332,11 +45697,11 @@ class GCNVTrack extends TrackBase {
 
         if (features && features.length > 0) {
 
-            if (self.dataRange.min === undefined) self.dataRange.min = 0;
+            if (this.dataRange.min === undefined) this.dataRange.min = 0;
 
             // Max can be less than min if config.min is set but max left to autoscale. If that's the case there is
             // nothing to paint.
-            if (self.dataRange.max > self.dataRange.min) {
+            if (this.dataRange.max > this.dataRange.min) {
                 const highlightSamples = this.config.highlightSamples;
                 const onlyHandleClicksForHighlightedSamples = this.config.onlyHandleClicksForHighlightedSamples;
 
@@ -45373,7 +45738,7 @@ class GCNVTrack extends TrackBase {
                             if (highlightColor) {
                                 highlightConnectorLines.push([previousX, previousY, x1, y, highlightColor]);
                             } else {
-                                IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
+                                IGVGraphics.strokeLine(context, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
                             }
                             if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
                                 this.clickDetectorCache[x1].push([previousX, previousY, x1, y, sampleName, highlightColor || 'gray']);
@@ -45385,7 +45750,7 @@ class GCNVTrack extends TrackBase {
                             if (highlightColor) {
                                 highlightFeatureLines.push([x1, y, x2, y, highlightColor]);
                             } else {
-                                IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
+                                IGVGraphics.strokeLine(context, x1, y, x2, y, {strokeStyle: 'gray'});
                             }
                             if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
                                 this.clickDetectorCache[x2].push([x1, y, x2, y, sampleName, highlightColor || 'gray']);
@@ -45401,17 +45766,17 @@ class GCNVTrack extends TrackBase {
                 }
 
                 for (let f of highlightConnectorLines) {
-                    IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 1.3});
+                    IGVGraphics.strokeLine(context, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 1.3});
                 }
                 for (let f of highlightFeatureLines) {
-                    IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 2});
+                    IGVGraphics.strokeLine(context, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 2});
                 }
 
                 /*
                 // If the track includes negative values draw a baseline
-                if (self.dataRange.min < 0) {
-                    const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
-                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+                if (this.dataRange.min < 0) {
+                    const basepx = (self.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight;
+                    IGVGraphics.strokeLine(context, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
                 }
                 */
             }
@@ -46612,11 +46977,6 @@ function createReferenceFrameWithAlignment(genome, chromosomeName, bpp, viewport
     return referenceFrame
 }
 
-const _version = "2.7.1-jb2";
-function version$1() {
-    return _version;
-}
-
 const defaultNucleotideColors = {
     "A": "rgb(  0, 200,   0)",
     "C": "rgb(  0,0,200)",
@@ -46644,7 +47004,7 @@ async function search(browser, string) {
         let locusObject = parseLocusString$1(browser, locus);
 
         if (!locusObject) {
-            locusObject = browser.featureDB[locus.toUpperCase()];
+            locusObject = browser.genome.featureDB[locus.toUpperCase()];
         }
 
         if (!locusObject) {
@@ -46932,7 +47292,6 @@ class Browser {
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
         this.cursorGuideVisible = false;
-        this.featureDB = {};   // Hash of name -> feature, used for search function.
         this.constants = {
             dragThreshold: 3,
             scrollThreshold: 5,
@@ -47059,7 +47418,7 @@ class Browser {
         const h_output = height;
         const h_render = 8000;
 
-        let svgContext = new C2S$1(
+        let svgContext = new C2S(
             {
 
                 width: w,
@@ -47221,9 +47580,9 @@ class Browser {
             this.rulerTrack.trackView.updateViews();
         }
 
-        this.updateLocusSearchWidget(this.referenceFrameList[0]);
+        this.updateLocusSearchWidget(this.referenceFrameList);
 
-        this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
+        this.windowSizePanel.updatePanel(this.referenceFrameList);
 
     }
 
@@ -47254,8 +47613,8 @@ class Browser {
             this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true);
         } catch (error) {
             // Couldn't find initial locus
-            const errorString = 'Unrecognized locus ' + initialLocus;
-            Alert.presentAlert(errorString, undefined);
+            error.message();
+            Alert.presentAlert(new Error(`Unrecognized locus ${ initialLocus }`), undefined);
             this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
         }
 
@@ -47287,7 +47646,7 @@ class Browser {
                 const knownGenomes = GenomeUtils.KNOWN_GENOMES;
                 const reference = knownGenomes[genomeID];
                 if (!reference) {
-                    Alert.presentAlert("Unknown genome id: " + genomeID, undefined);
+                    Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
                 }
                 return reference;
             } else {
@@ -47454,7 +47813,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                Alert.presentAlert("Unknown file type: " + config.url || config, undefined);
+                Alert.presentAlert(new Error(`Unknown file type: ${ config.url || config }`), undefined);
                 return newTrack;
             }
 
@@ -47488,7 +47847,7 @@ class Browser {
                 msg = httpMessages[msg];
             }
             msg += (": " + config.url);
-            Alert.presentAlert(msg, undefined);
+            Alert.presentAlert(new Error(msg), undefined);
         } finally {
             if (!noSpinner) {
                 this.stopSpinner();
@@ -47737,14 +48096,29 @@ class Browser {
 
     async resize() {
 
-        if (this.centerGuide) this.centerGuide.resize();
-        for (let trackView of this.trackViews) {
-            trackView.resize();
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length);
+
+        for (let referenceFrame of this.referenceFrameList) {
+
+            const viewportWidthBP = referenceFrame.toBP(viewportWidth);
+            const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr);
+
+            if (viewportWidthBP > bpLength) {
+                // console.log(`viewport-length-bp ${ StringUtils.numberFormatter(Math.round(viewportWidthBP))} chr-length-bp ${ StringUtils.numberFormatter(Math.round(bpLength)) }`)
+                referenceFrame.bpPerPixel = bpLength/viewportWidth;
+            }
+
         }
 
+        for (let trackView of this.trackViews) {
+            trackView.resize(viewportWidth);
+        }
+
+        if (this.centerGuide) this.centerGuide.resize();
+
         if (this.referenceFrameList && this.referenceFrameList.length > 0) {
-            this.updateLocusSearchWidget(this.referenceFrameList[0]);
-            this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
+            this.updateLocusSearchWidget(this.referenceFrameList);
+            this.windowSizePanel.updatePanel(this.referenceFrameList);
         }
 
         await this.updateViews();
@@ -47764,8 +48138,14 @@ class Browser {
             referenceFrame = this.referenceFrameList[0];
         }
         if (referenceFrame) {
-            this.updateLocusSearchWidget(referenceFrame);
-            this.windowSizePanel.updateWithReferenceFrame(referenceFrame);
+
+            if (this.referenceFrameList.length > 1) {
+                this.updateLocusSearchWidget(this.referenceFrameList);
+                this.windowSizePanel.updatePanel(this.referenceFrameList);
+            } else {
+                this.updateLocusSearchWidget([ referenceFrame ]);
+                this.windowSizePanel.updatePanel([referenceFrame]);
+            }
         }
 
         if (this.centerGuide) {
@@ -47835,53 +48215,48 @@ class Browser {
         return false;
     };
 
-    updateLocusSearchWidget(referenceFrame) {
+    updateLocusSearchWidget(referenceFrameList) {
 
-        var self = this,
-            ss,
-            ee,
-            str,
-            end,
-            chromosome;
-
+        if (referenceFrameList.length > 1) {
+            this.$searchInput.val('');
+            this.chromosomeSelectWidget.$select.val('');
+            return
+        }
 
         if (this.rulerTrack) {
             this.rulerTrack.updateLocusLabel();
         }
 
-        if (0 === this.referenceFrameList.indexOf(referenceFrame) && 1 === this.referenceFrameList.length) {
+        const referenceFrame = referenceFrameList[ 0 ];
+        if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
 
-            if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
+            this.$searchInput.val(referenceFrame.locusSearchString);
+            this.chromosomeSelectWidget.$select.val('all');
+        } else {
 
-                this.$searchInput.val(referenceFrame.locusSearchString);
-                this.chromosomeSelectWidget.$select.val('all');
-            } else {
+            this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
 
-                this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
+            let ss;
+            let ee;
+            let str;
+            if (this.$searchInput) {
 
-                if (this.$searchInput) {
+                let end = referenceFrame.start + referenceFrame.bpPerPixel * this.viewportWidth();
 
-                    end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
-
-                    if (this.genome) {
-                        chromosome = this.genome.getChromosome(referenceFrame.chr);
-                        if (chromosome) {
-                            end = Math.min(end, chromosome.bpLength);
-                        }
+                if (this.genome) {
+                    const chromosome = this.genome.getChromosome(referenceFrame.chr);
+                    if (chromosome) {
+                        end = Math.min(end, chromosome.bpLength);
                     }
-
-                    ss = numberFormatter(Math.floor(referenceFrame.start + 1));
-                    ee = numberFormatter(Math.floor(end));
-                    str = referenceFrame.chr + ":" + ss + "-" + ee;
-                    this.$searchInput.val(str);
                 }
 
-                this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
+                ss = numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = numberFormatter(Math.floor(end));
+                str = referenceFrame.chr + ":" + ss + "-" + ee;
+                this.$searchInput.val(str);
             }
 
-        } else {
-            this.$searchInput.val('');
-            this.chromosomeSelectWidget.$select.val('');
+            this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
         }
 
     };
@@ -48267,24 +48642,38 @@ class Browser {
         }
 
         const trackJson = [];
+        const errors = [];
         for (let {track} of this.trackViews) {
-
-            let config;
-            if (typeof track.getState === "function") {
-                config = track.getState();
-            } else {
-                config = track.config;
-            }
-
-            if (config) {
-                // null backpointer to browser
-                if (config.browser) {
-                    delete config.browser;
+            try {
+                let config;
+                if (typeof track.getState === "function") {
+                    config = track.getState();
+                } else {
+                    config = track.config;
                 }
-                config.order = track.order; //order++;
-                trackJson.push(config);
+
+                if (config) {
+                    // null backpointer to browser
+                    if (config.browser) {
+                        delete config.browser;
+                    }
+                    config.order = track.order; //order++;
+                    trackJson.push(config);
+                }
+            } catch (e) {
+                errors.push(e);
             }
         }
+
+        if(errors.length > 0) {
+            let n = 1;
+            let message = 'Errors encountered saving session:';
+            for(let e of errors) {
+                message += ` (${n++}) ${e.toString()}.`;
+            }
+            throw Error(message);
+        }
+
 
         const locaTrackFiles = trackJson.filter((track) => {
             track.url && isFilePath(track.url);
@@ -48491,7 +48880,13 @@ class Browser {
                 if (self.dragObject) {
                     const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
                     if (viewChanged) {
-                        self.updateLocusSearchWidget(self.vpMouseDown.referenceFrame);
+
+                        if (self.referenceFrameList.length > 1) {
+                            self.updateLocusSearchWidget(self.referenceFrameList);
+                        } else {
+                            self.updateLocusSearchWidget([ self.vpMouseDown.referenceFrame ]);
+                        }
+
                         self.updateViews();
                     }
                     self.fireEvent('trackdrag');
@@ -48597,8 +48992,8 @@ class WindowSizePanel {
         this.$container.hide();
     }
 
-    updateWithReferenceFrame(referenceFrame) {
-        this.$container.text(prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrame.bpPerPixel)));
+    updatePanel(referenceFrameList) {
+        this.$container.text(1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(this.browser.viewportWidth() * referenceFrameList[ 0 ].bpPerPixel)) : '');
     }
 }
 
@@ -49578,13 +49973,21 @@ function createStandardControls(browser, config) {
     browser.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
     $searchContainer.append(browser.$searchInput);
 
-    browser.$searchInput.change(function (e) {
+    browser.$searchInput.change(async () => {
 
-        browser.search($(this).val())
+        try {
+            const str = browser.$searchInput.val();
+            const referenceFrameList = await browser.search(str);
 
-            .catch(function (error) {
-                Alert.presentAlert(error);
-            });
+            if (referenceFrameList.length > 1) {
+                browser.updateLocusSearchWidget(referenceFrameList);
+                browser.windowSizePanel.updatePanel(referenceFrameList);
+            }
+
+        } catch (error) {
+            Alert.presentAlert(error);
+        }
+
     });
 
     const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});
@@ -49775,7 +50178,7 @@ async function createTrack (config, browser) {
 
 function embedCSS$1() {
 
-    var css =  '.igv-generic-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 2048;\n  background-color: white;\n  cursor: pointer;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-container div:first-child {\n    cursor: move;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    height: 24px;\n    width: 100%;\n    background-color: #dddddd; }\n    .igv-generic-container div:first-child i {\n      display: block;\n      color: #5f5f5f;\n      cursor: pointer;\n      width: 14px;\n      height: 14px;\n      margin-right: 8px;\n      margin-bottom: 4px; }\n\n.igv-generic-dialog-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 300px;\n  height: 200px;\n  border-color: #7F7F7F;\n  border-radius: 4px;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  z-index: 2048;\n  background-color: white;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-dialog-container .igv-generic-dialog-header {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    width: 100%;\n    height: 24px;\n    cursor: move;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-color: #7F7F7F;\n    border-bottom-style: solid;\n    border-bottom-width: thin;\n    background-color: #eee; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div {\n      margin-right: 4px;\n      margin-bottom: 2px;\n      height: 12px;\n      width: 12px;\n      color: #7F7F7F; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {\n      cursor: pointer;\n      color: #444; }\n  .igv-generic-dialog-container .igv-generic-dialog-one-liner {\n    color: #373737;\n    width: 95%;\n    height: 24px;\n    line-height: 24px;\n    text-align: left;\n    margin-top: 8px;\n    padding-left: 8px;\n    overflow-wrap: break-word;\n    background-color: white; }\n  .igv-generic-dialog-container .igv-generic-dialog-label-input {\n    margin-top: 8px;\n    width: 95%;\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    padding-left: 8px;\n    background-color: white;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input div {\n      width: 30%;\n      height: 100%;\n      font-size: 16px;\n      text-align: right;\n      padding-right: 8px;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      width: 50%;\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-input {\n    margin-top: 8px;\n    width: calc(100% - 16px);\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {\n    width: 100%;\n    height: 28px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {\n      margin-top: 32px;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: 14px;\n      font-weight: 400;\n      width: 75px;\n      height: 28px;\n      line-height: 28px;\n      text-align: center;\n      border-color: transparent;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 2px; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {\n      margin-left: 32px;\n      margin-right: 0;\n      background-color: #5ea4e0; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {\n      margin-left: 0;\n      margin-right: 32px;\n      background-color: #c4c4c4; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {\n      cursor: pointer;\n      background-color: #3b5c7f; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {\n      cursor: pointer;\n      background-color: #7f7f7f; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok {\n    width: 100%;\n    height: 36px;\n    margin-top: 32px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div {\n      width: 98px;\n      height: 36px;\n      line-height: 36px;\n      text-align: center;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: medium;\n      font-weight: 400;\n      border-color: white;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 4px;\n      background-color: #2B81AF; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {\n      cursor: pointer;\n      background-color: #25597f; }\n\n.igv-trackgear-container {\n  position: relative;\n  width: 20px;\n  height: 20px;\n  margin-left: 4px;\n  color: #7F7F7F; }\n\n.igv-trackgear-container:hover {\n  cursor: pointer;\n  color: #444; }\n\n.igv-trackgear-popover {\n  position: absolute;\n  top: 0;\n  left: 0;\n  min-width: 132px;\n  z-index: 4096;\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  color: #4b4b4b;\n  background: white;\n  border-radius: 4px;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-end;\n  text-align: left; }\n  .igv-trackgear-popover > div:not(:first-child) {\n    width: 100%; }\n    .igv-trackgear-popover > div:not(:first-child) > div {\n      background: white; }\n    .igv-trackgear-popover > div:not(:first-child) > div:last-child {\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px;\n      border-bottom-color: transparent;\n      border-bottom-style: solid;\n      border-bottom-width: thin; }\n    .igv-trackgear-popover > div:not(:first-child) > div:hover {\n      background: #efefef; }\n\n.igv-trackgear-popover-shim {\n  padding-left: 8px;\n  padding-right: 8px; }\n\n.igv-trackgear-popover-header {\n  position: relative;\n  width: 100%;\n  height: 24px;\n  cursor: move;\n  border-top-color: transparent;\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-color: #7F7F7F;\n  border-bottom-style: solid;\n  border-bottom-width: thin;\n  background-color: #eee;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-end;\n  align-items: center; }\n  .igv-trackgear-popover-header div {\n    margin-right: 4px;\n    height: 12px;\n    width: 12px;\n    color: #7F7F7F; }\n  .igv-trackgear-popover-header div:hover {\n    cursor: pointer;\n    color: #444; }\n\n.igv-trackgear-popover-check-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center;\n  width: 100%;\n  height: 20px;\n  background-color: transparent; }\n  .igv-trackgear-popover-check-container div {\n    padding-top: 2px;\n    padding-left: 8px; }\n  .igv-trackgear-popover-check-container div:first-child {\n    position: relative;\n    width: 12px;\n    height: 12px; }\n    .igv-trackgear-popover-check-container div:first-child svg {\n      position: absolute;\n      width: 12px;\n      height: 12px; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-root {\n  position: relative;\n  padding-top: 4px;\n  margin-left: 10px;\n  margin-right: 10px;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch; }\n  .igv-root .igv-navbar {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    color: #444;\n    font-size: 12px;\n    font-family: \"Open Sans\", sans-serif;\n    font-weight: 400;\n    line-height: 32px;\n    padding-left: 8px;\n    padding-right: 8px;\n    margin-top: 2px;\n    margin-bottom: 4px;\n    height: 32px;\n    border-style: solid;\n    border-radius: 3px;\n    border-width: thin;\n    border-color: #bfbfbf;\n    background-color: #f3f3f3; }\n    .igv-root .igv-navbar .igv-navbar-left-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 32px;\n      line-height: 32px; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-logo {\n        width: 34px;\n        height: 32px;\n        margin-right: 8px; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-current-genome {\n        height: 32px;\n        margin-left: 4px;\n        margin-right: 4px;\n        user-select: none;\n        line-height: 32px;\n        vertical-align: middle;\n        text-align: center; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        height: 100%; }\n        .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container {\n          display: flex;\n          flex-flow: column;\n          flex-wrap: nowrap;\n          justify-content: space-around;\n          align-items: center;\n          height: 100%;\n          width: 125px;\n          margin-right: 4px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container select {\n            display: block;\n            cursor: pointer;\n            width: 100px;\n            height: 75%;\n            outline: none;\n            font-size: 12px;\n            font-family: \"Open Sans\", sans-serif;\n            font-weight: 400; }\n        .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group {\n          display: flex;\n          flex-flow: row;\n          flex-wrap: nowrap;\n          justify-content: space-between;\n          align-items: center;\n          margin-left: 8px;\n          height: 22px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container {\n            display: flex;\n            flex-flow: row;\n            flex-wrap: nowrap;\n            justify-content: flex-start;\n            align-items: center;\n            width: 200px;\n            height: 22px;\n            line-height: 22px; }\n            .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container input.igv-search-input {\n              cursor: text;\n              width: 85%;\n              height: 22px;\n              line-height: 22px;\n              font-size: 12px;\n              font-family: \"Open Sans\", sans-serif;\n              font-weight: 400;\n              text-align: left;\n              padding-left: 8px;\n              margin-right: 8px;\n              outline: none;\n              border-style: solid;\n              border-radius: 3px;\n              border-width: thin;\n              border-color: #bfbfbf;\n              background-color: white; }\n            .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container .igv-search-icon-container {\n              cursor: pointer;\n              height: 16px;\n              width: 16px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-windowsize-panel-container {\n            margin-left: 4px;\n            user-select: none; }\n    .igv-root .igv-navbar .igv-navbar-right-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 32px;\n      line-height: 32px; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        height: 100%; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div {\n          margin-left: 0;\n          margin-right: 4px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {\n          margin-left: 0;\n          margin-right: 0; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {\n        display: none; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget {\n        color: #737373;\n        font-size: 18px;\n        height: 32px;\n        line-height: 32px;\n        margin-left: 8px;\n        user-select: none;\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: flex-end;\n        align-items: center; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div {\n          cursor: pointer;\n          margin-left: unset;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:first-child {\n          height: 24px;\n          width: 24px;\n          margin-left: unset;\n          margin-right: 8px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:last-child {\n          height: 24px;\n          width: 24px;\n          margin-left: 8px;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {\n          display: block;\n          height: fit-content; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget input {\n          display: block;\n          width: 125px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget svg {\n          display: block; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 {\n        color: #737373;\n        font-size: 18px;\n        height: 32px;\n        line-height: 32px;\n        margin-left: 8px;\n        user-select: none;\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: flex-end;\n        align-items: center; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div {\n          cursor: pointer;\n          margin-left: unset;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:first-child {\n          height: 24px;\n          width: 24px;\n          margin-left: unset;\n          margin-right: 8px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:last-child {\n          height: 24px;\n          width: 24px;\n          margin-left: 8px;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {\n          width: 0;\n          height: 0;\n          display: none; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 input {\n          width: 0;\n          height: 0;\n          display: none; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 svg {\n          display: block; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {\n        display: none; }\n  .igv-root .igv-ideogram-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center;\n    margin-top: 10px;\n    height: 16px;\n    width: 100%; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content {\n      height: 100%;\n      background-color: white; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content:first-child {\n      margin-left: 50px; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content-border-right {\n      border-right-color: #292929;\n      border-right-style: solid;\n      border-right-width: 1px; }\n  .igv-root .igv-track-container {\n    position: relative; }\n\n.igv-multi-locus-separator {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  z-index: 2;\n  width: 1px;\n  background-color: gray; }\n\n.igv-track-container-spinner {\n  position: absolute;\n  top: 90%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-track {\n  position: relative;\n  width: 100%;\n  margin-top: 4px;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch; }\n\n.igv-left-hand-gutter {\n  width: 50px;\n  height: 100%; }\n\n.igv-right-hand-gutter {\n  position: relative;\n  width: 36px;\n  height: 100%;\n  background: white; }\n\n.igv-viewport-container {\n  position: relative;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch;\n  width: calc(100% - 112px);\n  height: 100%; }\n  .igv-viewport-container .igv-viewport {\n    position: relative;\n    height: 100%;\n    overflow-x: hidden;\n    overflow-y: hidden;\n    background-color: white; }\n  .igv-viewport-container .igv-viewport-multi-locus-gap-shim {\n    height: 100%;\n    width: 1px;\n    margin-left: 2px;\n    margin-right: 2px;\n    background-color: transparent; }\n\n.igv-viewport-content {\n  position: relative;\n  width: 100%; }\n\n.igv-canvas {\n  position: relative;\n  display: block; }\n\n.igv-scrollbar-shim {\n  position: relative;\n  width: 14px;\n  height: 100%;\n  background-color: white; }\n\n.igv-scrollbar-outer-div {\n  position: relative;\n  width: 14px;\n  height: 100%;\n  background-color: white; }\n  .igv-scrollbar-outer-div > div {\n    cursor: pointer;\n    position: absolute;\n    top: 0;\n    left: 2px;\n    width: 8px;\n    border-width: 1px;\n    border-style: solid;\n    border-color: #c4c4c4;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-left-radius: 4px;\n    border-bottom-right-radius: 4px;\n    background-color: transparent; }\n  .igv-scrollbar-outer-div > div:hover {\n    background-color: #c4c4c4; }\n\n.igv-viewport-border-right {\n  border-right-color: #292929;\n  border-right-style: solid;\n  border-right-width: 1px; }\n\n.igv-viewport-ruler {\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 10px;\n  font-weight: 200;\n  text-align: center; }\n  .igv-viewport-ruler > div {\n    height: 100%; }\n\n.igv-track-manipulation-handle {\n  position: relative;\n  cursor: pointer;\n  width: 12px;\n  height: 100%;\n  margin-left: 0;\n  font-size: medium;\n  border-color: #c4c4c4;\n  border-style: solid;\n  border-width: 0;\n  border-top-right-radius: 6px;\n  border-bottom-right-radius: 6px;\n  z-index: 512;\n  background-color: #c4c4c4; }\n\n.igv-track-manipulation-handle:hover,\n.igv-track-manipulation-handle:focus,\n.igv-track-manipulation-handle:active {\n  border-color: #7e7e7e;\n  background-color: #7e7e7e; }\n\n.igv-multi-locus-panel-border {\n  position: absolute;\n  top: 0;\n  left: 0;\n  height: 100%;\n  width: 1px;\n  background-color: green;\n  border-right-color: #ff0000;\n  border-right-style: solid;\n  border-right-width: 1px; }\n\n.igv-navbar-button {\n  box-sizing: unset;\n  padding-left: 6px;\n  padding-right: 6px;\n  height: 18px;\n  text-transform: capitalize;\n  user-select: none;\n  line-height: 18px;\n  text-align: center;\n  vertical-align: middle;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 11px;\n  font-weight: 200;\n  color: #737373;\n  background-color: #f3f3f3;\n  border-color: #737373;\n  border-style: solid;\n  border-width: thin;\n  border-radius: 6px; }\n\n.igv-navbar-button-clicked {\n  color: white;\n  background-color: #737373; }\n\n.igv-navbar-button:hover {\n  cursor: pointer; }\n\n.igv-logo-nonav {\n  margin-left: 4px;\n  margin-top: 12px;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 34px;\n  height: 16px; }\n\n.igv-search-results {\n  position: absolute;\n  top: 32px;\n  left: 2px;\n  height: 320px;\n  width: 213px;\n  background-color: white;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  overflow-x: hidden;\n  overflow-y: auto;\n  z-index: 9999; }\n  .igv-search-results tr {\n    font-family: \"Open Sans\", sans-serif;\n    font-size: small;\n    font-weight: 400;\n    color: #444; }\n  .igv-search-results tr:hover,\n  .igv-search-results tr:focus,\n  .igv-search-results tr:active {\n    cursor: pointer;\n    font-weight: 700;\n    color: #141414; }\n\n.igv-viewport-message {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  color: rgba(0, 0, 0, 0.15);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 25px;\n  font-weight: bold;\n  user-select: none; }\n\n.igv-whole-genome-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: space-between;\n  width: 100%;\n  height: 100%;\n  background-color: white; }\n  .igv-whole-genome-container div {\n    font-family: \"Open Sans\", sans-serif;\n    font-size: 10px;\n    font-weight: 400;\n    color: #444;\n    height: 100%;\n    text-align: center;\n    border-right-color: #bfbfbf;\n    border-right-style: solid;\n    border-right-width: thin; }\n    .igv-whole-genome-container div span {\n      display: block;\n      padding-top: 6px;\n      text-overflow: ellipsis; }\n  .igv-whole-genome-container div:last-child {\n    border-right-color: transparent; }\n  .igv-whole-genome-container div:hover,\n  .igv-whole-genome-container div:focus,\n  .igv-whole-genome-container div:active {\n    cursor: pointer;\n    background-color: #efefef; }\n\n.igv-multi-locus-panel-close-container {\n  position: absolute;\n  top: 4px;\n  right: 4px;\n  width: 16px;\n  height: 16px;\n  color: #666666;\n  z-index: 1000; }\n\n.igv-multi-locus-panel-close-container:hover {\n  cursor: pointer;\n  color: #434343; }\n\n.igv-multi-locus-panel-label-div {\n  position: absolute;\n  left: 50%;\n  top: 15%;\n  transform: translate(-50%, -25%);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 12px;\n  font-weight: 400;\n  text-align: center;\n  min-width: 16px;\n  z-index: 64;\n  color: #373737;\n  background-color: white;\n  padding: 1px; }\n\n.igv-multi-locus-panel-label-div:hover {\n  cursor: pointer; }\n\n.igv-viewport-spinner {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-ruler-sweeper-div {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 0;\n  height: 100%;\n  z-index: 99999;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-track-menu-border-top {\n  border-top-color: #a2a2a2;\n  border-top-style: solid;\n  border-top-width: thin; }\n\n.igv-track-menu-category {\n  padding-left: 4px;\n  font-weight: 400; }\n\n.igv-track-drag-scrim {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 256;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-track-label {\n  position: absolute;\n  left: 8px;\n  top: 8px;\n  width: auto;\n  height: auto;\n  max-width: 200px;\n  padding-left: 4px;\n  padding-right: 4px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: white;\n  z-index: 128;\n  cursor: pointer; }\n\n.igv-track-label:hover,\n.igv-track-label:focus,\n.igv-track-label:active {\n  background-color: rgba(0, 0, 0, 0.05); }\n\n.zoom-in-notice-container {\n  position: absolute;\n  top: 10px;\n  left: 50%; }\n  .zoom-in-notice-container div {\n    position: relative;\n    left: -50%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: medium;\n    font-weight: 400;\n    color: #3f3f3f;\n    background-color: rgba(255, 255, 255, 0.51);\n    z-index: 64; }\n\n.igv-center-guide {\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 8px;\n  z-index: 8;\n  display: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-left-style: dashed;\n  border-left-width: thin;\n  border-right-style: dashed;\n  border-right-width: thin; }\n\n.igv-center-guide-wide {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(127, 127, 127, 0.51); }\n\n.igv-center-guide-thin {\n  left: 50%;\n  width: 1px;\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(0, 0, 0, 0);\n  /*background-color: rgba(127, 127, 127, 0.51);*/\n  /*border-left-color: rgba(0,0,0,0);*/\n  /*border-right-color: rgba(0,0,0,0);*/ }\n\n.igv-cursor-tracking-guide {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 1px;\n  z-index: 1;\n  border-left-style: dotted;\n  border-left-width: thin;\n  border-left-color: rgba(127, 127, 127, 0.76);\n  display: none; }\n\n.igv-clickable {\n  cursor: pointer;\n  background-color: white; }\n\n#color-by-tag {\n  color: #444; }\n\n#color-by-tag:hover,\n#color-by-tag:focus,\n#color-by-tag:active {\n  cursor: pointer;\n  padding-left: 2px;\n  padding-right: 2px;\n  color: white;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: #7f7f7f; }\n\n.igv-ellipsis {\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis; }\n\n.igv-spinner-container {\n  color: #3f3f3f;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  padding-top: 8px;\n  font-size: 24px;\n  z-index: 512; }\n\n.igv-fa-check-visible {\n  color: inherit;\n  padding-right: 2px; }\n\n.igv-fa-check-hidden {\n  color: transparent;\n  padding-right: 2px; }\n\n.validateTips {\n  border: 1px solid transparent;\n  padding: 0.3em; }\n  .validateTips fieldset {\n    border: 0; }\n\n.igv-spacer-10 {\n  height: 10px;\n  width: 100%;\n  font-size: 0;\n  margin: 0;\n  padding: 0;\n  border: 0;\n  display: block; }\n\n.igv-fa5-spin {\n  -webkit-animation: igv-fa5-spin 2s infinite linear;\n  animation: igv-fa5-spin 2s infinite linear; }\n\n@-webkit-keyframes igv-fa5-spin {\n  0% {\n    -webkit-transform: rotate(0deg);\n    transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n@keyframes igv-fa5-spin {\n  0% {\n    -webkit-transform: rotate(0deg);\n    transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n\n/*# sourceMappingURL=igv.css.map */\n';
+    var css =  '.igv-generic-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  z-index: 2048;\n  background-color: white;\n  cursor: pointer;\n  display: flex;\n  flex-direction: row;\n  flex-wrap: wrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-container div:first-child {\n    cursor: move;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    height: 24px;\n    width: 100%;\n    background-color: #dddddd; }\n    .igv-generic-container div:first-child i {\n      display: block;\n      color: #5f5f5f;\n      cursor: pointer;\n      width: 14px;\n      height: 14px;\n      margin-right: 8px;\n      margin-bottom: 4px; }\n\n.igv-generic-dialog-container {\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 300px;\n  height: 200px;\n  border-color: #7F7F7F;\n  border-radius: 4px;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  z-index: 2048;\n  background-color: white;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-generic-dialog-container .igv-generic-dialog-header {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-end;\n    align-items: center;\n    width: 100%;\n    height: 24px;\n    cursor: move;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-color: #7F7F7F;\n    border-bottom-style: solid;\n    border-bottom-width: thin;\n    background-color: #eee; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div {\n      margin-right: 4px;\n      margin-bottom: 2px;\n      height: 12px;\n      width: 12px;\n      color: #7F7F7F; }\n    .igv-generic-dialog-container .igv-generic-dialog-header div:hover {\n      cursor: pointer;\n      color: #444; }\n  .igv-generic-dialog-container .igv-generic-dialog-one-liner {\n    color: #373737;\n    width: 95%;\n    height: 24px;\n    line-height: 24px;\n    text-align: left;\n    margin-top: 8px;\n    padding-left: 8px;\n    overflow-wrap: break-word;\n    background-color: white; }\n  .igv-generic-dialog-container .igv-generic-dialog-label-input {\n    margin-top: 8px;\n    width: 95%;\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    padding-left: 8px;\n    background-color: white;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input div {\n      width: 30%;\n      height: 100%;\n      font-size: 16px;\n      text-align: right;\n      padding-right: 8px;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-label-input input {\n      width: 50%;\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-input {\n    margin-top: 8px;\n    width: calc(100% - 16px);\n    height: 24px;\n    color: #373737;\n    line-height: 24px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      display: block;\n      height: 100%;\n      width: 100%;\n      padding-left: 4px;\n      font-family: \"Open Sans\", sans-serif;\n      font-weight: 400;\n      color: #373737;\n      text-align: left;\n      outline: none;\n      border-style: solid;\n      border-width: thin;\n      border-color: #7F7F7F;\n      background-color: white; }\n    .igv-generic-dialog-container .igv-generic-dialog-input input {\n      font-size: 16px; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok-cancel {\n    width: 100%;\n    height: 28px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div {\n      margin-top: 32px;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: 14px;\n      font-weight: 400;\n      width: 75px;\n      height: 28px;\n      line-height: 28px;\n      text-align: center;\n      border-color: transparent;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 2px; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child {\n      margin-left: 32px;\n      margin-right: 0;\n      background-color: #5ea4e0; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child {\n      margin-left: 0;\n      margin-right: 32px;\n      background-color: #c4c4c4; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:first-child:hover {\n      cursor: pointer;\n      background-color: #3b5c7f; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok-cancel div:last-child:hover {\n      cursor: pointer;\n      background-color: #7f7f7f; }\n  .igv-generic-dialog-container .igv-generic-dialog-ok {\n    width: 100%;\n    height: 36px;\n    margin-top: 32px;\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-around;\n    align-items: center; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div {\n      width: 98px;\n      height: 36px;\n      line-height: 36px;\n      text-align: center;\n      color: white;\n      font-family: \"Open Sans\", sans-serif;\n      font-size: medium;\n      font-weight: 400;\n      border-color: white;\n      border-style: solid;\n      border-width: thin;\n      border-radius: 4px;\n      background-color: #2B81AF; }\n    .igv-generic-dialog-container .igv-generic-dialog-ok div:hover {\n      cursor: pointer;\n      background-color: #25597f; }\n\n.igv-menu-popup {\n  position: absolute;\n  top: 0;\n  left: 0;\n  min-width: 132px;\n  z-index: 4096;\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  color: #4b4b4b;\n  background: white;\n  border-radius: 4px;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: flex-end;\n  text-align: left; }\n  .igv-menu-popup > div:not(:first-child) {\n    width: 100%; }\n    .igv-menu-popup > div:not(:first-child) > div {\n      background: white; }\n    .igv-menu-popup > div:not(:first-child) > div.context-menu {\n      padding-left: 4px;\n      padding-right: 4px; }\n    .igv-menu-popup > div:not(:first-child) > div:last-child {\n      border-bottom-left-radius: 4px;\n      border-bottom-right-radius: 4px;\n      border-bottom-color: transparent;\n      border-bottom-style: solid;\n      border-bottom-width: thin; }\n    .igv-menu-popup > div:not(:first-child) > div:hover {\n      background: #efefef; }\n\n.igv-menu-popup-shim {\n  padding-left: 8px;\n  padding-right: 8px; }\n\n.igv-menu-popup-header {\n  position: relative;\n  width: 100%;\n  height: 24px;\n  cursor: move;\n  border-top-color: transparent;\n  border-top-left-radius: 4px;\n  border-top-right-radius: 4px;\n  border-bottom-color: #7F7F7F;\n  border-bottom-style: solid;\n  border-bottom-width: thin;\n  background-color: #eee;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-end;\n  align-items: center; }\n  .igv-menu-popup-header div {\n    margin-right: 4px;\n    height: 12px;\n    width: 12px;\n    color: #7F7F7F; }\n  .igv-menu-popup-header div:hover {\n    cursor: pointer;\n    color: #444; }\n\n.igv-menu-popup-check-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center;\n  width: 100%;\n  height: 20px;\n  background-color: transparent; }\n  .igv-menu-popup-check-container div {\n    padding-top: 2px;\n    padding-left: 8px; }\n  .igv-menu-popup-check-container div:first-child {\n    position: relative;\n    width: 12px;\n    height: 12px; }\n    .igv-menu-popup-check-container div:first-child svg {\n      position: absolute;\n      width: 12px;\n      height: 12px; }\n\n.igv-user-feedback {\n  position: fixed;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  width: 512px;\n  height: 360px;\n  z-index: 2048;\n  background-color: white;\n  border-color: #a2a2a2;\n  border-style: solid;\n  border-width: thin;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: medium;\n  font-weight: 400;\n  color: #444;\n  display: flex;\n  flex-direction: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: center; }\n  .igv-user-feedback div:first-child {\n    position: relative;\n    height: 24px;\n    width: 100%;\n    background-color: white;\n    border-bottom-color: #a2a2a2;\n    border-bottom-style: solid;\n    border-bottom-width: thin; }\n    .igv-user-feedback div:first-child div {\n      position: absolute;\n      top: 2px;\n      width: 16px;\n      height: 16px;\n      background-color: transparent; }\n    .igv-user-feedback div:first-child div:first-child {\n      left: 8px; }\n    .igv-user-feedback div:first-child div:last-child {\n      cursor: pointer;\n      right: 8px; }\n  .igv-user-feedback div:last-child {\n    width: 100%;\n    height: calc(100% - 24px);\n    border-width: 0; }\n    .igv-user-feedback div:last-child div {\n      width: auto;\n      height: auto;\n      margin: 8px; }\n\n.igv-root {\n  position: relative;\n  padding-top: 4px;\n  margin-left: 10px;\n  margin-right: 10px;\n  display: flex;\n  flex-flow: column;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch; }\n  .igv-root .igv-navbar {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: space-between;\n    align-items: center;\n    color: #444;\n    font-size: 12px;\n    font-family: \"Open Sans\", sans-serif;\n    font-weight: 400;\n    line-height: 32px;\n    padding-left: 8px;\n    padding-right: 8px;\n    margin-top: 2px;\n    margin-bottom: 4px;\n    height: 32px;\n    border-style: solid;\n    border-radius: 3px;\n    border-width: thin;\n    border-color: #bfbfbf;\n    background-color: #f3f3f3; }\n    .igv-root .igv-navbar .igv-navbar-left-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 32px;\n      line-height: 32px; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-logo {\n        width: 34px;\n        height: 32px;\n        margin-right: 8px; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-current-genome {\n        height: 32px;\n        margin-left: 4px;\n        margin-right: 4px;\n        user-select: none;\n        line-height: 32px;\n        vertical-align: middle;\n        text-align: center; }\n      .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        height: 100%; }\n        .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container {\n          display: flex;\n          flex-flow: column;\n          flex-wrap: nowrap;\n          justify-content: space-around;\n          align-items: center;\n          height: 100%;\n          width: 125px;\n          margin-right: 4px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-chromosome-select-widget-container select {\n            display: block;\n            cursor: pointer;\n            width: 100px;\n            height: 75%;\n            outline: none;\n            font-size: 12px;\n            font-family: \"Open Sans\", sans-serif;\n            font-weight: 400; }\n        .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group {\n          display: flex;\n          flex-flow: row;\n          flex-wrap: nowrap;\n          justify-content: space-between;\n          align-items: center;\n          margin-left: 8px;\n          height: 22px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container {\n            display: flex;\n            flex-flow: row;\n            flex-wrap: nowrap;\n            justify-content: flex-start;\n            align-items: center;\n            width: 200px;\n            height: 22px;\n            line-height: 22px; }\n            .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container input.igv-search-input {\n              cursor: text;\n              width: 85%;\n              height: 22px;\n              line-height: 22px;\n              font-size: 12px;\n              font-family: \"Open Sans\", sans-serif;\n              font-weight: 400;\n              text-align: left;\n              padding-left: 8px;\n              margin-right: 8px;\n              outline: none;\n              border-style: solid;\n              border-radius: 3px;\n              border-width: thin;\n              border-color: #bfbfbf;\n              background-color: white; }\n            .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-search-container .igv-search-icon-container {\n              cursor: pointer;\n              height: 16px;\n              width: 16px; }\n          .igv-root .igv-navbar .igv-navbar-left-container .igv-navbar-genomic-location .igv-locus-size-group .igv-windowsize-panel-container {\n            margin-left: 4px;\n            user-select: none; }\n    .igv-root .igv-navbar .igv-navbar-right-container {\n      display: flex;\n      flex-flow: row;\n      flex-wrap: nowrap;\n      justify-content: space-between;\n      align-items: center;\n      height: 32px;\n      line-height: 32px; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container {\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: space-between;\n        align-items: center;\n        height: 100%; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div {\n          margin-left: 0;\n          margin-right: 4px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container div:last-child {\n          margin-left: 0;\n          margin-right: 0; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-navbar-toggle-button-container-750 {\n        display: none; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget {\n        color: #737373;\n        font-size: 18px;\n        height: 32px;\n        line-height: 32px;\n        margin-left: 8px;\n        user-select: none;\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: flex-end;\n        align-items: center; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div {\n          cursor: pointer;\n          margin-left: unset;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:first-child {\n          height: 24px;\n          width: 24px;\n          margin-left: unset;\n          margin-right: 8px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:last-child {\n          height: 24px;\n          width: 24px;\n          margin-left: 8px;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget div:nth-child(even) {\n          display: block;\n          height: fit-content; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget input {\n          display: block;\n          width: 125px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget svg {\n          display: block; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 {\n        color: #737373;\n        font-size: 18px;\n        height: 32px;\n        line-height: 32px;\n        margin-left: 8px;\n        user-select: none;\n        display: flex;\n        flex-flow: row;\n        flex-wrap: nowrap;\n        justify-content: flex-end;\n        align-items: center; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div {\n          cursor: pointer;\n          margin-left: unset;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:first-child {\n          height: 24px;\n          width: 24px;\n          margin-left: unset;\n          margin-right: 8px; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:last-child {\n          height: 24px;\n          width: 24px;\n          margin-left: 8px;\n          margin-right: unset; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 div:nth-child(even) {\n          width: 0;\n          height: 0;\n          display: none; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 input {\n          width: 0;\n          height: 0;\n          display: none; }\n        .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-900 svg {\n          display: block; }\n      .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {\n        display: none; }\n  .igv-root .igv-ideogram-container {\n    display: flex;\n    flex-flow: row;\n    flex-wrap: nowrap;\n    justify-content: flex-start;\n    align-items: center;\n    margin-top: 10px;\n    height: 16px;\n    width: 100%; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content {\n      height: 100%;\n      background-color: white; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content:first-child {\n      margin-left: 50px; }\n    .igv-root .igv-ideogram-container .igv-ideogram-content-border-right {\n      border-right-color: #292929;\n      border-right-style: solid;\n      border-right-width: 1px; }\n  .igv-root .igv-track-container {\n    position: relative; }\n\n.igv-multi-locus-separator {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  z-index: 2;\n  width: 1px;\n  background-color: gray; }\n\n.igv-track-container-spinner {\n  position: absolute;\n  top: 90%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-track {\n  position: relative;\n  width: 100%;\n  margin-top: 4px;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch; }\n\n.igv-left-hand-gutter {\n  width: 50px;\n  height: 100%; }\n\n.igv-right-hand-gutter {\n  position: relative;\n  width: 36px;\n  height: 100%;\n  background: white; }\n\n.igv-viewport-container {\n  position: relative;\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: flex-start;\n  align-items: stretch;\n  width: calc(100% - 112px);\n  height: 100%; }\n  .igv-viewport-container .igv-viewport {\n    position: relative;\n    height: 100%;\n    overflow-x: hidden;\n    overflow-y: hidden;\n    background-color: white; }\n  .igv-viewport-container .igv-viewport-multi-locus-gap-shim {\n    height: 100%;\n    width: 1px;\n    margin-left: 2px;\n    margin-right: 2px;\n    background-color: transparent; }\n\n.igv-viewport-content {\n  position: relative;\n  width: 100%; }\n\n.igv-canvas {\n  position: relative;\n  display: block; }\n\n.igv-scrollbar-shim {\n  position: relative;\n  width: 14px;\n  height: 100%;\n  background-color: white; }\n\n.igv-scrollbar-outer-div {\n  position: relative;\n  width: 14px;\n  height: 100%;\n  background-color: white; }\n  .igv-scrollbar-outer-div > div {\n    cursor: pointer;\n    position: absolute;\n    top: 0;\n    left: 2px;\n    width: 8px;\n    border-width: 1px;\n    border-style: solid;\n    border-color: #c4c4c4;\n    border-top-left-radius: 4px;\n    border-top-right-radius: 4px;\n    border-bottom-left-radius: 4px;\n    border-bottom-right-radius: 4px;\n    background-color: transparent; }\n  .igv-scrollbar-outer-div > div:hover {\n    background-color: #c4c4c4; }\n\n.igv-viewport-border-right {\n  border-right-color: #292929;\n  border-right-style: solid;\n  border-right-width: 1px; }\n\n.igv-viewport-ruler {\n  cursor: pointer;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 10px;\n  font-weight: 200;\n  text-align: center; }\n  .igv-viewport-ruler > div {\n    height: 100%; }\n\n.igv-track-manipulation-handle {\n  position: relative;\n  cursor: pointer;\n  width: 12px;\n  height: 100%;\n  margin-left: 0;\n  font-size: medium;\n  border-color: #c4c4c4;\n  border-style: solid;\n  border-width: 0;\n  border-top-right-radius: 6px;\n  border-bottom-right-radius: 6px;\n  z-index: 512;\n  background-color: #c4c4c4; }\n\n.igv-track-manipulation-handle:hover,\n.igv-track-manipulation-handle:focus,\n.igv-track-manipulation-handle:active {\n  border-color: #7e7e7e;\n  background-color: #7e7e7e; }\n\n.igv-multi-locus-panel-border {\n  position: absolute;\n  top: 0;\n  left: 0;\n  height: 100%;\n  width: 1px;\n  background-color: green;\n  border-right-color: #ff0000;\n  border-right-style: solid;\n  border-right-width: 1px; }\n\n.igv-navbar-button {\n  box-sizing: unset;\n  padding-left: 6px;\n  padding-right: 6px;\n  height: 18px;\n  text-transform: capitalize;\n  user-select: none;\n  line-height: 18px;\n  text-align: center;\n  vertical-align: middle;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 11px;\n  font-weight: 200;\n  color: #737373;\n  background-color: #f3f3f3;\n  border-color: #737373;\n  border-style: solid;\n  border-width: thin;\n  border-radius: 6px; }\n\n.igv-navbar-button-clicked {\n  color: white;\n  background-color: #737373; }\n\n.igv-navbar-button:hover {\n  cursor: pointer; }\n\n.igv-logo-nonav {\n  margin-left: 4px;\n  margin-top: 12px;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 34px;\n  height: 16px; }\n\n.igv-search-results {\n  position: absolute;\n  top: 32px;\n  left: 2px;\n  height: 320px;\n  width: 213px;\n  background-color: white;\n  border-color: #7F7F7F;\n  border-style: solid;\n  border-width: thin;\n  overflow-x: hidden;\n  overflow-y: auto;\n  z-index: 9999; }\n  .igv-search-results tr {\n    font-family: \"Open Sans\", sans-serif;\n    font-size: small;\n    font-weight: 400;\n    color: #444; }\n  .igv-search-results tr:hover,\n  .igv-search-results tr:focus,\n  .igv-search-results tr:active {\n    cursor: pointer;\n    font-weight: 700;\n    color: #141414; }\n\n.igv-viewport-message {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  color: rgba(0, 0, 0, 0.15);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 25px;\n  font-weight: bold;\n  user-select: none; }\n\n.igv-whole-genome-container {\n  display: flex;\n  flex-flow: row;\n  flex-wrap: nowrap;\n  justify-content: space-between;\n  width: 100%;\n  height: 100%;\n  background-color: white; }\n  .igv-whole-genome-container div {\n    font-family: \"Open Sans\", sans-serif;\n    font-size: 10px;\n    font-weight: 400;\n    color: #444;\n    height: 100%;\n    text-align: center;\n    border-right-color: #bfbfbf;\n    border-right-style: solid;\n    border-right-width: thin; }\n    .igv-whole-genome-container div span {\n      display: block;\n      padding-top: 6px;\n      text-overflow: ellipsis; }\n  .igv-whole-genome-container div:last-child {\n    border-right-color: transparent; }\n  .igv-whole-genome-container div:hover,\n  .igv-whole-genome-container div:focus,\n  .igv-whole-genome-container div:active {\n    cursor: pointer;\n    background-color: #efefef; }\n\n.igv-multi-locus-panel-close-container {\n  position: absolute;\n  top: 4px;\n  right: 4px;\n  width: 16px;\n  height: 16px;\n  color: #666666;\n  z-index: 1000; }\n\n.igv-multi-locus-panel-close-container:hover {\n  cursor: pointer;\n  color: #434343; }\n\n.igv-multi-locus-panel-label-div {\n  position: absolute;\n  left: 50%;\n  top: 15%;\n  transform: translate(-50%, -25%);\n  font-family: \"Open Sans\", sans-serif;\n  font-size: 12px;\n  font-weight: 400;\n  text-align: center;\n  min-width: 16px;\n  z-index: 64;\n  color: #373737;\n  background-color: white;\n  padding: 1px; }\n\n.igv-multi-locus-panel-label-div:hover {\n  cursor: pointer; }\n\n.igv-viewport-spinner {\n  position: absolute;\n  top: 50%;\n  left: 50%;\n  transform: translate(-50%, -50%);\n  z-index: 1024;\n  width: 24px;\n  height: 24px;\n  pointer-events: none;\n  color: #737373; }\n\n.igv-ruler-sweeper-div {\n  display: none;\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  left: 0;\n  width: 0;\n  height: 100%;\n  z-index: 99999;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-track-menu-border-top {\n  border-top-color: #a2a2a2;\n  border-top-style: solid;\n  border-top-width: thin; }\n\n.igv-track-menu-category {\n  padding-left: 4px;\n  font-weight: 400; }\n\n.igv-track-drag-scrim {\n  position: absolute;\n  left: 0;\n  top: 0;\n  width: 100%;\n  height: 100%;\n  z-index: 256;\n  background-color: rgba(68, 134, 247, 0.25); }\n\n.igv-trackgear-container {\n  position: relative;\n  width: 20px;\n  height: 20px;\n  margin-left: 4px;\n  color: #7F7F7F; }\n\n.igv-trackgear-container:hover {\n  cursor: pointer;\n  color: #444; }\n\n.igv-track-label {\n  position: absolute;\n  left: 8px;\n  top: 8px;\n  width: auto;\n  height: auto;\n  max-width: 200px;\n  padding-left: 4px;\n  padding-right: 4px;\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  font-family: \"Open Sans\", sans-serif;\n  font-size: small;\n  font-weight: 400;\n  text-align: center;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: white;\n  z-index: 128;\n  cursor: pointer; }\n\n.igv-track-label:hover,\n.igv-track-label:focus,\n.igv-track-label:active {\n  background-color: rgba(0, 0, 0, 0.05); }\n\n.zoom-in-notice-container {\n  position: absolute;\n  top: 10px;\n  left: 50%; }\n  .zoom-in-notice-container div {\n    position: relative;\n    left: -50%;\n    font-family: \"Open Sans\", sans-serif;\n    font-size: medium;\n    font-weight: 400;\n    color: #3f3f3f;\n    background-color: rgba(255, 255, 255, 0.51);\n    z-index: 64; }\n\n.igv-center-guide {\n  pointer-events: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 8px;\n  z-index: 8;\n  display: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  border-left-style: dashed;\n  border-left-width: thin;\n  border-right-style: dashed;\n  border-right-width: thin; }\n\n.igv-center-guide-wide {\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(127, 127, 127, 0.51); }\n\n.igv-center-guide-thin {\n  left: 50%;\n  width: 1px;\n  background-color: rgba(0, 0, 0, 0);\n  border-left-color: rgba(127, 127, 127, 0.51);\n  border-right-color: rgba(0, 0, 0, 0);\n  /*background-color: rgba(127, 127, 127, 0.51);*/\n  /*border-left-color: rgba(0,0,0,0);*/\n  /*border-right-color: rgba(0,0,0,0);*/ }\n\n.igv-cursor-tracking-guide {\n  pointer-events: none;\n  user-select: none;\n  -moz-user-select: none;\n  -webkit-user-select: none;\n  position: absolute;\n  top: 0;\n  bottom: 0;\n  left: 50%;\n  width: 1px;\n  z-index: 1;\n  border-left-style: dotted;\n  border-left-width: thin;\n  border-left-color: rgba(127, 127, 127, 0.76);\n  display: none; }\n\n.igv-clickable {\n  cursor: pointer;\n  background-color: white; }\n\n#color-by-tag {\n  color: #444; }\n\n#color-by-tag:hover,\n#color-by-tag:focus,\n#color-by-tag:active {\n  cursor: pointer;\n  padding-left: 2px;\n  padding-right: 2px;\n  color: white;\n  border-color: #444;\n  border-radius: 2px;\n  border-style: solid;\n  border-width: thin;\n  background-color: #7f7f7f; }\n\n.igv-ellipsis {\n  white-space: nowrap;\n  overflow: hidden;\n  text-overflow: ellipsis; }\n\n.igv-spinner-container {\n  color: #3f3f3f;\n  width: 100%;\n  height: 100%;\n  text-align: center;\n  padding-top: 8px;\n  font-size: 24px;\n  z-index: 512; }\n\n.igv-fa-check-visible {\n  color: inherit;\n  padding-right: 2px; }\n\n.igv-fa-check-hidden {\n  color: transparent;\n  padding-right: 2px; }\n\n.validateTips {\n  border: 1px solid transparent;\n  padding: 0.3em; }\n  .validateTips fieldset {\n    border: 0; }\n\n.igv-spacer-10 {\n  height: 10px;\n  width: 100%;\n  font-size: 0;\n  margin: 0;\n  padding: 0;\n  border: 0;\n  display: block; }\n\n.igv-fa5-spin {\n  -webkit-animation: igv-fa5-spin 2s infinite linear;\n  animation: igv-fa5-spin 2s infinite linear; }\n\n@-webkit-keyframes igv-fa5-spin {\n  0% {\n    -webkit-transform: rotate(0deg);\n    transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n@keyframes igv-fa5-spin {\n  0% {\n    -webkit-transform: rotate(0deg);\n    transform: rotate(0deg); }\n  100% {\n    -webkit-transform: rotate(360deg);\n    transform: rotate(360deg); } }\n\n/*# sourceMappingURL=igv.css.map */\n';
 
     var style = document.createElement('style');
     style.setAttribute('type', 'text/css');
