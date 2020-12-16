@@ -33,6 +33,9 @@ import GWASParser from "../gwas/gwasParser.js";
 import AEDParser from "../aed/AEDParser.js";
 import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import {loadIndex} from "../bam/indexFactory.js";
+import getDataWrapper from "./dataWrapper.js";
+import BGZipLineReader from "../util/BGZipLineReader.js";
+
 
 const isString = StringUtils.isString;
 
@@ -62,8 +65,8 @@ class FeatureFileReader {
             uriParts = URIUtils.parseUri(this.config.url);
             this.filename = config.filename || uriParts.file;
         }
-        this.format = this.config.format;
-        this.parser = this.getParser(this.format, this.config.decode, this.config);
+
+        this.parser = this.getParser(this.config);
 
         if (this.config.format === "vcf" && !this.config.indexURL) {
             console.warn("Warning: index file not specified.  The entire vcf file will be loaded.");
@@ -90,7 +93,7 @@ class FeatureFileReader {
             return this.loadFeaturesNoIndex()
         }
 
-     }
+    }
 
     async readHeader() {
 
@@ -106,39 +109,45 @@ class FeatureFileReader {
                     throw new Error("Unable to load index: " + this.config.indexURL);
                 }
 
-                // Load the file header (not HTTP header) for an indexed file.
-                let maxSize = "vcf" === this.config.format ? 65000 : 1000
-                const dataStart = index.firstAlignmentBlock ? index.firstAlignmentBlock : 0;
-
+                let dataWrapper;
                 if (index.tabix) {
-                    const bsizeOptions = buildOptions(this.config, {
-                        range: {
-                            start: dataStart,
-                            size: 26
-                        }
-                    });
-                    const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
-                    const bsize = bgzBlockSize(abuffer)
-                    maxSize = dataStart + bsize;
+                    dataWrapper = new BGZipLineReader(this.config);
+                } else {
+                   // Tribble
+                   const maxSize = Object.values(index.chrIndex)
+                        .flatMap(chr => chr.blocks)
+                        .map(block => block.max)
+                        .reduce((previous, current) =>
+                            Math.min(previous, current), Number.MAX_SAFE_INTEGER);
+                
+                    const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
+                    const data = await igvxhr.loadString(this.config.url, options)
+                    dataWrapper = getDataWrapper(data);
                 }
-                const options = buildOptions(this.config, {bgz: index.tabix, range: {start: 0, size: maxSize}});
-                const data = await igvxhr.loadString(this.config.url, options)
-                this.header = this.parser.parseHeader(data);  // Cache header, might be needed to parse features
+
+
+                this.header = await this.parser.parseHeader(dataWrapper);  // Cache header, might be needed to parse features
                 return this.header;
 
             } else {
                 // If this is a non-indexed file we will load all features in advance
                 const options = buildOptions(this.config);
                 const data = await igvxhr.loadString(this.config.url, options);
-                this.header = this.parser.parseHeader(data);
-                this.features = this.parser.parseFeatures(data);   // Temporarily cache features
+                let dataWrapper = getDataWrapper(data);
+                this.header = await this.parser.parseHeader(dataWrapper);
+
+                // Reset data wrapper and parse features
+                dataWrapper = getDataWrapper(data);
+                this.features = await this.parser.parseFeatures(dataWrapper);   // cache features
                 return this.header;
             }
         }
     }
 
-    getParser(format, decode, config) {
-        switch (format) {
+
+    getParser(config) {
+
+        switch (config.format) {
             case "vcf":
                 return new VcfParser(config);
             case "seg" :
@@ -146,9 +155,9 @@ class FeatureFileReader {
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :
-                return new AEDParser(format, decode, config);
+                return new AEDParser(config);
             default:
-                return new FeatureParser(format, decode, config);
+                return new FeatureParser(config);
         }
     }
 
@@ -163,9 +172,11 @@ class FeatureFileReader {
             const options = buildOptions(this.config);    // Add oauth token, if any
             const data = await igvxhr.loadString(this.config.url, options)
             if (!this.header) {
-                this.header = this.parser.parseHeader(data);
+                const dataWrapper = getDataWrapper(data);
+                this.header = await this.parser.parseHeader(dataWrapper);
             }
-            const features = this.parser.parseFeatures(data);   // <= PARSING DONE HERE
+            const dataWrapper = getDataWrapper(data);
+            const features = await this.parser.parseFeatures(dataWrapper);   // <= PARSING DONE HERE
             return features;
         }
     }
@@ -227,7 +238,8 @@ class FeatureFileReader {
                 }
 
                 const slicedData = startOffset ? inflated.slice(startOffset) : inflated;
-                const slicedFeatures = parser.parseFeatures(slicedData);
+                const dataWrapper = getDataWrapper(slicedData);
+                const slicedFeatures = await parser.parseFeatures(dataWrapper);
 
                 // Filter features not in requested range.
                 let inInterval = false;
@@ -293,11 +305,14 @@ class FeatureFileReader {
             return tmp;
         } else {
             const plain = URIUtils.decodeDataURI(this.dataURI)
-            this.header = this.parser.parseHeader(plain);
+            let dataWrapper = getDataWrapper(plain);
+            this.header = await this.parser.parseHeader(dataWrapper);
             if (this.header instanceof String && this.header.startsWith("##gff-version 3")) {
                 this.format = 'gff3';
             }
-            this.features = this.parser.parseFeatures(plain);
+
+            dataWrapper = getDataWrapper(plain);
+            this.features = await this.parser.parseFeatures(dataWrapper);
             return this.features;
         }
     }

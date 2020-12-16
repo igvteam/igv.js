@@ -178,7 +178,7 @@ class CramReader {
                 if (message && message.indexOf("MD5") >= 0) {
                     message = "Sequence mismatch. Is this the correct genome for the loaded CRAM?"
                 }
-                Alert.presentAlert(message)
+                Alert.presentAlert(new Error(message))
                 throw error
             }
         }

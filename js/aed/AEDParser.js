@@ -41,7 +41,8 @@ var aedRegexpNamespace = new RegExp("([^:]*):([^(]*)\\(([^)]*)\\)"); // namespac
 
 class AEDParser {
 
-    constructor(format, decode, config) {
+    constructor(config) {
+        const decode = config ? config.decode : undefined;
         this.nameField = config ? config.nameField : undefined;
         this.skipRows = 0;   // The number of fixed header rows to skip.  Override for specific types as needed
         if (decode) {
@@ -52,11 +53,10 @@ class AEDParser {
         this.delimiter = "\t";
     }
 
-    parseHeader(data) {
+    async parseHeader(dataWrapper) {
         let line;
         let header;
-        const dataWrapper = getDataWrapper(data);
-        while (line = dataWrapper.nextLine()) {
+        while (line = await dataWrapper.nextLine()) {
             if (line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 if (line.startsWith("track") || line.startsWith("#track")) {
                     let h = parseTrackLine(line);
@@ -85,12 +85,8 @@ class AEDParser {
         return header;
     }
 
-    parseFeatures(data) {
+    async parseFeatures(dataWrapper) {
 
-        if (!data) return null;
-
-        const dataWrapper = getDataWrapper(data);
-        const nextLine = dataWrapper.nextLineNoTrim.bind(dataWrapper);
         const allFeatures = [];
         let cnt = 0;
         const decode = this.decode;
@@ -99,7 +95,7 @@ class AEDParser {
         let line;
         let wig;
 
-        while ((line = nextLine()) !== undefined) {
+        while ((line =  dataWrapper.nextLine()) !== undefined) {
             i++;
             if (i <= this.skipRows || line.startsWith("track") || line.startsWith("#") || line.startsWith("browser")) {
                 continue;
