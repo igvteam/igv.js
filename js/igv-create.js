@@ -228,13 +228,21 @@ function createStandardControls(browser, config) {
     browser.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
     $searchContainer.append(browser.$searchInput);
 
-    browser.$searchInput.change(function (e) {
+    browser.$searchInput.change(async () => {
 
-        browser.search($(this).val())
+        try {
+            const str = browser.$searchInput.val()
+            const referenceFrameList = await browser.search(str)
 
-            .catch(function (error) {
-                Alert.presentAlert(error);
-            });
+            if (referenceFrameList.length > 1) {
+                browser.updateLocusSearchWidget(referenceFrameList)
+                browser.windowSizePanel.updatePanel(referenceFrameList)
+            }
+
+        } catch (error) {
+            Alert.presentAlert(error)
+        }
+
     });
 
     const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});

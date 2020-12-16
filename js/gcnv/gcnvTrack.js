@@ -5,7 +5,6 @@ import {isSimpleType} from "../util/igvUtils.js";
 import paintAxis from "../util/paintAxis.js";
 import MenuUtils from "../ui/menuUtils.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
-import deepCopy from "../util/deepCopy.js"
 
 const X_PIXEL_DIFF_THRESHOLD = 1;
 
@@ -83,13 +82,7 @@ class GCNVTrack extends TrackBase {
     draw(options) {
         let self = this;
 
-        const features = options.features;
-        const ctx = options.context;
-        const bpPerPixel = options.bpPerPixel;
-        const bpStart = options.bpStart;
-        const pixelWidth = options.pixelWidth;
-        const pixelHeight = options.pixelHeight;
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+        const {features, context, bpPerPixel, bpStart, pixelWidth, pixelHeight} = options;
 
         ///let baselineColor;
         //if (typeof self.color === "string" && self.color.startsWith("rgb(")) {
@@ -97,7 +90,7 @@ class GCNVTrack extends TrackBase {
         //}
 
         const yScale = (yValue) => {
-            return ((self.dataRange.max - yValue) / (self.dataRange.max - self.dataRange.min)) * pixelHeight
+            return ((this.dataRange.max - yValue) / (this.dataRange.max - this.dataRange.min)) * pixelHeight
         };
 
         const getX = function (bpPosition) {
@@ -107,9 +100,9 @@ class GCNVTrack extends TrackBase {
             return x;
         };
 
-        const drawGuideLines = function (options) {
-            if (self.config.hasOwnProperty('guideLines')) {
-                for (let line of self.config.guideLines) {
+        const drawGuideLines = (options) => {
+            if (this.config.hasOwnProperty('guideLines')) {
+                for (let line of this.config.guideLines) {
                     if (line.hasOwnProperty('color') && line.hasOwnProperty('y') && line.hasOwnProperty('dotted')) {
                         let y = yScale(line.y);
                         let props = {
@@ -125,11 +118,11 @@ class GCNVTrack extends TrackBase {
 
         if (features && features.length > 0) {
 
-            if (self.dataRange.min === undefined) self.dataRange.min = 0;
+            if (this.dataRange.min === undefined) this.dataRange.min = 0;
 
             // Max can be less than min if config.min is set but max left to autoscale. If that's the case there is
             // nothing to paint.
-            if (self.dataRange.max > self.dataRange.min) {
+            if (this.dataRange.max > this.dataRange.min) {
                 const highlightSamples = this.config.highlightSamples;
                 const onlyHandleClicksForHighlightedSamples = this.config.onlyHandleClicksForHighlightedSamples;
 
@@ -166,7 +159,7 @@ class GCNVTrack extends TrackBase {
                             if (highlightColor) {
                                 highlightConnectorLines.push([previousX, previousY, x1, y, highlightColor])
                             } else {
-                                IGVGraphics.strokeLine(ctx, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
+                                IGVGraphics.strokeLine(context, previousX, previousY, x1, y, {strokeStyle: '#D9D9D9'});
                             }
                             if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
                                 this.clickDetectorCache[x1].push([previousX, previousY, x1, y, sampleName, highlightColor || 'gray'])
@@ -178,7 +171,7 @@ class GCNVTrack extends TrackBase {
                             if (highlightColor) {
                                 highlightFeatureLines.push([x1, y, x2, y, highlightColor])
                             } else {
-                                IGVGraphics.strokeLine(ctx, x1, y, x2, y, {strokeStyle: 'gray'});
+                                IGVGraphics.strokeLine(context, x1, y, x2, y, {strokeStyle: 'gray'});
                             }
                             if (!onlyHandleClicksForHighlightedSamples || sampleName in highlightSamples) {
                                 this.clickDetectorCache[x2].push([x1, y, x2, y, sampleName, highlightColor || 'gray'])
@@ -194,17 +187,17 @@ class GCNVTrack extends TrackBase {
                 }
 
                 for (let f of highlightConnectorLines) {
-                    IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 1.3});
+                    IGVGraphics.strokeLine(context, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 1.3});
                 }
                 for (let f of highlightFeatureLines) {
-                    IGVGraphics.strokeLine(ctx, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 2});
+                    IGVGraphics.strokeLine(context, f[0], f[1], f[2], f[3], {strokeStyle: f[4], lineWidth: 2});
                 }
 
                 /*
                 // If the track includes negative values draw a baseline
-                if (self.dataRange.min < 0) {
-                    const basepx = (self.dataRange.max / (self.dataRange.max - self.dataRange.min)) * options.pixelHeight;
-                    IGVGraphics.strokeLine(ctx, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
+                if (this.dataRange.min < 0) {
+                    const basepx = (self.dataRange.max / (this.dataRange.max - this.dataRange.min)) * options.pixelHeight;
+                    IGVGraphics.strokeLine(context, 0, basepx, options.pixelWidth, basepx, {strokeStyle: baselineColor});
                 }
                 */
             }

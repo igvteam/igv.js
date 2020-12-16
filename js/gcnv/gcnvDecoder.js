@@ -27,6 +27,7 @@ function decodeGcnv(tokens, header) {
         }
     } else {
         // TODO Throw error?
+        console.warn(`${chr}:${start}-${end} row contains ${values.length} sample columns instead of the expected ${sampleCount} columns. Skipping...`)
         return undefined;
     }
 }

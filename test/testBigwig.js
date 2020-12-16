@@ -1,6 +1,7 @@
 import "./utils/mockObjects.js"
 import BWSource from "../js/bigwig/bwSource.js";
 import BWReader from "../js/bigwig/bwReader.js";
+import FeatureSource from "../js/feature/featureSource.js"
 import {assert} from 'chai';
 
 suite("testBigWig", function () {
@@ -10,8 +11,10 @@ suite("testBigWig", function () {
     test("No data", async function () {
 
         this.timeout(10000);
-        const bw = new BWSource(
-            {url: dataURL + 'bigwig/manyChromosomes.bigWig'}
+        const bw = FeatureSource (
+            {
+                format: 'bigwig',
+                url: dataURL + 'bigwig/manyChromosomes.bigWig'}
         );
         const features = await bw.getFeatures({chr: 'NoSuchChromosome', start: 0, end: 100});
         assert.equal(0, features.length);

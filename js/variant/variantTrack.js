@@ -63,6 +63,7 @@ class VariantTrack extends TrackBase {
         this.homvarColor = config.homvarColor || "rgb(17,248,254)";
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
+        this.type = config.type || "variant"
 
         this.nRows = 1;  // Computed dynamically
 
