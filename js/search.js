@@ -20,7 +20,7 @@ async function search(browser, string) {
         let locusObject = parseLocusString(browser, locus)
 
         if (!locusObject) {
-            locusObject = browser.featureDB[locus.toUpperCase()]
+            locusObject = browser.genome.featureDB[locus.toUpperCase()]
         }
 
         if (!locusObject) {

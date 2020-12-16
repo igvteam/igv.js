@@ -7,6 +7,11 @@ import search from "../js/search.js";
 
 suite("testSearch", function () {
 
+    genome.featureDB =  {
+        "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
+        "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
+    }
+
     const browser = {
         genome: genome,
         searchConfig : {
@@ -19,10 +24,6 @@ suite("testSearch", function () {
             geneField: "gene",
             snpField: "snp"
         },
-        featureDB: {
-            "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
-            "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
-        }
     }
 
     test("locus strings", function () {
@@ -95,11 +96,9 @@ suite("testSearch", function () {
 
     test("search with spaces", async function () {
 
-
+        this.timeout(20000);
         const s4 = "foo bar";
-
         const results = await search(browser, s4);
-
         const locus4 = results[0];
         assert.equal(locus4.chr, "chrX");
         assert.equal(locus4.start, 1);
@@ -107,26 +106,27 @@ suite("testSearch", function () {
 
     })
 
-
-    test("custom webservice", async function () {
-
-        this.timeout(10000);
-
-        browser.genome = macacaGenome;
-        browser.searchConfig = {
-            url: 'https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/$FEATURE$?content-type=application/json',
-            chromosomeField: 'seq_region_name',
-            displayName: 'display_name'
-        }
-
-        // olig3 => 4:41,813,339-41,814,160
-        const gene = "olig3";
-        const locus = await searchWebService(browser, gene, browser.searchConfig);
-        assert.equal(locus.chr, "4");
-        assert.equal(locus.start, 41813338);
-        assert.equal(locus.end, 41814160);
-    });
-
+    // TODO -- The Ensembl webservice does not work reliably
+    //
+    // test("custom webservice", async function () {
+    //
+    //
+    //
+    //     browser.genome = macacaGenome;
+    //     browser.searchConfig = {
+    //         url: 'https://rest.ensembl.org/lookup/symbol/macaca_fascicularis/$FEATURE$?content-type=application/json',
+    //         chromosomeField: 'seq_region_name',
+    //         displayName: 'display_name'
+    //     }
+    //
+    //     // olig3 => 4:41,813,339-41,814,160
+    //     const gene = "olig3";
+    //     const locus = await searchWebService(browser, gene, browser.searchConfig);
+    //     assert.equal(locus.chr, "4");
+    //     assert.equal(locus.start, 41813338);
+    //     assert.equal(locus.end, 41814160);
+    // });
+    //
 
 })
 
