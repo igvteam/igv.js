@@ -217,13 +217,6 @@ class TrackView {
         }
     }
 
-
-    appendRightHandGutter($parent) {
-        let $div = $('<div class="igv-right-hand-gutter">');
-        $parent.append($div);
-        this.createTrackGearPopup($div);
-    }
-
     dataRange() {
         return this.track.dataRange ? this.track.dataRange : undefined;
     }
@@ -535,23 +528,6 @@ class TrackView {
         return rpV;
     }
 
-    createTrackGearPopup($parent) {
-
-        let $container = $("<div>", {class: 'igv-trackgear-container'});
-        $parent.append($container);
-
-        $container.append(createIcon('cog'));
-
-        this.trackGearPopup = new MenuPopup($parent);
-        this.trackGearPopup.$popover.hide();
-
-        $container.click(e => {
-            e.preventDefault();
-            e.stopPropagation();
-            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
-        });
-    }
-
     /**
      * Do any cleanup here
      */
@@ -609,27 +585,26 @@ class TrackView {
 function appendRightHandGutter(trackView, $parent) {
     let $div = $('<div class="igv-right-hand-gutter">')
     $parent.append($div)
-    createTrackGearPopover(trackView, $div)
-
+    createTrackGearPopup(trackView, $div)
 }
 
-function createTrackGearPopover(trackView, $parent) {
+function createTrackGearPopup(trackView, $parent) {
 
-    const $cogContainer = $("<div>", {class: 'igv-trackgear-container'})
-    $parent.append($cogContainer)
+    let $container = $("<div>", {class: 'igv-trackgear-container'});
+    $parent.append($container);
 
-    $cogContainer.append(createIcon('cog'))
+    $container.append(createIcon('cog'));
 
-    trackView.trackGearPopover = new TrackGearPopover($parent)
-    trackView.trackGearPopover.$popover.hide()
+    this.trackGearPopup = new MenuPopup($parent);
+    this.trackGearPopup.$popover.hide();
 
-    $cogContainer.click(e => {
-        e.preventDefault()
-        e.stopPropagation()
-        trackView.trackGearPopover.presentMenuList(-(trackView.trackGearPopover.$popover.width()), 0, MenuUtils.trackMenuItemList(trackView))
+    $container.click(e => {
+        e.preventDefault();
+        e.stopPropagation();
+        this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
     });
-
 }
+
 
 function emptyViewportContainers(trackViews) {
 
@@ -829,5 +804,11 @@ class TrackScrollbar {
     }
 }
 
-export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer,createTrackGearPopover}
+export {
+    maxViewportContentHeight,
+    updateViewportShims,
+    emptyViewportContainers,
+    populateViewportContainer,
+    createTrackGearPopup
+}
 export default TrackView
