@@ -83,8 +83,7 @@ class TrackView {
         if (true === track.ignoreTrackMenu) {
             // do nothing
         } else {
-            // this.appendRightHandGutter($track);
-            appendRightHandGutter(this, $track)
+            this.appendRightHandGutter($track);
         }
 
         // color picker
@@ -580,29 +579,29 @@ class TrackView {
     scrollBy(delta) {
         this.scrollbar.moveScrollerBy(delta);
     }
-}
 
-function appendRightHandGutter(trackView, $parent) {
-    let $div = $('<div class="igv-right-hand-gutter">')
-    $parent.append($div)
-    createTrackGearPopup(trackView, $div)
-}
+    appendRightHandGutter($parent) {
+        let $div = $('<div class="igv-right-hand-gutter">')
+        $parent.append($div)
+        this.createTrackGearPopup($div)
+    }
 
-function createTrackGearPopup(trackView, $parent) {
+    createTrackGearPopup($parent) {
 
-    let $container = $("<div>", {class: 'igv-trackgear-container'});
-    $parent.append($container);
+        let $container = $("<div>", {class: 'igv-trackgear-container'});
+        $parent.append($container);
 
-    $container.append(createIcon('cog'));
+        $container.append(createIcon('cog'));
 
-    this.trackGearPopup = new MenuPopup($parent);
-    this.trackGearPopup.$popover.hide();
+        this.trackGearPopup = new MenuPopup($parent);
+        this.trackGearPopup.$popover.hide();
 
-    $container.click(e => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
-    });
+        $container.click(e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+        });
+    }
 }
 
 
@@ -808,7 +807,6 @@ export {
     maxViewportContentHeight,
     updateViewportShims,
     emptyViewportContainers,
-    populateViewportContainer,
-    createTrackGearPopup
+    populateViewportContainer
 }
 export default TrackView
