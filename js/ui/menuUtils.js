@@ -21,8 +21,9 @@ const MenuUtils = {
         }
 
         if (this.showColorPicker(trackView.track)) {
-            menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}))
+            menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}));
             menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}));
+            menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}));
         }
 
         if (trackView.track.menuItemList) {
@@ -204,6 +205,20 @@ function colorPickerMenuItem({trackView, label, option}) {
     return {
         object: $e,
         click: () => trackView.presentColorPicker(option)
+    }
+}
+
+function unsetColorMenuItem({trackView, label}) {
+
+    const $e = $('<div>');
+    $e.text(label);
+
+    return {
+        object: $e,
+        click: () => {
+            trackView.track.color = undefined;
+            trackView.repaintViews();
+        }
     }
 }
 
