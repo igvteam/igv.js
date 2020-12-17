@@ -9,7 +9,8 @@ import oauth from './oauth.js';
 import igvxhr from "./igvxhr.js";
 import embedCss from "./embedCss.js";
 import version from "./version.js"
-import { createTrackGearPopup } from "./trackView.js";
+import TrackView from "./trackView.js"
+
 const xhr = igvxhr;
 const setApiKey = igvxhr.setApiKey;
 
@@ -33,7 +34,7 @@ export default {
     version,
     xhr,
     setApiKey,
-    createTrackGearPopup,
-    doAutoscale
+    doAutoscale,
+    TrackView
 }
 
