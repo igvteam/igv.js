@@ -8214,6 +8214,7 @@ const MenuUtils = {
         if (this.showColorPicker(trackView.track)) {
             menuItems.push(colorPickerMenuItem({trackView, label: "Set track color", option: "color"}));
             menuItems.push(colorPickerMenuItem({trackView, label: "Set alt color", option: "altColor"}));
+            menuItems.push(unsetColorMenuItem({trackView, label: "Unset track color"}));
         }
 
         if (trackView.track.menuItemList) {
@@ -8395,6 +8396,20 @@ function colorPickerMenuItem({trackView, label, option}) {
     return {
         object: $e,
         click: () => trackView.presentColorPicker(option)
+    }
+}
+
+function unsetColorMenuItem({trackView, label}) {
+
+    const $e = $('<div>');
+    $e.text(label);
+
+    return {
+        object: $e,
+        click: () => {
+            trackView.track.color = undefined;
+            trackView.repaintViews();
+        }
     }
 }
 
@@ -28048,8 +28063,7 @@ class TrackView {
 
         // right hand gutter
         if (true === track.ignoreTrackMenu) ; else {
-            // this.appendRightHandGutter($track);
-            appendRightHandGutter(this, $track);
+            this.appendRightHandGutter($track);
         }
 
         // color picker
@@ -28536,29 +28550,29 @@ class TrackView {
     scrollBy(delta) {
         this.scrollbar.moveScrollerBy(delta);
     }
-}
 
-function appendRightHandGutter(trackView, $parent) {
-    let $div = $('<div class="igv-right-hand-gutter">');
-    $parent.append($div);
-    createTrackGearPopup(trackView, $div);
-}
+    appendRightHandGutter($parent) {
+        let $div = $('<div class="igv-right-hand-gutter">');
+        $parent.append($div);
+        this.createTrackGearPopup($div);
+    }
 
-function createTrackGearPopup(trackView, $parent) {
+    createTrackGearPopup($parent) {
 
-    let $container = $("<div>", {class: 'igv-trackgear-container'});
-    $parent.append($container);
+        let $container = $("<div>", {class: 'igv-trackgear-container'});
+        $parent.append($container);
 
-    $container.append(createIcon('cog'));
+        $container.append(createIcon('cog'));
 
-    this.trackGearPopup = new MenuPopup($parent);
-    this.trackGearPopup.$popover.hide();
+        this.trackGearPopup = new MenuPopup($parent);
+        this.trackGearPopup.$popover.hide();
 
-    $container.click(e => {
-        e.preventDefault();
-        e.stopPropagation();
-        this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
-    });
+        $container.click(e => {
+            e.preventDefault();
+            e.stopPropagation();
+            this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
+        });
+    }
 }
 
 
@@ -42610,8 +42624,8 @@ class BAMTrack extends TrackBase {
         this.showAllBases = config.showAllBases;
 
         this.showMismatches = config.showMismatches !== false;
-        this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
-        this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
+        this.color = config.color ;
+        this.coverageColor = config.coverageColor;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
@@ -43032,8 +43046,8 @@ class CoverageTrack {
 
         // paint for all coverage buckets
         // If alignment track color is != default, use it
-        let color = this.parent.coverageColor;
-        if (this.parent.color !== DEFAULT_ALIGNMENT_COLOR) {
+        let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
+        if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
         }
 
@@ -43692,7 +43706,7 @@ class AlignmentTrack {
 
     getAlignmentColor(alignment) {
 
-        let color = this.parent.color;   // The default color if nothing else applies
+        let color = this.parent.color || DEFAULT_ALIGNMENT_COLOR;   // The default color if nothing else applies
         const option = this.colorBy;
         switch (option) {
             case "strand":
@@ -43758,7 +43772,7 @@ class AlignmentTrack {
                 break;
 
             default:
-                color = this.parent.color;
+                color = this.parent.color || DEFAULT_ALIGNMENT_COLOR;
         }
 
         return color;
@@ -50164,6 +50178,7 @@ function embedCSS$1() {
 }
 
 // Defines the top-level API for the igv module
+
 const xhr = igvxhr;
 const setApiKey = igvxhr.setApiKey;
 
@@ -50187,8 +50202,8 @@ var index = {
     version: version$1,
     xhr,
     setApiKey,
-    createTrackGearPopup,
-    doAutoscale
+    doAutoscale,
+    TrackView
 };
 
 export default index;
