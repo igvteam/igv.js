@@ -969,21 +969,21 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   position: absolute;
 
   left: 8px;
-  top: 8px;
+  top: 3px;
 
   width: auto;
   height:auto;
   max-width: 200px;
 
-  padding-left: 4px;
-  padding-right: 4px;
+  padding-left: 3px;
+  padding-right: 3px;
 
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 
   font-family: $igv-default-font-face;
-  font-size: small;
+  font-size: 10px;
   font-weight: 400;
 
   text-align: center;
