@@ -28,6 +28,31 @@ class SampleNameViewport extends ViewportBase {
 
         this.mono_sample_ctx = $mono_sample_canvas.get(0).getContext('2d')
 
+        this.featureMap = undefined
+
+        this.canvas.addEventListener('mouseenter', ({ x, y }) => {
+            console.log(`${ Date.now() } - mouseenter - x ${ x } y ${ y }`)
+        })
+
+        this.canvas.addEventListener('mousemove', ({ offsetY }) => {
+
+            if (this.featureMap) {
+                const result = getBBox(this.featureMap, offsetY)
+                if (result) {
+
+                    // console.log(`${ Date.now() } - mouse move - canvas top ${ this.ctx.canvas.style.top }`)
+
+                    const { x: exe, y: wye , w, h } = result
+                    // // console.log(`${ Date.now() } - y ${ wye } h ${ h }`)
+                    IGVGraphics.fillRect(this.ctx, exe, wye, w, h, { 'fillStyle': randomRGBConstantAlpha(150, 250, 1) })
+                }
+            }
+        })
+
+        this.canvas.addEventListener('mouseleave', ({ x, y }) => {
+            console.log(`${ Date.now() } - mouseleave - x ${ x } y ${ y }`)
+        })
+
     }
 
     drawTrackName(name) {
@@ -36,12 +61,17 @@ class SampleNameViewport extends ViewportBase {
         this.sampleNameRenderer = undefined
         this.trackName = name
 
+
         // Hide multi-sample canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
+        this.ctx.canvas.style.display = 'none'
+
+
 
         const w = this.$viewport.width()
         const h = this.$viewport.height()
 
+        this.mono_sample_ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.mono_sample_ctx, w, h)
 
         IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
@@ -62,7 +92,11 @@ class SampleNameViewport extends ViewportBase {
 
         // hide mono-sample canvas
         this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
+        this.mono_sample_ctx.canvas.style.display = 'none'
 
+
+
+        this.ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.ctx, this.$viewport.width(), height)
 
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
@@ -71,6 +105,8 @@ class SampleNameViewport extends ViewportBase {
 
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
+
+        console.log(`${ Date.now() } - draw sample names - canvas top ${ this.ctx.canvas.style.top }`)
 
         sampleNameRenderer(this.ctx, featureMap, this.$viewport.width(), height)
     }
@@ -116,6 +152,19 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
+}
+
+function getBBox(featureMap, y) {
+
+    for (let [ key, value ] of featureMap) {
+        if (y < value.y || y > (value.h + value.y)) {
+
+        } else {
+            return value
+        }
+    }
+
+    return undefined
 }
 
 const fontConfig =
