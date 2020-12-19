@@ -15,3 +15,4 @@
 /dist/
 /dev/oauth/google-oauth.html
 igv.css.map
+/dev/oauth/oauthConfig-private.js
