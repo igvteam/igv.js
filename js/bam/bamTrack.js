@@ -71,8 +71,8 @@ class BAMTrack extends TrackBase {
         this.showAllBases = config.showAllBases;
 
         this.showMismatches = config.showMismatches !== false;
-        this.color = config.color || DEFAULT_ALIGNMENT_COLOR;
-        this.coverageColor = config.coverageColor || DEFAULT_COVERAGE_COLOR;
+        this.color = config.color ;
+        this.coverageColor = config.coverageColor;
         this.minFragmentLength = config.minFragmentLength;   // Optional, might be undefined
         this.maxFragmentLength = config.maxFragmentLength;
 
@@ -493,8 +493,8 @@ class CoverageTrack {
 
         // paint for all coverage buckets
         // If alignment track color is != default, use it
-        let color = this.parent.coverageColor;
-        if (this.parent.color !== DEFAULT_ALIGNMENT_COLOR) {
+        let color = this.parent.coverageColor || DEFAULT_COVERAGE_COLOR;
+        if (this.parent.color !== undefined) {
             color = IGVColor.darkenLighten(this.parent.color, -35);
         }
 
@@ -1155,7 +1155,7 @@ class AlignmentTrack {
 
     getAlignmentColor(alignment) {
 
-        let color = this.parent.color;   // The default color if nothing else applies
+        let color = this.parent.color || DEFAULT_ALIGNMENT_COLOR;   // The default color if nothing else applies
         const option = this.colorBy;
         switch (option) {
             case "strand":
@@ -1221,7 +1221,7 @@ class AlignmentTrack {
                 break;
 
             default:
-                color = this.parent.color;
+                color = this.parent.color || DEFAULT_ALIGNMENT_COLOR;
         }
 
         return color;
