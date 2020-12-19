@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.7.4-jb",
+  "version": "2.7.4-jb2",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "files": [
     "dist/**"
@@ -57,7 +57,7 @@
     "xmldom": "^0.4.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui#23d667e6",
-    "igv-utils": "github:igvteam/igv-utils#0e7dbafb"
+    "igv-ui": "github:igvteam/igv-ui#v1.1.1",
+    "igv-utils": "github:igvteam/igv-utils#v1.2.2"
   }
 }
