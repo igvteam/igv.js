@@ -25469,7 +25469,7 @@ function decodeDataUri(dataUri) {
     return s;
 }
 
-const _version = "2.7.4-jb";
+const _version = "2.7.4-jb2";
 function version$1() {
     return _version;
 }
