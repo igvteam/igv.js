@@ -1069,8 +1069,13 @@ class AlignmentTrack {
                 label: 'View mate in split screen',
                 click: () => {
                     if (clickedAlignment.mate) {
-                        this.highlightedAlignmentReadNamed = clickedAlignment.readName;
-                        this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, clickState.viewport.referenceFrame);
+                        const referenceFrame = clickState.viewport.referenceFrame;
+                        if(this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
+                            this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                            this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, referenceFrame);
+                        } else {
+                            Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`);
+                        }
                     }
                 },
                 init: undefined
