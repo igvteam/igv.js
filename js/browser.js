@@ -912,7 +912,7 @@ class Browser {
         for (let referenceFrame of this.referenceFrameList) {
 
             const viewportWidthBP = referenceFrame.toBP(viewportWidth)
-            const { bpLength } = referenceFrame.genome.getChromosome(referenceFrame.chr)
+            const { bpLength } = this.genome.getChromosome(referenceFrame.chr)
 
             if (viewportWidthBP > bpLength) {
                 // console.log(`viewport-length-bp ${ StringUtils.numberFormatter(Math.round(viewportWidthBP))} chr-length-bp ${ StringUtils.numberFormatter(Math.round(bpLength)) }`)
