@@ -12,6 +12,9 @@ import {
 
 const sampleNameViewportWidth = 128
 
+let yLast = undefined
+let hLast = undefined
+
 class SampleNameViewport extends ViewportBase {
 
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -22,47 +25,52 @@ class SampleNameViewport extends ViewportBase {
 
         this.$viewport.data('viewport-type', 'sample-name')
 
-        // mono-sample canvas
-        const $mono_sample_canvas = $('<canvas>', { class:'igv-mono-sample-canvas' })
-        this.$viewport.append($mono_sample_canvas)
+        // track name canvas
+        const $trackNameCanvas = $('<canvas>', { class:'igv-mono-sample-canvas' })
+        this.$viewport.append($trackNameCanvas)
 
-        this.mono_sample_ctx = $mono_sample_canvas.get(0).getContext('2d')
+        this.track_name_ctx = $trackNameCanvas.get(0).getContext('2d')
+
+        const $hover = $('<div>', { class:'igv-sample-name-viewport-hover' })
+        this.$content.append($hover)
+
 
         this.featureMap = undefined
+        this.canvasTop = undefined
 
-        this.canvas.addEventListener('mouseenter', ({ x, y }) => {
-            console.log(`${ Date.now() } - mouseenter - x ${ x } y ${ y }`)
-        })
+        this.ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientY }) => {
 
-        this.canvas.addEventListener('mousemove', ({ offsetY }) => {
+            if (this.featureMap && undefined !== this.canvasTop) {
 
-            if (this.featureMap) {
-                const result = getBBox(this.featureMap, offsetY)
+                const { y:y_bbox } = currentTarget.getBoundingClientRect()
+
+                // (clientY - y_bbox) is equivalent to event.offsetY which does not work correctly
+                const wye = (clientY - y_bbox) + this.canvasTop
+                const result = getBBox(this.featureMap, wye)
+
                 if (result) {
-
-                    // console.log(`${ Date.now() } - mouse move - canvas top ${ this.ctx.canvas.style.top }`)
-
-                    const { x: exe, y: wye , w, h } = result
-                    // // console.log(`${ Date.now() } - y ${ wye } h ${ h }`)
-                    IGVGraphics.fillRect(this.ctx, exe, wye, w, h, { 'fillStyle': randomRGBConstantAlpha(150, 250, 1) })
+                    this.showHover($hover, result)
                 }
             }
         })
 
-        this.canvas.addEventListener('mouseleave', ({ x, y }) => {
-            console.log(`${ Date.now() } - mouseleave - x ${ x } y ${ y }`)
-        })
+    }
 
+    showHover($hover, { y, h }) {
+        $hover.css({ top: y, height: h })
+        // IGVGraphics.fillRect(this.ctx, x, y, this.ctx.canvas.width, h, { 'fillStyle': randomRGBConstantAlpha(150, 250, 0.5) })
     }
 
     drawTrackName(name) {
 
-        this.featureMap = undefined
-        this.sampleNameRenderer = undefined
         this.trackName = name
 
+        this.featureMap = undefined
+        this.canvasTop = undefined
+        this.sampleNameRenderer = undefined
 
-        // Hide multi-sample canvas
+
+        // hide sample name canvas
         this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
         this.ctx.canvas.style.display = 'none'
 
@@ -71,33 +79,35 @@ class SampleNameViewport extends ViewportBase {
         const w = this.$viewport.width()
         const h = this.$viewport.height()
 
-        this.mono_sample_ctx.canvas.style.display = 'block'
-        IGVGraphics.configureHighDPICanvas(this.mono_sample_ctx, w, h)
+        this.track_name_ctx.canvas.style.display = 'block'
+        IGVGraphics.configureHighDPICanvas(this.track_name_ctx, w, h)
 
-        IGVGraphics.fillRect(this.mono_sample_ctx, 0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(this.mono_sample_ctx, fontConfig)
+        configureFont(this.track_name_ctx, fontConfig)
 
-        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.mono_sample_ctx.measureText(name)
+        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(name)
 
-        this.mono_sample_ctx.fillText(name, Math.round(w - 4), Math.round((h + actualBoundingBoxAscent)/2))
+        this.track_name_ctx.fillText(name, Math.round(w - 4), Math.round((h + actualBoundingBoxAscent)/2))
 
     }
 
     drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
         this.trackName = undefined
+
         this.featureMap = featureMap
+        this.canvasTop = canvasTop
         this.sampleNameRenderer = sampleNameRenderer
 
-        // hide mono-sample canvas
-        this.mono_sample_ctx.clearRect(0, 0, this.mono_sample_ctx.canvas.width, this.mono_sample_ctx.canvas.height)
-        this.mono_sample_ctx.canvas.style.display = 'none'
+        // hide track name canvas
+        this.track_name_ctx.clearRect(0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height)
+        this.track_name_ctx.canvas.style.display = 'none'
 
 
 
         this.ctx.canvas.style.display = 'block'
-        IGVGraphics.configureHighDPICanvas(this.ctx, this.$viewport.width(), height)
+        IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
 
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
@@ -106,9 +116,9 @@ class SampleNameViewport extends ViewportBase {
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
 
-        console.log(`${ Date.now() } - draw sample names - canvas top ${ this.ctx.canvas.style.top }`)
+        console.log(`drawSampleNames - canvas-top ${ canvasTop }`)
 
-        sampleNameRenderer(this.ctx, featureMap, this.$viewport.width(), height)
+        sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
 
     setTop(contentTop) {
@@ -116,8 +126,6 @@ class SampleNameViewport extends ViewportBase {
     }
 
     async renderSVGContext(context, { deltaX, deltaY }) {
-
-        // console.log('SampleNameViewport - renderSVGContext(context, offset)')
 
         let id = this.trackView.track.name || this.trackView.track.id
         id = id.replace(/\W/g, '')

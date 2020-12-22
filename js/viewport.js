@@ -189,7 +189,7 @@ class ViewPort extends ViewportBase {
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
-        const pixelWidth = $(this.contentDiv).width() * 3;
+        const pixelWidth = this.$content.width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
         const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
@@ -261,7 +261,7 @@ class ViewPort extends ViewportBase {
             }
             return;
         }
-        const canvasTop = Math.max(0, -($(this.contentDiv).position().top) - viewportHeight)
+        const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
         // Always use high DPI if in compressed display mode, otherwise use preference setting;
         let devicePixelRatio;
@@ -315,7 +315,7 @@ class ViewPort extends ViewportBase {
         if (this.canvas) {
             $(this.canvas).remove();
         }
-        $(this.contentDiv).append(newCanvas);
+        this.$content.append(newCanvas);
         this.canvas = newCanvas;
         this.ctx = ctx;
     }
@@ -358,7 +358,7 @@ class ViewPort extends ViewportBase {
                 viewbox:
                     {
                         x: 0,
-                        y: -$(this.contentDiv).position().top,
+                        y: -this.$content.position().top,
                         width: pixelWidth,
                         height: pixelHeight
                     }
@@ -369,7 +369,7 @@ class ViewPort extends ViewportBase {
             {
                 viewport: this,
                 context: ctx,
-                top: -$(this.contentDiv).position().top,
+                top: -this.$content.position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
                 pixelWidth,
                 pixelHeight,
@@ -393,7 +393,7 @@ class ViewPort extends ViewportBase {
         // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
         contentHeight = Math.min(contentHeight, 32000);
 
-        $(this.contentDiv).height(contentHeight);
+        this.$content.height(contentHeight);
 
         if (this.tile) this.tile.invalidate = true;
     }
@@ -419,7 +419,7 @@ class ViewPort extends ViewportBase {
         const w = this.$viewport.width() * devicePixelRatio;
         const h = this.$viewport.height() * devicePixelRatio;
         const x = -$(this.canvas).position().left * devicePixelRatio;
-        const y = (-$(this.contentDiv).position().top - canvasTop) * devicePixelRatio;
+        const y = (-this.$content.position().top - canvasTop) * devicePixelRatio;
 
         const imageData = this.ctx.getImageData(x, y, w, h);
         const exportCanvas = document.createElement('canvas');
@@ -571,7 +571,7 @@ class ViewPort extends ViewportBase {
 
             if (features) {
                 let requiredContentHeight = track.computePixelHeight(features);
-                let currentContentHeight = $(this.contentDiv).height();
+                let currentContentHeight = this.$content.height();
                 if (requiredContentHeight !== currentContentHeight) {
                     this.setContentHeight(requiredContentHeight);
                 }
