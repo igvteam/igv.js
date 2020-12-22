@@ -248,8 +248,8 @@ class SegTrack extends TrackBase {
 
                 if (false === featureMap.has(key)) {
                     featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
-                    // configureFont(context, fontConfig)
-                    // context.fillText(featureMap.get(key).name, x + 4, y + h)
+                    configureFont(context, fontConfig)
+                    context.fillText(`${ Math.floor(y) } ${ featureMap.get(key).name }`, x + 4, y + h)
                 }
 
             }

@@ -649,6 +649,13 @@
 .igv-viewport-content {
   position: relative;
   width: 100%; }
+  .igv-viewport-content .igv-sample-name-viewport-hover {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: 8888;
+    background-color: lime; }
 
 .igv-canvas {
   position: relative;

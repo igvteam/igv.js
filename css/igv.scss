@@ -576,7 +576,16 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 .igv-viewport-content {
   position: relative;
   width: 100%;
-  //background-color: deeppink;
+
+  .igv-sample-name-viewport-hover {
+    display: block;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    z-index: 8888;
+    background-color: lime;
+  }
+
 }
 
 .igv-canvas {
@@ -591,6 +600,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   display: block;
 }
 
+// sample name viewport - track name canvas
 .igv-mono-sample-canvas {
   display: block;
   position: absolute;
@@ -598,6 +608,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   left: 0;
   z-index: 8888;
 }
+
+// sample name viewport - hover div for long names
 
 .igv-scrollbar-outer-div {
 
