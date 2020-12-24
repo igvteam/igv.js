@@ -25,7 +25,7 @@
 
 import IGVGraphics from "./igv-canvas.js";
 
-const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER * 1e-4
+const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
 const complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
 const translationDict = {
     'TTT': 'F',

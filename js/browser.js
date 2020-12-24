@@ -391,9 +391,9 @@ class Browser {
             this.rulerTrack.trackView.updateViews();
         }
 
-        this.updateLocusSearchWidget(this.referenceFrameList[0]);
+        this.updateLocusSearchWidget(this.referenceFrameList);
 
-        this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
+        this.windowSizePanel.updatePanel(this.referenceFrameList);
 
     }
 
@@ -920,14 +920,29 @@ class Browser {
 
     async resize() {
 
-        if (this.centerGuide) this.centerGuide.resize();
-        for (let trackView of this.trackViews) {
-            trackView.resize();
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+
+        for (let referenceFrame of this.referenceFrameList) {
+
+            const viewportWidthBP = referenceFrame.toBP(viewportWidth)
+            const { bpLength } = this.genome.getChromosome(referenceFrame.chr)
+
+            if (viewportWidthBP > bpLength) {
+                // console.log(`viewport-length-bp ${ StringUtils.numberFormatter(Math.round(viewportWidthBP))} chr-length-bp ${ StringUtils.numberFormatter(Math.round(bpLength)) }`)
+                referenceFrame.bpPerPixel = bpLength/viewportWidth
+            }
+
         }
 
+        for (let trackView of this.trackViews) {
+            trackView.resize(viewportWidth)
+        }
+
+        if (this.centerGuide) this.centerGuide.resize();
+
         if (this.referenceFrameList && this.referenceFrameList.length > 0) {
-            this.updateLocusSearchWidget(this.referenceFrameList[0]);
-            this.windowSizePanel.updateWithReferenceFrame(this.referenceFrameList[0]);
+            this.updateLocusSearchWidget(this.referenceFrameList);
+            this.windowSizePanel.updatePanel(this.referenceFrameList);
         }
 
         await this.updateViews();
@@ -947,8 +962,14 @@ class Browser {
             referenceFrame = this.referenceFrameList[0];
         }
         if (referenceFrame) {
-            this.updateLocusSearchWidget(referenceFrame);
-            this.windowSizePanel.updateWithReferenceFrame(referenceFrame);
+
+            if (this.referenceFrameList.length > 1) {
+                this.updateLocusSearchWidget(this.referenceFrameList);
+                this.windowSizePanel.updatePanel(this.referenceFrameList);
+            } else {
+                this.updateLocusSearchWidget([ referenceFrame ]);
+                this.windowSizePanel.updatePanel([referenceFrame]);
+            }
         }
 
         if (this.centerGuide) {
@@ -1018,53 +1039,48 @@ class Browser {
         return false;
     };
 
-    updateLocusSearchWidget(referenceFrame) {
+    updateLocusSearchWidget(referenceFrameList) {
 
-        var self = this,
-            ss,
-            ee,
-            str,
-            end,
-            chromosome;
-
-
-        if (this.rulerTrack) {
-            this.rulerTrack.updateLocusLabel();
+        if (referenceFrameList.length > 1) {
+            this.$searchInput.val('')
+            this.chromosomeSelectWidget.$select.val('')
+            return
         }
 
-        if (0 === this.referenceFrameList.indexOf(referenceFrame) && 1 === this.referenceFrameList.length) {
+        if (this.rulerTrack) {
+            this.rulerTrack.updateLocusLabel()
+        }
 
-            if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
+        const referenceFrame = referenceFrameList[ 0 ]
+        if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
 
-                this.$searchInput.val(referenceFrame.locusSearchString);
-                this.chromosomeSelectWidget.$select.val('all');
-            } else {
+            this.$searchInput.val(referenceFrame.locusSearchString);
+            this.chromosomeSelectWidget.$select.val('all');
+        } else {
 
-                this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
+            this.chromosomeSelectWidget.$select.val(referenceFrame.chr);
 
-                if (this.$searchInput) {
+            let ss
+            let ee
+            let str
+            if (this.$searchInput) {
 
-                    end = referenceFrame.start + referenceFrame.bpPerPixel * self.viewportWidth();
+                let end = referenceFrame.start + referenceFrame.bpPerPixel * this.viewportWidth();
 
-                    if (this.genome) {
-                        chromosome = this.genome.getChromosome(referenceFrame.chr);
-                        if (chromosome) {
-                            end = Math.min(end, chromosome.bpLength);
-                        }
+                if (this.genome) {
+                    const chromosome = this.genome.getChromosome(referenceFrame.chr);
+                    if (chromosome) {
+                        end = Math.min(end, chromosome.bpLength);
                     }
-
-                    ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
-                    ee = StringUtils.numberFormatter(Math.floor(end));
-                    str = referenceFrame.chr + ":" + ss + "-" + ee;
-                    this.$searchInput.val(str);
                 }
 
-                this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
+                ss = StringUtils.numberFormatter(Math.floor(referenceFrame.start + 1));
+                ee = StringUtils.numberFormatter(Math.floor(end));
+                str = referenceFrame.chr + ":" + ss + "-" + ee;
+                this.$searchInput.val(str);
             }
 
-        } else {
-            this.$searchInput.val('');
-            this.chromosomeSelectWidget.$select.val('');
+            this.fireEvent('locuschange', [{chr: referenceFrame.chr, start: ss, end: ee, label: str}]);
         }
 
     };
@@ -1690,7 +1706,13 @@ class Browser {
                 if (self.dragObject) {
                     const viewChanged = referenceFrame.shiftPixels(self.vpMouseDown.lastMouseX - coords.x, viewportWidth);
                     if (viewChanged) {
-                        self.updateLocusSearchWidget(self.vpMouseDown.referenceFrame);
+
+                        if (self.referenceFrameList.length > 1) {
+                            self.updateLocusSearchWidget(self.referenceFrameList);
+                        } else {
+                            self.updateLocusSearchWidget([ self.vpMouseDown.referenceFrame ]);
+                        }
+
                         self.updateViews();
                     }
                     self.fireEvent('trackdrag');
