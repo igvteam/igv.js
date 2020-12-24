@@ -48,8 +48,12 @@ const junctionRenderingContext = {}
 class FeatureTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
 
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
         this.maxRows = config.maxRows === undefined ? 1000 : config.maxRows;
@@ -63,7 +67,7 @@ class FeatureTrack extends TrackBase {
         } else {
             this.featureSource = config.featureSource ?
                 config.featureSource :
-                FeatureSource(config, browser.genome);
+                FeatureSource(config, this.browser.genome);
         }
 
         // Set default heights
@@ -119,6 +123,11 @@ class FeatureTrack extends TrackBase {
         //UCSC useScore option
         this.useScore = config.useScore;
 
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
     }
 
     async postInit() {

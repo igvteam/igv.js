@@ -34,8 +34,11 @@ import {isSimpleType} from "../util/igvUtils.js";
 class SegTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
 
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
@@ -80,10 +83,15 @@ class SegTrack extends TrackBase {
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = FeatureSource(this.config, browser.genome);
+        this.featureSource = FeatureSource(this.config, this.browser.genome);
 
         this.initialSort = config.sort;
 
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
     }
 
     async postInit() {

@@ -46,17 +46,18 @@ const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 class BAMTrack extends TrackBase {
 
     constructor(config, browser) {
-
-
         super(config, browser);
+    }
+
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
 
         this.type = "alignment";   // Not sure this is used for anything
-
         if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
 
-        this.featureSource = new BamSource(config, browser);
+        this.featureSource = new BamSource(config, this.browser);
 
         this.showCoverage = config.showCoverage === undefined ? true : config.showCoverage;
         this.showAlignments = config.showAlignments === undefined ? true : config.showAlignments;
@@ -89,6 +90,12 @@ class BAMTrack extends TrackBase {
 
         // Invoke height setter last to allocated to coverage and alignment tracks
         this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT);
+
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
     }
 
     set height(h) {

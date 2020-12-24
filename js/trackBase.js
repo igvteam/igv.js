@@ -38,13 +38,17 @@ import {FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
 class TrackBase {
 
     constructor(config, browser) {
+        this.browser = browser;
 
+        this.updateConfig(config)
+    }
+
+    updateConfig(config) {
         if (config.displayMode) {
             config.displayMode = config.displayMode.toUpperCase();
         }
 
         this.config = config;
-        this.browser = browser;
         this.url = config.url;
         this.type = config.type;
         this.description = config.description;

@@ -40,8 +40,11 @@ const topMargin = 10;
 class VariantTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
 
         this.visibilityWindow = config.visibilityWindow;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
@@ -55,7 +58,7 @@ class VariantTrack extends TrackBase {
         this.squishedGroupGap = config.squishedGroupGap || 5;
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
-        this.featureSource = FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, this.browser.genome);
         this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
         this.mixedColor = config.mixedColor || "rgb(200, 220, 200)";
@@ -67,6 +70,11 @@ class VariantTrack extends TrackBase {
 
         this.nRows = 1;  // Computed dynamically
 
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
     }
 
     async postInit() {

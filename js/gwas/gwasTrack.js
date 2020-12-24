@@ -41,6 +41,10 @@ class GWASTrack extends TrackBase {
     constructor(config, browser) {
 
         super(config, browser);
+    }
+
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
 
         this.useChrColors = config.useChrColors === undefined ? true : config.useChrColors;
         this.trait = config.trait;
@@ -74,12 +78,17 @@ class GWASTrack extends TrackBase {
             {
                 "*": new BinnedColorScale(config.colorScale || {
                     thresholds: [5e-8, 5e-4, 0.5],
-                    colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"
-                    ]
+                    colors: ["rgb(255,50,50)", "rgb(251,100,100)", "rgb(251,170,170)", "rgb(227,238,249)"],
                 })
             }
 
-        this.featureSource = FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, this.browser.genome);
+
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
     }
 
     supportsWholeGenome() {

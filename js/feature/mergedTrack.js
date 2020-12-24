@@ -29,7 +29,6 @@ import {inferTrackType} from "../util/igvUtils.js";
 
 class MergedTrack extends TrackBase {
     constructor(config, browser) {
-
         if (!config.tracks) {
             throw Error("Error: no tracks defined for merged track" + config);
         }
@@ -37,6 +36,15 @@ class MergedTrack extends TrackBase {
         super(config, browser);
     }
 
+    updateConfig(config, repaint) {
+        super.updateConfig(config);
+
+        // update and repaint track if needed
+        if (repaint) {
+            this.trackView.checkContentHeight();
+            this.trackView.repaintViews();
+        }
+    }
 
     async postInit() {
         this.tracks = [];
