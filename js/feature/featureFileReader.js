@@ -26,12 +26,10 @@
 import FeatureParser from "./featureParser.js";
 import SegParser from "./segParser.js";
 import VcfParser from "../variant/vcfParser.js";
-import igvxhr from "../igvxhr.js";
-import {bgzBlockSize, unbgzf} from '../bam/bgzf.js';
+import {FileUtils, igvxhr, StringUtils, URIUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import GWASParser from "../gwas/gwasParser.js";
 import AEDParser from "../aed/AEDParser.js";
-import {FileUtils, StringUtils, URIUtils} from "../../node_modules/igv-utils/src/index.js";
 import {loadIndex} from "../bam/indexFactory.js";
 import getDataWrapper from "./dataWrapper.js";
 import BGZipLineReader from "../util/BGZipLineReader.js";
@@ -215,7 +213,7 @@ class FeatureFileReader {
                             }
                         });
                         const abuffer = await igvxhr.loadArrayBuffer(config.url, bsizeOptions)
-                        lastBlockSize = bgzBlockSize(abuffer)
+                        lastBlockSize = BGZip.bgzBlockSize(abuffer)
                     }
                     endPos = block.maxv.block + lastBlockSize;
                 } else {
@@ -232,7 +230,7 @@ class FeatureFileReader {
                 let inflated;
                 if (tabix) {
                     const data = await igvxhr.loadArrayBuffer(config.url, options);
-                    inflated = unbgzf(data);
+                    inflated = BGZip.unbgzf(data);
                 } else {
                     inflated = await igvxhr.loadString(config.url, options);
                 }

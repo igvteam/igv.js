@@ -21014,6 +21014,97 @@ function inferIndexPath(url, extension) {
     }
 }
 
+// Uncompress data,  assumed to be series of bgzipped blocks
+function unbgzf(data, lim) {
+
+    const oBlockList = [];
+    let ptr = 0;
+    let totalSize = 0;
+
+    lim = lim || data.byteLength - 18;
+
+    while (ptr < lim) {
+        try {
+            const ba = new Uint8Array(data, ptr, 18);
+            const xlen = (ba[11] << 8) | (ba[10]);
+            const si1 = ba[12];
+            const si2 = ba[13];
+            const slen = (ba[15] << 8) | (ba[14]);
+            const bsize = ((ba[17] << 8) | (ba[16])) + 1;
+            const start = 12 + xlen + ptr;    // Start of CDATA
+            const bytesLeft = data.byteLength - start;
+            const cDataSize = bsize - xlen - 19;
+            if (bytesLeft < cDataSize || cDataSize <= 0) break;
+
+            const a = new Uint8Array(data, start, cDataSize);
+            const inflate = new Zlib$1.RawInflate(a);
+            const unc = inflate.decompress();
+
+            ptr += inflate.ip + 26;
+            totalSize += unc.byteLength;
+            oBlockList.push(unc);
+        } catch (e) {
+            console.error(e);
+            break;
+        }
+    }
+
+    // Concatenate decompressed blocks
+    if (oBlockList.length === 1) {
+        return oBlockList[0];
+    } else {
+        const out = new Uint8Array(totalSize);
+        let cursor = 0;
+        for (let i = 0; i < oBlockList.length; ++i) {
+            var b = new Uint8Array(oBlockList[i]);
+            arrayCopy(b, 0, out, cursor, b.length);
+            cursor += b.length;
+        }
+        return out;
+    }
+}
+
+function bgzBlockSize(data) {
+    const ba = new Uint8Array(data);
+    const bsize = (ba[17] << 8) | (ba[16]) + 1;
+    return bsize;
+}
+
+// From Thomas Down's zlib implementation
+
+const testArray = new Uint8Array(1);
+const hasSubarray = (typeof testArray.subarray === 'function');
+
+function arrayCopy(src, srcOffset, dest, destOffset, count) {
+    if (count === 0) {
+        return;
+    }
+    if (!src) {
+        throw "Undef src";
+    } else if (!dest) {
+        throw "Undef dest";
+    }
+    if (srcOffset === 0 && count === src.length) {
+        arrayCopy_fast(src, dest, destOffset);
+    } else if (hasSubarray) {
+        arrayCopy_fast(src.subarray(srcOffset, srcOffset + count), dest, destOffset);
+    } else if (src.BYTES_PER_ELEMENT === 1 && count > 100) {
+        arrayCopy_fast(new Uint8Array(src.buffer, src.byteOffset + srcOffset, count), dest, destOffset);
+    } else {
+        arrayCopy_slow(src, srcOffset, dest, destOffset, count);
+    }
+}
+
+function arrayCopy_slow(src, srcOffset, dest, destOffset, count) {
+    for (let i = 0; i < count; ++i) {
+        dest[destOffset + i] = src[srcOffset + i];
+    }
+}
+
+function arrayCopy_fast(src, dest, destOffset) {
+    dest.set(src, destOffset);
+}
+
 /*
  * The MIT License (MIT)
  *
@@ -21808,6 +21899,749 @@ function dragEnd$1(event) {
     document.removeEventListener('mouseleave', dragEndFunction);
     document.removeEventListener('mouseexit', dragEndFunction);
     dragData$1 = undefined;
+}
+
+// Support for oauth token based authorization
+// This class supports explicit setting of an oauth token either globally or for specific hosts.
+//
+// The variable oauth.google.access_token, which becomes igv.oauth.google.access_token on ES5 conversion is
+// supported for backward compatibility
+
+const DEFAULT_HOST = "googleapis";
+
+const oauth = {
+
+    oauthTokens: {},
+
+    setToken: function (token, host) {
+        host = host || DEFAULT_HOST;
+        this.oauthTokens[host] = token;
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = token;    // legacy support
+        }
+    },
+
+    getToken: function (host) {
+        host = host || DEFAULT_HOST;
+        let token;
+        for (let key of Object.keys(this.oauthTokens)) {
+            const regex = wildcardToRegExp(key);
+            if (regex.test(host)) {
+                token = this.oauthTokens[key];
+                break;
+            }
+        }
+        return token;
+    },
+
+    removeToken: function (host) {
+        host = host || DEFAULT_HOST;
+        for (let key of Object.keys(this.oauthTokens)) {
+            const regex = wildcardToRegExp(key);
+            if (regex.test(host)) {
+                this.oauthTokens[key] = undefined;
+            }
+        }
+        if(host === DEFAULT_HOST) {
+            this.google.access_token = undefined;    // legacy support
+        }
+    },
+
+    // Special object for google -- legacy support
+    google: {
+        setToken: function (token) {
+            oauth.setToken(token);
+        }
+    }
+};
+
+
+/**
+ * Creates a RegExp from the given string, converting asterisks to .* expressions,
+ * and escaping all other characters.
+ *
+ * credit https://gist.github.com/donmccurdy/6d073ce2c6f3951312dfa45da14a420f
+ */
+function wildcardToRegExp(s) {
+    return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
+}
+
+/**
+ * RegExp-escapes all characters in the given string.
+ *
+ * credit https://gist.github.com/donmccurdy/6d073ce2c6f3951312dfa45da14a420f
+ */
+function regExpEscape(s) {
+    return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
+}
+
+// The MIT License (MIT)
+
+/**
+ * @constructor
+ * @param {Object} options A set op options to pass to the throttle function
+ *        @param {number} requestsPerSecond The amount of requests per second
+ *                                          the library will limit to
+ */
+class Throttle {
+    constructor(options) {
+        this.requestsPerSecond = options.requestsPerSecond || 10;
+        this.lastStartTime = 0;
+        this.queued = [];
+    }
+
+    /**
+     * Adds a promise
+     * @param {Function} async function to be executed
+     * @param {Object} options A set of options.
+     * @return {Promise} A promise
+     */
+    add(asyncFunction, options) {
+
+        var self = this;
+        return new Promise(function (resolve, reject) {
+            self.queued.push({
+                resolve: resolve,
+                reject: reject,
+                asyncFunction: asyncFunction,
+            });
+            self.dequeue();
+        });
+    }
+
+    /**
+     * Adds all the promises passed as parameters
+     * @param {Function} promises An array of functions that return a promise
+     * @param {Object} options A set of options.
+     * @param {number} options.signal An AbortSignal object that can be used to abort the returned promise
+     * @param {number} options.weight A "weight" of each operation resolving by array of promises
+     * @return {Promise} A promise that succeeds when all the promises passed as options do
+     */
+    addAll(promises, options) {
+        var addedPromises = promises.map(function (promise) {
+            return this.add(promise, options);
+        }.bind(this));
+
+        return Promise.all(addedPromises);
+    };
+
+    /**
+     * Dequeues a promise
+     * @return {void}
+     */
+    dequeue() {
+        if (this.queued.length > 0) {
+            var now = new Date(),
+                inc = (1000 / this.requestsPerSecond) + 1,
+                elapsed = now - this.lastStartTime;
+
+            if (elapsed >= inc) {
+                this._execute();
+            } else {
+                // we have reached the limit, schedule a dequeue operation
+                setTimeout(function () {
+                    this.dequeue();
+                }.bind(this), inc - elapsed);
+            }
+        }
+    }
+
+    /**
+     * Executes the promise
+     * @private
+     * @return {void}
+     */
+    async _execute() {
+        this.lastStartTime = new Date();
+        var candidate = this.queued.shift();
+        const f = candidate.asyncFunction;
+        try {
+            const r = await f();
+            candidate.resolve(r);
+        } catch (e) {
+            candidate.reject(e);
+        }
+
+    }
+
+
+}
+
+/*
+ * The MIT License (MIT)
+ *
+ * Copyright (c) 2014 Broad Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+
+var NONE = 0;
+var GZIP = 1;
+var BGZF = 2;
+var UNKNOWN = 3;
+let RANGE_WARNING_GIVEN = false;
+
+const googleThrottle = new Throttle({
+    requestsPerSecond: 5
+});
+
+const igvxhr = {
+
+    apiKey: undefined,
+
+    setApiKey: function (key) {
+        this.apiKey = key;
+    },
+
+    load: load$1,
+
+    loadArrayBuffer: async function (url, options) {
+        options = options || {};
+        if (!options.responseType) {
+            options.responseType = "arraybuffer";
+        }
+        if (url instanceof File) {
+            return loadFileSlice(url, options);
+        } else {
+            return load$1(url, options);
+        }
+    },
+
+    loadJson: async function (url, options) {
+        options = options || {};
+        const method = options.method || (options.sendData ? "POST" : "GET");
+        if (method === "POST") {
+            options.contentType = "application/json";
+        }
+        const result = await this.loadString(url, options);
+        if (result) {
+            return JSON.parse(result);
+        } else {
+            return result;
+        }
+    },
+
+    loadString: async function (path, options) {
+        options = options || {};
+        if (path instanceof File) {
+            return loadStringFromFile(path, options);
+        } else {
+            return loadStringFromUrl(path, options);
+        }
+    }
+};
+
+async function load$1(url, options) {
+
+    options = options || {};
+    const urlType = typeof url;
+
+    // Resolve functions, promises, and functions that return promises
+    url = await (typeof url === 'function' ? url() : url);
+
+    if (url instanceof File) {
+        return loadFileSlice(url, options);
+    } else if (typeof url.startsWith === 'function') {   // Test for string
+        if (url.startsWith("data:")) {
+            return decodeDataURI(url)
+        } else {
+            if (url.startsWith("https://drive.google.com")) {
+                url = driveDownloadURL(url);
+            }
+            if (isGoogleDriveURL(url)) {
+                return googleThrottle.add(async function () {
+                    return loadURL(url, options)
+                })
+            } else {
+                return loadURL(url, options);
+            }
+        }
+    } else {
+        throw Error(`url must be either a 'File', 'string', 'function', or 'Promise'.  Actual type: ${urlType}`);
+    }
+}
+
+async function loadURL(url, options) {
+
+    //console.log(`${Date.now()}   ${url}`)
+    url = mapUrl(url);
+
+    options = options || {};
+
+    let oauthToken = options.oauthToken || getOauthToken(url);
+    if (oauthToken) {
+        oauthToken = await (typeof oauthToken === 'function' ? oauthToken() : oauthToken);
+    }
+
+    return new Promise(function (resolve, reject) {
+
+        // Various Google tansformations
+        if (isGoogleURL(url)) {
+            if (url.startsWith("gs://")) {
+                url = translateGoogleCloudURL(url);
+            } else if (isGoogleStorageURL(url)) {
+                if (!url.includes("altMedia=")) {
+                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
+                }
+            }
+            url = addApiKey(url);
+
+            if (isGoogleDriveURL(url)) {
+                addTeamDrive(url);
+            }
+
+            // If we have an access token try it, but don't force a signIn or request for scopes yet
+            if (!oauthToken) {
+                oauthToken = getCurrentGoogleAccessToken();
+            }
+        }
+
+        const headers = options.headers || {};
+        if (oauthToken) {
+            addOauthHeaders(headers, oauthToken);
+        }
+        const range = options.range;
+        const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
+        const isSafari = navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
+
+        if (range && isChrome && !isAmazonV4Signed(url)) {
+            // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
+            url += url.includes("?") ? "&" : "?";
+            url += "someRandomSeed=" + Math.random().toString(36);
+        }
+
+        const xhr = new XMLHttpRequest();
+        const sendData = options.sendData || options.body;
+        const method = options.method || (sendData ? "POST" : "GET");
+        const responseType = options.responseType;
+        const contentType = options.contentType;
+        const mimeType = options.mimeType;
+
+        xhr.open(method, url);
+
+        if (range) {
+            var rangeEnd = range.size ? range.start + range.size - 1 : "";
+            xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
+            //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
+        }
+        if (contentType) {
+            xhr.setRequestHeader("Content-Type", contentType);
+        }
+        if (mimeType) {
+            xhr.overrideMimeType(mimeType);
+        }
+        if (responseType) {
+            xhr.responseType = responseType;
+        }
+        if (headers) {
+            for (let key of Object.keys(headers)) {
+                const value = headers[key];
+                xhr.setRequestHeader(key, value);
+            }
+        }
+
+        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
+        if (options.withCredentials === true) {
+            xhr.withCredentials = true;
+        }
+
+        xhr.onload = async function (event) {
+            // when the url points to a local file, the status is 0 but that is not an error
+            if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
+                if (range && xhr.status !== 206 && range.start !== 0) {
+                    // For small files a range starting at 0 can return the whole file => 200
+                    // Provide just the slice we asked for, throw out the rest quietly
+                    // If file is large warn user
+                    if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
+                        alert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
+                    }
+                    resolve(xhr.response.slice(range.start, range.start + range.size));
+
+                } else {
+                    resolve(xhr.response);
+                }
+            } else if ((typeof gapi !== "undefined") &&
+                ((xhr.status === 404 || xhr.status === 401 || xhr.status === 403) &&
+                    isGoogleURL(url)) &&
+                !options.retries) {
+                tryGoogleAuth();
+
+            } else {
+                if (xhr.status === 403) {
+                    handleError("Access forbidden: " + url);
+                } else if (xhr.status === 416) {
+                    //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
+                    handleError("Unsatisfiable range");
+                } else {
+                    handleError(xhr.status);
+                }
+            }
+        };
+
+        xhr.onerror = function (event) {
+            if (isGoogleURL(url) && !options.retries) {
+                tryGoogleAuth();
+            }
+            handleError("Error accessing resource: " + url + " Status: " + xhr.status);
+        };
+
+        xhr.ontimeout = function (event) {
+            handleError("Timed out");
+        };
+
+        xhr.onabort = function (event) {
+            console.log("Aborted");
+            reject(event);
+        };
+
+        try {
+            xhr.send(sendData);
+        } catch (e) {
+            reject(e);
+        }
+
+
+        function handleError(error) {
+            if (reject) {
+                reject(error);
+            } else {
+                throw error;
+            }
+        }
+
+        async function tryGoogleAuth() {
+            try {
+                const accessToken = await fetchGoogleAccessToken(url);
+                options.retries = 1;
+                options.oauthToken = accessToken;
+                const response = await load$1(url, options);
+                resolve(response);
+            } catch (e) {
+                if(e.error) {
+                    const msg = e.error.startsWith("popup_blocked") ?
+                        "Google login popup blocked by browser." :
+                        e.error;
+                    alert(msg);
+                } else {
+                    handleError(e);
+                }
+            }
+        }
+    })
+
+}
+
+async function loadFileSlice(localfile, options) {
+
+    let blob = (options && options.range) ?
+        localfile.slice(options.range.start, options.range.start + options.range.size) :
+        localfile;
+
+    if ("arraybuffer" === options.responseType) {
+        return blobToArrayBuffer(blob);
+    } else {
+        // binary string format, shouldn't be used anymore
+        return new Promise(function (resolve, reject) {
+            const fileReader = new FileReader();
+            fileReader.onload = function (e) {
+                resolve(fileReader.result);
+            };
+            fileReader.onerror = function (e) {
+                console.error("reject uploading local file " + localfile.name);
+                reject(null, fileReader);
+            };
+            fileReader.readAsBinaryString(blob);
+            console.warn("Deprecated method used: readAsBinaryString");
+        })
+    }
+}
+
+async function loadStringFromFile(localfile, options) {
+
+    const blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
+    let compression = NONE;
+    if (options && options.bgz || localfile.name.endsWith(".bgz")) {
+        compression = BGZF;
+    } else if (localfile.name.endsWith(".gz")) {
+        compression = GZIP;
+    }
+
+    if (compression === NONE) {
+        return blobToText(blob);
+    } else {
+        const arrayBuffer = await blobToArrayBuffer(blob);
+        return arrayBufferToString(arrayBuffer, compression);
+    }
+}
+
+async function blobToArrayBuffer(blob) {
+    if (typeof blob.arrayBuffer === 'function') {
+        return blob.arrayBuffer();
+    }
+    return new Promise(function (resolve, reject) {
+        const fileReader = new FileReader();
+        fileReader.onload = function (e) {
+            resolve(fileReader.result);
+        };
+        fileReader.onerror = function (e) {
+            console.error("reject uploading local file " + localfile.name);
+            reject(null, fileReader);
+        };
+        fileReader.readAsArrayBuffer(blob);
+    })
+}
+
+async function blobToText(blob) {
+    if (typeof blob.text === 'function') {
+        return blob.text();
+    }
+    return new Promise(function (resolve, reject) {
+        const fileReader = new FileReader();
+        fileReader.onload = function (e) {
+            resolve(fileReader.result);
+        };
+        fileReader.onerror = function (e) {
+            console.error("reject uploading local file " + localfile.name);
+            reject(null, fileReader);
+        };
+        fileReader.readAsText(blob);
+    })
+}
+
+async function loadStringFromUrl(url, options) {
+
+    options = options || {};
+
+    const fn = options.filename || await getFilename$1(url);
+    let compression = UNKNOWN;
+    if (options.bgz) {
+        compression = BGZF;
+    } else if (fn.endsWith(".gz")) {
+        compression = GZIP;
+    }
+
+    options.responseType = "arraybuffer";
+    const data = await igvxhr.load(url, options);
+    return arrayBufferToString(data, compression);
+}
+
+
+function isAmazonV4Signed(url) {
+    return url.indexOf("X-Amz-Signature") > -1;
+}
+
+function getOauthToken(url) {
+
+    // Google is the default provider, don't try to parse host for google URLs
+    const host = isGoogleURL(url) ?
+        undefined :
+        parseUri(url).host;
+    let token = oauth.getToken(host);
+    if (token) {
+        return token;
+    } else if (host === undefined) {
+        const googleToken = getCurrentGoogleAccessToken();
+        if (googleToken && googleToken.expires_at > Date.now()) {
+            return googleToken.access_token;
+        }
+    }
+}
+
+/**
+ * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we know
+ * a token is required, that is until we've tried the url and received a 401, 403, or 404.
+ *
+ * @param url
+ * @returns the oauth token
+ */
+async function fetchGoogleAccessToken(url) {
+    console.log("Fetch token for " + url);
+    if (isInitialized()) {
+        const scope = getScopeForURL(url);
+        const googleToken = await getAccessToken(scope);
+        return googleToken ? googleToken.access_token : undefined;
+    } else {
+        throw Error(
+            `Authorization is required, but Google oAuth has not been initalized. Contact your site administrator for assistance.`)
+    }
+}
+
+/**
+ * Return the current google access token, if one exists.  Do not triger signOn or request additional scopes.
+ * @returns {undefined|access_token}
+ */
+function getCurrentGoogleAccessToken() {
+    if (isInitialized()) {
+        const googleToken = getCurrentAccessToken();
+        return googleToken ? googleToken.access_token : undefined;
+    } else {
+        return undefined;
+    }
+}
+
+function addOauthHeaders(headers, acToken) {
+    if (acToken) {
+        headers["Cache-Control"] = "no-cache";
+        headers["Authorization"] = "Bearer " + acToken;
+    }
+    return headers;
+}
+
+
+function addApiKey(url) {
+    let apiKey = igvxhr.apiKey;
+    if (!apiKey && typeof gapi !== "undefined") {
+        apiKey = gapi.apiKey;
+    }
+    if (apiKey !== undefined && !url.includes("key=")) {
+        const paramSeparator = url.includes("?") ? "&" : "?";
+        url = url + paramSeparator + "key=" + apiKey;
+    }
+    return url;
+}
+
+function addTeamDrive(url) {
+    if (url.includes("supportsTeamDrive")) {
+        return url;
+    } else {
+        const paramSeparator = url.includes("?") ? "&" : "?";
+        url = url + paramSeparator + "supportsTeamDrive=true";
+    }
+}
+
+/**
+ * Perform some well-known url mappings.
+ * @param url
+ */
+function mapUrl(url) {
+
+    if (url.includes("//www.dropbox.com")) {
+        return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
+    } else if (url.includes("//drive.google.com")) {
+        return driveDownloadURL(url);
+    } else if (url.includes("//www.broadinstitute.org/igvdata")) {
+        return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
+    } else if (url.includes("//igvdata.broadinstitute.org")) {
+        return url.replace("//igvdata.broadinstitute.org", "https://dn7ywbm9isq8j.cloudfront.net")
+    } else if (url.startsWith("ftp://ftp.ncbi.nlm.nih.gov/geo")) {
+        return url.replace("ftp://", "https://")
+    } else {
+        return url;
+    }
+}
+
+
+function arrayBufferToString(arraybuffer, compression) {
+
+    if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
+        const m = new Uint8Array(arraybuffer, 0, 2);
+        if (m[0] === 31 && m[1] === 139) {
+            compression = GZIP;
+        }
+    }
+
+    let plain;
+    if (compression === GZIP) {
+        const inflate = new Zlib$1.Gunzip(new Uint8Array(arraybuffer));
+        plain = inflate.decompress();
+    } else if (compression === BGZF) {
+        plain = unbgzf(arraybuffer);
+    } else {
+        plain = new Uint8Array(arraybuffer);
+    }
+
+    if ('TextDecoder' in getGlobalObject()) {
+        return new TextDecoder().decode(plain);
+    } else {
+        return decodeUTF8(plain);
+    }
+}
+
+/**
+ * Use when TextDecoder is not available (primarily IE).
+ *
+ * From: https://gist.github.com/Yaffle/5458286
+ *
+ * @param octets
+ * @returns {string}
+ */
+function decodeUTF8(octets) {
+    var string = "";
+    var i = 0;
+    while (i < octets.length) {
+        var octet = octets[i];
+        var bytesNeeded = 0;
+        var codePoint = 0;
+        if (octet <= 0x7F) {
+            bytesNeeded = 0;
+            codePoint = octet & 0xFF;
+        } else if (octet <= 0xDF) {
+            bytesNeeded = 1;
+            codePoint = octet & 0x1F;
+        } else if (octet <= 0xEF) {
+            bytesNeeded = 2;
+            codePoint = octet & 0x0F;
+        } else if (octet <= 0xF4) {
+            bytesNeeded = 3;
+            codePoint = octet & 0x07;
+        }
+        if (octets.length - i - bytesNeeded > 0) {
+            var k = 0;
+            while (k < bytesNeeded) {
+                octet = octets[i + k + 1];
+                codePoint = (codePoint << 6) | (octet & 0x3F);
+                k += 1;
+            }
+        } else {
+            codePoint = 0xFFFD;
+            bytesNeeded = octets.length - i;
+        }
+        string += String.fromCodePoint(codePoint);
+        i += bytesNeeded + 1;
+    }
+    return string
+}
+
+
+function getGlobalObject() {
+    if (typeof self !== 'undefined') {
+        return self;
+    }
+    if (typeof global !== 'undefined') {
+        return global;
+    } else {
+        return window;
+    }
+}
+
+async function getFilename$1(url) {
+    if (isString(url) && url.startsWith("https://drive.google.com")) {
+        // This will fail if Google API key is not defined
+        if(getApiKey() === undefined) {
+            throw Error("Google drive is referenced, but API key is not defined.  An API key is required for Google Drive access");
+        }
+        const json = await getDriveFileInfo(url);
+        return json.originalFileName || json.name;
+    } else {
+        return getFilename(url);
+    }
 }
 
 /*
@@ -24124,171 +24958,6 @@ const Chromosome = function (name, order, bpStart, bpLength, rangeLocus) {
     this.rangeLocus = rangeLocus;
 };
 
-// Support for oauth token based authorization
-// This class supports explicit setting of an oauth token either globally or for specific hosts.
-//
-// The variable oauth.google.access_token, which becomes igv.oauth.google.access_token on ES5 conversion is
-// supported for backward compatibility
-
-const DEFAULT_HOST = "googleapis";
-
-const oauth = {
-
-    oauthTokens: {},
-
-    setToken: function (token, host) {
-        host = host || DEFAULT_HOST;
-        this.oauthTokens[host] = token;
-        if(host === DEFAULT_HOST) {
-            this.google.access_token = token;    // legacy support
-        }
-    },
-
-    getToken: function (host) {
-        host = host || DEFAULT_HOST;
-        let token;
-        for (let key of Object.keys(this.oauthTokens)) {
-            const regex = wildcardToRegExp(key);
-            if (regex.test(host)) {
-                token = this.oauthTokens[key];
-                break;
-            }
-        }
-        return token;
-    },
-
-    removeToken: function (host) {
-        host = host || DEFAULT_HOST;
-        for (let key of Object.keys(this.oauthTokens)) {
-            const regex = wildcardToRegExp(key);
-            if (regex.test(host)) {
-                this.oauthTokens[key] = undefined;
-            }
-        }
-        if(host === DEFAULT_HOST) {
-            this.google.access_token = undefined;    // legacy support
-        }
-    },
-
-    // Special object for google -- legacy support
-    google: {
-        setToken: function (token) {
-            oauth.setToken(token);
-        }
-    }
-};
-
-
-/**
- * Creates a RegExp from the given string, converting asterisks to .* expressions,
- * and escaping all other characters.
- *
- * credit https://gist.github.com/donmccurdy/6d073ce2c6f3951312dfa45da14a420f
- */
-function wildcardToRegExp(s) {
-    return new RegExp('^' + s.split(/\*+/).map(regExpEscape).join('.*') + '$');
-}
-
-/**
- * RegExp-escapes all characters in the given string.
- *
- * credit https://gist.github.com/donmccurdy/6d073ce2c6f3951312dfa45da14a420f
- */
-function regExpEscape(s) {
-    return s.replace(/[|\\{}()[\]^$+*?.]/g, '\\$&');
-}
-
-// Uncompress data,  assumed to be series of bgzipped blocks
-function unbgzf(data, lim) {
-
-    const oBlockList = [];
-    let ptr = 0;
-    let totalSize = 0;
-
-    lim = lim || data.byteLength - 18;
-
-    while (ptr < lim) {
-        try {
-            const ba = new Uint8Array(data, ptr, 18);
-            const xlen = (ba[11] << 8) | (ba[10]);
-            const si1 = ba[12];
-            const si2 = ba[13];
-            const slen = (ba[15] << 8) | (ba[14]);
-            const bsize = ((ba[17] << 8) | (ba[16])) + 1;
-            const start = 12 + xlen + ptr;    // Start of CDATA
-            const bytesLeft = data.byteLength - start;
-            const cDataSize = bsize - xlen - 19;
-            if (bytesLeft < cDataSize || cDataSize <= 0) break;
-
-            const a = new Uint8Array(data, start, cDataSize);
-            const inflate = new Zlib$1.RawInflate(a);
-            const unc = inflate.decompress();
-
-            ptr += inflate.ip + 26;
-            totalSize += unc.byteLength;
-            oBlockList.push(unc);
-        } catch (e) {
-            console.error(e);
-            break;
-        }
-    }
-
-    // Concatenate decompressed blocks
-    if (oBlockList.length === 1) {
-        return oBlockList[0];
-    } else {
-        const out = new Uint8Array(totalSize);
-        let cursor = 0;
-        for (let i = 0; i < oBlockList.length; ++i) {
-            var b = new Uint8Array(oBlockList[i]);
-            arrayCopy(b, 0, out, cursor, b.length);
-            cursor += b.length;
-        }
-        return out;
-    }
-}
-
-function bgzBlockSize(data) {
-    const ba = new Uint8Array(data);
-    const bsize = (ba[17] << 8) | (ba[16]) + 1;
-    return bsize;
-}
-
-// From Thomas Down's zlib implementation
-
-const testArray = new Uint8Array(1);
-const hasSubarray = (typeof testArray.subarray === 'function');
-
-function arrayCopy(src, srcOffset, dest, destOffset, count) {
-    if (count === 0) {
-        return;
-    }
-    if (!src) {
-        throw "Undef src";
-    } else if (!dest) {
-        throw "Undef dest";
-    }
-    if (srcOffset === 0 && count === src.length) {
-        arrayCopy_fast(src, dest, destOffset);
-    } else if (hasSubarray) {
-        arrayCopy_fast(src.subarray(srcOffset, srcOffset + count), dest, destOffset);
-    } else if (src.BYTES_PER_ELEMENT === 1 && count > 100) {
-        arrayCopy_fast(new Uint8Array(src.buffer, src.byteOffset + srcOffset, count), dest, destOffset);
-    } else {
-        arrayCopy_slow(src, srcOffset, dest, destOffset, count);
-    }
-}
-
-function arrayCopy_slow(src, srcOffset, dest, destOffset, count) {
-    for (let i = 0; i < count; ++i) {
-        dest[destOffset + i] = src[srcOffset + i];
-    }
-}
-
-function arrayCopy_fast(src, dest, destOffset) {
-    dest.set(src, destOffset);
-}
-
 /*
  * The MIT License (MIT)
  *
@@ -24515,7 +25184,7 @@ function translateDeprecatedTypes(config) {
     }
 }
 
-async function getFilename$1(url) {
+async function getFilename$2(url) {
     if (isString(url) && url.startsWith("https://drive.google.com")) {
         // This will fail if Google API key is not defined
         if(getApiKey() === undefined) {
@@ -24525,662 +25194,6 @@ async function getFilename$1(url) {
         return json.originalFileName || json.name;
     } else {
         return getFilename(url);
-    }
-}
-
-// The MIT License (MIT)
-
-/**
- * @constructor
- * @param {Object} options A set op options to pass to the throttle function
- *        @param {number} requestsPerSecond The amount of requests per second
- *                                          the library will limit to
- */
-class Throttle {
-    constructor(options) {
-        this.requestsPerSecond = options.requestsPerSecond || 10;
-        this.lastStartTime = 0;
-        this.queued = [];
-    }
-
-    /**
-     * Adds a promise
-     * @param {Function} async function to be executed
-     * @param {Object} options A set of options.
-     * @return {Promise} A promise
-     */
-    add(asyncFunction, options) {
-
-        var self = this;
-        return new Promise(function (resolve, reject) {
-            self.queued.push({
-                resolve: resolve,
-                reject: reject,
-                asyncFunction: asyncFunction,
-            });
-            self.dequeue();
-        });
-    }
-
-    /**
-     * Adds all the promises passed as parameters
-     * @param {Function} promises An array of functions that return a promise
-     * @param {Object} options A set of options.
-     * @param {number} options.signal An AbortSignal object that can be used to abort the returned promise
-     * @param {number} options.weight A "weight" of each operation resolving by array of promises
-     * @return {Promise} A promise that succeeds when all the promises passed as options do
-     */
-    addAll(promises, options) {
-        var addedPromises = promises.map(function (promise) {
-            return this.add(promise, options);
-        }.bind(this));
-
-        return Promise.all(addedPromises);
-    };
-
-    /**
-     * Dequeues a promise
-     * @return {void}
-     */
-    dequeue() {
-        if (this.queued.length > 0) {
-            var now = new Date(),
-                inc = (1000 / this.requestsPerSecond) + 1,
-                elapsed = now - this.lastStartTime;
-
-            if (elapsed >= inc) {
-                this._execute();
-            } else {
-                // we have reached the limit, schedule a dequeue operation
-                setTimeout(function () {
-                    this.dequeue();
-                }.bind(this), inc - elapsed);
-            }
-        }
-    }
-
-    /**
-     * Executes the promise
-     * @private
-     * @return {void}
-     */
-    async _execute() {
-        this.lastStartTime = new Date();
-        var candidate = this.queued.shift();
-        const f = candidate.asyncFunction;
-        try {
-            const r = await f();
-            candidate.resolve(r);
-        } catch (e) {
-            candidate.reject(e);
-        }
-
-    }
-
-
-}
-
-/*
- * The MIT License (MIT)
- *
- * Copyright (c) 2014 Broad Institute
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in
- * all copies or substantial portions of the Software.
- *
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- * THE SOFTWARE.
- */
-
-var NONE = 0;
-var GZIP = 1;
-var BGZF = 2;
-var UNKNOWN = 3;
-let RANGE_WARNING_GIVEN = false;
-
-const googleThrottle = new Throttle({
-    requestsPerSecond: 9
-});
-
-const igvxhr = {
-
-    apiKey: undefined,
-
-    setApiKey: function (key) {
-        this.apiKey = key;
-    },
-
-    load: load$1,
-
-    loadArrayBuffer: async function (url, options) {
-        options = options || {};
-        if (!options.responseType) {
-            options.responseType = "arraybuffer";
-        }
-        if (url instanceof File) {
-            return loadFileSlice(url, options);
-        } else {
-            return load$1(url, options);
-        }
-    },
-
-    loadJson: async function (url, options) {
-        options = options || {};
-        const method = options.method || (options.sendData ? "POST" : "GET");
-        if (method === "POST") {
-            options.contentType = "application/json";
-        }
-        const result = await this.loadString(url, options);
-        if (result) {
-            return JSON.parse(result);
-        } else {
-            return result;
-        }
-    },
-
-    loadString: async function (path, options) {
-        options = options || {};
-        if (path instanceof File) {
-            return loadStringFromFile(path, options);
-        } else {
-            return loadStringFromUrl(path, options);
-        }
-    }
-};
-
-async function load$1(url, options) {
-
-    options = options || {};
-    const urlType = typeof url;
-
-    // Resolve functions, promises, and functions that return promises
-    url = await (typeof url === 'function' ? url() : url);
-
-    if (url instanceof File) {
-        return loadFileSlice(url, options);
-    } else if (typeof url.startsWith === 'function') {   // Test for string
-        if (url.startsWith("data:")) {
-            return decodeDataURI(url)
-        } else {
-            if (url.startsWith("https://drive.google.com")) {
-                url = driveDownloadURL(url);
-            }
-            if (isGoogleDriveURL(url)) {
-                return googleThrottle.add(async function () {
-                    return loadURL(url, options)
-                })
-            } else {
-                return loadURL(url, options);
-            }
-        }
-    } else {
-        throw Error(`url must be either a 'File', 'string', 'function', or 'Promise'.  Actual type: ${urlType}`);
-    }
-}
-
-async function loadURL(url, options) {
-
-    //console.log(`${Date.now()}   ${url}`)
-    url = mapUrl(url);
-
-    options = options || {};
-
-    let oauthToken = options.oauthToken || getOauthToken(url);
-    if (oauthToken) {
-        oauthToken = await (typeof oauthToken === 'function' ? oauthToken() : oauthToken);
-    }
-
-    return new Promise(function (resolve, reject) {
-
-        // Various Google tansformations
-        if (isGoogleURL(url)) {
-            if (url.startsWith("gs://")) {
-                url = translateGoogleCloudURL(url);
-            } else if (isGoogleStorageURL(url)) {
-                if (!url.includes("altMedia=")) {
-                    url += (url.includes("?") ? "&altMedia=true" : "?altMedia=true");
-                }
-            }
-            url = addApiKey(url);
-
-            if (isGoogleDriveURL(url)) {
-                addTeamDrive(url);
-            }
-
-            // If we have an access token try it, but don't force a signIn or request for scopes yet
-            if (!oauthToken) {
-                oauthToken = getCurrentGoogleAccessToken();
-            }
-        }
-
-        const headers = options.headers || {};
-        if (oauthToken) {
-            addOauthHeaders(headers, oauthToken);
-        }
-        const range = options.range;
-        const isChrome = navigator.userAgent.indexOf('Chrome') > -1;
-        const isSafari = navigator.vendor.indexOf("Apple") === 0 && /\sSafari\//.test(navigator.userAgent);
-
-        if (range && isChrome && !isAmazonV4Signed(url)) {
-            // Hack to prevent caching for byte-ranges. Attempt to fix net:err-cache errors in Chrome
-            url += url.includes("?") ? "&" : "?";
-            url += "someRandomSeed=" + Math.random().toString(36);
-        }
-
-        const xhr = new XMLHttpRequest();
-        const sendData = options.sendData || options.body;
-        const method = options.method || (sendData ? "POST" : "GET");
-        const responseType = options.responseType;
-        const contentType = options.contentType;
-        const mimeType = options.mimeType;
-
-        xhr.open(method, url);
-
-        if (range) {
-            var rangeEnd = range.size ? range.start + range.size - 1 : "";
-            xhr.setRequestHeader("Range", "bytes=" + range.start + "-" + rangeEnd);
-            //      xhr.setRequestHeader("Cache-Control", "no-cache");    <= This can cause CORS issues, disabled for now
-        }
-        if (contentType) {
-            xhr.setRequestHeader("Content-Type", contentType);
-        }
-        if (mimeType) {
-            xhr.overrideMimeType(mimeType);
-        }
-        if (responseType) {
-            xhr.responseType = responseType;
-        }
-        if (headers) {
-            for (let key of Object.keys(headers)) {
-                const value = headers[key];
-                xhr.setRequestHeader(key, value);
-            }
-        }
-
-        // NOTE: using withCredentials with servers that return "*" for access-allowed-origin will fail
-        if (options.withCredentials === true) {
-            xhr.withCredentials = true;
-        }
-
-        xhr.onload = async function (event) {
-            // when the url points to a local file, the status is 0 but that is not an error
-            if (xhr.status === 0 || (xhr.status >= 200 && xhr.status <= 300)) {
-                if (range && xhr.status !== 206 && range.start !== 0) {
-                    // For small files a range starting at 0 can return the whole file => 200
-                    // Provide just the slice we asked for, throw out the rest quietly
-                    // If file is large warn user
-                    if (xhr.response.length > 100000 && !RANGE_WARNING_GIVEN) {
-                        alert(`Warning: Range header ignored for URL: ${url}.  This can have performance impacts.`);
-                    }
-                    resolve(xhr.response.slice(range.start, range.start + range.size));
-
-                } else {
-                    resolve(xhr.response);
-                }
-            } else if ((typeof gapi !== "undefined") &&
-                ((xhr.status === 404 || xhr.status === 401 || xhr.status === 403) &&
-                    isGoogleURL(url)) &&
-                !options.retries) {
-                tryGoogleAuth();
-
-            } else {
-                if (xhr.status === 403) {
-                    handleError("Access forbidden: " + url);
-                } else if (xhr.status === 416) {
-                    //  Tried to read off the end of the file.   This shouldn't happen, but if it does return an
-                    handleError("Unsatisfiable range");
-                } else {
-                    handleError(xhr.status);
-                }
-            }
-        };
-
-        xhr.onerror = function (event) {
-            if (isGoogleURL(url) && !options.retries) {
-                tryGoogleAuth();
-            }
-            handleError("Error accessing resource: " + url + " Status: " + xhr.status);
-        };
-
-        xhr.ontimeout = function (event) {
-            handleError("Timed out");
-        };
-
-        xhr.onabort = function (event) {
-            console.log("Aborted");
-            reject(event);
-        };
-
-        try {
-            xhr.send(sendData);
-        } catch (e) {
-            reject(e);
-        }
-
-
-        function handleError(error) {
-            if (reject) {
-                reject(error);
-            } else {
-                throw error;
-            }
-        }
-
-        async function tryGoogleAuth() {
-            try {
-                const accessToken = await fetchGoogleAccessToken(url);
-                options.retries = 1;
-                options.oauthToken = accessToken;
-                const response = await load$1(url, options);
-                resolve(response);
-            } catch (e) {
-                if(e.error) {
-                    const msg = e.error.startsWith("popup_blocked") ?
-                        "Google login popup blocked by browser." :
-                        e.error;
-                    alert(msg);
-                } else {
-                    handleError(e);
-                }
-            }
-        }
-    })
-
-}
-
-async function loadFileSlice(localfile, options) {
-
-    let blob = (options && options.range) ?
-        localfile.slice(options.range.start, options.range.start + options.range.size) :
-        localfile;
-
-    if ("arraybuffer" === options.responseType) {
-        return blobToArrayBuffer(blob);
-    } else {
-        // binary string format, shouldn't be used anymore
-        return new Promise(function (resolve, reject) {
-            const fileReader = new FileReader();
-            fileReader.onload = function (e) {
-                resolve(fileReader.result);
-            };
-            fileReader.onerror = function (e) {
-                console.error("reject uploading local file " + localfile.name);
-                reject(null, fileReader);
-            };
-            fileReader.readAsBinaryString(blob);
-            console.warn("Deprecated method used: readAsBinaryString");
-        })
-    }
-}
-
-async function loadStringFromFile(localfile, options) {
-
-    const blob = options.range ? localfile.slice(options.range.start, options.range.start + options.range.size) : localfile;
-    let compression = NONE;
-    if (options && options.bgz || localfile.name.endsWith(".bgz")) {
-        compression = BGZF;
-    } else if (localfile.name.endsWith(".gz")) {
-        compression = GZIP;
-    }
-
-    if (compression === NONE) {
-        return blobToText(blob);
-    } else {
-        const arrayBuffer = await blobToArrayBuffer(blob);
-        return arrayBufferToString(arrayBuffer, compression);
-    }
-}
-
-async function blobToArrayBuffer(blob) {
-    if (typeof blob.arrayBuffer === 'function') {
-        return blob.arrayBuffer();
-    }
-    return new Promise(function (resolve, reject) {
-        const fileReader = new FileReader();
-        fileReader.onload = function (e) {
-            resolve(fileReader.result);
-        };
-        fileReader.onerror = function (e) {
-            console.error("reject uploading local file " + localfile.name);
-            reject(null, fileReader);
-        };
-        fileReader.readAsArrayBuffer(blob);
-    })
-}
-
-async function blobToText(blob) {
-    if (typeof blob.text === 'function') {
-        return blob.text();
-    }
-    return new Promise(function (resolve, reject) {
-        const fileReader = new FileReader();
-        fileReader.onload = function (e) {
-            resolve(fileReader.result);
-        };
-        fileReader.onerror = function (e) {
-            console.error("reject uploading local file " + localfile.name);
-            reject(null, fileReader);
-        };
-        fileReader.readAsText(blob);
-    })
-}
-
-async function loadStringFromUrl(url, options) {
-
-    options = options || {};
-
-    const fn = options.filename || await getFilename$1(url);
-    let compression = UNKNOWN;
-    if (options.bgz) {
-        compression = BGZF;
-    } else if (fn.endsWith(".gz")) {
-        compression = GZIP;
-    }
-
-    options.responseType = "arraybuffer";
-    const data = await igvxhr.load(url, options);
-    return arrayBufferToString(data, compression);
-}
-
-
-function isAmazonV4Signed(url) {
-    return url.indexOf("X-Amz-Signature") > -1;
-}
-
-function getOauthToken(url) {
-
-    // Google is the default provider, don't try to parse host for google URLs
-    const host = isGoogleURL(url) ?
-        undefined :
-        parseUri(url).host;
-    let token = oauth.getToken(host);
-    if (token) {
-        return token;
-    } else if (host === undefined) {
-        const googleToken = getCurrentGoogleAccessToken();
-        if (googleToken && googleToken.expires_at > Date.now()) {
-            return googleToken.access_token;
-        }
-    }
-}
-
-/**
- * Return a Google oAuth token, triggering a sign in if required.   This method should not be called until we know
- * a token is required, that is until we've tried the url and received a 401, 403, or 404.
- *
- * @param url
- * @returns the oauth token
- */
-async function fetchGoogleAccessToken(url) {
-    console.log("Fetch token for " + url);
-    if (isInitialized()) {
-        const scope = getScopeForURL(url);
-        const googleToken = await getAccessToken(scope);
-        return googleToken ? googleToken.access_token : undefined;
-    } else {
-        throw Error(
-            `Authorization is required, but Google oAuth has not been initalized. Contact your site administrator for assistance.`)
-    }
-}
-
-/**
- * Return the current google access token, if one exists.  Do not triger signOn or request additional scopes.
- * @returns {undefined|access_token}
- */
-function getCurrentGoogleAccessToken() {
-    if (isInitialized()) {
-        const googleToken = getCurrentAccessToken();
-        return googleToken ? googleToken.access_token : undefined;
-    } else {
-        return undefined;
-    }
-}
-
-function addOauthHeaders(headers, acToken) {
-    if (acToken) {
-        headers["Cache-Control"] = "no-cache";
-        headers["Authorization"] = "Bearer " + acToken;
-    }
-    return headers;
-}
-
-
-function addApiKey(url) {
-    let apiKey = igvxhr.apiKey;
-    if (!apiKey && typeof gapi !== "undefined") {
-        apiKey = gapi.apiKey;
-    }
-    if (apiKey !== undefined && !url.includes("key=")) {
-        const paramSeparator = url.includes("?") ? "&" : "?";
-        url = url + paramSeparator + "key=" + apiKey;
-    }
-    return url;
-}
-
-function addTeamDrive(url) {
-    if (url.includes("supportsTeamDrive")) {
-        return url;
-    } else {
-        const paramSeparator = url.includes("?") ? "&" : "?";
-        url = url + paramSeparator + "supportsTeamDrive=true";
-    }
-}
-
-/**
- * Perform some well-known url mappings.
- * @param url
- */
-function mapUrl(url) {
-
-    if (url.includes("//www.dropbox.com")) {
-        return url.replace("//www.dropbox.com", "//dl.dropboxusercontent.com");
-    } else if (url.includes("//drive.google.com")) {
-        return driveDownloadURL(url);
-    } else if (url.includes("//www.broadinstitute.org/igvdata")) {
-        return url.replace("//www.broadinstitute.org/igvdata", "//data.broadinstitute.org/igvdata");
-    } else if (url.includes("//igvdata.broadinstitute.org")) {
-        return url.replace("//igvdata.broadinstitute.org", "https://dn7ywbm9isq8j.cloudfront.net")
-    } else if (url.startsWith("ftp://ftp.ncbi.nlm.nih.gov/geo")) {
-        return url.replace("ftp://", "https://")
-    } else {
-        return url;
-    }
-}
-
-
-function arrayBufferToString(arraybuffer, compression) {
-
-    if (compression === UNKNOWN && arraybuffer.byteLength > 2) {
-        const m = new Uint8Array(arraybuffer, 0, 2);
-        if (m[0] === 31 && m[1] === 139) {
-            compression = GZIP;
-        }
-    }
-
-    let plain;
-    if (compression === GZIP) {
-        const inflate = new Zlib$1.Gunzip(new Uint8Array(arraybuffer));
-        plain = inflate.decompress();
-    } else if (compression === BGZF) {
-        plain = unbgzf(arraybuffer);
-    } else {
-        plain = new Uint8Array(arraybuffer);
-    }
-
-    if ('TextDecoder' in getGlobalObject()) {
-        return new TextDecoder().decode(plain);
-    } else {
-        return decodeUTF8(plain);
-    }
-}
-
-/**
- * Use when TextDecoder is not available (primarily IE).
- *
- * From: https://gist.github.com/Yaffle/5458286
- *
- * @param octets
- * @returns {string}
- */
-function decodeUTF8(octets) {
-    var string = "";
-    var i = 0;
-    while (i < octets.length) {
-        var octet = octets[i];
-        var bytesNeeded = 0;
-        var codePoint = 0;
-        if (octet <= 0x7F) {
-            bytesNeeded = 0;
-            codePoint = octet & 0xFF;
-        } else if (octet <= 0xDF) {
-            bytesNeeded = 1;
-            codePoint = octet & 0x1F;
-        } else if (octet <= 0xEF) {
-            bytesNeeded = 2;
-            codePoint = octet & 0x0F;
-        } else if (octet <= 0xF4) {
-            bytesNeeded = 3;
-            codePoint = octet & 0x07;
-        }
-        if (octets.length - i - bytesNeeded > 0) {
-            var k = 0;
-            while (k < bytesNeeded) {
-                octet = octets[i + k + 1];
-                codePoint = (codePoint << 6) | (octet & 0x3F);
-                k += 1;
-            }
-        } else {
-            codePoint = 0xFFFD;
-            bytesNeeded = octets.length - i;
-        }
-        string += String.fromCodePoint(codePoint);
-        i += bytesNeeded + 1;
-    }
-    return string
-}
-
-
-function getGlobalObject() {
-    if (typeof self !== 'undefined') {
-        return self;
-    }
-    if (typeof global !== 'undefined') {
-        return global;
-    } else {
-        return window;
     }
 }
 
@@ -31900,7 +31913,7 @@ class BinaryParser {
 
 
     /**
-     * Return a bgzip (bam and tabix) virtual pointer
+     * Return a BGZip (bam and tabix) virtual pointer
      * TODO -- why isn't 8th byte used ?
      * @returns {*}
      */
@@ -31960,7 +31973,7 @@ async function parseCsiIndex(arrayBuffer, genome) {
 class CSIIndex {
 
     constructor(tabix) {
-        this.tabix = true;   // Means whatever is indexed is bgzipped
+        this.tabix = true;   // Means whatever is indexed is BGZipped
     }
 
     parse(arrayBuffer, genome) {
@@ -41120,7 +41133,7 @@ class BamReader {
 
                 const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}));
 
-                var ba = unbgzf(compressed); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                var ba = unbgzf(compressed); //new Uint8Array(BGZip.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                 const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
                 if (done) {
@@ -47535,7 +47548,7 @@ class Browser {
             } else {
                 let filename = options.filename;
                 if (!filename) {
-                    filename = (options.url ? await getFilename$1(options.url) : options.file.name);
+                    filename = (options.url ? await getFilename$2(options.url) : options.file.name);
                 }
 
                 if (filename.endsWith(".xml")) {
@@ -47903,7 +47916,7 @@ class Browser {
             } else {
                 let filename = config.filename;
                 if (!filename) {
-                    filename = await getFilename$1(url);
+                    filename = await getFilename$2(url);
                 }
                 config.format = inferFileFormat(filename);
             }
@@ -50224,7 +50237,7 @@ function embedCSS$1() {
 
 // Defines the top-level API for the igv module
 
-const xhr = igvxhr;
+
 const setApiKey = igvxhr.setApiKey;
 
 embedCSS$1();
@@ -50243,9 +50256,7 @@ var index = {
     removeAllBrowsers,
     visibilityChange,
     setGoogleOauthToken,
-    oauth,
     version: version$1,
-    xhr,
     setApiKey,
     doAutoscale,
     TrackView
