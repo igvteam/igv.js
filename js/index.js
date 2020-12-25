@@ -3,15 +3,14 @@
 import MenuUtils from "./ui/menuUtils.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import IGVGraphics from "./igv-canvas.js";
-import {createTrack, createBrowser, removeBrowser, removeAllBrowsers, visibilityChange} from './igv-create.js';
-import { doAutoscale } from "./util/igvUtils.js";
-import oauth from './oauth.js';
-import igvxhr from "./igvxhr.js";
+import {createBrowser, createTrack, removeAllBrowsers, removeBrowser, visibilityChange} from './igv-create.js';
+import {doAutoscale} from "./util/igvUtils.js";
 import embedCss from "./embedCss.js";
 import version from "./version.js"
 import TrackView from "./trackView.js"
+import {igvxhr, oauth} from "../node_modules/igv-utils/src/index.js"
 
-const xhr = igvxhr;
+
 const setApiKey = igvxhr.setApiKey;
 
 embedCss();
@@ -30,9 +29,7 @@ export default {
     removeAllBrowsers,
     visibilityChange,
     setGoogleOauthToken,
-    oauth,
     version,
-    xhr,
     setApiKey,
     doAutoscale,
     TrackView

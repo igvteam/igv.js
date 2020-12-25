@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
 import {unbgzf} from "../js/bam/bgzf.js";
-import igvxhr from "../js/igvxhr.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 

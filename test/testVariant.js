@@ -1,7 +1,7 @@
 import "./utils/mockObjects.js"
 import VcfParser from "../js/variant/vcfParser.js"
 import FeatureFileReader from "../js/feature/featureFileReader.js"
-import igvxhr from "../js/igvxhr.js"
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js"
 import {assert} from 'chai';
 import getDataWrapper from "../js/feature/dataWrapper.js";
 import {genome} from "./utils/Genome"

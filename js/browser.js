@@ -41,21 +41,21 @@ import RulerTrack from "./rulerTrack.js";
 import GenomeUtils from "./genome/genome.js";
 import loadPlinkFile from "./sampleInformation.js";
 import {adjustReferenceFrame, createReferenceFrameList, createReferenceFrameWithAlignment} from "./referenceFrame.js";
-import igvxhr from "./igvxhr.js";
+import {
+    DOMUtils,
+    FileUtils,
+    GoogleUtils,
+    igvxhr,
+    StringUtils,
+    TrackUtils,
+    URIUtils
+} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
 import {buildOptions, doAutoscale, getFilename, inferTrackType, validateLocusExtent} from "./util/igvUtils.js";
 import GtexUtils from "./gtex/gtexUtils.js";
 import IdeogramTrack from "./ideogramTrack.js";
 import {defaultSequenceTrackOrder} from './sequenceTrack.js';
 import version from "./version.js";
-import {
-    DOMUtils,
-    FileUtils,
-    GoogleUtils,
-    StringUtils,
-    TrackUtils,
-    URIUtils
-} from "../node_modules/igv-utils/src/index.js";
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"

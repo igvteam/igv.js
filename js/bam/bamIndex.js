@@ -2,8 +2,7 @@
 // Code is based heavily on bam.js, part of the Dalliance Genome Explorer,  (c) Thomas Down 2006-2001.
 
 import BinaryParser from "../binary.js";
-import igvxhr from "../igvxhr.js";
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const BAI_MAGIC = 21578050;
