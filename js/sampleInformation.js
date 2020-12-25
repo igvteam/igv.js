@@ -23,9 +23,8 @@
  * THE SOFTWARE.
  */
 
-import igvxhr from "./igvxhr.js";
+import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "./util/igvUtils.js";
-import {StringUtils} from "../node_modules/igv-utils/src/index.js";
 
 const splitLines = StringUtils.splitLines;
 

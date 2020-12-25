@@ -26,8 +26,7 @@
 
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
-import igvxhr from "../igvxhr.js";
-import {unbgzf} from './bgzf.js';
+import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 
 class HtsgetReader {
 
@@ -67,7 +66,7 @@ class HtsgetReader {
         const data = await igvxhr.loadJson(url, this.config);
         const dataArr = await loadUrls(data.htsget.urls);
         const compressedData = concatArrays(dataArr);  // In essence a complete bam file
-        const unc = unbgzf(compressedData.buffer);
+        const unc = BGZip.unbgzf(compressedData.buffer);
         const ba = unc;
 
         this.header = BamUtils.decodeBamHeader(ba, genome);

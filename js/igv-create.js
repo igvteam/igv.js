@@ -24,7 +24,7 @@
  */
 
 import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
-import {GoogleAuth} from '../node_modules/igv-utils/src/index.js';
+import {GoogleAuth, igvxhr, oauth} from '../node_modules/igv-utils/src/index.js';
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import Browser from "./browser.js";
 import GenomeUtils from "./genome/genome.js";
@@ -38,8 +38,6 @@ import TrackLabelControl from "./ui/trackLabelControl.js";
 import CenterGuide from "./ui/centerGuide.js";
 import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
-import igvxhr from "./igvxhr.js";
-import oauth from "./oauth.js";
 import {createIcon} from "./igv-icons.js";
 
 let allBrowsers = [];
