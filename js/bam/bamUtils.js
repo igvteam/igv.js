@@ -26,10 +26,8 @@
 
 import BamAlignment from "./bamAlignment.js";
 import AlignmentBlock from "./alignmentBlock.js";
-import igvxhr from "../igvxhr.js";
-import {unbgzf} from './bgzf.js';
+import {igvxhr, StringUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import BamFilter from "./bamFilter.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 
 /**
@@ -61,7 +59,7 @@ const BamUtils = {
 
                 var header, unc, uncba;
 
-                unc = unbgzf(compressedBuffer);
+                unc = BGZip.unbgzf(compressedBuffer);
                 uncba = unc;
 
                 header = BamUtils.decodeBamHeader(uncba, genome);

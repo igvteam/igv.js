@@ -1,6 +1,4 @@
-import BinaryParser from "../binary.js";
-import igvxhr from "../igvxhr.js";
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import {parseCsiIndex} from "./csiIndex.js";
 import {parseBamIndex, parseTabixIndex} from "./bamIndex.js";

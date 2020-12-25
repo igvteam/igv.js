@@ -23,9 +23,8 @@
  * THE SOFTWARE.
  */
 
-import FeatureUtils from "./feature/featureUtils.js";
 import {isSimpleType} from "./util/igvUtils.js";
-import {FileUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import {FileUtils, StringUtils, FeatureUtils} from "../node_modules/igv-utils/src/index.js";
 
 
 /**
