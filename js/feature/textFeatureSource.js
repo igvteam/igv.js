@@ -23,8 +23,8 @@
  * THE SOFTWARE.
  */
 
+import {FeatureCache} from "../../node_modules/igv-utils/src/index.js";
 import FeatureFileReader from "./featureFileReader.js";
-import FeatureCache from "./featureCache.js";
 import CustomServiceReader from "./customServiceReader.js";
 import UCSCServiceReader from "./ucscServiceReader.js";
 import GFFHelper from "./gffHelper.js";
