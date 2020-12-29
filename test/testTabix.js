@@ -1,21 +1,9 @@
 import "./utils/mockObjects.js"
 import {loadIndex} from "../js/bam/indexFactory.js";
-import {unbgzf} from "../js/bam/bgzf.js";
-import igvxhr from "../js/igvxhr.js";
 import FeatureFileReader from "../js/feature/featureFileReader.js";
 import {assert} from 'chai';
 
 suite("testTabix", function () {
-
-    test("bgzip", async function () {
-        const url = require.resolve("./data/bed/missing_linefeed.bed.gz");
-        const data = await igvxhr.load(url,
-            {
-                responseType: "arraybuffer",
-            })
-        const result = unbgzf(data)
-        assert.ok(result)
-    })
 
     test("CSI index", async function () {
 
