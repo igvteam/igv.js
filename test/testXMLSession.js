@@ -1,6 +1,6 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai';
-import igvxhr from "../js/igvxhr.js";
+import {igvxhr} from "../node_modules/igv-utils/src/index.js";
 import XMLSession from "../js/session/igvXmlSession"
 
 suite("testXMLSession", function () {

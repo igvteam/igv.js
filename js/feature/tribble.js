@@ -24,7 +24,7 @@
  */
 
 import BinaryParser from "../binary.js";
-import igvxhr from "../igvxhr.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const SEQUENCE_DICTIONARY_FLAG = 0x8000;  // if we have a sequence dictionary in our header

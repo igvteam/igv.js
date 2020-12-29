@@ -27,10 +27,8 @@
 import {loadIndex} from "./indexFactory.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
-import igvxhr from "../igvxhr.js";
-import {bgzBlockSize, unbgzf} from './bgzf.js';
+import {igvxhr, TrackUtils, BGZip} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
-import {TrackUtils} from "../../node_modules/igv-utils/src/index.js";
 
 /**
  * Class for reading a bam file
@@ -84,7 +82,7 @@ class BamReader {
                 } else {
                     const bsizeOptions = buildOptions(this.config, {range: {start: c.maxv.block, size: 26}});
                     const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-                    lastBlockSize = bgzBlockSize(abuffer)
+                    lastBlockSize = BGZip.bgzBlockSize(abuffer)
                 }
                 const fetchMin = c.minv.block
                 const fetchMax = c.maxv.block + lastBlockSize
@@ -92,7 +90,7 @@ class BamReader {
 
                 const compressed = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config, {range: range}));
 
-                var ba = unbgzf(compressed); //new Uint8Array(unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
+                var ba = BGZip.unbgzf(compressed); //new Uint8Array(BGZip.unbgzf(compressed)); //, c.maxv.block - c.minv.block + 1));
                 const done = BamUtils.decodeBamRecords(ba, c.minv.offset, alignmentContainer, this.indexToChr, chrId, bpStart, bpEnd, this.filter);
 
                 if (done) {
@@ -115,7 +113,7 @@ class BamReader {
             if (index.firstAlignmentBlock) {
                 const bsizeOptions = buildOptions(this.config, {range: {start: index.firstAlignmentBlock, size: 26}});
                 const abuffer = await igvxhr.loadArrayBuffer(this.bamPath, bsizeOptions)
-                const bsize = bgzBlockSize(abuffer)
+                const bsize = BGZip.bgzBlockSize(abuffer)
                 len = index.firstAlignmentBlock + bsize;   // Insure we get the complete compressed block containing the header
             } else {
                 len = 64000;

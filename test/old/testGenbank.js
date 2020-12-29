@@ -1,4 +1,4 @@
-import igvxhr from "../../js/igvxhr.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
 import {setup} from "../util/setup.js";
 import GenbankParser from "../../js/gbk/genbank.js"
 

@@ -24,10 +24,9 @@
  */
 
 // Indexed fasta files
-import {StringUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, StringUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import GenomicInterval from "./genomicInterval.js";
 import Chromosome from "./chromosome.js";
-import igvxhr from "../igvxhr.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const splitLines = StringUtils.splitLines;
