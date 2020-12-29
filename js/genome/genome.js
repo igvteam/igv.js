@@ -25,8 +25,7 @@
 
 import Cytoband from "./cytoband.js";
 import FastaSequence from "./fasta.js";
-import igvxhr from "../igvxhr.js";
-import {StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import version from "../version.js";
 

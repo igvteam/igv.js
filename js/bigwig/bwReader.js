@@ -25,8 +25,7 @@
 
 import BufferedReader from "./bufferedReader.js";
 import BinaryParser from "../binary.js";
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
-import igvxhr from "../igvxhr.js";
+import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 import getDecoder from "./bbDecoders.js";
 import {parseAutoSQL} from "../util/ucscUtils.js"

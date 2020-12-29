@@ -23,11 +23,10 @@
  * THE SOFTWARE.
  */
 
-import FeatureCache from "../feature/featureCache.js";
 import getDataWrapper from "../feature/dataWrapper.js";
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import igvxhr from "../igvxhr.js";
+import {igvxhr, FeatureCache} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 class RnaStructTrack extends TrackBase {

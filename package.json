@@ -1,17 +1,12 @@
 {
   "name": "igv",
-  "version": "2.7.4",
+  "version": "2.7.4-jb2",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
-  "main": "dist/igv.esm.js",
-  "browser": "dist/igv.js",
-  "module": "dist/igv.esm.js",
   "files": [
-    "embed.html",
     "dist/**"
   ],
   "scripts": {
     "build": "node scripts/updateVersion.js && node scripts/generateEmbedCss.js && npx rollup --config",
-    "prepack": "npm run build",
     "test": "mocha -u tdd -r esm"
   },
   "author": {
@@ -62,7 +57,7 @@
     "xmldom": "^0.4.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui#v1.1.1",
-    "igv-utils": "github:igvteam/igv-utils#v1.2.2"
+    "igv-ui": "github:igvteam/igv-ui#f9948ca7",
+    "igv-utils": "github:igvteam/igv-utils#6c830b25"
   }
 }

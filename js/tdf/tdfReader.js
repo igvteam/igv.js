@@ -25,8 +25,7 @@
  */
 
 import BinaryParser from "../binary.js";
-import igvxhr from "../igvxhr.js";
-import {Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const GZIP_FLAG = 0x1;

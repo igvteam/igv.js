@@ -181,7 +181,7 @@ class BinaryParser {
 
 
     /**
-     * Return a bgzip (bam and tabix) virtual pointer
+     * Return a BGZip (bam and tabix) virtual pointer
      * TODO -- why isn't 8th byte used ?
      * @returns {*}
      */
