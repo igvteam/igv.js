@@ -32,13 +32,14 @@ class SampleNameViewport extends ViewportBase {
         this.track_name_ctx = $trackNameCanvas.get(0).getContext('2d')
 
         const $hover = $('<div>', { class:'igv-sample-name-viewport-hover' })
-        this.$content.append($hover)
 
+        this.trackView.$viewportContainer.append($hover)
+        $hover.hide()
 
         this.featureMap = undefined
         this.canvasTop = undefined
 
-        this.ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientY }) => {
+        this.ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientX, clientY, screenX, screenY }) => {
 
             if (this.featureMap && undefined !== this.canvasTop) {
 
@@ -49,16 +50,30 @@ class SampleNameViewport extends ViewportBase {
                 const result = getBBox(this.featureMap, wye)
 
                 if (result) {
-                    this.showHover($hover, result)
+                    this.showHover($hover, result, this.$content.position().top)
                 }
             }
         })
 
+        this.ctx.canvas.addEventListener('mouseenter', () => {
+            $hover.show()
+            // $hover.text('')
+            // $hover.css({ height: 0 })
+        })
+
+        this.ctx.canvas.addEventListener('mouseleave', () => {
+            $hover.hide()
+            // $hover.text('')
+            // $hover.css({ height: 0 })
+        })
+
     }
 
-    showHover($hover, { y, h }) {
-        $hover.css({ top: y, height: h })
-        // IGVGraphics.fillRect(this.ctx, x, y, this.ctx.canvas.width, h, { 'fillStyle': randomRGBConstantAlpha(150, 250, 0.5) })
+    showHover($hover, { y, h, name }, contentTop) {
+        const yFudge = -2
+        const hFudge = 4
+        $hover.css({ left: 0, top: y + contentTop + yFudge, height: h + hFudge })
+        $hover.text(name)
     }
 
     drawTrackName(name) {
@@ -109,6 +124,7 @@ class SampleNameViewport extends ViewportBase {
         this.ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
 
+        // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
         configureFont(this.ctx, fontConfig)
@@ -116,7 +132,7 @@ class SampleNameViewport extends ViewportBase {
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
 
-        console.log(`drawSampleNames - canvas-top ${ canvasTop }`)
+        // console.log(`drawSampleNames - canvas-top ${ canvasTop }`)
 
         sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
