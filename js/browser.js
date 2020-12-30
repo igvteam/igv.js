@@ -1092,7 +1092,7 @@ class Browser {
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
-    viewportContainerWidth() {
+    getViewportContainerWidth() {
 
         let ww
         if (this.trackViews && this.trackViews.length > 0) {
@@ -1105,15 +1105,15 @@ class Browser {
         return ww
     };
 
-    calculateViewportWidth(referenceFrameListLength) {
-        if (1 === referenceFrameListLength) {
-            return this.viewportContainerWidth()
-        } else {
-            return Math.floor((this.viewportContainerWidth() - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
-        }
+    computeViewportWidth(referenceFrameListLength, viewportContainerWidth) {
+        const w = 1 === referenceFrameListLength ? viewportContainerWidth : Math.floor((viewportContainerWidth - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
+
+        // console.log(`${ Date.now() } - compute viewport width ${ StringUtils.numberFormatter(w) }`)
+
+        return w
     }
 
-    viewportWidth() {
+    getViewportWidth() {
         return this.trackViews[0].viewports[0].$viewport.width()
     };
 
