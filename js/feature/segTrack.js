@@ -37,6 +37,8 @@ class SegTrack extends TrackBase {
 
         super(config, browser);
 
+        this.type = config.type || "seg";
+
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;

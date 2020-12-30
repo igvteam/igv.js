@@ -31,7 +31,7 @@ const MenuUtils = {
             menuItems = menuItems.concat(trackView.track.menuItemList());
         }
 
-        if (hasVizWindow || vizWindowTypes.has(trackView.track.config.type)) {
+        if (hasVizWindow || vizWindowTypes.has(trackView.track.type)) {
             menuItems.push('<hr/>');
             menuItems.push(visibilityWindowMenuItem(trackView));
         }

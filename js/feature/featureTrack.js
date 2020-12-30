@@ -51,6 +51,8 @@ class FeatureTrack extends TrackBase {
 
         super(config, browser);
 
+        this.type = config.type || "annotation";
+
         // Set maxRows -- protects against pathological feature packing cases (# of rows of overlapping feaures)
         this.maxRows = config.maxRows === undefined ? 1000 : config.maxRows;
 
