@@ -248,8 +248,8 @@ class SegTrack extends TrackBase {
 
                 if (false === featureMap.has(key)) {
                     featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
-                    configureFont(context, fontConfig)
-                    context.fillText(`${ Math.floor(y) } ${ featureMap.get(key).name }`, x + 4, y + h)
+                    // configureFont(context, fontConfig)
+                    // context.fillText(`${ Math.floor(y) } ${ featureMap.get(key).name }`, x + 4, y + h)
                 }
 
             }
@@ -485,7 +485,8 @@ function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
     for (let { x, y, w, h, name } of featureMap.values()) {
 
         ctx.save()
-        ctx.fillStyle = randomRGBConstantAlpha(150, 250, 0.5)
+        // ctx.fillStyle = randomRGBConstantAlpha(150, 250, 0.5)
+        ctx.fillStyle = 'white'
         ctx.fillRect(0, y,canvasWidth, h)
         ctx.restore()
 

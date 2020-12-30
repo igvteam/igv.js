@@ -577,15 +577,32 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   position: relative;
   width: 100%;
 
-  .igv-sample-name-viewport-hover {
-    display: block;
-    position: absolute;
-    left: 0;
-    width: 100%;
-    z-index: 8888;
-    background-color: deeppink;
-  }
+}
 
+.igv-sample-name-viewport-hover {
+  cursor: pointer;
+
+  pointer-events: none;
+
+  display: block;
+
+  position: absolute;
+  width: 200px;
+
+  //padding-left: 4px;
+  padding-left: 4px;
+
+  color: black;
+  font-family: sans-serif;
+  font-size: 12px;
+  vertical-align: middle;
+
+  border-color: black;
+  border-style: solid;
+  border-width: thin;
+
+  z-index: 8888;
+  background-color: white;
 }
 
 .igv-canvas {
