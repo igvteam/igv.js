@@ -24,13 +24,13 @@
  * THE SOFTWARE.
  */
 
-import { Alert } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import gmodCRAM from "../vendor/cram-bundle.js"
 import AlignmentContainer from "../bam/alignmentContainer.js";
 import BamUtils from "../bam/bamUtils.js";
 import BamAlignment from "../bam/bamAlignment.js";
 import AlignmentBlock from "../bam/alignmentBlock.js";
-import igvxhr from "../igvxhr.js";
+import {igvxhr} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
 
 const READ_STRAND_FLAG = 0x10;

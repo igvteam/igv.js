@@ -24,13 +24,10 @@
  * THE SOFTWARE.
  */
 
-import FeatureCache from "../feature/featureCache.js";
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
-import igvxhr from "../igvxhr.js";
-import {unbgzf} from './bgzf.js';
+import {igvxhr, StringUtils, BGZip, FeatureCache} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 
@@ -69,12 +66,12 @@ class BamReaderNonIndexed {
         } else {
             if (this.isDataUri) {
                 const data = decodeDataURI(this.bamPath);
-                const unc = unbgzf(data.buffer);
+                const unc = BGZip.unbgzf(data.buffer);
                 parseAlignments.call(this, unc);
                 return fetchAlignments.call(this, chr, bpStart, bpEnd);
             } else {
                 const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
-                const unc = unbgzf(arrayBuffer);
+                const unc = BGZip.unbgzf(arrayBuffer);
                 parseAlignments.call(this, unc);
                 return fetchAlignments.call(this, chr, bpStart, bpEnd);
             }
