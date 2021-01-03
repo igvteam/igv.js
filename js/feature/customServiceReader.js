@@ -23,8 +23,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-import igvxhr from "../igvxhr.js";
-import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {igvxhr, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const isString = StringUtils.isString;
 

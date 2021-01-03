@@ -51,8 +51,8 @@ class BAMTrack extends TrackBase {
 
     updateConfig(config, repaint) {
         super.updateConfig(config);
+        this.type = "alignment";
 
-        this.type = "alignment";   // Not sure this is used for anything
         if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
@@ -288,10 +288,24 @@ class BAMTrack extends TrackBase {
             }
         });
 
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        // Soft clips
+        menuItems.push({
+            object: createCheckbox("Show soft clips", this.showSoftClips),
+            click: () => {
+                this.showSoftClips = !this.showSoftClips;
+                this.config.showSoftClips = this.showSoftClips;
+                this.featureSource.setShowSoftClips(this.showSoftClips);
+                const alignmentContainers = this.getCachedAlignmentContainers();
+                for (let ac of alignmentContainers) {
+                    ac.setShowSoftClips(this.showSoftClips);
+                }
+                this.trackView.repaintViews();
+            }
+        });
 
         // View as pairs
         if (this.pairsSupported && this.alignmentTrack.hasPairs) {
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
             menuItems.push({
                 object: createCheckbox("View as pairs", this.viewAsPairs),
                 click: () => {
@@ -307,20 +321,7 @@ class BAMTrack extends TrackBase {
             });
         }
 
-        // Soft clips
-        menuItems.push({
-            object: createCheckbox("Show soft clips", this.showSoftClips),
-            click: () => {
-                this.showSoftClips = !this.showSoftClips;
-                this.config.showSoftClips = this.showSoftClips;
-                this.featureSource.setShowSoftClips(this.showSoftClips);
-                const alignmentContainers = this.getCachedAlignmentContainers();
-                for (let ac of alignmentContainers) {
-                    ac.setShowSoftClips(this.showSoftClips);
-                }
-                this.trackView.repaintViews();
-            }
-        });
+
 
         // Display mode
         const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');

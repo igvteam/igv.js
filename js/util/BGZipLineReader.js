@@ -1,6 +1,5 @@
 import {buildOptions} from "../util/igvUtils.js";
-import igvxhr from "../igvxhr.js";
-import {bgzBlockSize, unbgzf} from "../bam/bgzf.js";
+import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
 
 class BGZipLineReader {
 
@@ -48,7 +47,7 @@ class BGZipLineReader {
             }
         });
         const abuffer = await igvxhr.loadArrayBuffer(this.config.url, bsizeOptions)
-        const bufferSize = bgzBlockSize(abuffer);
+        const bufferSize = BGZip.bgzBlockSize(abuffer);
         //console.log(`next block ${this.filePtr}  ${bufferSize}`);
 
         if (bufferSize === 0) {
@@ -61,7 +60,7 @@ class BGZipLineReader {
             if (data.byteLength < bufferSize) {
                 this.eof = true; // Assumption
             }
-            this.buffer = unbgzf(data);
+            this.buffer = BGZip.unbgzf(data);
             this.bufferPtr = 0;
             this.filePtr += data.byteLength; //data.byteLength;
         }

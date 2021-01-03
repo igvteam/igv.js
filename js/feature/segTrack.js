@@ -40,6 +40,8 @@ class SegTrack extends TrackBase {
     updateConfig(config, repaint) {
         super.updateConfig(config);
 
+        this.type = config.type || "seg";
+
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;
