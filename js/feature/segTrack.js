@@ -196,8 +196,9 @@ class SegTrack extends TrackBase {
 
             }
 
-            const pixelBottom = options.pixelTop + options.pixelHeight;
             for (let segment of featureList) {
+
+                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
 
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
@@ -341,7 +342,6 @@ class SegTrack extends TrackBase {
         return filterByRow(allFeatures, clickState.y);
 
         function filterByRow(features, y) {
-
             return features.filter(function (feature) {
                 const rect = feature.pixelRect;
                 return rect && y >= rect.y && y <= (rect.y + rect.h);
@@ -359,11 +359,9 @@ class SegTrack extends TrackBase {
         const items = [];
 
         for (let f of featureList) {
-        }
-        featureList.forEach(function (f) {
             extractPopupData(f, items);
 
-        });
+        }
 
         return items;
 
