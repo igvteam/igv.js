@@ -490,11 +490,13 @@ function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
         ctx.fillRect(0, y,canvasWidth, h)
         ctx.restore()
 
-        ctx.fillText(name, canvasWidth - fudge, y + h)
+        // right justified text
+        // ctx.fillText(name, canvasWidth - fudge, y + h)
+
+        // left justified text
+        ctx.fillText(name, fudge, y + h)
     }
 
 }
-
-export { drawSegTrackSampleNames }
 
 export default SegTrack

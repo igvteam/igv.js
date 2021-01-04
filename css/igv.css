@@ -655,11 +655,12 @@
   pointer-events: none;
   display: block;
   position: absolute;
-  width: 200px;
+  width: auto;
   padding-left: 4px;
+  padding-right: 4px;
   color: black;
   font-family: sans-serif;
-  font-size: 12px;
+  font-size: 10px;
   vertical-align: middle;
   border-color: black;
   border-style: solid;
