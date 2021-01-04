@@ -367,8 +367,6 @@ class SegTrack extends TrackBase {
 
         const items = [];
 
-        for (let f of featureList) {
-        }
         featureList.forEach(function (f) {
             extractPopupData(f, items);
 
