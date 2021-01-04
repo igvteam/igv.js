@@ -72,7 +72,7 @@ class SampleNameViewport extends ViewportBase {
     showHover($hover, { y, h, name }, contentTop) {
         const yFudge = -2
         const hFudge = 4
-        $hover.css({ left: 0, top: y + contentTop + yFudge, height: h + hFudge })
+        $hover.css({ left: 0, top: y + contentTop + yFudge, /*height: h + hFudge*/ })
         $hover.text(name)
     }
 
@@ -99,7 +99,7 @@ class SampleNameViewport extends ViewportBase {
 
         IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(this.track_name_ctx, fontConfig)
+        configureFont(this.track_name_ctx, rightJustifiedFontConfig)
 
         const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(name)
 
@@ -127,7 +127,7 @@ class SampleNameViewport extends ViewportBase {
         // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(this.ctx, fontConfig)
+        configureFont(this.ctx, leftJustifiedFontConfig)
 
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
@@ -163,7 +163,7 @@ class SampleNameViewport extends ViewportBase {
 
         IGVGraphics.fillRect(context, 0, 0, width, height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(context, fontConfig)
+        configureFont(context, leftJustifiedFontConfig)
 
         if (this.trackName) {
             const { width: textWidth, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
@@ -195,6 +195,24 @@ const fontConfig =
     {
         font: '10px sans-serif',
         textAlign: 'end', // start || end
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
+    };
+
+const rightJustifiedFontConfig =
+    {
+        font: '10px sans-serif',
+        textAlign: 'end', // start || end
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
+    };
+
+const leftJustifiedFontConfig =
+    {
+        font: '10px sans-serif',
+        textAlign: 'start', // start || end
         textBaseline: 'bottom',
         strokeStyle: 'black',
         fillStyle:'black'
