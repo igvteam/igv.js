@@ -920,7 +920,9 @@ class Browser {
 
     async resize() {
 
-        const viewportWidth = this.getViewportWidth()
+        const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length, this.getViewportContainerWidth())
+
+        // console.log(`browser.resize -   viewport-container-width ${ this.getViewportContainerWidth() } viewport-width ${ viewportWidth }`)
 
         for (let referenceFrame of this.referenceFrameList) {
 
