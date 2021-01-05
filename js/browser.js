@@ -489,7 +489,22 @@ class Browser {
 
             return loci;
         }
-    };
+    }
+
+    toggleSampleNameViewport() {
+
+        for (let { sampleNameViewport } of this.trackViews) {
+
+            if (sampleNameViewport.$viewport.is(":hidden")) {
+                sampleNameViewport.$viewport.show()
+            } else {
+                sampleNameViewport.$viewport.hide()
+            }
+
+        }
+
+        this.resize()
+    }
 
 //
     updateUIWithReferenceFrameListChange(referenceFrameList) {
