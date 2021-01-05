@@ -650,6 +650,23 @@
   position: relative;
   width: 100%; }
 
+.igv-canvas {
+  position: relative;
+  display: block; }
+
+.igv-ideogram-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block; }
+
+.igv-sample-name-viewport-track-name-canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 8989; }
+
 .igv-sample-name-viewport-hover {
   cursor: pointer;
   pointer-events: none;
@@ -667,23 +684,6 @@
   border-width: thin;
   z-index: 8888;
   background-color: white; }
-
-.igv-canvas {
-  position: relative;
-  display: block; }
-
-.igv-ideogram-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: block; }
-
-.igv-mono-sample-canvas {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 8888; }
 
 .igv-scrollbar-outer-div {
   position: relative;

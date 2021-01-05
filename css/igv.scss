@@ -579,6 +579,28 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
 }
 
+.igv-canvas {
+  position: relative;
+  display: block;
+}
+
+.igv-ideogram-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+}
+
+// sample name viewport - track name canvas
+.igv-sample-name-viewport-track-name-canvas {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 8989;
+}
+
+// sample name viewport - hover div for long names
 .igv-sample-name-viewport-hover {
   cursor: pointer;
 
@@ -604,29 +626,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   z-index: 8888;
   background-color: white;
 }
-
-.igv-canvas {
-  position: relative;
-  display: block;
-}
-
-.igv-ideogram-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  display: block;
-}
-
-// sample name viewport - track name canvas
-.igv-mono-sample-canvas {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 8888;
-}
-
-// sample name viewport - hover div for long names
 
 .igv-scrollbar-outer-div {
 

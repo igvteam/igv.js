@@ -26,7 +26,7 @@ class SampleNameViewport extends ViewportBase {
         this.$viewport.data('viewport-type', 'sample-name')
 
         // track name canvas
-        const $trackNameCanvas = $('<canvas>', { class:'igv-mono-sample-canvas' })
+        const $trackNameCanvas = $('<canvas>', { class:'igv-sample-name-viewport-track-name-canvas' })
         this.$viewport.append($trackNameCanvas)
 
         this.track_name_ctx = $trackNameCanvas.get(0).getContext('2d')
