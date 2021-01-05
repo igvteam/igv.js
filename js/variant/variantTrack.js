@@ -43,7 +43,7 @@ class VariantTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.visibilityWindow = config.visibilityWindow;
@@ -69,12 +69,6 @@ class VariantTrack extends TrackBase {
         this.type = config.type || "variant"
 
         this.nRows = 1;  // Computed dynamically
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     async postInit() {

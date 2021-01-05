@@ -37,7 +37,7 @@ class SegTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.type = config.type || "seg";
@@ -88,12 +88,6 @@ class SegTrack extends TrackBase {
         this.featureSource = FeatureSource(this.config, this.browser.genome);
 
         this.initialSort = config.sort;
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     async postInit() {

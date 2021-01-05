@@ -49,7 +49,7 @@ class BAMTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
         this.type = "alignment";
 
@@ -90,12 +90,6 @@ class BAMTrack extends TrackBase {
 
         // Invoke height setter last to allocated to coverage and alignment tracks
         this.height = (config.height !== undefined ? config.height : DEFAULT_TRACK_HEIGHT);
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     set height(h) {

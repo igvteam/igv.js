@@ -52,7 +52,7 @@ class FeatureTrack extends TrackBase {
     }
 
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.type = config.type || "annotation";
@@ -124,12 +124,6 @@ class FeatureTrack extends TrackBase {
 
         //UCSC useScore option
         this.useScore = config.useScore;
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     async postInit() {

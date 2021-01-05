@@ -37,7 +37,7 @@ class EqtlTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.name = config.name;
@@ -73,12 +73,6 @@ class EqtlTrack extends TrackBase {
         this.featureSource = FeatureSource(config, this.browser.genome);
 
         GtexUtils.gtexLoaded = true;
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {

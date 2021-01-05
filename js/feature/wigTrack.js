@@ -41,7 +41,7 @@ class WigTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.type = "wig";
@@ -70,12 +70,6 @@ class WigTrack extends TrackBase {
         this.graphType = config.graphType || "bar";
         this.normalize = config.normalize;  // boolean, for use with "TDF" files
         this.scaleFactor = config.scaleFactor;  // optional scale factor, ignored if normalize === true;
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
-        }
     }
 
     async postInit() {

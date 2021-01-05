@@ -14,7 +14,7 @@ class GCNVTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config, repaint) {
+    updateConfig(config) {
         super.updateConfig(config);
 
         this.autoscale = config.autoscale || config.max === undefined;
@@ -34,12 +34,6 @@ class GCNVTrack extends TrackBase {
             delete config._featureSource;
         } else {
             this.featureSource = FeatureSource(this.config, this.browser.genome);
-        }
-
-        // update and repaint track if needed
-        if (repaint) {
-            this.trackView.checkContentHeight();
-            this.trackView.repaintViews();
         }
     }
 
