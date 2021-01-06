@@ -39,6 +39,7 @@ import CenterGuide from "./ui/centerGuide.js";
 import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import {createIcon} from "./igv-icons.js";
+import SampleNameControl from "./ui/sampleNameControl.js";
 
 let allBrowsers = [];
 
@@ -267,6 +268,10 @@ function createStandardControls(browser, config) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
+    if (config.showSampleNameButton) {
+        browser.sampleNameControl = new SampleNameControl($toggle_button_container, browser)
+    }
+
     if (config.showSVGButton) {
         browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
@@ -301,6 +306,10 @@ function setDefaults(config) {
 
     if (undefined === config.showCenterGuideButton) {
         config.showCenterGuideButton = true;
+    }
+
+    if (undefined === config.showSampleNameButton) {
+        config.showSampleNameButton = true
     }
 
     if (undefined === config.showSVGButton) {
