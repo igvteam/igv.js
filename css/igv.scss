@@ -619,7 +619,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   font-size: 10px;
   vertical-align: middle;
 
-  border-color: black;
+  //border-color: black;
+  border-color: transparent;
   border-style: solid;
   border-width: thin;
 
