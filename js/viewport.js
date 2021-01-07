@@ -476,7 +476,7 @@ class ViewPort extends ViewportBase {
         // If present, paint axis canvas. Only in first multi-locus panel.
         if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
 
-            const { width, height } = this.trackView.controlCanvas.getBoundingClientRect();
+            const { width, height } = this.trackView.axisCanvas.getBoundingClientRect();
             context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), deltaX - width, deltaY, width, height, 0);
 
             context.save();

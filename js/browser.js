@@ -66,8 +66,6 @@ const multiLocusGapMarginWidth = 2
 
 const multiLocusGapWidth = (2 * multiLocusGapMarginWidth) + multiLocusGapDivWidth
 
-// const leftHandGutterWidth = 50
-const leftHandGutterWidth = 0
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
@@ -77,7 +75,7 @@ const trackManipulationHandleShim = trackManipulationHandleWidth + trackManipula
 const scrollbarOuterWidth = 14
 
 // igv.scss - $igv-viewport-container-shim-width
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
+const viewportContainerShimWidth = rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
 
 class Browser {
 
@@ -937,8 +935,6 @@ class Browser {
 
         const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length, this.getViewportContainerWidth())
 
-        // console.log(`browser.resize -   viewport-container-width ${ this.getViewportContainerWidth() } viewport-width ${ viewportWidth }`)
-
         for (let referenceFrame of this.referenceFrameList) {
 
             const viewportWidthBP = referenceFrame.toBP(viewportWidth)
@@ -1123,11 +1119,9 @@ class Browser {
     };
 
     computeViewportWidth(referenceFrameListLength, viewportContainerWidth) {
-        const w = 1 === referenceFrameListLength ? viewportContainerWidth : Math.floor((viewportContainerWidth - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
 
-        // console.log(`${ Date.now() } - compute viewport width ${ StringUtils.numberFormatter(w) }`)
-
-        return w
+        const containerWidth = TrackView.computeViewportWidth(this, viewportContainerWidth)
+        return 1 === referenceFrameListLength ? containerWidth : Math.floor((containerWidth - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
     }
 
     getViewportWidth() {

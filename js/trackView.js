@@ -39,6 +39,8 @@ import TrackScrollbar from './trackScrollbar.js';
 let dragged
 let dragDestination
 
+const axisContainerWidth = 50
+
 class TrackView {
 
     constructor(browser, $container, track) {
@@ -62,14 +64,13 @@ class TrackView {
             this.trackDiv.style.height = track.height + "px";
         }
 
-        // left hand gutter
-        this.appendLeftHandGutter($track);
-
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
 
-        // this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, browser.referenceFrameList, sampleNameViewportWidth)
         this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
+
+        // left hand gutter
+        this.$axis = this.createAxis(this.$viewportContainer)
 
         // viewport container DOM elements
         populateViewportContainer(browser, browser.referenceFrameList, this)
@@ -207,29 +208,27 @@ class TrackView {
 
     }
 
-    appendLeftHandGutter($track) {
+    createAxis($viewportContainer) {
 
-        const $leftHandGutter = $('<div class="igv-left-hand-gutter">');
-        this.leftHandGutter = $leftHandGutter[0];
-        $track.append($leftHandGutter);
+        const $axis = $('<div class="igv-axis-container">')
+        $viewportContainer.append($axis)
 
         if (typeof this.track.paintAxis === 'function') {
 
             if (this.track.dataRange) {
 
-                $leftHandGutter.click((e) => {
-                    this.browser.dataRangeDialog.configure({trackView: self});
-                    this.browser.dataRangeDialog.present($(self.trackDiv));
-                });
+                $axis.click(() => {
+                    this.browser.dataRangeDialog.configure(this)
+                    this.browser.dataRangeDialog.present($(this.trackDiv))
+                })
 
-                $leftHandGutter.addClass('igv-clickable');
+                $axis.addClass('igv-clickable')
             }
 
-            const $canvas = $('<canvas class ="igv-canvas">');
-            $leftHandGutter.append($canvas);
-            this.controlCanvas = $canvas.get(0);
-            this.resizeControlCanvas($leftHandGutter.outerWidth(), $leftHandGutter.outerHeight())
+            this.resizeAxisCanvas($axis, $axis.outerWidth(), $axis.outerHeight())
         }
+
+        return $axis
     }
 
     dataRange() {
@@ -280,7 +279,11 @@ class TrackView {
         }
         this.repaintViews();
 
-        this.resizeControlCanvas($(this.leftHandGutter).outerWidth(), newHeight);
+        this.resizeAxisCanvas(this.$axis, this.$axis.outerWidth(), newHeight);
+
+        if (this.track.paintAxis) {
+            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+        }
 
         if (this.scrollbar) {
             this.scrollbar.update();
@@ -299,8 +302,7 @@ class TrackView {
             viewport.setWidth(viewportWidth);
         }
 
-        const $leftHandGutter = $(this.leftHandGutter);
-        this.resizeControlCanvas($leftHandGutter.outerWidth(), $leftHandGutter.outerHeight());
+        this.resizeAxisCanvas(this.$axis, this.$axis.outerWidth(), this.$axis.outerHeight());
 
         this.updateViews(true);
     }
@@ -316,7 +318,7 @@ class TrackView {
         }
 
         if (this.track.paintAxis) {
-            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
         }
     }
 
@@ -417,7 +419,6 @@ class TrackView {
         return allFeatures;
     }
 
-
     checkContentHeight() {
         this.viewports.forEach(function (vp) {
             vp.checkContentHeight();
@@ -431,7 +432,7 @@ class TrackView {
         if (this.track.autoHeight) {
             this.setTrackHeight(maxHeight, false);
         } else if (this.track.paintAxis) {   // Avoid duplication, paintAxis is already called in setTrackHeight
-            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
+            this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
         }
 
         if (this.scrollbar) {
@@ -448,26 +449,26 @@ class TrackView {
         }
     }
 
-    resizeControlCanvas(width, height) {
+    resizeAxisCanvas($axis, width, height) {
 
-        var devicePixelRatio = window.devicePixelRatio;
+        if ($axis) {
 
-        if (this.leftHandGutter) {
-
-            if (this.controlCanvas) {
-                $(this.controlCanvas).remove();
+            if (this.axisCanvas) {
+                $(this.axisCanvas).remove()
             }
 
-            var $canvas = $('<canvas class ="igv-canvas">');
-            this.controlCanvas = $canvas[0];
-            $(this.leftHandGutter).append($canvas);
+            const $canvas = $('<canvas class ="igv-canvas">')
+            $axis.append($canvas)
 
-            this.controlCanvas.height = devicePixelRatio * height;
-            this.controlCanvas.width = devicePixelRatio * width;
-            this.controlCanvas.style.height = height + "px";
-            this.controlCanvas.style.width = width + "px";
-            this.controlCtx = this.controlCanvas.getContext("2d");
-            this.controlCtx.scale(devicePixelRatio, devicePixelRatio);
+            this.axisCanvas = $canvas.get(0)
+            this.axisCanvasContext = this.axisCanvas.getContext('2d')
+
+            this.axisCanvas.style.height = `${ height }px`
+            this.axisCanvas.style.width = `${ width }px`
+
+            this.axisCanvas.height = window.devicePixelRatio * height
+            this.axisCanvas.width = window.devicePixelRatio * width
+            this.axisCanvasContext.scale(window.devicePixelRatio, window.devicePixelRatio)
         }
     }
 
@@ -613,8 +614,11 @@ class TrackView {
             this.trackGearPopup.presentMenuList(-(this.trackGearPopup.$popover.width()), 0, MenuUtils.trackMenuItemList(this));
         });
     }
-}
 
+    static computeViewportWidth(browser, viewportContainerWidth) {
+        return viewportContainerWidth - sampleNameViewportWidth - axisContainerWidth
+    }
+}
 
 function emptyViewportContainers(trackViews) {
 
