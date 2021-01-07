@@ -560,24 +560,6 @@
           display: block; }
       .igv-root .igv-navbar .igv-navbar-right-container .igv-zoom-widget-hidden {
         display: none; }
-  .igv-root .igv-ideogram-container {
-    display: flex;
-    flex-flow: row;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
-    align-items: center;
-    margin-top: 10px;
-    height: 16px;
-    width: 100%; }
-    .igv-root .igv-ideogram-container .igv-ideogram-content {
-      height: 100%;
-      background-color: white; }
-    .igv-root .igv-ideogram-container .igv-ideogram-content:first-child {
-      margin-left: 0px; }
-    .igv-root .igv-ideogram-container .igv-ideogram-content-border-right {
-      border-right-color: #292929;
-      border-right-style: solid;
-      border-right-width: 1px; }
   .igv-root .igv-track-container {
     position: relative; }
 
@@ -614,10 +596,6 @@
   justify-content: flex-start;
   align-items: stretch; }
 
-.igv-left-hand-gutter {
-  width: 0px;
-  height: 100%; }
-
 .igv-right-hand-gutter {
   position: relative;
   width: 36px;
@@ -633,22 +611,25 @@
   align-items: stretch;
   width: calc(100% - 62px);
   height: 100%; }
+  .igv-viewport-container .igv-axis-container {
+    position: relative;
+    width: 50px;
+    height: 100%; }
   .igv-viewport-container .igv-viewport {
     position: relative;
     height: 100%;
     overflow-x: hidden;
     overflow-y: hidden;
     background-color: white; }
+    .igv-viewport-container .igv-viewport .igv-viewport-content {
+      position: relative;
+      width: 100%; }
   .igv-viewport-container .igv-viewport-multi-locus-gap-shim {
     height: 100%;
     width: 1px;
     margin-left: 2px;
     margin-right: 2px;
     background-color: transparent; }
-
-.igv-viewport-content {
-  position: relative;
-  width: 100%; }
 
 .igv-canvas {
   position: relative;
