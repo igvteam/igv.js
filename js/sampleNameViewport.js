@@ -96,11 +96,15 @@ class SampleNameViewport extends ViewportBase {
 
         IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(this.track_name_ctx, rightJustifiedFontConfig)
-
         const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(name)
 
-        this.track_name_ctx.fillText(name, Math.round(w - 4), Math.round((h + actualBoundingBoxAscent)/2))
+        // left justified
+        configureFont(this.track_name_ctx, leftJustifiedFontConfig)
+        this.track_name_ctx.fillText(name, 4, Math.round((h + actualBoundingBoxAscent)/2))
+
+        // right justified
+        // configureFont(this.track_name_ctx, rightJustifiedFontConfig)
+        // this.track_name_ctx.fillText(name, Math.round(w - 4), Math.round((h + actualBoundingBoxAscent)/2))
 
     }
 
