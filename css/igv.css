@@ -614,8 +614,7 @@
   .igv-viewport-container .igv-axis-container {
     position: relative;
     width: 50px;
-    height: 100%;
-    background-color: deeppink; }
+    height: 100%; }
   .igv-viewport-container .igv-viewport {
     position: relative;
     height: 100%;
