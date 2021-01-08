@@ -176,6 +176,9 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
+    getCurrentWidth() {
+        return this.$viewport.is(":hidden") ? 0 : sampleNameViewportWidth
+    }
 }
 
 function getBBox(featureMap, y) {
