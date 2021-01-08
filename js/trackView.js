@@ -616,7 +616,13 @@ class TrackView {
     }
 
     static computeViewportWidth(browser, viewportContainerWidth) {
-        return viewportContainerWidth - sampleNameViewportWidth - axisContainerWidth
+
+        if (browser.trackViews && browser.trackViews.length > 0) {
+            return viewportContainerWidth - axisContainerWidth - browser.trackViews[ 0 ].sampleNameViewport.getCurrentWidth()
+        } else {
+            return viewportContainerWidth
+        }
+
     }
 }
 
