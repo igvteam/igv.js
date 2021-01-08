@@ -12,9 +12,6 @@ import {
 
 const sampleNameViewportWidth = 128
 
-let yLast = undefined
-let hLast = undefined
-
 class SampleNameViewport extends ViewportBase {
 
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -176,8 +173,14 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    getCurrentWidth() {
-        return this.$viewport.is(":hidden") ? 0 : sampleNameViewportWidth
+    static getCurrentWidth(browser) {
+        if (false === browser.config.showSampleNames) {
+            return 0
+        } else if (false === browser.config.showSampleNameButton) {
+            return sampleNameViewportWidth
+        } else {
+            return true === browser.sampleNameControl.sampleNamesVisible ? sampleNameViewportWidth : 0
+        }
     }
 }
 

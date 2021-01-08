@@ -89,6 +89,7 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback.hide();
     browser.inputDialog = new InputDialog(browser.$root.get(0));
     browser.dataRangeDialog = new DataRangeDialog(browser.$root);
+
     if (false === config.showTrackLabels) {
         browser.hideTrackLabels();
     } else {
@@ -97,6 +98,7 @@ async function createBrowser(parentDiv, config) {
             browser.trackLabelControl.setState(browser.trackLabelsVisible);
         }
     }
+
     if (false === config.showCursorTrackingGuide) {
         browser.cursorGuide.doHide();
     } else {
@@ -268,11 +270,11 @@ function createStandardControls(browser, config) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
-    if (config.showSampleNameButton) {
+    if (true === config.showSampleNames && true === config.showSampleNameButton) {
         browser.sampleNameControl = new SampleNameControl($toggle_button_container, browser)
     }
 
-    if (config.showSVGButton) {
+    if (true === config.showSVGButton) {
         browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
 
@@ -300,36 +302,40 @@ function setDefaults(config) {
         config.showIdeogram = true;
     }
 
-    if (undefined === config.showCursorTrackingGuideButton) {
-        config.showCursorTrackingGuideButton = true;
-    }
-
-    if (undefined === config.showCenterGuideButton) {
-        config.showCenterGuideButton = true;
-    }
-
-    if (undefined === config.showSampleNameButton) {
-        config.showSampleNameButton = true
-    }
-
-    if (undefined === config.showSVGButton) {
-        config.showSVGButton = true;
-    }
-
     if (undefined === config.showTrackLabelButton) {
         config.showTrackLabelButton = true;
+    }
+
+    if (undefined === config.showTrackLabels) {
+        config.showTrackLabels = true;
+    }
+
+    if (undefined === config.showCursorTrackingGuideButton) {
+        config.showCursorTrackingGuideButton = true;
     }
 
     if (undefined === config.showCursorTrackingGuide) {
         config.showCursorTrackingGuide = false;
     }
 
+    if (undefined === config.showCenterGuideButton) {
+        config.showCenterGuideButton = true;
+    }
+
     if (undefined === config.showCenterGuide) {
         config.showCenterGuide = false;
     }
 
-    if (undefined === config.showTrackLabels) {
-        config.showTrackLabels = true;
+    if (undefined === config.showSampleNameButton) {
+        config.showSampleNameButton = true
+    }
+
+    if (undefined === config.showSampleNames) {
+        config.showSampleNames = true
+    }
+
+    if (undefined === config.showSVGButton) {
+        config.showSVGButton = true;
     }
 
     if (config.showControls === undefined) {

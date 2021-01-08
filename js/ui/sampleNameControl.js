@@ -26,16 +26,24 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 
-const SampleNameControl = function ($parent, browser) {
+class SampleNameControl {
 
-    const $button = $('<div class="igv-navbar-button">')
-    $parent.append($button)
+    constructor($parent, browser) {
 
-    $button.text('Sample Names')
+        this.sampleNamesVisible = browser.config.showSampleNames || true
 
-    $button.on('click.sample-name-control', () => {
-        browser.toggleSampleNameViewport()
-    });
-};
+        this.$button = $('<div class="igv-navbar-button">')
+        $parent.append(this.$button)
 
-export default SampleNameControl;
+        this.$button.text('Sample Names')
+
+        this.$button.on('click.sample-name-control', () => {
+            this.sampleNamesVisible = !this.sampleNamesVisible
+            browser.setSampleNameViewportVisibility(this.sampleNamesVisible)
+        })
+
+    }
+
+}
+
+export default SampleNameControl
