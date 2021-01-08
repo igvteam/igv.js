@@ -114,6 +114,7 @@ class ReferenceFrame {
 function createReferenceFrameList(browser, loci) {
 
     const viewportWidth = browser.computeViewportWidth(loci.length, browser.getViewportContainerWidth())
+
     return loci.map(locusObject => {
 
         // If a flanking region is defined, and the search object is a symbol ("gene") type, adjust start and end

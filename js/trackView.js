@@ -33,7 +33,7 @@ import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
-import SampleNameViewport, { sampleNameViewportWidth } from './sampleNameViewport.js';
+import SampleNameViewport from './sampleNameViewport.js';
 import TrackScrollbar from './trackScrollbar.js';
 
 let dragged
@@ -67,7 +67,7 @@ class TrackView {
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
 
-        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
 
         // left hand gutter
         this.$axis = this.createAxis(this.$viewportContainer)
@@ -616,13 +616,7 @@ class TrackView {
     }
 
     static computeViewportWidth(browser, viewportContainerWidth) {
-
-        if (browser.trackViews && browser.trackViews.length > 0) {
-            return viewportContainerWidth - axisContainerWidth - browser.trackViews[ 0 ].sampleNameViewport.getCurrentWidth()
-        } else {
-            return viewportContainerWidth
-        }
-
+        return viewportContainerWidth - axisContainerWidth - SampleNameViewport.getCurrentWidth(browser)
     }
 }
 

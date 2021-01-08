@@ -482,14 +482,14 @@ class Browser {
         }
     }
 
-    toggleSampleNameViewport() {
+    setSampleNameViewportVisibility(isVisible) {
 
         for (let { sampleNameViewport } of this.trackViews) {
 
-            if (sampleNameViewport.$viewport.is(":hidden")) {
-                sampleNameViewport.$viewport.show()
-            } else {
+            if (false === isVisible) {
                 sampleNameViewport.$viewport.hide()
+            } else {
+                sampleNameViewport.$viewport.show()
             }
 
         }
