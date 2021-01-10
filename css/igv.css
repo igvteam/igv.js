@@ -562,6 +562,43 @@
         display: none; }
   .igv-root .igv-track-container {
     position: relative; }
+    .igv-root .igv-track-container .igv-track {
+      position: relative;
+      width: 100%;
+      margin-top: 4px;
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: stretch; }
+      .igv-root .igv-track-container .igv-track .igv-viewport-container {
+        position: relative;
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        align-items: stretch;
+        width: calc(100% - 62px);
+        height: 100%; }
+        .igv-root .igv-track-container .igv-track .igv-viewport-container .igv-axis-container {
+          position: relative;
+          width: 50px;
+          height: 100%; }
+        .igv-root .igv-track-container .igv-track .igv-viewport-container .igv-viewport {
+          position: relative;
+          height: 100%;
+          overflow-x: hidden;
+          overflow-y: hidden;
+          background-color: white; }
+          .igv-root .igv-track-container .igv-track .igv-viewport-container .igv-viewport .igv-viewport-content {
+            position: relative;
+            width: 100%; }
+        .igv-root .igv-track-container .igv-track .igv-viewport-container .igv-viewport-multi-locus-gap-shim {
+          height: 100%;
+          width: 1px;
+          margin-left: 2px;
+          margin-right: 2px;
+          background-color: transparent; }
 
 .igv-multi-locus-separator {
   pointer-events: none;
@@ -586,50 +623,11 @@
   pointer-events: none;
   color: #737373; }
 
-.igv-track {
-  position: relative;
-  width: 100%;
-  margin-top: 4px;
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch; }
-
 .igv-right-hand-gutter {
   position: relative;
   width: 36px;
   height: 100%;
   background: white; }
-
-.igv-viewport-container {
-  position: relative;
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
-  width: calc(100% - 62px);
-  height: 100%; }
-  .igv-viewport-container .igv-axis-container {
-    position: relative;
-    width: 50px;
-    height: 100%; }
-  .igv-viewport-container .igv-viewport {
-    position: relative;
-    height: 100%;
-    overflow-x: hidden;
-    overflow-y: hidden;
-    background-color: white; }
-    .igv-viewport-container .igv-viewport .igv-viewport-content {
-      position: relative;
-      width: 100%; }
-  .igv-viewport-container .igv-viewport-multi-locus-gap-shim {
-    height: 100%;
-    width: 1px;
-    margin-left: 2px;
-    margin-right: 2px;
-    background-color: transparent; }
 
 .igv-canvas {
   position: relative;
