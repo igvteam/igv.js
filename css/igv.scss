@@ -436,6 +436,69 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   .igv-track-container {
     position: relative;
+
+    .igv-track {
+      position: relative;
+      width: 100%;
+
+      margin-top: 4px;
+
+      display: flex;
+      flex-flow: row;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      align-items: stretch;
+
+      .igv-viewport-container {
+
+        position: relative;
+
+        display: flex;
+        flex-flow: row;
+        flex-wrap: nowrap;
+
+        justify-content: flex-start;
+        align-items: stretch;
+
+        width: calc(100% - #{$igv-viewport-container-shim-width});
+        height: 100%;
+
+        .igv-axis-container {
+          position: relative;
+          width: $igv-axis-container-width;
+          height: 100%;
+          //background-color: deeppink;
+        }
+
+        .igv-viewport {
+          position: relative;
+
+          height: 100%;
+
+          overflow-x: hidden;
+          overflow-y: hidden;
+
+          background-color: white;
+
+          .igv-viewport-content {
+            position: relative;
+            width: 100%;
+
+          }
+
+        }
+
+        .igv-viewport-multi-locus-gap-shim {
+          height: 100%;
+          width: $igv-multi-locus-gap-div-width;
+          margin-left: $igv-multi-locus-gap-margin-width;
+          margin-right: $igv-multi-locus-gap-margin-width;
+          background-color: transparent;
+        }
+      }
+
+    }
+
   }
 
 }
@@ -475,20 +538,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   color: $igv-navbar-toggle-dark-dark;
 }
 
-.igv-track {
-  position: relative;
-  width: 100%;
-
-  margin-top: 4px;
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-  justify-content: flex-start;
-  align-items: stretch;
-
-}
-
 .igv-right-hand-gutter {
   position: relative;
 
@@ -497,55 +546,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   background: white;
 }
-
-.igv-viewport-container {
-
-  position: relative;
-
-  display: flex;
-  flex-flow: row;
-  flex-wrap: nowrap;
-
-  justify-content: flex-start;
-  align-items: stretch;
-
-  width: calc(100% - #{$igv-viewport-container-shim-width});
-  height: 100%;
-
-  .igv-axis-container {
-    position: relative;
-    width: $igv-axis-container-width;
-    height: 100%;
-    //background-color: deeppink;
-  }
-
-  .igv-viewport {
-    position: relative;
-
-    height: 100%;
-
-    overflow-x: hidden;
-    overflow-y: hidden;
-
-    background-color: white;
-
-    .igv-viewport-content {
-      position: relative;
-      width: 100%;
-
-    }
-
-  }
-
-  .igv-viewport-multi-locus-gap-shim {
-    height: 100%;
-    width: $igv-multi-locus-gap-div-width;
-    margin-left: $igv-multi-locus-gap-margin-width;
-    margin-right: $igv-multi-locus-gap-margin-width;
-    background-color: transparent;
-  }
-}
-
 
 .igv-canvas {
   position: relative;
