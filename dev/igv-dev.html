@@ -64,7 +64,8 @@
 <script type="module">
 
     import igv from '../js/index.js'
-    import GtexUtils from "../js/gtex/gtexUtils.js";
+    import GtexUtils from '../js/gtex/gtexUtils.js'
+    import { igvxhr } from '../node_modules/igv-utils/src/index.js'
 
     let browser
     (async () => {
@@ -123,58 +124,42 @@
 
     })()
 
-    function createTrackList(div, file, browser) {
+    async function createTrackList(div, file, browser) {
 
-        return igv.xhr.loadJson(file)
+        const tracks = await igvxhr.loadJson(file)
 
-            .then(function (tracks) {
+        for (let track of tracks) {
 
-                tracks.forEach(function (track) {
-
-                    var trackDiv, name;
-
-                    if (track.HEADING) {
-                        div.insertAdjacentHTML("beforeend",
-                            "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                            + track.HEADING + "</div>");
-                    } else {
-                        trackDiv = document.createElement('div');
-                        trackDiv.innerHTML = track.name;
-                        trackDiv.addEventListener('click', function (event) {
-
-                            // Convert to json to insure we can load json representations (not strictly neccessary).
-                            var json = JSON.stringify(track);
-
-                            browser.loadTrack(json);
-                        });
-
-                        div.appendChild(trackDiv);
-                    }
-
-                })
-
-                return GtexUtils.getTissueInfo("gtex_v7")
-            })
-
-            .then(function (json) {
-
+            if (track.HEADING) {
                 div.insertAdjacentHTML("beforeend",
-                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
+                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
+                    + track.HEADING + "</div>");
+            } else {
+                const trackDiv = document.createElement('div');
+                trackDiv.innerHTML = track.name;
+                trackDiv.addEventListener('click', function (event) {
 
-                json['tissueInfo'].forEach(function (obj) {
+                    // Convert to json to insure we can load json representations (not strictly neccessary).
+                    var json = JSON.stringify(track);
 
-                    let trackDiv = document.createElement('div');
-                    trackDiv.innerHTML = (obj.tissueSiteDetailId.split('_').join(' '));
-                    trackDiv.addEventListener('click', function (event) {
+                    browser.loadTrack(json);
+                });
 
-                        browser.loadTrack(GtexUtils.trackConfiguration(obj));
+                div.appendChild(trackDiv);
+            }
 
-                    });
+        }
 
-                    div.appendChild(trackDiv)
+        div.insertAdjacentHTML("beforeend", "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
 
-                })
-            });
+        const { tissueInfo } = await GtexUtils.getTissueInfo("gtex_v7")
+
+        for (let config of tissueInfo) {
+            const trackDiv = document.createElement('div')
+            trackDiv.innerHTML = (config.tissueSiteDetailId.split('_').join(' '))
+            div.appendChild(trackDiv)
+            trackDiv.addEventListener('click', () => browser.loadTrack(GtexUtils.trackConfiguration(config)))
+        }
 
     }
 
