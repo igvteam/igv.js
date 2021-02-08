@@ -123,8 +123,7 @@ class SampleNameViewport extends ViewportBase {
         this.track_name_ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.track_name_ctx, w, h)
 
-        // IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': randomRGBConstantAlpha(190, 250, 0.75) })
+        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
         const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(this.trackName)
         const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent

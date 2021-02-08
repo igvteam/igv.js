@@ -52,7 +52,7 @@ const MenuUtils = {
         const $e = $('<div>');
         $e.text('Set data range');
         const clickHandler = function () {
-            trackView.browser.dataRangeDialog.configure({trackView: trackView});
+            trackView.browser.dataRangeDialog.configure(trackView);
             trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
         };
         menuItems.push({object: $e, click: clickHandler});
