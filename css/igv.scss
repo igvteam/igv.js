@@ -565,7 +565,7 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 8989;
+  z-index: 1024;
 }
 
 // sample name viewport - hover div for long names
@@ -579,8 +579,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   position: absolute;
   width: auto;
 
-  padding-left: 4px;
-  padding-right: 4px;
+  //padding-left: 4px;
+  //padding-right: 4px;
 
   color: black;
   font-family: sans-serif;
@@ -588,12 +588,13 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   vertical-align: middle;
 
   //border-color: black;
-  border-color: transparent;
-  border-style: solid;
-  border-width: thin;
+  //border-color: transparent;
+  //border-style: solid;
+  //border-width: thin;
 
-  z-index: 8888;
-  background-color: white;
+  z-index: 1042;
+  //background-color: white;
+  background-color: orangered;
 }
 
 .igv-scrollbar-outer-div {
