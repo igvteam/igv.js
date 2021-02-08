@@ -11,6 +11,7 @@ import {
 } from './util/colorPalletes.js'
 
 const sampleNameViewportWidth = 128
+const sampleNameXShim = 4
 
 class SampleNameViewport extends ViewportBase {
 
@@ -29,12 +30,45 @@ class SampleNameViewport extends ViewportBase {
         this.track_name_ctx = $trackNameCanvas.get(0).getContext('2d')
 
         const $hover = $('<div>', { class:'igv-sample-name-viewport-hover' })
-
         this.trackView.$viewportContainer.append($hover)
-        $hover.hide()
 
         this.featureMap = undefined
         this.canvasTop = undefined
+
+        this.configureSampleNameHover($hover)
+        this.configureTrackNameHover($hover)
+
+    }
+
+    drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
+
+        this.trackName = undefined
+
+        this.featureMap = featureMap
+        this.canvasTop = canvasTop
+        this.sampleNameRenderer = sampleNameRenderer
+
+        // hide track name canvas
+        this.track_name_ctx.clearRect(0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height)
+        this.track_name_ctx.canvas.style.display = 'none'
+
+
+
+        this.ctx.canvas.style.display = 'block'
+        IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
+
+        // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+        IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+
+        configureFont(this.ctx, leftJustifiedFontConfig)
+
+        this.ctx.canvas.style.top = `${ canvasTop }px`
+        this.ctx.translate(0, -canvasTop)
+
+        sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
+    }
+
+    configureSampleNameHover($hover) {
 
         this.ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientX, clientY, screenX, screenY }) => {
 
@@ -64,13 +98,8 @@ class SampleNameViewport extends ViewportBase {
             // $hover.css({ height: 0 })
         })
 
-    }
+        $hover.hide()
 
-    showHover($hover, { y, h, name }, contentTop) {
-        const yFudge = -2
-        const hFudge = 4
-        $hover.css({ left: 0, top: y + contentTop + yFudge, /*height: h + hFudge*/ })
-        $hover.text(name)
     }
 
     drawTrackName(name) {
@@ -94,13 +123,15 @@ class SampleNameViewport extends ViewportBase {
         this.track_name_ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.track_name_ctx, w, h)
 
-        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+        // IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': randomRGBConstantAlpha(190, 250, 0.75) })
 
-        const { width, actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(name)
+        const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(this.trackName)
+        const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
 
         // left justified
         configureFont(this.track_name_ctx, leftJustifiedFontConfig)
-        this.track_name_ctx.fillText(name, 4, Math.round((h + actualBoundingBoxAscent)/2))
+        this.track_name_ctx.fillText(this.trackName, sampleNameXShim, Math.round(textHeight + (this.$viewport.height()/2)))
 
         // right justified
         // configureFont(this.track_name_ctx, rightJustifiedFontConfig)
@@ -108,34 +139,34 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
+    configureTrackNameHover($hover) {
 
-        this.trackName = undefined
+        this.track_name_ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientX, clientY, screenX, screenY }) => {
 
-        this.featureMap = featureMap
-        this.canvasTop = canvasTop
-        this.sampleNameRenderer = sampleNameRenderer
+            const { y:y_bbox } = currentTarget.getBoundingClientRect()
+            const dy = (clientY - y_bbox)
 
-        // hide track name canvas
-        this.track_name_ctx.clearRect(0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height)
-        this.track_name_ctx.canvas.style.display = 'none'
+            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(this.trackName)
+            const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
+            const y = Math.round(textHeight + (this.$viewport.height()/2))
 
+            if (dy < Math.round(this.$viewport.height()/2) || dy > Math.round(textHeight + this.$viewport.height()/2)) {
+                $hover.hide()
+            } else {
+                const fudge = 2
+                $hover.css({ left: sampleNameXShim, top: Math.round(this.$viewport.height()/2) - fudge })
+                $hover.text(this.trackName)
+                $hover.show()
+            }
+        })
 
+        $hover.hide()
 
-        this.ctx.canvas.style.display = 'block'
-        IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
+    }
 
-        // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-        IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-
-        configureFont(this.ctx, leftJustifiedFontConfig)
-
-        this.ctx.canvas.style.top = `${ canvasTop }px`
-        this.ctx.translate(0, -canvasTop)
-
-        // console.log(`drawSampleNames - canvas-top ${ canvasTop }`)
-
-        sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
+    showHover($hover, { y, h, name }, contentTop) {
+        $hover.css({ left: sampleNameXShim, top: y + contentTop })
+        $hover.text(name)
     }
 
     setTop(contentTop) {
@@ -235,6 +266,6 @@ function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillSt
     ctx.fillStyle = fillStyle
 }
 
-export { sampleNameViewportWidth }
+export { sampleNameViewportWidth, sampleNameXShim }
 
 export default SampleNameViewport

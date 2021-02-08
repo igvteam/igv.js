@@ -31,6 +31,7 @@ import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
 import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
+import { sampleNameXShim } from "../sampleNameViewport.js";
 
 class SegTrack extends TrackBase {
 
@@ -249,8 +250,8 @@ class SegTrack extends TrackBase {
 
                 if (false === featureMap.has(key)) {
                     featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
-                    // configureFont(context, fontConfig)
-                    // context.fillText(`${ Math.floor(y) } ${ featureMap.get(key).name }`, x + 4, y + h)
+                    configureFont(context, fontConfig)
+                    context.fillText(`${ featureMap.get(key).name }`, x + sampleNameXShim, y + h)
                 }
 
             }
@@ -443,7 +444,6 @@ class SegTrack extends TrackBase {
         return (this.config.indexed === false || !this.config.indexURL) && this.config.supportsWholeGenome !== false
     }
 
-
     updateSampleKeys(featureList) {
 
         if(this.explicitSamples) return;
@@ -475,7 +475,6 @@ function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillSt
     ctx.fillStyle = fillStyle
 }
 
-const fudge = 4
 function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
 
     for (let { x, y, w, h, name } of featureMap.values()) {
@@ -483,14 +482,14 @@ function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
         ctx.save()
         // ctx.fillStyle = randomRGBConstantAlpha(150, 250, 0.5)
         ctx.fillStyle = 'white'
-        ctx.fillRect(0, y,canvasWidth, h)
+        ctx.fillRect(0, y, canvasWidth, h)
         ctx.restore()
 
         // right justified text
         // ctx.fillText(name, canvasWidth - fudge, y + h)
 
         // left justified text
-        ctx.fillText(name, fudge, y + h)
+        ctx.fillText(name, sampleNameXShim, y + h)
     }
 
 }
