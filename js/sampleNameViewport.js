@@ -178,11 +178,10 @@ class SampleNameViewport extends ViewportBase {
         id = id.replace(/\W/g, '')
 
         const yScrollDelta = this.featureMap ? this.$content.position().top : 0
-        const dy = deltaY + yScrollDelta
 
         const { width, height } = this.$viewport.get(0).getBoundingClientRect()
 
-        context.addTrackGroupWithTranslationAndClipRect(id, deltaX, dy, width, height, -yScrollDelta)
+        context.addTrackGroupWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
 
         this.drawSVGWithContext(context, width, height)
 
@@ -197,8 +196,13 @@ class SampleNameViewport extends ViewportBase {
         configureFont(context, leftJustifiedFontConfig)
 
         if (this.trackName) {
-            const { width: textWidth, actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
-            context.fillText(this.trackName, Math.round(width - 4), Math.round((height + actualBoundingBoxAscent)/2))
+
+            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
+            const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
+
+            // left justified
+            configureFont(context, leftJustifiedFontConfig)
+            context.fillText(this.trackName, sampleNameXShim, Math.round(textHeight + (this.$viewport.height()/2)))
         } else if (this.featureMap) {
             this.sampleNameRenderer(context, this.featureMap, width, height)
         }
