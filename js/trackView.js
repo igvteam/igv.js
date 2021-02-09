@@ -135,29 +135,39 @@ class TrackView {
 
     async renderSVGContext(context, { deltaX, deltaY }) {
 
-        const list = [ this.sampleNameViewport, ...this.viewports ]
+        const { y, width:sampleNameViewportWidth } = this.sampleNameViewport.$viewport.get(0).getBoundingClientRect()
 
-        let sampleNameViewportWidth = undefined
-        for (let viewport of list) {
+        await this.sampleNameViewport.renderSVGContext(context, { deltaX, deltaY: y + deltaY })
+
+        const { width:axisWidth, height:axisHeight } = this.$axis.get(0).getBoundingClientRect()
+
+        if (typeof this.track.paintAxis === 'function') {
+
+            const { y, width, height } = this.axisCanvas.getBoundingClientRect()
+
+            let str = this.track.name || this.track.id
+            str = str.replace(/\W/g, '')
+
+            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), sampleNameViewportWidth + deltaX, y + deltaY, width, height, 0)
+
+            context.save()
+            this.track.paintAxis(context, width, height)
+            context.restore()
+        }
+
+        for (let viewport of this.viewports) {
 
             const { y, width } = viewport.$viewport.get(0).getBoundingClientRect()
 
-            if (0 === list.indexOf(viewport)) {
+            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame)
 
-                await viewport.renderSVGContext(context, { deltaX, deltaY: y + deltaY })
-                sampleNameViewportWidth = width
-            } else {
+            let offset =
+                {
+                    deltaX: sampleNameViewportWidth + axisWidth + index * width + deltaX,
+                    deltaY: y + deltaY
+                };
 
-                const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame)
-
-                let offset =
-                    {
-                        deltaX: sampleNameViewportWidth + index * width + deltaX,
-                        deltaY: y + deltaY
-                    };
-
-                await viewport.renderSVGContext(context, offset)
-            }
+            await viewport.renderSVGContext(context, offset)
         }
     }
 

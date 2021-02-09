@@ -473,17 +473,6 @@ class ViewPort extends ViewportBase {
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
         const id = str.toLowerCase() + '_genomic_state_index_' + index;
 
-        // If present, paint axis canvas. Only in first multi-locus panel.
-        if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
-
-            const { width, height } = this.trackView.axisCanvas.getBoundingClientRect();
-            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), deltaX - width, deltaY, width, height, 0);
-
-            context.save();
-            this.trackView.track.paintAxis(context, width, height);
-            context.restore();
-        }
-
         const dx = deltaX + (index * context.multiLocusGap);
 
         const yScrollDelta = this.$content.position().top;
@@ -496,6 +485,7 @@ class ViewPort extends ViewportBase {
         this.drawSVGWithContext(context, width, height)
 
     }
+
 
     renderTrackLabelSVG(context) {
 
