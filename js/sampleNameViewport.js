@@ -172,7 +172,7 @@ class SampleNameViewport extends ViewportBase {
         this.$content.css('top', `${ contentTop }px`);
     }
 
-    async renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, { deltaX, deltaY }) {
 
         let id = this.trackView.track.name || this.trackView.track.id
         id = id.replace(/\W/g, '')

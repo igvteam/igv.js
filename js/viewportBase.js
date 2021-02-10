@@ -116,7 +116,7 @@ class ViewportBase {
 
     }
 
-    async renderSVGContext(context, offset) {
+    renderSVGContext(context, offset) {
         console.log('ViewportBase - renderSVGContext(context, offset)')
     }
 

@@ -465,7 +465,7 @@ class ViewPort extends ViewportBase {
         FileUtils.download(`${str}.svg`, data);
     }
 
-    async renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, { deltaX, deltaY }) {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
