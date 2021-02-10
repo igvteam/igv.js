@@ -293,7 +293,6 @@ class ViewPort extends ViewportBase {
             {
                 context: ctx,
                 renderSVG: false,
-                features,
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
@@ -321,7 +320,13 @@ class ViewPort extends ViewportBase {
     }
 
     draw(drawConfiguration, features, roiFeatures) {
+
         if (features) {
+
+            // let str = this.trackView.track.name || this.trackView.track.id
+            // const { pixelHeight, pixelTop } = drawConfiguration
+            // console.log(`${ str } - draw - pixelTop ${ pixelTop } pixelHeight ${ pixelHeight }`)
+
             drawConfiguration.features = features;
             this.trackView.track.draw(drawConfiguration);
         }
@@ -471,7 +476,7 @@ class ViewPort extends ViewportBase {
         str = str.replace(/\W/g, '');
 
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = str.toLowerCase() + '_genomic_state_index_' + index;
+        const id = `${ str.toLowerCase() }_${ index }`
 
         const dx = deltaX + (index * context.multiLocusGap);
 
@@ -485,7 +490,6 @@ class ViewPort extends ViewportBase {
         this.drawSVGWithContext(context, width, height)
 
     }
-
 
     renderTrackLabelSVG(context) {
 
@@ -532,6 +536,10 @@ class ViewPort extends ViewportBase {
                 viewportContainerWidth: this.browser.getViewportContainerWidth(),
                 selection: this.selection
             };
+
+        // let str = this.trackView.track.name || this.trackView.track.id
+        // const { pixelHeight, pixelTop } = config
+        // console.log(`${ str } - draw svg - pixelTop ${ pixelTop } pixelHeight ${ pixelHeight }`)
 
         const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
