@@ -265,10 +265,6 @@ class TrackView {
 
         this.resizeControlCanvas($(this.leftHandGutter).outerWidth(), newHeight);
 
-        if (this.track.paintAxis) {
-            this.track.paintAxis(this.controlCtx, $(this.controlCanvas).width(), $(this.controlCanvas).height());
-        }
-
         if (this.scrollbar) {
             this.scrollbar.update();
         }
