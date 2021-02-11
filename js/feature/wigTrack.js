@@ -38,8 +38,11 @@ const DEFAULT_COLOR = "rgb(150,150,150)";
 class WigTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+    updateConfig(config) {
+        super.updateConfig(config);
 
         this.type = "wig";
         this.height = config.height || 50;
@@ -47,11 +50,11 @@ class WigTrack extends TrackBase {
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
-            this.featureSource = new BWSource(config, browser.genome);
+            this.featureSource = new BWSource(config, this.browser.genome);
         } else if ("tdf" === format) {
-            this.featureSource = new TDFSource(config, browser.genome);
+            this.featureSource = new TDFSource(config, this.browser.genome);
         } else {
-            this.featureSource = FeatureSource(config, browser.genome);
+            this.featureSource = FeatureSource(config, this.browser.genome);
         }
 
         this.autoscale = config.autoscale || config.max === undefined;
@@ -63,11 +66,10 @@ class WigTrack extends TrackBase {
         }
 
         this.windowFunction = config.windowFunction || "mean";
-        this.paintAxis = paintAxis;
+        this.paintAxis = config.paintAxis;
         this.graphType = config.graphType || "bar";
         this.normalize = config.normalize;  // boolean, for use with "TDF" files
         this.scaleFactor = config.scaleFactor;  // optional scale factor, ignored if normalize === true;
-
     }
 
     async postInit() {

@@ -48,8 +48,12 @@ const junctionRenderingContext = {}
 class FeatureTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+
+    updateConfig(config) {
+        super.updateConfig(config);
 
         this.type = config.type || "annotation";
 
@@ -65,7 +69,7 @@ class FeatureTrack extends TrackBase {
         } else {
             this.featureSource = config.featureSource ?
                 config.featureSource :
-                FeatureSource(config, browser.genome);
+                FeatureSource(config, this.browser.genome);
         }
 
         // Set default heights
@@ -120,7 +124,6 @@ class FeatureTrack extends TrackBase {
 
         //UCSC useScore option
         this.useScore = config.useScore;
-
     }
 
     async postInit() {
