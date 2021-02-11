@@ -36,9 +36,12 @@ import FeatureSource from "./featureSource.js"
 class InteractionTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
 
+    updateConfig(config) {
+
+        super.updateConfig(config);
         this.theta = config.theta || Math.PI / 4;
         this.sinTheta = Math.sin(this.theta);
         this.cosTheta = Math.cos(this.theta);
