@@ -117,8 +117,8 @@ class FeatureParser {
                 this.setDecoder(header.format);
 
                 // If the line can be parsed as a feature assume we are beyond the header, if any
+                const tokens = line.split(this.delimiter || "\t");
                 try {
-                    const tokens = line.split(this.delimiter || "\t");
                     const tmpHeader = Object.assign({columnNames}, header);
                     if (this.decode(tokens, tmpHeader)) {
                         break;
@@ -129,6 +129,9 @@ class FeatureParser {
                     }
                 } catch (e) {
                     // Not a feature
+                    if (tokens.length > 1) {
+                        columnNames = tokens; // possible column names
+                    }
                 }
             }
         }
