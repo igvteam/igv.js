@@ -49,8 +49,8 @@ class BAMTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
         this.type = "alignment";
 
         if (config.alleleFreqThreshold === undefined) {

@@ -37,8 +37,8 @@ class SegTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.type = config.type || "seg";
 

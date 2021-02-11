@@ -41,8 +41,8 @@ class WigTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.type = "wig";
         this.height = config.height || 50;

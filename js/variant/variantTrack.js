@@ -43,8 +43,8 @@ class VariantTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.visibilityWindow = config.visibilityWindow;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED

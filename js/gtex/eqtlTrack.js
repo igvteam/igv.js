@@ -37,8 +37,8 @@ class EqtlTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.name = config.name;
         this.pValueField = config.pValueField || "pValue";
