@@ -257,12 +257,11 @@ class TrackView {
 
         // If the track does not manage its own content height set it here
         if (typeof this.track.computePixelHeight !== "function") {
-            this.viewports.forEach(function (vp) {
+            for (let vp of this.viewports) {
                 vp.setContentHeight(newHeight);
-                if (vp.tile) vp.tile.invalidate = true;
-            });
-            this.repaintViews();
+            }
         }
+        this.repaintViews();
 
         this.resizeControlCanvas($(this.leftHandGutter).outerWidth(), newHeight);
 
