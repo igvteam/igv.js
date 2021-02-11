@@ -459,13 +459,14 @@ class ViewPort extends ViewportBase {
 
         context.save();
 
+        const top = -$(this.contentDiv).position().top;
         const config =
             {
                 context: context,
                 viewport: this,
                 referenceFrame: this.referenceFrame,
-                top: -$(this.contentDiv).position().top,
-                pixelTop: 0,
+                top: top,
+                pixelTop: top,
                 pixelWidth: width,
                 pixelHeight: height,
                 bpStart: start,
