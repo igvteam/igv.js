@@ -597,7 +597,10 @@ class ViewPort extends ViewportBase {
             // Track specific items
             let menuItems = [];
             if (typeof self.trackView.track.contextMenuItemList === "function") {
-                menuItems = self.trackView.track.contextMenuItemList(clickState);
+                const trackMenuItems = self.trackView.track.contextMenuItemList(clickState);
+                if(trackMenuItems) {
+                    menuItems = trackMenuItems;
+                }
             }
 
             // Add items common to all tracks
