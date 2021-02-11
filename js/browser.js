@@ -28,7 +28,6 @@ import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import TrackView, {
     emptyViewportContainers,
     maxViewportContentHeight,
-    populateViewportContainer,
     updateViewportShims
 } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
@@ -1348,7 +1347,7 @@ class Browser {
             this.referenceFrameList = referenceFrameList
             emptyViewportContainers(this.trackViews)
             for (let trackView of this.trackViews) {
-                populateViewportContainer(this, referenceFrameList, trackView);
+                trackView.populateViewportContainer(this, referenceFrameList);
             }
 
             this.updateUIWithReferenceFrameListChange(referenceFrameList);

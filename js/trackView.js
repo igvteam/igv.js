@@ -67,13 +67,11 @@ class TrackView {
         this.$viewportContainer = $('<div class="igv-viewport-container">');
         $track.append(this.$viewportContainer);
 
-        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
-
-        // left hand gutter
+        // add axis to viewportContainer
         this.$axis = this.createAxis(this.$viewportContainer)
 
-        // viewport container DOM elements
-        populateViewportContainer(browser, browser.referenceFrameList, this)
+        // add viewport(s) to viewportContainer. One viewport per reference frame
+        this.populateViewportContainer(browser, browser.referenceFrameList)
 
         // Track drag handle
         if ('ideogram' === track.type || 'ruler' === track.type) {
@@ -130,6 +128,27 @@ class TrackView {
         }
         this.altColorPicker = new ColorPicker(options);
 
+
+    }
+
+    populateViewportContainer(browser, referenceFrameList) {
+
+        const width = browser.computeViewportWidth(referenceFrameList.length, browser.getViewportContainerWidth());
+
+        this.viewports = [];
+
+        for (let referenceFrame of referenceFrameList) {
+            const viewport = createViewport(this, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
+            this.viewports.push(viewport)
+        }
+
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
+
+        updateViewportShims(this.viewports, this.$viewportContainer)
+
+        this.updateViewportForMultiLocus()
+
+        this.attachScrollbar($(this.trackDiv), this.$viewportContainer, [...this.viewports, this.sampleNameViewport])
 
     }
 
@@ -640,42 +659,23 @@ function emptyViewportContainers(trackViews) {
             trackView.scrollbar = undefined
         }
 
-        for (let viewport of trackView.viewports) {
+        for (let viewport of [ ...trackView.viewports, trackView.sampleNameViewport ]) {
 
             if (viewport.rulerSweeper) {
-                viewport.rulerSweeper.$rulerSweeper.remove();
+                viewport.rulerSweeper.$rulerSweeper.remove()
             }
 
             if (viewport.popover) {
                 viewport.popover.dispose()
             }
 
-            viewport.$viewport.remove();
+            viewport.$viewport.remove()
         }
 
-        delete trackView.viewports;
-
-        delete trackView.scrollbar;
+        delete trackView.sampleNameViewport
+        delete trackView.viewports
+        delete trackView.scrollbar
     }
-}
-
-function populateViewportContainer(browser, referenceFrameList, trackView) {
-
-    const width = browser.computeViewportWidth(referenceFrameList.length, browser.getViewportContainerWidth());
-
-    trackView.viewports = [];
-
-    for (let referenceFrame of referenceFrameList) {
-        const viewport = createViewport(trackView, referenceFrameList, referenceFrameList.indexOf(referenceFrame), width)
-        trackView.viewports.push(viewport);
-    }
-
-    updateViewportShims(trackView.viewports, trackView.$viewportContainer)
-
-    trackView.updateViewportForMultiLocus();
-
-    trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, [...trackView.viewports, trackView.sampleNameViewport])
-
 }
 
 function updateViewportShims(viewports, $viewportContainer) {
@@ -720,6 +720,6 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights);
 }
 
-export {maxViewportContentHeight, updateViewportShims, emptyViewportContainers, populateViewportContainer}
+export { maxViewportContentHeight, updateViewportShims, emptyViewportContainers }
 
 export default TrackView
