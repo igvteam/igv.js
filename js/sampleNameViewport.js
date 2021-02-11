@@ -59,14 +59,23 @@ class SampleNameViewport extends ViewportBase {
 
             if (this.featureMap && undefined !== this.canvasTop) {
 
-                const { y:y_bbox } = currentTarget.getBoundingClientRect()
+                const { x:x_viewport, y:y_viewport } = currentTarget.getBoundingClientRect()
 
-                // (clientY - y_bbox) is equivalent to event.offsetY which does not work correctly
-                const wye = (clientY - y_bbox) + this.canvasTop
+                // (clientY - y_viewport) is equivalent to event.offsetY which does not work correctly
+                const wye = (clientY - y_viewport) + this.canvasTop
                 const result = getBBox(this.featureMap, wye)
 
                 if (result) {
-                    this.showHover($hover, result, this.$content.position().top)
+
+                    const { y, name } = result
+
+                    $hover.css({ left: (x_viewport - 18) + sampleNameXShim, top: y + this.$content.position().top })
+
+                    $hover.text(name)
+
+                    // const { x: x_hover } = $hover.get(0).getBoundingClientRect()
+                    // console.log(`current-target ${ x_viewport } hover-bbox-x ${ x_hover } hover-offset-x ${ $hover.offset().left }`)
+
                 }
             }
         })
@@ -85,11 +94,6 @@ class SampleNameViewport extends ViewportBase {
 
         $hover.hide()
 
-    }
-
-    showHover($hover, { y, h, name }, contentTop) {
-        $hover.css({ left: sampleNameXShim, top: y + contentTop })
-        $hover.text(name)
     }
 
     setTop(contentTop) {
