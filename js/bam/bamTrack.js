@@ -46,17 +46,18 @@ const DEFAULT_CONNECTOR_COLOR = "rgb(200, 200, 200)";
 class BAMTrack extends TrackBase {
 
     constructor(config, browser) {
-
-
         super(config, browser);
+    }
 
+    updateConfig(config) {
+        super.updateConfig(config);
         this.type = "alignment";
 
         if (config.alleleFreqThreshold === undefined) {
             config.alleleFreqThreshold = 0.2;
         }
 
-        this.featureSource = new BamSource(config, browser);
+        this.featureSource = new BamSource(config, this.browser);
 
         this.showCoverage = config.showCoverage === undefined ? true : config.showCoverage;
         this.showAlignments = config.showAlignments === undefined ? true : config.showAlignments;

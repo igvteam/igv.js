@@ -12,6 +12,11 @@ class GCNVTrack extends TrackBase {
 
     constructor(config, browser) {
         super(config, browser);
+    }
+
+    updateConfig(config) {
+        super.updateConfig(config);
+
         this.autoscale = config.autoscale || config.max === undefined;
         this.dataRange = {
             min: config.min || 0,
@@ -28,7 +33,7 @@ class GCNVTrack extends TrackBase {
             this.featureSource = config._featureSource;
             delete config._featureSource;
         } else {
-            this.featureSource = FeatureSource(this.config, browser.genome);
+            this.featureSource = FeatureSource(this.config, this.browser.genome);
         }
     }
 

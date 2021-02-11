@@ -35,9 +35,11 @@ class EqtlTrack extends TrackBase {
     constructor(config, browser) {
 
         super(config, browser);
+    }
 
-        this.config = config;
-        this.url = config.url;
+    updateConfig(config) {
+        super.updateConfig(config);
+
         this.name = config.name;
         this.pValueField = config.pValueField || "pValue";
         this.geneField = config.geneField || "geneSymbol";
@@ -68,10 +70,9 @@ class EqtlTrack extends TrackBase {
         this.visibilityWindow = config.visibilityWindow === undefined ?
             2000000 : config.visibilityWindow >= 0 ? Math.min(2000000, config.visibilityWindow) : 2000000;
 
-        this.featureSource = FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, this.browser.genome);
 
         GtexUtils.gtexLoaded = true;
-
     }
 
     paintAxis(ctx, pixelWidth, pixelHeight) {

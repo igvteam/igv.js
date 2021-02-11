@@ -34,8 +34,11 @@ import {isSimpleType} from "../util/igvUtils.js";
 class SegTrack extends TrackBase {
 
     constructor(config, browser) {
-
         super(config, browser);
+    }
+
+    updateConfig(config) {
+        super.updateConfig(config);
 
         this.type = config.type || "seg";
 
@@ -82,10 +85,9 @@ class SegTrack extends TrackBase {
 
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
-        this.featureSource = FeatureSource(this.config, browser.genome);
+        this.featureSource = FeatureSource(this.config, this.browser.genome);
 
         this.initialSort = config.sort;
-
     }
 
     async postInit() {
