@@ -97,10 +97,12 @@ class Variant {
 
                         let altLength = alt.length;
                         let lengthOnRef = ref.length;
+                        const lmin = Math.min(altLength, lengthOnRef);
 
                         // Trim off matching bases.  Try first match, then right -> left,  then any remaining left -> right
                         let s = 0;
-                        if (ref.charCodeAt(0) === alt.charCodeAt(0)) {
+
+                        while(s < lmin && (ref.charCodeAt(s) === alt.charCodeAt(s))) {
                             s++;
                             altLength--;
                             lengthOnRef--;
@@ -132,7 +134,7 @@ class Variant {
                         }
 
                         const alleleStart = this.pos + s - 1;      // -1 for zero based coordinates
-                        const alleleEnd = alleleStart + lengthOnRef;    // insertions have zero length on ref, but we give them 1
+                        const alleleEnd = alleleStart + lengthOnRef;
                         this.start = this.start === undefined ? alleleStart : Math.min(this.start, alleleStart);
                         this.end = this.end === undefined ? alleleEnd : Math.max(this.end, alleleEnd);
                     }
