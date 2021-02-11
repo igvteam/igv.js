@@ -24,6 +24,7 @@
  */
 
 import TrackBase from "../trackBase.js";
+import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 
 const knownAltBases = new Set(["A", "C", "T", "G"].map(c => c.charCodeAt(0)))
@@ -72,7 +73,7 @@ class Variant {
         // not the leading or trailing reference
         if (this.info["END"]) {
             this.start = this.pos - 1;
-            if(this.info["CHR2"] && this.info["CHR2"] !== this.chr) {
+            if (this.info["CHR2"] && this.info["CHR2"] !== this.chr) {
                 this.end = this.start + 1;
             } else {
                 this.end = Number.parseInt(this.info["END"]);
@@ -102,7 +103,7 @@ class Variant {
                         // Trim off matching bases.  Try first match, then right -> left,  then any remaining left -> right
                         let s = 0;
 
-                        while(s < lmin && (ref.charCodeAt(s) === alt.charCodeAt(s))) {
+                        while (s < lmin && (ref.charCodeAt(s) === alt.charCodeAt(s))) {
                             s++;
                             altLength--;
                             lengthOnRef--;
@@ -141,7 +142,7 @@ class Variant {
                 }
 
                 // Default to single base representation @ position for variant types not otherwise handled
-                if(this.start === undefined) {
+                if (this.start === undefined) {
                     this.start = this.pos - 1;
                     this.end = this.pos;
                 }
@@ -155,10 +156,14 @@ class Variant {
         var self = this,
             fields, gt;
 
-        const posString = this.end === this.pos ? this.pos : `${this.pos}-${this.end}`;
+        const posString = `${StringUtils.numberFormatter(this.pos)}`;
+        const locString = this.start === this.end ?
+            `${StringUtils.numberFormatter(this.start)} | ${StringUtils.numberFormatter(this.start + 1)}` :
+            `${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`;
         fields = [
             {name: "Chr", value: this.chr},
             {name: "Pos", value: posString},
+            {name: "Loc", value: locString},
             {name: "Names", value: this.names ? this.names : ""},
             {name: "Ref", value: this.referenceBases},
             {name: "Alt", value: this.alternateBases.replace("<", "&lt;")},
