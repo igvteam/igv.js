@@ -38,11 +38,16 @@ class TrackBase {
 
     constructor(config, browser) {
         this.browser = browser;
-
-        this.updateConfig(config)
+        this.init(config)
     }
 
-    updateConfig(config) {
+    /**
+     * Initialize track properties from the config object.  This method is typically overriden in subclasses, which
+     * will call this implementation as super.init(config).
+     *
+     * @param config
+     */
+    init(config) {
         if (config.displayMode) {
             config.displayMode = config.displayMode.toUpperCase();
         }
@@ -81,6 +86,15 @@ class TrackBase {
         this.maxHeight = config.maxHeight || Math.max(1000, this.height);
 
         this.visibilityWindow = config.visibilityWindow;
+    }
+
+    /**
+     * Update track properties from the config object.
+     *
+     * @param config
+     */
+    updateConfig(config) {
+        this.init(config);
     }
 
     /**

@@ -43,8 +43,8 @@ class GWASTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.useChrColors = config.useChrColors === undefined ? true : config.useChrColors;
         this.trait = config.trait;
