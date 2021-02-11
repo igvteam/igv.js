@@ -52,8 +52,8 @@ class FeatureTrack extends TrackBase {
     }
 
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.type = config.type || "annotation";
 

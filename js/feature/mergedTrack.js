@@ -32,12 +32,12 @@ class MergedTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
+    init(config) {
         if (!config.tracks) {
             throw Error("Error: no tracks defined for merged track" + config)
         }
 
-        super.updateConfig(config);
+        super.init(config);
     }
 
     async postInit() {

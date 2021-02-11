@@ -14,8 +14,8 @@ class GCNVTrack extends TrackBase {
         super(config, browser);
     }
 
-    updateConfig(config) {
-        super.updateConfig(config);
+    init(config) {
+        super.init(config);
 
         this.autoscale = config.autoscale || config.max === undefined;
         this.dataRange = {
