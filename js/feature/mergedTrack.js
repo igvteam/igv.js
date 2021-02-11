@@ -29,14 +29,16 @@ import {inferTrackType} from "../util/igvUtils.js";
 
 class MergedTrack extends TrackBase {
     constructor(config, browser) {
-
-        if (!config.tracks) {
-            throw Error("Error: no tracks defined for merged track" + config);
-        }
-
         super(config, browser);
     }
 
+    updateConfig(config) {
+        if (!config.tracks) {
+            throw Error("Error: no tracks defined for merged track" + config)
+        }
+
+        super.updateConfig(config);
+    }
 
     async postInit() {
         this.tracks = [];
