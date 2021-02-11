@@ -322,11 +322,6 @@ class ViewPort extends ViewportBase {
     draw(drawConfiguration, features, roiFeatures) {
 
         if (features) {
-
-            // let str = this.trackView.track.name || this.trackView.track.id
-            // const { pixelHeight, pixelTop } = drawConfiguration
-            // console.log(`${ str } - draw - pixelTop ${ pixelTop } pixelHeight ${ pixelHeight }`)
-
             drawConfiguration.features = features;
             this.trackView.track.draw(drawConfiguration);
         }
@@ -536,10 +531,6 @@ class ViewPort extends ViewportBase {
                 viewportContainerWidth: this.browser.getViewportContainerWidth(),
                 selection: this.selection
             };
-
-        // let str = this.trackView.track.name || this.trackView.track.id
-        // const { pixelHeight, pixelTop } = config
-        // console.log(`${ str } - draw svg - pixelTop ${ pixelTop } pixelHeight ${ pixelHeight }`)
 
         const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;

@@ -23,12 +23,6 @@ class SampleNameViewport extends ViewportBase {
 
         this.$viewport.data('viewport-type', 'sample-name')
 
-        // track name canvas
-        const $trackNameCanvas = $('<canvas>', { class:'igv-sample-name-viewport-track-name-canvas' })
-        this.$viewport.append($trackNameCanvas)
-
-        this.track_name_ctx = $trackNameCanvas.get(0).getContext('2d')
-
         const $hover = $('<div>', { class:'igv-sample-name-viewport-hover' })
         this.trackView.$viewportContainer.append($hover)
 
@@ -36,23 +30,14 @@ class SampleNameViewport extends ViewportBase {
         this.canvasTop = undefined
 
         this.configureSampleNameHover($hover)
-        this.configureTrackNameHover($hover)
 
     }
 
     drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
-        this.trackName = undefined
-
         this.featureMap = featureMap
         this.canvasTop = canvasTop
         this.sampleNameRenderer = sampleNameRenderer
-
-        // hide track name canvas
-        this.track_name_ctx.clearRect(0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height)
-        this.track_name_ctx.canvas.style.display = 'none'
-
-
 
         this.ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
@@ -102,67 +87,6 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    drawTrackName(name) {
-
-        this.trackName = name
-
-        this.featureMap = undefined
-        this.canvasTop = undefined
-        this.sampleNameRenderer = undefined
-
-
-        // hide sample name canvas
-        this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height)
-        this.ctx.canvas.style.display = 'none'
-
-
-
-        const w = this.$viewport.width()
-        const h = this.$viewport.height()
-
-        this.track_name_ctx.canvas.style.display = 'block'
-        IGVGraphics.configureHighDPICanvas(this.track_name_ctx, w, h)
-
-        IGVGraphics.fillRect(this.track_name_ctx, 0, 0, this.track_name_ctx.canvas.width, this.track_name_ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-
-        const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(this.trackName)
-        const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
-
-        // left justified
-        configureFont(this.track_name_ctx, leftJustifiedFontConfig)
-        this.track_name_ctx.fillText(this.trackName, sampleNameXShim, Math.round(textHeight + (this.$viewport.height()/2)))
-
-        // right justified
-        // configureFont(this.track_name_ctx, rightJustifiedFontConfig)
-        // this.track_name_ctx.fillText(name, Math.round(w - 4), Math.round((h + actualBoundingBoxAscent)/2))
-
-    }
-
-    configureTrackNameHover($hover) {
-
-        this.track_name_ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientX, clientY, screenX, screenY }) => {
-
-            const { y:y_bbox } = currentTarget.getBoundingClientRect()
-            const dy = (clientY - y_bbox)
-
-            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = this.track_name_ctx.measureText(this.trackName)
-            const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
-            const y = Math.round(textHeight + (this.$viewport.height()/2))
-
-            if (dy < Math.round(this.$viewport.height()/2) || dy > Math.round(textHeight + this.$viewport.height()/2)) {
-                $hover.hide()
-            } else {
-                const fudge = 2
-                $hover.css({ left: sampleNameXShim, top: Math.round(this.$viewport.height()/2) - fudge })
-                $hover.text(this.trackName)
-                $hover.show()
-            }
-        })
-
-        $hover.hide()
-
-    }
-
     showHover($hover, { y, h, name }, contentTop) {
         $hover.css({ left: sampleNameXShim, top: y + contentTop })
         $hover.text(name)
@@ -195,15 +119,7 @@ class SampleNameViewport extends ViewportBase {
 
         configureFont(context, leftJustifiedFontConfig)
 
-        if (this.trackName) {
-
-            const { actualBoundingBoxAscent, actualBoundingBoxDescent } = context.measureText(this.trackName)
-            const textHeight = actualBoundingBoxAscent + actualBoundingBoxDescent
-
-            // left justified
-            configureFont(context, leftJustifiedFontConfig)
-            context.fillText(this.trackName, sampleNameXShim, Math.round(textHeight + (this.$viewport.height()/2)))
-        } else if (this.featureMap) {
+        if (this.featureMap) {
             this.sampleNameRenderer(context, this.featureMap, width, height)
         }
 
