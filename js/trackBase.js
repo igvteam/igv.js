@@ -234,9 +234,9 @@ class TrackBase {
         const genomicLocation = clickState.genomicLocation;
 
         // When zoomed out we need some tolerance around genomicLocation
-        const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0;
-        const ss = Math.floor(genomicLocation) - tolerance;
-        const ee = Math.floor(genomicLocation) + tolerance;
+        const tolerance = (clickState.referenceFrame.bpPerPixel > 0.2) ? 3 * clickState.referenceFrame.bpPerPixel : 0.2;
+        const ss = genomicLocation - tolerance;
+        const ee = genomicLocation + tolerance;
         return (FeatureUtils.findOverlapping(features, ss, ee));
     }
 
