@@ -1008,12 +1008,15 @@ class AlignmentTrack {
     contextMenuItemList(clickState) {
 
         const viewport = clickState.viewport;
-        const showSoftClips = this.parent.showSoftClips;
         const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        const clickedAlignment = clickedObject && (typeof clickedObject.alignmentContaining === 'function') ?
+        if(!clickedObject) {
+            return [];
+        }
+
+        const showSoftClips = this.parent.showSoftClips;
+        const clickedAlignment =  (typeof clickedObject.alignmentContaining === 'function') ?
             clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
             clickedObject;
-        const isSingleAlignment = clickedAlignment && (typeof clickedObject.isPaired === 'function');
         const list = [];
 
         const sortByOption = (option) => {
