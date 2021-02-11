@@ -770,6 +770,8 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
         this.reorderTracks();
+        this.fireEvent('trackorderchanged', this.getTrackOrder())
+
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
             return trackView.updateViews();
@@ -803,7 +805,10 @@ class Browser {
         for (let trackView of this.trackViews) {
             this.trackContainer.appendChild(trackView.trackDiv);
         }
+    }
 
+    getTrackOrder() {
+        return this.trackViews.map((trackView) => trackView.track.name)
     }
 
     removeTrackByName(name) {
@@ -829,7 +834,8 @@ class Browser {
         if (trackPanelRemoved) {
             this.trackViews.splice(i, 1);
             $(trackPanelRemoved.trackDiv).remove();
-            this.fireEvent('trackremoved', [trackPanelRemoved.track]);
+            this.fireEvent('trackremoved', [trackPanelRemoved.track])
+            this.fireEvent('trackorderchanged', this.getTrackOrder())
             trackPanelRemoved.dispose();
         }
 
@@ -1619,6 +1625,7 @@ class Browser {
     endTrackDrag() {
         if (this.dragTrack) {
             this.dragTrack.$trackDragScrim.hide();
+            this.fireEvent('trackorderchanged', this.getTrackOrder())
         }
         this.dragTrack = undefined;
     }
