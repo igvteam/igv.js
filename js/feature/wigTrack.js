@@ -107,10 +107,6 @@ class WigTrack extends TrackBase {
 
     draw(options) {
 
-        if (false === options.renderSVG) {
-            this.drawTrackNameAsSampleName(this.name)
-        }
-
         const features = options.features;
         const ctx = options.context;
         const bpPerPixel = options.bpPerPixel;

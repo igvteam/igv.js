@@ -639,13 +639,6 @@
   left: 0;
   display: block; }
 
-.igv-sample-name-viewport-track-name-canvas {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1024; }
-
 .igv-sample-name-viewport-hover {
   cursor: pointer;
   pointer-events: none;

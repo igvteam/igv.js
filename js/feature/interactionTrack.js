@@ -115,10 +115,6 @@ class InteractionTrack extends TrackBase {
 
     draw(options) {
 
-        if (false === options.renderSVG) {
-            this.drawTrackNameAsSampleName(this.name)
-        }
-
         if (this.arcType === "proportional") {
             this.drawProportional(options);
         } else {

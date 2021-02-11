@@ -559,15 +559,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   display: block;
 }
 
-// sample name viewport - track name canvas
-.igv-sample-name-viewport-track-name-canvas {
-  display: block;
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 1024;
-}
-
 // sample name viewport - hover div for long names
 .igv-sample-name-viewport-hover {
   cursor: pointer;

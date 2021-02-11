@@ -262,14 +262,10 @@ class SegTrack extends TrackBase {
             if (false === renderSVG) {
                 if (featureMap.size > 0 && 'EXPANDED' === this.displayMode) {
                     this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
-                } else {
-                    this.drawTrackNameAsSampleName(this.name)
                 }
 
             }
 
-        } else if (false === renderSVG) {
-            this.drawTrackNameAsSampleName(this.name)
         }
 
         function checkForLog(featureList) {
