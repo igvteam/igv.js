@@ -506,7 +506,9 @@ class ViewPort extends ViewportBase {
 
     }
 
-    drawSVGWithContext(context, width, height) {
+    drawSVGWithContect(context, width, height) {
+
+        // console.log('Viewport draw SVG.')
 
         let {start, bpPerPixel} = this.referenceFrame;
 
@@ -515,8 +517,7 @@ class ViewPort extends ViewportBase {
         const top = -$(this.contentDiv).position().top;
         const config =
             {
-                context,
-                renderSVG: true,
+                context: context,
                 viewport: this,
                 referenceFrame: this.referenceFrame,
                 top: top,
@@ -528,7 +529,7 @@ class ViewPort extends ViewportBase {
                 bpPerPixel,
                 viewportWidth: width,
                 viewportContainerX: 0,
-                viewportContainerWidth: this.browser.getViewportContainerWidth(),
+                viewportContainerWidth: this.browser.viewportContainerWidth(),
                 selection: this.selection
             };
 
