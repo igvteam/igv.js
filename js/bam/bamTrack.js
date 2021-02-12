@@ -698,6 +698,7 @@ class AlignmentTrack {
         ctx.save();
         if (this.top) {
             ctx.translate(0, this.top);
+            pixelTop -= this.top;
         }
         const pixelBottom = pixelTop + options.pixelHeight;
 
@@ -1009,15 +1010,6 @@ class AlignmentTrack {
     contextMenuItemList(clickState) {
 
         const viewport = clickState.viewport;
-        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
-        if(!clickedObject) {
-            return [];
-        }
-
-        const showSoftClips = this.parent.showSoftClips;
-        const clickedAlignment =  (typeof clickedObject.alignmentContaining === 'function') ?
-            clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
-            clickedObject;
         const list = [];
 
         const sortByOption = (option) => {
@@ -1069,43 +1061,52 @@ class AlignmentTrack {
         });
         list.push('<hr/>');
 
-        if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
-            list.push({
-                label: 'View mate in split screen',
-                click: () => {
-                    if (clickedAlignment.mate) {
-                        const referenceFrame = clickState.viewport.referenceFrame;
-                        if(this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
-                            this.highlightedAlignmentReadNamed = clickedAlignment.readName;
-                            this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, referenceFrame);
-                        } else {
-                            Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`);
+        const clickedObject = this.getClickedObject(viewport, clickState.y, clickState.genomicLocation);
+        if(clickedObject) {
+
+            const showSoftClips = this.parent.showSoftClips;
+            const clickedAlignment = (typeof clickedObject.alignmentContaining === 'function') ?
+                clickedObject.alignmentContaining(clickState.genomicLocation, showSoftClips) :
+                clickedObject;
+
+            if (clickedAlignment.isPaired() && clickedAlignment.isMateMapped()) {
+                list.push({
+                    label: 'View mate in split screen',
+                    click: () => {
+                        if (clickedAlignment.mate) {
+                            const referenceFrame = clickState.viewport.referenceFrame;
+                            if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
+                                this.highlightedAlignmentReadNamed = clickedAlignment.readName;
+                                this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, referenceFrame);
+                            } else {
+                                Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`);
+                            }
                         }
+                    },
+                    init: undefined
+                });
+            }
+
+            list.push({
+                label: 'View read sequence',
+                click: () => {
+                    const alignment = clickedAlignment;
+                    if (!alignment) return;
+
+                    const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
+                    if (!seqstring || "*" === seqstring) {
+                        Alert.presentAlert("Read sequence: *")
+                    } else {
+                        Alert.presentAlert(seqstring);
                     }
-                },
-                init: undefined
+                }
             });
+            list.push('<hr/>');
         }
 
-        list.push({
-            label: 'View read sequence',
-            click: () => {
-                const alignment = clickedAlignment;
-                if (!alignment) return;
-
-                const seqstring = alignment.seq; //.map(b => String.fromCharCode(b)).join("");
-                if (!seqstring || "*" === seqstring) {
-                    Alert.presentAlert("Read sequence: *")
-                } else {
-                    Alert.presentAlert(seqstring);
-                }
-            }
-        });
-        list.push('<hr/>');
         return list;
 
-
-    };
+    }
 
     getClickedObject(viewport, y, genomicLocation) {
 
