@@ -152,7 +152,25 @@ class TrackView {
 
     }
 
-    async renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, offset) {
+
+        for (let viewport of this.viewports) {
+
+            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
+            const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
+
+            let o =
+                {
+                    deltaX: offset.deltaX + index * width,
+                    deltaY: offset.deltaY + y
+                };
+
+            viewport.renderSVGContext(context, o);
+        }
+
+    }
+
+    async __renderSVGContext(context, { deltaX, deltaY }) {
 
         const { x, y } = this.sampleNameViewport.$viewport.get(0).getBoundingClientRect()
 
