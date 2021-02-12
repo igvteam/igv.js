@@ -62,24 +62,20 @@ class SampleNameViewport extends ViewportBase {
 
             if (this.featureMap && undefined !== this.canvasTop) {
 
-                const { x:x_current_target_viewport, y:y_viewport } = currentTarget.getBoundingClientRect()
+                const { x:x_current_target, y:y_current_target, width: width_current_target } = currentTarget.getBoundingClientRect()
 
-                // (clientY - y_viewport) is equivalent to event.offsetY which does not work correctly
-                const dy = (clientY - y_viewport) + this.canvasTop
+                // (clientY - y_current_target) is equivalent to event.offsetY which does not work correctly
+                const dy = (clientY - y_current_target) + this.canvasTop
                 const result = getBBox(this.featureMap, dy)
 
                 if (result) {
 
-                    const { y, name } = result
+                    const { width: width_viewport_container } = this.trackView.$viewportContainer.get(0).getBoundingClientRect()
 
-                    $hover.css({ left: (x_current_target_viewport - 18) + sampleNameXShim, top: y + this.$content.position().top })
+                    $hover.css({ left: width_viewport_container - width_current_target + sampleNameXShim, top: result.y + this.$content.position().top })
+                    // $hover.css({ left: (x_current_target - 18) + sampleNameXShim, top: y + this.$content.position().top })
 
-                    $hover.text(name)
-
-                    // const {    x: x_viewport } = $hover.get(0).getBoundingClientRect()
-                    // const { left: x_position } = $hover.position()
-                    // console.log(`current-target x-current-target-viewport ${ x_current_target_viewport }. hover x-viewport ${ x_viewport } x-position ${ x_position }`)
-
+                    $hover.text(result.name)
                 }
             }
         })
