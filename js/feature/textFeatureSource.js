@@ -191,7 +191,7 @@ class TextFeatureSource {
             intervalEnd = chromosome ? chromosome.bpLength : Number.MAX_SAFE_INTEGER;
         } else if (visibilityWindow > (end - start) && this.expandQuery !== false) {
             const expansionWindow = Math.min(4.1 * (end - start), visibilityWindow)
-            intervalStart = Math.max(0, (start + end - expansionWindow) / 2);
+            intervalStart = Math.max(0, (start + end) / 2 - expansionWindow);
             intervalEnd = start + expansionWindow;
         }
 
