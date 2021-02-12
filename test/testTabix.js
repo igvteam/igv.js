@@ -5,6 +5,24 @@ import {assert} from 'chai';
 
 suite("testTabix", function () {
 
+    test("TBI index", async function () {
+
+        const refID = 26,
+            beg = 55369194,
+            end = 55369443,
+            indexPath = require.resolve("./data/tabix/refGene.hg19.bed.gz.tbi"),
+            config = {};
+
+        const tbiIndex = await loadIndex(indexPath, config);
+        assert.ok(tbiIndex);
+
+        const blocks = tbiIndex.blocksForRange(refID, beg, end);
+        assert.equal(blocks.length, 1)
+        assert.equal(1640062, blocks[0].minv.block)
+
+    })
+
+
     test("CSI index", async function () {
 
         const refID = 0,
