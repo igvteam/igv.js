@@ -154,11 +154,11 @@ class TrackView {
 
     async renderSVGContext(context, { deltaX, deltaY }) {
 
-        const { y, width:sampleNameViewportWidth } = this.sampleNameViewport.$viewport.get(0).getBoundingClientRect()
+        const { x, y } = this.sampleNameViewport.$viewport.get(0).getBoundingClientRect()
 
-        await this.sampleNameViewport.renderSVGContext(context, { deltaX, deltaY: y + deltaY })
+        this.sampleNameViewport.renderSVGContext(context, { deltaX: x + deltaX, deltaY: y + deltaY })
 
-        const { width:axisWidth, height:axisHeight } = this.$axis.get(0).getBoundingClientRect()
+        const { width:axisWidth } = this.$axis.get(0).getBoundingClientRect()
 
         if (typeof this.track.paintAxis === 'function') {
 
@@ -167,7 +167,7 @@ class TrackView {
             let str = this.track.name || this.track.id
             str = str.replace(/\W/g, '')
 
-            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), sampleNameViewportWidth + deltaX, y + deltaY, width, height, 0)
+            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), deltaX, y + deltaY, width, height, 0)
 
             context.save()
             this.track.paintAxis(context, width, height)
@@ -182,11 +182,11 @@ class TrackView {
 
             let offset =
                 {
-                    deltaX: sampleNameViewportWidth + axisWidth + index * width + deltaX,
+                    deltaX: axisWidth + index * width + deltaX,
                     deltaY: y + deltaY
                 };
 
-            await viewport.renderSVGContext(context, offset)
+            viewport.renderSVGContext(context, offset)
         }
     }
 
