@@ -14,6 +14,37 @@ import {
 const sampleNameViewportWidth = 128
 const sampleNameXShim = 4
 
+const fontConfigurations =
+    {
+        'FILL':
+            {
+                font: '2pt sans-serif',
+                // font: '10px sans-serif',
+                textAlign: 'start', // start || end
+                textBaseline: 'bottom',
+                strokeStyle: 'black',
+                fillStyle:'black'
+            },
+        'SQUISHED':
+            {
+                font: '2pt sans-serif',
+                // font: '10px sans-serif',
+                textAlign: 'start', // start || end
+                textBaseline: 'bottom',
+                strokeStyle: 'black',
+                fillStyle:'black'
+            },
+        'EXPANDED':
+            {
+                font: '10px sans-serif',
+                textAlign: 'start', // start || end
+                textBaseline: 'bottom',
+                strokeStyle: 'black',
+                fillStyle:'black'
+            }
+
+    }
+
 class SampleNameViewport extends ViewportBase {
 
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -46,7 +77,8 @@ class SampleNameViewport extends ViewportBase {
         // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(this.ctx, leftJustifiedFontConfig)
+        const fontConfig = fontConfigurations[ featureMap.get('displayMode') ]
+        configureFont(this.ctx, fontConfig)
 
         this.ctx.canvas.style.top = `${ canvasTop }px`
         this.ctx.translate(0, -canvasTop)
@@ -82,14 +114,10 @@ class SampleNameViewport extends ViewportBase {
 
         this.ctx.canvas.addEventListener('mouseenter', () => {
             $hover.show()
-            // $hover.text('')
-            // $hover.css({ height: 0 })
         })
 
         this.ctx.canvas.addEventListener('mouseleave', () => {
             $hover.hide()
-            // $hover.text('')
-            // $hover.css({ height: 0 })
         })
 
         $hover.hide()
@@ -121,7 +149,7 @@ class SampleNameViewport extends ViewportBase {
 
         IGVGraphics.fillRect(context, 0, 0, width, height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(context, leftJustifiedFontConfig)
+        configureFont(context, fontConfigExpandedDisplayMode)
 
         if (this.featureMap) {
             this.sampleNameRenderer(context, this.featureMap, width, height)
@@ -145,6 +173,11 @@ class SampleNameViewport extends ViewportBase {
 function getBBox(featureMap, y) {
 
     for (let [ key, value ] of featureMap) {
+
+        if ('displayMode' === key) {
+            continue
+        }
+
         if (y < value.y || y > (value.h + value.y)) {
 
         } else {
@@ -154,33 +187,6 @@ function getBBox(featureMap, y) {
 
     return undefined
 }
-
-const fontConfig =
-    {
-        font: '10px sans-serif',
-        textAlign: 'end', // start || end
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle:'black'
-    };
-
-const rightJustifiedFontConfig =
-    {
-        font: '10px sans-serif',
-        textAlign: 'end', // start || end
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle:'black'
-    };
-
-const leftJustifiedFontConfig =
-    {
-        font: '10px sans-serif',
-        textAlign: 'start', // start || end
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle:'black'
-    };
 
 function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
     ctx.font = font

@@ -187,6 +187,8 @@ class SegTrack extends TrackBase {
             }
 
             const featureMap = new Map()
+            featureMap.set('displayMode', this.displayMode)
+
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             const pixelBottom = pixelTop + pixelHeight;
             for (let segment of features) {
@@ -241,7 +243,7 @@ class SegTrack extends TrackBase {
                 segment.pixelRect = { x, y, w, h };
 
                 context.fillStyle = color
-                // context.fillStyle = randomRGB(180, 240)
+                context.fillStyle = randomRGB(180, 240)
                 // context.fillStyle = randomGrey(200, 255)
                 context.fillRect(x, y, w, h)
 
@@ -260,10 +262,9 @@ class SegTrack extends TrackBase {
             }
 
             if (false === renderSVG) {
-                if (featureMap.size > 0 && 'EXPANDED' === this.displayMode) {
+                if (featureMap.size > 0 /*&& 'EXPANDED' === this.displayMode*/) {
                     this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
                 }
-
             }
 
         }
