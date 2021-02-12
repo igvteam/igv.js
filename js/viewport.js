@@ -460,7 +460,45 @@ class ViewPort extends ViewportBase {
         FileUtils.download(`${str}.svg`, data);
     }
 
-    renderSVGContext(context, { deltaX, deltaY }) {
+    renderSVGContext(context, offset) {
+
+        // Nothing to do if zoomInNotice is active
+        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
+            return;
+        }
+
+        let str = this.trackView.track.name || this.trackView.track.id;
+        str = str.replace(/\W/g, '');
+
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const id = str.toLowerCase() + '_genomic_state_index_' + index;
+
+        // If present, paint axis canvas. Only in first multi-locus panel.
+        if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
+
+            const bbox = this.trackView.$axis.get(0).getBoundingClientRect();
+            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
+
+            context.save();
+            this.trackView.track.paintAxis(context, bbox.width, bbox.height);
+            context.restore();
+        }
+
+        const yScrollDelta = $(this.contentDiv).position().top;
+        const dx = offset.deltaX + (index * context.multiLocusGap);
+        const dy = offset.deltaY + yScrollDelta;
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
+
+        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
+
+        // console.log(`ViewportBase render SVG. context.addGroup( id ${ id } dx ${ dx } dy ${ dy } width ${ width } height ${ height } -yScrollDelta ${ -yScrollDelta })`)
+
+        this.drawSVGWithContect(context, width, height)
+
+    }
+
+
+    __renderSVGContext(context, { deltaX, deltaY }) {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
@@ -507,6 +545,45 @@ class ViewPort extends ViewportBase {
     }
 
     drawSVGWithContect(context, width, height) {
+
+        // console.log('Viewport draw SVG.')
+
+        let {start, bpPerPixel} = this.referenceFrame;
+
+        context.save();
+
+        const top = -$(this.contentDiv).position().top;
+        const config =
+            {
+                context: context,
+                viewport: this,
+                referenceFrame: this.referenceFrame,
+                top: top,
+                pixelTop: top,
+                pixelWidth: width,
+                pixelHeight: height,
+                bpStart: start,
+                bpEnd: start + (width * bpPerPixel),
+                bpPerPixel,
+                viewportWidth: width,
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.getViewportContainerWidth(),
+                selection: this.selection
+            };
+
+        const features = this.tile ? this.tile.features : [];
+        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
+        this.draw(config, features, roiFeatures);
+
+        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
+            this.renderTrackLabelSVG(context);
+        }
+
+        context.restore();
+
+    }
+
+    __drawSVGWithContect(context, width, height) {
 
         // console.log('Viewport draw SVG.')
 

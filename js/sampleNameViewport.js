@@ -1,3 +1,4 @@
+import { DOMUtils } from '../node_modules/igv-utils/src/index.js'
 import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
@@ -55,26 +56,29 @@ class SampleNameViewport extends ViewportBase {
 
     configureSampleNameHover($hover) {
 
-        this.ctx.canvas.addEventListener('mousemove', ({ currentTarget, clientX, clientY, screenX, screenY }) => {
+        this.ctx.canvas.addEventListener('mousemove', (e) => {
+
+            const { currentTarget, clientX, clientY, screenX, screenY } = e
 
             if (this.featureMap && undefined !== this.canvasTop) {
 
-                const { x:x_viewport, y:y_viewport } = currentTarget.getBoundingClientRect()
+                const { x:x_current_target_viewport, y:y_viewport } = currentTarget.getBoundingClientRect()
 
                 // (clientY - y_viewport) is equivalent to event.offsetY which does not work correctly
-                const wye = (clientY - y_viewport) + this.canvasTop
-                const result = getBBox(this.featureMap, wye)
+                const dy = (clientY - y_viewport) + this.canvasTop
+                const result = getBBox(this.featureMap, dy)
 
                 if (result) {
 
                     const { y, name } = result
 
-                    $hover.css({ left: (x_viewport - 18) + sampleNameXShim, top: y + this.$content.position().top })
+                    $hover.css({ left: (x_current_target_viewport - 18) + sampleNameXShim, top: y + this.$content.position().top })
 
                     $hover.text(name)
 
-                    // const { x: x_hover } = $hover.get(0).getBoundingClientRect()
-                    // console.log(`current-target ${ x_viewport } hover-bbox-x ${ x_hover } hover-offset-x ${ $hover.offset().left }`)
+                    // const {    x: x_viewport } = $hover.get(0).getBoundingClientRect()
+                    // const { left: x_position } = $hover.position()
+                    // console.log(`current-target x-current-target-viewport ${ x_current_target_viewport }. hover x-viewport ${ x_viewport } x-position ${ x_position }`)
 
                 }
             }

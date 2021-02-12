@@ -250,7 +250,7 @@ class Browser {
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            await trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y})
+            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y})
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
