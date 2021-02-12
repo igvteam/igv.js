@@ -251,7 +251,7 @@ function reg2bins(beg, end) {
     const list = []
     if (end >= 1 << 29) end = 1 << 29;
     --end;
-    list.push(0);
+    list.push([0, 0]);
     list.push([1 + (beg >> 26), 1 + (end >> 26)]);
     list.push([9 + (beg >> 23), 9 + (end >> 23)]);
     list.push([73 + (beg >> 20), 73 + (end >> 20)]);
