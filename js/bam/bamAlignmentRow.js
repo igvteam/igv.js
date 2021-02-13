@@ -73,22 +73,15 @@ class BamAlignmentRow {
         if (!sortOption) sortOption = "BASE";
 
         const alignment = this.findAlignment(position);
-
         if (undefined === alignment) {
-            return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
+            return Number.MAX_VALUE * (direction ? 1 : -1);
         }
 
         let mate;
         switch (sortOption) {
             case "NUCLEOTIDE":
             case "BASE": {
-                const readBase = alignment.readBaseAt(position);
-                const quality = alignment.readBaseQualityAt(position);
-                if (!readBase) {
-                    return direction ? Number.MAX_VALUE : -Number.MAX_VALUE;
-                } else {
-                    return calculateBaseScore(readBase, quality, alignmentContainer, position);
-                }
+                return calculateBaseScore(alignment, alignmentContainer, position);
             }
             case "STRAND":
                 return alignment.strand ? 1 : -1;
@@ -125,7 +118,7 @@ class BamAlignmentRow {
         }
 
 
-        function calculateBaseScore(base, quality, alignmentContainer, genomicLocation) {
+        function calculateBaseScore(alignment, alignmentContainer, genomicLocation) {
 
             let reference;
             const idx = Math.floor(genomicLocation) - alignmentContainer.start;
@@ -133,32 +126,49 @@ class BamAlignmentRow {
                 reference = alignmentContainer.sequence.charAt(idx);
             }
             if (!reference) {
-                return undefined;
+                return 0;
             }
+            const base = alignment.readBaseAt(genomicLocation);
+            const quality = alignment.readBaseQualityAt(genomicLocation);
 
-            if (undefined === base) {
-                return Number.MAX_VALUE;
-            }
-            if ('N' === base) {
-                return 2;
+            const coverageMap = alignmentContainer.coverageMap;
+            const coverageMapIndex = Math.floor(genomicLocation - coverageMap.bpStart);
+            const coverage = coverageMap.coverage[coverageMapIndex];
 
-            } else if (reference === base || '=' === base) {
-                return 4 - quality / 1000;
-
-            } else if ("X" === base || reference !== base) {
-
-                const idx = Math.floor(genomicLocation) - alignmentContainer.coverageMap.bpStart;
-
-                if (idx > 0 && idx < alignmentContainer.coverageMap.coverage.length) {
-                    const coverage = alignmentContainer.coverageMap.coverage[idx];
-                    const count = coverage["pos" + base] + coverage["neg" + base];
-                    return -(count + (quality / 1000));
-                } else {
-                    return -(1 + quality / 1000);
+            // Insertions.  These are additive with base scores as they occur between bases, so you can have a
+            // base mismatch AND an insertion
+            let baseScore = 0;
+            if (alignment.insertions) {
+                for(let ins of alignment.insertions) {
+                    if(ins.start === genomicLocation) {
+                        baseScore = -coverage.ins;
+                    }
                 }
             }
 
-            return 0;
+
+            if (!base) {
+                // Either deletion or skipped (splice junction)
+                const delCount = coverage.del;
+                if (delCount > 0) {
+                    baseScore -= delCount;
+                } else if (baseScore === 0) {    // Don't modify insertion score, if any
+                    baseScore = 1;
+                }
+            } else {
+                reference = reference.toUpperCase();
+                if ('N' === base && baseScore === 0) {
+                    baseScore = 2;
+                } else if ((reference === base || '=' === base) && baseScore === 0) {
+                    baseScore = 4 - quality / 1000;
+                } else if ("X" === base || reference !== base) {
+                    const count = coverage["pos" + base] + coverage["neg" + base];
+                    baseScore -= (count + (quality / 1000));
+                }
+            }
+
+
+            return baseScore;
         }
     }
 }

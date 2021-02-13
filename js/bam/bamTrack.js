@@ -688,6 +688,8 @@ class AlignmentTrack {
         const showAllBases = this.parent.showAllBases;
         const nucleotideColors = this.browser.nucleotideColors;
 
+        ctx.save();
+
         let referenceSequence = alignmentContainer.sequence;
         if (referenceSequence) {
             referenceSequence = referenceSequence.toUpperCase();
@@ -695,7 +697,6 @@ class AlignmentTrack {
         let alignmentRowYInset = 0;
 
         let pixelTop = options.pixelTop;
-        ctx.save();
         if (this.top) {
             ctx.translate(0, this.top);
             pixelTop -= this.top;
@@ -1252,6 +1253,11 @@ function sortAlignmentRows(options, alignmentContainer) {
         const i = rowA.score > rowB.score ? 1 : (rowA.score < rowB.score ? -1 : 0)
         return true === direction ? i : -i;
     });
+
+    // For debugging
+    // for(let r of alignmentContainer.packedAlignmentRows) {
+    //     console.log(r.score);
+    // }
 
 }
 
