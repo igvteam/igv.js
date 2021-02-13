@@ -173,7 +173,8 @@ class ViewPort extends ViewportBase {
         const viewportHeight = this.$viewport.height()
         const viewTop = -contentTop
         const viewBottom = viewTop + viewportHeight
-        this.$content.css("top", contentTop + "px");
+
+        this.$content.css("top", contentTop + "px")
 
         if (!this.canvasVerticalRange ||
             this.canvasVerticalRange.bottom < viewBottom ||
