@@ -67,6 +67,11 @@ class SampleNameViewport extends ViewportBase {
 
     drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
+        const { top } = this.trackView.viewports[ 0 ].$content.position()
+        this.setTop(top)
+
+        console.log(`sampleNameViewportContentPositionTop ${ this.$content.position().top } viewportContentPositionTop ${ this.trackView.viewports[ 0 ].$content.position().top }`)
+
         this.featureMap = featureMap
         this.canvasTop = canvasTop
         this.sampleNameRenderer = sampleNameRenderer
@@ -125,7 +130,7 @@ class SampleNameViewport extends ViewportBase {
     }
 
     setTop(contentTop) {
-        this.$content.css('top', `${ contentTop }px`);
+        this.$content.css('top', `${ contentTop }px`)
     }
 
     renderSVGContext(context, { deltaX, deltaY }) {
