@@ -67,27 +67,26 @@ class SampleNameViewport extends ViewportBase {
 
     drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
+        this.featureMap = featureMap
+        this.sampleNameRenderer = sampleNameRenderer
+
         const { top } = this.trackView.viewports[ 0 ].$content.position()
         this.setTop(top)
 
-        console.log(`sampleNameViewportContentPositionTop ${ this.$content.position().top } viewportContentPositionTop ${ this.trackView.viewports[ 0 ].$content.position().top }`)
+        // console.log(`sampleNameViewportContentPositionTop ${ this.$content.position().top } viewportContentPositionTop ${ this.trackView.viewports[ 0 ].$content.position().top }`)
 
-        this.featureMap = featureMap
-        this.canvasTop = canvasTop
-        this.sampleNameRenderer = sampleNameRenderer
-
-        this.ctx.canvas.style.display = 'block'
         IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
 
         // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
         IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        const fontConfig = fontConfigurations[ featureMap.get('displayMode') ]
-        configureFont(this.ctx, fontConfig)
-
+        this.ctx.canvas.style.display = 'block'
         this.ctx.canvas.style.top = `${ canvasTop }px`
+        
         this.ctx.translate(0, -canvasTop)
+        this.canvasTop = canvasTop
 
+        configureFont(this.ctx, fontConfigurations[ featureMap.get('displayMode') ])
         sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
 
