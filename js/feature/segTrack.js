@@ -187,7 +187,6 @@ class SegTrack extends TrackBase {
             }
 
             const featureMap = new Map()
-            featureMap.set('displayMode', this.displayMode)
 
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             const pixelBottom = pixelTop + pixelHeight;
@@ -263,6 +262,7 @@ class SegTrack extends TrackBase {
 
             if (false === renderSVG) {
                 if (featureMap.size > 0 /*&& 'EXPANDED' === this.displayMode*/) {
+                    featureMap.set('sampleHeight', sampleHeight)
                     this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
                 }
             }

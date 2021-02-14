@@ -573,12 +573,12 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
   color: black;
   font-family: sans-serif;
-  font-size: 10px;
+  //font-size: 10px;
   vertical-align: middle;
 
   z-index: 1042;
-  //background-color: white;
-  background-color: orangered;
+  background-color: white;
+  //background-color: orangered;
 }
 
 .igv-scrollbar-outer-div {

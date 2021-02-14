@@ -14,35 +14,13 @@ import {
 const sampleNameViewportWidth = 128
 const sampleNameXShim = 4
 
-const fontConfigurations =
+const fontConfigureTemplate =
     {
-        'FILL':
-            {
-                font: '2pt sans-serif',
-                // font: '10px sans-serif',
-                textAlign: 'start', // start || end
-                textBaseline: 'bottom',
-                strokeStyle: 'black',
-                fillStyle:'black'
-            },
-        'SQUISHED':
-            {
-                font: '2pt sans-serif',
-                // font: '10px sans-serif',
-                textAlign: 'start', // start || end
-                textBaseline: 'bottom',
-                strokeStyle: 'black',
-                fillStyle:'black'
-            },
-        'EXPANDED':
-            {
-                font: '10px sans-serif',
-                textAlign: 'start', // start || end
-                textBaseline: 'bottom',
-                strokeStyle: 'black',
-                fillStyle:'black'
-            }
-
+        // font: '2pt sans-serif',
+        textAlign: 'start',
+        textBaseline: 'bottom',
+        strokeStyle: 'black',
+        fillStyle:'black'
     }
 
 class SampleNameViewport extends ViewportBase {
@@ -70,10 +48,9 @@ class SampleNameViewport extends ViewportBase {
         this.featureMap = featureMap
         this.sampleNameRenderer = sampleNameRenderer
 
+        // sync viewport top with track viewport top
         const { top } = this.trackView.viewports[ 0 ].$content.position()
         this.setTop(top)
-
-        // console.log(`sampleNameViewportContentPositionTop ${ this.$content.position().top } viewportContentPositionTop ${ this.trackView.viewports[ 0 ].$content.position().top }`)
 
         IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
 
@@ -82,11 +59,12 @@ class SampleNameViewport extends ViewportBase {
 
         this.ctx.canvas.style.display = 'block'
         this.ctx.canvas.style.top = `${ canvasTop }px`
-        
+
         this.ctx.translate(0, -canvasTop)
         this.canvasTop = canvasTop
 
-        configureFont(this.ctx, fontConfigurations[ featureMap.get('displayMode') ])
+        fontConfigureTemplate.font = `${ featureMap.get('sampleHeight') }px sans-serif`
+        configureFont(this.ctx, fontConfigureTemplate)
         sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
 
@@ -108,8 +86,16 @@ class SampleNameViewport extends ViewportBase {
 
                     const { width: width_viewport_container } = this.trackView.$viewportContainer.get(0).getBoundingClientRect()
 
-                    $hover.css({ left: width_viewport_container - width_current_target + sampleNameXShim, top: result.y + this.$content.position().top })
-                    // $hover.css({ left: (x_current_target - 18) + sampleNameXShim, top: y + this.$content.position().top })
+                    const fudge = 3
+                    const cssConfig =
+                        {
+                            'font-size': `${ this.trackView.track.expandedRowHeight }px`,
+                            // left: width_viewport_container - width_current_target + sampleNameXShim,
+                            right: 0,
+                            top: result.y + this.$content.position().top - fudge
+                        }
+
+                    $hover.css(cssConfig)
 
                     $hover.text(result.name)
                 }
@@ -178,7 +164,7 @@ function getBBox(featureMap, y) {
 
     for (let [ key, value ] of featureMap) {
 
-        if ('displayMode' === key) {
+        if ('sampleHeight' === key) {
             continue
         }
 
