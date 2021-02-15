@@ -74,7 +74,7 @@ class InteractionTrack extends TrackBase {
         }
 
         // Create the FeatureSource and override the default whole genome method
-        this.featureSource = FeatureSource(config, browser.genome);
+        this.featureSource = FeatureSource(config, this.browser.genome);
         this.featureSource.getWGFeatures = getWGFeatures;
     }
 
