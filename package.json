@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.7.4-jb2",
+  "version": "2.7.5",
   "description": "Embeddable genomic visualization component based on the Integrative Genomics Viewer",
   "files": [
     "dist/**"
