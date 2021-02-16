@@ -101,9 +101,8 @@ class SequenceTrack {
         this.type = "sequence";
         this.browser = browser;
         this.removable = false;
-
         this.config = config;
-        this.name = "";
+        this.name = "Sequence";
         this.id = "sequence";
         this.sequenceType = config.sequenceType || "dna";             //   dna | rna | prot
         this.height = 25;
