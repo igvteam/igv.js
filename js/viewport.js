@@ -37,7 +37,7 @@ class ViewPort extends ViewportBase {
             this.$zoomInNotice = this.createZoomInNotice(this.$content);
         }
 
-        if (track.name) {
+        if (track.name && "sequence" !== track.config.type) {
 
             this.$trackLabel = $('<div class="igv-track-label">');
             this.$viewport.append(this.$trackLabel);
