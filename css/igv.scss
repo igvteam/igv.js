@@ -561,6 +561,8 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
 // sample name viewport - hover div for long names
 .igv-sample-name-viewport-hover {
+  z-index: 1042;
+
   cursor: pointer;
 
   pointer-events: none;
@@ -568,15 +570,13 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   display: block;
 
   position: absolute;
-  //position: fixed;
   width: auto;
 
+  text-transform: uppercase;
   color: black;
   font-family: sans-serif;
-  //font-size: 10px;
   vertical-align: middle;
 
-  z-index: 1042;
   background-color: white;
   //background-color: orangered;
 }

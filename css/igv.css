@@ -640,15 +640,16 @@
   display: block; }
 
 .igv-sample-name-viewport-hover {
+  z-index: 1042;
   cursor: pointer;
   pointer-events: none;
   display: block;
   position: absolute;
   width: auto;
+  text-transform: uppercase;
   color: black;
   font-family: sans-serif;
   vertical-align: middle;
-  z-index: 1042;
   background-color: white; }
 
 .igv-scrollbar-outer-div {
