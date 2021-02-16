@@ -251,7 +251,8 @@ class SegTrack extends TrackBase {
                 const key = y.toString()
                 if (false === featureMap.has(key)) {
 
-                    featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
+                    const name = (segment.sampleKey || segment.sample).toUpperCase()
+                    featureMap.set(key, { x, y, w, h, name })
 
                     // Debugging - render sample names directly in canvas
                     // configureFont(context, fontConfig)

@@ -14,6 +14,8 @@ import {
 const sampleNameViewportWidth = 128
 const sampleNameXShim = 4
 
+const maxFontSize = 10
+
 const fontConfigureTemplate =
     {
         // font: '2pt sans-serif',
@@ -63,8 +65,7 @@ class SampleNameViewport extends ViewportBase {
         this.ctx.translate(0, -canvasTop)
         this.canvasTop = canvasTop
 
-        fontConfigureTemplate.font = `${ featureMap.get('sampleHeight') }px sans-serif`
-        configureFont(this.ctx, fontConfigureTemplate)
+        configureFont(this.ctx, fontConfigureTemplate, featureMap)
         sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
 
@@ -87,9 +88,10 @@ class SampleNameViewport extends ViewportBase {
                     const { width: width_viewport_container } = this.trackView.$viewportContainer.get(0).getBoundingClientRect()
 
                     const fudge = 3
+                    const font_size = Math.min(this.trackView.track.expandedRowHeight, maxFontSize)
                     const cssConfig =
                         {
-                            'font-size': `${ this.trackView.track.expandedRowHeight }px`,
+                            'font-size': `${ font_size }px`,
                             // left: width_viewport_container - width_current_target + sampleNameXShim,
                             right: 0,
                             top: result.y + this.$content.position().top - fudge
@@ -178,8 +180,9 @@ function getBBox(featureMap, y) {
     return undefined
 }
 
-function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
-    ctx.font = font
+function configureFont(ctx, { textAlign, textBaseline, strokeStyle, fillStyle }, featureMap) {
+    const pixels = Math.min(featureMap.get('sampleHeight'), maxFontSize)
+    ctx.font = `${ pixels }px sans-serif`
     ctx.textAlign = textAlign
     ctx.textBaseline = textBaseline
     ctx.fillStyle = fillStyle
