@@ -770,7 +770,7 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
         this.reorderTracks();
-        this.fireEvent('trackorderchanged', this.getTrackOrder())
+        this.fireEvent('trackorderchanged', [this.getTrackOrder()])
 
         if (!track.autoscaleGroup) {
             // Group autoscale groups will get updated later (as a group)
@@ -808,7 +808,7 @@ class Browser {
     }
 
     getTrackOrder() {
-        return this.trackViews.map((trackView) => trackView.track.name)
+        return this.trackViews.filter(tv => tv.track && tv.track.name).map(tv => tv.track.name)
     }
 
     removeTrackByName(name) {
@@ -835,7 +835,7 @@ class Browser {
             this.trackViews.splice(i, 1);
             $(trackPanelRemoved.trackDiv).remove();
             this.fireEvent('trackremoved', [trackPanelRemoved.track])
-            this.fireEvent('trackorderchanged', this.getTrackOrder())
+            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
             trackPanelRemoved.dispose();
         }
 
@@ -1390,26 +1390,22 @@ class Browser {
                 this.eventHandlers[eventName].splice(callbackIndex, 1);
             }
         }
-    };
+    }
 
     fireEvent(eventName, args, thisObj) {
-        var scope,
-            results,
-            eventHandler = this.eventHandlers[eventName];
 
-        if (undefined === eventHandler || eventHandler.length === 0) {
+        const handlers = this.eventHandlers[eventName];
+        if (undefined === handlers || handlers.length === 0) {
             return undefined;
         }
 
-        scope = thisObj || window;
-        results = eventHandler.map(function (event) {
+        const scope = thisObj || window;
+        const results = handlers.map(function (event) {
             return event.apply(scope, args);
         });
 
-
         return results[0];
-
-    };
+    }
 
     dispose() {
 
@@ -1419,8 +1415,7 @@ class Browser {
         this.trackViews.forEach(function (tv) {
             tv.dispose();
         })
-
-    };
+    }
 
     toJSON() {
 
@@ -1625,9 +1620,11 @@ class Browser {
     endTrackDrag() {
         if (this.dragTrack) {
             this.dragTrack.$trackDragScrim.hide();
-            this.fireEvent('trackorderchanged', this.getTrackOrder())
+            this.dragTrack = undefined;
+            this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+        } else {
+            this.dragTrack = undefined;
         }
-        this.dragTrack = undefined;
     }
 
     /**
