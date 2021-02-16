@@ -31,7 +31,6 @@ import IGVGraphics from "../igv-canvas.js";
 import paintAxis from "../util/paintAxis.js";
 import {IGVColor, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import MenuUtils from "../ui/menuUtils.js";
-import deepCopy from "../util/deepCopy.js";
 
 const DEFAULT_COLOR = "rgb(150,150,150)";
 
@@ -47,6 +46,7 @@ class WigTrack extends TrackBase {
         this.type = "wig";
         this.height = config.height || 50;
         this.featureType = 'numeric';
+        this.paintAxis = paintAxis;
 
         const format = config.format ? config.format.toLowerCase() : config.format;
         if ("bigwig" === format) {
@@ -66,7 +66,6 @@ class WigTrack extends TrackBase {
         }
 
         this.windowFunction = config.windowFunction || "mean";
-        this.paintAxis = config.paintAxis;
         this.graphType = config.graphType || "bar";
         this.normalize = config.normalize;  // boolean, for use with "TDF" files
         this.scaleFactor = config.scaleFactor;  // optional scale factor, ignored if normalize === true;
