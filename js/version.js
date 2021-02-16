@@ -1,4 +1,4 @@
-const _version = "2.7.4-jb2"
+const _version = "2.7.5"
 function version() {
     return _version;
 }
