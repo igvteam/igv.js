@@ -241,14 +241,14 @@ class SegTrack extends TrackBase {
                 h -= 2 * border
                 segment.pixelRect = { x, y, w, h };
 
-                context.fillStyle = color
-                context.fillStyle = randomRGB(180, 240)
+                // Use for diagnostic rendering
+                // context.fillStyle = randomRGB(180, 240)
                 // context.fillStyle = randomGrey(200, 255)
+                context.fillStyle = color
+
                 context.fillRect(x, y, w, h)
 
-                // diagnostic - test sort, etc.
                 const key = y.toString()
-
                 if (false === featureMap.has(key)) {
 
                     featureMap.set(key, { x, y, w, h, name: (segment.sampleKey || segment.sample) })
