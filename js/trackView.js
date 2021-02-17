@@ -152,22 +152,38 @@ class TrackView {
 
     }
 
-    renderSVGContext(context, offset) {
+    renderSVGContext(context, { deltaX, deltaY }) {
 
-        for (let viewport of this.viewports) {
+        const { width:axisWidth } = this.$axis.get(0).getBoundingClientRect()
 
-            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame);
-            const {y, width} = viewport.$viewport.get(0).getBoundingClientRect();
+        if (typeof this.track.paintAxis === 'function') {
 
-            let o =
-                {
-                    deltaX: offset.deltaX + index * width,
-                    deltaY: offset.deltaY + y
-                };
+            const { y, width, height } = this.axisCanvas.getBoundingClientRect()
 
-            viewport.renderSVGContext(context, o);
+            let str = this.track.name || this.track.id
+            str = str.replace(/\W/g, '')
+
+            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), deltaX, y + deltaY, width, height, 0)
+
+            context.save()
+            this.track.paintAxis(context, width, height)
+            context.restore()
         }
 
+        const { y } = this.viewports[ 0 ].$viewport.get(0).getBoundingClientRect()
+
+        let delta =
+            {
+                deltaX: axisWidth + deltaX,
+                deltaY: y + deltaY
+            }
+        for (let viewport of this.viewports) {
+            viewport.renderSVGContext(context, delta)
+            const { width } = viewport.$viewport.get(0).getBoundingClientRect()
+            delta.deltaX += width
+        }
+
+        this.sampleNameViewport.renderSVGContext(context, delta)
     }
 
     async __renderSVGContext(context, { deltaX, deltaY }) {

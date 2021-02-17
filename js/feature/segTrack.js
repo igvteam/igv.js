@@ -478,19 +478,23 @@ function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillSt
 
 function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
 
-    for (let { x, y, w, h, name } of featureMap.values()) {
+    for (let [ key, value ] of featureMap) {
+
+        if ('sampleHeight' === key) {
+            continue
+        }
+
+        const { x, y, w, h, name } = value
 
         ctx.save()
-        // ctx.fillStyle = randomRGBConstantAlpha(150, 250, 0.5)
         ctx.fillStyle = 'white'
         ctx.fillRect(0, y, canvasWidth, h)
         ctx.restore()
 
-        // right justified text
-        // ctx.fillText(name, canvasWidth - fudge, y + h)
-
         // left justified text
+        console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
         ctx.fillText(name, sampleNameXShim, y + h)
+
     }
 
 }
