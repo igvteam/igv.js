@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+
+    <title>SVG Dev</title>
+
+    <link href="css/dev.css" rel="stylesheet"/>
+    <link href="css/save_to_svg.css" rel="stylesheet"/>
+
+    <style>
+        #trackList {
+
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+        }
+
+        div#myDiv > h3 {
+            font-size: large;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<div id="trackList"></div>
+
+<div id="igv-centering-container">
+    <div id='igv-app-container'></div>
+</div>
+
+<div id='igv-draw-svg-button-container'>
+    <button id='igv-draw-svg-button' type="button">
+        <label>Draw SVG</label>
+    </button>
+</div>
+
+<div id="igv-svg-container">
+</div>
+
+</body>
+
+<script type="module">
+
+    import $ from '../js/vendor/jquery-3.3.1.slim.js'
+    import igv from '../js/index.js'
+    import GtexUtils from '../js/gtex/gtexUtils.js'
+    import { igvxhr } from '../node_modules/igv-utils/src/index.js'
+
+    let browser
+    (async () => {
+
+        const options =
+            {
+                genome: "hg19",
+                showSVGButton: false,
+                showTrackLabels: false,
+
+                locus: 'myc',
+                // vcf friendly locs
+                // locus: 'chr8:128,562,838-128,863,257',
+                // locus: 'chr1',
+                // locus: 'all',
+                // locus: [ 'ace', 'myc' ],
+                // locus: [ 'ace', 'myc', 'egfr' ],
+                // locus: 'chr8:128,751,240-128,751,534',
+
+                tracks:
+                    [
+                        {
+                            "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                            "name": "Big BigWig"
+                        },
+                        {
+                            "sourceType": "gcs",
+                            "type": "alignment",
+                            "url": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam",
+                            "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12889_S1.bam.bai",
+                            "name": "NA12889"
+                        },
+                        {
+                            name: "A SEG Track",
+                            url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                            indexed: false,
+                            isLog: true,
+                            displayMode: 'SQUISHED',
+                            height: 256
+
+                        },
+                    ]
+            };
+
+        browser = await igv.createBrowser(document.getElementById('igv-app-container'), options)
+
+        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
+
+        $('#igv-draw-svg-button').on('click', () => {
+            browser.saveSVGtoFile({ $container: $('#igv-svg-container') })
+        });
+
+
+    })()
+
+    async function createTrackList(div, file, browser) {
+
+        const tracks = await igvxhr.loadJson(file)
+
+        for (let track of tracks) {
+
+            if (track.HEADING) {
+                div.insertAdjacentHTML("beforeend",
+                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
+                    + track.HEADING + "</div>");
+            } else {
+                const trackDiv = document.createElement('div');
+                trackDiv.innerHTML = track.name;
+                trackDiv.addEventListener('click', function (event) {
+
+                    // Convert to json to insure we can load json representations (not strictly neccessary).
+                    var json = JSON.stringify(track);
+
+                    browser.loadTrack(json);
+                });
+
+                div.appendChild(trackDiv);
+            }
+
+        }
+
+        div.insertAdjacentHTML("beforeend", "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
+
+        const { tissueInfo } = await GtexUtils.getTissueInfo("gtex_v7")
+
+        for (let config of tissueInfo) {
+            const trackDiv = document.createElement('div')
+            trackDiv.innerHTML = (config.tissueSiteDetailId.split('_').join(' '))
+            div.appendChild(trackDiv)
+            trackDiv.addEventListener('click', () => browser.loadTrack(GtexUtils.trackConfiguration(config)))
+        }
+
+    }
+
+</script>
+</html>
