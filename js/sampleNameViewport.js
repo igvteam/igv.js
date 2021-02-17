@@ -122,6 +122,9 @@ class SampleNameViewport extends ViewportBase {
 
     renderSVGContext(context, { deltaX, deltaY }) {
 
+        // return
+
+
         let id = this.trackView.track.name || this.trackView.track.id
         id = id.replace(/\W/g, '')
 
@@ -141,9 +144,8 @@ class SampleNameViewport extends ViewportBase {
 
         IGVGraphics.fillRect(context, 0, 0, width, height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
 
-        configureFont(context, fontConfigExpandedDisplayMode)
-
         if (this.featureMap) {
+            configureFont(context, fontConfigureTemplate, this.featureMap)
             this.sampleNameRenderer(context, this.featureMap, width, height)
         }
 
