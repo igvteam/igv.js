@@ -42,10 +42,17 @@ class IdeogramViewport extends ViewPort {
         const canvas = this.$ideogramCanvas.get(0)
         this.ideogram_ctx = canvas.getContext('2d')
 
+        this.$canvas.remove()
+        this.canvas = undefined
+        this.ctx = undefined
+
         this.$viewport.on('click.ideogram', e => {
             clickHandler(e, canvas, this.browser, this.referenceFrame)
         })
 
+    }
+    setWidth(width) {
+        this.$viewport.width(width);
     }
 
     drawSVGWithContext(context, width, height) {
@@ -54,7 +61,12 @@ class IdeogramViewport extends ViewPort {
         context.restore()
     }
 
-    draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
+    async repaint() {
+        console.log('IdeogramViewport repaint')
+        this.draw({ referenceFrame: this.referenceFrame })
+    }
+
+    draw({ referenceFrame }) {
 
         this.$canvas.hide()
 

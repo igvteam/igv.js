@@ -492,7 +492,7 @@ function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
         ctx.restore()
 
         // left justified text
-        console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
+        // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
         ctx.fillText(name, sampleNameXShim, y + h)
 
     }
