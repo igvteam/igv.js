@@ -312,12 +312,13 @@ class ViewPort extends ViewportBase {
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
-        if (this.canvas) {
-            $(this.canvas).remove();
+        if (this.$canvas) {
+            this.$canvas.remove()
         }
-        this.$content.append(newCanvas);
-        this.canvas = newCanvas;
-        this.ctx = ctx;
+        this.$canvas = $(newCanvas)
+        this.$content.append(this.$canvas)
+        this.canvas = newCanvas
+        this.ctx = ctx
     }
 
     draw(drawConfiguration, features, roiFeatures) {
