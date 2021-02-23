@@ -146,7 +146,156 @@ class SegTrack extends TrackBase {
         return features;
     }
 
-    draw({ context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
+    draw(options) {
+
+        const self = this;
+
+        const v2 = IGVMath.log2(2);
+
+        const ctx = options.context;
+        const pixelTop = options.pixelTop;
+        const pixelWidth = options.pixelWidth;
+        const pixelHeight = options.pixelHeight;
+        const pixelBottom = pixelTop + pixelHeight;
+        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
+        const featureList = options.features;
+
+        if (featureList && featureList.length > 0) {
+
+            if (self.isLog === undefined) checkForLog(featureList);
+
+            const bpPerPixel = options.bpPerPixel;
+            const bpStart = options.bpStart;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const xScale = bpPerPixel;
+
+            this.updateSampleKeys(featureList);
+
+            // Create a map for fast id -> row lookup
+            const samples = {};
+            this.sampleKeys.forEach(function (id, index) {
+                samples[id] = index;
+            })
+
+
+            let sampleHeight;
+            let border;
+            switch (this.displayMode) {
+
+                case "FILL":
+                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    border = 0
+                    break;
+
+                case "SQUISHED":
+                    sampleHeight = this.squishedRowHeight;
+                    border = 0;
+                    break;
+
+                default:   // EXPANDED
+                    sampleHeight = this.expandedRowHeight;
+                    border = 1;
+
+            }
+
+            this.featureMap = new Map()
+
+            for (let segment of featureList) {
+
+                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
+
+                if (segment.end < bpStart) continue;
+                if (segment.start > bpEnd) break;
+
+                const sampleKey = segment.sampleKey || segment.sample
+                segment.row = samples[sampleKey];
+                const y = pixelTop + segment.row * sampleHeight + border;
+                const bottom = y + sampleHeight;
+
+                if (bottom < pixelTop || y > pixelBottom) {
+                    continue;
+                }
+
+                let value = segment.value;
+                if (!self.isLog) {
+                    value = IGVMath.log2(value / 2);
+                }
+
+
+                const segmentStart = Math.max(segment.start, bpStart);
+                // const segmentStart = segment.start;
+                const px = Math.round((segmentStart - bpStart) / xScale);
+
+                const segmentEnd = Math.min(segment.end, bpEnd);
+                // const segmentEnd = segment.end;
+                const px1 = Math.round((segmentEnd - bpStart) / xScale);
+
+                const pw = Math.max(1, px1 - px);
+
+                // const sign = px < 0 ? '-' : '+';
+                // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
+
+                let color;
+                if (value < -0.1) {
+                    color = self.negColorScale.getColor(value);
+                } else if (value > 0.1) {
+                    color = self.posColorScale.getColor(value);
+                } else {
+                    color = "white";
+                }
+
+                // Use for diagnostic rendering
+                // context.fillStyle = randomRGB(180, 240)
+                // context.fillStyle = randomGrey(200, 255)
+                ctx.fillStyle = color;
+
+                // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
+                let sh = sampleHeight;
+                if (sampleHeight < 0.25) {
+                    const f = 0.1 + 2 * Math.abs(value);
+                    sh = Math.min(1, f * sampleHeight);
+                }
+
+                segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
+                ctx.fillRect(px, y, pw, sh - 2 * border);
+
+                //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
+
+                const key = y.toString()
+                if (false === this.featureMap.has(key)) {
+                    this.featureMap.set(key, { ...segment.pixelRect, ...{ name: (segment.sampleKey || segment.sample).toUpperCase() } })
+                }
+            }
+
+            if (false === options.renderSVG) {
+                if (this.featureMap.size > 0) {
+                    this.featureMap.set('sampleHeight', sampleHeight)
+                    this.drawSampleNames(this.featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
+                }
+            }
+
+        } else {
+            console.log("No feature list");
+        }
+
+
+        function checkForLog(featureList) {
+
+            if (self.isLog === undefined) {
+                self.isLog = false;
+                for (let feature of featureList) {
+                    if (feature.value < 0) {
+                        self.isLog = true;
+                        return;
+                    }
+                }
+            }
+        }
+
+    }
+
+    __draw({ context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
 
         const self = this
 
