@@ -49,13 +49,13 @@
 
 <body>
 
-<div>
-    <button id="bmBtn">Bookmark</button>
-</div>
+<!--<div>-->
+<!--    <button id="bmBtn">Bookmark</button>-->
+<!--</div>-->
 
-<h3>Example tracks - click to load</h3>
+<!--<h3>Example tracks - click to load</h3>-->
 
-<div id="trackList"></div>
+<!--<div id="trackList"></div>-->
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -116,7 +116,7 @@
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
 
-        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
+        // await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
     })()
 
@@ -163,7 +163,7 @@
         window.history.pushState({}, "IGV", browser.sessionURL());
     }
 
-    document.getElementById("bmBtn").addEventListener("click", bookmark);
+    // document.getElementById("bmBtn").addEventListener("click", bookmark);
 
 </script>
 </html>

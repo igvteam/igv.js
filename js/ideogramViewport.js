@@ -62,7 +62,6 @@ class IdeogramViewport extends ViewPort {
     }
 
     async repaint() {
-        console.log('IdeogramViewport repaint')
         this.draw({ referenceFrame: this.referenceFrame })
     }
 
