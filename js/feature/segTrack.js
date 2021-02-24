@@ -268,12 +268,12 @@ class SegTrack extends TrackBase {
                 }
             }
 
-            if (false === options.renderSVG) {
-                if (this.featureMap.size > 0) {
-                    this.featureMap.set('sampleHeight', sampleHeight)
-                    this.drawSampleNames(this.featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
-                }
-            }
+            // if (false === options.renderSVG) {
+            //     if (this.featureMap.size > 0) {
+            //         this.featureMap.set('sampleHeight', sampleHeight)
+            //         this.drawSampleNames(this.featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
+            //     }
+            // }
 
         } else {
             console.log("No feature list");

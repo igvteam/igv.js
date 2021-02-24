@@ -10,6 +10,7 @@ import {
     randomGrey,
     randomRGBConstantAlpha
 } from './util/colorPalletes.js'
+import GenomeUtils from "./genome/genome";
 
 const sampleNameViewportWidth = 128
 const sampleNameXShim = 4
@@ -45,6 +46,83 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
+    async repaint() {
+
+        const pixelWidth = sampleNameViewportWidth
+
+        const viewportHeight = this.$viewport.height()
+        const contentHeight = this.getContentHeight()
+
+        const pixelHeight = Math.min(contentHeight, 3 * viewportHeight)
+
+        const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
+
+        let devicePixelRatio
+        if ("FILL" === this.trackView.track.displayMode) {
+            devicePixelRatio = window.devicePixelRatio
+        } else {
+            devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio
+        }
+
+        const canvas = $('<canvas class="igv-canvas">').get(0)
+        const ctx = canvas.getContext("2d")
+
+        canvas.style.width = `${ pixelWidth }px`
+        canvas.style.height = `${ pixelHeight }px`
+
+        canvas.width = devicePixelRatio * pixelWidth
+        canvas.height = devicePixelRatio * pixelHeight
+
+        ctx.scale(devicePixelRatio, devicePixelRatio)
+
+        canvas.style.top = `${ canvasTop }px`
+
+        ctx.translate(0, -canvasTop)
+
+        const drawConfiguration =
+            {
+                context: ctx,
+                renderSVG: false,
+                pixelWidth,
+                pixelHeight,
+                pixelTop: canvasTop,
+                referenceFrame: this.referenceFrame,
+            };
+
+        this.draw(drawConfiguration)
+
+        this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
+
+        if (this.$canvas) {
+            this.$canvas.remove()
+        }
+        this.$canvas = $(canvas)
+        this.$content.append(this.$canvas)
+        this.canvas = canvas
+        this.ctx = ctx
+    }
+
+    draw({ renderSVG, pixelWidth, pixelHeight, pixelTop, referenceFrame }) {
+        // console.log(`${ Date.now() } sample-name-viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ pixelTop }.`)
+
+        if (undefined === this.trackView.track.featureMap) {
+            return
+        }
+
+        for (let [ key, value ] of this.trackView.track.featureMap) {
+
+            if ('sampleHeight' === key) {
+                continue
+            }
+
+            const { y, h } = value
+
+            this.ctx.fillStyle = randomRGBConstantAlpha(180, 250, .75)
+            this.ctx.fillRect(0, y, this.ctx.canvas.width, h)
+        }
+
+    }
+
     drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
         this.featureMap = featureMap
@@ -61,6 +139,8 @@ class SampleNameViewport extends ViewportBase {
 
         this.ctx.canvas.style.display = 'block'
         this.ctx.canvas.style.top = `${ canvasTop }px`
+
+        console.log(`sample-name-viewport. content-css-top ${ this.$content.css('top') }. canvas-top ${ canvasTop }`)
 
         this.ctx.translate(0, -canvasTop)
         this.canvasTop = canvasTop
@@ -116,11 +196,7 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    setTop(contentTop) {
-        this.$content.css('top', `${ contentTop }px`)
-    }
-
-    renderSVGContext(context, { deltaX, deltaY }) {
+   renderSVGContext(context, { deltaX, deltaY }) {
 
         // return
 

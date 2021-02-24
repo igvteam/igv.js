@@ -91,7 +91,19 @@ class ViewportBase {
 
     shift() {}
 
-    setTop(contentTop) {}
+    setTop(contentTop) {
+
+        const viewportHeight = this.$viewport.height()
+        const viewTop = -contentTop
+        const viewBottom = viewTop + viewportHeight
+
+        this.$content.css('top', `${ contentTop }px`)
+
+        if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
+            this.repaint()
+        }
+
+    }
 
     async loadFeatures () {
         return undefined
@@ -105,7 +117,37 @@ class ViewportBase {
         console.log('ViewportBase - draw(drawConfiguration, features, roiFeatures)')
     }
 
+    checkContentHeight() {
+
+        let track = this.trackView.track;
+
+        if ("FILL" === track.displayMode) {
+            this.setContentHeight(this.$viewport.height())
+        } else if (typeof track.computePixelHeight === 'function') {
+
+            let features = this.dataViewport ? this.dataViewport.cachedFeatures : this.cachedFeatures
+
+            if (features) {
+                let requiredContentHeight = track.computePixelHeight(features);
+                let currentContentHeight = this.$content.height();
+                if (requiredContentHeight !== currentContentHeight) {
+                    this.setContentHeight(requiredContentHeight);
+                }
+            }
+        }
+    }
+
+    getContentHeight() {
+        return this.$content.height()
+    }
+
     setContentHeight(contentHeight) {
+        // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
+        contentHeight = Math.min(contentHeight, 32000);
+
+        this.$content.height(contentHeight);
+
+        if (this.tile) this.tile.invalidate = true;
     }
 
     isLoading() {
@@ -136,10 +178,6 @@ class ViewportBase {
 
     getWidth() {
         return this.$viewport.width();
-    }
-
-    getContentHeight() {
-        return this.$content.height();
     }
 
     getContentTop() {

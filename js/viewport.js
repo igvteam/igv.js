@@ -168,21 +168,6 @@ class ViewPort extends ViewportBase {
         }
     }
 
-    setTop(contentTop) {
-
-        const viewportHeight = this.$viewport.height()
-        const viewTop = -contentTop
-        const viewBottom = viewTop + viewportHeight
-
-        this.$content.css("top", contentTop + "px")
-
-        if (!this.canvasVerticalRange ||
-            this.canvasVerticalRange.bottom < viewBottom ||
-            this.canvasVerticalRange.top > viewTop) {
-            this.repaint()
-        }
-    }
-
     async loadFeatures() {
 
         const referenceFrame = this.referenceFrame;
@@ -253,8 +238,9 @@ class ViewPort extends ViewportBase {
         }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const viewportHeight = this.$viewport.height();
-        const minHeight = roiFeatures ? Math.max(this.getContentHeight(), viewportHeight) : this.getContentHeight();  // Need to fill viewport for ROIs.
+        const viewportHeight = this.$viewport.height()
+        const contentHeight = this.getContentHeight()
+        const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight;  // Need to fill viewport for ROIs.
         let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas) {
@@ -323,6 +309,8 @@ class ViewPort extends ViewportBase {
 
     draw(drawConfiguration, features, roiFeatures) {
 
+        // console.log(`${ Date.now() } viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ drawConfiguration.pixelTop }.`)
+
         if (features) {
             drawConfiguration.features = features;
             this.trackView.track.draw(drawConfiguration);
@@ -389,15 +377,6 @@ class ViewPort extends ViewportBase {
 
         return ctx.getSerializedSvg(true);
 
-    }
-
-    setContentHeight(contentHeight) {
-        // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
-        contentHeight = Math.min(contentHeight, 32000);
-
-        this.$content.height(contentHeight);
-
-        if (this.tile) this.tile.invalidate = true;
     }
 
     containsPosition(chr, position) {
@@ -481,8 +460,6 @@ class ViewPort extends ViewportBase {
         const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
         context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
-
-        // console.log(`ViewportBase render SVG. context.addGroup( id ${ id } dx ${ dx } dy ${ dy } width ${ width } height ${ height } -yScrollDelta ${ -yScrollDelta })`)
 
         this.drawSVGWithContext(context, width, height)
     }
@@ -613,26 +590,6 @@ class ViewPort extends ViewportBase {
 
     getCachedFeatures() {
         return this.tile ? this.tile.features : [];
-    }
-
-    checkContentHeight() {
-
-        let track = this.trackView.track;
-
-        if ("FILL" === track.displayMode) {
-            this.setContentHeight(this.$viewport.height())
-        } else if (typeof track.computePixelHeight === 'function') {
-
-            let features = this.cachedFeatures;
-
-            if (features) {
-                let requiredContentHeight = track.computePixelHeight(features);
-                let currentContentHeight = this.$content.height();
-                if (requiredContentHeight !== currentContentHeight) {
-                    this.setContentHeight(requiredContentHeight);
-                }
-            }
-        }
     }
 
     async getFeatures(track, chr, start, end, bpPerPixel) {

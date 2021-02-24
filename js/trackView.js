@@ -143,6 +143,7 @@ class TrackView {
         }
 
         this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
+        this.sampleNameViewport.dataViewport = this.viewports[ 0 ]
 
         updateViewportShims(this.viewports, this.$viewportContainer)
 
@@ -376,6 +377,8 @@ class TrackView {
      */
     repaintViews() {
 
+        this.sampleNameViewport.repaint()
+
         for (let viewport of this.viewports) {
             viewport.repaint();
         }
@@ -432,6 +435,7 @@ class TrackView {
             }
         }
 
+        this.sampleNameViewport.repaint()
 
         // Must repaint all viewports if autoscaling
         if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
@@ -483,10 +487,12 @@ class TrackView {
     }
 
     checkContentHeight() {
-        this.viewports.forEach(function (vp) {
-            vp.checkContentHeight();
-        })
-        this.adjustTrackHeight();
+
+        for (let viewport of [ ...this.viewports, this.sampleNameViewport ]) {
+            viewport.checkContentHeight()
+        }
+
+        this.adjustTrackHeight()
     }
 
     adjustTrackHeight() {
@@ -499,14 +505,18 @@ class TrackView {
         }
 
         if (this.scrollbar) {
+
             const currentTop = this.viewports[0].getContentTop();
-            const heights = this.viewports.map((viewport) => viewport.getContentHeight());
+
+            const viewports = [ ...this.viewports, this.sampleNameViewport ]
+            const heights = viewports.map((viewport) => viewport.getContentHeight());
             const minContentHeight = Math.min(...heights);
             const newTop = Math.min(0, this.$viewportContainer.height() - minContentHeight);
             if (currentTop < newTop) {
-                this.viewports.forEach(function (viewport) {
-                    $(viewport.contentDiv).css("top", newTop + "px");
-                });
+
+                for (let viewport of viewports) {
+                    viewport.$content.css("top", `${ newTop }px`)
+                }
             }
             this.scrollbar.update();
         }
