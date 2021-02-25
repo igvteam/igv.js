@@ -90,10 +90,6 @@ class TrackBase {
         this.trackView = undefined
     }
 
-    drawSampleNames(features, canvasTop, height, sampleNameRenderer) {
-        this.trackView.sampleNameViewport.drawSampleNames(features, canvasTop, height, sampleNameRenderer)
-    }
-
     /**
      * Update track properties from the config object.
      *

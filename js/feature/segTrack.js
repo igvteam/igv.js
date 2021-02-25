@@ -30,8 +30,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
-import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
-import { sampleNameXShim } from "../sampleNameViewport.js";
+import {sampleNameXShim} from "../sampleNameViewport.js";
 
 class SegTrack extends TrackBase {
 
@@ -43,13 +42,12 @@ class SegTrack extends TrackBase {
         super.init(config);
 
         this.type = config.type || "seg";
-
         this.isLog = config.isLog;
         this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
         this.maxHeight = config.maxHeight || 500;
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
-        this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 12;
-
+        this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13;
+        this.sampleHeight = this.squishedRowHeight;      // Initial value, will get overwritten when rendered
         this.posColorScale = config.posColorScale ||
             new GradientColorScale(
                 {
@@ -77,7 +75,7 @@ class SegTrack extends TrackBase {
                 }
             );
 
-        if(config.samples) {
+        if (config.samples) {
             this.sampleKeys = config.samples;
             this.explicitSamples = true;
         } else {
@@ -135,6 +133,12 @@ class SegTrack extends TrackBase {
 
     }
 
+    getSamples() {
+        return {
+            names: this.sampleKeys,
+            height: this.sampleHeight
+        }
+    }
 
     async getFeatures(chr, start, end) {
         const features = await this.featureSource.getFeatures({chr, start, end});
@@ -146,31 +150,17 @@ class SegTrack extends TrackBase {
         return features;
     }
 
-    draw(options) {
 
-        const self = this;
+    draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
+console.log(`segTrack pixelTop =` + pixelTop)
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
-        const v2 = IGVMath.log2(2);
+        if (features && features.length > 0) {
 
-        const ctx = options.context;
-        const pixelTop = options.pixelTop;
-        const pixelWidth = options.pixelWidth;
-        const pixelHeight = options.pixelHeight;
-        const pixelBottom = pixelTop + pixelHeight;
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+            this.checkForLog(features);
 
-        const featureList = options.features;
-
-        if (featureList && featureList.length > 0) {
-
-            if (self.isLog === undefined) checkForLog(featureList);
-
-            const bpPerPixel = options.bpPerPixel;
-            const bpStart = options.bpStart;
-            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-            const xScale = bpPerPixel;
-
-            this.updateSampleKeys(featureList);
+            // New segments could conceivably add new samples
+            this.updateSampleKeys(features);
 
             // Create a map for fast id -> row lookup
             const samples = {};
@@ -178,47 +168,51 @@ class SegTrack extends TrackBase {
                 samples[id] = index;
             })
 
-
-            let sampleHeight;
             let border;
             switch (this.displayMode) {
-
                 case "FILL":
-                    sampleHeight = options.pixelHeight / this.sampleKeys.length;
+                    this.sampleHeight = pixelHeight / this.sampleKeys.length;
                     border = 0
                     break;
 
                 case "SQUISHED":
-                    sampleHeight = this.squishedRowHeight;
+                    this.sampleHeight = this.squishedRowHeight;
                     border = 0;
                     break;
 
                 default:   // EXPANDED
-                    sampleHeight = this.expandedRowHeight;
+                    this.sampleHeight = this.expandedRowHeight;
                     border = 1;
+            }
+            const rowHeight = this.sampleHeight;
 
+
+            // this.featureMap = new Map()
+
+            for (let segment of features) {
+                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
             }
 
-            this.featureMap = new Map()
+            const pixelBottom = pixelTop + pixelHeight;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
+            const xScale = bpPerPixel;
 
-            for (let segment of featureList) {
-
-                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
+            for (let segment of features) {
 
                 if (segment.end < bpStart) continue;
                 if (segment.start > bpEnd) break;
 
                 const sampleKey = segment.sampleKey || segment.sample
                 segment.row = samples[sampleKey];
-                const y = pixelTop + segment.row * sampleHeight + border;
-                const bottom = y + sampleHeight;
+                const y = pixelTop + segment.row * rowHeight + border;
+                const bottom = y + rowHeight;
 
                 if (bottom < pixelTop || y > pixelBottom) {
                     continue;
                 }
 
                 let value = segment.value;
-                if (!self.isLog) {
+                if (!this.isLog) {
                     value = IGVMath.log2(value / 2);
                 }
 
@@ -238,9 +232,9 @@ class SegTrack extends TrackBase {
 
                 let color;
                 if (value < -0.1) {
-                    color = self.negColorScale.getColor(value);
+                    color = this.negColorScale.getColor(value);
                 } else if (value > 0.1) {
-                    color = self.posColorScale.getColor(value);
+                    color = this.posColorScale.getColor(value);
                 } else {
                     color = "white";
                 }
@@ -248,24 +242,24 @@ class SegTrack extends TrackBase {
                 // Use for diagnostic rendering
                 // context.fillStyle = randomRGB(180, 240)
                 // context.fillStyle = randomGrey(200, 255)
-                ctx.fillStyle = color;
+                context.fillStyle = color;
 
                 // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
-                let sh = sampleHeight;
-                if (sampleHeight < 0.25) {
+                let sh = rowHeight;
+                if (rowHeight < 0.25) {
                     const f = 0.1 + 2 * Math.abs(value);
-                    sh = Math.min(1, f * sampleHeight);
+                    sh = Math.min(1, f * rowHeight);
                 }
 
                 segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
-                ctx.fillRect(px, y, pw, sh - 2 * border);
+                context.fillRect(px, y, pw, sh - 2 * border);
 
                 //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
 
-                const key = y.toString()
-                if (false === this.featureMap.has(key)) {
-                    this.featureMap.set(key, { ...segment.pixelRect, ...{ name: (segment.sampleKey || segment.sample).toUpperCase() } })
-                }
+                // const key = y.toString()
+                //  if (false === this.featureMap.has(key)) {
+                //      this.featureMap.set(key, {...segment.pixelRect, ...{name: (segment.sampleKey || segment.sample).toUpperCase()}})
+                //  }
             }
 
             // if (false === options.renderSVG) {
@@ -279,23 +273,21 @@ class SegTrack extends TrackBase {
             console.log("No feature list");
         }
 
+    }
 
-        function checkForLog(featureList) {
-
-            if (self.isLog === undefined) {
-                self.isLog = false;
-                for (let feature of featureList) {
-                    if (feature.value < 0) {
-                        self.isLog = true;
-                        return;
-                    }
+    checkForLog(features) {
+        if (this.isLog === undefined) {
+            this.isLog = false;
+            for (let feature of features) {
+                if (feature.value < 0) {
+                    this.isLog = true;
+                    return;
                 }
             }
         }
-
     }
 
-    __draw({ context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart }) {
+    __draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
         const self = this
 
@@ -388,7 +380,7 @@ class SegTrack extends TrackBase {
                     h = Math.min(1, f * sampleHeight);
                 }
                 h -= 2 * border
-                segment.pixelRect = { x, y, w, h };
+                segment.pixelRect = {x, y, w, h};
 
                 // Use for diagnostic rendering
                 // context.fillStyle = randomRGB(180, 240)
@@ -401,7 +393,7 @@ class SegTrack extends TrackBase {
                 if (false === featureMap.has(key)) {
 
                     const name = (segment.sampleKey || segment.sample).toUpperCase()
-                    featureMap.set(key, { x, y, w, h, name })
+                    featureMap.set(key, {x, y, w, h, name})
 
                     // Debugging - render sample names directly in canvas
                     // configureFont(context, fontConfig)
@@ -596,7 +588,7 @@ class SegTrack extends TrackBase {
 
     updateSampleKeys(featureList) {
 
-        if(this.explicitSamples) return;
+        if (this.explicitSamples) return;
 
         const samples = new Set(this.sampleKeys);
         for (let feature of featureList) {
@@ -615,37 +607,15 @@ const fontConfig =
         textAlign: 'start', // start || end
         textBaseline: 'bottom',
         strokeStyle: 'black',
-        fillStyle:'black'
+        fillStyle: 'black'
     };
 
-function configureFont(ctx, { font, textAlign, textBaseline, strokeStyle, fillStyle }) {
+function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
     ctx.font = font
     ctx.textAlign = textAlign
     ctx.textBaseline = textBaseline
     ctx.fillStyle = fillStyle
 }
 
-function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
-
-    for (let [ key, value ] of featureMap) {
-
-        if ('sampleHeight' === key) {
-            continue
-        }
-
-        const { x, y, w, h, name } = value
-
-        ctx.save()
-        ctx.fillStyle = 'white'
-        ctx.fillRect(0, y, canvasWidth, h)
-        ctx.restore()
-
-        // left justified text
-        // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
-        ctx.fillText(name, sampleNameXShim, y + h)
-
-    }
-
-}
 
 export default SegTrack

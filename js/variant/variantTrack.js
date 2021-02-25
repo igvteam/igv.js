@@ -250,10 +250,6 @@ class VariantTrack extends TrackBase {
                 }
             }
 
-            if (drawnFeatures.length > 0) {
-                this.drawSampleNames(drawnFeatures, pixelTop, pixelHeight, drawVariantTrackSampleNames)
-            }
-
         } else {
             console.log("No feature list");
         }
