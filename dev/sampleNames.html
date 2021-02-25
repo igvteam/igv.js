@@ -21,24 +21,9 @@
 
     const options =
         {
-            showCursorTrackingGuideButton: false,
-            showCenterGuideButton: false,
-            showSVGButton: true,
-            showTrackLabelButton: false,
-
-            // showSampleNameButton: false,
-            // showSampleNames: true,
 
             genome: "hg19",
-            // locus: 'chr1',
-
-            // vcf friendly locs
-            // locus: 'chr8:128,562,838-128,863,257',
-
-            // locus: 'all',
             locus: 'ace',
-            // locus: [ 'ace', 'myc' ],
-            // locus: [ 'egfr', 'myc', 'ace' ],
 
             tracks:
                 [
@@ -47,19 +32,10 @@
                         url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
                         indexed: false,
                         isLog: true,
-                        // displayMode: 'EXPANDED',
+                        displayMode: 'EXPANDED',
+                        expandedRowHeight: 20,
                         height: 512
-                    },
-                    // {
-                    //     "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                    //     "graphType": "points",
-                    //     "pointSize": 3,
-                    //     "name": "Encode bigwig points"
-                    // },
-                    // {
-                    //     "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
-                    //     "name": "Big BigWig"
-                    // }
+                    }
                 ]
         };
 

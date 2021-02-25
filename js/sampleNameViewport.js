@@ -1,16 +1,11 @@
-import { DOMUtils } from '../node_modules/igv-utils/src/index.js'
 import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import {
-    appleCrayonRGB,
     appleCrayonRGBA,
-    appleCrayonPalette,
-    greyScale,
-    randomGrey,
     randomRGBConstantAlpha
 } from './util/colorPalletes.js'
-import GenomeUtils from "./genome/genome";
+import {IGVMath} from "../node_modules/igv-utils/src/index.js";
 
 const sampleNameViewportWidth = 128
 const sampleNameXShim = 4
@@ -46,7 +41,7 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    async repaint() {
+    async repaint(samples) {
 
         const pixelWidth = sampleNameViewportWidth
 
@@ -87,6 +82,7 @@ class SampleNameViewport extends ViewportBase {
                 pixelHeight,
                 pixelTop: canvasTop,
                 referenceFrame: this.referenceFrame,
+                samples
             };
 
         this.draw(drawConfiguration)
@@ -102,28 +98,33 @@ class SampleNameViewport extends ViewportBase {
         this.ctx = ctx
     }
 
-    draw({ renderSVG, pixelWidth, pixelHeight, pixelTop, referenceFrame }) {
+    draw({ context, renderSVG, pixelWidth, pixelHeight, pixelTop, referenceFrame, samples }) {
         // console.log(`${ Date.now() } sample-name-viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ pixelTop }.`)
-
-        if (undefined === this.trackView.track.featureMap) {
+        console.log(`sampleNames pixelTop =` + pixelTop)
+        if (!samples || samples.names.length === 0) {
             return
         }
 
-        for (let [ key, value ] of this.trackView.track.featureMap) {
+        const sampleNameXShim = 4
+        const sampleHeight = samples.height;
+        let y = 0;
+        for (let name of samples.names) {
+            //console.log(`y = ${y} name=${name}`);
+            context.save();
+            context.fillStyle = 'white';
+            context.fillRect(0, y, pixelWidth, sampleHeight);
+            context.restore();
 
-            if ('sampleHeight' === key) {
-                continue
-            }
+            // left justified text
+            // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
+            context.fillText(name, sampleNameXShim, y + sampleHeight);
 
-            const { y, h } = value
-
-            this.ctx.fillStyle = randomRGBConstantAlpha(180, 250, .75)
-            this.ctx.fillRect(0, y, this.ctx.canvas.width, h)
+            y += sampleHeight;
         }
-
     }
 
-    drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
+
+    __drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
         this.featureMap = featureMap
         this.sampleNameRenderer = sampleNameRenderer

@@ -377,14 +377,23 @@ class TrackView {
      */
     repaintViews() {
 
-        this.sampleNameViewport.repaint()
-
         for (let viewport of this.viewports) {
             viewport.repaint();
         }
 
         if (this.track.paintAxis) {
             this.track.paintAxis(this.axisCanvasContext, this.axisCanvasContext.canvas.width, this.axisCanvasContext.canvas.height);
+        }
+
+        // Repaint sample names last
+        this.repaintSamples();
+
+    }
+
+    repaintSamples() {
+        if(typeof this.track.getSamples === 'function') {
+            const samples = this.track.getSamples();
+            this.sampleNameViewport.repaint(samples);
         }
     }
 
@@ -435,8 +444,6 @@ class TrackView {
             }
         }
 
-        this.sampleNameViewport.repaint()
-
         // Must repaint all viewports if autoscaling
         if (!isDragging && (this.track.autoscale || this.track.autoscaleGroup)) {
             for (let vp of visibleViewports) {
@@ -447,6 +454,9 @@ class TrackView {
                 vp.repaint();
             }
         }
+
+        // Repaint sample names last
+        this.repaintSamples();
 
         this.adjustTrackHeight();
     }
@@ -488,7 +498,7 @@ class TrackView {
 
     checkContentHeight() {
 
-        for (let viewport of [ ...this.viewports, this.sampleNameViewport ]) {
+        for (let viewport of this.viewports) {
             viewport.checkContentHeight()
         }
 
