@@ -30,7 +30,7 @@ import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
-import {sampleNameXShim} from "../sampleNameViewport.js";
+import { randomRGB } from '../util/colorPalletes.js'
 
 class SegTrack extends TrackBase {
 
@@ -136,6 +136,7 @@ class SegTrack extends TrackBase {
     getSamples() {
         return {
             names: this.sampleKeys,
+            rects: this.sampleRects,
             height: this.sampleHeight
         }
     }
@@ -152,7 +153,7 @@ class SegTrack extends TrackBase {
 
 
     draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
-console.log(`segTrack pixelTop =` + pixelTop)
+
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (features && features.length > 0) {
@@ -164,6 +165,7 @@ console.log(`segTrack pixelTop =` + pixelTop)
 
             // Create a map for fast id -> row lookup
             const samples = {};
+            this.sampleRects = []
             this.sampleKeys.forEach(function (id, index) {
                 samples[id] = index;
             })
@@ -219,13 +221,13 @@ console.log(`segTrack pixelTop =` + pixelTop)
 
                 const segmentStart = Math.max(segment.start, bpStart);
                 // const segmentStart = segment.start;
-                const px = Math.round((segmentStart - bpStart) / xScale);
+                const x = Math.round((segmentStart - bpStart) / xScale);
 
                 const segmentEnd = Math.min(segment.end, bpEnd);
                 // const segmentEnd = segment.end;
-                const px1 = Math.round((segmentEnd - bpStart) / xScale);
+                const x1 = Math.round((segmentEnd - bpStart) / xScale);
 
-                const pw = Math.max(1, px1 - px);
+                const w = Math.max(1, x1 - x);
 
                 // const sign = px < 0 ? '-' : '+';
                 // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
@@ -251,23 +253,12 @@ console.log(`segTrack pixelTop =` + pixelTop)
                     sh = Math.min(1, f * rowHeight);
                 }
 
-                segment.pixelRect = {x: px, y: y, w: pw, h: sh - 2 * border};
-                context.fillRect(px, y, pw, sh - 2 * border);
+                const h = sh - 2 * border
+                segment.pixelRect = { x, y, w, h };
+                this.sampleRects.push(segment.pixelRect)
 
-                //IGVGraphics.fillRect(ctx, px, y, pw, sampleHeight - 2 * border, {fillStyle: color});
-
-                // const key = y.toString()
-                //  if (false === this.featureMap.has(key)) {
-                //      this.featureMap.set(key, {...segment.pixelRect, ...{name: (segment.sampleKey || segment.sample).toUpperCase()}})
-                //  }
+                context.fillRect(x, y, w, h);
             }
-
-            // if (false === options.renderSVG) {
-            //     if (this.featureMap.size > 0) {
-            //         this.featureMap.set('sampleHeight', sampleHeight)
-            //         this.drawSampleNames(this.featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
-            //     }
-            // }
 
         } else {
             console.log("No feature list");
@@ -286,146 +277,7 @@ console.log(`segTrack pixelTop =` + pixelTop)
             }
         }
     }
-
-    __draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
-
-        const self = this
-
-        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255,255,255)"});
-
-        if (features && features.length > 0) {
-
-            if (this.isLog === undefined) checkForLog(features);
-
-
-            this.updateSampleKeys(features);
-
-            // Create a map for fast id -> row lookup
-            const samples = {};
-            this.sampleKeys.forEach(function (id, index) {
-                samples[id] = index;
-            })
-
-
-            let sampleHeight;
-            let border;
-            switch (this.displayMode) {
-
-                case "FILL":
-                    sampleHeight = pixelHeight / this.sampleKeys.length;
-                    border = 0
-                    break;
-
-                case "SQUISHED":
-                    sampleHeight = this.squishedRowHeight;
-                    border = 0;
-                    break;
-
-                default:   // EXPANDED
-                    sampleHeight = this.expandedRowHeight;
-                    border = 1;
-
-            }
-
-            const featureMap = new Map()
-
-            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
-            const pixelBottom = pixelTop + pixelHeight;
-            for (let segment of features) {
-
-                segment.pixelRect = undefined;   // !important, reset this in case segment is not drawn
-
-                if (segment.end < bpStart) continue;
-                if (segment.start > bpEnd) break;
-
-                const sampleKey = segment.sampleKey || segment.sample
-                segment.row = samples[sampleKey];
-                const y = pixelTop + segment.row * sampleHeight + border;
-                const bottom = y + sampleHeight;
-
-
-                if (bottom < pixelTop || y > pixelBottom) {
-                    continue;
-                }
-
-                let value = segment.value;
-                if (!this.isLog) {
-                    value = IGVMath.log2(value / 2);
-                }
-
-
-                const segmentStart = Math.max(segment.start, bpStart);
-
-                const x = Math.round((segmentStart - bpStart) / bpPerPixel);
-
-                const segmentEnd = Math.min(segment.end, bpEnd);
-
-                const x1 = Math.round((segmentEnd - bpStart) / bpPerPixel);
-
-                const w = Math.max(1, x1 - x);
-
-                let color;
-                if (value < -0.1) {
-                    color = this.negColorScale.getColor(value);
-                } else if (value > 0.1) {
-                    color = this.posColorScale.getColor(value);
-                } else {
-                    color = "white";
-                }
-
-                // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
-                let h = sampleHeight;
-                if (sampleHeight < 0.25) {
-                    const f = 0.1 + 2 * Math.abs(value);
-                    h = Math.min(1, f * sampleHeight);
-                }
-                h -= 2 * border
-                segment.pixelRect = {x, y, w, h};
-
-                // Use for diagnostic rendering
-                // context.fillStyle = randomRGB(180, 240)
-                // context.fillStyle = randomGrey(200, 255)
-                context.fillStyle = color
-
-                context.fillRect(x, y, w, h)
-
-                const key = y.toString()
-                if (false === featureMap.has(key)) {
-
-                    const name = (segment.sampleKey || segment.sample).toUpperCase()
-                    featureMap.set(key, {x, y, w, h, name})
-
-                    // Debugging - render sample names directly in canvas
-                    // configureFont(context, fontConfig)
-                    // context.fillText(`${ featureMap.get(key).name }`, x + sampleNameXShim, y + h)
-                }
-
-            }
-
-            if (false === renderSVG) {
-                if (featureMap.size > 0 /*&& 'EXPANDED' === this.displayMode*/) {
-                    featureMap.set('sampleHeight', sampleHeight)
-                    this.drawSampleNames(featureMap, pixelTop, pixelHeight, drawSegTrackSampleNames)
-                }
-            }
-
-        }
-
-        function checkForLog(featureList) {
-
-            if (self.isLog === undefined) {
-                self.isLog = false;
-                for (let feature of featureList) {
-                    if (feature.value < 0) {
-                        self.isLog = true;
-                        return;
-                    }
-                }
-            }
-        }
-
-    }
-
+    
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.

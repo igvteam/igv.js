@@ -143,7 +143,6 @@ class TrackView {
         }
 
         this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
-        this.sampleNameViewport.dataViewport = this.viewports[ 0 ]
 
         updateViewportShims(this.viewports, this.$viewportContainer)
 
@@ -391,9 +390,14 @@ class TrackView {
     }
 
     repaintSamples() {
-        if(typeof this.track.getSamples === 'function') {
-            const samples = this.track.getSamples();
-            this.sampleNameViewport.repaint(samples);
+
+        if(typeof this.track.getSamples === 'function' && typeof this.track.computePixelHeight === 'function') {
+
+            const features = this.viewports[ 0 ].cachedFeatures
+            const contentHeight = this.track.computePixelHeight(features)
+
+            const samples = this.track.getSamples()
+            this.sampleNameViewport.repaint({ contentHeight, samples })
         }
     }
 

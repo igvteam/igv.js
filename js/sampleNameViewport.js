@@ -1,10 +1,7 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
-import {
-    appleCrayonRGBA,
-    randomRGBConstantAlpha
-} from './util/colorPalletes.js'
+import { appleCrayonRGB, appleCrayonRGBA, randomRGB, randomRGBConstantAlpha } from './util/colorPalletes.js'
 import {IGVMath} from "../node_modules/igv-utils/src/index.js";
 
 const sampleNameViewportWidth = 128
@@ -41,12 +38,30 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    async repaint(samples) {
-
-        const pixelWidth = sampleNameViewportWidth
+    setTop(contentTop) {
 
         const viewportHeight = this.$viewport.height()
-        const contentHeight = this.getContentHeight()
+        const viewTop = -contentTop
+        const viewBottom = viewTop + viewportHeight
+
+        this.$content.css('top', `${ contentTop }px`)
+
+        if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
+            if(typeof this.trackView.track.getSamples === 'function' && typeof this.trackView.track.computePixelHeight === 'function') {
+
+                const features = this.trackView.viewports[ 0 ].cachedFeatures
+                const contentHeight = this.trackView.track.computePixelHeight(features)
+
+                const samples = this.trackView.track.getSamples()
+                this.repaint({ contentHeight, samples })
+            }
+        }
+
+    }
+
+    async repaint({ contentHeight, samples }) {
+
+        const viewportHeight = this.$viewport.height()
 
         const pixelHeight = Math.min(contentHeight, 3 * viewportHeight)
 
@@ -61,6 +76,8 @@ class SampleNameViewport extends ViewportBase {
 
         const canvas = $('<canvas class="igv-canvas">').get(0)
         const ctx = canvas.getContext("2d")
+
+        const pixelWidth = sampleNameViewportWidth
 
         canvas.style.width = `${ pixelWidth }px`
         canvas.style.height = `${ pixelHeight }px`
@@ -98,31 +115,50 @@ class SampleNameViewport extends ViewportBase {
         this.ctx = ctx
     }
 
-    draw({ context, renderSVG, pixelWidth, pixelHeight, pixelTop, referenceFrame, samples }) {
-        // console.log(`${ Date.now() } sample-name-viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ pixelTop }.`)
-        console.log(`sampleNames pixelTop =` + pixelTop)
+    draw({ context, pixelWidth, samples }) {
+
         if (!samples || samples.names.length === 0) {
             return
         }
 
+        configureFont(context, fontConfigureTemplate, samples.height)
+
         const sampleNameXShim = 4
-        const sampleHeight = samples.height;
-        let y = pixelTop;
-        for (let name of samples.names) {
-            //console.log(`y = ${y} name=${name}`);
-            context.save();
-            context.fillStyle = 'white';
-            context.fillRect(0, y, pixelWidth, sampleHeight);
-            context.restore();
+        let index = 0
 
-            // left justified text
-            // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
-            context.fillText(name, sampleNameXShim, y + sampleHeight);
+        // context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-            y += sampleHeight;
+        for (let { y, h } of samples.rects) {
+
+            context.save()
+
+            context.fillStyle = appleCrayonRGB('snow')
+            context.fillRect(0, y, pixelWidth, h)
+
+            context.fillStyle = randomRGBConstantAlpha(180, 240, 0.5)
+            context.fillRect(0, y, pixelWidth, h)
+
+            context.restore()
+
+            context.fillText(samples.names[ index ], sampleNameXShim, y + h)
+
+            ++index
         }
-    }
 
+        // for (let name of samples.names) {
+        //     //console.log(`y = ${y} name=${name}`);
+        //     context.save();
+        //     context.fillStyle = 'white';
+        //     context.fillRect(0, y, pixelWidth, sampleHeight);
+        //     context.restore();
+        //
+        //     // left justified text
+        //     // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
+        //     context.fillText(name, sampleNameXShim, y + sampleHeight);
+        //
+        //     y += sampleHeight;
+        // }
+    }
 
     __drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
 
@@ -241,6 +277,29 @@ class SampleNameViewport extends ViewportBase {
     }
 }
 
+function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
+
+    for (let [ key, value ] of featureMap) {
+
+        if ('sampleHeight' === key) {
+            continue
+        }
+
+        const { x, y, w, h, name } = value
+
+        ctx.save()
+        ctx.fillStyle = 'white'
+        ctx.fillRect(0, y, canvasWidth, h)
+        ctx.restore()
+
+        // left justified text
+        // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
+        ctx.fillText(name, sampleNameXShim, y + h)
+
+    }
+
+}
+
 function getBBox(featureMap, y) {
 
     for (let [ key, value ] of featureMap) {
@@ -259,8 +318,8 @@ function getBBox(featureMap, y) {
     return undefined
 }
 
-function configureFont(ctx, { textAlign, textBaseline, strokeStyle, fillStyle }, featureMap) {
-    const pixels = Math.min(featureMap.get('sampleHeight'), maxFontSize)
+function configureFont(ctx, { textAlign, textBaseline, strokeStyle, fillStyle }, sampleHeight) {
+    const pixels = Math.min(sampleHeight, maxFontSize)
     ctx.font = `${ pixels }px sans-serif`
     ctx.textAlign = textAlign
     ctx.textBaseline = textBaseline
