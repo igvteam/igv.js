@@ -49,13 +49,13 @@
 
 <body>
 
-<!--<div>-->
-<!--    <button id="bmBtn">Bookmark</button>-->
-<!--</div>-->
+<div>
+    <button id="bmBtn">Bookmark</button>
+</div>
 
-<!--<h3>Example tracks - click to load</h3>-->
+<h3>Example tracks - click to load</h3>
 
-<!--<div id="trackList"></div>-->
+<div id="trackList"></div>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
@@ -72,51 +72,13 @@
 
         const options =
             {
-                showCursorTrackingGuideButton: false,
-                showCenterGuideButton: false,
-                showSVGButton: true,
-                showTrackLabelButton: false,
-
-                // showSampleNameButton: false,
-                // showSampleNames: true,
-
                 genome: "hg19",
-                // locus: 'chr1',
 
-                // vcf friendly locs
-                // locus: 'chr8:128,562,838-128,863,257',
-
-                // locus: 'all',
-                locus: 'ace',
-                // locus: [ 'ace', 'myc' ],
-                // locus: [ 'egfr', 'myc', 'ace' ],
-
-                tracks:
-                    [
-                        {
-                            name: "SEG Track",
-                            url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                            indexed: false,
-                            isLog: true,
-                            // displayMode: 'EXPANDED',
-                            height: 512
-                        },
-                        // {
-                        //     "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                        //     "graphType": "points",
-                        //     "pointSize": 3,
-                        //     "name": "Encode bigwig points"
-                        // },
-                        // {
-                        //     "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
-                        //     "name": "Big BigWig"
-                        // }
-                    ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)
 
-        // await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
+        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
     })()
 
@@ -163,7 +125,7 @@
         window.history.pushState({}, "IGV", browser.sessionURL());
     }
 
-    // document.getElementById("bmBtn").addEventListener("click", bookmark);
+    document.getElementById("bmBtn").addEventListener("click", bookmark);
 
 </script>
 </html>
