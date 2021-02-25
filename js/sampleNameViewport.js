@@ -107,7 +107,7 @@ class SampleNameViewport extends ViewportBase {
 
         const sampleNameXShim = 4
         const sampleHeight = samples.height;
-        let y = 0;
+        let y = pixelTop;
         for (let name of samples.names) {
             //console.log(`y = ${y} name=${name}`);
             context.save();
