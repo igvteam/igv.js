@@ -125,13 +125,14 @@ class ViewportBase {
             this.setContentHeight(this.$viewport.height())
         } else if (typeof track.computePixelHeight === 'function') {
 
-            let features = this.dataViewport ? this.dataViewport.cachedFeatures : this.cachedFeatures
+            let features = this.cachedFeatures || this.trackView.viewports[ 0 ].cachedFeatures
 
-            if (features) {
+            if (features && features.length > 0) {
                 let requiredContentHeight = track.computePixelHeight(features);
                 let currentContentHeight = this.$content.height();
                 if (requiredContentHeight !== currentContentHeight) {
                     this.setContentHeight(requiredContentHeight);
+                    this.trackView.sampleNameViewport.setContentHeight(requiredContentHeight);
                 }
             }
         }
