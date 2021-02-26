@@ -136,7 +136,6 @@ class SegTrack extends TrackBase {
     getSamples() {
         return {
             names: this.sampleKeys,
-            rects: this.sampleRects,
             height: this.sampleHeight
         }
     }
@@ -165,7 +164,6 @@ class SegTrack extends TrackBase {
 
             // Create a map for fast id -> row lookup
             const samples = {};
-            this.sampleRects = []
             this.sampleKeys.forEach(function (id, index) {
                 samples[id] = index;
             })
@@ -199,6 +197,7 @@ class SegTrack extends TrackBase {
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
             const xScale = bpPerPixel;
 
+            this.sampleYStart = undefined
             for (let segment of features) {
 
                 if (segment.end < bpStart) continue;
@@ -207,6 +206,11 @@ class SegTrack extends TrackBase {
                 const sampleKey = segment.sampleKey || segment.sample
                 segment.row = samples[sampleKey];
                 const y = pixelTop + segment.row * rowHeight + border;
+
+                if (undefined === this.sampleYStart) {
+                    this.sampleYStart = y
+                }
+
                 const bottom = y + rowHeight;
 
                 if (bottom < pixelTop || y > pixelBottom) {
@@ -242,9 +246,9 @@ class SegTrack extends TrackBase {
                 }
 
                 // Use for diagnostic rendering
-                // context.fillStyle = randomRGB(180, 240)
+                context.fillStyle = randomRGB(180, 240)
                 // context.fillStyle = randomGrey(200, 255)
-                context.fillStyle = color;
+                // context.fillStyle = color;
 
                 // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                 let sh = rowHeight;
@@ -255,8 +259,6 @@ class SegTrack extends TrackBase {
 
                 const h = sh - 2 * border
                 segment.pixelRect = { x, y, w, h };
-                this.sampleRects.push(segment.pixelRect)
-
                 context.fillRect(x, y, w, h);
             }
 
@@ -277,7 +279,7 @@ class SegTrack extends TrackBase {
             }
         }
     }
-    
+
     /**
      * Optional method to compute pixel height to accomodate the list of features.  The implementation below
      * has side effects (modifiying the samples hash).  This is unfortunate, but harmless.

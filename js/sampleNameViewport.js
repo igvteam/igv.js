@@ -115,7 +115,7 @@ class SampleNameViewport extends ViewportBase {
         this.ctx = ctx
     }
 
-    draw({ context, pixelWidth, samples }) {
+    draw({ context, pixelWidth, pixelTop, samples }) {
 
         if (!samples || samples.names.length === 0) {
             return
@@ -124,40 +124,32 @@ class SampleNameViewport extends ViewportBase {
         configureFont(context, fontConfigureTemplate, samples.height)
 
         const sampleNameXShim = 4
-        let index = 0
 
-        // context.clearRect(0, 0, context.canvas.width, context.canvas.height)
+        context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-        for (let { y, h } of samples.rects) {
+        let y = pixelTop
+        for (let name of samples.names) {
 
-            context.save()
+            // context.save()
 
-            context.fillStyle = appleCrayonRGB('snow')
-            context.fillRect(0, y, pixelWidth, h)
+            // context.fillStyle = appleCrayonRGB('snow')
+            // context.fillRect(0, y, pixelWidth, h)
 
-            context.fillStyle = randomRGBConstantAlpha(180, 240, 0.5)
-            context.fillRect(0, y, pixelWidth, h)
+            context.fillStyle = randomRGBConstantAlpha(180, 240, 1)
+            // context.fillStyle = appleCrayonRGB('snow')
+            context.fillRect(0, y, pixelWidth, samples.height)
 
-            context.restore()
+            // context.restore()
 
-            context.fillText(samples.names[ index ], sampleNameXShim, y + h)
+            context.fillStyle = appleCrayonRGB('lead')
 
-            ++index
+            const text = name.toUpperCase()
+            const dy = getSampleNameYShim(context, text, samples.height)
+            context.fillText(text, sampleNameXShim, y + samples.height - dy)
+
+            y += samples.height
         }
 
-        // for (let name of samples.names) {
-        //     //console.log(`y = ${y} name=${name}`);
-        //     context.save();
-        //     context.fillStyle = 'white';
-        //     context.fillRect(0, y, pixelWidth, sampleHeight);
-        //     context.restore();
-        //
-        //     // left justified text
-        //     // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
-        //     context.fillText(name, sampleNameXShim, y + sampleHeight);
-        //
-        //     y += sampleHeight;
-        // }
     }
 
     __drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
@@ -300,6 +292,11 @@ function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
 
 }
 
+function getSampleNameYShim(context, text, h) {
+
+    const { fontBoundingBoxAscent, fontBoundingBoxDescent } = context.measureText(text)
+    return (h - (fontBoundingBoxAscent + fontBoundingBoxDescent))/2
+}
 function getBBox(featureMap, y) {
 
     for (let [ key, value ] of featureMap) {
