@@ -233,9 +233,6 @@ class SegTrack extends TrackBase {
 
                 const w = Math.max(1, x1 - x);
 
-                // const sign = px < 0 ? '-' : '+';
-                // console.log('start ' + sign + numberFormatter(Math.abs(px)) + ' width ' + numberFormatter(pw) + ' end ' + numberFormatter(px + pw));
-
                 let color;
                 if (value < -0.1) {
                     color = this.negColorScale.getColor(value);
@@ -246,9 +243,9 @@ class SegTrack extends TrackBase {
                 }
 
                 // Use for diagnostic rendering
-                context.fillStyle = randomRGB(180, 240)
+                // context.fillStyle = randomRGB(180, 240)
                 // context.fillStyle = randomGrey(200, 255)
-                // context.fillStyle = color;
+                context.fillStyle = color;
 
                 // Enhance the contrast of sub-pixel displays (FILL mode) by adjusting sample height.
                 let sh = rowHeight;
