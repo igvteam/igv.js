@@ -135,8 +135,8 @@ class SampleNameViewport extends ViewportBase {
             // context.fillStyle = appleCrayonRGB('snow')
             // context.fillRect(0, y, pixelWidth, h)
 
-            context.fillStyle = randomRGBConstantAlpha(180, 240, 1)
-            // context.fillStyle = appleCrayonRGB('snow')
+            // context.fillStyle = randomRGBConstantAlpha(180, 240, 1)
+            context.fillStyle = appleCrayonRGB('snow')
             context.fillRect(0, y, pixelWidth, samples.height)
 
             // context.restore()
@@ -267,29 +267,6 @@ class SampleNameViewport extends ViewportBase {
             return true === browser.sampleNameControl.sampleNamesVisible ? sampleNameViewportWidth : 0
         }
     }
-}
-
-function drawSegTrackSampleNames(ctx, featureMap, canvasWidth, canvasHeight) {
-
-    for (let [ key, value ] of featureMap) {
-
-        if ('sampleHeight' === key) {
-            continue
-        }
-
-        const { x, y, w, h, name } = value
-
-        ctx.save()
-        ctx.fillStyle = 'white'
-        ctx.fillRect(0, y, canvasWidth, h)
-        ctx.restore()
-
-        // left justified text
-        // console.log(`drawSegTrackSampleNames y ${ y } h ${ h }`)
-        ctx.fillText(name, sampleNameXShim, y + h)
-
-    }
-
 }
 
 function getSampleNameYShim(context, text, h) {
