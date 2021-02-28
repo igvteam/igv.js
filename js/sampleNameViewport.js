@@ -61,11 +61,7 @@ class SampleNameViewport extends ViewportBase {
 
     async repaint({ contentHeight, samples }) {
 
-        const viewportHeight = this.$viewport.height()
-
-        const pixelHeight = Math.min(contentHeight, 3 * viewportHeight)
-
-        const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
+        console.log('sample name viewport - repaint')
 
         let devicePixelRatio
         if ("FILL" === this.trackView.track.displayMode) {
@@ -75,44 +71,39 @@ class SampleNameViewport extends ViewportBase {
         }
 
         const canvas = $('<canvas class="igv-canvas">').get(0)
-        const ctx = canvas.getContext("2d")
 
-        const pixelWidth = sampleNameViewportWidth
+        const context = canvas.getContext("2d")
 
-        canvas.style.width = `${ pixelWidth }px`
+        canvas.style.width = `${ sampleNameViewportWidth }px`
+        canvas.width = devicePixelRatio * sampleNameViewportWidth
+
+        const viewportHeight = this.$viewport.height()
+        const pixelHeight = Math.min(contentHeight, 3 * viewportHeight)
+
         canvas.style.height = `${ pixelHeight }px`
-
-        canvas.width = devicePixelRatio * pixelWidth
         canvas.height = devicePixelRatio * pixelHeight
 
-        ctx.scale(devicePixelRatio, devicePixelRatio)
+        context.scale(devicePixelRatio, devicePixelRatio)
 
-        canvas.style.top = `${ canvasTop }px`
+        const pixelTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
-        ctx.translate(0, -canvasTop)
+        canvas.style.top = `${ pixelTop }px`
 
-        const drawConfiguration =
-            {
-                context: ctx,
-                renderSVG: false,
-                pixelWidth,
-                pixelHeight,
-                pixelTop: canvasTop,
-                referenceFrame: this.referenceFrame,
-                samples
-            };
+        context.translate(0, -pixelTop)
 
-        this.draw(drawConfiguration)
+        this.draw({ context, pixelWidth: sampleNameViewportWidth, pixelTop, samples })
 
-        this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
+        this.canvasVerticalRange = {top: pixelTop, bottom: pixelTop + pixelHeight}
 
         if (this.$canvas) {
             this.$canvas.remove()
+            this.canvas = this.ctx = null
         }
+
         this.$canvas = $(canvas)
         this.$content.append(this.$canvas)
         this.canvas = canvas
-        this.ctx = ctx
+        this.ctx = context
     }
 
     draw({ context, pixelWidth, pixelTop, samples }) {
@@ -150,32 +141,6 @@ class SampleNameViewport extends ViewportBase {
             y += samples.height
         }
 
-    }
-
-    __drawSampleNames(featureMap, canvasTop, height, sampleNameRenderer) {
-
-        this.featureMap = featureMap
-        this.sampleNameRenderer = sampleNameRenderer
-
-        // sync viewport top with track viewport top
-        const { top } = this.trackView.viewports[ 0 ].$content.position()
-        this.setTop(top)
-
-        IGVGraphics.configureHighDPICanvas(this.ctx, this.$content.width(), height)
-
-        // IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-        IGVGraphics.fillRect(this.ctx, 0, 0, this.ctx.canvas.width, this.ctx.canvas.height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
-
-        this.ctx.canvas.style.display = 'block'
-        this.ctx.canvas.style.top = `${ canvasTop }px`
-
-        console.log(`sample-name-viewport. content-css-top ${ this.$content.css('top') }. canvas-top ${ canvasTop }`)
-
-        this.ctx.translate(0, -canvasTop)
-        this.canvasTop = canvasTop
-
-        configureFont(this.ctx, fontConfigureTemplate, featureMap)
-        sampleNameRenderer(this.ctx, featureMap, this.$content.width(), height)
     }
 
     configureSampleNameHover($hover) {
