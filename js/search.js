@@ -22,7 +22,7 @@ async function search(browser, string) {
             locusObject = browser.genome.featureDB[locus.toUpperCase()]
         }
 
-        if (!locusObject && (false !== browser.config.search)) {
+        if (!locusObject && (browser.config && false !== browser.config.search)) {
             locusObject = await searchWebService(browser, locus, searchConfig)
         }
         return locusObject
