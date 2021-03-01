@@ -105,7 +105,7 @@ class SampleNameViewport extends ViewportBase {
 
             const { y:target_bbox_min_y } = currentTarget.getBoundingClientRect()
 
-            const y = (clientY - target_bbox_min_y) + pixelTop
+            const y = (clientY - target_bbox_min_y) + pixelTop + this.$content.position().top
             // console.log(`y ${ StringUtils.numberFormatter(y) }`)
 
             let yMin = pixelTop
@@ -115,15 +115,7 @@ class SampleNameViewport extends ViewportBase {
                 if (y < yMin || y > yMax) {
                     // do nothing
                 } else {
-
-                    const cssConfig =
-                        {
-                            right: 0,
-                            top: y + this.$content.position().top
-                        }
-
-                    this.$hover.css(cssConfig)
-
+                    this.$hover.css({ right: 0, top: yMin })
                     this.$hover.text(name.toUpperCase())
                 }
 
