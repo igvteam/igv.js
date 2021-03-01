@@ -646,11 +646,16 @@
   display: block;
   position: absolute;
   width: auto;
-  text-transform: uppercase;
+  font-size: 12px;
   color: black;
   font-family: sans-serif;
+  text-transform: uppercase;
   vertical-align: middle;
-  background-color: white; }
+  background-color: white;
+  padding: 1px;
+  border-style: solid;
+  border-width: thin;
+  border-color: rgba(0, 0, 0, 0.125); }
 
 .igv-scrollbar-outer-div {
   position: relative;
