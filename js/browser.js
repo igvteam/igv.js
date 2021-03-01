@@ -381,6 +381,14 @@ class Browser {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
+        // Maintain track order unless explicitly set
+        let trackOrder = 1;
+        for(let t of tracks) {
+            if(undefined === t.order) {
+                t.order = trackOrder++;
+            }
+        }
+
         await this.loadTrackList(tracks);
 
         if (this.ideogram) {
@@ -424,8 +432,7 @@ class Browser {
             this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
         } catch (error) {
             // Couldn't find initial locus
-            error.message()
-            Alert.presentAlert(new Error(`Unrecognized locus ${ initialLocus }`), undefined);
+            Alert.presentAlert(new Error(`Error searching for locus ${ initialLocus }  [${error}]`), undefined);
             this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
         }
 
