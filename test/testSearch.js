@@ -7,14 +7,29 @@ import search from "../js/search.js";
 
 suite("testSearch", function () {
 
-    genome.featureDB =  {
+    genome.featureDB = {
         "MUC1": {chr: "chr1", start: 155185820, end: 155192900}, // coords are off on purpose, for test
         "FOO BAR": {chr: "chrX", start: 1, end: 2}   // for testing feature names with spaces
     }
 
     const browser = {
         genome: genome,
-        searchConfig : {
+
+        config: {
+            // This looks redundant, but its important for the test
+            search: {
+                type: "plain",
+                url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
+                coords: 0,
+                chromosomeField: "chromosome",
+                startField: "start",
+                endField: "end",
+                geneField: "gene",
+                snpField: "snp"
+            }
+        },
+
+        searchConfig: {
             type: "plain",
             url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
             coords: 0,
@@ -23,7 +38,7 @@ suite("testSearch", function () {
             endField: "end",
             geneField: "gene",
             snpField: "snp"
-        },
+        }
     }
 
     test("locus strings", function () {
