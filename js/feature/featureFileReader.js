@@ -96,7 +96,7 @@ class FeatureFileReader {
     async readHeader() {
 
         if (this.dataURI) {
-            this.loadFeaturesFromDataURI(this.dataURI);
+            await this.loadFeaturesFromDataURI(this.dataURI);
             return this.header;
         } else {
 
