@@ -1,9 +1,7 @@
-import {StringUtils} from '../node_modules/igv-utils/src/index.js'
-import {IGVMath} from '../node_modules/igv-utils/src/index.js'
 import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
-import { appleCrayonRGB, appleCrayonRGBA, randomRGB, randomRGBConstantAlpha } from './util/colorPalletes.js'
+import { appleCrayonRGB, appleCrayonRGBA} from './util/colorPalletes.js'
 
 const sampleNameViewportWidth = 200
 const sampleNameXShim = 4
@@ -108,7 +106,7 @@ class SampleNameViewport extends ViewportBase {
             const y = (clientY - target_bbox_min_y) + pixelTop
             // console.log(`y ${ StringUtils.numberFormatter(y) }`)
 
-            let yMin = pixelTop
+            let yMin = 0
             for (let name of samples.names) {
 
                 const yMax = getYFont(context, name.toUpperCase(), yMin, samples.height)
