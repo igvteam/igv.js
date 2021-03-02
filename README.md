@@ -16,15 +16,15 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.7.5/examples/cram-vcf.html)***
+***[Alignments](https://igv.org/web/release/2.7.6/examples/cram-vcf.html)***
 
-***[Interactions](https://igv.org/web/release/2.7.5/examples/arcs.html)***
+***[Interactions](https://igv.org/web/release/2.7.6/examples/arcs.html)***
 
-***[Copy number](https://igv.org/web/release/2.7.5/examples/copyNumber.html)***
+***[Copy number](https://igv.org/web/release/2.7.6/examples/copyNumber.html)***
 
-***[Multiple regions](https://igv.org/web/release/2.7.5/examples/multi-locus.html)***
+***[Multiple regions](https://igv.org/web/release/2.7.6/examples/multi-locus.html)***
 
-***[More](https://igv.org/web/release/2.7.5/examples/)***
+***[More](https://igv.org/web/release/2.7.6/examples/)***
 
  
 # Quickstart
@@ -33,11 +33,11 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 igv.js consists of a single javascript file with no external dependencies.  To link directly to the current release copy this snippet
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/igv@2.7.5/dist/igv.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/igv@2.7.6/dist/igv.min.js"></script>
 ``` 
 
 Pre-built files for ES5 (igv.min.js) and ES6 (igv.esm.min.js)
-can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.7.5/dist/](https://cdn.jsdelivr.net/npm/igv@2.7.5/dist/).   
+can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.7.6/dist/](https://cdn.jsdelivr.net/npm/igv@2.7.6/dist/).   
  
 Alternatively you can install with npm  
  
@@ -51,11 +51,11 @@ To use igv.js include it with a script tag
 
 ***or*** import it as a requirejs module 
 
-```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](https://igv.org/web/release/2.7.5/examples/igv-require.html))*
+```requirejs(['igv.min'], function (igv) {...}```   *(see [examples/igv-require.html](https://igv.org/web/release/2.7.6/examples/igv-require.html))*
 
 ***or*** import it as an es6 module 
 
-```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](https://igv.org/web/release/2.7.5/examples/igv-esm.html))*
+```import igv from 'igv.esm.min.js'```  *(see [examples/igv-esm.html](https://igv.org/web/release/2.7.6/examples/igv-esm.html))*
 
 
 
