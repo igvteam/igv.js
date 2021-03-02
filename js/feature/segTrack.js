@@ -151,7 +151,7 @@ class SegTrack extends TrackBase {
     }
 
 
-    draw({context, renderSVG, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
+    draw({context, pixelTop, pixelWidth, pixelHeight, features, bpPerPixel, bpStart}) {
 
         IGVGraphics.fillRect(context, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -451,22 +451,5 @@ class SegTrack extends TrackBase {
         }
     }
 }
-
-const fontConfig =
-    {
-        font: '10px sans-serif',
-        textAlign: 'start', // start || end
-        textBaseline: 'bottom',
-        strokeStyle: 'black',
-        fillStyle: 'black'
-    };
-
-function configureFont(ctx, {font, textAlign, textBaseline, strokeStyle, fillStyle}) {
-    ctx.font = font
-    ctx.textAlign = textAlign
-    ctx.textBaseline = textBaseline
-    ctx.fillStyle = fillStyle
-}
-
 
 export default SegTrack

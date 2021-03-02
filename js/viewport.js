@@ -279,7 +279,6 @@ class ViewPort extends ViewportBase {
         const drawConfiguration =
             {
                 context: ctx,
-                renderSVG: false,
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
