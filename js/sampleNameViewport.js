@@ -5,7 +5,7 @@ import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import { appleCrayonRGB, appleCrayonRGBA, randomRGB, randomRGBConstantAlpha } from './util/colorPalletes.js'
 
-const sampleNameViewportWidth = 128
+const sampleNameViewportWidth = 200
 const sampleNameXShim = 4
 
 const maxFontSize = 10
@@ -153,7 +153,7 @@ class SampleNameViewport extends ViewportBase {
 
         context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-        let y = pixelTop
+        let y = 0
         for (let name of samples.names) {
 
             // context.save()
