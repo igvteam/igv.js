@@ -101,7 +101,7 @@ class SampleNameViewport extends ViewportBase {
         this.canvas = canvas
         this.ctx = context
 
-        this.addMouseHandler(pixelTop, samples)
+        // this.addMouseHandler(context, pixelTop, samples)
 
     }
 
@@ -181,7 +181,7 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    addMouseHandler(pixelTop, samples) {
+    addMouseHandler(context, pixelTop, samples) {
 
         this.canvas.addEventListener('click', e => {
 
@@ -195,7 +195,6 @@ class SampleNameViewport extends ViewportBase {
                 const { y:target_bbox_min_y } = currentTarget.getBoundingClientRect()
 
                 const y = (clientY - target_bbox_min_y) + pixelTop
-                // console.log(`y ${ StringUtils.numberFormatter(y) }`)
 
                 let yMin = 0
                 for (let name of samples.names) {

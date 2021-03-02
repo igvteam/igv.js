@@ -922,7 +922,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   font-family: "Open Sans", sans-serif;
-  font-size: 10px;
+  font-size: small;
   font-weight: 400;
   text-align: center;
   user-select: none;
