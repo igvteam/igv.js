@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seg</title>
+</head>
+
+<body>
+
+<h1>Segmented Copy Number</h1>
+
+<div>
+    <button id="bmBtn">Bookmark</button>
+</div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    const options =
+        {
+
+            genome: "hg19",
+            locus: 'ace',
+
+            tracks:
+                [
+                    {
+                        name: "SEG Track",
+                        url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        indexed: false,
+                        isLog: true,
+                        displayMode: 'EXPANDED',
+                        expandedRowHeight: 20,
+                        height: 512
+                    }
+                ]
+        };
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            // console.log("Created IGV browser");
+
+            function bookmark() {
+            }
+
+            document.getElementById("bmBtn")
+                .addEventListener("click", () => window.history.pushState({}, "IGV", browser.sessionURL()));
+        })
+
+
+</script>
+</body>
+</html>
