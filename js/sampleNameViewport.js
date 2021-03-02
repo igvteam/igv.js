@@ -25,8 +25,11 @@ class SampleNameViewport extends ViewportBase {
 
     initializationHelper() {
         this.$viewport.data('viewport-type', 'sample-name')
-        this.$hover = $('<div>', { class:'igv-sample-name-viewport-hover' })
-        this.trackView.$viewportContainer.append(this.$hover)
+
+        this.hover = document.createElement('div')
+        this.hover.classList.add('igv-sample-name-viewport-hover')
+
+        this.trackView.$viewportContainer.append($(this.hover))
     }
 
     setTop(contentTop) {
@@ -61,7 +64,8 @@ class SampleNameViewport extends ViewportBase {
             devicePixelRatio = (this.trackView.track.supportHiDPI === false) ? 1 : window.devicePixelRatio
         }
 
-        const canvas = $('<canvas class="igv-canvas">').get(0)
+        const canvas = document.createElement('canvas')
+        canvas.classList.add('igv-canvas')
 
         const context = canvas.getContext("2d")
 
@@ -97,46 +101,8 @@ class SampleNameViewport extends ViewportBase {
         this.canvas = canvas
         this.ctx = context
 
-        this.canvas.addEventListener('mousemove', e => {
+        this.addMouseHandler(pixelTop, samples)
 
-            const { currentTarget, clientY } = e
-
-            const { y:target_bbox_min_y } = currentTarget.getBoundingClientRect()
-
-            const y = (clientY - target_bbox_min_y) + pixelTop
-            // console.log(`y ${ StringUtils.numberFormatter(y) }`)
-
-            let yMin = 0
-            for (let name of samples.names) {
-
-                const yMax = getYFont(context, name.toUpperCase(), yMin, samples.height)
-                if (y < yMin || y > yMax) {
-                    // do nothing
-                } else {
-
-                    const cssConfig =
-                        {
-                            right: 0,
-                            top: y + this.$content.position().top
-                        }
-
-                    this.$hover.css(cssConfig)
-
-                    this.$hover.text(name.toUpperCase())
-                }
-
-                yMin += samples.height
-            }
-
-        })
-
-        this.canvas.addEventListener('mouseenter', e => {
-            this.$hover.show()
-        })
-
-        this.canvas.addEventListener('mouseleave', e => {
-            this.$hover.hide()
-        })
     }
 
     draw({ context, pixelWidth, pixelTop, samples }) {
@@ -213,6 +179,51 @@ class SampleNameViewport extends ViewportBase {
 
         context.restore()
 
+    }
+
+    addMouseHandler(pixelTop, samples) {
+
+        this.canvas.addEventListener('click', e => {
+
+            if ('block' === this.hover.style.display) {
+                this.hover.style.display = 'none'
+                this.hover.textContent = ''
+            } else {
+
+                const { currentTarget, clientY } = e
+
+                const { y:target_bbox_min_y } = currentTarget.getBoundingClientRect()
+
+                const y = (clientY - target_bbox_min_y) + pixelTop
+                // console.log(`y ${ StringUtils.numberFormatter(y) }`)
+
+                let yMin = 0
+                for (let name of samples.names) {
+
+                    const yMax = getYFont(context, name.toUpperCase(), yMin, samples.height)
+                    if (y < yMin || y > yMax) {
+                        // do nothing
+                    } else {
+
+                        this.hover.style.top = `${ yMin + this.$content.position().top }px`
+                        this.hover.style.right = '0px'
+
+                        this.hover.textContent = name.toUpperCase()
+                        this.hover.style.display = 'block'
+                    }
+
+                    yMin += samples.height
+                }
+
+            }
+
+
+        })
+
+        this.canvas.addEventListener('mouseleave', () => {
+            this.hover.style.display = 'none'
+            this.hover.textContent = ''
+        })
     }
 
     static getCurrentWidth(browser) {
