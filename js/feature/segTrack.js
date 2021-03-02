@@ -205,7 +205,7 @@ class SegTrack extends TrackBase {
 
                 const sampleKey = segment.sampleKey || segment.sample
                 segment.row = samples[sampleKey];
-                const y = pixelTop + segment.row * rowHeight + border;
+                const y = segment.row * rowHeight + border;
 
                 if (undefined === this.sampleYStart) {
                     this.sampleYStart = y

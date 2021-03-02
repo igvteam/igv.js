@@ -699,7 +699,6 @@ class AlignmentTrack {
         let pixelTop = options.pixelTop;
         if (this.top) {
             ctx.translate(0, this.top);
-            pixelTop -= this.top;
         }
         const pixelBottom = pixelTop + options.pixelHeight;
 
