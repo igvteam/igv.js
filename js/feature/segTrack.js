@@ -156,7 +156,7 @@ class SegTrack extends TrackBase {
         const pixelWidth = options.pixelWidth;
         const pixelHeight = options.pixelHeight;
         const pixelBottom = pixelTop + pixelHeight;
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+        IGVGraphics.fillRect(ctx, 0, 0, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         const featureList = options.features;
 
@@ -207,7 +207,7 @@ class SegTrack extends TrackBase {
 
                 const sampleKey = segment.sampleKey || segment.sample
                 segment.row = samples[sampleKey];
-                const y = pixelTop + segment.row * sampleHeight + border;
+                const y = segment.row * sampleHeight + border;
                 const bottom = y + sampleHeight;
 
                 if (bottom < pixelTop || y > pixelBottom) {
