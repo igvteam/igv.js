@@ -26,7 +26,7 @@
 import IGVGraphics from "./igv-canvas.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
-const complement = {'A': 'T', 'C': 'G', 'G': 'C', 'T': 'A'};
+
 const translationDict = {
     'TTT': 'F',
     'TTC': 'F',
@@ -94,11 +94,19 @@ const translationDict = {
     'GGG': 'G'
 }
 
+const complement = {};
+const t1 = ['A', 'G', 'C', 'T', 'Y', 'R', 'W', 'S', 'K', 'M', 'D', 'V', 'H', 'B', 'N', 'X']
+const t2 = ['T', 'C', 'G', 'A', 'R', 'Y', 'W', 'S', 'M', 'K', 'H', 'B', 'D', 'V', 'N', 'X']
+for(let i=0; i<t1.length; i++) {
+    complement[t1[i]] = t2[i];
+    complement[t1[i].toLowerCase()] = t2[i].toLowerCase();
+}
+
 class SequenceTrack {
 
     constructor(config, browser) {
 
-        this.type = "sequence";
+        this.type = "sequence"
         this.browser = browser;
         this.removable = false;
         this.config = config;
@@ -152,21 +160,19 @@ class SequenceTrack {
         const threeFrame = [[], [], []];
 
         for (let fNum of [0, 1, 2]) {
-            var idx = fNum;
-            var obj, st;
+            let idx = fNum;
 
             while ((seq.length - idx) >= 3) {
-                obj = {};
-                st = seq.slice(idx, idx + 3);
-
+                 let st = seq.slice(idx, idx + 3);
                 if (this.reversed) {
                     st = st.split('').reverse().join('');
                 }
 
-                obj.codons = st;
-                obj.aminoA = translationDict[st.toUpperCase()];
-                threeFrame[fNum].push(obj);
-                obj = null;
+                const aa = translationDict[st.toUpperCase()] || "";
+                threeFrame[fNum].push({
+                    codons: st,
+                    aminoA: aa
+                });
                 idx += 3;
             }
         }
@@ -206,7 +212,7 @@ class SequenceTrack {
                     let letter = sequence[seqOffsetBp];
 
                     if (this.reversed) {
-                        letter = complement[letter.toUpperCase()];
+                        letter = complement[letter] || "";
                     }
 
                     let offsetBP = bp - options.bpStart;
