@@ -149,7 +149,9 @@ class FeatureFileReader {
             case "vcf":
                 return new VcfParser(config);
             case "seg" :
-                return new SegParser();
+                return new SegParser("seg");
+            case "mut":
+                return new SegParser("mut");
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :
