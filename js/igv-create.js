@@ -333,7 +333,7 @@ function setDefaults(config) {
     }
 
     if (undefined === config.showSampleNames) {
-        config.showSampleNames = true
+        config.showSampleNames = false
     }
 
     if (undefined === config.showSVGButton) {
