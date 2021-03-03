@@ -100,6 +100,9 @@ class Browser {
         this.trackViews = [];
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
+
+        this.sampleNamesVisible = false;
+
         this.cursorGuideVisible = false;
         this.constants = {
             dragThreshold: 3,

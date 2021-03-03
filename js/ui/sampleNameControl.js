@@ -30,16 +30,28 @@ class SampleNameControl {
 
     constructor($parent, browser) {
 
-        this.sampleNamesVisible = browser.config.showSampleNames || true
-
         this.$button = $('<div class="igv-navbar-button">')
         $parent.append(this.$button)
 
         this.$button.text('Sample Names')
 
+        if (true === browser.sampleNamesVisible) {
+            this.$button.addClass('igv-navbar-button-clicked')
+        } else {
+            this.$button.removeClass('igv-navbar-button-clicked')
+        }
+
         this.$button.on('click.sample-name-control', () => {
-            this.sampleNamesVisible = !this.sampleNamesVisible
-            browser.setSampleNameViewportVisibility(this.sampleNamesVisible)
+
+            browser.sampleNamesVisible = !browser.sampleNamesVisible
+
+            if (true === browser.sampleNamesVisible) {
+                this.$button.addClass('igv-navbar-button-clicked')
+            } else {
+                this.$button.removeClass('igv-navbar-button-clicked')
+            }
+
+            browser.setSampleNameViewportVisibility(browser.sampleNamesVisible)
         })
 
     }
