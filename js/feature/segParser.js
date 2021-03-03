@@ -37,17 +37,34 @@ import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
  */
 
 
-const sampleKeyColumn = 0,
-    sampleColumn = 0,
-    chrColumn = 1,
-    startColumn = 2,
-    endColumn = 3;
-
 class SegParser {
+
+    constructor(type) {
+        this.type = type || 'seg';   // One of seg, mut, or maf
+
+        switch (this.type) {
+            case 'mut':
+                this.sampleKeyColumn = 3;
+                this.sampleColumn = 3;
+                this.chrColumn = 0;
+                this.startColumn = 1;
+                this.endColumn = 2;
+                this.dataColumn = 4;
+                break;
+
+            default:
+                this.sampleKeyColumn = 0;
+                this.sampleColumn = 0;
+                this.chrColumn = 1;
+                this.startColumn = 2;
+                this.endColumn = 3;
+
+        }
+    }
 
     async parseHeader(dataWrapper) {
         let line;
-        while((line = await dataWrapper.nextLine()) !== undefined) {
+        while ((line = await dataWrapper.nextLine()) !== undefined) {
             if (line.startsWith("#")) {
                 // skip
             } else {
@@ -65,18 +82,23 @@ class SegParser {
         if (!this.header) {
             this.header = await this.parseHeader(await dataWrapper.nextLine());  // This will only work for non-indexed files
         }
-        const dataColumn = this.header.headings.length - 1;
+        if('seg' === this.type) {
+            this.dataColumn = this.header.headings.length - 1;
+        }
         let line;
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split("\t");
-            if (tokens.length > dataColumn) {
+
+            const value = ('seg' === this.type) ? parseFloat(tokens[this.dataColumn]) : tokens[this.dataColumn];
+
+            if (tokens.length > this.dataColumn) {
                 allFeatures.push({
-                    sampleKey: tokens[sampleKeyColumn],
-                    sample: tokens[sampleColumn],
-                    chr: tokens[chrColumn],
-                    start: parseInt(tokens[startColumn]),
-                    end: parseInt(tokens[endColumn]),
-                    value: parseFloat(tokens[dataColumn])
+                    sampleKey: tokens[this.sampleKeyColumn],
+                    sample: tokens[this.sampleColumn],
+                    chr: tokens[this.chrColumn],
+                    start: parseInt(tokens[this.startColumn]) - 1,
+                    end: parseInt(tokens[this.endColumn]),
+                    value: value
                 });
             }
         }

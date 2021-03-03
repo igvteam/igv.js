@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Seg</title>
+</head>
+
+<body>
+
+<h1>Segmented Copy Number</h1>
+
+<div>
+    <button id="bmBtn">Bookmark</button>
+</div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var options =
+        {
+            genome: "hg19",
+            tracks: [
+                {
+                    name: "Segmented Copy Number",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz"
+                },
+                {
+                    name: "Specific samples",
+                    type: "seg",
+                    format: "seg",
+                    displayMode: "EXPANDED",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    samples: [
+                        "TCGA-02-0001-01C-01D-0182-01",
+                        "TCGA-02-0003-01A-01D-0182-01",
+                        "TCGA-02-0006-01B-01D-0182-01",
+                        "TCGA-02-0007-01A-01D-0182-01",
+                        "TCGA-02-0009-01A-01D-0182-01"]
+                },
+
+                {
+                    name: "Indexed",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi"
+                },
+                {
+                    name: "Indexed with visibility window",
+                    type: "seg",
+                    format: "seg",
+                    url: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz",
+                    indexURL: "https://s3.amazonaws.com/igv.org.demo/GBM-TP.seg.gz.tbi",
+                    visibilityWindow: "100000000"
+                },
+            ]
+        }
+
+    var igvDiv = document.getElementById("igvDiv");
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+
+            function bookmark() {
+            }
+
+            document.getElementById("bmBtn")
+                .addEventListener("click", () => window.history.pushState({}, "IGV", browser.sessionURL()));
+        })
+
+
+</script>
+</body>
+</html>

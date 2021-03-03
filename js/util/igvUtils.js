@@ -183,6 +183,8 @@ function inferTrackType(config) {
                 return "variant";
             case "seg":
                 return "seg";
+            case "mut":
+                return "mut";
             case "bam":
             case "cram":
                 return "alignment";
