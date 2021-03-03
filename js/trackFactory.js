@@ -25,6 +25,9 @@ const tracks = {
     'seg': (config, browser) => {
         return new SegTrack(config, browser);
     },
+    'mut': (config, browser) => {
+        return new SegTrack(config, browser);
+    },
     'wig': (config, browser) => {
         return new WigTrack(config, browser);
     },
