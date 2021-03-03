@@ -129,6 +129,7 @@ async function createBrowser(parentDiv, config) {
     }
     browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
+    browser.setSampleNameViewportVisibility(browser.sampleNamesVisible)
 
     return browser;
 

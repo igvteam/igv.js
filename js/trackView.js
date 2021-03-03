@@ -33,7 +33,7 @@ import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
-import SampleNameViewport from './sampleNameViewport.js';
+import SampleNameViewport, {sampleNameViewportWidth} from './sampleNameViewport.js';
 import TrackScrollbar from './trackScrollbar.js';
 
 let dragged
@@ -142,7 +142,7 @@ class TrackView {
             this.viewports.push(viewport)
         }
 
-        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, SampleNameViewport.getCurrentWidth(browser))
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
 
         updateViewportShims(this.viewports, this.$viewportContainer)
 

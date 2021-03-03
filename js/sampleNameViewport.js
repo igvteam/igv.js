@@ -25,7 +25,6 @@ class SampleNameViewport extends ViewportBase {
 
     initializationHelper() {
         this.$viewport.data('viewport-type', 'sample-name')
-
         // this.hover = document.createElement('div')
         // this.hover.classList.add('igv-sample-name-viewport-hover')
         // this.trackView.$viewportContainer.append($(this.hover))
@@ -53,8 +52,6 @@ class SampleNameViewport extends ViewportBase {
     }
 
     async repaint({ contentHeight, samples }) {
-
-        console.log('sample name viewport - repaint')
 
         let devicePixelRatio
         if ("FILL" === this.trackView.track.displayMode) {
@@ -225,6 +222,7 @@ class SampleNameViewport extends ViewportBase {
     }
 
     static getCurrentWidth(browser) {
+
         if (false === browser.sampleNamesVisible) {
             return 0
         } else if (false === browser.config.showSampleNameButton) {
