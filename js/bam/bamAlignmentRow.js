@@ -68,9 +68,9 @@ class BamAlignmentRow {
         this.score = this.calculateScore(options, alignmentContainer);
     }
 
-    calculateScore({position, sortOption, direction, tag}, alignmentContainer) {
+    calculateScore({position, option, direction, tag}, alignmentContainer) {
 
-        if (!sortOption) sortOption = "BASE";
+        if (!option) option = "BASE";
 
         const alignment = this.findAlignment(position);
         if (undefined === alignment) {
@@ -78,7 +78,7 @@ class BamAlignmentRow {
         }
 
         let mate;
-        switch (sortOption) {
+        switch (option) {
             case "NUCLEOTIDE":
             case "BASE": {
                 return calculateBaseScore(alignment, alignmentContainer, position);
