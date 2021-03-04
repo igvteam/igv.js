@@ -144,6 +144,12 @@ class TrackView {
 
         this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
 
+        if (false === browser.sampleNamesVisible) {
+            this.sampleNameViewport.$viewport.hide()
+        } else {
+            this.sampleNameViewport.$viewport.show()
+        }
+
         updateViewportShims(this.viewports, this.$viewportContainer)
 
         this.updateViewportForMultiLocus()

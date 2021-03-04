@@ -223,13 +223,16 @@ class SampleNameViewport extends ViewportBase {
 
     static getCurrentWidth(browser) {
 
-        if (false === browser.sampleNamesVisible) {
-            return 0
-        } else if (false === browser.config.showSampleNameButton) {
-            return sampleNameViewportWidth
-        } else {
-            return true === browser.sampleNamesVisible ? sampleNameViewportWidth : 0
-        }
+        return false === browser.sampleNamesVisible ? 0 : sampleNameViewportWidth
+
+        // if (false === browser.sampleNamesVisible) {
+        //     return 0
+        // } else if (false === browser.config.showSampleNameButton) {
+        //     return sampleNameViewportWidth
+        // } else {
+        //     return true === browser.sampleNamesVisible ? sampleNameViewportWidth : 0
+        // }
+
     }
 }
 
