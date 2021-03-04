@@ -19,10 +19,14 @@
 
     import igv from "../js";
 
-    igv.createBrowser(document.getElementById('igvDiv'), {genome: "hg19"})
+    igv.createBrowser(document.getElementById('igvDiv'), {
+        genome: "hg19",
+        showChromosomeWidget: false,
+        showCenterGuide: true,
+    })
         .then(function (browser) {
             browser.loadSession({
-                url: "../test/data/session/amazontest.json"
+                url: "sessions/sortedBamSession.json"
             })
         })
 

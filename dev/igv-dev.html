@@ -51,9 +51,12 @@
 
 <div>
     <button id="bmBtn">Bookmark</button>
+    <button id="sessionButton">Save Session</button>
 </div>
 
 <h3>Example tracks - click to load</h3>
+
+
 
 <div id="trackList"></div>
 
@@ -122,6 +125,19 @@
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
+
+        document.getElementById("sessionButton").addEventListener("click", () => {
+            try {
+                const json = browser.toJSON();
+                console.log(json);
+                const jsonString = JSON.stringify(json, null, '\t');
+                const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
+                download("session.json", data);
+            } catch (e) {
+                alert(e);
+            }
+        })
+
     })()
 
     async function createTrackList(div, file, browser) {
@@ -165,6 +181,17 @@
 
     function bookmark() {
         window.history.pushState({}, "IGV", browser.sessionURL());
+    }
+
+    function download(filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
     }
 
     document.getElementById("bmBtn").addEventListener("click", bookmark);
