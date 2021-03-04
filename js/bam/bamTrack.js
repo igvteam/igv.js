@@ -1019,7 +1019,7 @@ class AlignmentTrack {
             const newSortObject = {
                 chr: viewport.referenceFrame.chr,
                 position: Math.floor(clickState.genomicLocation),
-                sortOption: option,
+                option: option,
                 direction: direction
             }
             this.parent.sortObject = newSortObject;
@@ -1046,7 +1046,7 @@ class AlignmentTrack {
                                 const newSortObject = {
                                     chr: viewport.referenceFrame.chr,
                                     position: Math.floor(clickState.genomicLocation),
-                                    sortOption: "TAG",
+                                    option: "TAG",
                                     tag: tag,
                                     direction: direction
                                 }
