@@ -1,0 +1,20 @@
+{
+  "genome": "hg19",
+  "locus": "chr1:155,175,780-155,175,818",
+  "tracks": [
+    {
+      "type": "alignment",
+      "name": "HG02450 - Broad",
+      "format": "bam",
+      "url": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam",
+      "indexURL": "https://1000genomes.s3.amazonaws.com/phase3/data/HG02450/alignment/HG02450.mapped.ILLUMINA.bwa.ACB.low_coverage.20120522.bam.bai",
+      "alleleFreqThreshold": 0.2,
+      "sort": {
+        "chr": "chr1",
+        "position": 155175799,
+        "direction": "ASC"
+      },
+      "order": 4
+    }
+  ]
+}
