@@ -713,6 +713,21 @@ class TrackView {
     }
 }
 
+function setSampleNameViewportVisibility(browser) {
+
+    for (let { sampleNameViewport } of browser.trackViews) {
+
+        if (false === browser.sampleNamesVisible) {
+            sampleNameViewport.$viewport.hide()
+        } else {
+            sampleNameViewport.$viewport.show()
+        }
+
+    }
+
+    browser.resize()
+}
+
 function emptyViewportContainers(trackViews) {
 
     for (let trackView of trackViews) {
@@ -784,6 +799,6 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights);
 }
 
-export { maxViewportContentHeight, updateViewportShims, emptyViewportContainers }
+export { maxViewportContentHeight, updateViewportShims, emptyViewportContainers, setSampleNameViewportVisibility }
 
 export default TrackView

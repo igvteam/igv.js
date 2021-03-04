@@ -25,6 +25,8 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
+import {setSampleNameViewportVisibility} from '../trackView.js'
+import TrackLabelControl from "./trackLabelControl";
 
 class SampleNameControl {
 
@@ -51,9 +53,17 @@ class SampleNameControl {
                 this.$button.removeClass('igv-navbar-button-clicked')
             }
 
-            browser.setSampleNameViewportVisibility(browser.sampleNamesVisible)
+            setSampleNameViewportVisibility(browser)
         })
 
+    }
+
+    setState(isVisible) {
+        if (true === isVisible) {
+            this.$button.addClass('igv-navbar-button-clicked')
+        } else {
+            this.$button.removeClass('igv-navbar-button-clicked')
+        }
     }
 
 }

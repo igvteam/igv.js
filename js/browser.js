@@ -341,6 +341,11 @@ class Browser {
 
         this.removeAllTracks();
 
+        if (session.sampleNamesVisible) {
+            this.sampleNamesVisible = 'true'=== session.sampleNamesVisible
+            this.sampleNameControl.setState(this.sampleNamesVisible)
+        }
+
         const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
@@ -489,21 +494,6 @@ class Browser {
 
             return loci;
         }
-    }
-
-    setSampleNameViewportVisibility(isVisible) {
-
-        for (let { sampleNameViewport } of this.trackViews) {
-
-            if (false === isVisible) {
-                sampleNameViewport.$viewport.hide()
-            } else {
-                sampleNameViewport.$viewport.show()
-            }
-
-        }
-
-        this.resize()
     }
 
 //
@@ -1446,6 +1436,8 @@ class Browser {
         const json = {
             "version": version()
         }
+
+        json['sampleNamesVisible'] = true === this.sampleNamesVisible ? 'true' : 'false'
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
