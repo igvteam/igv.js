@@ -399,6 +399,10 @@ class Browser {
             this.rulerTrack.trackView.updateViews();
         }
 
+        if (this.centerGuide) {
+            this.centerGuide.repaint();
+        }
+
         this.updateLocusSearchWidget(this.referenceFrameList);
 
         this.windowSizePanel.updatePanel(this.referenceFrameList);

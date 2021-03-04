@@ -112,32 +112,23 @@ class CenterGuide {
 
     repaint() {
 
-        var ppb,
-            xy,
-            halfWidth,
-            width,
-            left,
-            ls,
-            ws,
-            center,
-            referenceFrame;
 
         if (this.browser.referenceFrameList) {
 
-            referenceFrame = this.browser.referenceFrameList[0]
-            ppb = 1.0 / referenceFrame.bpPerPixel;
+            const referenceFrame = this.browser.referenceFrameList[0]
+            const ppb = 1.0 / referenceFrame.bpPerPixel;
 
             if (ppb > 1) {
 
-                xy = this.browser.trackViews[0].$viewportContainer.position();
-                halfWidth = Math.round(this.browser.trackViews[0].$viewportContainer.width() / 2);
+                const xy = this.browser.trackViews[0].$viewportContainer.position();
+                const halfWidth = Math.round(this.browser.trackViews[0].$viewportContainer.width() / 2);
 
-                center = xy.left + halfWidth;
-                width = referenceFrame.toPixels(1);
-                left = center - 0.5 * width;
+                const center = xy.left + halfWidth;
+                const width = referenceFrame.toPixels(1);
+                const left = center - 0.5 * width;
 
-                ls = Math.round(left).toString() + 'px';
-                ws = Math.round(width).toString() + 'px';
+                const ls = Math.round(left).toString() + 'px';
+                const ws = Math.round(width).toString() + 'px';
                 this.$container.css({left: ls, width: ws});
 
                 this.$container.removeClass('igv-center-guide-thin');
@@ -145,7 +136,6 @@ class CenterGuide {
             } else {
 
                 this.$container.css({left: '50%', width: '1px'});
-
                 this.$container.removeClass('igv-center-guide-wide');
                 this.$container.addClass('igv-center-guide-thin');
             }
