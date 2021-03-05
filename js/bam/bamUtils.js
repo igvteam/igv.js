@@ -215,9 +215,11 @@ const BamUtils = {
             }
             if (refID < 0) {
                 offset = blockEnd;
-                continue;   // unmapped read
+                continue;   // unmapped read, skip
             } else if (chrIdx !== undefined && (refID > chrIdx || pos > max)) {
-                return true;    // off right edge, we're done
+                offset = blockEnd;
+                continue;
+               // return true;    // off right edge, we're done
             } else if (chrIdx !== undefined && (refID < chrIdx)) {
                 offset = blockEnd;
                 continue;   // ref ID to left of start, not sure this is possible
