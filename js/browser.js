@@ -76,6 +76,8 @@ const scrollbarOuterWidth = 14
 // igv.scss - $igv-viewport-container-shim-width
 const viewportContainerShimWidth = rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
 
+const defaultSampleNameViewportWidth = 200
+
 class Browser {
 
     constructor(options, parentDiv) {
@@ -140,6 +142,8 @@ class Browser {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
 
+        this.sampleNameViewportWidth = options.sampleNameViewportWidth || defaultSampleNameViewportWidth;
+
         if (options.search) {
             this.searchConfig = {
                 type: "json",
@@ -175,6 +179,10 @@ class Browser {
 
             }
         }
+    }
+
+    getSampleNameViewportWidth() {
+        return false === this.sampleNamesVisible ? 0 : this.sampleNameViewportWidth
     }
 
     startSpinner() {

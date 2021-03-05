@@ -33,7 +33,7 @@ import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
 import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
-import SampleNameViewport, {sampleNameViewportWidth} from './sampleNameViewport.js';
+import SampleNameViewport from './sampleNameViewport.js';
 import TrackScrollbar from './trackScrollbar.js';
 
 let dragged
@@ -142,7 +142,7 @@ class TrackView {
             this.viewports.push(viewport)
         }
 
-        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, sampleNameViewportWidth)
+        this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, browser.sampleNameViewportWidth)
 
         if (false === browser.sampleNamesVisible) {
             this.sampleNameViewport.$viewport.hide()
@@ -660,7 +660,7 @@ class TrackView {
     }
 
     static computeViewportWidth(browser, viewportContainerWidth) {
-        return viewportContainerWidth - axisContainerWidth - SampleNameViewport.getCurrentWidth(browser)
+        return viewportContainerWidth - axisContainerWidth - browser.getSampleNameViewportWidth()
     }
 }
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {

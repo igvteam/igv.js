@@ -3,7 +3,6 @@ import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
 import { appleCrayonRGB, appleCrayonRGBA, randomRGB } from './util/colorPalletes.js'
 
-const sampleNameViewportWidth = 200
 const sampleNameXShim = 4
 
 const maxFontSize = 10
@@ -65,8 +64,8 @@ class SampleNameViewport extends ViewportBase {
 
         const context = canvas.getContext("2d")
 
-        canvas.style.width = `${ sampleNameViewportWidth }px`
-        canvas.width = devicePixelRatio * sampleNameViewportWidth
+        canvas.style.width = `${ this.browser.sampleNameViewportWidth }px`
+        canvas.width = devicePixelRatio * this.browser.sampleNameViewportWidth
 
         const viewportHeight = this.$viewport.height()
         const pixelHeight = Math.min(contentHeight, 3 * viewportHeight)
@@ -82,7 +81,7 @@ class SampleNameViewport extends ViewportBase {
 
         context.translate(0, -pixelTop)
 
-        this.draw({ context, pixelWidth: sampleNameViewportWidth, samples })
+        this.draw({ context, pixelWidth: this.browser.sampleNameViewportWidth, samples })
 
         this.canvasVerticalRange = {top: pixelTop, bottom: pixelTop + pixelHeight}
 
@@ -235,9 +234,6 @@ class SampleNameViewport extends ViewportBase {
         })
     }
 
-    static getCurrentWidth(browser) {
-        return false === browser.sampleNamesVisible ? 0 : sampleNameViewportWidth
-    }
 }
 
 function getYFont(context, text, y, height) {
@@ -258,6 +254,6 @@ function configureFont(ctx, { textAlign, textBaseline, strokeStyle, fillStyle },
     ctx.fillStyle = fillStyle
 }
 
-export { sampleNameViewportWidth, sampleNameXShim }
+export { sampleNameXShim }
 
 export default SampleNameViewport
