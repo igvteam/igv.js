@@ -830,8 +830,10 @@ class ViewPort extends ViewportBase {
                 if (nameValue.name) {
                     const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
                     return `<div title="${nameValue.value}">${str}</div>`
-                } else if ('<hr>' === nameValue) {
+                } else if ('<hr>' === nameValue) { // this can be retired if nameValue.html is allowed.
                     return nameValue
+                } else if (nameValue.html) {
+                    return nameValue.html
                 } else {
                     return `<div title="${nameValue}">${nameValue}</div>`
                 }
