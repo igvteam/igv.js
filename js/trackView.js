@@ -160,21 +160,9 @@ class TrackView {
 
     renderSVGContext(context, { deltaX, deltaY }) {
 
+        renderSVGAxis(context, this.track, this.axisCanvas, deltaX, deltaY)
+
         const { width:axisWidth } = this.$axis.get(0).getBoundingClientRect()
-
-        if (typeof this.track.paintAxis === 'function') {
-
-            const { y, width, height } = this.axisCanvas.getBoundingClientRect()
-
-            let str = this.track.name || this.track.id
-            str = str.replace(/\W/g, '')
-
-            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), deltaX, y + deltaY, width, height, 0)
-
-            context.save()
-            this.track.paintAxis(context, width, height)
-            context.restore()
-        }
 
         const { y } = this.viewports[ 0 ].$viewport.get(0).getBoundingClientRect()
 
@@ -183,6 +171,7 @@ class TrackView {
                 deltaX: axisWidth + deltaX,
                 deltaY: y + deltaY
             }
+
         for (let viewport of this.viewports) {
             viewport.renderSVGContext(context, delta)
             const { width } = viewport.$viewport.get(0).getBoundingClientRect()
@@ -190,44 +179,6 @@ class TrackView {
         }
 
         this.sampleNameViewport.renderSVGContext(context, delta)
-    }
-
-    async __renderSVGContext(context, { deltaX, deltaY }) {
-
-        const { x, y } = this.sampleNameViewport.$viewport.get(0).getBoundingClientRect()
-
-        this.sampleNameViewport.renderSVGContext(context, { deltaX: x + deltaX, deltaY: y + deltaY })
-
-        const { width:axisWidth } = this.$axis.get(0).getBoundingClientRect()
-
-        if (typeof this.track.paintAxis === 'function') {
-
-            const { y, width, height } = this.axisCanvas.getBoundingClientRect()
-
-            let str = this.track.name || this.track.id
-            str = str.replace(/\W/g, '')
-
-            context.addTrackGroupWithTranslationAndClipRect((`${ str }_axis`), deltaX, y + deltaY, width, height, 0)
-
-            context.save()
-            this.track.paintAxis(context, width, height)
-            context.restore()
-        }
-
-        for (let viewport of this.viewports) {
-
-            const { y, width } = viewport.$viewport.get(0).getBoundingClientRect()
-
-            const index = viewport.browser.referenceFrameList.indexOf(viewport.referenceFrame)
-
-            let offset =
-                {
-                    deltaX: axisWidth + index * width + deltaX,
-                    deltaY: y + deltaY
-                };
-
-            viewport.renderSVGContext(context, offset)
-        }
     }
 
     attachScrollbar($track, $viewportContainer, viewports) {
@@ -711,6 +662,22 @@ class TrackView {
     static computeViewportWidth(browser, viewportContainerWidth) {
         return viewportContainerWidth - axisContainerWidth - SampleNameViewport.getCurrentWidth(browser)
     }
+}
+function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
+
+    if (typeof track.paintAxis === 'function') {
+
+        const { y, width, height } = axisCanvas.getBoundingClientRect()
+
+        const str = track.name || track.id
+
+        context.addTrackGroupWithTranslationAndClipRect((`${ str.replace(/\\W/g, '') }_axis`), deltaX, y + deltaY, width, height, 0)
+
+        context.save()
+        track.paintAxis(context, width, height)
+        context.restore()
+    }
+
 }
 
 function setSampleNameViewportVisibility(browser) {

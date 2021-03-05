@@ -1,7 +1,7 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
 import ViewportBase from './viewportBase.js'
 import IGVGraphics from './igv-canvas.js'
-import { appleCrayonRGB, appleCrayonRGBA} from './util/colorPalletes.js'
+import { appleCrayonRGB, appleCrayonRGBA, randomRGB } from './util/colorPalletes.js'
 
 const sampleNameViewportWidth = 200
 const sampleNameXShim = 4
@@ -82,7 +82,7 @@ class SampleNameViewport extends ViewportBase {
 
         context.translate(0, -pixelTop)
 
-        this.draw({ context, pixelWidth: sampleNameViewportWidth, pixelTop, samples })
+        this.draw({ context, pixelWidth: sampleNameViewportWidth, samples })
 
         this.canvasVerticalRange = {top: pixelTop, bottom: pixelTop + pixelHeight}
 
@@ -101,7 +101,7 @@ class SampleNameViewport extends ViewportBase {
 
     }
 
-    draw({ context, pixelWidth, pixelTop, samples }) {
+    draw({ context, pixelWidth, samples }) {
 
         if (!samples || samples.names.length === 0) {
             return
@@ -146,34 +146,48 @@ class SampleNameViewport extends ViewportBase {
 
     renderSVGContext(context, { deltaX, deltaY }) {
 
-        // return
-
-
-        let id = this.trackView.track.name || this.trackView.track.id
-        id = id.replace(/\W/g, '')
-
-        const yScrollDelta = this.featureMap ? this.$content.position().top : 0
+        const yScrollDelta = this.$content.position().top
 
         const { width, height } = this.$viewport.get(0).getBoundingClientRect()
 
+        const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
         context.addTrackGroupWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
 
-        this.drawSVGWithContext(context, width, height)
+        this.drawSVGWithContext(context, width)
 
     }
 
-    drawSVGWithContext(context, width, height) {
+    drawSVGWithContext(context, width) {
 
-        context.save()
+        if(typeof this.trackView.track.getSamples === 'function' && typeof this.trackView.track.computePixelHeight === 'function') {
 
-        IGVGraphics.fillRect(context, 0, 0, width, height, { 'fillStyle': appleCrayonRGBA('snow', 1) })
+            context.save()
 
-        if (this.featureMap) {
-            configureFont(context, fontConfigureTemplate, this.featureMap)
-            this.sampleNameRenderer(context, this.featureMap, width, height)
+            const samples = this.trackView.track.getSamples()
+
+            configureFont(context, fontConfigureTemplate, samples.height)
+
+            const sampleNameXShim = 4
+
+            let y = 0
+            for (let name of samples.names) {
+
+                context.fillStyle = appleCrayonRGB('snow')
+                context.fillRect(0, y, width, samples.height)
+
+                context.fillStyle = appleCrayonRGB('lead')
+
+                const text = name.toUpperCase()
+
+                const yFont = getYFont(context, text, y, samples.height)
+
+                context.fillText(text, sampleNameXShim, yFont)
+
+                y += samples.height
+            }
+
+            context.restore()
         }
-
-        context.restore()
 
     }
 
@@ -222,17 +236,7 @@ class SampleNameViewport extends ViewportBase {
     }
 
     static getCurrentWidth(browser) {
-
         return false === browser.sampleNamesVisible ? 0 : sampleNameViewportWidth
-
-        // if (false === browser.sampleNamesVisible) {
-        //     return 0
-        // } else if (false === browser.config.showSampleNameButton) {
-        //     return sampleNameViewportWidth
-        // } else {
-        //     return true === browser.sampleNamesVisible ? sampleNameViewportWidth : 0
-        // }
-
     }
 }
 

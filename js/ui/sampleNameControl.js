@@ -26,7 +26,6 @@
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import {setSampleNameViewportVisibility} from '../trackView.js'
-import TrackLabelControl from "./trackLabelControl";
 
 class SampleNameControl {
 
