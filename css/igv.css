@@ -581,6 +581,24 @@
   .igv-root .igv-track-container {
     position: relative; }
 
+.igv-ruler-tooltip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 32px;
+  background-color: red;
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center; }
+  .igv-ruler-tooltip > div {
+    width: 128px;
+    height: auto;
+    padding: 1px;
+    background-color: cyan; }
+
 .igv-multi-locus-separator {
   pointer-events: none;
   user-select: none;
@@ -837,7 +855,7 @@
   width: 16px;
   height: 16px;
   color: #666666;
-  z-index: 1000; }
+  z-index: 1024; }
 
 .igv-multi-locus-panel-close-container:hover {
   cursor: pointer;

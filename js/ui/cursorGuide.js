@@ -25,7 +25,7 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
@@ -41,24 +41,24 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
         e.preventDefault();
 
-        const $child = $(document.elementFromPoint(e.clientX, e.clientY));
-        const $parent = $child.parent();
+        const $target = $(document.elementFromPoint(e.clientX, e.clientY));
+        const $parent = $target.parent();
 
         let $viewport = undefined;
 
         if ($parent.hasClass('igv-viewport-content')) {
             $viewport = $parent.parent();
-        } else if ($parent.hasClass('igv-viewport') && $child.hasClass('igv-viewport-content')) {
+        } else if ($parent.hasClass('igv-viewport') && $target.hasClass('igv-viewport-content')) {
             $viewport = $parent;
-        } else if ($parent.hasClass('igv-viewport-container') && $child.hasClass('igv-viewport')) {
-            $viewport = $child;
+        } else if ($parent.hasClass('igv-viewport-container') && $target.hasClass('igv-viewport')) {
+            $viewport = $target;
         }
 
-        const [ childClass, parentClass ] = [ $child.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
+        const [ childClass, parentClass ] = [ $target.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
 
         if ($viewport) {
 
-            // console.log(`target class ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
+            // console.log(`${ Date.now() } - target ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
 
             const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
 
@@ -103,7 +103,8 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
     $guideLine.css({ left });
 
     // base-pair location of guide line
-    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0));
+    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
+
 
     const guid = $viewport.data('viewportGUID');
     const viewport = browser.getViewportWithGUID(guid);
@@ -115,15 +116,23 @@ let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
 
     const { start, bpPerPixel } = viewport.referenceFrame;
 
-    // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
+    const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)
+    const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+
+    // units: bp = bp + (pixel * (bp / pixel))
+    const bp = Math.round(start + x * bpPerPixel)
+
+    rulerViewport.mouseMove(event)
+
+    console.log(`index ${ index } bp ${ StringUtils.numberFormatter(bp) }`)
+
     const $trackContainer = $viewport.closest('.igv-track-container');
 
     return {
         $host: $trackContainer,
         host_css_left: left,
 
-        // units: bp = bp + (pixel * (bp / pixel))
-        bp: Math.round(start + x * bpPerPixel),
+        bp,
 
         start,
         end: 1 + start + (width * bpPerPixel),
