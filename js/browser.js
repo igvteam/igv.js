@@ -532,12 +532,14 @@ class Browser {
 
 // cursor guide
     hideCursorGuide() {
-        this.cursorGuide.$guide.hide();
+        this.cursorGuide.$verticalGuide.hide();
+        this.cursorGuide.$horizontalGuide.hide();
         this.cursorGuideVisible = false;
     };
 
     showCursorGuide() {
-        this.cursorGuide.$guide.show();
+        this.cursorGuide.$verticalGuide.show();
+        this.cursorGuide.$horizontalGuide.show();
         this.cursorGuideVisible = true;
     };
 

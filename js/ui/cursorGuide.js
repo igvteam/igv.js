@@ -33,8 +33,11 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
     this.browser = browser;
 
-    this.$guide = $('<div class="igv-cursor-tracking-guide">');
-    $cursorGuideParent.append(this.$guide);
+    this.$horizontalGuide = $('<div class="igv-cursor-guide-horizontal">');
+    $cursorGuideParent.append(this.$horizontalGuide);
+
+    this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
+    $cursorGuideParent.append(this.$verticalGuide);
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
     $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
@@ -54,13 +57,9 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
             $viewport = $target;
         }
 
-        const [ childClass, parentClass ] = [ $target.attr('class') || 'noclass', $parent.attr('class') || 'noclass' ];
-
         if ($viewport) {
 
-            // console.log(`${ Date.now() } - target ${ $viewport.attr('class') } parent ${ parentClass } child ${ childClass }`);
-
-            const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
+            const result = mouseHandler(e, $viewport, this.$horizontalGuide, this.$verticalGuide, $cursorGuideParent, browser)
 
             if (result) {
 
@@ -94,12 +93,15 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
 };
 
-function mouseHandler(event, $viewport, $guideLine, $guideParent, browser) {
+function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $cursorGuideParent, browser) {
 
-    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, $guideParent.get(0));
+    const { x:xParent, y:yParent } = DOMUtils.translateMouseCoordinates(event, $cursorGuideParent.get(0));
+
+    const top = `${ yParent }px`;
+    $horizontalGuide.css({ top });
 
     const left = `${ xParent }px`;
-    $guideLine.css({ left });
+    $verticalGuide.css({ left });
 
     const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
 
@@ -113,7 +115,6 @@ function mouseHandler(event, $viewport, $guideLine, $guideParent, browser) {
     const { start, bpPerPixel } = viewport.referenceFrame
     const end = 1 + start + (width * bpPerPixel)
 
-    // units: bp = bp + (pixel * (bp / pixel))
     const bp = Math.round(start + x * bpPerPixel)
 
     if (browser.rulerTrack) {
@@ -121,8 +122,6 @@ function mouseHandler(event, $viewport, $guideLine, $guideParent, browser) {
         const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
         rulerViewport.mouseMove(event)
     }
-
-    // console.log(`index ${ index } bp ${ StringUtils.numberFormatter(bp) }`)
 
     const $host = $viewport.closest('.igv-track-container')
     return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }
@@ -163,7 +162,8 @@ CursorGuide.prototype.setState = function (cursorGuideVisible) {
 
 CursorGuide.prototype.disable = function () {
     this.doHide();
-    this.$guide.hide();
+    this.$verticalGuide.hide();
+    this.$horizontalGuide.hide();
 };
 
 CursorGuide.prototype.enable = function () {
