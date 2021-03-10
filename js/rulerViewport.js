@@ -5,6 +5,7 @@ import GenomeUtils from "./genome/genome.js";
 import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
 
+let timer
 let currentViewport = undefined
 
 class RulerViewport extends ViewPort {
@@ -103,8 +104,12 @@ class RulerViewport extends ViewPort {
 
             this.$tooltip.css({ left: `${ IGVMath.clamp(x, 0, w - ww) }px` })
 
+            // hide tooltip when movement stops
+            clearTimeout(timer)
+            timer = setTimeout(() => this.$tooltip.hide(),1500)
+
         }
-        
+
     }
 
 }
