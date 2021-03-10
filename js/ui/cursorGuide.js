@@ -94,57 +94,53 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
 
 };
 
-let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
+function mouseHandler(event, $viewport, $guideLine, $guideParent, browser) {
 
-    // pixel location of guide line
-    const parent = $guideParent.get(0)
-    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, parent);
+    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, $guideParent.get(0));
+
     const left = `${ xParent }px`;
     $guideLine.css({ left });
 
-    // base-pair location of guide line
     const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
 
-
-    const guid = $viewport.data('viewportGUID');
-    const viewport = browser.getViewportWithGUID(guid);
+    const viewport = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
 
     if (undefined === viewport) {
         console.log('ERROR: No viewport found');
         return undefined;
     }
 
-    const { start, bpPerPixel } = viewport.referenceFrame;
-
-    const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)
-    const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+    const { start, bpPerPixel } = viewport.referenceFrame
+    const end = 1 + start + (width * bpPerPixel)
 
     // units: bp = bp + (pixel * (bp / pixel))
     const bp = Math.round(start + x * bpPerPixel)
 
-    rulerViewport.mouseMove(event)
+    if (browser.rulerTrack) {
+        const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)
+        const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+        rulerViewport.mouseMove(event)
+    }
 
-    console.log(`index ${ index } bp ${ StringUtils.numberFormatter(bp) }`)
+    // console.log(`index ${ index } bp ${ StringUtils.numberFormatter(bp) }`)
 
-    const $trackContainer = $viewport.closest('.igv-track-container');
-
-    return {
-        $host: $trackContainer,
-        host_css_left: left,
-
-        bp,
-
-        start,
-        end: 1 + start + (width * bpPerPixel),
-        interpolant: xNormalized
-    };
-};
+    const $host = $viewport.closest('.igv-track-container')
+    return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }
+}
 
 CursorGuide.prototype.doHide = function () {
     if (this.$button) {
         this.$button.removeClass('igv-navbar-button-clicked');
     }
+
     this.browser.hideCursorGuide();
+
+    if (this.browser.rulerTrack) {
+        for (let viewport of this.browser.rulerTrack.trackView.viewports) {
+            viewport.$tooltip.hide()
+        }
+    }
+
 };
 
 CursorGuide.prototype.doShow = function () {

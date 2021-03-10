@@ -2,8 +2,10 @@ import ViewPort from "./viewport.js";
 import $ from "./vendor/jquery-3.3.1.slim.js";
 import RulerSweeper from "./rulerSweeper.js";
 import GenomeUtils from "./genome/genome.js";
-import {DOMUtils, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import {DOMUtils, IGVMath, StringUtils} from "../node_modules/igv-utils/src/index.js";
 import {createIcon} from "./igv-icons.js";
+
+let currentViewport = undefined
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -71,36 +73,38 @@ class RulerViewport extends ViewPort {
                 this.browser.search(searchString);
             })
 
-        } else {
-
-            // const mousemove = `mousemove${ this.namespace }`
-            // this.$viewport.on(mousemove, event => {
-            //
-            //     let { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
-            //
-            //     const { start, bpPerPixel } = this.referenceFrame
-            //
-            //     const bp = Math.round(start + Math.max(0, x) * bpPerPixel)
-            //
-            //     this.$tooltip.css({ left: `${ x }px` })
-            //     this.$tooltipContent.text( StringUtils.numberFormatter(bp) )
-            // })
-
         }
 
     }
 
     mouseMove(event) {
 
-        let { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
+        if (true === this.browser.cursorGuideVisible) {
 
-        const { start, bpPerPixel } = this.referenceFrame
+            if (undefined === currentViewport) {
+                currentViewport = this
+                this.$tooltip.show()
+            } else if (currentViewport.guid !== this.guid) {
+                currentViewport.$tooltip.hide()
+                this.$tooltip.show()
+                currentViewport = this
+            } else {
+                this.$tooltip.show()
+            }
 
-        const bp = Math.round(start + Math.max(0, x) * bpPerPixel)
+            const { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
+            const { start, bpPerPixel } = this.referenceFrame
+            const bp = Math.round(start + Math.max(0, x) * bpPerPixel)
 
-        this.$tooltip.css({ left: `${ x }px` })
-        this.$tooltipContent.text( StringUtils.numberFormatter(bp) )
+            this.$tooltipContent.text( StringUtils.numberFormatter(bp) )
 
+            const { width:ww } = this.$tooltipContent.get(0).getBoundingClientRect()
+            const { width:w } = this.$viewport.get(0).getBoundingClientRect()
+
+            this.$tooltip.css({ left: `${ IGVMath.clamp(x, 0, w - ww) }px` })
+
+        }
+        
     }
 
 }

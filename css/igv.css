@@ -582,22 +582,32 @@
     position: relative; }
 
 .igv-ruler-tooltip {
+  pointer-events: none;
+  z-index: 128;
   position: absolute;
   top: 0;
   left: 0;
   width: 1px;
   height: 32px;
-  background-color: red;
+  background-color: transparent;
   display: flex;
   flex-flow: row;
   flex-wrap: nowrap;
   justify-content: flex-start;
   align-items: center; }
   .igv-ruler-tooltip > div {
+    pointer-events: none;
     width: 128px;
     height: auto;
     padding: 1px;
-    background-color: cyan; }
+    color: #373737;
+    font-size: 10px;
+    font-family: "Open Sans", sans-serif;
+    font-weight: 400;
+    background-color: white;
+    border-style: solid;
+    border-width: thin;
+    border-color: #373737; }
 
 .igv-multi-locus-separator {
   pointer-events: none;
@@ -735,17 +745,6 @@
   border-color: #7e7e7e;
   background-color: #7e7e7e; }
 
-.igv-multi-locus-panel-border {
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 1px;
-  background-color: green;
-  border-right-color: #ff0000;
-  border-right-style: solid;
-  border-right-width: 1px; }
-
 .igv-navbar-button {
   box-sizing: unset;
   padding-left: 6px;
@@ -852,29 +851,28 @@
   position: absolute;
   top: 4px;
   right: 4px;
-  width: 16px;
-  height: 16px;
   color: #666666;
-  z-index: 1024; }
+  width: 16px;
+  height: 16px; }
 
 .igv-multi-locus-panel-close-container:hover {
   cursor: pointer;
   color: #434343; }
 
 .igv-multi-locus-panel-label-div {
+  pointer-events: none;
   position: absolute;
   left: 50%;
   top: 15%;
   transform: translate(-50%, -25%);
+  color: #373737;
   font-family: "Open Sans", sans-serif;
   font-size: 12px;
   font-weight: 400;
+  padding: 1px;
   text-align: center;
   min-width: 16px;
-  z-index: 64;
-  color: #373737;
-  background-color: white;
-  padding: 1px; }
+  background-color: white; }
 
 .igv-multi-locus-panel-label-div:hover {
   cursor: pointer; }

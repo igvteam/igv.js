@@ -470,15 +470,17 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 }
 
 .igv-ruler-tooltip {
+  pointer-events: none;
+  z-index: 128;
+
   position: absolute;
   top: 0;
   left: 0;
 
-  //width: 32px;
   width: 1px;
   height: 32px;
 
-  background-color: red;
+  background-color: transparent;
 
   display: flex;
   flex-flow: row;
@@ -487,10 +489,23 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   align-items: center;
 
   > div {
+    pointer-events: none;
+
     width: 128px;
     height: auto;
+
     padding: 1px;
-    background-color: cyan;
+
+    color: $igv-dark-grey-color;
+    font-size: 10px;
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+
+    background-color: white;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-dark-grey-color;
   }
 
 }
@@ -711,23 +726,6 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   background-color: #7e7e7e;
 }
 
-// multi-locus panel border
-.igv-multi-locus-panel-border {
-  position: absolute;
-  top: 0;
-  left: 0;
-
-  height: 100%;
-  width: 1px;
-
-  background-color: green;
-
-  border-right-color: #ff0000;
-  border-right-style: solid;
-  border-right-width: 1px;
-
-}
-
 // drag & drop file upload button
 .igv-navbar-button {
 
@@ -868,17 +866,15 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 }
 
 .igv-multi-locus-panel-close-container {
+
   position: absolute;
   top: 4px;
   right: 4px;
 
-  width: 16px;
-  height: 16px;
-
   color: #666666;
 
-  z-index: 1024;
-
+  width: 16px;
+  height: 16px;
 }
 
 .igv-multi-locus-panel-close-container:hover {
@@ -887,26 +883,26 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 }
 
 .igv-multi-locus-panel-label-div {
+
+  pointer-events: none;
+
   position: absolute;
 
   left:50%;
   top:15%;
   transform: translate(-50%, -25%);
 
+  color: $igv-dark-grey-color;
   font-family: $igv-default-font-face;
   font-size: 12px;
   font-weight: 400;
+  padding: 1px;
 
   text-align: center;
   min-width: 16px;
 
-
-  z-index:64;
-
-  color: $igv-dark-grey-color;
   background-color: white;
 
-  padding: 1px;
 }
 
 .igv-multi-locus-panel-label-div:hover {
