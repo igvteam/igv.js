@@ -354,6 +354,10 @@ class Browser {
             this.sampleNameControl.setState(this.sampleNamesVisible)
         }
 
+        if (session.sampleNameViewportWidth) {
+            this.sampleNameViewportWidth = session.sampleNameViewportWidth
+        }
+
         const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
@@ -1450,6 +1454,7 @@ class Browser {
         }
 
         json['sampleNamesVisible'] = true === this.sampleNamesVisible ? 'true' : 'false'
+        json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
