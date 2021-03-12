@@ -39,6 +39,7 @@ import CenterGuide from "./ui/centerGuide.js";
 import CursorGuide from "./ui/cursorGuide.js";
 import NavbarManager from "./navbarManager.js";
 import {createIcon} from "./igv-icons.js";
+import SampleNameControl from "./ui/sampleNameControl.js";
 
 let allBrowsers = [];
 
@@ -88,6 +89,7 @@ async function createBrowser(parentDiv, config) {
     browser.userFeedback.hide();
     browser.inputDialog = new InputDialog(browser.$root.get(0));
     browser.dataRangeDialog = new DataRangeDialog(browser.$root);
+
     if (false === config.showTrackLabels) {
         browser.hideTrackLabels();
     } else {
@@ -96,6 +98,7 @@ async function createBrowser(parentDiv, config) {
             browser.trackLabelControl.setState(browser.trackLabelsVisible);
         }
     }
+
     if (false === config.showCursorTrackingGuide) {
         browser.cursorGuide.doHide();
     } else {
@@ -125,7 +128,6 @@ async function createBrowser(parentDiv, config) {
         browser.centerGuide.forcedShow();
     }
     browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
-
 
     return browser;
 
@@ -267,7 +269,12 @@ function createStandardControls(browser, config) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
-    if (config.showSVGButton) {
+    browser.sampleNamesVisible = config.showSampleNames
+    if (true === config.showSampleNameButton) {
+        browser.sampleNameControl = new SampleNameControl($toggle_button_container, browser)
+    }
+
+    if (true === config.showSVGButton) {
         browser.svgSaveControl = new SVGSaveControl($toggle_button_container, browser);
     }
 
@@ -295,32 +302,40 @@ function setDefaults(config) {
         config.showIdeogram = true;
     }
 
-    if (undefined === config.showCursorTrackingGuideButton) {
-        config.showCursorTrackingGuideButton = true;
-    }
-
-    if (undefined === config.showCenterGuideButton) {
-        config.showCenterGuideButton = true;
-    }
-
-    if (undefined === config.showSVGButton) {
-        config.showSVGButton = true;
-    }
-
     if (undefined === config.showTrackLabelButton) {
         config.showTrackLabelButton = true;
+    }
+
+    if (undefined === config.showTrackLabels) {
+        config.showTrackLabels = true;
+    }
+
+    if (undefined === config.showCursorTrackingGuideButton) {
+        config.showCursorTrackingGuideButton = true;
     }
 
     if (undefined === config.showCursorTrackingGuide) {
         config.showCursorTrackingGuide = false;
     }
 
+    if (undefined === config.showCenterGuideButton) {
+        config.showCenterGuideButton = true;
+    }
+
     if (undefined === config.showCenterGuide) {
         config.showCenterGuide = false;
     }
 
-    if (undefined === config.showTrackLabels) {
-        config.showTrackLabels = true;
+    if (undefined === config.showSampleNameButton) {
+        config.showSampleNameButton = true
+    }
+
+    if (undefined === config.showSampleNames) {
+        config.showSampleNames = false
+    }
+
+    if (undefined === config.showSVGButton) {
+        config.showSVGButton = true;
     }
 
     if (config.showControls === undefined) {

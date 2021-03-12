@@ -1,0 +1,8 @@
+$light-grey-color: #dfdfdf;
+$medium-grey-color: #bfbfbf;
+
+.modal-table-example-disabled-button {
+  color: $medium-grey-color;
+  pointer-events: none; // This makes it not clickable
+  opacity: 0.6; // This grays it out to look disabled
+}

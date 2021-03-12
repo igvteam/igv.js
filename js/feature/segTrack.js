@@ -49,7 +49,7 @@ class SegTrack extends TrackBase {
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13;
         this.sampleHeight = this.squishedRowHeight;      // Initial value, will get overwritten when rendered
 
-        if(config.color) {
+        if (config.color) {
             this.color = config.color;
         } else {
             // Color scales for "seg" (copy number) tracks.
@@ -77,7 +77,7 @@ class SegTrack extends TrackBase {
                 });
 
             // Color table for mutation (mut and maf) tracks
-            this.colorTable = new ColorTable(config.colorTable);
+            this.colorTable = new ColorTable(config.colorTable || MUT_COLORS);
         }
 
         if (config.samples) {
@@ -232,15 +232,14 @@ class SegTrack extends TrackBase {
                 let w = Math.max(1, x1 - x);
 
                 let color;
-                if(this.color) {
-                    if(typeof this.color === "function") {
+                if (this.color) {
+                    if (typeof this.color === "function") {
                         color = this.color(f);
                     } else {
                         color = this.color;
                     }
-                }
-                else if("mut" === this.type) {
-                    color = this.colorTable.getColor(f.value);
+                } else if ("mut" === this.type) {
+                    color = this.colorTable.getColor(f.value.toLowerCase());
                 } else {
                     // Assume seg track
                     let value = f.value;
@@ -258,9 +257,9 @@ class SegTrack extends TrackBase {
 
 
                 let h;
-                if("mut" === this.type) {
-                    h = rowHeight - 2*border;
-                    if(w < 3) {
+                if ("mut" === this.type) {
+                    h = rowHeight - 2 * border;
+                    if (w < 3) {
                         w = 3;
                         x -= 1;
                     }
@@ -274,7 +273,7 @@ class SegTrack extends TrackBase {
                     h = sh - 2 * border
                 }
 
-                f.pixelRect = { x, y, w, h };
+                f.pixelRect = {x, y, w, h};
 
                 // Use for diagnostic rendering
                 // context.fillStyle = randomRGB(180, 240)
@@ -330,34 +329,57 @@ class SegTrack extends TrackBase {
         this.updateSampleKeys(featureList);
 
         const scores = {};
-        const bpLength = end - start + 1;
+        const d2 = (direction === "ASC" ? 1 : -1);
 
-        // Compute weighted average score for each sample
-        for (let segment of featureList) {
+        const sortSeg = () => {
+            // Compute weighted average score for each sample
+            const bpLength = end - start + 1;
+            for (let segment of featureList) {
+                if (segment.end < start) continue;
+                if (segment.start > end) break;
+                const min = Math.max(start, segment.start);
+                const max = Math.min(end, segment.end);
+                const f = (max - min) / bpLength;
+                const sampleKey = segment.sampleKey || segment.sample
+                const s = scores[sampleKey] || 0;
+                scores[sampleKey] = s + f * segment.value;
+            }
 
-            if (segment.end < start) continue;
-            if (segment.start > end) break;
-
-            const min = Math.max(start, segment.start);
-            const max = Math.min(end, segment.end);
-            const f = (max - min) / bpLength;
-
-            const sampleKey = segment.sampleKey || segment.sample
-            const s = scores[sampleKey] || 0;
-            scores[sampleKey] = s + f * segment.value;
+            // Now sort sample names by score
+            this.sampleKeys.sort(function (a, b) {
+                let s1 = scores[a];
+                let s2 = scores[b];
+                if (!s1) s1 = d2 * Number.MAX_VALUE;
+                if (!s2) s2 = d2 * Number.MAX_VALUE;
+                if (s1 === s2) return 0;
+                else if (s1 > s2) return d2;
+                else return d2 * -1;
+            });
         }
 
-        // Now sort sample names by score
-        const d2 = (direction === "ASC" ? 1 : -1);
-        this.sampleKeys.sort(function (a, b) {
-            let s1 = scores[a];
-            let s2 = scores[b];
-            if (!s1) s1 = d2 * Number.MAX_VALUE;
-            if (!s2) s2 = d2 * Number.MAX_VALUE;
-            if (s1 === s2) return 0;
-            else if (s1 > s2) return d2;
-            else return d2 * -1;
-        });
+        const sortMut = () => {
+            // Compute weighted average score for each sample
+            for (let segment of featureList) {
+                if (segment.end < start) continue;
+                if (segment.start > end) break;
+                const sampleKey = segment.sampleKey || segment.sample
+                if (!scores.hasOwnProperty(sampleKey) || segment.value.localeCompare(scores[sampleKey]) > 0) {
+                    scores[sampleKey] = segment.value;
+                }
+            }
+            // Now sort sample names by score
+            this.sampleKeys.sort(function (a, b) {
+                let sa = scores[a] || "";
+                let sb = scores[b] || ""
+                return d2 * (sa.localeCompare(sb));
+            });
+        }
+
+        if ("mut" === this.type) {
+            sortMut();
+        } else {
+            sortSeg();
+        }
 
         this.trackView.repaintViews();
         // self.trackView.$viewport.scrollTop(0);
@@ -476,6 +498,41 @@ class SegTrack extends TrackBase {
     }
 }
 
+// Mut and MAF file default color table
+
+const MUT_COLORS = {
+
+    "indel": "rgb(0,200,0)",
+    "missense": "rgb(170,20,240)",
+    "nonsense": "rgb(50,30,75)",
+    "splice site": "rgb(150,0,150)",
+    "synonymous": "rgb(	200,170,200)",
+    "targeted region": "rgb(236,155,43)",
+    "truncating": "rgb(	150,0,0)",
+    "non-coding transcript": "rgb(0,0,150)",
+    "other aa changing": "rgb(	0,150,150)"
+    //
+    // 3'Flank
+    // 3'UTR
+    // 5'Flank
+    // 5'UTR
+    // Frame_Shift_Del
+    // Frame_Shift_Ins
+    // IGR
+    // In_Frame_Del
+    // In_Frame_Ins
+    // Intron
+    // Missense_Mutation
+    // Nonsense_Mutation
+    // Nonstop_Mutation
+    // RNA
+    // Silent
+    // Splice_Region
+    // Splice_Site
+    // Translation_Start_Site
+    // Variant_Classification
+
+}
 
 
 export default SegTrack
