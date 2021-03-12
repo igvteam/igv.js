@@ -269,7 +269,7 @@ function createStandardControls(browser, config) {
         browser.trackLabelControl = new TrackLabelControl($toggle_button_container, browser);
     }
 
-    browser.sampleNamesVisible = config.showSampleNames
+    browser.showSampleNames = config.showSampleNames
     if (true === config.showSampleNameButton) {
         browser.sampleNameControl = new SampleNameControl($toggle_button_container, browser)
     }

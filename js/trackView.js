@@ -144,7 +144,7 @@ class TrackView {
 
         this.sampleNameViewport = new SampleNameViewport(this, this.$viewportContainer, undefined, browser.sampleNameViewportWidth)
 
-        if (false === browser.sampleNamesVisible) {
+        if (false === browser.showSampleNames) {
             this.sampleNameViewport.$viewport.hide()
         } else {
             this.sampleNameViewport.$viewport.show()
@@ -684,7 +684,7 @@ function setSampleNameViewportVisibility(browser) {
 
     for (let { sampleNameViewport } of browser.trackViews) {
 
-        if (false === browser.sampleNamesVisible) {
+        if (false === browser.showSampleNames) {
             sampleNameViewport.$viewport.hide()
         } else {
             sampleNameViewport.$viewport.show()
