@@ -36,7 +36,7 @@ class SampleNameControl {
 
         this.$button.text('Sample Names')
 
-        if (true === browser.sampleNamesVisible) {
+        if (true === browser.showSampleNames) {
             this.$button.addClass('igv-navbar-button-clicked')
         } else {
             this.$button.removeClass('igv-navbar-button-clicked')
@@ -44,9 +44,9 @@ class SampleNameControl {
 
         this.$button.on('click.sample-name-control', () => {
 
-            browser.sampleNamesVisible = !browser.sampleNamesVisible
+            browser.showSampleNames = !browser.showSampleNames
 
-            if (true === browser.sampleNamesVisible) {
+            if (true === browser.showSampleNames) {
                 this.$button.addClass('igv-navbar-button-clicked')
             } else {
                 this.$button.removeClass('igv-navbar-button-clicked')
