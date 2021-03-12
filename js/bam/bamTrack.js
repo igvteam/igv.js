@@ -181,10 +181,10 @@ class BAMTrack extends TrackBase {
         IGVGraphics.fillRect(options.context, 0, options.pixelTop, options.pixelWidth, options.pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
         if (true === this.showCoverage && this.coverageTrack.height > 0) {
-            this.trackView.controlCanvas.style.display = 'block'
+            this.trackView.axisCanvas.style.display = 'block'
             this.coverageTrack.draw(options);
         } else {
-            this.trackView.controlCanvas.style.display = 'none'
+            this.trackView.axisCanvas.style.display = 'none'
         }
 
         if (true === this.showAlignments) {
@@ -699,7 +699,6 @@ class AlignmentTrack {
         let pixelTop = options.pixelTop;
         if (this.top) {
             ctx.translate(0, this.top);
-            pixelTop -= this.top;
         }
         const pixelBottom = pixelTop + options.pixelHeight;
 

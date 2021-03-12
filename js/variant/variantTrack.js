@@ -30,6 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
+import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
 
 const isString = StringUtils.isString;
 
@@ -157,56 +158,54 @@ class VariantTrack extends TrackBase {
 
     };
 
-    draw(options) {
+    draw({ context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features }) {
 
-        const ctx = options.context
+        IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
+
         const callSets = this.callSets;
         const nCalls = this.getCallsetsLength();
-        const pixelWidth = options.pixelWidth
-        const pixelHeight = options.pixelHeight
-        const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
-        const bpPerPixel = options.bpPerPixel
-        const bpStart = options.bpStart
-        const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
-        IGVGraphics.fillRect(ctx, 0, options.pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
-
-        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
-
         if (callSets && nCalls > 0 && "COLLAPSED" !== this.displayMode) {
-            IGVGraphics.strokeLine(ctx, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
+            IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
         }
 
-        const featureList = options.features
+        if (features) {
 
-        if (featureList) {
-            for (let variant of featureList) {
+            const drawnFeatures = []
+
+            const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
+            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+            for (let variant of features) {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
-                const py = topMargin + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
-                const vh = this.variantHeight;
+                const y = topMargin + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
+                const h = this.variantHeight;
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
-                let px = Math.round((variant.start - bpStart) / bpPerPixel);
-                let px1 = Math.round((variant.end - bpStart) / bpPerPixel);
-                let pw = Math.max(1, px1 - px);
-                if (pw < 3) {
-                    pw = 3;
-                    px -= 1;
-                } else if (pw > 5) {
-                    px += 1;
-                    pw -= 2;
+                let x = Math.round((variant.start - bpStart) / bpPerPixel);
+                let x1 = Math.round((variant.end - bpStart) / bpPerPixel);
+                let w = Math.max(1, x1 - x);
+                if (w < 3) {
+                    w = 3;
+                    x -= 1;
+                } else if (w > 5) {
+                    x += 1;
+                    w -= 2;
                 }
 
                 if ("NONVARIANT" === variant.type) {
-                    ctx.fillStyle = this.nonRefColor;
+                    context.fillStyle = this.nonRefColor;
                 } else if ("MIXED" === variant.type) {
-                    ctx.fillStyle = this.mixedColor;
+                    context.fillStyle = this.mixedColor;
                 } else {
-                    ctx.fillStyle = this.color || this.defaultColor;
+                    context.fillStyle = this.color || this.defaultColor;
                 }
 
-                ctx.fillRect(px, py, pw, vh);
+                context.fillRect(x, y, w, h)
+
+                variant.pixelRect = { x, y, w, h }
+                drawnFeatures.push(variant)
 
                 if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
@@ -230,16 +229,19 @@ class VariantTrack extends TrackBase {
                             }
 
                             if (noCall) {
-                                ctx.fillStyle = this.noCallColor;
+                                context.fillStyle = this.noCallColor;
                             } else if (allRef) {
-                                ctx.fillStyle = this.homrefColor;
+                                context.fillStyle = this.homrefColor;
                             } else if (allVar) {
-                                ctx.fillStyle = this.homvarColor;
+                                context.fillStyle = this.homvarColor;
                             } else {
-                                ctx.fillStyle = this.hetvarColor;
+                                context.fillStyle = this.hetvarColor;
                             }
 
-                            ctx.fillRect(px, py, pw, callHeight);
+                            context.fillRect(x, py, w, callHeight)
+
+                            callSet.pixelRect = { x, y:py, w, h:callHeight }
+                            drawnFeatures.push(callSet)
 
                         }
                         callsDrawn++;
@@ -247,6 +249,7 @@ class VariantTrack extends TrackBase {
 
                 }
             }
+
         } else {
             console.log("No feature list");
         }
@@ -457,6 +460,22 @@ class VariantTrack extends TrackBase {
         return menuItems;
 
     }
+}
+
+function drawVariantTrackSampleNames(ctx, features, canvasTop) {
+
+    console.log(`variant track - draw sample names - features(${ features.length })`)
+
+    // ctx.canvas.height = height
+    // ctx.canvas.style.top = `${ canvasTop }px`
+    // ctx.translate(0, -canvasTop)
+    //
+    // for (let feature of features) {
+    //     const { y, h } = feature.pixelRect
+    //     IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': randomRGB(200, 255)})
+    //     ctx.fillText(feature.names, 0, y + h)
+    // }
+
 }
 
 export default VariantTrack

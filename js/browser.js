@@ -28,7 +28,6 @@ import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 import TrackView, {
     emptyViewportContainers,
     maxViewportContentHeight,
-    populateViewportContainer,
     updateViewportShims
 } from "./trackView.js";
 import {createViewport} from "./viewportFactory.js";
@@ -66,7 +65,6 @@ const multiLocusGapMarginWidth = 2
 
 const multiLocusGapWidth = (2 * multiLocusGapMarginWidth) + multiLocusGapDivWidth
 
-const leftHandGutterWidth = 50
 const rightHandGutterWidth = 36
 
 const trackManipulationHandleWidth = 12
@@ -76,7 +74,9 @@ const trackManipulationHandleShim = trackManipulationHandleWidth + trackManipula
 const scrollbarOuterWidth = 14
 
 // igv.scss - $igv-viewport-container-shim-width
-const viewportContainerShimWidth = leftHandGutterWidth + rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
+const viewportContainerShimWidth = rightHandGutterWidth + trackManipulationHandleShim + scrollbarOuterWidth
+
+const defaultSampleNameViewportWidth = 200
 
 class Browser {
 
@@ -102,6 +102,9 @@ class Browser {
         this.trackViews = [];
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
+
+        this.sampleNamesVisible = false;
+
         this.cursorGuideVisible = false;
         this.constants = {
             dragThreshold: 3,
@@ -139,6 +142,8 @@ class Browser {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
 
+        this.sampleNameViewportWidth = options.sampleNameViewportWidth || defaultSampleNameViewportWidth;
+
         if (options.search) {
             this.searchConfig = {
                 type: "json",
@@ -174,6 +179,10 @@ class Browser {
 
             }
         }
+    }
+
+    getSampleNameViewportWidth() {
+        return false === this.sampleNamesVisible ? 0 : this.sampleNameViewportWidth
     }
 
     startSpinner() {
@@ -219,20 +228,19 @@ class Browser {
      * Render browse display as SVG
      * @returns {string}
      */
-    toSVG() {
+    async toSVG() {
 
-        const {x, y, width, height} = this.trackContainer.getBoundingClientRect();
+        let { x, y, width, height } = this.trackContainer.getBoundingClientRect();
         const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
 
-        const w = width + (this.referenceFrameList.length - 1) * multiLocusGapWidth;
+        width += (this.referenceFrameList.length - 1) * multiLocusGapWidth
 
-        const h_output = height;
         const h_render = 8000;
 
         let svgContext = new C2S(
             {
 
-                width: w,
+                width,
                 height: h_render,
 
                 backdropColor: 'white',
@@ -243,7 +251,7 @@ class Browser {
                     {
                         x: 0,
                         y: 0,
-                        width: w,
+                        width,
                         height: h_render
                     }
 
@@ -253,19 +261,19 @@ class Browser {
 
         // tracks -> SVG
         for (let trackView of this.trackViews) {
-            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y});
+            trackView.renderSVGContext(svgContext, {deltaX: dx, deltaY: -y})
         }
 
         // reset height to trim away unneeded svg canvas real estate. Yes, a bit of a hack.
-        svgContext.setHeight(h_output);
+        svgContext.setHeight(height);
 
         return svgContext.getSerializedSvg(true);
 
     };
 
-    saveSVGtoFile(config) {
+    async saveSVGtoFile(config) {
 
-        let svg = this.toSVG();
+        let svg = await this.toSVG();
 
         if (config.$container) {
 
@@ -340,6 +348,11 @@ class Browser {
     async loadSessionObject(session) {
 
         this.removeAllTracks();
+
+        if (session.sampleNamesVisible) {
+            this.sampleNamesVisible = 'true'=== session.sampleNamesVisible
+            this.sampleNameControl.setState(this.sampleNamesVisible)
+        }
 
         const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
 
@@ -493,7 +506,7 @@ class Browser {
 
             return loci;
         }
-    };
+    }
 
 //
     updateUIWithReferenceFrameListChange(referenceFrameList) {
@@ -924,7 +937,7 @@ class Browser {
 
     async resize() {
 
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+        const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length, this.getViewportContainerWidth())
 
         for (let referenceFrame of this.referenceFrameList) {
 
@@ -937,6 +950,10 @@ class Browser {
             }
 
         }
+
+        // console.log(`${ Date.now() } - browser - resize`)
+
+        if (this.centerGuide) this.centerGuide.resize();
 
         for (let trackView of this.trackViews) {
             trackView.resize(viewportWidth)
@@ -956,10 +973,10 @@ class Browser {
         }
     }
 
-    async updateViews(referenceFrame, views, force) {
+    async updateViews(referenceFrame, trackViews, force) {
 
-        if (!views) {
-            views = this.trackViews;
+        if (!trackViews) {
+            trackViews = this.trackViews;
         }
 
         if (!referenceFrame && this.referenceFrameList && 1 === this.referenceFrameList.length) {
@@ -982,14 +999,14 @@ class Browser {
 
         // Don't autoscale while dragging.
         if (this.dragObject) {
-            for (let trackView of views) {
+            for (let trackView of trackViews) {
                 await trackView.updateViews(force);
             }
         } else {
             // Group autoscale
             const groupAutoscaleTracks = {};
             const otherTracks = [];
-            for (let trackView of views) {
+            for (let trackView of trackViews) {
                 const group = trackView.track.autoscaleGroup;
                 if (group) {
                     var l = groupAutoscaleTracks[group];
@@ -1069,7 +1086,7 @@ class Browser {
             let str
             if (this.$searchInput) {
 
-                let end = referenceFrame.start + referenceFrame.bpPerPixel * this.viewportWidth();
+                let end = referenceFrame.start + referenceFrame.bpPerPixel * this.getViewportWidth();
 
                 if (this.genome) {
                     const chromosome = this.genome.getChromosome(referenceFrame.chr);
@@ -1092,7 +1109,7 @@ class Browser {
     /**
      * Return the visible width of a track.  All tracks should have the same width.
      */
-    viewportContainerWidth() {
+    getViewportContainerWidth() {
 
         let ww
         if (this.trackViews && this.trackViews.length > 0) {
@@ -1105,15 +1122,13 @@ class Browser {
         return ww
     };
 
-    calculateViewportWidth(referenceFrameListLength) {
-        if (1 === referenceFrameListLength) {
-            return this.viewportContainerWidth()
-        } else {
-            return Math.floor((this.viewportContainerWidth() - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
-        }
+    computeViewportWidth(referenceFrameListLength, viewportContainerWidth) {
+
+        const containerWidth = TrackView.computeViewportWidth(this, viewportContainerWidth)
+        return 1 === referenceFrameListLength ? containerWidth : Math.floor((containerWidth - (referenceFrameListLength - 1) * multiLocusGapWidth) / referenceFrameListLength)
     }
 
-    viewportWidth() {
+    getViewportWidth() {
         return this.trackViews[0].viewports[0].$viewport.width()
     };
 
@@ -1337,7 +1352,7 @@ class Browser {
             this.referenceFrameList = referenceFrameList
             emptyViewportContainers(this.trackViews)
             for (let trackView of this.trackViews) {
-                populateViewportContainer(this, referenceFrameList, trackView);
+                trackView.populateViewportContainer(this, referenceFrameList);
             }
 
             this.updateUIWithReferenceFrameListChange(referenceFrameList);
@@ -1433,6 +1448,8 @@ class Browser {
         const json = {
             "version": version()
         }
+
+        json['sampleNamesVisible'] = true === this.sampleNamesVisible ? 'true' : 'false'
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {

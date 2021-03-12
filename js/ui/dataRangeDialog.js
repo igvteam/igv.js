@@ -94,9 +94,9 @@ class DataRangeDialog {
         this.$container.hide();
     }
 
-    configure(config) {
+    configure(trackView) {
 
-        const dataRange = config.trackView.dataRange();
+        const dataRange = trackView.dataRange();
         let min;
         let max;
         if (dataRange) {
@@ -113,32 +113,32 @@ class DataRangeDialog {
         this.$minimum_input.unbind();
         this.$minimum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(config);
+                this.processResults(trackView);
             }
         });
 
         this.$maximum_input.unbind();
         this.$maximum_input.on('keyup', (e) => {
             if (13 === e.keyCode) {
-                this.processResults(config);
+                this.processResults(trackView);
             }
         });
 
         this.$ok.unbind();
         this.$ok.on('click',  (e) => {
-            this.processResults(config);
+            this.processResults(trackView);
         });
     }
 
 
-    processResults(config) {
+    processResults(trackView) {
 
         const min = parseFloat(this.$minimum_input.val());
         const max = parseFloat(this.$maximum_input.val());
         if (isNaN(min) || isNaN(max)) {
             Alert.presentAlert(new Error('Must input numeric values'), undefined);
         } else {
-            config.trackView.setDataRange(min, max);
+            trackView.setDataRange(min, max);
         }
 
         this.$minimum_input.val(undefined);

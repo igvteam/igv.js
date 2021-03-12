@@ -46,6 +46,20 @@ var log = function (msg) {
 
 const IGVGraphics = {
 
+    configureHighDPICanvas: function(ctx, w, h) {
+
+        const scaleFactor = window.devicePixelRatio
+        // const scaleFactor = 1
+
+        ctx.canvas.style.width = (`${ w }px`)
+        ctx.canvas.width = Math.floor(scaleFactor * w)
+
+        ctx.canvas.style.height = (`${ h }px`)
+        ctx.canvas.height = Math.floor(scaleFactor * h)
+
+        ctx.scale(scaleFactor, scaleFactor)
+
+    },
 
     setProperties: function (ctx, properties) {
 

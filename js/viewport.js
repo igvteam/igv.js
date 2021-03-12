@@ -168,20 +168,6 @@ class ViewPort extends ViewportBase {
         }
     }
 
-    setTop(contentTop) {
-
-        const viewportHeight = this.$viewport.height()
-        const viewTop = -contentTop
-        const viewBottom = viewTop + viewportHeight
-        $(this.contentDiv).css("top", contentTop + "px");
-
-        if (!this.canvasVerticalRange ||
-            this.canvasVerticalRange.bottom < viewBottom ||
-            this.canvasVerticalRange.top > viewTop) {
-            this.repaint()
-        }
-    }
-
     async loadFeatures() {
 
         const referenceFrame = this.referenceFrame;
@@ -189,7 +175,7 @@ class ViewPort extends ViewportBase {
 
         // Expand the requested range so we can pan a bit without reloading.  But not beyond chromosome bounds
         const chrLength = this.browser.genome.getChromosome(chr).bpLength;
-        const pixelWidth = $(this.contentDiv).width() * 3;
+        const pixelWidth = this.$content.width() * 3;
         const bpWidth = pixelWidth * referenceFrame.bpPerPixel;
         const bpStart = Math.floor(Math.max(0, referenceFrame.start - bpWidth / 3));
         const bpEnd = Math.ceil(Math.min(chrLength, bpStart + bpWidth));
@@ -252,8 +238,9 @@ class ViewPort extends ViewportBase {
         }
 
         // For deep tracks we paint a canvas == 3*viewportHeight centered on the current vertical scroll position
-        const viewportHeight = this.$viewport.height();
-        const minHeight = roiFeatures ? Math.max(this.getContentHeight(), viewportHeight) : this.getContentHeight();  // Need to fill viewport for ROIs.
+        const viewportHeight = this.$viewport.height()
+        const contentHeight = this.getContentHeight()
+        const minHeight = roiFeatures ? Math.max(contentHeight, viewportHeight) : contentHeight;  // Need to fill viewport for ROIs.
         let pixelHeight = Math.min(minHeight, 3 * viewportHeight);
         if (0 === pixelWidth || 0 === pixelHeight) {
             if (this.canvas) {
@@ -261,7 +248,7 @@ class ViewPort extends ViewportBase {
             }
             return;
         }
-        const canvasTop = Math.max(0, -($(this.contentDiv).position().top) - viewportHeight)
+        const canvasTop = Math.max(0, -(this.$content.position().top) - viewportHeight)
 
         // Always use high DPI if in compressed display mode, otherwise use preference setting;
         let devicePixelRatio;
@@ -292,7 +279,6 @@ class ViewPort extends ViewportBase {
         const drawConfiguration =
             {
                 context: ctx,
-                features,
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
@@ -304,22 +290,26 @@ class ViewPort extends ViewportBase {
                 viewport: this,
                 viewportWidth: this.$viewport.width(),
                 viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
-                viewportContainerWidth: this.browser.viewportContainerWidth()
+                viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
 
         this.canvasVerticalRange = {top: canvasTop, bottom: canvasTop + pixelHeight}
 
-        if (this.canvas) {
-            $(this.canvas).remove();
+        if (this.$canvas) {
+            this.$canvas.remove()
         }
-        $(this.contentDiv).append(newCanvas);
-        this.canvas = newCanvas;
-        this.ctx = ctx;
+        this.$canvas = $(newCanvas)
+        this.$content.append(this.$canvas)
+        this.canvas = newCanvas
+        this.ctx = ctx
     }
 
     draw(drawConfiguration, features, roiFeatures) {
+
+        // console.log(`${ Date.now() } viewport draw(). track ${ this.trackView.track.type }. content-css-top ${ this.$content.css('top') }. canvas-top ${ drawConfiguration.pixelTop }.`)
+
         if (features) {
             drawConfiguration.features = features;
             this.trackView.track.draw(drawConfiguration);
@@ -357,7 +347,7 @@ class ViewPort extends ViewportBase {
                 viewbox:
                     {
                         x: 0,
-                        y: -$(this.contentDiv).position().top,
+                        y: -this.$content.position().top,
                         width: pixelWidth,
                         height: pixelHeight
                     }
@@ -368,7 +358,7 @@ class ViewPort extends ViewportBase {
             {
                 viewport: this,
                 context: ctx,
-                top: -$(this.contentDiv).position().top,
+                top: -this.$content.position().top,
                 pixelTop: 0,   // for compatibility with canvas draw
                 pixelWidth,
                 pixelHeight,
@@ -379,7 +369,7 @@ class ViewPort extends ViewportBase {
                 selection: this.selection,
                 viewportWidth: pixelWidth,
                 viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth()
+                viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
@@ -388,13 +378,12 @@ class ViewPort extends ViewportBase {
 
     }
 
-    setContentHeight(contentHeight) {
-        // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
-        contentHeight = Math.min(contentHeight, 32000);
-
-        $(this.contentDiv).height(contentHeight);
-
-        if (this.tile) this.tile.invalidate = true;
+    containsPosition(chr, position) {
+        if(this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
+            return position <= this.referenceFrame.calculateEnd(this.getWidth());
+        } else {
+            return false;
+        }
     }
 
     isLoading() {
@@ -410,7 +399,7 @@ class ViewPort extends ViewportBase {
         const w = this.$viewport.width() * devicePixelRatio;
         const h = this.$viewport.height() * devicePixelRatio;
         const x = -$(this.canvas).position().left * devicePixelRatio;
-        const y = (-$(this.contentDiv).position().top - canvasTop) * devicePixelRatio;
+        const y = (-this.$content.position().top - canvasTop) * devicePixelRatio;
 
         const imageData = this.ctx.getImageData(x, y, w, h);
         const exportCanvas = document.createElement('canvas');
@@ -436,7 +425,7 @@ class ViewPort extends ViewportBase {
                 viewbox:
                     {
                         x: 0,
-                        y: -$(this.contentDiv).position().top,
+                        y: -this.$content.position().top,
                         width,
                         height
                     }
@@ -444,88 +433,34 @@ class ViewPort extends ViewportBase {
             }
 
         const context = new C2S(config);
-        this.drawSVGWithContect(context, width, height)
+        this.drawSVGWithContext(context, width, height)
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
         const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
         FileUtils.download(`${str}.svg`, data);
     }
 
-    drawSVGWithContect(context, width, height) {
+    renderSVGContext(context, offset) {
 
-        // console.log('Viewport draw SVG.')
-
-        let {start, bpPerPixel} = this.referenceFrame;
-
-        context.save();
-
-        const top = -$(this.contentDiv).position().top;
-        const config =
-            {
-                context: context,
-                viewport: this,
-                referenceFrame: this.referenceFrame,
-                top: top,
-                pixelTop: top,
-                pixelWidth: width,
-                pixelHeight: height,
-                bpStart: start,
-                bpEnd: start + (width * bpPerPixel),
-                bpPerPixel,
-                viewportWidth: width,
-                viewportContainerX: 0,
-                viewportContainerWidth: this.browser.viewportContainerWidth(),
-                selection: this.selection
-            };
-
-        const features = this.tile ? this.tile.features : [];
-        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
-        this.draw(config, features, roiFeatures);
-
-        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            this.renderTrackLabelSVG(context);
+        // Nothing to do if zoomInNotice is active
+        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
+            return;
         }
 
-        context.restore();
+        let str = this.trackView.track.name || this.trackView.track.id;
+        str = str.replace(/\W/g, '');
 
-    }
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const id = str.toLowerCase() + '_genomic_state_index_' + index;
 
-    getCachedFeatures() {
-        return this.tile ? this.tile.features : [];
-    }
+        const yScrollDelta = $(this.contentDiv).position().top;
+        const dx = offset.deltaX + (index * context.multiLocusGap);
+        const dy = offset.deltaY + yScrollDelta;
+        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
-    checkContentHeight() {
+        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
 
-        let track = this.trackView.track;
-
-        if ("FILL" === track.displayMode) {
-            this.setContentHeight(this.$viewport.height())
-        } else if (typeof track.computePixelHeight === 'function') {
-
-            let features = this.cachedFeatures;
-
-            if (features) {
-                let requiredContentHeight = track.computePixelHeight(features);
-                let currentContentHeight = $(this.contentDiv).height();
-                if (requiredContentHeight !== currentContentHeight) {
-                    this.setContentHeight(requiredContentHeight);
-                }
-            }
-        }
-    }
-
-    async getFeatures(track, chr, start, end, bpPerPixel) {
-
-        if (this.tile && this.tile.containsRange(chr, start, end, bpPerPixel)) {
-            return this.tile.features;
-        } else if (typeof track.getFeatures === "function") {
-            const features = await track.getFeatures(chr, start, end, bpPerPixel, this);
-            this.cachedFeatures = features;
-            this.checkContentHeight();
-            return features;
-        } else {
-            return undefined;
-        }
+        this.drawSVGWithContext(context, width, height)
     }
 
     renderTrackLabelSVG(context) {
@@ -548,6 +483,60 @@ class ViewPort extends ViewportBase {
 
     }
 
+    drawSVGWithContext(context, width, height) {
+
+        let { start, bpPerPixel} = this.referenceFrame;
+
+        context.save();
+
+        const top = -this.$content.position().top;
+        const config =
+            {
+                context,
+                viewport: this,
+                referenceFrame: this.referenceFrame,
+                top,
+                pixelTop: top,
+                pixelWidth: width,
+                pixelHeight: height,
+                bpStart: start,
+                bpEnd: start + (width * bpPerPixel),
+                bpPerPixel,
+                viewportWidth: width,
+                viewportContainerX: 0,
+                viewportContainerWidth: this.browser.getViewportContainerWidth(),
+                selection: this.selection
+            };
+
+        const features = this.tile ? this.tile.features : [];
+        const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
+        this.draw(config, features, roiFeatures);
+
+        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
+            this.renderTrackLabelSVG(context);
+        }
+
+        context.restore();
+
+    }
+
+    getCachedFeatures() {
+        return this.tile ? this.tile.features : [];
+    }
+
+    async getFeatures(track, chr, start, end, bpPerPixel) {
+
+        if (this.tile && this.tile.containsRange(chr, start, end, bpPerPixel)) {
+            return this.tile.features;
+        } else if (typeof track.getFeatures === "function") {
+            const features = await track.getFeatures(chr, start, end, bpPerPixel, this);
+            this.cachedFeatures = features;
+            this.checkContentHeight();
+            return features;
+        } else {
+            return undefined;
+        }
+    }
 
     createZoomInNotice($parent) {
 
@@ -566,7 +555,6 @@ class ViewPort extends ViewportBase {
     viewIsReady() {
         return this.browser && this.browser.referenceFrameList && this.referenceFrame;
     }
-
 
     addMouseHandlers() {
 
@@ -841,7 +829,6 @@ class ViewPort extends ViewportBase {
             return rows.join('')
         }
     }
-
 
 }
 
