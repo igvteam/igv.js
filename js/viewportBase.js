@@ -64,15 +64,6 @@ class ViewportBase {
 
     }
 
-    setTrackLabel(label) {}
-
-    startSpinner() {}
-    stopSpinner(){}
-
-    checkZoomIn() {
-        return true
-    }
-
     showMessage(message) {
         if (!this.messageDiv) {
             this.messageDiv = document.createElement('div');
@@ -88,49 +79,92 @@ class ViewportBase {
             this.messageDiv.style.display = 'none'
     }
 
-    async renderSVGContext(context, offset) {
+    setTrackLabel(label) {}
 
-        // Nothing to do if zoomInNotice is active
-        if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
-            return;
+    startSpinner() {}
+
+    stopSpinner(){}
+
+    checkZoomIn() {
+        return true
+    }
+
+    shift() {}
+
+    setTop(contentTop) {
+
+        const viewportHeight = this.$viewport.height()
+        const viewTop = -contentTop
+        const viewBottom = viewTop + viewportHeight
+
+        this.$content.css('top', `${ contentTop }px`)
+
+        if (undefined === this.canvasVerticalRange || this.canvasVerticalRange.bottom < viewBottom || this.canvasVerticalRange.top > viewTop) {
+            this.repaint()
         }
-
-        let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.replace(/\W/g, '');
-
-        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = str.toLowerCase() + '_genomic_state_index_' + index;
-
-        // If present, paint axis canvas. Only in first multi-locus panel.
-        if (0 === index && typeof this.trackView.track.paintAxis === 'function') {
-
-            const bbox = this.trackView.controlCanvas.getBoundingClientRect();
-            context.addTrackGroupWithTranslationAndClipRect((id + '_axis'), offset.deltaX - bbox.width, offset.deltaY, bbox.width, bbox.height, 0);
-
-            context.save();
-            this.trackView.track.paintAxis(context, bbox.width, bbox.height);
-            context.restore();
-        }
-
-        const yScrollDelta = $(this.contentDiv).position().top;
-        const dx = offset.deltaX + (index * context.multiLocusGap);
-        const dy = offset.deltaY + yScrollDelta;
-        const {width, height} = this.$viewport.get(0).getBoundingClientRect();
-
-        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
-
-        // console.log(`ViewportBase render SVG. context.addGroup( id ${ id } dx ${ dx } dy ${ dy } width ${ width } height ${ height } -yScrollDelta ${ -yScrollDelta })`)
-
-        this.drawSVGWithContect(context, width, height)
 
     }
 
-    drawSVGWithContect(context) {
+    async loadFeatures () {
+        return undefined
+    }
 
+    async repaint() {
+        console.log('ViewportBase - repaint()')
+    }
+
+    draw(drawConfiguration, features, roiFeatures) {
+        console.log('ViewportBase - draw(drawConfiguration, features, roiFeatures)')
+    }
+
+    checkContentHeight() {
+
+        let track = this.trackView.track;
+
+        if ("FILL" === track.displayMode) {
+            this.setContentHeight(this.$viewport.height())
+        } else if (typeof track.computePixelHeight === 'function') {
+
+            let features = this.cachedFeatures || this.trackView.viewports[ 0 ].cachedFeatures
+
+            if (features && features.length > 0) {
+                let requiredContentHeight = track.computePixelHeight(features);
+                let currentContentHeight = this.$content.height();
+                if (requiredContentHeight !== currentContentHeight) {
+                    this.setContentHeight(requiredContentHeight);
+                    this.trackView.sampleNameViewport.setContentHeight(requiredContentHeight);
+                }
+            }
+        }
+    }
+
+    getContentHeight() {
+        return this.$content.height()
+    }
+
+    setContentHeight(contentHeight) {
+        // Maximum height of a canvas is ~32,000 pixels on Chrome, possibly smaller on other platforms
+        contentHeight = Math.min(contentHeight, 32000);
+
+        this.$content.height(contentHeight);
+
+        if (this.tile) this.tile.invalidate = true;
+    }
+
+    isLoading() {
+        return false
     }
 
     saveSVG() {
 
+    }
+
+    renderSVGContext(context, offset) {
+        console.log('ViewportBase - renderSVGContext(context, offset)')
+    }
+
+    drawSVGWithContext(context) {
+        console.log('ViewportBase - drawSVGWithContext(context)')
     }
 
     isVisible() {
@@ -142,27 +176,9 @@ class ViewportBase {
         this.canvas.style.width = (`${ width }px`);
         this.canvas.setAttribute('width', width);
     }
-    
+
     getWidth() {
         return this.$viewport.width();
-    }
-
-    shift() {}
-
-    setTop(contentTop) {}
-
-    async loadFeatures () {
-        return undefined
-    }
-
-    setContentHeight(contentHeight) {}
-
-    isLoading() {
-        return false
-    }
-
-    getContentHeight() {
-        return this.$content.height();
     }
 
     getContentTop() {
@@ -170,11 +186,7 @@ class ViewportBase {
     }
 
     containsPosition(chr, position) {
-        if(this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
-            return position <= this.referenceFrame.calculateEnd(this.getWidth());
-        } else {
-            return false;
-        }
+        console.log('ViewportBase - containsPosition(chr, position)')
     }
 
     /**

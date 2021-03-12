@@ -96,7 +96,7 @@ class SegParser {
                     sampleKey: tokens[this.sampleKeyColumn],
                     sample: tokens[this.sampleColumn],
                     chr: tokens[this.chrColumn],
-                    start: parseInt(tokens[this.startColumn]),
+                    start: parseInt(tokens[this.startColumn]) - 1,
                     end: parseInt(tokens[this.endColumn]),
                     value: value
                 });

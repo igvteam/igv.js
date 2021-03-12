@@ -52,9 +52,7 @@ class RulerTrack {
     };
 
     async getFeatures(chr, start, end) {
-
         return [];
-
     };
 
     computePixelHeight(ignore) {
