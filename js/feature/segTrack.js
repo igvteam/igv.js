@@ -407,34 +407,40 @@ class SegTrack extends TrackBase {
         const items = [];
 
         for (let f of featureList) {
+            if(items.length > 0) {
+                items.push("<hr/>")
+            }
             extractPopupData(f, items)
         }
 
         return items;
 
-        function extractPopupData(feature, data) {
+        function extractPopupData(feature) {
 
-            const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
-
-            // hack for whole genome properties
-            let f
-            if (feature.hasOwnProperty('realChr')) {
-                f = Object.assign({}, feature);
-                f.chr = feature.realChr;
-                f.start = feature.realStart;
-                f.end = feature.realEnd;
-                delete f.realChr;
-                delete f.realStart;
-                delete f.realEnd;
+            if (typeof feature.popupData === 'function') {
+                const data = feature.popupData()
+                Array.prototype.push.apply(items, data);
             } else {
-                f = feature;
-            }
+                const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
 
+                // hack for whole genome properties
+                let f
+                if (feature.hasOwnProperty('realChr')) {
+                    f = Object.assign({}, feature);
+                    f.chr = feature.realChr;
+                    f.start = feature.realStart;
+                    f.end = feature.realEnd;
+                    delete f.realChr;
+                    delete f.realStart;
+                    delete f.realEnd;
+                } else {
+                    f = feature;
+                }
 
-            for (let property of Object.keys(f)) {
-
-                if (!filteredProperties.has(property) && isSimpleType(f[property])) {
-                    data.push({name: property, value: f[property]});
+                for (let property of Object.keys(f)) {
+                    if (!filteredProperties.has(property) && isSimpleType(f[property])) {
+                        items.push({name: property, value: f[property]});
+                    }
                 }
             }
         }

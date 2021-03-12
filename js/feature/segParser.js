@@ -44,7 +44,6 @@ class SegParser {
 
         switch (this.type) {
             case 'mut':
-                this.sampleKeyColumn = 3;
                 this.sampleColumn = 3;
                 this.chrColumn = 0;
                 this.startColumn = 1;
@@ -53,12 +52,11 @@ class SegParser {
                 break;
 
             default:
-                this.sampleKeyColumn = 0;
                 this.sampleColumn = 0;
                 this.chrColumn = 1;
                 this.startColumn = 2;
                 this.endColumn = 3;
-
+            // Data column determined after reading header
         }
     }
 
@@ -79,30 +77,95 @@ class SegParser {
     async parseFeatures(dataWrapper) {
 
         const allFeatures = [];
+        let extraHeaders;
         if (!this.header) {
             this.header = await this.parseHeader(await dataWrapper.nextLine());  // This will only work for non-indexed files
         }
-        if('seg' === this.type) {
+        if ('seg' === this.type) {
             this.dataColumn = this.header.headings.length - 1;
         }
+        if (this.header.headings.length > 5) {
+            extraHeaders = this.extractExtraColumns(this.header.headings);
+        }
+        const valueColumnName = this.header.headings[this.dataColumn];
+
         let line;
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             const tokens = line.split("\t");
-
             const value = ('seg' === this.type) ? parseFloat(tokens[this.dataColumn]) : tokens[this.dataColumn];
-
             if (tokens.length > this.dataColumn) {
-                allFeatures.push({
-                    sampleKey: tokens[this.sampleKeyColumn],
+                const feature = new SegFeature({
                     sample: tokens[this.sampleColumn],
                     chr: tokens[this.chrColumn],
                     start: parseInt(tokens[this.startColumn]) - 1,
                     end: parseInt(tokens[this.endColumn]),
-                    value: value
-                });
+                    value,
+                    valueColumnName
+                })
+                if (extraHeaders) {
+                    const extraValues = this.extractExtraColumns(tokens);
+                    feature.setAttributes({names: extraHeaders, values: extraValues});
+                }
+                allFeatures.push(feature);
             }
         }
         return allFeatures;
+    }
+
+    extractExtraColumns(tokens) {
+        const extras = []
+        for (let i = 0; i < tokens.length; i++) {
+            if (i !== this.sampleColumn && i !== this.chrColumn && i !== this.startColumn && i !== this.endColumn && i !== this.dataColumn) {
+                extras.push(tokens[i]);
+            }
+        }
+        return extras;
+    }
+
+}
+
+class SegFeature {
+
+    constructor({sample, chr, start, end, value, valueColumnName}) {
+        this.sample = sample;
+        this.chr = chr;
+        this.start = start;
+        this.end = end;
+        this.value = value;
+        this.valueColumnName = valueColumnName;
+    }
+
+    setAttributes({names, values}) {
+        this.attributeNames = names;
+        this.attributeValues = values;
+    }
+
+    getAttribute(name) {
+        if (this.attributeNames) {
+            const idx = this.attributeNames.indexOf(name);
+            if (idx >= 0) {
+                return this.attributeValues[idx];
+            }
+        }
+        return undefined;
+    }
+
+    popupData() {
+
+        const locationString = (this.chr + ":" +
+            StringUtils.numberFormatter(this.start + 1) + "-" +
+            StringUtils.numberFormatter(this.end));
+        const pd = [
+            {name: "Sample", value: this.sample},
+            {name: "Location", value: locationString},
+            {name: (this.valueColumnName ? this.valueColumnName : "Value"), value: this.value}
+        ];
+        if (this.attributeNames) {
+            for (let i = 0; i < this.attributeNames.length; i++) {
+                pd.push({name: this.attributeNames[i], value: this.attributeValues[i]});
+            }
+        }
+        return pd;
     }
 }
 
