@@ -205,28 +205,45 @@ class WigTrack extends TrackBase {
 
         if (features && features.length > 0) {
 
-            let genomicLocation = clickState.genomicLocation;
-            let referenceFrame = clickState.viewport.referenceFrame;
-            let popupData = [];
+            const genomicLocation = clickState.genomicLocation;
+            const popupData = [];
 
-            // We need some tolerance around genomicLocation, start with +/- 2 pixels
-            let tolerance = 2 * referenceFrame.bpPerPixel;
-            let selectedFeature = binarySearch(features, genomicLocation, tolerance);
+            // Sort features based on distance from click
+            features.sort(function (a, b) {
+                const distA = Math.abs((a.start + a.end) / 2 - genomicLocation);
+                const distB = Math.abs((b.start + b.end) / 2 - genomicLocation);
+                return distA - distB;
+            })
 
-            if (selectedFeature) {
-                let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
-                    StringUtils.numberFormatter(selectedFeature.start + 1)
-                    : StringUtils.numberFormatter(selectedFeature.start + 1) + "-" + StringUtils.numberFormatter(selectedFeature.end);
-                popupData.push({name: "Position:", value: posString});
-                popupData.push({
-                    name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
-                    value: StringUtils.numberFormatter(selectedFeature.value)
-                });
+            // Display closest 10
+            const displayFeatures = features.length > 10 ? features.slice(0, 10) : features;
+
+            // Resort in ascending order
+            displayFeatures.sort(function (a, b) {
+                return a.start - b.start;
+            })
+
+            for(let selectedFeature of displayFeatures) {
+                if (selectedFeature) {
+                    if(popupData.length > 0) {
+                        popupData.push("<hr/>")
+                    }
+                    let posString = (selectedFeature.end - selectedFeature.start) === 1 ?
+                        StringUtils.numberFormatter(selectedFeature.start + 1)
+                        : StringUtils.numberFormatter(selectedFeature.start + 1) + "-" + StringUtils.numberFormatter(selectedFeature.end);
+                    popupData.push({name: "Position:", value: posString});
+                    popupData.push({
+                        name: "Value:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;",
+                        value: StringUtils.numberFormatter(selectedFeature.value)
+                    });
+                }
+            }
+            if(displayFeatures.length < features.length) {
+                popupData.push("<hr/>...");
             }
 
             return popupData;
-
-
+            
         } else {
             return [];
         }
@@ -247,85 +264,6 @@ class WigTrack extends TrackBase {
         this.trackView = undefined;
     }
 }
-
-function signsDiffer(a, b) {
-    return (a > 0 && b < 0 || a < 0 && b > 0);
-}
-
-/**
- * Return the closest feature to the genomic position +/- the specified tolerance.  Closest is defined
- * by the minimum of the distance between position and start or end of the feature.
- *
- * @param features
- * @param position
- * @returns {*}
- */
-function binarySearch(features, position, tolerance) {
-    var startIndex = 0,
-        stopIndex = features.length - 1,
-        index = (startIndex + stopIndex) >> 1,
-        candidateFeature,
-        tmp;
-
-
-    // Use binary search to get the index of at least 1 feature in the click tolerance bounds
-    while (!test(features[index], position, tolerance) && startIndex < stopIndex) {
-        if (position < features[index].start) {
-            stopIndex = index - 1;
-        } else if (position > features[index].end) {
-            startIndex = index + 1;
-        }
-
-        index = (startIndex + stopIndex) >> 1;
-    }
-
-    if (test(features[index], position, tolerance)) {
-
-        candidateFeature = features[index];
-        if (test(candidateFeature, position, 0)) return candidateFeature;
-
-        // Else, find closest feature to click
-        tmp = index;
-        while (tmp-- >= 0) {
-            if (!test(features[tmp]), position, tolerance) {
-                break;
-            }
-            if (test(features[tmp], position, 0)) {
-                return features[tmp];
-            }
-            if (delta(features[tmp], position) < delta(candidateFeature, position)) {
-                candidateFeature = features[tmp];
-            }
-
-            tmp = index;
-            while (tmp++ < features.length) {
-                if (!test(features[tmp]), position, tolerance) {
-                    break;
-                }
-                if (test(features[tmp], position, 0)) {
-                    return features[tmp];
-                }
-                if (delta(features[tmp], position) < delta(candidateFeature, position)) {
-                    candidateFeature = features[tmp];
-                }
-            }
-        }
-        return candidateFeature;
-
-    } else {
-        console.log(position + ' not found!');
-        return undefined;
-    }
-
-    function test(feature, position, tolerance) {
-        return position >= (feature.start - tolerance) && position <= (feature.end + tolerance);
-    }
-
-    function delta(feature, position) {
-        return Math.min(Math.abs(feature.start - position), Math.abs(feature.end - position));
-    }
-}
-
 
 
 export default WigTrack;
