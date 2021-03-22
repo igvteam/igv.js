@@ -25,8 +25,9 @@
 
 import Cytoband from "./cytoband.js";
 import FastaSequence from "./fasta.js";
-import {igvxhr, StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
 import {buildOptions} from "../util/igvUtils.js";
+import {igvxhr, StringUtils, URIUtils, Zlib} from "../../node_modules/igv-utils/src/index.js";
+import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import version from "../version.js";
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json";
@@ -91,6 +92,40 @@ const GenomeUtils = {
 
     isWholeGenomeView: function (chr) {
         return 'all' === chr.toLowerCase();
+    },
+
+    // Expand a genome id to a reference object, if needed
+    expandReference: function(idOrConfig) {
+
+        // idOrConfig might be json
+        if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
+            try {
+                idOrConfig = JSON.parse(idOrConfig);
+            } catch (e) {
+                // Apparently its not json,  could be an ID starting with "{".  Unusual but legal.
+            }
+        }
+
+        let genomeID;
+        if (StringUtils.isString(idOrConfig)) {
+            genomeID = idOrConfig;
+        } else if (idOrConfig.genome) {
+            genomeID = idOrConfig.genome;
+        } else if (idOrConfig.id !== undefined && idOrConfig.fastaURL === undefined) {
+            // Backward compatibility
+            genomeID = idOrConfig.id;
+        }
+
+        if (genomeID) {
+            const knownGenomes = GenomeUtils.KNOWN_GENOMES;
+            const reference = knownGenomes[genomeID];
+            if (!reference) {
+                Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
+            }
+            return reference;
+        } else {
+            return idOrConfig;
+        }
     }
 };
 
