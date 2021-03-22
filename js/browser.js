@@ -230,7 +230,7 @@ class Browser {
      */
     async toSVG() {
 
-        let { x, y, width, height } = this.trackContainer.getBoundingClientRect();
+        let {x, y, width, height} = this.trackContainer.getBoundingClientRect();
         const {x: vpx} = this.trackViews[0].$viewportContainer.get(0).getBoundingClientRect();
 
         width += (this.referenceFrameList.length - 1) * multiLocusGapWidth
@@ -350,11 +350,12 @@ class Browser {
         this.removeAllTracks();
 
         if (session.sampleNamesVisible) {
-            this.sampleNamesVisible = 'true'=== session.sampleNamesVisible
-            this.sampleNameControl.setState(this.sampleNamesVisible)
+            this.sampleNamesVisible = (true === session.sampleNamesVisible);    // Default is false
+            this.sampleNameControl.setState(this.sampleNamesVisible);
         }
 
-        const genome = await this.loadGenome(session.reference || session.genome, session.locus, false)
+        const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
+        const genome = await this.loadReference(genomeConfig, session.locus);
 
         // Create ideogram and ruler track.  Really this belongs in browser initialization, but creation is
         // deferred because ideogram and ruler are treated as "tracks", and tracks require a reference frame
@@ -387,8 +388,11 @@ class Browser {
             }
         }
 
-        const tracks = session.tracks || [];
+        // Tracks.  Start with genome tracks, if any, then append session tracks
+        const genomeTracks = genomeConfig.tracks || [];
+        const tracks = session.tracks ? genomeTracks.concat(session.tracks) : genomeTracks;
 
+        // Insure that we always have a sequence track
         const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0;
         if (pushSequenceTrack && false !== this.config.showSequence) {
             tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
@@ -396,8 +400,8 @@ class Browser {
 
         // Maintain track order unless explicitly set
         let trackOrder = 1;
-        for(let t of tracks) {
-            if(undefined === t.order) {
+        for (let t of tracks) {
+            if (undefined === t.order) {
                 t.order = trackOrder++;
             }
         }
@@ -419,21 +423,44 @@ class Browser {
         this.updateLocusSearchWidget(this.referenceFrameList);
 
         this.windowSizePanel.updatePanel(this.referenceFrameList);
-
     }
 
-    async loadGenome(idOrConfig, initialLocus, update) {
+    /**
+     * Load a genome, defined by a string ID or a json-like configuration object. This includes a fasta reference
+     * as well as optional cytoband and annotation tracks.
+     *
+     * @param idOrConfig
+     * @returns {Promise<void>}
+     */
+    async loadGenome(idOrConfig) {
 
-        // idOrConfig might be json
-        if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
-            try {
-                idOrConfig = JSON.parse(idOrConfig);
-            } catch (e) {
-                // Apparently its not json,  just continue
-            }
+        const genomeConfig = await GenomeUtils.expandReference(idOrConfig);
+        const genome = await this.loadReference(genomeConfig);
+
+        const tracks = genomeConfig.tracks || [];
+
+        // Insure that we always have a sequence track
+        const pushSequenceTrack = tracks.filter(track => track.type === 'sequence').length === 0;
+        if (pushSequenceTrack) {
+            tracks.push({type: "sequence", order: defaultSequenceTrackOrder})
         }
 
-        const genomeConfig = await expandReference.call(this, idOrConfig)
+        await this.loadTrackList(tracks);
+
+        this.updateViews();
+        return genome;
+    }
+
+    /**
+     * Load a reference genome object.  This includes the fasta, and optional cytoband, but no tracks.  This method
+     * is used by loadGenome and loadSession.
+     *
+     * @param genomeConfig
+     * @param initialLocus
+     * @returns {Promise<void>}
+     */
+    async loadReference(genomeConfig, initialLocus) {
+
         const genome = await GenomeUtils.loadGenome(genomeConfig)
         const genomeChange = this.genome && (this.genome.id !== genome.id);
         this.genome = genome;
@@ -449,50 +476,14 @@ class Browser {
             this.referenceFrameList = await this.search(getInitialLocus(initialLocus, genome), true)
         } catch (error) {
             // Couldn't find initial locus
-            Alert.presentAlert(new Error(`Error searching for locus ${ initialLocus }  [${error}]`), undefined);
+            Alert.presentAlert(new Error(`Error searching for locus ${initialLocus}  [${error}]`), undefined);
             this.referenceFrameList = await this.search(this.genome.getHomeChromosomeName());
-        }
-
-        if (genomeConfig.tracks) {
-            await this.loadTrackList(genomeConfig.tracks);
-        }
-
-        if (update !== false) {
-            this.updateViews();
         }
         return this.genome;
 
 
-        // Expand a genome id to a reference object, if needed
-        async function expandReference(conf) {
-
-            var genomeID;
-
-            if (StringUtils.isString(conf)) {
-                genomeID = conf;
-            } else if (conf.genome) {
-                genomeID = conf.genome;
-            } else if (conf.id !== undefined && conf.fastaURL === undefined) {
-                // Backward compatibility
-                genomeID = conf.id;
-            }
-
-            if (genomeID) {
-                const knownGenomes = GenomeUtils.KNOWN_GENOMES;
-                const reference = knownGenomes[genomeID];
-                if (!reference) {
-                    Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
-                }
-                return reference;
-            } else {
-                return conf;
-            }
-        }
-
         function getInitialLocus(locus, genome) {
-
-            var loci = [];
-
+            let loci = [];
             if (locus) {
                 if (Array.isArray(locus)) {
                     loci = locus.join(' ');
@@ -648,7 +639,7 @@ class Browser {
             const newTrack = await this.createTrack(config);
 
             if (undefined === newTrack) {
-                Alert.presentAlert(new Error(`Unknown file type: ${ config.url || config }`), undefined);
+                Alert.presentAlert(new Error(`Unknown file type: ${config.url || config}`), undefined);
                 return newTrack;
             }
 
@@ -677,7 +668,7 @@ class Browser {
                     "404": "Not found"
                 };
             console.error(error);
-            let msg = error.message || error.error ||  error.toString();
+            let msg = error.message || error.error || error.toString();
             if (httpMessages.hasOwnProperty(msg)) {
                 msg = httpMessages[msg];
             }
@@ -942,11 +933,11 @@ class Browser {
         for (let referenceFrame of this.referenceFrameList) {
 
             const viewportWidthBP = referenceFrame.toBP(viewportWidth)
-            const { bpLength } = this.genome.getChromosome(referenceFrame.chr)
+            const {bpLength} = this.genome.getChromosome(referenceFrame.chr)
 
             if (viewportWidthBP > bpLength) {
                 // console.log(`viewport-length-bp ${ StringUtils.numberFormatter(Math.round(viewportWidthBP))} chr-length-bp ${ StringUtils.numberFormatter(Math.round(bpLength)) }`)
-                referenceFrame.bpPerPixel = bpLength/viewportWidth
+                referenceFrame.bpPerPixel = bpLength / viewportWidth
             }
 
         }
@@ -988,7 +979,7 @@ class Browser {
                 this.updateLocusSearchWidget(this.referenceFrameList);
                 this.windowSizePanel.updatePanel(this.referenceFrameList);
             } else {
-                this.updateLocusSearchWidget([ referenceFrame ]);
+                this.updateLocusSearchWidget([referenceFrame]);
                 this.windowSizePanel.updatePanel([referenceFrame]);
             }
         }
@@ -1072,7 +1063,7 @@ class Browser {
             this.rulerTrack.updateLocusLabel()
         }
 
-        const referenceFrame = referenceFrameList[ 0 ]
+        const referenceFrame = referenceFrameList[0]
         if (referenceFrame.locusSearchString && 'all' === referenceFrame.locusSearchString.toLowerCase()) {
 
             this.$searchInput.val(referenceFrame.locusSearchString);
@@ -1449,7 +1440,7 @@ class Browser {
             "version": version()
         }
 
-        json['sampleNamesVisible'] = true === this.sampleNamesVisible ? 'true' : 'false'
+        json['sampleNamesVisible'] = true === this.sampleNamesVisible ? true : false
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
@@ -1506,10 +1497,10 @@ class Browser {
             }
         }
 
-        if(errors.length > 0) {
+        if (errors.length > 0) {
             let n = 1;
             let message = 'Errors encountered saving session:';
-            for(let e of errors) {
+            for (let e of errors) {
                 message += ` (${n++}) ${e.toString()}.`;
             }
             throw Error(message);
@@ -1728,7 +1719,7 @@ class Browser {
                         if (self.referenceFrameList.length > 1) {
                             self.updateLocusSearchWidget(self.referenceFrameList);
                         } else {
-                            self.updateLocusSearchWidget([ self.vpMouseDown.referenceFrame ]);
+                            self.updateLocusSearchWidget([self.vpMouseDown.referenceFrame]);
                         }
 
                         self.updateViews();
