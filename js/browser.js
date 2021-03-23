@@ -103,7 +103,7 @@ class Browser {
         this.trackLabelsVisible = true;
         this.isCenterGuideVisible = false;
 
-        this.sampleNamesVisible = false;
+        this.showSampleNames = false;
 
         this.cursorGuideVisible = false;
         this.constants = {
@@ -182,7 +182,7 @@ class Browser {
     }
 
     getSampleNameViewportWidth() {
-        return false === this.sampleNamesVisible ? 0 : this.sampleNameViewportWidth
+        return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
     }
 
     startSpinner() {
@@ -349,9 +349,14 @@ class Browser {
 
         this.removeAllTracks();
 
-        if (session.sampleNamesVisible) {
-            this.sampleNamesVisible = (true === session.sampleNamesVisible);    // Default is false
-            this.sampleNameControl.setState(this.sampleNamesVisible);
+        if (session.showSampleNames) {
+            this.showSampleNames = 'true'=== session.showSampleNames
+            this.sampleNameControl.setState(this.showSampleNames)
+        }
+
+        if (session.sampleNameViewportWidth) {
+            this.sampleNameViewportWidth = session.sampleNameViewportWidth
+
         }
 
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
@@ -1440,7 +1445,8 @@ class Browser {
             "version": version()
         }
 
-        json['sampleNamesVisible'] = true === this.sampleNamesVisible ? true : false
+        json['showSampleNames'] = true === this.showSampleNames ? 'true' : 'false'
+        json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
