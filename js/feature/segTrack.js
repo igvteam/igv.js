@@ -108,8 +108,6 @@ class SegTrack extends TrackBase {
 
     menuItemList() {
 
-        const self = this;
-
         const menuItems = [];
         const lut =
             {
@@ -121,18 +119,20 @@ class SegTrack extends TrackBase {
         menuItems.push("<hr/>");
         menuItems.push("Sample Height");
 
-        ["SQUISHED", "EXPANDED", "FILL"].forEach(function (displayMode) {
+        const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
+
+        for (let displayMode of displayOptions) {
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                    click: function () {
-                        self.displayMode = displayMode;
-                        self.config.displayMode = displayMode;
-                        self.trackView.checkContentHeight();
-                        self.trackView.repaintViews();
+                    object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                    click:  () => {
+                        this.displayMode = displayMode;
+                        this.config.displayMode = displayMode;
+                        this.trackView.checkContentHeight();
+                        this.trackView.repaintViews();
                     }
                 });
-        })
+        }
 
         return menuItems;
 
@@ -407,7 +407,7 @@ class SegTrack extends TrackBase {
         const items = [];
 
         for (let f of featureList) {
-            if(items.length > 0) {
+            if (items.length > 0) {
                 items.push("<hr/>")
             }
             extractPopupData(f, items)
@@ -463,9 +463,11 @@ class SegTrack extends TrackBase {
             this.sortSamples(sort.chr, sort.start, sort.end, sort.direction, features);
         }
 
+        const sortLabel = this.type === 'seg' ? 'Sort by value' : 'Sort by type'
+
         return [
             {
-                label: 'Sort by value', click: (e) => {
+                label: sortLabel, click: (e) => {
 
 
                     const sort = {
