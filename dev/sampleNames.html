@@ -10,7 +10,7 @@
 <h1>Segmented Copy Number</h1>
 
 <div>
-    <button id="bmBtn">Bookmark</button>
+    <button id="sessionButton">Save Session</button>
 </div>
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
@@ -19,9 +19,55 @@
 
     import igv from "../js/index.js";
 
-    const options =
+    const session =
         {
-            sampleNameViewportWidth: 512,
+            "version": "2.8.0",
+            "showSampleNames": "true",
+            "sampleNameViewportWidth": 200,
+            "reference": {
+                "id": "hg19",
+                "name": "Human (CRCh37/hg19)",
+                "fastaURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+                "indexURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai",
+                "cytobandURL": "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/cytoBand.txt"
+            },
+            "locus": "chr17:61,553,421-61,571,530",
+            "gtexSelections": {
+                "chr17:61,553,421-61,571,530": {
+                    "gene": "ACE",
+                    "snp": null
+                }
+            },
+            "tracks": [
+                {
+                    "type": "sequence",
+                    "order": -9007199254740991
+                },
+                {
+                    "name": "SEG Track",
+                    "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                    "indexed": false,
+                    "isLog": true,
+                    "displayMode": "EXPANDED",
+                    "expandedRowHeight": 20,
+                    "height": 512,
+                    "order": 1,
+                    "format": "seg"
+                },
+                {
+                    "name": "Refseq Genes",
+                    "format": "refgene",
+                    "url": "https://s3.amazonaws.com/igv.org.genomes/hg19/ncbiRefGene.txt.gz",
+                    "indexed": false,
+                    "visibilityWindow": -1,
+                    "removable": false,
+                    "order": 1000000
+                }
+            ]
+        };
+
+    const config =
+        {
             genome: "hg19",
             locus: 'ace',
             // locus: 'all',
@@ -39,19 +85,33 @@
                 ]
         };
 
-    var igvDiv = document.getElementById("igvDiv");
+    (async () => {
 
-    igv.createBrowser(igvDiv, options)
-        .then(function (browser) {
-            // console.log("Created IGV browser");
+        const browser = await igv.createBrowser(document.getElementById("igvDiv"), /*config*/session)
 
-            function bookmark() {
+        document.getElementById("sessionButton").addEventListener("click", () => {
+            try {
+                const json = browser.toJSON()
+                console.log(json)
+                const jsonString = JSON.stringify(json, null, '\t')
+                const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}))
+                download(`igv-sample-name-session-${ Date.now() }.json`, data)
+            } catch (e) {
+                alert(e)
             }
-
-            document.getElementById("bmBtn")
-                .addEventListener("click", () => window.history.pushState({}, "IGV", browser.sessionURL()));
         })
+    })()
 
+    function download(filename, data) {
+
+        const element = document.createElement('a');
+        element.setAttribute('href', data);
+        element.setAttribute('download', filename);
+        element.style.display = 'none';
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+    }
 
 </script>
 </body>
