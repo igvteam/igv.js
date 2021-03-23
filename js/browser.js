@@ -349,10 +349,8 @@ class Browser {
 
         this.removeAllTracks();
 
-        if (session.showSampleNames) {
-            this.showSampleNames = 'true'=== session.showSampleNames
-            this.sampleNameControl.setState(this.showSampleNames)
-        }
+        this.showSampleNames = session.showSampleNames
+        this.sampleNameControl.setState(this.showSampleNames === true);
 
         if (session.sampleNameViewportWidth) {
             this.sampleNameViewportWidth = session.sampleNameViewportWidth
@@ -1445,8 +1443,10 @@ class Browser {
             "version": version()
         }
 
-        json['showSampleNames'] = true === this.showSampleNames ? 'true' : 'false'
-        json['sampleNameViewportWidth'] = this.sampleNameViewportWidth
+        if(this.showSampleNames) {
+            json['showSampleNames'] = this.showSampleNames;
+        }
+        json['sampleNameViewportWidth'] = this.sampleNameViewportWidth;
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
