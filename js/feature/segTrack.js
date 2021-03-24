@@ -283,7 +283,7 @@ class SegTrack extends TrackBase {
             }
 
         } else {
-            console.log("No feature list");
+            //console.log("No feature list");
         }
 
     }
@@ -511,14 +511,24 @@ class SegTrack extends TrackBase {
 const MUT_COLORS = {
 
     "indel": "rgb(0,200,0)",
-    "missense": "rgb(170,20,240)",
-    "nonsense": "rgb(50,30,75)",
-    "splice site": "rgb(150,0,150)",
-    "synonymous": "rgb(	200,170,200)",
     "targeted region": "rgb(236,155,43)",
     "truncating": "rgb(	150,0,0)",
     "non-coding transcript": "rgb(0,0,150)",
-    "other aa changing": "rgb(	0,150,150)"
+
+    // Colors from https://www.nature.com/articles/nature11404
+    "synonymous": "rgb(109,165,95)",
+    "silent": "rgb(109,135,80)",
+    "missense_mutation": "rgb(72,130,187)",
+    "missense": "rgb(72,130,187)",
+    "splice site": "rgb(143,83,155)",
+    "splice_region": "rgb(143,83,155)",
+    "nonsense": "rgb(216, 57,81)",
+    "nonsense_mutation": "rgb(216, 57,81)",
+    "frame_shift_del": "rgb(226,135,65)",
+    "frame_shift_ins": "rgb(226,135,65)",
+    "in_frame_del": "rgb(247,235,94)",
+    "in_frame_ins": "rgb(247,235,94)",
+    "*other*": "rgb(159,91,50)"
     //
     // 3'Flank
     // 3'UTR
@@ -541,6 +551,5 @@ const MUT_COLORS = {
     // Variant_Classification
 
 }
-
 
 export default SegTrack
