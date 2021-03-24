@@ -169,11 +169,7 @@ class SequenceTrack {
                     const start = viewport.referenceFrame.start;
                     const end = start + bpWindow;
                     const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
-                    if (viewport.trackView.alert) {
-                        viewport.trackView.alert.present(sequence);
-                    } else {
-                        Alert.presentAlert(sequence);
-                    }
+                    Alert.presentAlert(sequence);
                 }
             },
                 '<hr/>'

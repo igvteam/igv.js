@@ -49,13 +49,14 @@ const MenuUtils = {
         const menuItems = [];
 
         // Data range
-        const $e = $('<div>');
-        $e.text('Set data range');
-        const clickHandler = function () {
+        const object = $('<div>');
+        object.text('Set data range');
+
+        const click = () => {
             trackView.browser.dataRangeDialog.configure(trackView);
-            trackView.browser.dataRangeDialog.present($(trackView.trackDiv));
+            trackView.browser.dataRangeDialog.present($(trackView.browser.columnContainer));
         };
-        menuItems.push({object: $e, click: clickHandler});
+        menuItems.push({ object, click });
 
         if (trackView.track.logScale !== undefined) {
             menuItems.push({
@@ -184,17 +185,10 @@ function visibilityWindowMenuItem(trackView) {
 
 function trackRemovalMenuItem(trackView) {
 
-    var $e,
-        menuClickHandler;
+    const object = $('<div>');
+    object.text('Remove track');
 
-    $e = $('<div>');
-    $e.text('Remove track');
-
-    menuClickHandler = function () {
-        trackView.browser.removeTrack(trackView.track);
-    };
-
-    return {object: $e, click: menuClickHandler};
+    return { object, click: () => trackView.browser.removeTrack(trackView.track) };
 
 }
 
@@ -279,7 +273,7 @@ function trackHeightMenuItem(trackView) {
         const config =
             {
                 label: 'Track Height',
-                value: trackView.trackDiv.clientHeight,
+                value: trackView.track.height,
                 callback
             }
 

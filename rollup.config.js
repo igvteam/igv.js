@@ -15,7 +15,7 @@ export default [
         plugins: [
             strip({
                 debugger: true,
-                functions: ['console.log', 'assert.*', 'debug']
+                functions: [/*'console.log', */'assert.*', 'debug']
             })
         ]
     },
@@ -29,7 +29,7 @@ export default [
         plugins: [
             strip({
                 debugger: true,
-                functions: ['console.log', 'assert.*', 'debug']
+                functions: [/*'console.log', */'assert.*', 'debug']
             }),
             commonjs(),
             nodeResolve(),

@@ -78,23 +78,15 @@
             {
                 genome: "hg19",
                 showSVGButton: false,
-                // showSampleNames: true,
                 // showTrackLabels: false,
                 // sampleNameViewportWidth: 512,
-                // locus: 'slc25a3',
-                locus: '7',
+                locus: '17',
                 tracks:
                     [
-                        // {
-                        //     "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
-                        //     "name": "Big BigWig"
-                        // },
-                        // {
-                        //     "type": "alignment",
-                        //     "name": "Heart SLC25A3 - Dropbox CRAM",
-                        //     "url": "https://www.dropbox.com/s/zx7owfskn0jk6ab/heart_slc25a3.cram?dl=0",
-                        //     "indexURL": "https://www.dropbox.com/s/k3r83ckbo0chtm7/heart_slc25a3.crai?dl=0"
-                        // },
+                        {
+                            "url": "https://s3-us-west-2.amazonaws.com/ilmn.igv-test/test2.bigWig",
+                            "name": "Big BigWig"
+                        },
                         {
                             name: "A SEG Track",
                             url: "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
@@ -103,13 +95,20 @@
                             displayMode: 'EXPANDED',
                             height: 256
 
-                        }
+                        },
+                        // {
+                        //     "sourceType": "gcs",
+                        //     "type": "alignment",
+                        //     "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+                        //     "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+                        //     "name": "NA12891"
+                        // }
                     ]
             }
 
         const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options)
 
-        $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile({ $container: $('#igv-svg-container') }))
+        $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
 
 
     })()

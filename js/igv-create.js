@@ -90,6 +90,7 @@ async function createBrowser(parentDiv, config) {
 
 }
 
+
 function removeBrowser(browser) {
     browser.dispose();
     browser.$root.remove();

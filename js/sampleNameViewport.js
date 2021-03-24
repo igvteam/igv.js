@@ -1,5 +1,5 @@
 import $ from './vendor/jquery-3.3.1.slim.js'
-import {appleCrayonRGB} from './util/colorPalletes.js'
+import {appleCrayonRGB, randomRGB} from './util/colorPalletes.js'
 import {DOMUtils} from '../node_modules/igv-utils/src/index.js';
 
 const sampleNameXShim = 4
@@ -17,18 +17,23 @@ const fontConfigureTemplate =
 
 class SampleNameViewport {
 
-    constructor(trackView, $viewportContainer, referenceFrame, width) {
+    constructor(trackView, $column, unused, width) {
 
         this.guid = DOMUtils.guid();
         this.trackView = trackView;
-        this.referenceFrame = referenceFrame;
 
         this.browser = trackView.browser;
 
         this.$viewport = $('<div class="igv-viewport">');
-        $viewportContainer.append(this.$viewport);
+        $column.append(this.$viewport);
 
-        this.$canvas = $('<canvas class ="igv-canvas">');
+        if (trackView.track.height) {
+            this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
+        }
+
+        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
+
+        this.$canvas = $('<canvas>');
         this.$viewport.append(this.$canvas);
 
         this.canvas = this.$canvas.get(0);
@@ -37,6 +42,10 @@ class SampleNameViewport {
         this.contentTop = 0;
 
         this.setWidth(width);
+
+        if (false === this.browser.showSampleNames) {
+            this.hide()
+        }
 
         this.$viewport.get(0).addEventListener('contextmenu', e => {
 
@@ -47,8 +56,8 @@ class SampleNameViewport {
                 {
                     label: 'Name Panel Width',
                     value: this.browser.sampleNameViewportWidth,
-                    callback: width => {
-                        this.browser.sampleNameViewportWidth = width
+                    callback: newWidth => {
+                        this.browser.sampleNameViewportWidth = parseInt(newWidth)
                         for (let { sampleNameViewport } of this.browser.trackViews) {
                             sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
                         }
@@ -79,7 +88,6 @@ class SampleNameViewport {
 
     }
 
-
     setTop(contentTop) {
 
         if (typeof this.trackView.track.getSamples === 'function') {
@@ -89,7 +97,6 @@ class SampleNameViewport {
         }
 
     }
-
 
     setWidth(width) {
         this.$viewport.width(width);
@@ -105,6 +112,7 @@ class SampleNameViewport {
     }
 
     async repaint(samples) {
+
         this.checkCanvas();
         this.draw({context: this.ctx, samples})
     }
@@ -159,6 +167,13 @@ class SampleNameViewport {
 
     addMouseHandler(context, pixelTop, samples) {
 
+
+
+        return
+
+
+
+
         this.canvas.addEventListener('click', e => {
 
             if ('block' === this.hover.style.display) {
@@ -203,6 +218,12 @@ class SampleNameViewport {
 
 }
 
+function createSampleNameColumn(columnContainer) {
+    const column = DOMUtils.div({ class: 'igv-sample-name-column' })
+    columnContainer.appendChild(column)
+    return column
+}
+
 function getYFont(context, text, y, height) {
     return y + height - getSampleNameYShim(context, text, height)
 }
@@ -221,6 +242,6 @@ function configureFont(ctx, {textAlign, textBaseline, strokeStyle, fillStyle}, s
     ctx.fillStyle = fillStyle
 }
 
-export {sampleNameXShim}
+export { createSampleNameColumn }
 
 export default SampleNameViewport

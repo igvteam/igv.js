@@ -40,12 +40,13 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
     $cursorGuideParent.append(this.$verticalGuide);
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
-    $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
+    $cursorGuideParent.on('mousemove.cursor-guide', e => {
 
         e.preventDefault();
 
         const $target = $(document.elementFromPoint(e.clientX, e.clientY));
         const $parent = $target.parent();
+
 
         let $viewport = undefined;
 
@@ -53,8 +54,6 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
             $viewport = $parent.parent();
         } else if ($parent.hasClass('igv-viewport') && $target.hasClass('igv-viewport-content')) {
             $viewport = $parent;
-        } else if ($parent.hasClass('igv-viewport-container') && $target.hasClass('igv-viewport')) {
-            $viewport = $target;
         }
 
         if ($viewport) {
@@ -103,26 +102,21 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     const left = `${ xParent }px`;
     $verticalGuide.css({ left });
 
-    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
-
-    const viewport = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
-
-    if (undefined === viewport) {
-        // console.log('ERROR: No viewport found');
-        return undefined;
-    }
-
-    const { start, bpPerPixel } = viewport.referenceFrame
-    const end = 1 + start + (width * bpPerPixel)
-
-    const bp = 1 + Math.floor(start + x * bpPerPixel)
-    // console.log(`bp ${ StringUtils.numberFormatter(bp) }`)
-
+    const { referenceFrame } = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
     if (browser.rulerTrack) {
-        const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)
+        const index = browser.referenceFrameList.indexOf(referenceFrame)
         const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
         rulerViewport.mouseMove(event)
     }
+
+    return undefined
+
+    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
+
+    const { start, bpPerPixel } = referenceFrame
+    const end = 1 + start + (width * bpPerPixel)
+
+    const bp = Math.round(start + x * bpPerPixel)
 
     const $host = $viewport.closest('.igv-track-container')
     return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }

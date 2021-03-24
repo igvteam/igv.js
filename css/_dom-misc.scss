@@ -1,0 +1,183 @@
+
+.igv-zoom-in-notice {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+
+  div {
+    position: relative;
+    left: -50%;
+    font-family: $igv-default-font-face;
+    font-size: medium;
+    font-weight: 400;
+    color: #3f3f3f;
+    background-color: rgba(255, 255, 255, 0.51);
+    z-index: 64;
+  }
+
+}
+
+.igv-container-spinner {
+
+  position: absolute;
+  top: 90%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1024;
+
+  width: 24px;
+  height: 24px;
+
+  pointer-events:none;
+  color: $igv-navbar-toggle-dark-dark;
+}
+
+.igv-multi-locus-close-button {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+
+  width: 16px;
+  height: 16px;
+
+  color: #666666;
+
+  z-index: 1000;
+
+}
+
+.igv-multi-locus-close-button:hover {
+  cursor: pointer;
+  color: #434343;
+}
+
+.igv-multi-locus-ruler-label {
+  position: absolute;
+
+  left:50%;
+  top:15%;
+  transform: translate(-50%, -25%);
+
+  font-family: $igv-default-font-face;
+  font-size: 12px;
+  font-weight: 400;
+
+  text-align: center;
+  min-width: 16px;
+
+
+  z-index:64;
+
+  color: $igv-dark-grey-color;
+  background-color: white;
+
+  padding: 1px;
+}
+
+.igv-multi-locus-ruler-label:hover {
+  cursor: pointer;
+}
+
+.igv-ruler-sweeper {
+
+  display: none;
+
+  pointer-events: none;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height:100%;
+
+  z-index:99999;
+
+  background-color: $igv-ruler-sweeper-color;
+}
+
+.igv-ruler-tooltip {
+  pointer-events: none;
+  z-index: 128;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 1px;
+  height: 32px;
+
+  background-color: transparent;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  > div {
+    pointer-events: none;
+
+    width: 128px;
+    height: auto;
+
+    padding: 1px;
+
+    color: $igv-dark-grey-color;
+    font-size: 10px;
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+
+    background-color: white;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-dark-grey-color;
+  }
+
+}
+
+.igv-track-label {
+
+  position: absolute;
+
+  left: 8px;
+  top: 8px;
+
+  width: auto;
+  height:auto;
+  max-width: 200px;
+
+  padding-left: 4px;
+  padding-right: 4px;
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  font-family: $igv-default-font-face;
+  font-size: small;
+  font-weight: 400;
+
+  text-align: center;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  border-color: #444;
+  border-radius: 2px;
+  border-style: solid;
+  border-width: thin;
+
+  background-color: white;
+
+  z-index: 128;
+
+  cursor: pointer;
+}
+
+.igv-track-label:hover,
+.igv-track-label:focus,
+.igv-track-label:active  {
+  background-color: rgba(0, 0, 0, 0.05);
+}

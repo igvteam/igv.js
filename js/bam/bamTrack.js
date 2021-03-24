@@ -1080,7 +1080,7 @@ class AlignmentTrack {
                             const referenceFrame = clickState.viewport.referenceFrame;
                             if (this.browser.genome.getChromosome(clickedAlignment.mate.chr)) {
                                 this.highlightedAlignmentReadNamed = clickedAlignment.readName;
-                                this.browser.presentSplitScreenMultiLocusPanel(clickedAlignment, referenceFrame);
+                                this.browser.presentMultiLocusPanel(clickedAlignment, referenceFrame);
                             } else {
                                 Alert.presentAlert(`Reference does not contain chromosome: ${clickedAlignment.mate.chr}`);
                             }

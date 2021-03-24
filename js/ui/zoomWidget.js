@@ -40,9 +40,7 @@ const ZoomWidget = function (browser, $parent) {
 
     $div.append(createIcon("minus-circle"));
 
-    $div.on('click', function () {
-        browser.zoomOut();
-    });
+    $div.on('click', () => browser.zoomWithScaleFactor(2.0));
 
     // Range slider
     $div = $('<div>');
@@ -51,9 +49,7 @@ const ZoomWidget = function (browser, $parent) {
     this.$slider = $('<input type="range"/>');
     $div.append(this.$slider);
 
-    this.$slider.on('change', function (e) {
-        browser.zoomWithRangePercentage(e.target.value / 100.0);
-    });
+    this.$slider.on('change', e => browser.zoomWithRangePercentage(e.target.value / 100.0));
 
     // zoom in
     $div = $('<div>');
@@ -61,16 +57,20 @@ const ZoomWidget = function (browser, $parent) {
 
     $div.append(createIcon("plus-circle"));
 
-    $div.on('click', function () {
-        browser.zoomIn();
-    });
+    $div.on('click', () => browser.zoomWithScaleFactor(0.5));
 
     this.currentChr = undefined;
+    browser.on('locuschange', () => browser.updateZoomSlider(this.$slider))
+};
 
-    let self = this;
-    browser.on('locuschange', function () {
-        browser.updateZoomSlider(self.$slider);
-    })
+ZoomWidget.prototype.enable = function () {
+    // enable
+    this.$slider.get(0).disabled = false;
+};
+
+ZoomWidget.prototype.disable = function () {
+    // disable
+    this.$slider.get(0).disabled = true;
 };
 
 ZoomWidget.prototype.hide = function () {
