@@ -152,6 +152,8 @@ class FeatureFileReader {
                 return new SegParser("seg");
             case "mut":
                 return new SegParser("mut");
+            case "maf":
+                return new SegParser("maf");
             case "gwas" :
                 return new GWASParser(config);
             case "aed" :

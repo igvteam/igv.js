@@ -239,6 +239,9 @@ class ColorTable {
 
     getColor(key) {
         if (!this.colorTable.hasOwnProperty(key)) {
+            if(this.colorTable.hasOwnProperty("*other*")) {
+                return this.colorTable["*other"];
+            }
             this.colorTable[key] = this.colorGenerator.get();
         }
         return this.colorTable[key];

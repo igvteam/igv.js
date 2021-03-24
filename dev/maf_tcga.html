@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IGV</title>
+
+</head>
+
+<body>
+
+<h1>MAF file example</h1>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+    //import igv from "https://cdn.jsdelivr.net/npm/igv@2.7.5/dist/igv.esm.min.js";  //"../../js/index.js";
+    import igv from "../js/index.js";
+
+    (async function () {
+
+        const options =
+            {
+                showSampleNames: true,
+                sampleNameViewportWidth: 200,
+                genome: 'hg38',
+                tracks: [
+                    // {
+                    //     format: 'maf',
+                    //     type: 'mut',
+                    //     url: 'https://www.dropbox.com/s/lsekhbe800x0617/TCGA-06-0219-10A-01D-1491-08.maf?dl=0',
+                    //     height: 700,
+                    //     displayMode: "EXPANDED",
+                    //
+                    // },
+                    {
+                        format: 'maf',
+                        type: 'mut',
+                        url: 'https://www.dropbox.com/s/ztqas02zwag8bnt/TCGA.GBM.muse.59a84472-27d4-497c-8f37-8bc447ff9374.DR-10.0.somatic.maf.gz?dl=0',
+                        height: 700,
+                        displayMode: "EXPANDED",
+
+                    }
+                ]
+            }
+
+        const igvDiv = document.getElementById("igvDiv");
+
+        igv.createBrowser(igvDiv, options)
+            .then(function (browser) {
+                console.log("Created IGV browser");
+            })
+    })();
+
+</script>
+
+</body>
+
+</html>
