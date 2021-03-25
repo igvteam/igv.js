@@ -25,33 +25,41 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import {DOMUtils} from "../../node_modules/igv-utils/src/index.js";
+import {DOMUtils, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 
 const CursorGuide = function ($cursorGuideParent, $controlParent, config, browser) {
 
+    const self = this;
+
     this.browser = browser;
 
-    this.$guide = $('<div class="igv-cursor-tracking-guide">');
-    $cursorGuideParent.append(this.$guide);
+    this.$horizontalGuide = $('<div class="igv-cursor-guide-horizontal">');
+    $cursorGuideParent.append(this.$horizontalGuide);
+
+    this.$verticalGuide = $('<div class="igv-cursor-guide-vertical">');
+    $cursorGuideParent.append(this.$verticalGuide);
 
     // Guide line is bound within track area, and offset by 5 pixels so as not to interfere mouse clicks.
     $cursorGuideParent.on('mousemove.cursor-guide', (e) => {
 
         e.preventDefault();
 
-        const $child = $(document.elementFromPoint(e.clientX, e.clientY));
-        const $parent = $child.parent();
+        const $target = $(document.elementFromPoint(e.clientX, e.clientY));
+        const $parent = $target.parent();
 
         let $viewport = undefined;
 
-        if ($parent.hasClass('igv-viewport-content') && 'sample-name' !== $parent.parent().data('viewport-type')) {
-            $viewport = $parent.parent()
-            // console.log(`cursor guide - parent(viewport-content) child(canvas)`)
+        if ($parent.hasClass('igv-viewport-content')) {
+            $viewport = $parent.parent();
+        } else if ($parent.hasClass('igv-viewport') && $target.hasClass('igv-viewport-content')) {
+            $viewport = $parent;
+        } else if ($parent.hasClass('igv-viewport-container') && $target.hasClass('igv-viewport')) {
+            $viewport = $target;
         }
 
         if ($viewport) {
 
-            const result = mouseHandler(e, $viewport, this.$guide, $cursorGuideParent, browser);
+            const result = mouseHandler(e, $viewport, this.$horizontalGuide, this.$verticalGuide, $cursorGuideParent, browser)
 
             if (result) {
 
@@ -73,54 +81,65 @@ const CursorGuide = function ($cursorGuideParent, $controlParent, config, browse
         $controlParent.append(this.$button);
         this.$button.text('cursor guide');
 
-        this.$button.on('click', () => true === browser.cursorGuideVisible ? this.doHide() : this.doShow());
+        this.$button.on('click', function () {
+            if (true === browser.cursorGuideVisible) {
+                self.doHide();
+            } else {
+                self.doShow();
+            }
+        });
 
     }
 
 };
 
-let mouseHandler = (event, $viewport, $guideLine, $guideParent, browser) => {
+function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $cursorGuideParent, browser) {
 
-    // pixel location of guide line
-    const parent = $guideParent.get(0)
-    const { x: xParent } = DOMUtils.translateMouseCoordinates(event, parent);
+    const { x:xParent, y:yParent } = DOMUtils.translateMouseCoordinates(event, $cursorGuideParent.get(0));
+
+    const top = `${ yParent }px`;
+    $horizontalGuide.css({ top });
+
     const left = `${ xParent }px`;
-    $guideLine.css({ left });
+    $verticalGuide.css({ left });
 
-    // base-pair location of guide line
-    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0));
+    const { x, xNormalized, width } = DOMUtils.translateMouseCoordinates(event, $viewport.get(0))
 
-    const guid = $viewport.data('viewportGUID');
-    const viewport = browser.getViewportWithGUID(guid);
+    const viewport = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
 
     if (undefined === viewport) {
-        // console.log(`${ Date.now() } ERROR - cursor guide - no viewport found`);
+        console.log('ERROR: No viewport found');
         return undefined;
     }
 
-    const { start, bpPerPixel } = viewport.referenceFrame;
+    const { start, bpPerPixel } = viewport.referenceFrame
+    const end = 1 + start + (width * bpPerPixel)
 
-    // TODO: Can we make use of this in the custom mouse handler (ie: Tracing3D)
-    const $trackContainer = $viewport.closest('.igv-track-container');
+    const bp = Math.round(start + x * bpPerPixel)
 
-    return {
-        $host: $trackContainer,
-        host_css_left: left,
+    if (browser.rulerTrack) {
+        const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)
+        const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
+        rulerViewport.mouseMove(event)
+    }
 
-        // units: bp = bp + (pixel * (bp / pixel))
-        bp: Math.round(start + x * bpPerPixel),
-
-        start,
-        end: 1 + start + (width * bpPerPixel),
-        interpolant: xNormalized
-    };
-};
+    const $host = $viewport.closest('.igv-track-container')
+    return { bp, start, end, interpolant:xNormalized, host_css_left:left, $host }
+}
 
 CursorGuide.prototype.doHide = function () {
     if (this.$button) {
         this.$button.removeClass('igv-navbar-button-clicked');
     }
+
     this.browser.hideCursorGuide();
+
+    if (this.browser.rulerTrack) {
+        for (let viewport of this.browser.rulerTrack.trackView.viewports) {
+            viewport.$tooltip.hide()
+        }
+    }
+
 };
 
 CursorGuide.prototype.doShow = function () {
@@ -143,7 +162,8 @@ CursorGuide.prototype.setState = function (cursorGuideVisible) {
 
 CursorGuide.prototype.disable = function () {
     this.doHide();
-    this.$guide.hide();
+    this.$verticalGuide.hide();
+    this.$horizontalGuide.hide();
 };
 
 CursorGuide.prototype.enable = function () {
