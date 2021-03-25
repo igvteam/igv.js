@@ -61,7 +61,7 @@
     "xmldom": "^0.5.0"
   },
   "dependencies": {
-    "igv-ui": "github:igvteam/igv-ui#v1.1.4",
-    "igv-utils": "github:igvteam/igv-utils#v1.1.5"
+    "igv-ui": "https://github.com/igvteam/igv-ui#v1.1.4",
+    "igv-utils": "https://github.com/igvteam/igv-utils#v1.2.5"
   }
 }
