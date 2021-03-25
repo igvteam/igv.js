@@ -503,6 +503,47 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
 
 }
 
+.igv-ruler-tooltip {
+  pointer-events: none;
+  z-index: 128;
+
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 1px;
+  height: 32px;
+
+  background-color: transparent;
+
+  display: flex;
+  flex-flow: row;
+  flex-wrap: nowrap;
+  justify-content: flex-start;
+  align-items: center;
+
+  > div {
+    pointer-events: none;
+
+    width: 128px;
+    height: auto;
+
+    padding: 1px;
+
+    color: $igv-dark-grey-color;
+    font-size: 10px;
+    font-family: $igv-default-font-face;
+    font-weight: 400;
+
+    background-color: white;
+
+    border-style: solid;
+    border-width: thin;
+    border-color: $igv-dark-grey-color;
+  }
+
+}
+
 .igv-multi-locus-separator {
 
   pointer-events: none;
@@ -1063,7 +1104,32 @@ $igv-multi-locus-gap-width: 2 * ($igv-multi-locus-gap-margin-width) + $igv-multi
   /*border-right-color: rgba(0,0,0,0);*/
 }
 
-.igv-cursor-tracking-guide {
+.igv-cursor-guide-horizontal {
+
+  pointer-events: none;
+
+  user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+
+  position: absolute;
+  left: 0;
+  right: 0;
+
+  top: 50%;
+  height: 1px;
+
+  z-index: 1;
+
+  border-top-style: dotted;
+  border-top-width: thin;
+  border-top-color: rgba(127, 127, 127, 0.76);
+
+  display: none;
+
+}
+
+.igv-cursor-guide-vertical {
 
   pointer-events: none;
 
