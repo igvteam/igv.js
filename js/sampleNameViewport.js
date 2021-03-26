@@ -112,7 +112,7 @@ class SampleNameViewport extends ViewportBase {
 
         context.clearRect(0, 0, context.canvas.width, context.canvas.height)
 
-        let y = 0
+        let y = samples.yOffset || 0;
         for (let name of samples.names) {
 
             // context.save()
@@ -160,15 +160,16 @@ class SampleNameViewport extends ViewportBase {
 
         if(typeof this.trackView.track.getSamples === 'function' && typeof this.trackView.track.computePixelHeight === 'function') {
 
-            context.save()
+            const samples = this.trackView.track.getSamples();
+            if(!samples || samples.names.length == 0) return;
 
-            const samples = this.trackView.track.getSamples()
+            context.save()
 
             configureFont(context, fontConfigureTemplate, samples.height)
 
             const sampleNameXShim = 4
 
-            let y = 0
+            let y = samples.yOffest || 0;
             for (let name of samples.names) {
 
                 context.fillStyle = appleCrayonRGB('snow')
