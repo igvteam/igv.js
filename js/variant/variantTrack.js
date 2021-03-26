@@ -36,7 +36,7 @@ const isString = StringUtils.isString;
 
 
 const DEFAULT_VISIBILITY_WINDOW = 1000000;
-const topMargin = 10;
+const TOP_MARGIN = 10;
 
 class VariantTrack extends TrackBase {
 
@@ -69,7 +69,7 @@ class VariantTrack extends TrackBase {
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
 
-        this.nRows = 1;  // Computed dynamically
+        this.nVariantRows = 1;  // Computed dynamically
     }
 
     async postInit() {
@@ -96,23 +96,21 @@ class VariantTrack extends TrackBase {
 
     async getHeader() {
 
-        if (this.header) {
-            return this.header;
-        } else if (typeof this.featureSource.getHeader === "function") {
-            const header = await this.featureSource.getHeader()
-            if (header) {
-                this.callSets = header.callSets || [];
+        if (!this.header) {
+            if (typeof this.featureSource.getHeader === "function") {
+                const header = await this.featureSource.getHeader()
+                if (header) {
+                    this.callSets = header.callSets || [];
+                }
+                this.header = header;
             }
-            this.header = header;
-            return header;
-        } else {
-            this.callSets = [];
-            return undefined;
+            this.sampleNames = this.callSets ? this.callSets.map(cs => cs.name) : [];
         }
 
+        return this.header;
     }
 
-    getCallsetsLength () {
+    getCallsetsLength() {
         return this.callSets.length;
     }
 
@@ -122,7 +120,18 @@ class VariantTrack extends TrackBase {
             this.header = await this.getHeader();
         }
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow: this.visibilityWindow});
+    }
 
+    getSamples() {
+        if (this.displayMode === "COLLAPSED") {
+            return undefined;
+        } else {
+            return {
+                yOffset: this.sampleYOffset,
+                names: this.sampleNames,
+                height: this.sampleHeight
+            }
+        }
     }
 
     /**
@@ -134,31 +143,27 @@ class VariantTrack extends TrackBase {
      */
     computePixelHeight(features) {
 
+        if (!features || features.length == 0) return TOP_MARGIN;
+
         if (this.displayMode === "COLLAPSED") {
-            this.nRows = 1;
-            return topMargin + this.variantHeight;
+            this.nVariantRows = 1;
+            return TOP_MARGIN + this.variantHeight;
         } else {
 
-            var maxRow = 0;
-            if (features) {
-                for (let feature of features) {
-                    if (feature.row && feature.row > maxRow) maxRow = feature.row;
-                }
-            }
+            const maxRow = features.reduce((a, b) => Math.max(a.row || 0, b.row || 0));
+            this.nVariantRows = maxRow + 1;
+
             const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
-            this.nRows = maxRow + 1;
-            const h = topMargin + this.nRows * (this.variantHeight + vGap);
-            this.variantBandHeight = h;
+            const h = TOP_MARGIN + this.nVariantRows * (this.variantHeight + vGap);
+            this.variantBandHeight = h;    // This is a side effect, used during draw.
 
             const callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
-            const nCalls = this.getCallsetsLength() * this.nRows;
+            const nCalls = this.getCallsetsLength() * this.nVariantRows;
             return h + vGap + (nCalls + 1) * (callHeight + vGap);
-
         }
+    }
 
-    };
-
-    draw({ context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features }) {
+    draw({context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features}) {
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
@@ -170,16 +175,16 @@ class VariantTrack extends TrackBase {
 
         if (features) {
 
-            const drawnFeatures = []
+            const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight);
+            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
-            const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight)
-            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
-            const bpEnd = bpStart + pixelWidth * bpPerPixel + 1
+            // Loop through variants.  A variant == a row in a VCF file
             for (let variant of features) {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
-                const y = topMargin + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
+                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
                 const h = this.variantHeight;
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
@@ -204,17 +209,19 @@ class VariantTrack extends TrackBase {
 
                 context.fillRect(x, y, w, h)
 
-                variant.pixelRect = { x, y, w, h }
-                drawnFeatures.push(variant)
+                variant.pixelRect = {x, y, w, h}
 
+                // Loop though the calls for this variant.  There will potentially be a call for each sample.
                 if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
 
-                    let callsDrawn = 0;
+                    this.sampleYOffset = this.variantBandHeight + vGap;
+                    this.sampleHeight = this.nVariantRows * (callHeight + vGap);  // For each sample, there is a call for each variant at this position
 
+                    let sampleNumber = 0;
                     for (let callSet of callSets) {
                         const call = variant.calls[callSet.id];
                         if (call) {
-                            const py = this.variantBandHeight + vGap + (callsDrawn + variant.row) * (callHeight + vGap)
+                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + variant.row * (callHeight + vGap);
                             let allVar = true;  // until proven otherwise
                             let allRef = true;
                             let noCall = false;
@@ -240,11 +247,9 @@ class VariantTrack extends TrackBase {
 
                             context.fillRect(x, py, w, callHeight)
 
-                            callSet.pixelRect = { x, y:py, w, h:callHeight }
-                            drawnFeatures.push(callSet)
-
+                            callSet.pixelRect = {x, y: py, w, h: callHeight}
                         }
-                        callsDrawn++;
+                        sampleNumber++;
                     }
 
                 }
@@ -276,19 +281,21 @@ class VariantTrack extends TrackBase {
             if ("COLLAPSED" === this.displayMode) {
                 Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
             } else {
-                const yOffset = clickState.y
-                const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap
 
-                if (yOffset <= this.variantBandHeight) {  // Variant
-                    const row = (Math.floor)((yOffset - topMargin) / (this.variantHeight + vGap));
+                const yOffset = clickState.y;
+                const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+
+                if (yOffset <= this.variantBandHeight) {
+                    // Variant
+                    const row = (Math.floor)((yOffset - TOP_MARGIN) / (this.variantHeight + vGap));
                     if (variant.row === row) {
                         Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
                     }
-                } else { // Genotype
-
+                } else {
+                    // Callset
                     const callSets = this.callSets;
                     if (callSets && variant.calls) {
-                        const callHeight = this.nRows * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
+                        const callHeight = this.nVariantRows * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
                         const row = Math.floor((yOffset - this.variantBandHeight) / (callHeight + vGap))
                         if (row >= 0 && row < callSets.length) {
                             const cs = callSets[row];
@@ -464,7 +471,7 @@ class VariantTrack extends TrackBase {
 
 function drawVariantTrackSampleNames(ctx, features, canvasTop) {
 
-    console.log(`variant track - draw sample names - features(${ features.length })`)
+    console.log(`variant track - draw sample names - features(${features.length})`)
 
     // ctx.canvas.height = height
     // ctx.canvas.style.top = `${ canvasTop }px`
