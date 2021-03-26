@@ -141,7 +141,8 @@ class SegTrack extends TrackBase {
     getSamples() {
         return {
             names: this.sampleKeys,
-            height: this.sampleHeight
+            height: this.sampleHeight,
+            yOffset: 0
         }
     }
 
@@ -287,6 +288,7 @@ class SegTrack extends TrackBase {
         }
 
     }
+
 
     checkForLog(features) {
         if (this.isLog === undefined) {
