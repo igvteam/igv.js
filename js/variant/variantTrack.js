@@ -146,21 +146,22 @@ class VariantTrack extends TrackBase {
         if (!features || features.length == 0) return TOP_MARGIN;
 
         if (this.displayMode === "COLLAPSED") {
-            this.nVariantRows = 1;
+            //this.nVariantRows = 1;
             return TOP_MARGIN + this.variantHeight;
         } else {
-
-            const maxRow = features.reduce((a, b) => Math.max(a.row || 0, b.row || 0));
-            this.nVariantRows = maxRow + 1;
-
             const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
             const h = TOP_MARGIN + this.nVariantRows * (this.variantHeight + vGap);
-            this.variantBandHeight = h;    // This is a side effect, used during draw.
-
             const callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
             const nCalls = this.getCallsetsLength() * this.nVariantRows;
             return h + vGap + (nCalls + 1) * (callHeight + vGap);
         }
+    }
+
+    variantRowCount(count) {
+        this.nVariantRows = count;
+        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+        this.variantBandHeight = TOP_MARGIN + this.nVariantRows * (this.variantHeight + vGap);
+
     }
 
     draw({context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features}) {
@@ -271,6 +272,22 @@ class VariantTrack extends TrackBase {
         const genomeID = this.browser.genome.id
         const popupData = []
         const sampleInformation = this.browser.sampleInformation;
+        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+        const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
+
+        // Find the variant row (i.e. row assigned during feature packing)
+        const yOffset = clickState.y;
+        let row;
+        let sampleRow;
+        if (yOffset <= this.variantBandHeight) {
+            // Variant
+            row = (Math.floor)((yOffset - TOP_MARGIN) / (this.variantHeight + vGap));
+            sampleRow = -1;
+        } else {
+            const sampleY = yOffset - this.variantBandHeight;
+            sampleRow = Math.floor(sampleY / this.sampleHeight);
+            row = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight);
+        }
 
         for (let variant of featureList) {
 
@@ -281,31 +298,22 @@ class VariantTrack extends TrackBase {
             if ("COLLAPSED" === this.displayMode) {
                 Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
             } else {
-
-                const yOffset = clickState.y;
-                const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
-
-                if (yOffset <= this.variantBandHeight) {
-                    // Variant
-                    const row = (Math.floor)((yOffset - TOP_MARGIN) / (this.variantHeight + vGap));
-                    if (variant.row === row) {
+                if (variant.row === row) {
+                    if (yOffset <= this.variantBandHeight) {
                         Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
-                    }
-                } else {
-                    // Callset
-                    const callSets = this.callSets;
-                    if (callSets && variant.calls) {
-                        const callHeight = this.nVariantRows * ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
-                        const row = Math.floor((yOffset - this.variantBandHeight) / (callHeight + vGap))
-                        if (row >= 0 && row < callSets.length) {
-                            const cs = callSets[row];
-                            const call = variant.calls[cs.id];
-                            Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
+                    } else {
+                        // Callset
+                        const callSets = this.callSets;
+                        if (callSets && variant.calls) {
+                            if (sampleRow >= 0 && sampleRow < callSets.length) {
+                                const cs = callSets[sampleRow];
+                                const call = variant.calls[cs.id];
+                                Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
+                            }
                         }
                     }
                 }
             }
-
         }
 
         return popupData;
@@ -467,22 +475,6 @@ class VariantTrack extends TrackBase {
         return menuItems;
 
     }
-}
-
-function drawVariantTrackSampleNames(ctx, features, canvasTop) {
-
-    console.log(`variant track - draw sample names - features(${features.length})`)
-
-    // ctx.canvas.height = height
-    // ctx.canvas.style.top = `${ canvasTop }px`
-    // ctx.translate(0, -canvasTop)
-    //
-    // for (let feature of features) {
-    //     const { y, h } = feature.pixelRect
-    //     IGVGraphics.fillRect(ctx, 0, y, ctx.canvas.width, h, { 'fillStyle': randomRGB(200, 255)})
-    //     ctx.fillText(feature.names, 0, y + h)
-    // }
-
 }
 
 export default VariantTrack
