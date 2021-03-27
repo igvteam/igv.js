@@ -27,14 +27,15 @@
         {
             // Example of fully specifying a reference .  We could alternatively use  "genome: 'hg19'"
             genome: "hg18",
-            locus: "chr20:1,234,560-1,234,599",
+            locus: ["chr20:14,350-14,390", "chr20:1,234,560-1,234,599"],
             tracks:
                 [
                     {
                         type: 'variant',
                         format: 'vcf',
                         url: '../test/data/vcf/example.vcf',
-                        indexed: false
+                        indexed: false,
+                        height: 500
                     }
                 ]
         };
