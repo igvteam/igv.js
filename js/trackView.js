@@ -349,10 +349,8 @@ class TrackView {
     repaintSamples() {
 
         if(typeof this.track.getSamples === 'function' && typeof this.track.computePixelHeight === 'function') {
-
-            const features = this.viewports[ 0 ].cachedFeatures
-            const contentHeight = this.track.computePixelHeight(features)
-
+            // Get the max content height of all viewports
+            const contentHeight = this.viewports.reduce((a, b) => Math.max(a.getContentHeight(), b.getContentHeight()));
             const samples = this.track.getSamples()
             this.sampleNameViewport.repaint({ contentHeight, samples })
         }
@@ -378,6 +376,25 @@ class TrackView {
         // Trigger viewport to load features needed to cover current genomic range
         for (let vp of rpV) {
             await vp.loadFeatures()
+        }
+
+        // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
+        // section depends on data from all the views.  We only need to adjust this however if any data was loaded
+        // (i.e. rpV.length > 0)
+        if(rpV.length > 0 && typeof this.track.variantRowCount === 'function') {
+            let maxRow = 0;
+            for(let vp of this.viewports) {
+                if (vp.tile && vp.tile.features) {
+                    maxRow = Math.max(maxRow, vp.tile.features.reduce((a, b) => Math.max(a.row || 0, b.row || 0)));
+                }
+            }
+            const current = this.track.nVariantRows;
+            if(current !== maxRow + 1) {
+                this.track.variantRowCount(maxRow + 1);
+                for (let vp of this.viewports) {
+                    vp.checkContentHeight();
+                }
+            }
         }
 
         if (this.disposed) return;   // Track was removed during load
@@ -416,10 +433,10 @@ class TrackView {
             }
         }
 
+        this.adjustTrackHeight();
+
         // Repaint sample names last
         this.repaintSamples();
-
-        this.adjustTrackHeight();
     }
 
     /**
