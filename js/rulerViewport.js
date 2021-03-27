@@ -7,6 +7,7 @@ import {createIcon} from "./igv-icons.js";
 
 let timer
 let currentViewport = undefined
+const toolTipTimeout = 5e3
 
 class RulerViewport extends ViewPort {
     constructor(trackView, $viewportContainer, referenceFrame, width) {
@@ -106,7 +107,7 @@ class RulerViewport extends ViewPort {
 
             // hide tooltip when movement stops
             clearTimeout(timer)
-            timer = setTimeout(() => this.$tooltip.hide(),1500)
+            timer = setTimeout(() => this.$tooltip.hide(),toolTipTimeout)
 
         }
 
