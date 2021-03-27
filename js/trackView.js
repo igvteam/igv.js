@@ -350,9 +350,9 @@ class TrackView {
 
         if(typeof this.track.getSamples === 'function' && typeof this.track.computePixelHeight === 'function') {
             // Get the max content height of all viewports
-            //const contentHeight = this.viewports.reduce((a, b) => Math.max(a.getContentHeight(), b.getContentHeight()));
-            let contentHeight = 0;
-            for(let vp of this.viewports) contentHeight = Math.max(contentHeight, vp.getContentHeight());
+            const contentHeight = this.viewports.reduce((a, vp) => Math.max(a, vp.getContentHeight()), 0);
+            // let contentHeight = 0;
+            // for(let vp of this.viewports) contentHeight = Math.max(contentHeight, vp.getContentHeight());
             const samples = this.track.getSamples()
             this.sampleNameViewport.repaint({ contentHeight, samples })
         }
@@ -387,7 +387,7 @@ class TrackView {
             let maxRow = 0;
             for(let vp of this.viewports) {
                 if (vp.tile && vp.tile.features) {
-                    maxRow = Math.max(maxRow, vp.tile.features.reduce((a, b) => Math.max(a.row || 0, b.row || 0)));
+                    maxRow = Math.max(maxRow, vp.tile.features.reduce((a, f) => Math.max(a, f.row || 0), 0));
                 }
             }
             const current = this.track.nVariantRows;
