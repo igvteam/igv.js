@@ -24,6 +24,7 @@
  */
 
 import IGVGraphics from "./igv-canvas.js";
+import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
 
@@ -97,7 +98,7 @@ const translationDict = {
 const complement = {};
 const t1 = ['A', 'G', 'C', 'T', 'Y', 'R', 'W', 'S', 'K', 'M', 'D', 'V', 'H', 'B', 'N', 'X']
 const t2 = ['T', 'C', 'G', 'A', 'R', 'Y', 'W', 'S', 'M', 'K', 'H', 'B', 'D', 'V', 'N', 'X']
-for(let i=0; i<t1.length; i++) {
+for (let i = 0; i < t1.length; i++) {
     complement[t1[i]] = t2[i];
     complement[t1[i].toLowerCase()] = t2[i].toLowerCase();
 }
@@ -152,8 +153,36 @@ class SequenceTrack {
 
                 }
             }
-        ];
+        ]
     }
+
+
+    contextMenuItemList(clickState) {
+        const viewport = clickState.viewport;
+        if (viewport.referenceFrame.bpPerPixel <= 1) {
+            return [{
+                label: 'Copy visible sequence...',
+                click: async () => {
+                    const pixelWidth = viewport.getWidth();
+                    const bpWindow = pixelWidth * viewport.referenceFrame.bpPerPixel;
+                    const chr = viewport.referenceFrame.chr;
+                    const start = viewport.referenceFrame.start;
+                    const end = start + bpWindow;
+                    const sequence = await this.browser.genome.sequence.getSequence(chr, start, end);
+                    if (viewport.trackView.alert) {
+                        viewport.trackView.alert.present(sequence);
+                    } else {
+                        Alert.presentAlert(sequence);
+                    }
+                }
+            },
+                '<hr/>'
+            ]
+        } else {
+            return undefined;
+        }
+    }
+
 
     translateSequence(seq) {
 
@@ -163,7 +192,7 @@ class SequenceTrack {
             let idx = fNum;
 
             while ((seq.length - idx) >= 3) {
-                 let st = seq.slice(idx, idx + 3);
+                let st = seq.slice(idx, idx + 3);
                 if (this.reversed) {
                     st = st.split('').reverse().join('');
                 }
