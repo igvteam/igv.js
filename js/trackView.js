@@ -32,9 +32,10 @@ import MenuUtils from "./ui/menuUtils.js";
 import {createIcon} from "./igv-icons.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
-import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
+import {ColorPicker, AlertDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
 import SampleNameViewport from './sampleNameViewport.js';
 import TrackScrollbar from './trackScrollbar.js';
+import SequenceTrack from "./sequenceTrack.js";
 
 let dragged
 let dragDestination
@@ -58,6 +59,11 @@ class TrackView {
 
         if (track instanceof RulerTrack) {
             this.trackDiv.dataset.rulerTrack = "rulerTrack";
+        }
+
+        // Create an alert dialog for the sequence track to copy ref sequence to.  Obviously a little hacky.
+        if (track instanceof SequenceTrack) {
+            this.alert = new AlertDialog(this.trackDiv);
         }
 
         if (track.height) {
@@ -647,6 +653,10 @@ class TrackView {
         Object.keys(this).forEach(function (key) {
             self[key] = undefined;
         })
+
+        if(this.alert) {
+            this.alert.container.remove();    // This is quite obviously a hack, need a "dispose" method on AlertDialog
+        }
 
         this.disposed = true;
     }
