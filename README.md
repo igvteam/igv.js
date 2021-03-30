@@ -1,5 +1,5 @@
 # igv.js
-![Build Status](https://github.com/igvteam/igv.js/actions/workflows/ci_build.yml/badge.svg)
+![Build](https://github.com/igvteam/igv.js/main.yml/badge.svg)
 [![](https://img.shields.io/npm/dw/igv.svg)](https://www.npmjs.com/package/igv)
 [![](https://img.shields.io/github/last-commit/igvteam/igv.js.svg)](https://github.com/igvteam/igv.js)
 [![](https://img.shields.io/npm/l/igv.svg)](LICENSE)
