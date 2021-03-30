@@ -71,7 +71,7 @@ suite("testVariant", function () {
         dataWrapper = getDataWrapper(data)
         const featureList = await parser.parseFeatures(dataWrapper);
         const len = featureList.length;
-        assert.equal(7, len);   // # of features (determined by greping file)
+        assert.equal(8, len);   // # of features (determined by greping file)
 
         // Snp
         const snp = featureList[0];
