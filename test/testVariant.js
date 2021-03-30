@@ -80,19 +80,19 @@ suite("testVariant", function () {
         assert.equal(snp.end, 14370);
 
         // The microsatellite
-        const micro = featureList[3];
+        const micro = featureList[4];
         assert.equal(micro.start, 1234567);
         assert.equal(micro.end, 1234569);
         assert.equal(2, micro.alleles.length);
 
         // Deletion
-        const del = featureList[4];
+        const del = featureList[5];
         assert.equal(del.pos, 1234575);
         assert.equal(del.start, 1234575);
         assert.equal(del.end, 1234577);
 
         // Insertion
-        const ins = featureList[5];
+        const ins = featureList[6];
         assert.equal(ins.pos, 1234580);
         assert.equal(ins.start, 1234582);
         assert.equal(ins.end, 1234582);
