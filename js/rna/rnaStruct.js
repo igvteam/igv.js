@@ -157,9 +157,9 @@ class RnaStructTrack extends TrackBase {
         }
     }
 
-    clickedFeatures(clickState) {
+    clickedFeatures(clickState, features) {
 
-        let features = super.clickedFeatures(clickState);
+        features = super.clickedFeatures(clickState, features);
 
         const clicked = [];
 
@@ -204,7 +204,7 @@ class RnaStructTrack extends TrackBase {
         // We use the featureCache property rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
 
-        if (!features) features = this.clickedFeatures(clickState);
+        features = this.clickedFeatures(clickState, features);
 
         if (features && features.length > 0) {
 

@@ -237,11 +237,11 @@ class TrackBase {
         return this.visibilityWindow;
     }
 
-    clickedFeatures(clickState) {
+    clickedFeatures(clickState, features) {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        const features = clickState.viewport.getCachedFeatures();
+        if(!features) features = clickState.viewport.getCachedFeatures();
 
         if (!features || features.length === 0) {
             return [];
@@ -331,8 +331,7 @@ class TrackBase {
         if (feature.strand) {
             posString += ` (${feature.strand})`
         }
-        data.push('<hr\>');
-        data.push(posString);
+        data.push({name: 'Location', value: posString});
 
         return data;
 
@@ -343,7 +342,8 @@ class TrackBase {
         if ("hg38" === genomeID || "GRCh38" === genomeID) {
 
             const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
-            return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
+            return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html"
+` +
                 `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}">Cravat ${ref}->${alt}</a>`
             // return "<a target='_blank' " +
             //     "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
