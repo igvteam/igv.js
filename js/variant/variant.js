@@ -192,7 +192,7 @@ class Variant {
         }
 
         if (this.info) {
-            fields.push('<hr>');
+            fields.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'});
             Object.keys(this.info).forEach(function (key) {
                 fields.push({name: key, value: arrayToString(self.info[key])});
             });

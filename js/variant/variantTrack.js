@@ -277,7 +277,6 @@ class VariantTrack extends TrackBase {
 
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id
-        const popupData = []
         const sampleInformation = this.browser.sampleInformation;
         const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
         const callHeight = vGap + ("SQUISHED" === this.displayMode ? this.squishedCallHeight : this.expandedCallHeight);
@@ -295,31 +294,29 @@ class VariantTrack extends TrackBase {
             sampleRow = Math.floor(sampleY / this.sampleHeight);
             row = Math.floor((sampleY - sampleRow * this.sampleHeight) / callHeight);
         }
+        const rowVariants = featureList.filter(f => f.row === row);
 
-        for (let variant of featureList) {
+        let popupData = []
+        for (let variant of rowVariants) {
 
             if (popupData.length > 0) {
-                popupData.push('<HR>')
+                popupData.push({html: '<hr style="border-top-width:2px ;border-color: #c9c3ba" />'})
             }
 
-            if ("COLLAPSED" === this.displayMode) {
-                Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, this.type));
+            if (yOffset <= this.variantBandHeight) {
+                const v = variant.popupData(genomicLocation, genomeID);
+                Array.prototype.push.apply(popupData, v);
             } else {
-                if (variant.row === row) {
-                    if (yOffset <= this.variantBandHeight) {
-                        Array.prototype.push.apply(popupData, variant.popupData(genomicLocation, genomeID), this.type);
-                    } else {
-                        // Callset
-                        const callSets = this.callSets;
-                        if (callSets && variant.calls) {
-                            if (sampleRow >= 0 && sampleRow < callSets.length) {
-                                const cs = callSets[sampleRow];
-                                const call = variant.calls[cs.id];
-                                Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
-                            }
-                        }
+                // Callset
+                const callSets = this.callSets;
+                if (callSets && variant.calls) {
+                    if (sampleRow >= 0 && sampleRow < callSets.length) {
+                        const cs = callSets[sampleRow];
+                        const call = variant.calls[cs.id];
+                        Array.prototype.push.apply(popupData, extractGenotypePopupData(call, variant, genomeID, sampleInformation));
                     }
                 }
+
             }
         }
 
