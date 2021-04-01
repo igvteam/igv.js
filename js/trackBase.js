@@ -310,9 +310,11 @@ class TrackBase {
                         let alt = b[i].a;
                         if (alt.length === 1) {
                             const cravatLink = TrackBase.getCravatLink(feature.chr, feature.start + 1, ref, alt, genomeId)
+                            console.log(cravatLink)
                             if (cravatLink) {
                                 data.push("<hr/>");
-                                data.push(cravatLink);
+                                data.push({html: cravatLink});
+                                data.push("<hr/>");
                             }
                         }
                     }
@@ -342,8 +344,7 @@ class TrackBase {
         if ("hg38" === genomeID || "GRCh38" === genomeID) {
 
             const cravatChr = chr.startsWith("chr") ? chr : "chr" + chr;
-            return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html"
-` +
+            return `<a target="_blank" href="https://run.opencravat.org/result/nocache/variant.html` +
                 `?chrom=${cravatChr}&pos=${position}&ref_base=${ref}&alt_base=${alt}">Cravat ${ref}->${alt}</a>`
             // return "<a target='_blank' " +
             //     "href='https://www.cravat.us/CRAVAT/variant.html?variant=" +
