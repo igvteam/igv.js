@@ -428,7 +428,7 @@ class InteractionTrack extends TrackBase {
 
     popupData(clickState, features) {
 
-        if (!features) features = this.clickedFeatures(clickState);
+        features = this.clickedFeatures(clickState);
 
         const data = [];
         for (let feature of features) {
@@ -468,11 +468,11 @@ class InteractionTrack extends TrackBase {
         return data;
     }
 
-    clickedFeatures(clickState) {
+    clickedFeatures(clickState, features) {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        const featureList = clickState.viewport.getCachedFeatures();
+        const featureList = features || clickState.viewport.getCachedFeatures();
         const candidates = [];
         if (featureList) {
             const proportional = this.arcType === "proportional";
