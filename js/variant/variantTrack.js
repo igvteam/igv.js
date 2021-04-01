@@ -69,7 +69,9 @@ class VariantTrack extends TrackBase {
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
 
-        this.nVariantRows = 1;  // Computed dynamically
+        // The number of variant rows are computed dynamically, but start with "1" by default
+        this.variantRowCount(1);
+
     }
 
     async postInit() {
