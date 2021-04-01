@@ -284,7 +284,7 @@ class GCNVTrack extends TrackBase {
 
     popupData(clickState, featureList) {
 
-        if (!featureList) featureList = this.clickedFeatures(clickState);
+        featureList = this.clickedFeatures(clickState, featureList);
 
         const items = [];
         featureList.forEach(function (f) {

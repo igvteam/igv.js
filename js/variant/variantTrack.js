@@ -266,7 +266,7 @@ class VariantTrack extends TrackBase {
      */
     popupData(clickState, featureList) {
 
-        if (!featureList) featureList = this.clickedFeatures(clickState);
+        featureList = this.clickedFeatures(clickState, featureList);
 
         const genomicLocation = clickState.genomicLocation
         const genomeID = this.browser.genome.id

@@ -387,9 +387,9 @@ class SegTrack extends TrackBase {
         // self.trackView.$viewport.scrollTop(0);
     }
 
-    clickedFeatures(clickState) {
+    clickedFeatures(clickState, features) {
 
-        const allFeatures = super.clickedFeatures(clickState);
+        const allFeatures = super.clickedFeatures(clickState, features);
         return filterByRow(allFeatures, clickState.y);
 
         function filterByRow(features, y) {
@@ -404,7 +404,7 @@ class SegTrack extends TrackBase {
 
     popupData(clickState, featureList) {
 
-        if (!featureList) featureList = this.clickedFeatures(clickState);
+        featureList = this.clickedFeatures(clickState);
 
         const items = [];
 
