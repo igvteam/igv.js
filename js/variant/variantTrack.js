@@ -201,17 +201,8 @@ class VariantTrack extends TrackBase {
                     x += 1;
                     w -= 2;
                 }
-
-                if ("NONVARIANT" === variant.type) {
-                    context.fillStyle = this.nonRefColor;
-                } else if ("MIXED" === variant.type) {
-                    context.fillStyle = this.mixedColor;
-                } else {
-                    context.fillStyle = this.color || this.defaultColor;
-                }
-
+                context.fillStyle = this.getVariantColor(variant);
                 context.fillRect(x, y, w, h)
-
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
@@ -262,6 +253,20 @@ class VariantTrack extends TrackBase {
             console.log("No feature list");
         }
     };
+
+    getVariantColor(variant) {
+        let variantColor;
+        if ("NONVARIANT" === variant.type) {
+            variantColor = this.nonRefColor;
+        } else if ("MIXED" === variant.type) {
+            variantColor = this.mixedColor;
+        } else if (this.color) {
+            variantColor = (typeof this.color === "function") ? this.color(variant) : this.color;
+        } else {
+            variantColor = this.defaultColor;
+        }
+        return variantColor;
+    }
 
     /**
      * Return "popup data" for feature @ genomic location.  Data is an array of key-value pairs
