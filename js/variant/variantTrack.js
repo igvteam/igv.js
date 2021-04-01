@@ -30,7 +30,7 @@ import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
 import {createCheckbox} from "../igv-icons.js";
 import {StringUtils} from "../../node_modules/igv-utils/src/index.js";
-import {greyScale, randomColor, randomGrey, randomRGB, randomRGBConstantAlpha} from "../util/colorPalletes.js"
+import {PaletteColorTable, ColorTable} from "../util/colorPalletes.js";
 
 const isString = StringUtils.isString;
 
@@ -68,6 +68,7 @@ class VariantTrack extends TrackBase {
         this.hetvarColor = config.hetvarColor || "rgb(34,12,253)";
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
+        this.variantColorBy = config.variantColorBy;   // Can be undefined => default
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1);
@@ -255,8 +256,17 @@ class VariantTrack extends TrackBase {
     };
 
     getVariantColor(variant) {
+
         let variantColor;
-        if ("NONVARIANT" === variant.type) {
+
+        if (this.variantColorBy) {
+            const value = variant.info[this.variantColorBy];
+            if(value) {
+                return getVariantColorTable(this.variantColorBy).getColor(value);
+            } else {
+                return "gray";
+            }
+        } else if ("NONVARIANT" === variant.type) {
             variantColor = this.nonRefColor;
         } else if ("MIXED" === variant.type) {
             variantColor = this.mixedColor;
@@ -449,14 +459,11 @@ class VariantTrack extends TrackBase {
 
     menuItemList() {
 
-        var self = this,
-            menuItems = [],
-            mapped;
-
+        const menuItems = [];
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
 
-        ["COLLAPSED", "SQUISHED", "EXPANDED"].forEach(function (displayMode) {
+        for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
             var lut =
                 {
                     "COLLAPSED": "Collapse",
@@ -466,19 +473,86 @@ class VariantTrack extends TrackBase {
 
             menuItems.push(
                 {
-                    object: createCheckbox(lut[displayMode], displayMode === self.displayMode),
-                    click: function () {
-                        self.displayMode = displayMode;
-                        self.trackView.checkContentHeight();
-                        self.trackView.repaintViews();
+                    object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
+                    click: () => {
+                        this.displayMode = displayMode;
+                        this.trackView.checkContentHeight();
+                        this.trackView.repaintViews();
                     }
                 });
-        });
+        }
 
+        if (this.header.INFO) {
+            const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
+            if (stringInfoKeys.length > 0) {
+
+                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+                $e.text('Color by');
+                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+                stringInfoKeys.sort();
+                for (let item of stringInfoKeys) {
+                    const selected = (this.variantColorBy === item);
+                    menuItems.push(this.colorByCB({key: item, label: item}, selected));
+                }
+            }
+        }
 
         return menuItems;
-
     }
+
+    /**
+     * Create a "color by" checkbox menu item, optionally initially checked
+     * @param menuItem
+     * @param showCheck
+     * @returns {{init: undefined, name: undefined, click: clickHandler, object: (jQuery|HTMLElement|jQuery.fn.init)}}
+     */
+    colorByCB(menuItem, showCheck) {
+
+        const $e = createCheckbox(menuItem.label, showCheck);
+        const clickHandler = ev => {
+
+            if (menuItem.key === this.variantColorBy) {
+                this.variantColorBy = undefined;
+                delete this.config.variantColorBy;
+                this.trackView.repaintViews();
+            } else {
+                this.variantColorBy = menuItem.key;
+                this.config.variantColorBy = menuItem.key;
+                this.trackView.repaintViews();
+            }
+
+        };
+
+        return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    }
+}
+
+let VARIANT_COLOR_TABLES;
+
+function getVariantColorTable(key) {
+
+    if (!VARIANT_COLOR_TABLES) VARIANT_COLOR_TABLES = new Map();
+
+    if (!VARIANT_COLOR_TABLES.has(key)) {
+        let tbl;
+        switch (key) {
+            case "SVTYPE" :
+                tbl = new ColorTable({
+                    'DEL': '#ff2101',
+                    'INS': '#001888',
+                    'DUP': '#028401',
+                    'INV': '#008688',
+                    'CNV': '#8931ff',
+                    'BND': '#891100'
+                })
+                break;
+            default:
+                tbl = new PaletteColorTable("Set1");
+        }
+        VARIANT_COLOR_TABLES.set(key, tbl);
+    }
+    return VARIANT_COLOR_TABLES.get(key);
+
 }
 
 export default VariantTrack
