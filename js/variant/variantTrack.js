@@ -45,6 +45,7 @@ class VariantTrack extends TrackBase {
     }
 
     init(config) {
+
         super.init(config);
 
         this.visibilityWindow = config.visibilityWindow;
@@ -70,6 +71,7 @@ class VariantTrack extends TrackBase {
         this.sortDirection = "ASC";
         this.type = config.type || "variant"
         this.variantColorBy = config.variantColorBy;   // Can be undefined => default
+        this._color = config.color;
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1);
@@ -96,6 +98,15 @@ class VariantTrack extends TrackBase {
 
     supportsWholeGenome() {
         return this.config.indexed === false && this.config.supportsWholeGenome !== false
+    }
+
+    get color() {
+        return this._color;
+    }
+
+    set color(c) {
+        this._color = c;
+        this.variantColorBy = undefined;
     }
 
     async getHeader() {
@@ -234,10 +245,9 @@ class VariantTrack extends TrackBase {
                                 }
                             }
 
-                            if(!call.genotype) {
+                            if (!call.genotype) {
                                 context.fillStyle = this.noGenotypeColor;
-                            }
-                            else if (noCall) {
+                            } else if (noCall) {
                                 context.fillStyle = this.noCallColor;
                             } else if (allRef) {
                                 context.fillStyle = this.homrefColor;
@@ -277,8 +287,8 @@ class VariantTrack extends TrackBase {
             variantColor = this.nonRefColor;
         } else if ("MIXED" === variant.type) {
             variantColor = this.mixedColor;
-        } else if (this.color) {
-            variantColor = (typeof this.color === "function") ? this.color(variant) : this.color;
+        } else if (this._color) {
+            variantColor = (typeof this._color === "function") ? this._color(variant) : this._color;
         } else {
             variantColor = this.defaultColor;
         }
@@ -466,8 +476,29 @@ class VariantTrack extends TrackBase {
 
         const menuItems = [];
 
-        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+        // color-by INFO attribute
+        if (this.header.INFO) {
+            //Code below will present checkboxes for all info fields of type "String".   Wait until this is requested
+            //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
 
+            // For now stick to explicit info fields (well, exactly 1 for starters)
+            const stringInfoKeys = ['SVTYPE', undefined]
+
+            if (stringInfoKeys.length > 0) {
+                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
+                $e.text('Color by');
+                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
+                stringInfoKeys.sort();
+                for (let item of stringInfoKeys) {
+                    const selected = (this.variantColorBy === item);
+                    const label = item ? item : 'None';
+                    menuItems.push(this.colorByCB({key: item, label: label}, selected));
+                }
+            }
+        }
+
+
+        menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
             var lut =
                 {
@@ -487,25 +518,6 @@ class VariantTrack extends TrackBase {
                 });
         }
 
-        if (this.header.INFO) {
-            //Code below will present checkboxes for all info fields of type "String".   Wait until this is requested
-            //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
-
-            // For now stick to explicit info fields (well, exactly 1 for starters)
-            const stringInfoKeys = ['SVTYPE', undefined]
-
-            if (stringInfoKeys.length > 0) {
-                const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-                $e.text('Color by');
-                menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
-                stringInfoKeys.sort();
-                for (let item of stringInfoKeys) {
-                    const selected = (this.variantColorBy === item);
-                    const label = item ? item : 'Default';
-                    menuItems.push(this.colorByCB({key: item, label: label}, selected));
-                }
-            }
-        }
 
         return menuItems;
     }
@@ -534,6 +546,14 @@ class VariantTrack extends TrackBase {
         };
 
         return {name: undefined, object: $e, click: clickHandler, init: undefined}
+    }
+
+    getState() {
+
+        const config = super.getState();
+        config.color = this._color;
+        return config;
+
     }
 }
 
