@@ -130,8 +130,8 @@ class VcfParser {
         const nExpectedColumns = 8 + (callSets ? callSets.length + 1 : 0);
         let line;
         while ((line = await dataWrapper.nextLine()) !== undefined) {
-
             if (line && !line.startsWith("#")) {
+
                 const tokens = line.split("\t");
                 if (tokens.length === nExpectedColumns) {
                     const variant = createVCFVariant(tokens);
@@ -148,8 +148,8 @@ class VcfParser {
 
                             const token = tokens[index];
 
-                            var callSet = callSets[index - 9],
-                                call = {
+                           const  callSet = callSets[index - 9];
+const                                call = {
                                     callSetName: callSet.name,
                                     info: {}
                                 };
