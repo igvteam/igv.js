@@ -60,7 +60,8 @@ class VariantTrack extends TrackBase {
         this.featureHeight = config.featureHeight || 14;
         this.visibilityWindow = config.visibilityWindow;
         this.featureSource = FeatureSource(config, this.browser.genome);
-        this.noCallColor = config.noCallColor || "rgb(245, 245, 245)";
+        this.noGenotypeColor = config.noGenotypeColor || "rgb(200,180,180)"
+        this.noCallColor = config.noCallColor || "rgb(225, 225, 225)";
         this.nonRefColor = config.nonRefColor || "rgb(200, 200, 215)";
         this.mixedColor = config.mixedColor || "rgb(200, 220, 200)";
         this.homrefColor = config.homrefColor || "rgb(200, 200, 200)";
@@ -220,17 +221,23 @@ class VariantTrack extends TrackBase {
                             let allVar = true;  // until proven otherwise
                             let allRef = true;
                             let noCall = false;
-                            for (let g of call.genotype) {
-                                if ('.' === g) {
-                                    noCall = true;
-                                    break;
-                                } else {
-                                    if (g !== 0) allRef = false;
-                                    if (g === 0) allVar = false;
+
+                            if (call.genotype) {
+                                for (let g of call.genotype) {
+                                    if ('.' === g) {
+                                        noCall = true;
+                                        break;
+                                    } else {
+                                        if (g !== 0) allRef = false;
+                                        if (g === 0) allVar = false;
+                                    }
                                 }
                             }
 
-                            if (noCall) {
+                            if(!call.genotype) {
+                                context.fillStyle = this.noGenotypeColor;
+                            }
+                            else if (noCall) {
                                 context.fillStyle = this.noCallColor;
                             } else if (allRef) {
                                 context.fillStyle = this.homrefColor;
@@ -261,7 +268,7 @@ class VariantTrack extends TrackBase {
 
         if (this.variantColorBy) {
             const value = variant.info[this.variantColorBy];
-            if(value) {
+            if (value) {
                 return getVariantColorTable(this.variantColorBy).getColor(value);
             } else {
                 return "gray";
@@ -340,25 +347,29 @@ class VariantTrack extends TrackBase {
          */
         function extractGenotypePopupData(call, variant, genomeId, sampleInformation) {
 
-            let gt = '';
-            const altArray = variant.alternateBases.split(",")
-            for (let allele of call.genotype) {
-                if ('.' === allele) {
-                    gt += 'No Call';
-                    break;
-                } else if (allele === 0) {
-                    gt += variant.referenceBases;
-                } else {
-                    let alt = altArray[allele - 1].replace("<", "&lt;");
-                    gt += alt;
-                }
-            }
-
             let popupData = [];
             if (call.callSetName !== undefined) {
                 popupData.push({name: 'Name', value: call.callSetName});
             }
-            popupData.push({name: 'Genotype', value: gt});
+
+            if (call.genotype) {
+                let gt = '';
+                const altArray = variant.alternateBases.split(",")
+                for (let allele of call.genotype) {
+                    if ('.' === allele) {
+                        gt += 'No Call';
+                        break;
+                    } else if (allele === 0) {
+                        gt += variant.referenceBases;
+                    } else {
+                        let alt = altArray[allele - 1].replace("<", "&lt;");
+                        gt += alt;
+                    }
+                }
+                popupData.push({name: 'Genotype', value: gt});
+            }
+
+
             if (call.phaseset !== undefined) {
                 popupData.push({name: 'Phase set', value: call.phaseset});
             }
@@ -382,14 +393,8 @@ class VariantTrack extends TrackBase {
                 popupData.push("<hr>");
             }
             infoKeys.forEach(function (key) {
-                popupData.push({name: key, value: call.info[key]});
+                popupData.push({name: key, value: decodeURIComponent(call.info[key])});
             });
-
-            let cravatLinks = [];                   // TODO -- where do these get calculated?
-            if (cravatLinks.length > 0) {
-                popupData.push("<HR/>");
-                popupData = popupData.concat(cravatLinks);
-            }
 
             return popupData;
         }
@@ -483,16 +488,21 @@ class VariantTrack extends TrackBase {
         }
 
         if (this.header.INFO) {
-            const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
-            if (stringInfoKeys.length > 0) {
+            //Code below will present checkboxes for all info fields of type "String".   Wait until this is requested
+            //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
 
+            // For now stick to explicit info fields (well, exactly 1 for starters)
+            const stringInfoKeys = ['SVTYPE', undefined]
+
+            if (stringInfoKeys.length > 0) {
                 const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
                 $e.text('Color by');
                 menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
                 stringInfoKeys.sort();
                 for (let item of stringInfoKeys) {
                     const selected = (this.variantColorBy === item);
-                    menuItems.push(this.colorByCB({key: item, label: item}, selected));
+                    const label = item ? item : 'Default';
+                    menuItems.push(this.colorByCB({key: item, label: label}, selected));
                 }
             }
         }
