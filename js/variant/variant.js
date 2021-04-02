@@ -153,14 +153,12 @@ class Variant {
 
     popupData(genomicLocation, genomeId) {
 
-        var self = this,
-            fields, gt;
 
         const posString = `${StringUtils.numberFormatter(this.pos)}`;
         const locString = this.start === this.end ?
             `${StringUtils.numberFormatter(this.start)} | ${StringUtils.numberFormatter(this.start + 1)}` :
             `${StringUtils.numberFormatter(this.start + 1)}-${StringUtils.numberFormatter(this.end)}`;
-        fields = [
+        const fields = [
             {name: "Chr", value: this.chr},
             {name: "Pos", value: posString},
             {name: "Loc", value: locString},
@@ -180,7 +178,7 @@ class Variant {
                         let l = TrackBase.getCravatLink(this.chr, this.pos, ref, alt, genomeId)
                         if (l) {
                             fields.push("<hr/>");
-                            fields.push(l);
+                            fields.push({html: l});
                         }
                     }
                 }
@@ -193,22 +191,20 @@ class Variant {
 
         if (this.info) {
             fields.push({html: '<hr style="border-top: dotted 1px;border-color: #c9c3ba" />'});
-            Object.keys(this.info).forEach(function (key) {
-                fields.push({name: key, value: arrayToString(self.info[key])});
-            });
+            for (let key of Object.keys(this.info)) {
+                fields.push({name: key, value: arrayToString(decodeURIComponent(this.info[key]))});
+            }
         }
 
 
         // Special case of VCF with a single sample
-        if (this.calls && this.calls.length === 1) {
+        if (this.calls && this.calls.length === 1 && this.calls[0].genotype) {
             fields.push('<hr>');
-            gt = this.alleles[this.calls[0].genotype[0]] + this.alleles[this.calls[0].genotype[1]];
+            const gt = this.calls[0].genotype.map(gt => this.alleles[gt]).join('');
             fields.push({name: "Genotype", value: gt});
         }
 
-
         return fields;
-
 
     };
 
