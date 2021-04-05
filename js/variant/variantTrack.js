@@ -160,43 +160,42 @@ class VariantTrack extends TrackBase {
 
         if (!features || features.length == 0) return TOP_MARGIN;
 
-        if (this.displayMode === "COLLAPSED") {
-            //this.nVariantRows = 1;
-            return TOP_MARGIN + this.variantHeight;
-        } else {
-            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
-            const h = TOP_MARGIN + this.nVariantRows * (this.variantHeight + vGap);
-            const callHeight = (this.displayMode === "EXPANDED" ? this.expandedCallHeight : this.squishedCallHeight);
-            const nCalls = this.getCallsetsLength() * this.nVariantRows;
-            return h + vGap + (nCalls + 1) * (callHeight + vGap);
-        }
+        const nVariantRows = (this.displayMode === "COLLAPSED") ? 1 : this.nVariantRows;
+        const vGap = (this.displayMode === "SQUISHED") ? this.squishedVGap : this.expandedVGap;
+        const h = TOP_MARGIN + nVariantRows * (this.variantHeight + vGap);
+        const callHeight = (this.displayMode === "SQUISHED") ? this.squishedCallHeight : this.expandedCallHeight;
+        const nCalls = this.getCallsetsLength() * nVariantRows;
+        return h + vGap + (nCalls + 1) * (callHeight + vGap);
+
     }
 
     variantRowCount(count) {
         this.nVariantRows = count;
-        const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
-        this.variantBandHeight = TOP_MARGIN + this.nVariantRows * (this.variantHeight + vGap);
-
     }
 
     draw({context, pixelWidth, pixelHeight, bpPerPixel, bpStart, pixelTop, features}) {
 
         IGVGraphics.fillRect(context, 0, pixelTop, pixelWidth, pixelHeight, {'fillStyle': "rgb(255, 255, 255)"});
 
+        const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap;
+        const rc = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows;
+        this.variantBandHeight = TOP_MARGIN + rc * (this.variantHeight + vGap);
+
         const callSets = this.callSets;
         const nCalls = this.getCallsetsLength();
-        if (callSets && nCalls > 0 && "COLLAPSED" !== this.displayMode) {
+        if (callSets && nCalls > 0 ) {
             IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
         }
 
         if (features) {
 
-            const callHeight = ("EXPANDED" === this.displayMode ? this.expandedCallHeight : this.squishedCallHeight);
-            const vGap = (this.displayMode === 'EXPANDED') ? this.expandedVGap : this.squishedVGap;
+            const callHeight = ("SQUISHED" === this.displayMode) ? this.squishedCallHeight : this.expandedCallHeight;
+            const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap;
             const bpEnd = bpStart + pixelWidth * bpPerPixel + 1;
 
             // Loop through variants.  A variant == a row in a VCF file
             for (let variant of features) {
+
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
@@ -219,16 +218,18 @@ class VariantTrack extends TrackBase {
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
-                if (nCalls > 0 && variant.calls && "COLLAPSED" !== this.displayMode) {
+                if (nCalls > 0) {
 
+                    const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows;
                     this.sampleYOffset = this.variantBandHeight + vGap;
-                    this.sampleHeight = this.nVariantRows * (callHeight + vGap);  // For each sample, there is a call for each variant at this position
+                    this.sampleHeight = nVariantRows * (callHeight + vGap);  // For each sample, there is a call for each variant at this position
 
                     let sampleNumber = 0;
                     for (let callSet of callSets) {
                         const call = variant.calls[callSet.id];
                         if (call) {
-                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + variant.row * (callHeight + vGap);
+                            const row = "COLLAPSED" === this.displayMode ? 0 : variant.row;
+                            const py = this.sampleYOffset + sampleNumber * this.sampleHeight + row * (callHeight + vGap);
                             let allVar = true;  // until proven otherwise
                             let allRef = true;
                             let noCall = false;
@@ -489,7 +490,7 @@ class VariantTrack extends TrackBase {
             //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
 
             // For now stick to explicit info fields (well, exactly 1 for starters)
-            const stringInfoKeys = this.header.INFO.SVTYPE ?  ['SVTYPE', undefined] : [];
+            const stringInfoKeys = this.header.INFO.SVTYPE ? ['SVTYPE', undefined] : [];
 
             if (stringInfoKeys.length > 0) {
                 const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
