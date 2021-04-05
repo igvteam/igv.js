@@ -51,7 +51,8 @@ class VariantTrack extends TrackBase {
         this.visibilityWindow = config.visibilityWindow;
         this.displayMode = config.displayMode || "EXPANDED";    // COLLAPSED | EXPANDED | SQUISHED
         this.labelDisplayMode = config.labelDisplayMode;
-        this.variantHeight = config.variantHeight || 10;
+        this.expandedVariantHeight = config.expandedVariantHeight || config.variantHeight || 10;
+        this.squishedVariantHeight = config.squishedVariantHeight || 2;
         this.squishedCallHeight = config.squishedCallHeight || 1;
         this.expandedCallHeight = config.expandedCallHeight || 10;
         this.expandedVGap = config.expandedVGap !== undefined ? config.expandedVGap : 2;
@@ -72,6 +73,7 @@ class VariantTrack extends TrackBase {
         this.type = config.type || "variant"
         this.variantColorBy = config.variantColorBy;   // Can be undefined => default
         this._color = config.color;
+        this.showGenotypes = config.showGenotypes === undefined ? true : config.showGenotypes;
 
         // The number of variant rows are computed dynamically, but start with "1" by default
         this.variantRowCount(1);
@@ -162,9 +164,10 @@ class VariantTrack extends TrackBase {
 
         const nVariantRows = (this.displayMode === "COLLAPSED") ? 1 : this.nVariantRows;
         const vGap = (this.displayMode === "SQUISHED") ? this.squishedVGap : this.expandedVGap;
-        const h = TOP_MARGIN + nVariantRows * (this.variantHeight + vGap);
+        const variantHeight = (this.displayMode === "SQUISHED") ? this.squishedVariantHeight : this.expandedVariantHeight;
         const callHeight = (this.displayMode === "SQUISHED") ? this.squishedCallHeight : this.expandedCallHeight;
-        const nCalls = this.getCallsetsLength() * nVariantRows;
+        const nCalls = this.showGenotypes === false ? 0 : this.getCallsetsLength() * nVariantRows;
+        const h = TOP_MARGIN + nVariantRows * (variantHeight + vGap);
         return h + vGap + (nCalls + 1) * (callHeight + vGap);
 
     }
@@ -179,11 +182,12 @@ class VariantTrack extends TrackBase {
 
         const vGap = ("SQUISHED" === this.displayMode) ? this.squishedVGap : this.expandedVGap;
         const rc = ("COLLAPSED" === this.displayMode) ? 1 : this.nVariantRows;
-        this.variantBandHeight = TOP_MARGIN + rc * (this.variantHeight + vGap);
+        const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight;
+        this.variantBandHeight = TOP_MARGIN + rc * (variantHeight + vGap);
 
         const callSets = this.callSets;
         const nCalls = this.getCallsetsLength();
-        if (callSets && nCalls > 0 ) {
+        if (callSets && nCalls > 0 && this.showGenotypes !== false) {
             IGVGraphics.strokeLine(context, 0, this.variantBandHeight, pixelWidth, this.variantBandHeight, {strokeStyle: 'rgb(224,224,224) '});
         }
 
@@ -199,8 +203,9 @@ class VariantTrack extends TrackBase {
                 if (variant.end < bpStart) continue;
                 if (variant.start > bpEnd) break;
 
-                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (this.variantHeight + vGap));
-                const h = this.variantHeight;
+                const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight;
+                const y = TOP_MARGIN + ("COLLAPSED" === this.displayMode ? 0 : variant.row * (variantHeight + vGap));
+                const h = variantHeight;
 
                 // Compute pixel width.   Minimum width is 3 pixels,  if > 5 pixels create gap between variants
                 let x = Math.round((variant.start - bpStart) / bpPerPixel);
@@ -218,7 +223,7 @@ class VariantTrack extends TrackBase {
                 variant.pixelRect = {x, y, w, h}
 
                 // Loop though the calls for this variant.  There will potentially be a call for each sample.
-                if (nCalls > 0) {
+                if (nCalls > 0 && this.showGenotypes !== false) {
 
                     const nVariantRows = "COLLAPSED" === this.displayMode ? 1 : this.nVariantRows;
                     this.sampleYOffset = this.variantBandHeight + vGap;
@@ -315,7 +320,8 @@ class VariantTrack extends TrackBase {
         let sampleRow;
         if (yOffset <= this.variantBandHeight) {
             // Variant
-            row = (Math.floor)((yOffset - TOP_MARGIN) / (this.variantHeight + vGap));
+            const variantHeight = ("SQUISHED" === this.displayMode) ? this.squishedVariantHeight : this.expandedVariantHeight;
+            row = (Math.floor)((yOffset - TOP_MARGIN) / (variantHeight + vGap));
             sampleRow = -1;
         } else {
             const sampleY = yOffset - this.variantBandHeight;
@@ -505,6 +511,18 @@ class VariantTrack extends TrackBase {
             }
         }
 
+        if (this.getCallsetsLength() > 0) {
+            menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
+            menuItems.push({
+                object: createCheckbox("Show Genotypes", this.showGenotypes),
+                click: () => {
+                    this.showGenotypes = !this.showGenotypes;
+                    //adjustTrackHeight();
+                    this.trackView.checkContentHeight();
+                    this.trackView.repaintViews();
+                }
+            })
+        }
 
         menuItems.push({object: $('<div class="igv-track-menu-border-top">')});
         for (let displayMode of ["COLLAPSED", "SQUISHED", "EXPANDED"]) {
