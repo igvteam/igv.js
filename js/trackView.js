@@ -387,9 +387,8 @@ class TrackView {
         }
 
         // Very special case for variant tracks in multilocus view.  The # of rows to allocate to the variant (site)
-        // section depends on data from all the views.  We only need to adjust this however if any data was loaded
-        // (i.e. rpV.length > 0)
-        if(rpV.length > 0 && typeof this.track.variantRowCount === 'function') {
+        // section depends on data from all the views.
+        if(typeof this.track.variantRowCount === 'function') {
             let maxRow = 0;
             for(let vp of this.viewports) {
                 if (vp.tile && vp.tile.features) {
