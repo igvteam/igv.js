@@ -196,14 +196,6 @@ class Variant {
             }
         }
 
-
-        // Special case of VCF with a single sample
-        if (this.calls && this.calls.length === 1 && this.calls[0].genotype) {
-            fields.push('<hr>');
-            const gt = this.calls[0].genotype.map(gt => this.alleles[gt]).join('');
-            fields.push({name: "Genotype", value: gt});
-        }
-
         return fields;
 
     };

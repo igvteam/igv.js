@@ -80,7 +80,7 @@ class VariantTrack extends TrackBase {
 
     async postInit() {
 
-        const header = await this.getHeader();   // cricital, don't remove'
+        this.header = await this.getHeader();   // cricital, don't remove'
         if (undefined === this.visibilityWindow && this.config.indexed !== false) {
             const fn = this.config.url instanceof File ? this.config.url.name : this.config.url;
             if (isString(fn) && fn.toLowerCase().includes("gnomad")) {
@@ -364,16 +364,23 @@ class VariantTrack extends TrackBase {
 
             if (call.genotype) {
                 let gt = '';
-                const altArray = variant.alternateBases.split(",")
-                for (let allele of call.genotype) {
-                    if ('.' === allele) {
-                        gt += 'No Call';
-                        break;
-                    } else if (allele === 0) {
-                        gt += variant.referenceBases;
-                    } else {
-                        let alt = altArray[allele - 1].replace("<", "&lt;");
-                        gt += alt;
+
+                if (variant.alternateBases === ".") {
+                    gt = "No Call";
+                } else {
+                    const altArray = variant.alternateBases.split(",")
+                    for (let allele of call.genotype) {
+                        if (gt.length > 0) {
+                            gt += "|";
+                        }
+                        if ('.' === allele) {
+                            gt += '.';
+                        } else if (allele === 0) {
+                            gt += variant.referenceBases;
+                        } else {
+                            let alt = altArray[allele - 1].replace("<", "&lt;");
+                            gt += alt;
+                        }
                     }
                 }
                 popupData.push({name: 'Genotype', value: gt});
@@ -482,7 +489,7 @@ class VariantTrack extends TrackBase {
             //const stringInfoKeys = Object.keys(this.header.INFO).filter(key => "String" === this.header.INFO[key].Type);
 
             // For now stick to explicit info fields (well, exactly 1 for starters)
-            const stringInfoKeys = ['SVTYPE', undefined]
+            const stringInfoKeys = this.header.INFO.SVTYPE ?  ['SVTYPE', undefined] : [];
 
             if (stringInfoKeys.length > 0) {
                 const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
