@@ -148,11 +148,11 @@ class VcfParser {
 
                             const token = tokens[index];
 
-                           const  callSet = callSets[index - 9];
-const                                call = {
-                                    callSetName: callSet.name,
-                                    info: {}
-                                };
+                            const callSet = callSets[index - 9];
+                            const call = {
+                                callSetName: callSet.name,
+                                info: {}
+                            };
 
                             variant.calls[callSet.id] = call;
 
