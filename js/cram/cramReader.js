@@ -289,7 +289,7 @@ class CramReader {
                                 }
                                 const len = 'i' === code ? 1 : data.length;
                                 insertions.push(new AlignmentBlock({
-                                    start: refPos - 1,
+                                    start: refPos,
                                     len: len,
                                     seqOffset: basesUsed,
                                     type: 'I'
