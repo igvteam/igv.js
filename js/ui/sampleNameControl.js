@@ -65,6 +65,14 @@ class SampleNameControl {
         }
     }
 
+    hide() {
+        this.$button.hide();
+    }
+
+    show() {
+        this.$button.show();
+    }
+
 }
 
 export default SampleNameControl
