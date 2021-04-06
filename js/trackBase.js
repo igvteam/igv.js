@@ -108,23 +108,23 @@ class TrackBase {
 
         // Create copy of config, minus transient properties (convention is name starts with '_')
         const state = {};
-        for(let key of Object.keys(this.config)) {
-            if(!key.startsWith("_")) {
+        for (let key of Object.keys(this.config)) {
+            if (!key.startsWith("_")) {
                 state[key] = this.config[key];
             }
         }
 
         // Update original config values with any changes
-        for(let key of Object.keys(state)) {
-            if(key.startsWith("_")) continue;   // transient property
+        for (let key of Object.keys(state)) {
+            if (key.startsWith("_")) continue;   // transient property
             const value = this[key];
             if (value && (isSimpleType(value) || typeof value === "boolean")) {
                 state[key] = value;
             }
         }
 
-        if(this.color) state.color = this.color;
-        if(this.altColor) state.altColor = this.altColor;
+        if (this.color) state.color = this.color;
+        if (this.altColor) state.altColor = this.altColor;
 
         // Flatten dataRange if present
         if (!this.autoscale && this.dataRange) {
@@ -133,13 +133,15 @@ class TrackBase {
         }
 
         // Check for non-json-if-yable properties.  Perhaps we should test what can be saved.
-        for(let key of Object.keys(state)) {
-            if(typeof state[key] === 'function') {
-                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.` );
-            } if(state[key] instanceof File) {
+        for (let key of Object.keys(state)) {
+            if (typeof state[key] === 'function') {
+                throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`);
+            }
+            if (state[key] instanceof File) {
                 throw Error(`Property '${key}' of track '${this.name} is a local File. Local file references cannot be saved in sessions.`);
-            } if(state[key] instanceof Promise) {
-                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.` );
+            }
+            if (state[key] instanceof Promise) {
+                throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`);
             }
         }
 
@@ -215,7 +217,7 @@ class TrackBase {
                     }
                     break;
                 case "viewlimits":
-                    if(!this.config.autoscale) {   // autoscale in the config has precedence
+                    if (!this.config.autoscale) {   // autoscale in the config has precedence
                         tokens = properties[key].split(":");
                         let min = 0;
                         let max;
@@ -230,6 +232,9 @@ class TrackBase {
                     }
                 case "name":
                     tracklineConfg[key] = properties[key];
+                    break;
+                case "url":
+                    tracklineConfg["infoURL"] = properties[key];
             }
         }
 
@@ -249,7 +254,7 @@ class TrackBase {
 
         // We use the cached features rather than method to avoid async load.  If the
         // feature is not already loaded this won't work,  but the user wouldn't be mousing over it either.
-        if(!features) features = clickState.viewport.getCachedFeatures();
+        if (!features) features = clickState.viewport.getCachedFeatures();
 
         if (!features || features.length === 0) {
             return [];
@@ -269,7 +274,7 @@ class TrackBase {
      * @param feature
      * @returns {Array}
      */
-    static extractPopupData(feature, genomeId) {
+    extractPopupData(feature, genomeId) {
 
         const filteredProperties = new Set(['row', 'color', 'chr', 'start', 'end', 'cdStart', 'cdEnd', 'strand', 'alpha']);
         const data = [];
@@ -342,6 +347,12 @@ class TrackBase {
             posString += ` (${feature.strand})`
         }
         data.push({name: 'Location', value: posString});
+
+        if (this.infoURL) {
+            data.push("<hr/>");
+            const href = this.infoURL.replace("$$", feature.name);
+            data.push({html: `<a target="_blank" href=${href}>${href}</a>`});
+        }
 
         return data;
 

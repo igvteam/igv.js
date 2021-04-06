@@ -1,0 +1,10 @@
+browser position chr22:10000000-10020000
+browser hide all
+track name=clones description="Clones" visibility=2 color=0,128,0 useScore=1 url="http://genome.ucsc.edu/goldenPath/help/clones.html#$$"
+#chrom chromStart chromEnd name score
+chr22 10000000 10004000 cloneA 960
+chr22 10002000 10006000 cloneB 200
+chr22 10005000 10009000 cloneC 700
+chr22 10006000 10010000 cloneD 600
+chr22 10011000 10015000 cloneE 300
+chr22 10012000 10017000 cloneF 100
