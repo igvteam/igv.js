@@ -10,6 +10,7 @@ import ViewportBase from "./viewportBase.js";
 import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import MenuPopup from "./ui/menuPopup.js";
 import C2S from "./canvas2svg.js"
+import {getFilename} from "./util/igvUtils.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -53,9 +54,18 @@ class ViewPort extends ViewportBase {
                 if (typeof track.description === 'function') {
                     str = track.description();
                 } else if (track.description) {
-                    str = `<div title="${track.name}"><div>${track.description}</div></div>`
+                    str = `<div>${track.description}</div>`
                 } else {
-                    str = `<div title="${track.name}"><div>${track.name}</div></div>`
+                    if(track.url) {
+                        if (track.url instanceof File) {
+                            str = `<div><b>Filename: </b>${track.url.name}`;
+                        } else {
+                            str = `<div><b>URL: </b>${track.url}`;
+                        }
+                    } else {
+                        str = track.name;
+
+                    }
                 }
 
                 if (this.popover) this.popover.dispose()
@@ -151,7 +161,6 @@ class ViewPort extends ViewportBase {
         return true;
 
 
-
     }
 
     shift() {
@@ -223,7 +232,7 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        let { features, roiFeatures, bpPerPixel, startBP, endBP } = this.tile
+        let {features, roiFeatures, bpPerPixel, startBP, endBP} = this.tile
 
         const isWGV = GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr)
         let pixelWidth
@@ -379,7 +388,7 @@ class ViewPort extends ViewportBase {
     }
 
     containsPosition(chr, position) {
-        if(this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
+        if (this.referenceFrame.chr === chr && position >= this.referenceFrame.start) {
             return position <= this.referenceFrame.calculateEnd(this.getWidth());
         } else {
             return false;
@@ -485,7 +494,7 @@ class ViewPort extends ViewportBase {
 
     drawSVGWithContext(context, width, height) {
 
-        let { start, bpPerPixel} = this.referenceFrame;
+        let {start, bpPerPixel} = this.referenceFrame;
 
         context.save();
 
@@ -587,7 +596,7 @@ class ViewPort extends ViewportBase {
             let menuItems = [];
             if (typeof self.trackView.track.contextMenuItemList === "function") {
                 const trackMenuItems = self.trackView.track.contextMenuItemList(clickState);
-                if(trackMenuItems) {
+                if (trackMenuItems) {
                     menuItems = trackMenuItems;
                 }
             }
@@ -833,8 +842,6 @@ class ViewPort extends ViewportBase {
     }
 
 }
-
-
 
 
 var Tile = function (chr, tileStart, tileEnd, bpPerPixel, features, roiFeatures) {
