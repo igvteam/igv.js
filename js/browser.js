@@ -316,9 +316,12 @@ class Browser {
             this.trackLabelControl = new TrackLabelControl($toggle_button_container, this);
         }
 
-        if (true === config.showSampleNameButton) {
-            this.sampleNameControl = new SampleNameControl($toggle_button_container, this)
+        // if (true === config.showSampleNameButton) {
+        this.sampleNameControl = new SampleNameControl($toggle_button_container, this)
+        if (!config.showSampleNameButton) {
+            this.sampleNameControl.hide();
         }
+        //  }
 
         if (true === config.showSVGButton) {
             this.svgSaveControl = new SVGSaveControl($toggle_button_container, this);
@@ -338,7 +341,6 @@ class Browser {
         return $navBar;
 
     }
-
 
 
     getSampleNameViewportWidth() {
@@ -821,6 +823,12 @@ class Browser {
                 await this.addTrack(newTrack);
             } else {
                 this.addTrack(newTrack);
+            }
+
+            if(typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+                if(this.config.showSampleNameButton !== false) {
+                    this.sampleNameControl.show();   // If not explicitly set
+                }
             }
 
             return newTrack;
@@ -1605,10 +1613,10 @@ class Browser {
             "version": version()
         }
 
-        if(this.showSampleNames !== undefined) {
+        if (this.showSampleNames !== undefined) {
             json['showSampleNames'] = this.showSampleNames;
         }
-        if(this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
+        if (this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
             json['sampleNameViewportWidth'] = this.sampleNameViewportWidth;
         }
 

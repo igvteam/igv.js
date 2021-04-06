@@ -139,15 +139,15 @@ class VariantTrack extends TrackBase {
         return this.featureSource.getFeatures({chr, start, end, bpPerPixel, visibilityWindow: this.visibilityWindow});
     }
 
+    hasSamples() {
+        return this.getCallsetsLength() > 0;
+    }
+
     getSamples() {
-        if (this.displayMode === "COLLAPSED") {
-            return undefined;
-        } else {
-            return {
-                yOffset: this.sampleYOffset,
-                names: this.sampleNames,
-                height: this.sampleHeight
-            }
+        return {
+            yOffset: this.sampleYOffset,
+            names: this.sampleNames,
+            height: this.sampleHeight
         }
     }
 

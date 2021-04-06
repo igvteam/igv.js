@@ -150,6 +150,14 @@ class TrackBase {
         return false;
     }
 
+    /**
+     * Does the track support sample names.  Current sample aware tracks include VCF (with genotypes), MUT, MAF, and SEG
+     * @returns {boolean}
+     */
+    hasSamples() {
+        return false;
+    }
+
     getGenomeId() {
         return this.browser.genome ? this.browser.genome.id : undefined
     }
