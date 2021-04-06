@@ -24,7 +24,7 @@
  */
 
 import $ from "./vendor/jquery-3.3.1.slim.js";
-import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {Alert, InputDialog} from '../node_modules/igv-ui/dist/igv-ui.js';
 import TrackView, {
     emptyViewportContainers,
     maxViewportContentHeight,
@@ -58,6 +58,17 @@ import version from "./version.js";
 import FeatureSource from "./feature/featureSource.js"
 import {defaultNucleotideColors} from "./util/nucleotideColors.js"
 import search from "./search.js"
+import NavbarManager from "./navbarManager.js";
+import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
+import WindowSizePanel from "./windowSizePanel.js";
+import CursorGuide from "./ui/cursorGuide.js";
+import CenterGuide from "./ui/centerGuide.js";
+import TrackLabelControl from "./ui/trackLabelControl.js";
+import SampleNameControl from "./ui/sampleNameControl.js";
+import SVGSaveControl from "./ui/svgSaveControl.js";
+import ZoomWidget from "./ui/zoomWidget.js";
+import UserFeedback from "./ui/userFeedback.js";
+import DataRangeDialog from "./ui/dataRangeDialog.js";
 
 // igv.scss - $igv-multi-locus-gap-width
 const multiLocusGapDivWidth = 1
@@ -80,9 +91,9 @@ const defaultSampleNameViewportWidth = 200
 
 class Browser {
 
-    constructor(options, parentDiv) {
+    constructor(config, parentDiv) {
 
-        this.config = options;
+        this.config = config;
         this.guid = DOMUtils.guid();
         this.namespace = '.browser_' + this.guid;
 
@@ -97,7 +108,7 @@ class Browser {
         Alert.init(this.$root.get(0))
         this.trackContainer = $trackContainer.get(0);
 
-        this.initialize(options);
+        this.initialize(config);
 
         this.trackViews = [];
         this.trackLabelsVisible = true;
@@ -110,7 +121,7 @@ class Browser {
             dragThreshold: 3,
             scrollThreshold: 5,
             defaultColor: "rgb(0,0,150)",
-            doubleClickDelay: options.doubleClickDelay || 500
+            doubleClickDelay: config.doubleClickDelay || 500
         }
 
         // Map of event name -> [ handlerFn, ... ]
@@ -124,44 +135,49 @@ class Browser {
         this.stopSpinner();
 
         this.addMouseHandlers();
+
+        this.setControls(config);
     }
 
-    initialize(options) {
+    initialize(config) {
 
         var genomeId;
 
-        if (options.gtex) {
+        if (config.gtex) {
             GtexUtils.gtexLoaded = true
         }
-        this.flanking = options.flanking;
-        this.crossDomainProxy = options.crossDomainProxy;
-        this.formats = options.formats;
-        this.trackDefaults = options.trackDefaults;
-        this.nucleotideColors = options.nucleotideColors || defaultNucleotideColors;
+        this.flanking = config.flanking;
+        this.crossDomainProxy = config.crossDomainProxy;
+        this.formats = config.formats;
+        this.trackDefaults = config.trackDefaults;
+        this.nucleotideColors = config.nucleotideColors || defaultNucleotideColors;
         for (let key of Object.keys(this.nucleotideColors)) {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
 
-        this.sampleNameViewportWidth = options.sampleNameViewportWidth || defaultSampleNameViewportWidth;
+        this.showSampleNames = config.showSampleNames;
+        this.showSampleNameButton = config.showSampleNameButton;
+        this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth;
 
-        if (options.search) {
+
+        if (config.search) {
             this.searchConfig = {
                 type: "json",
-                url: options.search.url,
-                coords: options.search.coords === undefined ? 1 : options.search.coords,
-                chromosomeField: options.search.chromosomeField || "chromosome",
-                startField: options.search.startField || "start",
-                endField: options.search.endField || "end",
-                geneField: options.search.geneField || "gene",
-                snpField: options.search.snpField || "snp",
-                resultsField: options.search.resultsField
+                url: config.search.url,
+                coords: config.search.coords === undefined ? 1 : config.search.coords,
+                chromosomeField: config.search.chromosomeField || "chromosome",
+                startField: config.search.startField || "start",
+                endField: config.search.endField || "end",
+                geneField: config.search.geneField || "gene",
+                snpField: config.search.snpField || "snp",
+                resultsField: config.search.resultsField
             }
         } else {
 
-            if (options.reference && options.reference.id) {
-                genomeId = options.reference.id;
-            } else if (options.genome) {
-                genomeId = options.genome;
+            if (config.reference && config.reference.id) {
+                genomeId = config.reference.id;
+            } else if (config.genome) {
+                genomeId = config.genome;
             } else {
                 genomeId = "hg19";
             }
@@ -180,6 +196,150 @@ class Browser {
             }
         }
     }
+
+
+    setControls(config) {
+
+        const $navBar = this.createStandardControls(config);
+
+        $navBar.insertBefore($(this.trackContainer));
+
+        if (false === config.showControls) {
+            $navBar.hide();
+        }
+
+        if (false === config.showTrackLabels) {
+            this.hideTrackLabels();
+        } else {
+            this.showTrackLabels();
+            if (this.trackLabelControl) {
+                this.trackLabelControl.setState(this.trackLabelsVisible);
+            }
+        }
+
+        if (false === config.showCursorTrackingGuide) {
+            this.cursorGuide.doHide();
+        } else {
+            this.cursorGuide.doShow();
+        }
+        if (false === config.showCenterGuide) {
+            this.centerGuide.doHide();
+        } else {
+            this.centerGuide.doShow();
+        }
+
+    }
+
+    createStandardControls(config) {
+
+        this.navbarManager = new NavbarManager(this);
+
+        const $navBar = $('<div>', {class: 'igv-navbar'});
+        this.$navigation = $navBar;
+
+        const $navbarLeftContainer = $('<div>', {class: 'igv-navbar-left-container'});
+        $navBar.append($navbarLeftContainer);
+
+        // IGV logo
+        const $logo = $('<div>', {class: 'igv-logo'});
+        $navbarLeftContainer.append($logo);
+
+        const logoSvg = logo();
+        logoSvg.css("width", "34px");
+        logoSvg.css("height", "32px");
+        $logo.append(logoSvg);
+
+        this.$current_genome = $('<div>', {class: 'igv-current-genome'});
+        $navbarLeftContainer.append(this.$current_genome);
+        this.$current_genome.text('');
+
+        const $genomicLocation = $('<div>', {class: 'igv-navbar-genomic-location'});
+        $navbarLeftContainer.append($genomicLocation);
+
+        // chromosome select widget
+        this.chromosomeSelectWidget = new ChromosomeSelectWidget(this, $genomicLocation);
+        if (undefined === config.showChromosomeWidget) {
+            config.showChromosomeWidget = true;   // Default to true
+        }
+        if (true === config.showChromosomeWidget) {
+            this.chromosomeSelectWidget.$container.show();
+        } else {
+            this.chromosomeSelectWidget.$container.hide();
+        }
+
+        const $locusSizeGroup = $('<div>', {class: 'igv-locus-size-group'});
+        $genomicLocation.append($locusSizeGroup);
+
+        const $searchContainer = $('<div>', {class: 'igv-search-container'});
+        $locusSizeGroup.append($searchContainer);
+
+        // browser.$searchInput = $('<input type="text" placeholder="Locus Search">');
+        this.$searchInput = $('<input>', {class: 'igv-search-input', type: 'text', placeholder: 'Locus Search'});
+        $searchContainer.append(this.$searchInput);
+
+        this.$searchInput.change(async () => {
+            try {
+                const str = this.$searchInput.val()
+                const referenceFrameList = await this.search(str)
+
+                if (referenceFrameList.length > 1) {
+                    this.updateLocusSearchWidget(referenceFrameList)
+                    this.windowSizePanel.updatePanel(referenceFrameList)
+                }
+
+            } catch (error) {
+                Alert.presentAlert(error)
+            }
+        })
+
+        const $searchIconContainer = $('<div>', {class: 'igv-search-icon-container'});
+        $searchContainer.append($searchIconContainer);
+
+        $searchIconContainer.append(createIcon("search"));
+
+        $searchIconContainer.on('click', () => this.search(this.$searchInput.val()));
+
+        this.windowSizePanel = new WindowSizePanel($locusSizeGroup, this);
+
+        const $navbarRightContainer = $('<div>', {class: 'igv-navbar-right-container'});
+        $navBar.append($navbarRightContainer);
+
+        const $toggle_button_container = $('<div class="igv-navbar-toggle-button-container">');
+        $navbarRightContainer.append($toggle_button_container);
+        this.$toggle_button_container = $toggle_button_container;
+
+        this.cursorGuide = new CursorGuide($(this.trackContainer), $toggle_button_container, config, this);
+
+        this.centerGuide = new CenterGuide($(this.trackContainer), $toggle_button_container, config, this);
+
+        if (true === config.showTrackLabelButton) {
+            this.trackLabelControl = new TrackLabelControl($toggle_button_container, this);
+        }
+
+        if (true === config.showSampleNameButton) {
+            this.sampleNameControl = new SampleNameControl($toggle_button_container, this)
+        }
+
+        if (true === config.showSVGButton) {
+            this.svgSaveControl = new SVGSaveControl($toggle_button_container, this);
+        }
+
+        this.zoomWidget = new ZoomWidget(this, $navbarRightContainer);
+
+        if (false === config.showNavigation) {
+            this.$navigation.hide();
+        }
+
+        this.userFeedback = new UserFeedback($(this.trackContainer));
+        this.userFeedback.hide();
+        this.inputDialog = new InputDialog(this.$root.get(0));
+        this.dataRangeDialog = new DataRangeDialog(this.$root);
+
+        return $navBar;
+
+    }
+
+
 
     getSampleNameViewportWidth() {
         return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
@@ -1445,10 +1605,12 @@ class Browser {
             "version": version()
         }
 
-        if(this.showSampleNames) {
+        if(this.showSampleNames !== undefined) {
             json['showSampleNames'] = this.showSampleNames;
         }
-        json['sampleNameViewportWidth'] = this.sampleNameViewportWidth;
+        if(this.sampleNameViewportWidth !== defaultSampleNameViewportWidth) {
+            json['sampleNameViewportWidth'] = this.sampleNameViewportWidth;
+        }
 
         json["reference"] = this.genome.toJSON();
         if (FileUtils.isFilePath(json.reference.fastaURL)) {
@@ -1859,6 +2021,20 @@ async function searchWebService(browser, locus, searchConfig) {
     }
     const result = await igvxhr.loadString(path)
     return {result: result, locusSearchString: locus}
+}
+
+function logo() {
+
+    return $(
+        '<svg width="690px" height="324px" viewBox="0 0 690 324" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">' +
+        '<title>IGV</title>' +
+        '<g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">' +
+        '<g id="IGV" fill="#666666">' +
+        '<polygon id="Path" points="379.54574 8.00169252 455.581247 8.00169252 515.564813 188.87244 532.884012 253.529506 537.108207 253.529506 554.849825 188.87244 614.833392 8.00169252 689.60164 8.00169252 582.729511 320.722144 486.840288 320.722144"></polygon>' +
+        '<path d="M261.482414,323.793286 C207.975678,323.793286 168.339046,310.552102 142.571329,284.069337 C116.803612,257.586572 103.919946,217.158702 103.919946,162.784513 C103.919946,108.410325 117.437235,67.8415913 144.472217,41.0770945 C171.507199,14.3125977 212.903894,0.930550071 268.663545,0.930550071 C283.025879,0.930550071 298.232828,1.84616386 314.284849,3.6774189 C330.33687,5.50867394 344.839793,7.97378798 357.794056,11.072835 L357.794056,68.968378 C339.48912,65.869331 323.578145,63.5450806 310.060654,61.9955571 C296.543163,60.4460336 284.574731,59.6712835 274.154998,59.6712835 C255.850062,59.6712835 240.502308,61.4320792 228.111274,64.9537236 C215.720241,68.4753679 205.793482,74.2507779 198.330701,82.2801269 C190.867919,90.309476 185.587729,100.87425 182.48997,113.974767 C179.392212,127.075284 177.843356,143.345037 177.843356,162.784513 C177.843356,181.942258 179.251407,198.000716 182.067551,210.960367 C184.883695,223.920018 189.671068,234.41436 196.429813,242.443709 C203.188559,250.473058 212.059279,256.178037 223.042241,259.558815 C234.025202,262.939594 247.683295,264.629958 264.01693,264.629958 C268.241146,264.629958 273.098922,264.489094 278.590403,264.207362 C284.081883,263.925631 289.643684,263.50304 295.275972,262.939577 L295.275972,159.826347 L361.595831,159.826347 L361.595831,308.579859 C344.698967,313.087564 327.239137,316.750019 309.215815,319.567334 C291.192494,322.38465 275.281519,323.793286 261.482414,323.793286 L261.482414,323.793286 L261.482414,323.793286 Z" id="Path"></path>;' +
+        '<polygon id="Path" points="0.81355666 5.00169252 73.0472883 5.00169252 73.0472883 317.722144 0.81355666 317.722144"></polygon>' +
+        '</g> </g> </svg>'
+    );
 }
 
 export {isLocusString, searchWebService}
