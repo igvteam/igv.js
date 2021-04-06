@@ -967,7 +967,7 @@
 .igv-track-label:hover,
 .igv-track-label:focus,
 .igv-track-label:active {
-  background-color: rgba(0, 0, 0, 0.05); }
+  background-color: rgb(240,240,240); }
 
 .zoom-in-notice-container {
   position: absolute;
