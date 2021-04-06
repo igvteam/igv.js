@@ -53,7 +53,7 @@ class ViewPort extends ViewportBase {
                 if (typeof track.description === 'function') {
                     str = track.description();
                 } else if (track.description) {
-                    str = `<div title="${track.description}"><div>${track.description}</div></div>`
+                    str = `<div title="${track.name}"><div>${track.description}</div></div>`
                 } else {
                     str = `<div title="${track.name}"><div>${track.name}</div></div>`
                 }
