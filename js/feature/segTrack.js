@@ -87,7 +87,6 @@ class SegTrack extends TrackBase {
             this.sampleKeys = [];
         }
 
-
         //   this.featureSource = config.sourceType === "bigquery" ?
         //       new igv.BigQueryFeatureSource(this.config) :
         this.featureSource = FeatureSource(this.config, this.browser.genome);
@@ -136,6 +135,10 @@ class SegTrack extends TrackBase {
 
         return menuItems;
 
+    }
+
+    hasSamples() {
+        return true;   // SEG, MUT, and MAF tracks have samples by definition
     }
 
     getSamples() {

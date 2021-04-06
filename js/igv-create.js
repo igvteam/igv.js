@@ -64,9 +64,6 @@ async function createBrowser(parentDiv, config) {
         })
     }
 
-    // Set track order explicitly. Otherwise they will be ordered randomly as each completes its async load
-    setTrackOrder(config);
-
     // Create browser
     const browser = new Browser(config, parentDiv);
     allBrowsers.push(browser);
@@ -117,19 +114,6 @@ async function visibilityChange() {
     }
 }
 
-function setTrackOrder(conf) {
-
-    let trackOrder = 1;
-
-    if (conf.tracks) {
-        conf.tracks.forEach(function (track) {
-            if (track.order === undefined) {
-                track.order = trackOrder++;
-            }
-        });
-    }
-}
-
 function setDefaults(config) {
 
     if (undefined === config.promisified) {
@@ -166,10 +150,6 @@ function setDefaults(config) {
 
     if (undefined === config.showCenterGuide) {
         config.showCenterGuide = false;
-    }
-
-    if (undefined === config.showSampleNameButton) {
-        config.showSampleNameButton = true
     }
 
     if (undefined === config.showSampleNames) {
