@@ -264,13 +264,6 @@ class TextFeatureSource {
 
                         // Don't draw exons in whole genome view
                         if (wg["exons"]) delete wg["exons"]
-                        wg.popupData = function (genomeLocation) {
-                            if (typeof this._f.popupData === 'function') {
-                                return this._f.popupData();
-                            } else {
-                                return TrackBase.extractPopupData(this._f, genome.id);
-                            }
-                        }
 
                         wgFeatures.push(wg);
                     }
