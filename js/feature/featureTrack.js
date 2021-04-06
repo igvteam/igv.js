@@ -295,11 +295,11 @@ class FeatureTrack extends TrackBase {
             }
             const featureData = (typeof feature.popupData === "function") ?
               feature.popupData(genomicLocation) :
-              TrackBase.extractPopupData(feature, this.getGenomeId());
+              this.extractPopupData(feature._f || feature, this.getGenomeId());
 
             if (featureData) {
                 if (data.length > 0) {
-                    data.push("<HR>");
+                    data.push("<hr/><hr/>");
                 }
 
                 Array.prototype.push.apply(data, featureData);
