@@ -43,7 +43,8 @@ class SegTrack extends TrackBase {
 
         this.type = config.type || "seg";
         this.isLog = config.isLog;
-        this.displayMode = config.displayMode || "SQUISHED"; // EXPANDED | SQUISHED
+        this.displayMode = config.displayMode || "EXPANDED"; // EXPANDED | SQUISHED -- TODO perhaps set his based on sample count
+        this.height = config.height || 300;
         this.maxHeight = config.maxHeight || 500;
         this.squishedRowHeight = config.sampleSquishHeight || config.squishedRowHeight || 2;
         this.expandedRowHeight = config.sampleExpandHeight || config.expandedRowHeight || 13;
@@ -80,11 +81,15 @@ class SegTrack extends TrackBase {
             this.colorTable = new ColorTable(config.colorTable || MUT_COLORS);
         }
 
+        this.sampleKeys = [];
+        this.sampleNames = new Map();
         if (config.samples) {
-            this.sampleKeys = config.samples;
+            // Explicit setting, keys == names
+            for(let s of config.samples) {
+                this.sampleKeys.push(s);
+                this.sampleNames.set(s, s);
+            }
             this.explicitSamples = true;
-        } else {
-            this.sampleKeys = [];
         }
 
         //   this.featureSource = config.sourceType === "bigquery" ?
@@ -143,7 +148,7 @@ class SegTrack extends TrackBase {
 
     getSamples() {
         return {
-            names: this.sampleKeys,
+            names: this.sampleKeys.map(key => this.sampleNames.get(key)),
             height: this.sampleHeight,
             yOffset: 0
         }
@@ -500,11 +505,10 @@ class SegTrack extends TrackBase {
 
         if (this.explicitSamples) return;
 
-        const samples = new Set(this.sampleKeys);
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample;
-            if (!samples.has(sampleKey)) {
-                samples.add(sampleKey);
+            if (!this.sampleNames.has (sampleKey)) {
+                this.sampleNames.set(sampleKey, feature.sample);
                 this.sampleKeys.push(sampleKey);
             }
         }
