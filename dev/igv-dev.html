@@ -75,9 +75,19 @@
 
         const options =
             {
-                showCursorTrackingGuide: true,
+                // showCursorTrackingGuide: true,
                 genome: "hg19",
-                locus: [ 'ace', 'myc' ]
+                // locus: [ 'ace', 'myc' ]
+                locus: 'myc',
+                tracks:
+                [
+                    {
+                        "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                        "graphType": "points",
+                        "pointSize": 3,
+                        "name": "Encode bigwig points"
+                    }
+                ]
             };
 
         browser = await igv.createBrowser(document.getElementById('igvDiv'), options)

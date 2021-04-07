@@ -69,7 +69,7 @@ class ViewPort extends ViewportBase {
                 }
 
                 if (this.popover) this.popover.dispose()
-                this.popover = new Popover(this.trackView.$viewportContainer.get(0))
+                this.popover = new Popover(this.trackView.$viewportContainer.get(0), (track.name || 'unnamed'))
                 this.popover.presentContentWithEvent(e, str)
             });
             this.$trackLabel.mousedown(function (e) {
