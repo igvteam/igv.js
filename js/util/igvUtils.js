@@ -184,6 +184,7 @@ function inferTrackType(config) {
             case "seg":
                 return "seg";
             case "mut":
+            case "maf":
                 return "mut";
             case "bam":
             case "cram":

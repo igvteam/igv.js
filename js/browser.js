@@ -825,8 +825,8 @@ class Browser {
                 this.addTrack(newTrack);
             }
 
-            if(typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
-                if(this.config.showSampleNameButton !== false) {
+            if (typeof newTrack.hasSamples === 'function' && newTrack.hasSamples()) {
+                if (this.config.showSampleNameButton !== false) {
                     this.sampleNameControl.show();   // If not explicitly set
                 }
             }
@@ -875,23 +875,24 @@ class Browser {
         }
 
         let type = config.type;
-        if (type && "bedtype" !== type) {
+        if (type) {
             type = type.toLowerCase();
         } else {
             type = inferTrackType(config);
-            if ("bedtype" === type) {
-                // Bed files must be read to determine track type
-                const featureSource = FeatureSource(config, this.genome);
-                config._featureSource = featureSource;    // This is a temp variable, bit of a hack
-                const trackType = await featureSource.trackType();
-                if (trackType) {
-                    type = trackType;
-                } else {
-                    type = "annotation";
-                }
-                // Record in config to make type persistent in session
-                config.type = type;
+            config.type = type;
+        }
+        if ("bedtype" === type) {
+            // Bed files must be read to determine track type
+            const featureSource = FeatureSource(config, this.genome);
+            config._featureSource = featureSource;    // This is a temp variable, bit of a hack
+            const trackType = await featureSource.trackType();
+            if (trackType) {
+                type = trackType;
+            } else {
+                type = "annotation";
             }
+            // Record in config to make type persistent in session
+            config.type = type;
         }
 
         // Set defaults if specified
