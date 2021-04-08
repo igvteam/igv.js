@@ -54,7 +54,7 @@ class TextFeatureSource {
         const queryableFormats = new Set(["bigwig", "bw", "bigbed", "bb", "tdf"]);
 
         if (config.features && Array.isArray(config.features)) {
-            let features = fixFeatures(config.features);
+            let features = fixFeatures(config.features, genome);
             packFeatures(features);
             if (config.mappings) {
                 mapProperties(features, config.mappings)
@@ -311,7 +311,7 @@ function packFeatures(features, maxRows) {
  * config as an array of objects.   At the moment the only application is bedpe type features.
  * @param features
  */
-function fixFeatures(features) {
+function fixFeatures(features, genome) {
 
     if (!features || features.length === 0) return;
 
@@ -319,6 +319,12 @@ function fixFeatures(features) {
     if (isBedPE) {
         const interChrFeatures = [];
         for (let feature of features) {
+
+            if(genome) {
+                feature.chr1 = genome.getChromosomeName(feature.chr1);
+                feature.chr2 = genome.getChromosomeName(feature.chr2);
+            }
+
             // Set total extent of feature
             if (feature.chr1 === feature.chr2) {
                 feature.chr = feature.chr1;
@@ -328,6 +334,7 @@ function fixFeatures(features) {
                 interChrFeatures.push(feature);
             }
         }
+
         // Make copies of inter-chr features, one for each chromosome
         for (let f1 of interChrFeatures) {
             const f2 = Object.assign({dup: true}, f1);
@@ -341,7 +348,12 @@ function fixFeatures(features) {
             f2.start = f2.start2;
             f2.end = f2.end2;
         }
+    } else if (genome) {
+        for (let feature of features) {
+            feature.chr = genome.getChromosomeName(feature.chr);
+        }
     }
+
 
     return features;
 }

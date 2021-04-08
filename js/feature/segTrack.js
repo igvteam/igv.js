@@ -85,7 +85,7 @@ class SegTrack extends TrackBase {
         this.sampleNames = new Map();
         if (config.samples) {
             // Explicit setting, keys == names
-            for(let s of config.samples) {
+            for (let s of config.samples) {
                 this.sampleKeys.push(s);
                 this.sampleNames.set(s, s);
             }
@@ -129,7 +129,7 @@ class SegTrack extends TrackBase {
             menuItems.push(
                 {
                     object: createCheckbox(lut[displayMode], displayMode === this.displayMode),
-                    click:  () => {
+                    click: () => {
                         this.displayMode = displayMode;
                         this.config.displayMode = displayMode;
                         this.trackView.checkContentHeight();
@@ -431,8 +431,8 @@ class SegTrack extends TrackBase {
                 const data = feature.popupData()
                 Array.prototype.push.apply(items, data);
             } else {
-                const filteredProperties = new Set(['chr', 'start', 'end', 'row', 'color', 'sampleKey',
-                    'sample', 'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
+                const filteredProperties = new Set(['chr', 'start', 'end', 'sample', 'value', 'row', 'color', 'sampleKey',
+                    'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
 
                 // hack for whole genome features, which save the original feature as "_f"
                 const f = feature._f || feature;
@@ -501,7 +501,7 @@ class SegTrack extends TrackBase {
 
         for (let feature of featureList) {
             const sampleKey = feature.sampleKey || feature.sample;
-            if (!this.sampleNames.has (sampleKey)) {
+            if (!this.sampleNames.has(sampleKey)) {
                 this.sampleNames.set(sampleKey, feature.sample);
                 this.sampleKeys.push(sampleKey);
             }
