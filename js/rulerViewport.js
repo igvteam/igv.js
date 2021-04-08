@@ -35,6 +35,8 @@ class RulerViewport extends ViewPort {
 
         this.attachMouseHandlers( GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr) )
 
+        this.$tooltip.hide()
+
     }
 
     updateLocusLabel() {
