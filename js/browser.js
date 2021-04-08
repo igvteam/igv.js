@@ -1081,7 +1081,7 @@ class Browser {
         const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
 
         if (status) {
-            const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length)
+            const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length, this.getViewportContainerWidth())
             for (let referenceFrame of this.referenceFrameList) {
                 referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth
             }
@@ -1402,7 +1402,7 @@ class Browser {
     presentSplitScreenMultiLocusPanel(alignment, leftMatePairReferenceFrame) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
-        const viewportWidth = this.computeViewportWidth(1 + this.referenceFrameList.length);
+        const viewportWidth = this.computeViewportWidth(1 + this.referenceFrameList.length, this.getViewportContainerWidth());
 
         adjustReferenceFrame(leftMatePairReferenceFrame, viewportWidth, alignment.start, alignment.lengthOnRef)
 
