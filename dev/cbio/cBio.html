@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <meta content="" name="description">
+    <meta content="" name="author">
+    <link href=img/favicon.ico rel="shortcut icon">
+    <title>IGV - Dev</title>
+
+    <style>
+        #trackList {
+
+            border-color: rgb(127, 127, 127);
+            border-style: solid;
+            border-width: thin;
+
+            width: 480px;
+            height: 256px;
+            overflow-y: auto;
+        }
+
+        div#trackList > div, div#myDiv > h3 {
+
+            font-family: 'PT Sans', sans-serif;
+            font-size: small;
+            font-weight: 400;
+
+            color: #444;
+            margin-left: 16px;
+            margin-top: 4px;
+            margin-bottom: 4px;
+
+            padding-left: 32px;
+        }
+
+        div#myDiv > h3 {
+            font-size: large;
+        }
+
+        div#trackList > div:hover,
+        div#trackList > div:focus,
+        div#trackList > div:active {
+            cursor: pointer;
+            color: white;
+            background-color: rgba(49, 106, 246, 1);
+        }
+
+    </style>
+</head>
+
+<body>
+
+<h3>Select study to load copy number</h3>
+
+<div id="trackList"></div>
+
+<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+
+<script type="module">
+
+   import cBioUtils from "../js/cbio/cbio.js";
+
+    const cBio = {
+
+        //
+        // fetchStudies: function () {
+        //
+        //     let url = "https://www.cbioportal.org/api/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
+        //     return igvxhr.loadJson(url);
+        // },
+        //
+        // fetchSamplesByStudy: async function (study) {
+        //
+        //     let url = "https://www.cbioportal.org/api/studies/" + study + "/samples";
+        //     const samples = await igvxhr.loadJson(url);
+        //     let sampleStudyList = [];
+        //     samples.forEach(function (sampleJson) {
+        //         sampleStudyList.push(
+        //             {
+        //                 "sampleId": sampleJson["sampleId"],
+        //                 "studyId": study
+        //             }
+        //         )
+        //     })
+        //     return sampleStudyList;
+        // },
+        //
+        // fetchCopyNumberByStudy: async function (study) {
+        //     const sampleStudyList = await this.fetchSamplesByStudy(study);
+        //     let url = "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY";
+        //     let body = JSON.stringify(sampleStudyList);
+        //     return igvxhr.loadJson(url, {method: "POST", sendData: body})
+        // },
+
+        initMenu: async function (div, browser) {
+
+            let self = this;
+
+            const studies = await cBioUtils.fetchStudies();
+
+            for (let study of studies) {
+
+                let sampleCount = study["cnaSampleCount"];
+                if (sampleCount > 0) {
+
+                    const sampleStudyList = await self.fetchSamplesByStudy(study.studyId)
+                    let name = study["shortName"] + " (" + sampleCount + ")";
+                    let body = JSON.stringify(sampleStudyList);
+
+                    let trackDiv = document.createElement('div');
+                    trackDiv.textContent = name;
+                    trackDiv.addEventListener('click', function (event) {
+
+                        let trackJson = {
+                            "name": name,
+                            "type": "seg",
+                            "displayMode": "EXPANDED",
+                            "sourceType": "custom",
+                            "source": {
+                                "url": "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
+                                "method": "POST",
+                                "contentType": "application/json",
+                                "body": body,
+                                "queryable": false,
+                                "isLog": true,
+                                "mappings": {
+                                    "chr": "chromosome",
+                                    "value": "segmentMean",
+                                    "sampleKey": "uniqueSampleKey",
+                                    "sample": "sampleId"
+                                }
+                            },
+
+                        }
+                        browser.loadTrack(trackJson);
+
+                    });
+
+                    div.appendChild(trackDiv);
+
+                }
+
+            }
+        }
+    }
+
+
+    //    http://www.cbioportal.org/api/molecular-profiles/ov_tcga_pub_mutations/mutations/fetch?projection=DETAILED
+    //    {"sampleIds":["TCGA-13-1489-01"]}
+
+    // Example json
+
+    // Copy number
+    // {
+    //     "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
+    //     "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
+    //     "patientId": "TCGA-OR-A5J2",
+    //     "start": 3218610,
+    //     "end": 4749076,
+    //     "segmentMean": -0.2239,
+    //     "studyId": "acc_tcga",
+    //     "sampleId": "TCGA-OR-A5J2-01",
+    //     "chromosome": "1",
+    //     "numberOfProbes": 958
+    // }
+
+
+    const options = {
+        genome: "hg19",
+        tracks: []
+    }
+
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            cBio.initMenu(document.getElementById('trackList'), browser);
+        })
+
+
+    // Example mut json
+    const mutJson = [
+        {
+            "uniqueSampleKey": "VENHQS0xMy0xNDg5LTAxOm92X3RjZ2FfcHVi",
+            "uniquePatientKey": "VENHQS0xMy0xNDg5Om92X3RjZ2FfcHVi",
+            "molecularProfileId": "ov_tcga_pub_mutations",
+            "sampleId": "TCGA-13-1489-01",
+            "patientId": "TCGA-13-1489",
+            "entrezGeneId": 10114,
+            "gene": {
+                "entrezGeneId": 10114,
+                "hugoGeneSymbol": "HIPK3",
+                "type": "protein-coding",
+                "cytoband": "11p13",
+                "length": 100352,
+                "chromosome": "11"
+            },
+            "studyId": "ov_tcga_pub",
+            "center": "genome.wustl.edu",
+            "mutationStatus": "Somatic",
+            "validationStatus": "NA",
+            "startPosition": 33358691,
+            "endPosition": 33358692,
+            "referenceAllele": "GA",
+            "proteinChange": "R431I",
+            "mutationType": "Missense_Mutation",
+            "functionalImpactScore": "[Not Available]",
+            "fisValue": 1.4013E-45,
+            "linkXvar": "[Not Available]",
+            "linkPdb": "[Not Available]",
+            "linkMsa": "[Not Available]",
+            "ncbiBuild": "GRCh37",
+            "variantType": "DNP",
+            "keyword": "HIPK3 R431 missense",
+            "driverFilter": "",
+            "driverFilterAnnotation": "",
+            "driverTiersFilter": "",
+            "driverTiersFilterAnnotation": "",
+            "variantAllele": "TT",
+            "refseqMrnaId": "NM_005734.4",
+            "proteinPosStart": 431,
+            "proteinPosEnd": 431
+        },
+        {
+            "uniqueSampleKey": "VENHQS0xMy0xNDg5LTAxOm92X3RjZ2FfcHVi",
+            "uniquePatientKey": "VENHQS0xMy0xNDg5Om92X3RjZ2FfcHVi",
+            "molecularProfileId": "ov_tcga_pub_mutations",
+            "sampleId": "TCGA-13-1489-01",
+            "patientId": "TCGA-13-1489",
+            "entrezGeneId": 672,
+            "gene": {
+                "entrezGeneId": 672,
+                "hugoGeneSymbol": "BRCA1",
+                "type": "protein-coding",
+                "cytoband": "17q21.31",
+                "length": 81189,
+                "chromosome": "17"
+            },
+            "studyId": "ov_tcga_pub",
+            "center": "genome.wustl.edu",
+            "mutationStatus": "Somatic",
+            "validationStatus": "Valid",
+            "startPosition": 41243753,
+            "endPosition": 41243754,
+            "referenceAllele": "NA",
+            "proteinChange": "N1265Kfs*4",
+            "mutationType": "Frame_Shift_Ins",
+            "functionalImpactScore": "[Not Available]",
+            "fisValue": 1.4013E-45,
+            "linkXvar": "[Not Available]",
+            "linkPdb": "[Not Available]",
+            "linkMsa": "[Not Available]",
+            "ncbiBuild": "GRCh37",
+            "variantType": "INS",
+            "keyword": "BRCA1 truncating",
+            "driverFilter": "",
+            "driverFilterAnnotation": "",
+            "driverTiersFilter": "",
+            "driverTiersFilterAnnotation": "",
+            "variantAllele": "TT",
+            "refseqMrnaId": "NM_007294.3",
+            "proteinPosStart": 1265,
+            "proteinPosEnd": 1265
+        },
+        {
+            "uniqueSampleKey": "VENHQS0xMy0xNDg5LTAxOm92X3RjZ2FfcHVi",
+            "uniquePatientKey": "VENHQS0xMy0xNDg5Om92X3RjZ2FfcHVi",
+            "molecularProfileId": "ov_tcga_pub_mutations",
+            "sampleId": "TCGA-13-1489-01",
+            "patientId": "TCGA-13-1489",
+            "entrezGeneId": 7157,
+            "gene": {
+                "entrezGeneId": 7157,
+                "hugoGeneSymbol": "TP53",
+                "type": "protein-coding",
+                "cytoband": "17p13.1",
+                "length": 19149,
+                "chromosome": "17"
+            },
+            "studyId": "ov_tcga_pub",
+            "center": "genome.wustl.edu",
+            "mutationStatus": "Somatic",
+            "validationStatus": "Valid",
+            "startPosition": 7574003,
+            "endPosition": 7574003,
+            "referenceAllele": "G",
+            "proteinChange": "R342*",
+            "mutationType": "Nonsense_Mutation",
+            "functionalImpactScore": "NA",
+            "fisValue": 0,
+            "linkXvar": "getma.org/?cm=var&var=hg19,17,7574003,G,A&fts=all",
+            "linkPdb": "NA",
+            "linkMsa": "NA",
+            "ncbiBuild": "GRCh37",
+            "variantType": "SNP",
+            "keyword": "TP53 truncating",
+            "driverFilter": "",
+            "driverFilterAnnotation": "",
+            "driverTiersFilter": "",
+            "driverTiersFilterAnnotation": "",
+            "variantAllele": "A",
+            "refseqMrnaId": "NM_001126112.2,NM_001276761.1,NM_001276760.1,NM_000546.5,NM_0011",
+            "proteinPosStart": 342,
+            "proteinPosEnd": 342
+        },
+        {
+            "uniqueSampleKey": "VENHQS0xMy0xNDg5LTAxOm92X3RjZ2FfcHVi",
+            "uniquePatientKey": "VENHQS0xMy0xNDg5Om92X3RjZ2FfcHVi",
+            "molecularProfileId": "ov_tcga_pub_mutations",
+            "sampleId": "TCGA-13-1489-01",
+            "patientId": "TCGA-13-1489",
+            "entrezGeneId": 5101,
+            "gene": {
+                "entrezGeneId": 5101,
+                "hugoGeneSymbol": "PCDH9",
+                "type": "protein-coding",
+                "cytoband": "13q21.32",
+                "length": 927503,
+                "chromosome": "13"
+            },
+            "studyId": "ov_tcga_pub",
+            "center": "genome.wustl.edu",
+            "mutationStatus": "Somatic",
+            "validationStatus": "Valid",
+            "startPosition": 66879068,
+            "endPosition": 66879068,
+            "referenceAllele": "G",
+            "proteinChange": "P1145S",
+            "mutationType": "Missense_Mutation",
+            "functionalImpactScore": "M",
+            "fisValue": 2.03,
+            "linkXvar": "getma.org/?cm=var&var=hg19,13,66879068,G,A&fts=all",
+            "linkPdb": "NA",
+            "linkMsa": "getma.org/?cm=msa&ty=f&p=PCDH9_HUMAN&rb=1003&re=1202&var=P1145S",
+            "ncbiBuild": "GRCh37",
+            "variantType": "SNP",
+            "keyword": "PCDH9 P1145 missense",
+            "driverFilter": "",
+            "driverFilterAnnotation": "",
+            "driverTiersFilter": "",
+            "driverTiersFilterAnnotation": "",
+            "variantAllele": "A",
+            "refseqMrnaId": "NM_203487.2",
+            "proteinPosStart": 1145,
+            "proteinPosEnd": 1145
+        }
+    ]
+
+
+</script>
+
+</body>
+
+</html>

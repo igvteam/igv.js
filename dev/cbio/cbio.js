@@ -29,100 +29,37 @@ const cBioUtils = {
 
     fetchStudies: async function (baseURL) {
 
-        baseURL = baseURL || "http://www.cbioportal.org/api";
-
+        baseURL = baseURL || "https://www.cbioportal.org/api";
         let url = baseURL + "/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
         return igvxhr.loadJson(url);
     },
 
     fetchSamplesByStudy: async function (study, baseURL) {
 
-        baseURL = baseURL || "http://www.cbioportal.org/api"
+        baseURL = baseURL || "https://www.cbioportal.org/api"
 
         let url = baseURL + "/studies/" + study.studyId + "/samples";
-
         const samples = await igvxhr.loadJson(url);
-
-        let sampleStudyList = {
-            studyId: study.studyId,
-            study: study,
-            sampleIDs: []
-        }
-
-        for (let sampleJson of samples) {
-            sampleStudyList.sampleIDs.push(sampleJson["sampleId"]);
-        }
-
+        let sampleStudyList = [];
+        samples.forEach(function (sampleJson) {
+            sampleStudyList.push(
+                {
+                    "sampleId": sampleJson["sampleId"],
+                    "studyId": study
+                }
+            )
+        })
         return sampleStudyList;
-
     },
 
     fetchCopyNumberByStudy: async function (study, baseURL) {
-
-        baseURL = baseURL || "http://www.cbioportal.org/api";
-
+        baseURL = baseURL || "https://www.cbioportal.org/api";
         const sampleStudyList = await this.fetchSamplesByStudy(study);
         let url = baseURL + "/copy-number-segments/fetch?projection=SUMMARY";
         let body = JSON.stringify(sampleStudyList);
         return igvxhr.loadJson(url, {method: "POST", sendData: body})
-
     },
 
-    initMenu: async function (baseURL) {
-
-        baseURL = baseURL || "http://www.cbioportal.org/api";
-
-        const self = this;
-
-        const studies = await this.fetchStudies(baseURL);
-
-        const samplePromises = [];
-
-        for (let study of studies) {
-
-            let sampleCount = study["cnaSampleCount"];
-            if (sampleCount > 0) {
-                samplePromises.push(self.fetchSamplesByStudy(study.studyId, baseURL));
-            }
-        }
-        const sampleStudyListArray = await Promise.all(samplePromises);
-
-
-        const trackJson = [];
-        for (let sampleStudyList of sampleStudyListArray) {
-            const study = sampleStudyList.study;
-            const sampleCount = sampleStudyList.sampleIDs.length;
-
-            if (sampleCount > 0) {
-
-                const name = study["shortName"] + " (" + sampleCount + ")";
-                const body = JSON.stringify(sampleStudyList);
-
-                trackJson.push({
-                    "name": name,
-                    "type": "seg",
-                    "displayMode": "EXPANDED",
-                    "sourceType": "custom",
-                    "source": {
-                        "url": baseURL + "/copy-number-segments/fetch?projection=SUMMARY",
-                        "method": "POST",
-                        "contentType": "application/json",
-                        "body": body,
-                        "queryable": false,
-                        "isLog": true,
-                        "mappings": {
-                            "chr": "chromosome",
-                            "value": "segmentMean",
-                            "sampleKey": "uniqueSampleKey",
-                            "sample": "sampleId"
-                        }
-                    }
-                });
-            }
-        }
-
-        return trackJson;
-    }
 }
 
 
