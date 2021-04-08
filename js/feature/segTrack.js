@@ -26,7 +26,7 @@
 import FeatureSource from './featureSource.js';
 import TrackBase from "../trackBase.js";
 import IGVGraphics from "../igv-canvas.js";
-import {IGVMath} from "../../node_modules/igv-utils/src/index.js";
+import {IGVMath, StringUtils} from "../../node_modules/igv-utils/src/index.js";
 import {createCheckbox} from "../igv-icons.js";
 import {GradientColorScale} from "../util/colorScale.js";
 import {isSimpleType} from "../util/igvUtils.js";
@@ -431,22 +431,16 @@ class SegTrack extends TrackBase {
                 const data = feature.popupData()
                 Array.prototype.push.apply(items, data);
             } else {
-                const filteredProperties = new Set(['row', 'color', 'sampleKey', 'uniqueSampleKey', 'uniquePatientKey']);
+                const filteredProperties = new Set(['chr', 'start', 'end', 'row', 'color', 'sampleKey',
+                    'sample', 'uniqueSampleKey', 'sampleId', 'chromosome', 'uniquePatientKey']);
 
-                // hack for whole genome properties
-                let f
-                if (feature.hasOwnProperty('realChr')) {
-                    f = Object.assign({}, feature);
-                    f.chr = feature.realChr;
-                    f.start = feature.realStart;
-                    f.end = feature.realEnd;
-                    delete f.realChr;
-                    delete f.realStart;
-                    delete f.realEnd;
-                } else {
-                    f = feature;
-                }
-
+                // hack for whole genome features, which save the original feature as "_f"
+                const f = feature._f || feature;
+                items.push({name: 'Sample', value: f.sample})
+                items.push({name: 'Value', value: StringUtils.numberFormatter(f.value)});
+                const locus = `${f.chr}:${StringUtils.numberFormatter(f.start + 1)}-${StringUtils.numberFormatter(f.end)}`;
+                items.push({name: 'Locus', value: locus})
+                items.push('<hr/>')
                 for (let property of Object.keys(f)) {
                     if (!filteredProperties.has(property) && isSimpleType(f[property])) {
                         items.push({name: property, value: f[property]});
