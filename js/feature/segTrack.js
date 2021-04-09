@@ -241,6 +241,7 @@ class SegTrack extends TrackBase {
                 let w = Math.max(1, x1 - x);
 
                 let color;
+                let h;
                 if (this.color) {
                     if (typeof this.color === "function") {
                         color = this.color(f);
@@ -249,7 +250,11 @@ class SegTrack extends TrackBase {
                     }
                 } else if ("mut" === this.type) {
                     color = this.colorTable.getColor(f.value.toLowerCase());
-                } else {
+                    h = rowHeight - 2 * border;
+                    if (w < 3) {
+                        w = 3;
+                        x -= 1;
+                    }               } else {
                     // Assume seg track
                     let value = f.value;
                     if (!this.isLog) {
@@ -262,18 +267,7 @@ class SegTrack extends TrackBase {
                     } else {
                         color = "white";
                     }
-                }
 
-
-                let h;
-                if ("mut" === this.type) {
-                    h = rowHeight - 2 * border;
-                    if (w < 3) {
-                        w = 3;
-                        x -= 1;
-                    }
-                } else {
-                    // Assume seg track
                     let sh = rowHeight;
                     if (rowHeight < 0.25) {
                         const f = 0.1 + 2 * Math.abs(value);
@@ -281,6 +275,7 @@ class SegTrack extends TrackBase {
                     }
                     h = sh - 2 * border
                 }
+
 
                 f.pixelRect = {x, y, w, h};
 
