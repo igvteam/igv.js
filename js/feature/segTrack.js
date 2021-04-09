@@ -416,16 +416,10 @@ class SegTrack extends TrackBase {
 
         const items = [];
 
-        for (let f of featureList) {
+        for (let feature of featureList) {
             if (items.length > 0) {
                 items.push("<hr/>")
             }
-            extractPopupData(f, items)
-        }
-
-        return items;
-
-        function extractPopupData(feature) {
 
             if (typeof feature.popupData === 'function') {
                 const data = feature.popupData()
@@ -437,7 +431,8 @@ class SegTrack extends TrackBase {
                 // hack for whole genome features, which save the original feature as "_f"
                 const f = feature._f || feature;
                 items.push({name: 'Sample', value: f.sample})
-                items.push({name: 'Value', value: StringUtils.numberFormatter(f.value)});
+                const valueString = this.type === 'seg' ? StringUtils.numberFormatter(f.value) : f.value;
+                items.push({name: 'Value', value: valueString});
                 const locus = `${f.chr}:${StringUtils.numberFormatter(f.start + 1)}-${StringUtils.numberFormatter(f.end)}`;
                 items.push({name: 'Locus', value: locus})
                 items.push('<hr/>')
@@ -448,6 +443,8 @@ class SegTrack extends TrackBase {
                 }
             }
         }
+
+        return items;
     }
 
     contextMenuItemList(clickState) {
