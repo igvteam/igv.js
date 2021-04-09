@@ -82,8 +82,6 @@ class SampleNameViewport { //extends ViewportBase {
             return
         }
 
-        context.save();
-
         configureFont(context, fontConfigureTemplate, samples.height);
         const sampleNameXShim = 4;
 
@@ -100,8 +98,6 @@ class SampleNameViewport { //extends ViewportBase {
             context.fillText(text, sampleNameXShim, yFont);
             y += samples.height;
         }
-
-        context.restore();
 
     }
 
