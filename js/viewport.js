@@ -298,8 +298,8 @@ class ViewPort extends ViewportBase {
                 selection: this.selection,
                 viewport: this,
                 viewportWidth: this.$viewport.width(),
-                viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
-                viewportContainerWidth: this.browser.getViewportContainerWidth()
+                //viewportContainerX: this.referenceFrame.toPixels(this.referenceFrame.start - startBP),
+                //viewportContainerWidth: this.browser.getViewportContainerWidth()
             };
 
         this.draw(drawConfiguration, features, roiFeatures);
@@ -331,7 +331,7 @@ class ViewPort extends ViewportBase {
         }
     }
 
-    // render viewport as SVG
+    // TODO: Nolonger used. Will discard
     async toSVG(tile) {
 
         // Nothing to do if zoomInNotice is active
@@ -449,6 +449,8 @@ class ViewPort extends ViewportBase {
         FileUtils.download(`${str}.svg`, data);
     }
 
+    // called by trackView.renderSVGContext() when rendering
+    // entire browser as SVG
     renderSVGContext(context, offset) {
 
         // Nothing to do if zoomInNotice is active
@@ -472,6 +474,7 @@ class ViewPort extends ViewportBase {
         this.drawSVGWithContext(context, width, height)
     }
 
+    // render track label element called from renderSVGContext()
     renderTrackLabelSVG(context) {
 
         const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
@@ -492,6 +495,7 @@ class ViewPort extends ViewportBase {
 
     }
 
+    // called by renderSVGContext()
     drawSVGWithContext(context, width, height) {
 
         let {start, bpPerPixel} = this.referenceFrame;
@@ -512,8 +516,8 @@ class ViewPort extends ViewportBase {
                 bpEnd: start + (width * bpPerPixel),
                 bpPerPixel,
                 viewportWidth: width,
-                viewportContainerX: 0,
-                viewportContainerWidth: this.browser.getViewportContainerWidth(),
+               // viewportContainerX: 0,
+               // viewportContainerWidth: this.browser.getViewportContainerWidth(),
                 selection: this.selection
             };
 
