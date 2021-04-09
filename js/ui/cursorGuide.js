@@ -115,7 +115,8 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     const { start, bpPerPixel } = viewport.referenceFrame
     const end = 1 + start + (width * bpPerPixel)
 
-    const bp = Math.round(start + x * bpPerPixel)
+    const bp = 1 + Math.floor(start + x * bpPerPixel)
+    // console.log(`bp ${ StringUtils.numberFormatter(bp) }`)
 
     if (browser.rulerTrack) {
         const index = browser.referenceFrameList.indexOf(viewport.referenceFrame)

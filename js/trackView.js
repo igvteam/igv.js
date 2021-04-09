@@ -160,7 +160,7 @@ class TrackView {
 
         this.updateViewportForMultiLocus()
 
-        this.attachScrollbar($(this.trackDiv), this.$viewportContainer, [...this.viewports, this.sampleNameViewport])
+        this.attachScrollbar($(this.trackDiv), this.$viewportContainer, this.viewports, this.sampleNameViewport)
 
     }
 
@@ -187,10 +187,10 @@ class TrackView {
         this.sampleNameViewport.renderSVGContext(context, delta)
     }
 
-    attachScrollbar($track, $viewportContainer, viewports) {
+    attachScrollbar($track, $viewportContainer, viewports, sampleNameViewport) {
 
         if ("hidden" === $viewportContainer.find('.igv-viewport').css("overflow-y")) {
-            this.scrollbar = new TrackScrollbar($viewportContainer, viewports)
+            this.scrollbar = new TrackScrollbar($viewportContainer, viewports, sampleNameViewport)
             this.scrollbar.$outerScroll.insertAfter($viewportContainer)
 
             if ('ruler' === this.track.type || 'ideogram' === this.track.type) {
