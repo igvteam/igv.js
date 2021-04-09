@@ -78,7 +78,7 @@ class SampleNameViewport { //extends ViewportBase {
 
     draw({context, samples}) {
 
-        if (!samples || samples.names.length === 0) {
+        if (!samples || samples.names.length === 0 || samples.height < 1) {
             return
         }
 
