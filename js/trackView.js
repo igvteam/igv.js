@@ -790,7 +790,7 @@ function documentOffset(el) {
 }
 
 function maxViewportContentHeight(viewports) {
-    const heights = viewports.map(viewport => viewport.getContentHeight());
+    const heights = viewports.filter(viewport => !(viewport.trackView.sampleNameViewport === viewport)).map(viewport => viewport.getContentHeight());
     return Math.max(...heights);
 }
 
