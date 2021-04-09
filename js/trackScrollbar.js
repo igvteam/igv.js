@@ -6,7 +6,7 @@ const namespace = '.trackscrollbar' + DOMUtils.guid()
 
 class TrackScrollbar {
 
-    constructor($viewportContainer, viewports) {
+    constructor($viewportContainer, viewports, sampleNameViewport) {
 
         let lastY;
 
@@ -46,6 +46,7 @@ class TrackScrollbar {
 
         this.$viewportContainer = $viewportContainer;
         this.viewports = viewports;
+        this.sampleNameViewport = sampleNameViewport
 
         this.$innerScroll.on("mousedown", mouseDown);
 
@@ -83,7 +84,7 @@ class TrackScrollbar {
 
         this.$innerScroll.css("top", newTop + "px");
 
-        for (let viewport of this.viewports) {
+        for (let viewport of [...this.viewports, this.sampleNameViewport]) {
             viewport.setTop(contentTop)
         }
 
