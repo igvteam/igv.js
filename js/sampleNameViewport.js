@@ -113,11 +113,11 @@ class SampleNameViewport { //extends ViewportBase {
 
             const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
+            context.save();  // This save/restore bracketing is essential to create groups.
             const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '') + "_samples"
             context.addTrackGroupWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
-
             this.draw({context, samples});
-
+            context.restore();
         }
     }
 
