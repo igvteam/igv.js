@@ -1081,7 +1081,7 @@ class Browser {
         const status = this.referenceFrameList.find(referenceFrame => referenceFrame.bpPerPixel < 0)
 
         if (status) {
-            const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
+            const viewportWidth = this.computeViewportWidth(this.referenceFrameList.length, this.getViewportContainerWidth())
             for (let referenceFrame of this.referenceFrameList) {
                 referenceFrame.bpPerPixel = (referenceFrame.initialEnd - referenceFrame.start) / viewportWidth
             }
@@ -1402,7 +1402,7 @@ class Browser {
     presentSplitScreenMultiLocusPanel(alignment, leftMatePairReferenceFrame) {
 
         // account for reduced viewport width as a result of adding right mate pair panel
-        const viewportWidth = this.calculateViewportWidth(1 + this.referenceFrameList.length);
+        const viewportWidth = this.computeViewportWidth(1 + this.referenceFrameList.length, this.getViewportContainerWidth());
 
         adjustReferenceFrame(leftMatePairReferenceFrame, viewportWidth, alignment.start, alignment.lengthOnRef)
 
@@ -1451,8 +1451,13 @@ class Browser {
             this.referenceFrameList.push(referenceFrame);
 
             for (let trackView of this.trackViews) {
+                
                 const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
                 trackView.viewports.push(viewport);
+
+                const $detached = viewport.$viewport.detach()
+                $detached.insertAfter(trackView.viewports[index - 1].$viewport)
+
             }
 
         } else {
@@ -1464,7 +1469,6 @@ class Browser {
                 const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
                 trackView.viewports.splice(index, 0, viewport)
 
-                // The viewport constructor always appends. Reorder here.
                 const $detached = viewport.$viewport.detach()
                 $detached.insertAfter(trackView.viewports[index - 1].$viewport)
 
@@ -1472,9 +1476,9 @@ class Browser {
 
         }
 
+
         for (let trackView of this.trackViews) {
             trackView.updateViewportForMultiLocus();
-            // trackView.attachScrollbar($(trackView.trackDiv), trackView.$viewportContainer, trackView.viewports);
         }
 
         if (this.rulerTrack) {
