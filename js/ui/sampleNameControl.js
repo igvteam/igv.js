@@ -25,7 +25,6 @@
  */
 
 import $ from "../vendor/jquery-3.3.1.slim.js";
-import {setSampleNameViewportVisibility} from '../trackView.js'
 
 class SampleNameControl {
 
@@ -52,7 +51,17 @@ class SampleNameControl {
                 this.$button.removeClass('igv-navbar-button-clicked')
             }
 
-            setSampleNameViewportVisibility(browser)
+            for (let {sampleNameViewport} of browser.trackViews) {
+                if (false === browser.showSampleNames) {
+                    sampleNameViewport.hide()
+                } else {
+                    sampleNameViewport.show()
+                }
+            }
+
+            browser.resize()
+
+
         })
 
     }
