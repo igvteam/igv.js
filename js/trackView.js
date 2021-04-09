@@ -504,11 +504,10 @@ class TrackView {
             const currentTop = this.viewports[0].getContentTop();
 
             const viewports = [ ...this.viewports, this.sampleNameViewport ]
-            const heights = viewports.map((viewport) => viewport.getContentHeight());
+            const heights = this.viewports.map((viewport) => viewport.getContentHeight());
             const minContentHeight = Math.min(...heights);
             const newTop = Math.min(0, this.$viewportContainer.height() - minContentHeight);
             if (currentTop < newTop) {
-
                 for (let viewport of viewports) {
                     viewport.$content.css("top", `${ newTop }px`)
                 }
