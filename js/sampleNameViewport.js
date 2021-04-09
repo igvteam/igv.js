@@ -46,7 +46,7 @@ class SampleNameViewport { //extends ViewportBase {
         const requiredHeight = this.$viewport.height();
         const requiredWidth = this.browser.sampleNameViewportWidth;
 
-        if (this.canvas.width !== requiredWidth*dpi || this.canvas.height !== requiredHeight*dpi) {
+        if (this.canvas.width !== requiredWidth * dpi || this.canvas.height !== requiredHeight * dpi) {
             const canvas = this.canvas;
             canvas.width = requiredWidth * dpi;
             canvas.height = requiredHeight * dpi;
@@ -89,16 +89,18 @@ class SampleNameViewport { //extends ViewportBase {
 
         context.fillStyle = appleCrayonRGB('lead');
 
+        const viewportHeight = this.$viewport.get(0).getBoundingClientRect().height;
         let y = (samples.yOffset || 0) + this.contentTop;    // contentTop will always be a negative number (top relative to viewport)
 
         for (let name of samples.names) {
-
-            const text = name.toUpperCase();
-            const yFont = getYFont(context, text, y, samples.height);
-            context.fillText(text, sampleNameXShim, yFont);
+            if (y > viewportHeight) break;
+            if (y + samples.height > 0) {
+                const text = name.toUpperCase();
+                const yFont = getYFont(context, text, y, samples.height);
+                context.fillText(text, sampleNameXShim, yFont);
+            }
             y += samples.height;
         }
-
     }
 
     renderSVGContext(context, {deltaX, deltaY}) {
@@ -111,10 +113,11 @@ class SampleNameViewport { //extends ViewportBase {
 
             const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
-            const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+            const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '') + "_samples"
             context.addTrackGroupWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
 
             this.draw({context, samples});
+
         }
     }
 
