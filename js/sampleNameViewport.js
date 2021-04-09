@@ -111,7 +111,8 @@ class SampleNameViewport { //extends ViewportBase {
 
             const samples = this.trackView.track.getSamples();
 
-            const yScrollDelta = this.contentTop;
+            const yScrollDelta = 0;   // This is not relevant, scrolling is handled in "draw"
+
             const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
             const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
