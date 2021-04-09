@@ -96,6 +96,13 @@ class RulerViewport extends ViewPort {
                 this.$tooltip.show()
             }
 
+            const isWholeGenome = (this.browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.browser.referenceFrameList[0].chr));
+
+            if (isWholeGenome) {
+                this.$tooltip.hide();
+                return;
+            }
+
             const { x } = DOMUtils.translateMouseCoordinates(event, this.$viewport.get(0))
             const { start, bpPerPixel } = this.referenceFrame
             const bp = Math.round(0.5 + start + Math.max(0, x) * bpPerPixel)
