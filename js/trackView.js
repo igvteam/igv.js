@@ -703,20 +703,6 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
 }
 
-function setSampleNameViewportVisibility(browser) {
-
-    for (let { sampleNameViewport } of browser.trackViews) {
-
-        if (false === browser.showSampleNames) {
-            sampleNameViewport.$viewport.hide()
-        } else {
-            sampleNameViewport.$viewport.show()
-        }
-
-    }
-
-    browser.resize()
-}
 
 function emptyViewportContainers(trackViews) {
 
@@ -789,6 +775,6 @@ function maxViewportContentHeight(viewports) {
     return Math.max(...heights);
 }
 
-export { maxViewportContentHeight, updateViewportShims, emptyViewportContainers, setSampleNameViewportVisibility }
+export { maxViewportContentHeight, updateViewportShims, emptyViewportContainers }
 
 export default TrackView

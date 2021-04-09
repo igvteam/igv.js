@@ -71,6 +71,14 @@ class SampleNameViewport { //extends ViewportBase {
         this.checkCanvas();
     }
 
+    show() {
+        this.$viewport.show()
+    }
+
+    hide() {
+        this.$viewport.hide()
+    }
+
     async repaint(samples) {
         this.checkCanvas();
         this.draw({context: this.ctx, samples})
