@@ -354,13 +354,9 @@ class TrackView {
 
     repaintSamples() {
 
-        if(typeof this.track.getSamples === 'function' && typeof this.track.computePixelHeight === 'function') {
-            // Get the max content height of all viewports
-            const contentHeight = this.viewports.reduce((a, vp) => Math.max(a, vp.getContentHeight()), 0);
-            // let contentHeight = 0;
-            // for(let vp of this.viewports) contentHeight = Math.max(contentHeight, vp.getContentHeight());
+        if(typeof this.track.getSamples === 'function') {
             const samples = this.track.getSamples()
-            this.sampleNameViewport.repaint({ contentHeight, samples })
+            this.sampleNameViewport.repaint(samples )
         }
     }
 
