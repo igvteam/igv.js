@@ -138,7 +138,8 @@ class TrackBase {
                 throw Error(`Property '${key}' of track '${this.name} is a function. Functions cannot be saved in sessions.`);
             }
             if (state[key] instanceof File) {
-                throw Error(`Property '${key}' of track '${this.name} is a local File. Local file references cannot be saved in sessions.`);
+                const str = `Track ${this.name} is a local file. Sessions cannot be saved with local file references.`;
+                throw Error(str);
             }
             if (state[key] instanceof Promise) {
                 throw Error(`Property '${key}' of track '${this.name} is a Promise. Promises cannot be saved in sessions.`);
