@@ -1451,7 +1451,7 @@ class Browser {
             this.referenceFrameList.push(referenceFrame);
 
             for (let trackView of this.trackViews) {
-                
+
                 const viewport = createViewport(trackView, this.referenceFrameList, index, viewportWidth)
                 trackView.viewports.push(viewport);
 
@@ -1684,18 +1684,18 @@ class Browser {
             let n = 1;
             let message = 'Errors encountered saving session:';
             for (let e of errors) {
-                message += ` (${n++}) ${e.toString()}.`;
+                message += ` (${n++}) ${e.toString()}`;
             }
             throw Error(message);
         }
 
-
+        // TODO: Remove this code and thrown error. This error is caught in track.getState()
         const locaTrackFiles = trackJson.filter((track) => {
             track.url && FileUtils.isFilePath(track.url)
         })
 
         if (locaTrackFiles.length > 0) {
-            throw new Error(`Error. Sessions cannot include local file references.`);
+            throw new Error(`Error. Sessions cannot be saved with local file references.`);
         }
 
         json["tracks"] = trackJson;
