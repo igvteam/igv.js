@@ -108,7 +108,7 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     const viewport = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
 
     if (undefined === viewport) {
-        console.log('ERROR: No viewport found');
+        // console.log('ERROR: No viewport found');
         return undefined;
     }
 
