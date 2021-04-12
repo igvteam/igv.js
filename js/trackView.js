@@ -184,7 +184,7 @@ class TrackView {
             delta.deltaX += width
         }
 
-        this.sampleNameViewport.renderSVGContext(context, delta)
+        // this.sampleNameViewport.renderSVGContext(context, delta)
     }
 
     attachScrollbar($track, $viewportContainer, viewports, sampleNameViewport) {
@@ -692,12 +692,13 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
         const { y, width, height } = axisCanvas.getBoundingClientRect()
 
-        const str = track.name || track.id
+        const str = (track.name || track.id).replace(/\W/g, '');
+        const id = `${ str }_guid_${ DOMUtils.guid() }`
 
-        context.addTrackGroupWithTranslationAndClipRect((`${ str.replace(/\\W/g, '') }_axis`), deltaX, y + deltaY, width, height, 0)
+        context.saveWithTranslationAndClipRect(id, deltaX, y + deltaY, width, height, 0);
 
-        context.save()
         track.paintAxis(context, width, height)
+
         context.restore()
     }
 

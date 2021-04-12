@@ -458,20 +458,17 @@ class ViewPort extends ViewportBase {
             return;
         }
 
-        let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.replace(/\W/g, '');
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
 
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = str.toLowerCase() + '_genomic_state_index_' + index;
+        const id = `${ str }_referenceFrame_${ index }_guid_${ DOMUtils.guid() }`
 
         const yScrollDelta = $(this.contentDiv).position().top;
         const dx = offset.deltaX + (index * context.multiLocusGap);
         const dy = offset.deltaY + yScrollDelta;
         const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
-        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
-
-        this.drawSVGWithContext(context, width, height)
+        this.drawSVGWithContext(context, width, height, id, dx, dy, -yScrollDelta)
     }
 
     // render track label element called from renderSVGContext()
@@ -496,11 +493,11 @@ class ViewPort extends ViewportBase {
     }
 
     // called by renderSVGContext()
-    drawSVGWithContext(context, width, height) {
+    drawSVGWithContext(context, width, height, id, tx, ty, clipYOffset) {
 
         let {start, bpPerPixel} = this.referenceFrame;
 
-        context.save();
+        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, clipYOffset);
 
         const top = -this.$content.position().top;
         const config =
