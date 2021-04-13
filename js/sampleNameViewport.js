@@ -125,50 +125,16 @@ class SampleNameViewport { //extends ViewportBase {
 
             const {width, height} = this.$viewport.get(0).getBoundingClientRect()
 
-            context.save();  // This save/restore bracketing is essential to create groups.
-            const id = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '') + "_samples"
-            context.addTrackGroupWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
+            const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '')
+            const id = `${ str }_sample_names_guid_${ DOMUtils.guid() }`
+
+            context.saveWithTranslationAndClipRect(id, deltaX, deltaY + yScrollDelta, width, height, -yScrollDelta)
+
             this.draw({context, samples});
+
             context.restore();
         }
     }
-
-    //
-    // drawSVGWithContext(context, width) {
-    //
-    //     if (typeof this.trackView.track.getSamples === 'function' && typeof this.trackView.track.computePixelHeight === 'function') {
-    //
-    //         const samples = this.trackView.track.getSamples();
-    //         if (!samples || samples.names.length == 0) return;
-    //
-    //         context.save()
-    //
-    //         configureFont(context, fontConfigureTemplate, samples.height)
-    //
-    //         const sampleNameXShim = 4
-    //
-    //         let y = samples.yOffest || 0;
-    //         for (let name of samples.names) {
-    //
-    //             context.fillStyle = appleCrayonRGB('snow')
-    //             context.fillRect(0, y, width, samples.height)
-    //
-    //             context.fillStyle = appleCrayonRGB('lead')
-    //
-    //             const text = name.toUpperCase()
-    //
-    //             const yFont = getYFont(context, text, y, samples.height)
-    //
-    //             context.fillText(text, sampleNameXShim, yFont)
-    //
-    //             y += samples.height
-    //         }
-    //
-    //         context.restore()
-    //
-    //     }
-    //
-    // }
 
     addMouseHandler(context, pixelTop, samples) {
 

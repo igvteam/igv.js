@@ -11,6 +11,7 @@ import {DOMUtils, FileUtils} from "../node_modules/igv-utils/src/index.js";
 import MenuPopup from "./ui/menuPopup.js";
 import C2S from "./canvas2svg.js"
 import {getFilename} from "./util/igvUtils.js";
+import IGVGraphics from "./igv-canvas.js";
 
 const NOT_LOADED_MESSAGE = 'Error loading track data';
 
@@ -451,56 +452,64 @@ class ViewPort extends ViewportBase {
 
     // called by trackView.renderSVGContext() when rendering
     // entire browser as SVG
-    renderSVGContext(context, offset) {
+    renderSVGContext(context, { deltaX, deltaY }) {
 
         // Nothing to do if zoomInNotice is active
         if (this.$zoomInNotice && this.$zoomInNotice.is(":visible")) {
             return;
         }
 
-        let str = this.trackView.track.name || this.trackView.track.id;
-        str = str.replace(/\W/g, '');
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
 
         const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
-        const id = str.toLowerCase() + '_genomic_state_index_' + index;
+        const id = `${ str }_referenceFrame_${ index }_guid_${ DOMUtils.guid() }`
 
         const yScrollDelta = $(this.contentDiv).position().top;
-        const dx = offset.deltaX + (index * context.multiLocusGap);
-        const dy = offset.deltaY + yScrollDelta;
+        const dx = deltaX + (index * context.multiLocusGap);
+        const dy = deltaY + yScrollDelta;
         const {width, height} = this.$viewport.get(0).getBoundingClientRect();
 
-        context.addTrackGroupWithTranslationAndClipRect(id, dx, dy, width, height, -yScrollDelta);
+        this.drawSVGWithContext(context, width, height, id, dx, dy, -yScrollDelta)
 
-        this.drawSVGWithContext(context, width, height)
+        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
+            const { x:xTrackLabel, y:yTrackLabel, width:wTracklabel, height:hTrackLabel } = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+            this.renderTrackLabelSVG(context, deltaX + xTrackLabel, deltaY + yTrackLabel, wTracklabel, hTrackLabel)
+        }
+
     }
 
     // render track label element called from renderSVGContext()
-    renderTrackLabelSVG(context) {
+    renderTrackLabelSVG(context, tx, ty, width, height) {
 
-        const {x, y, width, height} = DOMUtils.relativeDOMBBox(this.$viewport.get(0), this.$trackLabel.get(0));
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
+        const id = `${ str }_track_label_guid_${ DOMUtils.guid() }`
 
-        const {width: stringWidth} = context.measureText(this.$trackLabel.text());
+        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, 0);
+
         context.fillStyle = "white";
-        context.fillRect(x, y, width, height);
+        context.fillRect(0, 0, width, height);
 
         context.font = "12px Arial";
         context.fillStyle = 'rgb(68, 68, 68)';
 
+        const { width: stringWidth } = context.measureText(this.$trackLabel.text());
         const dx = 0.25 * (width - stringWidth);
         const dy = 0.7 * (height - 12);
-        context.fillText(this.$trackLabel.text(), x + dx, y + height - dy);
+        context.fillText(this.$trackLabel.text(), dx, height - dy);
 
         context.strokeStyle = 'rgb(68, 68, 68)';
-        context.strokeRect(x, y, width, height);
+        context.strokeRect(0, 0, width, height);
+
+        context.restore();
 
     }
 
     // called by renderSVGContext()
-    drawSVGWithContext(context, width, height) {
+    drawSVGWithContext(context, width, height, id, tx, ty, clipYOffset) {
 
         let {start, bpPerPixel} = this.referenceFrame;
 
-        context.save();
+        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, clipYOffset);
 
         const top = -this.$content.position().top;
         const config =
@@ -524,10 +533,6 @@ class ViewPort extends ViewportBase {
         const features = this.tile ? this.tile.features : [];
         const roiFeatures = this.tile ? this.tile.roiFeatures : undefined;
         this.draw(config, features, roiFeatures);
-
-        if (this.$trackLabel && true === this.browser.trackLabelsVisible) {
-            this.renderTrackLabelSVG(context);
-        }
 
         context.restore();
 
