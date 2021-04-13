@@ -184,7 +184,7 @@ class TrackView {
             delta.deltaX += width
         }
 
-        // this.sampleNameViewport.renderSVGContext(context, delta)
+        this.sampleNameViewport.renderSVGContext(context, delta)
     }
 
     attachScrollbar($track, $viewportContainer, viewports, sampleNameViewport) {
@@ -686,6 +686,7 @@ class TrackView {
         return viewportContainerWidth - axisContainerWidth - browser.getSampleNameViewportWidth()
     }
 }
+
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
     if (typeof track.paintAxis === 'function') {
