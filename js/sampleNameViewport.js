@@ -60,9 +60,13 @@ class SampleNameViewport { //extends ViewportBase {
 
 
     setTop(contentTop) {
-        this.contentTop = contentTop;
-        const samples = this.trackView.track.getSamples();
-        this.repaint(samples)
+
+        if (typeof this.trackView.track.getSamples === 'function') {
+            this.contentTop = contentTop;
+            const samples = this.trackView.track.getSamples();
+            this.repaint(samples);
+        }
+
     }
 
 
