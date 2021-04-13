@@ -55,9 +55,12 @@ class IdeogramViewport extends ViewPort {
         this.$viewport.width(width);
     }
 
-    drawSVGWithContext(context, width, height) {
-        context.save()
+    drawSVGWithContext(context, width, height, id, tx, ty, clipYOffset) {
+
+        context.saveWithTranslationAndClipRect(id, tx, ty, width, height, clipYOffset);
+
         this.trackView.track.draw({ context, referenceFrame: this.referenceFrame, pixelWidth: width, pixelHeight: height })
+
         context.restore()
     }
 

@@ -510,9 +510,40 @@ ctx.prototype.getSerializedSvg = function (fixNamedEntities) {
 ctx.prototype.getSvg = function () {
     return this.__root;
 };
+
 /**
  * Will generate a group tag.
  */
+ctx.prototype.saveWithTranslationAndClipRect = function (id, tx, ty, width, height, clipYOffset) {
+
+    // clip rect
+    const clip_id = `${ id }_clip_rect`;
+    let clipPath = this.__createElement('clipPath', {id: clip_id});
+
+    this.__defs.appendChild(clipPath);
+
+    const config =
+        {
+            x: '0',
+            y: clipYOffset.toString(),
+            width: width.toString(),
+            height: height.toString()
+        };
+
+    clipPath.appendChild(this.__createElement('rect', config));
+
+    const group = this.__createElement("g");
+    group.setAttribute('transform', format('translate({x},{y})', {x: tx, y: ty}));
+    group.setAttribute('clip-path', format('url(#{id})', {id: clip_id}));
+
+    const parent = this.__closestGroupOrSvg();
+    parent.appendChild(group);
+    this.__groupStack.push(parent);
+
+    this.__currentElement = group;
+    this.__stack.push(this.__getStyleState());
+};
+
 ctx.prototype.save = function () {
     var group = this.__createElement("g");
     var parent = this.__closestGroupOrSvg();
