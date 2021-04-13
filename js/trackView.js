@@ -686,18 +686,20 @@ class TrackView {
         return viewportContainerWidth - axisContainerWidth - browser.getSampleNameViewportWidth()
     }
 }
+
 function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
 
     if (typeof track.paintAxis === 'function') {
 
         const { y, width, height } = axisCanvas.getBoundingClientRect()
 
-        const str = track.name || track.id
+        const str = (track.name || track.id).replace(/\W/g, '');
+        const id = `${ str }_axis_guid_${ DOMUtils.guid() }`
 
-        context.addTrackGroupWithTranslationAndClipRect((`${ str.replace(/\\W/g, '') }_axis`), deltaX, y + deltaY, width, height, 0)
+        context.saveWithTranslationAndClipRect(id, deltaX, y + deltaY, width, height, 0);
 
-        context.save()
         track.paintAxis(context, width, height)
+
         context.restore()
     }
 
