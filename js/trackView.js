@@ -693,7 +693,7 @@ function renderSVGAxis(context, track, axisCanvas, deltaX, deltaY) {
         const { y, width, height } = axisCanvas.getBoundingClientRect()
 
         const str = (track.name || track.id).replace(/\W/g, '');
-        const id = `${ str }_guid_${ DOMUtils.guid() }`
+        const id = `${ str }_axis_guid_${ DOMUtils.guid() }`
 
         context.saveWithTranslationAndClipRect(id, deltaX, y + deltaY, width, height, 0);
 
