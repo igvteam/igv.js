@@ -604,13 +604,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         }
     }
 
-    const windowX = Math.round(options.viewportContainerX);
-    // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
-    // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
-    const windowX1 = windowX + options.viewportWidth;
-
     if (options.drawLabel) {
-        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
+        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, options);
     }
 }
 
@@ -620,12 +615,9 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  * @param featureX  feature start x-coordinate
  * @param featureX1 feature end x-coordinate
  * @param featureY  feature y-coordinate
- * @param windowX   visible window start x-coordinate
- * @param windowX1  visible window end x-coordinate
- * @param referenceFrame  genomic state
  * @param options  options
  */
-function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, referenceFrame, options) {
+function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, options) {
 
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
@@ -635,22 +627,22 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
     // feature outside of viewable window
     let boxX;
     let boxX1;
-    if (featureX1 < windowX || featureX > windowX1) {
+    if (featureX1 < 0 || featureX > options.viewportWidth) {
         boxX = featureX;
         boxX1 = featureX1;
     } else {
         // center label within visible portion of the feature
-        boxX = Math.max(featureX, windowX);
-        boxX1 = Math.min(featureX1, windowX1);
+        boxX = Math.max(featureX, 0);
+        boxX1 = Math.min(featureX1, options.viewportWidth);
     }
 
     let color = getColorForFeature.call(this, feature);
     let geneColor;
     let gtexSelection = false;
-    if (referenceFrame.selection && GtexUtils.gtexLoaded) {
+    if (options.referenceFrame.selection && GtexUtils.gtexLoaded) {
         // TODO -- for gtex, figure out a better way to do this
         gtexSelection = true;
-        geneColor = referenceFrame.selection.colorForGene(name);
+        geneColor = options.referenceFrame.selection.colorForGene(name);
     }
 
 
@@ -672,7 +664,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
         const textBox = ctx.measureText(name);
         const xleft = labelX - textBox.width / 2;
         const xright = labelX + textBox.width / 2;
-        if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
+        if (options.drawLabel || xleft > options.rowLastX[feature.row] || gtexSelection) {
 
             options.rowLastX[feature.row] = xright;
 
