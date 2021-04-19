@@ -46,7 +46,9 @@ class SampleNameViewport {
                     value: this.browser.sampleNameViewportWidth,
                     callback: width => {
                         this.browser.sampleNameViewportWidth = width
-                        this.setWidth(this.browser.sampleNameViewportWidth)
+                        for (let { sampleNameViewport } of this.browser.trackViews) {
+                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        }
                         this.browser.resize()
                     }
                 }
