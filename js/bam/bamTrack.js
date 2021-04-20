@@ -227,7 +227,7 @@ class BAMTrack extends TrackBase {
 
         // Color by items
         const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-        $e.text('Color by');
+        $e.text('Color by:');
         menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
 
         const colorByMenuItems = [{key: 'strand', label: 'read strand'}];
@@ -321,7 +321,7 @@ class BAMTrack extends TrackBase {
 
         // Display mode
         const $displayModeLabel = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-        $displayModeLabel.text('Display mode');
+        $displayModeLabel.text('Display mode:');
         menuItems.push({name: undefined, object: $displayModeLabel, click: undefined, init: undefined});
 
         menuItems.push({
