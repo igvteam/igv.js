@@ -42,7 +42,7 @@ class SampleNameViewport {
 
             const config =
                 {
-                    label: 'Resize',
+                    label: 'Name Panel Width',
                     value: this.browser.sampleNameViewportWidth,
                     callback: width => {
                         this.browser.sampleNameViewportWidth = width
