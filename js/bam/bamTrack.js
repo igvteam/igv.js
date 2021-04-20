@@ -195,11 +195,13 @@ class BAMTrack extends TrackBase {
 
     paintAxis(ctx, pixelWidth, pixelHeight) {
 
-        if (this.browser.isMultiLocusMode()) {
-            ctx.clearRect(0, 0, pixelWidth, pixelHeight);
-        } else {
-            this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
-        }
+        this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
+
+        // if (this.browser.isMultiLocusMode()) {
+        //     ctx.clearRect(0, 0, pixelWidth, pixelHeight);
+        // } else {
+        //     this.coverageTrack.paintAxis(ctx, pixelWidth, this.coverageTrack.height);
+        // }
     }
 
     contextMenuItemList(config) {
