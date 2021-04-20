@@ -834,7 +834,7 @@ class ViewPort extends ViewportBase {
             const rows = nameValues.map(nameValue => {
 
                 if (nameValue.name) {
-                    const str = `<span>${nameValue.name}</span>&nbsp&nbsp&nbsp${nameValue.value}`
+                    const str = `<span>${nameValue.name}:</span>&nbsp&nbsp&nbsp${nameValue.value}`
                     return `<div title="${nameValue.value}">${str}</div>`
                 } else if ('<hr>' === nameValue) { // this can be retired if nameValue.html is allowed.
                     return nameValue
