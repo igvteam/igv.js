@@ -60,90 +60,48 @@
 
 <script type="module">
 
-   import cBioUtils from "../js/cbio/cbio.js";
+    import cBioUtils from "./cbio.js";
+    import igv from "../../js/index.js";
 
-    const cBio = {
 
-        //
-        // fetchStudies: function () {
-        //
-        //     let url = "https://www.cbioportal.org/api/studies?projection=DETAILED&pageSize=10000000&pageNumber=0&direction=ASC";
-        //     return igvxhr.loadJson(url);
-        // },
-        //
-        // fetchSamplesByStudy: async function (study) {
-        //
-        //     let url = "https://www.cbioportal.org/api/studies/" + study + "/samples";
-        //     const samples = await igvxhr.loadJson(url);
-        //     let sampleStudyList = [];
-        //     samples.forEach(function (sampleJson) {
-        //         sampleStudyList.push(
-        //             {
-        //                 "sampleId": sampleJson["sampleId"],
-        //                 "studyId": study
-        //             }
-        //         )
-        //     })
-        //     return sampleStudyList;
-        // },
-        //
-        // fetchCopyNumberByStudy: async function (study) {
-        //     const sampleStudyList = await this.fetchSamplesByStudy(study);
-        //     let url = "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY";
-        //     let body = JSON.stringify(sampleStudyList);
-        //     return igvxhr.loadJson(url, {method: "POST", sendData: body})
-        // },
+    async function initMenu(div, browser) {
 
-        initMenu: async function (div, browser) {
+        const studies = await cBioUtils.fetchStudies();
 
-            let self = this;
+        for (let study of studies) {
 
-            const studies = await cBioUtils.fetchStudies();
+            let sampleCount = study["cnaSampleCount"];
+            if (sampleCount > 0) {
+                let name = study["shortName"] + " (" + sampleCount + ")";
+                let trackDiv = document.createElement('div');
+                trackDiv.textContent = name;
+                trackDiv.addEventListener('click', async function (event) {
 
-            for (let study of studies) {
+                    const sampleStudyList = await cBioUtils.fetchSamplesByStudy(study.studyId)
 
-                let sampleCount = study["cnaSampleCount"];
-                if (sampleCount > 0) {
-
-                    const sampleStudyList = await self.fetchSamplesByStudy(study.studyId)
-                    let name = study["shortName"] + " (" + sampleCount + ")";
                     let body = JSON.stringify(sampleStudyList);
 
-                    let trackDiv = document.createElement('div');
-                    trackDiv.textContent = name;
-                    trackDiv.addEventListener('click', function (event) {
+                    let mutJsion = await cBioUtils.fetchMutationsByStudy(study.studyId);
 
-                        let trackJson = {
-                            "name": name,
-                            "type": "seg",
-                            "displayMode": "EXPANDED",
-                            "sourceType": "custom",
-                            "source": {
-                                "url": "https://www.cbioportal.org/api/copy-number-segments/fetch?projection=SUMMARY",
-                                "method": "POST",
-                                "contentType": "application/json",
-                                "body": body,
-                                "queryable": false,
-                                "isLog": true,
-                                "mappings": {
-                                    "chr": "chromosome",
-                                    "value": "segmentMean",
-                                    "sampleKey": "uniqueSampleKey",
-                                    "sample": "sampleId"
-                                }
-                            },
+                    const features = await cBioUtils.fetchCopyNumberByStudy(study.studyId)
 
-                        }
-                        browser.loadTrack(trackJson);
+                    let trackJson = {
+                        "name": name,
+                        "type": "seg",
+                        "displayMode": "EXPANDED",
+                        features: features
 
-                    });
+                    }
+                    browser.loadTrack(trackJson);
 
-                    div.appendChild(trackDiv);
+                });
 
-                }
+                div.appendChild(trackDiv);
 
             }
+
         }
+
     }
 
 
@@ -151,20 +109,6 @@
     //    {"sampleIds":["TCGA-13-1489-01"]}
 
     // Example json
-
-    // Copy number
-    // {
-    //     "uniqueSampleKey": "VENHQS1PUi1BNUoyLTAxOmFjY190Y2dh",
-    //     "uniquePatientKey": "VENHQS1PUi1BNUoyOmFjY190Y2dh",
-    //     "patientId": "TCGA-OR-A5J2",
-    //     "start": 3218610,
-    //     "end": 4749076,
-    //     "segmentMean": -0.2239,
-    //     "studyId": "acc_tcga",
-    //     "sampleId": "TCGA-OR-A5J2-01",
-    //     "chromosome": "1",
-    //     "numberOfProbes": 958
-    // }
 
 
     const options = {
@@ -174,7 +118,7 @@
 
     igv.createBrowser(igvDiv, options)
         .then(function (browser) {
-            cBio.initMenu(document.getElementById('trackList'), browser);
+            initMenu(document.getElementById('trackList'), browser);
         })
 
 
