@@ -500,7 +500,7 @@ class VariantTrack extends TrackBase {
 
             if (stringInfoKeys.length > 0) {
                 const $e = $('<div class="igv-track-menu-category igv-track-menu-border-top">');
-                $e.text('Color by');
+                $e.text('Color by:');
                 menuItems.push({name: undefined, object: $e, click: undefined, init: undefined});
                 stringInfoKeys.sort();
                 for (let item of stringInfoKeys) {
