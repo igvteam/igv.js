@@ -511,7 +511,7 @@ class Browser {
 
         this.removeAllTracks();
 
-        this.showSampleNames = session.showSampleNames
+        this.showSampleNames = session.showSampleNames || false;
         this.sampleNameControl.setState(this.showSampleNames === true);
 
         if (session.sampleNameViewportWidth) {
