@@ -58,8 +58,11 @@
 
     import igv from "../../js/index.js";
 
-
-    igv.createBrowser(igvDiv, {genome: "hg19", showSampleNames: true})
+//https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai
+    igv.createBrowser(igvDiv, {        reference: {
+            fastaURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta",
+            indexURL: "https://s3.amazonaws.com/igv.broadinstitute.org/genomes/seq/hg19/hg19.fasta.fai"
+        }, showSampleNames: true})
 
         .then(async function (browser) {
 
@@ -71,7 +74,7 @@
                 name: "cBIO mut example",
                 type: "mut",
                 features: features,
-                height: 300,
+                height: 50,
 
             })
 
