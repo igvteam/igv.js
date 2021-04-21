@@ -38,7 +38,10 @@ class SampleNameViewport {
 
         this.setWidth(width);
 
-        this.$viewport.get(0).addEventListener('click', e => {
+        this.$viewport.get(0).addEventListener('contextmenu', e => {
+
+            e.preventDefault()
+            e.stopPropagation()
 
             const config =
                 {
