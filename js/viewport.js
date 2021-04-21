@@ -443,11 +443,18 @@ class ViewPort extends ViewportBase {
             }
 
         const context = new C2S(config);
-        this.drawSVGWithContext(context, width, height)
+
+        const str = (this.trackView.track.name || this.trackView.track.id).replace(/\W/g, '');
+
+        const index = this.browser.referenceFrameList.indexOf(this.referenceFrame);
+        const id = `${ str }_referenceFrame_${ index }_guid_${ DOMUtils.guid() }`
+
+        this.drawSVGWithContext(context, width, height, id, 0, 0, 0)
+
         const svg = context.getSerializedSvg(true);
         const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-        const str = this.$trackLabel ? this.$trackLabel.text() : this.trackView.track.id;
-        FileUtils.download(`${str}.svg`, data);
+
+        FileUtils.download(`${ id }.svg`, data);
     }
 
     // called by trackView.renderSVGContext() when rendering
