@@ -19,3 +19,4 @@ igv.css.map
 /dev/covidbrowser/
 /deploy-snapshot.sh
 /package-lock.json
+/deploy-release.sh
