@@ -121,7 +121,7 @@ class SegTrack extends TrackBase {
             };
 
         menuItems.push("<hr/>");
-        menuItems.push("Sample Height");
+        menuItems.push("Sample Height:");
 
         const displayOptions = this.type === 'seg' ? ["SQUISHED", "EXPANDED", "FILL"] : ["SQUISHED", "EXPANDED"];
 
