@@ -17,3 +17,5 @@
 igv.css.map
 /dev/oauth/oauthConfig-private.js
 /dev/covidbrowser/
+/deploy-snapshot.sh
+/package-lock.json
