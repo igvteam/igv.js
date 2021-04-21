@@ -15,7 +15,7 @@ const fontConfigureTemplate =
         fillStyle: 'black'
     }
 
-class SampleNameViewport { //extends ViewportBase {
+class SampleNameViewport {
 
     constructor(trackView, $viewportContainer, referenceFrame, width) {
 
@@ -37,6 +37,24 @@ class SampleNameViewport { //extends ViewportBase {
         this.contentTop = 0;
 
         this.setWidth(width);
+
+        this.$viewport.get(0).addEventListener('click', e => {
+
+            const config =
+                {
+                    label: 'Name Panel Width',
+                    value: this.browser.sampleNameViewportWidth,
+                    callback: width => {
+                        this.browser.sampleNameViewportWidth = width
+                        for (let { sampleNameViewport } of this.browser.trackViews) {
+                            sampleNameViewport.setWidth(this.browser.sampleNameViewportWidth)
+                        }
+                        this.browser.resize()
+                    }
+                }
+
+            this.browser.inputDialog.present(config, e);
+        })
 
     }
 
