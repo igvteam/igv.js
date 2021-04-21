@@ -184,7 +184,9 @@ class TrackView {
             delta.deltaX += width
         }
 
-        this.sampleNameViewport.renderSVGContext(context, delta)
+        if (true === this.browser.showSampleNames) {
+            this.sampleNameViewport.renderSVGContext(context, delta)
+        }
     }
 
     attachScrollbar($track, $viewportContainer, viewports, sampleNameViewport) {
