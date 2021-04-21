@@ -5,9 +5,6 @@
     <meta content="Jim Robinson" name="author">
     <link href=img/favicon.ico rel="shortcut icon">
     <title>igv.js</title>
-
-    <!-- IGV JS-->
-    <script src="../dist/igv.min.js"></script>
 </head>
 
 <body>
@@ -30,48 +27,47 @@ Track configuration:
 
 <div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
-<script type="text/javascript">
+<script type="module">
+
+    import igv from "../js/index.js";
+
+    var igvDiv = document.getElementById("igvDiv");
+    var options =
+        {
+            genome: "hg19",
+            locus: 'chr1:629,422-16,522,294',
+            tracks:
+                [
+                    {
+                        name: "Copy number",
+                        type: "seg",
+                        displayMode: "EXPANDED",
+                        features: [
+                            {
+                                "chr": "1",
+                                "start": 3218610,
+                                "end": 4749076,
+                                "value": -0.2239,
+                                "sample": "TCGA-OR-A5J2-01"
+                            },
+                            {
+                                "chr": "1",
+                                "start": 4750119,
+                                "end": 11347492,
+                                "value": -0.8391,
+                                "sample": "TCGA-OR-A5J2-01"
+                            }
+                        ]
+                    },
+                ]
+        }
 
 
-    document.addEventListener("DOMContentLoaded", function () {
+    igv.createBrowser(igvDiv, options)
+        .then(function (browser) {
+            console.log("Created IGV browser");
+        })
 
-        var igvDiv = document.getElementById("igvDiv");
-        var options =
-            {
-                genome: "hg19",
-                locus: 'chr1:629,422-16,522,294',
-                tracks:
-                    [
-                        {
-                            name: "Copy number",
-                            type: "seg",
-                            displayMode: "EXPANDED",
-                            features: [
-                                {
-                                    "chr": "1",
-                                    "start": 3218610,
-                                    "end": 4749076,
-                                    "value": -0.2239,
-                                    "sample": "TCGA-OR-A5J2-01"
-                                },
-                                {
-                                    "chr": "1",
-                                    "start": 4750119,
-                                    "end": 11347492,
-                                    "value": -0.8391,
-                                    "sample": "TCGA-OR-A5J2-01"
-                                }
-                            ]
-                        },
-                    ]
-            }
-
-
-        igv.createBrowser(igvDiv, options)
-            .then(function (browser) {
-                console.log("Created IGV browser");
-            })
-    })
 
 </script>
 
