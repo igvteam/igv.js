@@ -42,6 +42,7 @@ import {decodeFusionJuncSpan} from "./decode/fusionJuncSpan.js";
 import {decodeGtexGWAS} from "./decode/gtexGWAS.js";
 import {decodeCustom} from "./decode/custom.js";
 import {decodeGcnv} from "../gcnv/gcnvDecoder.js";
+import DecodeError from "./decode/decodeError.js";
 
 /**
  *  Parser for column style (tab delimited, etc) text file formats (bed, gff, vcf, etc).
@@ -158,6 +159,7 @@ class FeatureParser {
         const format = this.header.format;
         const delimiter = this.delimiter || "\t";
         let i = 0;
+        let errorCount = 0;
         let line;
         while ((line = await dataWrapper.nextLine()) !== undefined) {
             i++;
@@ -179,6 +181,15 @@ class FeatureParser {
             }
 
             const feature = decode(tokens, this.header);
+
+            if(feature instanceof DecodeError) {
+                errorCount++;
+                if(errorCount > 0) {
+                    console.error(`Error parsing line '${line}': ${feature.message}`);
+                }
+                continue;
+            }
+
             if (feature) {
                 allFeatures.push(feature);
             }
