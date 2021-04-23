@@ -20,3 +20,4 @@ igv.css.map
 /deploy-snapshot.sh
 /package-lock.json
 /deploy-release.sh
+/deploy/
