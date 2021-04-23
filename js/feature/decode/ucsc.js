@@ -1,6 +1,6 @@
 import {IGVColor} from "../../../node_modules/igv-utils/src/index.js";
-
 import {gffNameFields, parseAttributeString} from "./gff.js";
+import DecodeError from "./decodeError.js";
 
 
 /**
@@ -22,7 +22,7 @@ function decodeBed(tokens, header) {
     const start = parseInt(tokens[1]);
     const end = tokens.length > 2 ? parseInt(tokens[2]) : start + 1;
     if (isNaN(start) || isNaN(end)) {
-        throw Error(`Unparsable bed record: ${tokens.join('\t')}`);
+        return new DecodeError(`Unparsable bed record.`);
     }
     const feature = {chr: chr, start: start, end: end, score: 1000};
 
