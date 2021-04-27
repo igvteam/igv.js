@@ -24,7 +24,7 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 
 ***[Multiple regions](https://igv.org/web/release/2.8.1/examples/multi-locus.html)***
 
-***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.8.1/examples/mmaf-tcga.html)***
+***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.8.1/examples/maf-tcga.html)***
 
 ***[More](https://igv.org/web/release/2.8.1/examples/)***
 
