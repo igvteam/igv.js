@@ -29,6 +29,8 @@ global.navigator = {
 
 global.DOMParser = DOMParser;
 
-global.atob = require('atob')
+global.atob = require('atob');
+
+global.btoa = require('btoa');
 
 
