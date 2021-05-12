@@ -1,6 +1,6 @@
 {
   "name": "igv",
-  "version": "2.8.2",
+  "version": "2.8.3",
   "main": "dist/igv.esm.js",
   "browser": "dist/igv.js",
   "module": "dist/igv.esm.js",
@@ -61,7 +61,7 @@
     "xmldom": "^0.5.0"
   },
   "dependencies": {
-    "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.1.5",
+    "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.1.6",
     "igv-utils": "git+https://github.com/igvteam/igv-utils.git#v1.2.7"
   }
 }
