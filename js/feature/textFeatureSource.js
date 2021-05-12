@@ -313,7 +313,7 @@ function packFeatures(features, maxRows) {
  */
 function fixFeatures(features, genome) {
 
-    if (!features || features.length === 0) return;
+    if (!features || features.length === 0) return [];
 
     const isBedPE = features[0].chr === undefined && features[0].chr1 !== undefined;
     if (isBedPE) {
