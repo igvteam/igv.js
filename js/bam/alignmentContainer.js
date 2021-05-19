@@ -319,7 +319,7 @@ class CoverageMap {
                     self.coverage[i] = new Coverage(self.threshold);
                 }
 
-                const base = seq.charAt(seqOffset + j);
+                const base = (seq == undefined) ? "N" : seq.charAt(seqOffset + j);
                 const key = (alignment.strand) ? "pos" + base : "neg" + base;
                 const q = qual && seqOffset + j < qual.length ? qual[seqOffset + j] : 30;
 
