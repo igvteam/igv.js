@@ -107,24 +107,24 @@
                             "pointSize": 3,
                             "name": "Encode bigwig points"
                         },
-                        // {
-                        //     "name": "SEG Track",
-                        //     "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                        //     "indexed": false,
-                        //     "isLog": true,
-                        //     "displayMode": "EXPANDED",
-                        //     "expandedRowHeight": 20,
-                        //     "height": 256,
-                        //     "order": 1,
-                        //     "format": "seg"
-                        // },
-                        // {
-                        //     "sourceType": "gcs",
-                        //     "type": "alignment",
-                        //     "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
-                        //     "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
-                        //     "name": "NA12891"
-                        // }
+                        {
+                            "name": "SEG Track",
+                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                            "indexed": false,
+                            "isLog": true,
+                            "displayMode": "EXPANDED",
+                            "expandedRowHeight": 20,
+                            "height": 256,
+                            "order": 1,
+                            "format": "seg"
+                        },
+                        {
+                            "sourceType": "gcs",
+                            "type": "alignment",
+                            "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+                            "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+                            "name": "NA12891"
+                        }
                     ]
             };
 
@@ -145,11 +145,13 @@
             }
         })
 
+        // programmatic search
         await browser.search('chr1:153,588,447-153,707,067')
-
         const [ locus ] = browser.currentLoci()
-
         console.log(`locus ${ locus }`)
+
+        // programatic hide track labels
+        browser.hideTrackLabels()
 
     })()
 
