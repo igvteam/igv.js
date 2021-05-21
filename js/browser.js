@@ -624,8 +624,8 @@ class Browser {
 
         // discard auxiliary columns
         if (this.axisColumn) this.axisColumn.remove()
-        if (this.$sampleNameColumn) this.sampleNameColumn.remove()
-        if (this.trackScrollbarControl) this.trackScrollbarControl.$column.remove()
+        if (this.sampleNameColumn) this.sampleNameColumn.remove()
+        if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
         if (this.trackDragControl) this.trackDragControl.column.remove()
         if (this.trackGearControl) this.trackGearControl.column.remove()
 

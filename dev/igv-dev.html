@@ -145,6 +145,12 @@
             }
         })
 
+        await browser.search('chr1:153,588,447-153,707,067')
+
+        const [ locus ] = browser.currentLoci()
+
+        console.log(`locus ${ locus }`)
+
     })()
 
     async function createTrackList(div, file, browser) {
