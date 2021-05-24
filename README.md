@@ -16,17 +16,17 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
  
 # Examples
  
-***[Alignments](https://igv.org/web/release/2.8.3/examples/cram-vcf.html)***
+***[Alignments](https://igv.org/web/release/2.8.4/examples/cram-vcf.html)***
 
-***[Interactions](https://igv.org/web/release/2.8.3/examples/arcs.html)***
+***[Interactions](https://igv.org/web/release/2.8.4/examples/arcs.html)***
 
-***[Copy number](https://igv.org/web/release/2.8.3/examples/copyNumber.html)***
+***[Copy number](https://igv.org/web/release/2.8.4/examples/copyNumber.html)***
 
-***[Multiple regions](https://igv.org/web/release/2.8.3/examples/multi-locus.html)***
+***[Multiple regions](https://igv.org/web/release/2.8.4/examples/multi-locus.html)***
 
-***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.8.3/examples/maf-tcga.html)***
+***[Mutation Annotation Format (MAF)](https://igv.org/web/release/2.8.4/examples/maf-tcga.html)***
 
-***[More](https://igv.org/web/release/2.8.3/examples/)***
+***[More](https://igv.org/web/release/2.8.4/examples/)***
 
  
 # Quickstart
@@ -35,11 +35,11 @@ See the [Wiki](https://github.com/igvteam/igv.js/wiki) for more documentation.
 igv.js consists of a single javascript file with no external dependencies.  To link directly to the current release copy this snippet
 
 ```html
-<script src="https://cdn.jsdelivr.net/npm/igv@2.8.3/dist/igv.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/igv@2.8.4/dist/igv.min.js"></script>
 ``` 
 
 Pre-built files for ES5 (igv.min.js) and ES6 (igv.esm.min.js)
-can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.8.3/dist/](https://cdn.jsdelivr.net/npm/igv@2.8.3/dist/).   
+can be downloaded from [https://cdn.jsdelivr.net/npm/igv@2.8.4/dist/](https://cdn.jsdelivr.net/npm/igv@2.8.4/dist/).   
  
 Alternatively you can install with npm  
  
