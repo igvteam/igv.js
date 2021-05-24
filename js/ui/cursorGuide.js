@@ -102,9 +102,8 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     const left = `${ xParent }px`;
     $verticalGuide.css({ left });
 
-    const { referenceFrame } = browser.getViewportWithGUID( $viewport.data('viewportGUID') );
     if (browser.rulerTrack) {
-        const index = browser.referenceFrameList.indexOf(referenceFrame)
+        const index = parseInt( $viewport.data('referenceFrameIndex') )
         const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
         rulerViewport.mouseMove(event)
     }

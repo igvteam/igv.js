@@ -464,8 +464,7 @@ class Browser {
 
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
 
-        const { genome, referenceFrameList } = await this.loadReference(genomeConfig, session.locus);
-        this.referenceFrameList = referenceFrameList
+        this.referenceFrameList = await this.loadReference(genomeConfig, session.locus);
 
         this.axisColumn = createAxisColumn(this.columnContainer)
 
@@ -541,8 +540,6 @@ class Browser {
             this.centerGuide.repaint();
         }
 
-        this.updateNavbarDOMWithGenome(genome)
-
         this.updateLocusSearchWidget(this.referenceFrameList);
 
         this.windowSizePanel.updatePanel(this.referenceFrameList);
@@ -569,7 +566,15 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         const genome = await GenomeUtils.loadGenome(genomeConfig)
+        const genomeChange = this.genome && (this.genome.id !== genome.id)
+
         this.genome = genome
+
+        this.updateNavbarDOMWithGenome(genome)
+
+        if (genomeChange) {
+            this.removeAllTracks();
+        }
 
         let referenceFrameList
         try {
@@ -580,7 +585,7 @@ class Browser {
             referenceFrameList = await this.createReferenceFrameList( genome.getHomeChromosomeName() );
         }
 
-        return { genome, referenceFrameList }
+        return referenceFrameList
 
         function getInitialLocus(locus, genome) {
             let loci = [];
@@ -656,8 +661,8 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         const genomeConfig = await GenomeUtils.expandReference(idOrConfig);
-        const { genome, referenceFrameList } = await this.loadReference(genomeConfig, undefined);
-        this.referenceFrameList = referenceFrameList
+
+        this.referenceFrameList = await this.loadReference(genomeConfig, undefined);
 
         const tracks = genomeConfig.tracks || [];
 
@@ -669,8 +674,9 @@ class Browser {
 
         await this.loadTrackList(tracks);
 
-        this.updateViews();
-        return genome;
+        await this.updateViews();
+
+        return this.genome;
     }
 
 //
@@ -1089,7 +1095,7 @@ class Browser {
 
                 const { axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer } = trackView
 
-                axis.detach()
+                axis.remove()
 
                 for (let { $viewport } of viewports) {
                     $viewport.detach()
@@ -1496,17 +1502,16 @@ class Browser {
     }
 
     getViewportWithGUID(guid) {
-
-        let result = undefined;
+        ;
         for (let { viewports } of this.trackViews) {
             for (let viewport of viewports) {
                 if (guid === viewport.guid) {
-                    result = viewport;
+                    return viewport;
                 }
             }
         }
 
-        return result;
+        return undefined;
     };
 
     /**
