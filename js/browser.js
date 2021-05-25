@@ -464,7 +464,7 @@ class Browser {
 
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
 
-        const genome = await this.loadReference(genomeConfig, session.locus);
+        await this.loadReference(genomeConfig, session.locus);
 
         this.axisColumn = createAxisColumn(this.columnContainer)
 
@@ -510,7 +510,7 @@ class Browser {
         if (session.roi) {
             this.roi = [];
             for (let r of session.roi) {
-                this.roi.push(new ROI(r, genome));
+                this.roi.push(new ROI(r, this.genome));
             }
         }
 
@@ -561,7 +561,6 @@ class Browser {
      *
      * @param genomeConfig
      * @param initialLocus
-     * @returns {Promise<void>}
      */
     async loadReference(genomeConfig, initialLocus) {
 
@@ -587,7 +586,6 @@ class Browser {
             locus = this.genome.getHomeChromosomeName()
             await this.search(locus);
         }
-        return this.genome;
 
         function getInitialLocus(locus, genome) {
             let loci = [];
@@ -659,12 +657,12 @@ class Browser {
      * as well as optional cytoband and annotation tracks.
      *
      * @param idOrConfig
-     * @returns {Promise<void>}
+     * @returns genome
      */
     async loadGenome(idOrConfig) {
 
         const genomeConfig = await GenomeUtils.expandReference(idOrConfig);
-        const genome = await this.loadReference(genomeConfig, undefined);
+        await this.loadReference(genomeConfig, undefined);
 
         const tracks = genomeConfig.tracks || [];
 
@@ -678,7 +676,7 @@ class Browser {
 
         await this.updateViews();
 
-        return genome;
+        return this.genome;
     }
 
 //
