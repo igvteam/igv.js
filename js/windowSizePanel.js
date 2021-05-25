@@ -42,7 +42,8 @@ class WindowSizePanel {
     }
 
     updatePanel(referenceFrameList) {
-        this.$container.text(1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(this.browser.getViewportWidth() * referenceFrameList[ 0 ].bpPerPixel)) : '');
+        const width = this.browser.calculateViewportWidth(this.browser.referenceFrameList.length)
+        this.$container.text(1 === referenceFrameList.length ? prettyBasePairNumber(Math.round(width * referenceFrameList[ 0 ].bpPerPixel)) : '');
     }
 }
 

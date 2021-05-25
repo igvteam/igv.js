@@ -464,7 +464,7 @@ class Browser {
 
         const genomeConfig = await GenomeUtils.expandReference(session.reference || session.genome);
 
-        this.referenceFrameList = await this.loadReference(genomeConfig, session.locus);
+        const genome = await this.loadReference(genomeConfig, session.locus);
 
         this.axisColumn = createAxisColumn(this.columnContainer)
 
@@ -566,7 +566,8 @@ class Browser {
     async loadReference(genomeConfig, initialLocus) {
 
         const genome = await GenomeUtils.loadGenome(genomeConfig)
-        const genomeChange = this.genome && (this.genome.id !== genome.id)
+
+        const genomeChange = undefined === this.genome || (this.genome.id !== genome.id)
 
         this.genome = genome
 
@@ -576,16 +577,17 @@ class Browser {
             this.removeAllTracks();
         }
 
-        let referenceFrameList
+        let locus
         try {
-            const loci = initialLocus ? getInitialLocus(initialLocus, genome) :  genome.getHomeChromosomeName();
-            referenceFrameList = await this.createReferenceFrameList( loci )
+            locus = getInitialLocus(initialLocus, genome)
+            await this.search(locus, true)
         } catch (error) {
-            Alert.presentAlert(new Error(`Error searching for locus ${initialLocus}  [${error}]`), undefined);
-            referenceFrameList = await this.createReferenceFrameList( genome.getHomeChromosomeName() );
-        }
+            Alert.presentAlert(new Error(`Error searching for locus ${initialLocus}  [${error}]`), undefined)
 
-        return referenceFrameList
+            locus = this.genome.getHomeChromosomeName()
+            await this.search(locus);
+        }
+        return this.genome;
 
         function getInitialLocus(locus, genome) {
             let loci = [];
@@ -602,6 +604,7 @@ class Browser {
 
             return loci;
         }
+
     }
 
     cleanHouseForSession() {
@@ -661,8 +664,7 @@ class Browser {
     async loadGenome(idOrConfig) {
 
         const genomeConfig = await GenomeUtils.expandReference(idOrConfig);
-
-        this.referenceFrameList = await this.loadReference(genomeConfig, undefined);
+        const genome = await this.loadReference(genomeConfig, undefined);
 
         const tracks = genomeConfig.tracks || [];
 
@@ -676,13 +678,14 @@ class Browser {
 
         await this.updateViews();
 
-        return this.genome;
+        return genome;
     }
 
 //
     updateUIWithReferenceFrameList(referenceFrameList) {
 
         this.updateLocusSearchWidget(referenceFrameList)
+
         this.windowSizePanel.updatePanel(referenceFrameList)
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
@@ -1293,7 +1296,8 @@ class Browser {
 
         } else {
 
-            const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(this.calculateViewportWidth(this.referenceFrameList.length))
+            const width = this.calculateViewportWidth(this.referenceFrameList.length)
+            const locus = referenceFrameList[ 0 ].getPresentationLocusComponents(width)
 
             this.chromosomeSelectWidget.$select.val(locus.chr)
 
@@ -1321,20 +1325,14 @@ class Browser {
         return Math.floor(width/referenceFrameListLength)
     }
 
-    getViewportWidth() {
-        return this.trackViews[0].viewports[0].$viewport.width()
-    };
-
     minimumBases() {
         return this.config.minimumBases;
     };
 
     updateZoomSlider($slider) {
 
-        const referenceFrame = this.referenceFrameList[0]
-        const { $viewport } = this.trackViews[0].viewports[0];
-
-        const viewportWidthBP = $viewport.width() * referenceFrame.bpPerPixel;
+        const referenceFrame = this.referenceFrameList[0];
+        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * referenceFrame.bpPerPixel;
         const maxBP = referenceFrame.getChromosome().bpLength;
         const minBP = this.minimumBases();
         const percent = (maxBP - viewportWidthBP) / (maxBP - minBP)
@@ -1505,10 +1503,10 @@ class Browser {
      * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
      */
     async goto(chr, start, end) {
-        return this.search(chr + ":" + start + "-" + end);
+        await this.search(chr + ":" + start + "-" + end);
     }
 
-    async search(string) {
+    async search(string, init) {
 
         let loci
 
@@ -1532,7 +1530,6 @@ class Browser {
             // discard track columns
             viewportColumnManager.discardAllColumns(this.columnContainer)
 
-
             // create new reference frame list based on search loci
             this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
 
@@ -1544,7 +1541,9 @@ class Browser {
 
             this.updateUIWithReferenceFrameList(this.referenceFrameList);
 
-            this.updateViews();
+            if (!init) {
+                await this.updateViews();
+            }
 
         } else {
             Alert.presentAlert( new Error(`Error searching for locus ${ string }`) )
