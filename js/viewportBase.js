@@ -43,9 +43,6 @@ class ViewportBase {
         this.$viewport = $('<div class="igv-viewport">');
         $viewportColumn.append(this.$viewport);
 
-        // store the viewport GUID for later use
-        this.$viewport.data('viewportGUID', this.guid);
-
         // store referenceFrame index
         this.$viewport.data('referenceFrameIndex', this.browser.referenceFrameList.indexOf(referenceFrame).toString());
 

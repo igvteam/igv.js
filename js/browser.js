@@ -1501,19 +1501,6 @@ class Browser {
 
     }
 
-    getViewportWithGUID(guid) {
-        ;
-        for (let { viewports } of this.trackViews) {
-            for (let viewport of viewports) {
-                if (guid === viewport.guid) {
-                    return viewport;
-                }
-            }
-        }
-
-        return undefined;
-    };
-
     /**
      * @deprecated  This is a deprecated method with no known usages.  To be removed in a future release.
      */
