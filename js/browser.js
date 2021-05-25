@@ -1355,7 +1355,7 @@ class Browser {
         const centerBP = referenceFrame.start + referenceFrame.toBP($viewport.width() / 2.0);
         const { bpStart, bpLength } = referenceFrame.getChromosome();
         const bpp = IGVMath.lerp((bpLength - bpStart) / $viewport.width(), this.minimumBases() / $viewport.width(), percentage);
-        const viewportWidthBP = bpp * $viewport.width();
+        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * bpp;
 
         referenceFrame.start = centerBP - (viewportWidthBP / 2);
         referenceFrame.bpPerPixel = bpp;
@@ -1392,7 +1392,7 @@ class Browser {
         }
 
         // Update reference frame start and bpp
-        const viewportWidthBP = bpp * $viewport.width();
+        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * bpp;
         referenceFrame.start = centerBP - (viewportWidthBP / 2)
         referenceFrame.bpPerPixel = bpp;
         referenceFrame.clamp($viewport.width())
