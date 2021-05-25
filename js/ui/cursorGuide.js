@@ -103,7 +103,7 @@ function mouseHandler(event, $viewport, $horizontalGuide, $verticalGuide, $curso
     $verticalGuide.css({ left });
 
     if (browser.rulerTrack) {
-        const index = parseInt( $viewport.data('referenceFrameIndex') )
+        const index = $('.igv-column').index($viewport.parent())
         const rulerViewport = browser.rulerTrack.trackView.viewports[ index ]
         rulerViewport.mouseMove(event)
     }

@@ -43,9 +43,6 @@ class ViewportBase {
         this.$viewport = $('<div class="igv-viewport">');
         $viewportColumn.append(this.$viewport);
 
-        // store referenceFrame index
-        this.$viewport.data('referenceFrameIndex', this.browser.referenceFrameList.indexOf(referenceFrame).toString());
-
         if (trackView.track.height) {
             this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
         }
