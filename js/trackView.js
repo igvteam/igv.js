@@ -550,18 +550,29 @@ class TrackView {
      */
     dispose() {
 
-        if (this.dragHandle) {
-            this.browser.trackDragControl.removeDragHandle(this)
+        this.axis.remove()
+
+        for (let viewport of this.viewports) {
+            viewport.dispose();
         }
+
+        this.sampleNameViewport.$viewport.detach()
 
         if (this.outerScroll) {
             this.browser.trackScrollbarControl.removeScrollbar(this)
         }
 
+        if (this.dragHandle) {
+            this.browser.trackDragControl.removeDragHandle(this)
+        }
+
+        this.browser.trackGearControl.removeGearContainer(this)
+
         if (typeof this.track.dispose === "function") {
             this.track.dispose();
         }
 
+        // TODO: Perhaps better done in track/trackBase
         const track = this.track;
 
         if (typeof track.dispose === 'function') {
@@ -572,9 +583,6 @@ class TrackView {
             track[key] = undefined;
         }
 
-        for (let viewport of this.viewports) {
-            viewport.dispose();
-        }
 
         for (let key of Object.keys(this)) {
             this[key] = undefined;

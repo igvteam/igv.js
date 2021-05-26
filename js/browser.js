@@ -587,22 +587,6 @@ class Browser {
             await this.search(locus);
         }
 
-        function getInitialLocus(locus, genome) {
-            let loci = [];
-            if (locus) {
-                if (Array.isArray(locus)) {
-                    loci = locus.join(' ');
-
-                } else {
-                    loci = locus;
-                }
-            } else {
-                loci = genome.getHomeChromosomeName();
-            }
-
-            return loci;
-        }
-
     }
 
     cleanHouseForSession() {
@@ -611,7 +595,7 @@ class Browser {
         for (let trackView of this.trackViews) {
 
             // empty axis column
-            // empty track columns
+            // empty viewport columns
             // empty sampleName column
             trackView.removeDOMFromColumnContainer()
 
@@ -625,14 +609,24 @@ class Browser {
             this.trackGearControl.removeGearContainer(trackView)
         }
 
-        // discard track columns
+        // discard columns
+
+        // axis column
+        if (this.axisColumn) this.axisColumn.remove()
+
+        // viewport columns
         viewportColumnManager.discardAllColumns(this.columnContainer)
 
-        // discard auxiliary columns
-        if (this.axisColumn) this.axisColumn.remove()
+        // sample name column
         if (this.sampleNameColumn) this.sampleNameColumn.remove()
+
+        // scrollbar column
         if (this.trackScrollbarControl) this.trackScrollbarControl.column.remove()
+
+        // drag column
         if (this.trackDragControl) this.trackDragControl.column.remove()
+
+        // gear column
         if (this.trackGearControl) this.trackGearControl.column.remove()
 
         // discard remaining state
@@ -1064,22 +1058,9 @@ class Browser {
 
         this.trackViews.splice(this.trackViews.indexOf(track.trackView), 1)
 
-        const { axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer } = track.trackView
-
-        axis.remove()
-
-        for (let { $viewport } of viewports) {
-            $viewport.detach()
-        }
-
-        sampleNameViewport.$viewport.detach()
-
-        outerScroll.remove()
-        dragHandle.remove()
-        gearContainer.remove()
-
         this.fireEvent('trackremoved', [track])
         this.fireEvent('trackorderchanged', [this.getTrackOrder()])
+
         track.trackView.dispose()
     }
 
@@ -1088,34 +1069,19 @@ class Browser {
      */
     removeAllTracks() {
 
-        const newTrackViews = [];
+        const remainingTrackViews = [];
 
         for (let trackView of this.trackViews) {
 
             if (trackView.track.id !== 'ruler' && trackView.track.id !== 'ideogram') {
-
-                const { axis, viewports, sampleNameViewport, outerScroll, dragHandle, gearContainer } = trackView
-
-                axis.remove()
-
-                for (let { $viewport } of viewports) {
-                    $viewport.detach()
-                }
-
-                sampleNameViewport.$viewport.detach()
-
-                outerScroll.remove()
-                dragHandle.remove()
-                gearContainer.remove()
-
                 this.fireEvent('trackremoved', [trackView.track]);
                 trackView.dispose();
-            } else {
-                newTrackViews.push(trackView);
+             } else {
+                remainingTrackViews.push(trackView);
             }
         }
 
-        this.trackViews = newTrackViews;
+        this.trackViews = remainingTrackViews;
     }
 
     /**
@@ -1517,19 +1483,27 @@ class Browser {
 
         if (loci && loci.length > 0) {
 
+            // create reference frame list based on search loci
+            this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
+
+
             // discard viewport DOM elements
             for (let trackView of this.trackViews) {
+
                 trackView.removeDOMFromColumnContainer()
+
                 this.trackScrollbarControl.removeScrollbar(trackView)
+
                 this.trackDragControl.removeDragHandle(trackView)
+
                 this.trackGearControl.removeGearContainer(trackView)
             }
 
             // discard track columns
             viewportColumnManager.discardAllColumns(this.columnContainer)
 
-            // create new reference frame list based on search loci
-            this.referenceFrameList = createReferenceFrameList(loci, this.genome, this.flanking, this.minimumBases(), this.calculateViewportWidth(loci.length))
+
+
 
             viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length)
 
@@ -1963,6 +1937,14 @@ class Browser {
         }
     }
 
+}
+
+function getInitialLocus(locus, genome) {
+    if (locus) {
+        return Array.isArray(locus) ? locus.join(' ') : locus
+    } else {
+        return genome.getHomeChromosomeName()
+    }
 }
 
 function logo() {
