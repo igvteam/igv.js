@@ -1278,15 +1278,20 @@ class Browser {
 
     };
 
-    calculateViewportWidth(referenceFrameListLength) {
+    calculateViewportWidth(columnCount) {
 
         let { width } = this.columnContainer.getBoundingClientRect()
+        console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
 
-        width -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width;
+        const sampleNameViewportWidth = this.getSampleNameViewportWidth()
 
-        width -= column_multi_locus_shim_width * (referenceFrameListLength - 1)
+        width -= igv_axis_column_width + sampleNameViewportWidth + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
 
-        return Math.floor(width/referenceFrameListLength)
+        width -= column_multi_locus_shim_width * (columnCount - 1)
+
+        // console.log(`${ Date.now() }  column-container ${ width } viewport ${ Math.floor(width/columnCount) } sample-name-viewport ${ sampleNameViewportWidth }`)
+
+        return Math.floor(width/columnCount)
     }
 
     minimumBases() {

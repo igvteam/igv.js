@@ -566,6 +566,11 @@ class TrackView {
 
         this.browser.trackGearControl.removeGearContainer(this)
 
+        if (false === colorPickerExclusionTypes.has(this.track.type)) {
+            this.colorPicker.container.remove()
+            this.altColorPicker.container.remove()
+        }
+
         if (typeof this.track.dispose === "function") {
             this.track.dispose();
         }

@@ -101,23 +101,23 @@
                 // locus: [ 'ace', 'myc' ],
                 tracks:
                     [
-                        {
-                            "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                            "graphType": "points",
-                            "pointSize": 3,
-                            "name": "Encode bigwig points"
-                        },
-                        {
-                            "name": "SEG Track",
-                            "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
-                            "indexed": false,
-                            "isLog": true,
-                            "displayMode": "EXPANDED",
-                            "expandedRowHeight": 20,
-                            "height": 256,
-                            "order": 1,
-                            "format": "seg"
-                        },
+                        // {
+                        //     "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
+                        //     "graphType": "points",
+                        //     "pointSize": 3,
+                        //     "name": "Encode bigwig points"
+                        // },
+                        // {
+                        //     "name": "SEG Track",
+                        //     "url": "https://data.broadinstitute.org/igvdata/test/igv-web/segmented_data_080520.seg.gz",
+                        //     "indexed": false,
+                        //     "isLog": true,
+                        //     "displayMode": "EXPANDED",
+                        //     "expandedRowHeight": 20,
+                        //     "height": 256,
+                        //     "order": 1,
+                        //     "format": "seg"
+                        // },
                         // {
                         //     "sourceType": "gcs",
                         //     "type": "alignment",
@@ -168,12 +168,13 @@
             } else {
                 const trackDiv = document.createElement('div');
                 trackDiv.innerHTML = track.name;
-                trackDiv.addEventListener('click', function (event) {
+                trackDiv.addEventListener('click', async () => {
 
                     // Convert to json to insure we can load json representations (not strictly neccessary).
-                    var json = JSON.stringify(track);
+                    const json = JSON.stringify(track)
 
-                    browser.loadTrack(json);
+                    await browser.loadTrack(json)
+                    await browser.resize()
                 });
 
                 div.appendChild(trackDiv);
@@ -189,7 +190,10 @@
             const trackDiv = document.createElement('div')
             trackDiv.innerHTML = (config.tissueSiteDetailId.split('_').join(' '))
             div.appendChild(trackDiv)
-            trackDiv.addEventListener('click', () => browser.loadTrack(GtexUtils.trackConfiguration(config)))
+            trackDiv.addEventListener('click', async () => {
+                await browser.loadTrack(GtexUtils.trackConfiguration(config))
+                await browser.resize()
+            })
         }
 
     }

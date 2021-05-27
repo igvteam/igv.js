@@ -547,16 +547,17 @@ class ViewPort extends ViewportBase {
 
     createZoomInNotice($parent) {
 
-        const $notice = $('<div class="zoom-in-notice-container">');
-        $parent.append($notice);
+        const $container = $('<div>', { class: 'igv-zoom-in-notice-container' })
+        $parent.append($container);
 
         const $e = $('<div>');
-        $notice.append($e);
+        $container.append($e);
+
         $e.text('Zoom in to see features');
 
-        $notice.hide();
+        $container.hide();
 
-        return $notice;
+        return $container;
     }
 
     viewIsReady() {
