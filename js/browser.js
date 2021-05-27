@@ -746,8 +746,7 @@ class Browser {
             // this.startSpinner();
             const promises = [];
             for (let config of configList) {
-                const noSpinner = true;
-                promises.push(this.loadTrack(config, noSpinner));
+                promises.push(this.loadTrack(config, false));
             }
 
             const loadedTracks = await Promise.all(promises)
@@ -759,7 +758,7 @@ class Browser {
             }
             return loadedTracks;
         } finally {
-            // this.stopSpinner();
+            await this.resize()
         }
     };
 
@@ -800,10 +799,11 @@ class Browser {
      * Return a promise to load a track
      *
      * @param config
+     * @param doResize - undefined by default
      * @returns {*}
      */
 
-    async loadTrack(config, noSpinner) {
+    async loadTrack(config, doResize) {
 
 
         // config might be json
@@ -812,7 +812,6 @@ class Browser {
         }
 
         try {
-            if (!noSpinner) this.startSpinner();
 
             const newTrack = await this.createTrack(config);
 
@@ -859,8 +858,11 @@ class Browser {
             msg += (": " + config.url);
             Alert.presentAlert(new Error(msg), undefined);
         } finally {
-            if (!noSpinner) {
-                this.stopSpinner();
+            // TODO: If loadTrack() is called individually - not via loadTrackList() - call this.resize()
+            if (false === doResize) {
+                // do nothing
+            } else {
+                await this.resize()
             }
         }
     }

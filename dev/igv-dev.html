@@ -168,13 +168,11 @@
             } else {
                 const trackDiv = document.createElement('div');
                 trackDiv.innerHTML = track.name;
-                trackDiv.addEventListener('click', async () => {
+                trackDiv.addEventListener('click', () => {
 
                     // Convert to json to insure we can load json representations (not strictly neccessary).
                     const json = JSON.stringify(track)
-
-                    await browser.loadTrack(json)
-                    await browser.resize()
+                    browser.loadTrack(json)
                 });
 
                 div.appendChild(trackDiv);
@@ -190,9 +188,8 @@
             const trackDiv = document.createElement('div')
             trackDiv.innerHTML = (config.tissueSiteDetailId.split('_').join(' '))
             div.appendChild(trackDiv)
-            trackDiv.addEventListener('click', async () => {
-                await browser.loadTrack(GtexUtils.trackConfiguration(config))
-                await browser.resize()
+            trackDiv.addEventListener('click', () => {
+                browser.loadTrack(GtexUtils.trackConfiguration(config))
             })
         }
 
