@@ -43,8 +43,12 @@ class TrackDragControl {
     }
 
     removeDragHandle(trackView) {
-        $(trackView.dragHandle).off()
-        trackView.dragHandle.remove()
+
+        if (trackView.dragHandle) {
+            $(trackView.dragHandle).off()
+            trackView.dragHandle.remove()
+        }
+
     }
 
     addDragShim(trackView) {

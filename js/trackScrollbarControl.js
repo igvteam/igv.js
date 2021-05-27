@@ -13,7 +13,7 @@ class TrackScrollbarControl {
         columnContainer.appendChild(this.column)
     }
 
-    addScrollbar(trackView) {
+    addScrollbar(trackView, columnContainer) {
 
         const outerScroll = DOMUtils.div()
         this.column.appendChild(outerScroll)
@@ -27,29 +27,14 @@ class TrackScrollbarControl {
         trackView.innerScroll = innerScroll
         trackView.outerScroll = outerScroll
 
-        // const moveScroller = delta => {
-        //
-        //     const y = $(innerScroll).position().top + delta
-        //     const top = Math.min(Math.max(0, y), outerScroll.clientHeight - innerScroll.clientHeight)
-        //     $(innerScroll).css('top', `${ top }px`);
-        //
-        //     const contentHeight = maxViewportContentHeight(trackView.viewports)
-        //     const contentTop = -Math.round(top * (contentHeight / trackView.viewports[ 0 ].$viewport.height()))
-        //
-        //     for (let viewport of [...trackView.viewports, trackView.sampleNameViewport]) {
-        //         viewport.setTop(contentTop)
-        //     }
-        //
-        // }
-
         const namespace = 'track-scrollbar-' + DOMUtils.guid()
 
-        $(innerScroll).on(`mousedown.${namespace}`, event => {
+        $(innerScroll).on(`mousedown.${ trackView.namespace }`, event => {
             event.stopPropagation()
             const { y } = DOMUtils.pageCoordinates(event)
             $(innerScroll).data('yDown', y.toString());
 
-            $(innerScroll).on(`mousemove.${namespace}`, event => {
+            $(columnContainer).on(`mousemove.${ trackView.namespace }`, event => {
                 event.stopPropagation()
                 const { y } = DOMUtils.pageCoordinates(event)
                 TrackScrollbarControl.moveScroller(trackView,y - parseInt( $(innerScroll).data('yDown') ))
@@ -59,18 +44,26 @@ class TrackScrollbarControl {
 
         })
 
-        $(innerScroll).on(`mouseup.${namespace}`, () => $(innerScroll).off('mousemove'))
+        $(columnContainer).on(`mouseup.${ trackView.namespace }`, () => $(columnContainer).off(`mousemove.${ trackView.namespace }`))
 
-        $(innerScroll).on(`mouseleave.${namespace}`, () => $(innerScroll).off('mousemove'))
     }
 
-    removeScrollbar(trackView) {
-        if (trackView.innerScroll) {
-            $(trackView.innerScroll).off()
-            trackView.innerScroll.remove()
+    removeScrollbar(trackView, columnContainer) {
+
+        if (trackView.outerScroll) {
+
+            if (trackView.innerScroll) {
+
+                $(trackView.innerScroll).off(trackView.namespace)
+                trackView.innerScroll.remove()
+
+                $(columnContainer).off(trackView.namespace)
+            }
+
+            trackView.outerScroll.remove()
+
         }
 
-        trackView.outerScroll.remove()
     }
 
     addScrollbarShim(trackView) {

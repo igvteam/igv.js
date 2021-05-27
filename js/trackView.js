@@ -40,6 +40,8 @@ class TrackView {
 
     constructor(browser, columnContainer, track) {
 
+        this.namespace = `trackview-${ DOMUtils.guid() }`
+
         this.browser = browser;
         this.track = track;
         track.trackView = this;
@@ -207,7 +209,7 @@ class TrackView {
     attachScrollbar(browser) {
 
         if (false === scrollbarExclusionTypes.has(this.track.type)) {
-            browser.trackScrollbarControl.addScrollbar(this)
+            browser.trackScrollbarControl.addScrollbar(this, browser.columnContainer)
         } else {
             browser.trackScrollbarControl.addScrollbarShim(this)
         }
@@ -558,13 +560,9 @@ class TrackView {
 
         this.sampleNameViewport.$viewport.detach()
 
-        if (this.outerScroll) {
-            this.browser.trackScrollbarControl.removeScrollbar(this)
-        }
+        this.browser.trackScrollbarControl.removeScrollbar(this, this.this.columnContainer)
 
-        if (this.dragHandle) {
-            this.browser.trackDragControl.removeDragHandle(this)
-        }
+        this.browser.trackDragControl.removeDragHandle(this)
 
         this.browser.trackGearControl.removeGearContainer(this)
 

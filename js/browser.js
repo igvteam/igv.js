@@ -600,7 +600,7 @@ class Browser {
             trackView.removeDOMFromColumnContainer()
 
             // empty trackScrollbarControl column
-            this.trackScrollbarControl.removeScrollbar(trackView)
+            this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
 
             // empty trackDragControl column
             this.trackDragControl.removeDragHandle(trackView)
@@ -1492,7 +1492,7 @@ class Browser {
 
                 trackView.removeDOMFromColumnContainer()
 
-                this.trackScrollbarControl.removeScrollbar(trackView)
+                this.trackScrollbarControl.removeScrollbar(trackView, this.columnContainer)
 
                 this.trackDragControl.removeDragHandle(trackView)
 
