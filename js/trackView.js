@@ -560,7 +560,7 @@ class TrackView {
 
         this.sampleNameViewport.$viewport.detach()
 
-        this.browser.trackScrollbarControl.removeScrollbar(this, this.this.columnContainer)
+        this.browser.trackScrollbarControl.removeScrollbar(this, this.browser.columnContainer)
 
         this.browser.trackDragControl.removeDragHandle(this)
 

@@ -204,13 +204,13 @@ class ViewportBase {
         }
 
         this.$canvas.off();
-        this.$canvas.empty();
+        this.$canvas.remove();
 
         this.$content.off();
-        this.$content.empty();
+        this.$content.remove();
 
         this.$viewport.off();
-        this.$viewport.empty();
+        this.$viewport.remove();
 
         // Null out all properties -- this should not be neccessary, but just in case there is a
         // reference to self somewhere we want to free memory.
