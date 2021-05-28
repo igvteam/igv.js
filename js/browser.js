@@ -1283,7 +1283,7 @@ class Browser {
     calculateViewportWidth(columnCount) {
 
         let { width } = this.columnContainer.getBoundingClientRect()
-        console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
+        // console.log(`${ Date.now() }  column-container ${ StringUtils.numberFormatter(width) }  root ${ StringUtils.numberFormatter(this.$root.get(0).clientWidth) } `)
 
         const sampleNameViewportWidth = this.getSampleNameViewportWidth()
 
