@@ -74,6 +74,64 @@
 
     (async () => {
 
+        const bedgraph_options = {
+            locus: '19:49301000-49305700',
+            genome: "hg19",
+            tracks: [
+                {
+                    name: 'All negative points',
+                    url: '../test/data/wig/allNegativewig.bedgraph',
+                    indexed: false,
+                    graphType: "points",
+                    guideLines:
+                        [
+                            {dotted: true, y: 0, color: "green"},
+                            {dotted: true, y: -0.25, color: "blue"},
+                            {dotted: true, y: -0.5, color: "red"}
+                        ]
+                },
+                {
+                    name: 'All negative bars',
+                    url: '../test/data/wig/allNegativewig.bedgraph',
+                    indexed: false
+                },
+                {
+                    name: 'Mixed_pos_neg_points',
+                    url: '../test/data/wig/mixedPosNeg.bedgraph',
+                    indexed: false,
+                    graphType: "points",
+                    guideLines:
+                        [
+                            {dotted: true, y: 0, color: "green"},
+                            {dotted: true, y: -0.5, color: "blue"},
+                            {dotted: true, y: 0.5, color: "red"}
+                        ]
+                },
+                {
+                    name: 'Mixed pos neg bars',
+                    url: '../test/data/wig/mixedPosNeg.bedgraph',
+                    indexed: false
+                },
+                {
+                    name: 'All pos points',
+                    url: '../test/data/wig/allPositive.bedgraph',
+                    indexed: false,
+                    graphType: "points",
+                    guideLines:
+                        [
+                            {dotted: true, y: 0, color: "green"},
+                            {dotted: true, y: 0.25, color: "blue"},
+                            {dotted: true, y: 0.5, color: "red"}
+                        ]
+                },
+                {
+                    name: 'All pos bars',
+                    url: '../test/data/wig/allPositive.bedgraph',
+                    indexed: false
+                }
+            ]
+        };
+
         const options =
             {
                 genome: "hg19",
@@ -106,7 +164,7 @@
                     ]
             }
 
-        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), options)
+        const browser = await igv.createBrowser(document.getElementById('igv-app-container'), bedgraph_options)
 
         $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
 
