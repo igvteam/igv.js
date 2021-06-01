@@ -136,7 +136,8 @@ class SampleNameViewport {
         for (let name of samples.names) {
             if (y > viewportHeight) break;
             if (y + samples.height > 0) {
-                const text = name.toUpperCase();
+                // const text = name.toUpperCase();
+                const text = name;
                 const yFont = getYFont(context, text, y, samples.height);
                 context.fillText(text, sampleNameXShim, yFont);
             }
