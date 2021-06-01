@@ -47,7 +47,7 @@ class ViewportBase {
             this.$viewport.get(0).style.height = `${ trackView.track.height }px`;
         }
 
-        this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
+        // this.$viewport.get(0).style.backgroundColor = randomRGB(150, 250);
 
         if (trackView.track instanceof RulerTrack) {
             this.$viewport.get(0).dataset.rulerTrack = 'rulerTrack';
