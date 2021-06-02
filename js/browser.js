@@ -374,24 +374,22 @@ class Browser {
         const svg = await this.toSVG()
         $container.empty()
         $container.append(svg)
+
+        return svg
     }
 
     async saveSVGtoFile(config) {
 
-        let svg = await this.toSVG();
+        let svg = await this.toSVG()
 
         if (config.$container) {
-
-            const trackContainerBBox = this.columnContainer.getBoundingClientRect();
-
-            config.$container.empty();
-            config.$container.width(trackContainerBBox.width);
-            config.$container.append(svg);
+            config.$container.empty()
+            config.$container.append(svg)
         }
 
-        const path = config.filename || 'igv.svg';
-        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}));
-        FileUtils.download(path, data);
+        const path = config.filename || 'igvjs.svg'
+        const data = URL.createObjectURL(new Blob([svg], {type: "application/octet-stream"}))
+        FileUtils.download(path, data)
     }
 
     /**

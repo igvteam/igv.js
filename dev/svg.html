@@ -166,7 +166,8 @@
 
         const browser = await igv.createBrowser(document.getElementById('igv-app-container'), bedgraph_options)
 
-        $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
+        // $('#igv-draw-svg-button').on('click', () => browser.renderSVG($('#igv-svg-container')))
+        $('#igv-draw-svg-button').on('click', () => browser.saveSVGtoFile({ $container: $('#igv-svg-container') }))
 
 
     })()
