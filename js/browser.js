@@ -272,8 +272,12 @@ class Browser {
 
         this.userFeedback = new UserFeedback($(this.columnContainer));
         this.userFeedback.hide();
+
         this.inputDialog = new InputDialog(this.$root.get(0));
+        this.inputDialog.container.id = `igv-input-dialog-${ DOMUtils.guid() }`
+
         this.dataRangeDialog = new DataRangeDialog(this.$root);
+        this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${ DOMUtils.guid() }`
 
         return $navBar;
 
