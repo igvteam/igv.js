@@ -28,7 +28,7 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
-import {ColorPicker} from '../node_modules/igv-ui/dist/igv-ui.js';
+import GenericColorPicker from './ui/genericColorPicker.js';
 import SampleNameViewport from './sampleNameViewport.js';
 import TrackScrollbarControl from "./trackScrollbarControl.js";
 import {randomRGB} from "./util/colorPalletes.js";
@@ -145,8 +145,11 @@ class TrackView {
     }
 
     configureColorPicker(columnContainer, track) {
+
         const trackColors = []
+
         const color = track.color || track.defaultColor;
+
         if (StringUtils.isString(color)) {
             trackColors.push(color);
         }
@@ -156,28 +159,22 @@ class TrackView {
         }
 
         const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c));
-        const options =
+
+        const colorHandlers =
             {
-                parent: columnContainer,
-                top: undefined,
-                left: undefined,
-                width: 432,
-                height: undefined,
-                defaultColors,
-                colorHandler: color => {
-                    track.color = color;
-                    this.repaintViews();
+                color: color => {
+                    track.color = color
+                    this.repaintViews()
+                },
+                altColor: color => {
+                    track.altColor = color
+                    this.repaintViews()
                 }
-            };
 
-        this.colorPicker = new ColorPicker(options);
+            }
 
-        // alt color picker -- TODO pass handler in at "show" time and use 1 color picker
-        options.colorHandler = color => {
-            track.altColor = color;
-            this.repaintViews();
-        }
-        this.altColorPicker = new ColorPicker(options);
+        this.genericColorPicker = new GenericColorPicker({ parent: columnContainer, width: 432, defaultColors, colorHandlers })
+        this.genericColorPicker.container.id = `igv-track-color-picker-${ DOMUtils.guid() }`
 
     }
 
@@ -231,13 +228,10 @@ class TrackView {
         this.repaintViews();
     }
 
-    presentColorPicker(option) {
-        if (option === "altColor") {
-            this.altColorPicker.show();
-        } else {
-            this.colorPicker.show();
-        }
-    }
+    presentColorPicker(key) {
+        this.genericColorPicker.setActiveColorHandler(key)
+        this.genericColorPicker.show()
+     }
 
     setTrackHeight(newHeight, force) {
 
@@ -567,9 +561,8 @@ class TrackView {
         this.browser.trackGearControl.removeGearContainer(this)
 
         if (false === colorPickerExclusionTypes.has(this.track.type)) {
-            this.colorPicker.container.remove()
-            this.altColorPicker.container.remove()
-        }
+            this.genericColorPicker.container.remove()
+         }
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();

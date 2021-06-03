@@ -26,7 +26,7 @@
 import $ from "../vendor/jquery-3.3.1.slim.js";
 import MenuUtils from "./menuUtils.js"
 import {DOMUtils, UIUtils, makeDraggable} from "../../node_modules/igv-utils/src/index.js";
-import { ColorPicker } from '../../node_modules/igv-ui/dist/igv-ui.js'
+import GenericColorPicker from './genericColorPicker.js';
 
 const trackMenuItemListHelper = MenuUtils.trackMenuItemListHelper
 
@@ -136,12 +136,12 @@ function createMenuElements(itemList, popover) {
             if ("checkbox" === item.type) {
                 elem = Icon.createCheckbox("Show all bases", item.value);
             } else if("color" === item.type) {
-                const colorPicker = new ColorPicker({
-                    parent: popover.parentElement,
-                    width: 364,
-                    //defaultColor: 'aqua',
-                    colorHandler: (color) => item.click(color)
-                })
+                const colorHandlers =
+                    {
+                        color: color => item.click(color)
+                    }
+                const colorPicker = new GenericColorPicker({ parent: popover.parentElement, width: 364, colorHandlers })
+
                 elem = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
                     elem.innerHTML = item.label;
