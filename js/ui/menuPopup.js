@@ -136,11 +136,9 @@ function createMenuElements(itemList, popover) {
             if ("checkbox" === item.type) {
                 elem = Icon.createCheckbox("Show all bases", item.value);
             } else if("color" === item.type) {
-                const colorHandlers =
-                    {
-                        color: color => item.click(color)
-                    }
+
                 const colorPicker = new GenericColorPicker({ parent: popover.parentElement, width: 364 })
+                colorPicker.configure(undefined, { color: color => item.click(color) })
 
                 elem = DOMUtils.div({ class:'context-menu'})
                 if (typeof item.label === 'string') {
