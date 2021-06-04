@@ -28,7 +28,6 @@ import $ from "./vendor/jquery-3.3.1.slim.js";
 import {createViewport} from "./viewportFactory.js";
 import {doAutoscale} from "./util/igvUtils.js";
 import {DOMUtils, IGVColor, StringUtils, FeatureUtils} from '../node_modules/igv-utils/src/index.js';
-import GenericColorPicker from './ui/genericColorPicker.js';
 import SampleNameViewport from './sampleNameViewport.js';
 import TrackScrollbarControl from "./trackScrollbarControl.js";
 import {randomRGB} from "./util/colorPalletes.js";
@@ -49,10 +48,6 @@ class TrackView {
         // add columns to columnContainer. One column per reference frame
         this.addDOMToColumnContainer(browser, columnContainer, browser.referenceFrameList)
 
-        // colorPicker
-        if (false === colorPickerExclusionTypes.has(this.track.type)) {
-            this.configureColorPicker(columnContainer, track)
-        }
 
     }
 
@@ -144,40 +139,6 @@ class TrackView {
 
     }
 
-    configureColorPicker(columnContainer, track) {
-
-        const trackColors = []
-
-        const color = track.color || track.defaultColor;
-
-        if (StringUtils.isString(color)) {
-            trackColors.push(color);
-        }
-
-        if (track.altColor && StringUtils.isString(track.altColor)) {
-            trackColors.push(track.altColor);
-        }
-
-        const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c));
-
-        const colorHandlers =
-            {
-                color: color => {
-                    track.color = color
-                    this.repaintViews()
-                },
-                altColor: color => {
-                    track.altColor = color
-                    this.repaintViews()
-                }
-
-            }
-
-        this.genericColorPicker = new GenericColorPicker({ parent: columnContainer, width: 432, defaultColors, colorHandlers })
-        this.genericColorPicker.container.id = `igv-track-color-picker-${ DOMUtils.guid() }`
-
-    }
-
     renderSVGContext(context, { deltaX, deltaY }) {
 
         renderSVGAxis(context, this.track, this.axisCanvas, deltaX, deltaY)
@@ -229,8 +190,41 @@ class TrackView {
     }
 
     presentColorPicker(key) {
-        this.genericColorPicker.setActiveColorHandler(key)
-        this.genericColorPicker.show()
+
+        if (false === colorPickerExclusionTypes.has(this.track.type)) {
+
+            const trackColors = []
+
+            const color = this.track.color || this.track.defaultColor;
+
+            if (StringUtils.isString(color)) {
+                trackColors.push(color);
+            }
+
+            if (this.track.altColor && StringUtils.isString(this.track.altColor)) {
+                trackColors.push(this.track.altColor);
+            }
+
+            const defaultColors = trackColors.map(c => c.startsWith("#") ? c : c.startsWith("rgb(") ? IGVColor.rgbToHex(c) : IGVColor.colorNameToHex(c));
+
+            const colorHandlers =
+                {
+                    color: color => {
+                        this.track.color = color
+                        this.repaintViews()
+                    },
+                    altColor: color => {
+                        this.track.altColor = color
+                        this.repaintViews()
+                    }
+
+                }
+
+            this.browser.genericColorPicker.configure(defaultColors, colorHandlers)
+            this.browser.genericColorPicker.setActiveColorHandler(key)
+            this.browser.genericColorPicker.show()
+        }
+
      }
 
     setTrackHeight(newHeight, force) {
@@ -559,10 +553,6 @@ class TrackView {
         this.browser.trackDragControl.removeDragHandle(this)
 
         this.browser.trackGearControl.removeGearContainer(this)
-
-        if (false === colorPickerExclusionTypes.has(this.track.type)) {
-            this.genericColorPicker.container.remove()
-         }
 
         if (typeof this.track.dispose === "function") {
             this.track.dispose();

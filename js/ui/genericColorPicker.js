@@ -3,16 +3,18 @@ import {GenericContainer} from '../../node_modules/igv-ui/dist/igv-ui.js';
 
 class GenericColorPicker extends GenericContainer {
 
-    constructor( {parent, width, defaultColors, colorHandlers }) {
-
+    constructor( {parent, width }) {
         super({ parent, width, border: '1px solid gray'})
+    }
 
-        this.createSwatches(defaultColors);
+    configure(defaultColors, colorHandlers) {
 
         this.colorHandlers = colorHandlers
 
         // active color handler defaults to handler with 'color' as key
         this.setActiveColorHandler('color')
+
+        this.createSwatches(defaultColors)
 
     }
 
@@ -21,6 +23,8 @@ class GenericColorPicker extends GenericContainer {
     }
 
     createSwatches(defaultColors) {
+
+        this.container.querySelectorAll('.igv-ui-color-swatch').forEach(swatch => swatch.remove())
 
         const hexColorStrings = Object.values(appleCrayonPalette);
 

@@ -65,6 +65,7 @@ import SVGSaveControl from "./ui/svgSaveControl.js";
 import MenuPopup from "./ui/menuPopup.js";
 import {randomRGB} from "./util/colorPalletes.js";
 import { viewportColumnManager } from "./viewportColumnManager.js";
+import GenericColorPicker from './ui/genericColorPicker.js';
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -278,6 +279,9 @@ class Browser {
 
         this.dataRangeDialog = new DataRangeDialog(this.$root);
         this.dataRangeDialog.$container.get(0).id = `igv-data-range-dialog-${ DOMUtils.guid() }`
+
+        this.genericColorPicker = new GenericColorPicker({ parent: this.columnContainer, width: 432 })
+        this.genericColorPicker.container.id = `igv-track-color-picker-${ DOMUtils.guid() }`
 
         return $navBar;
 
