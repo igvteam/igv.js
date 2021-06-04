@@ -294,8 +294,8 @@ class FeatureTrack extends TrackBase {
                 }
             }
             const featureData = (typeof feature.popupData === "function") ?
-              feature.popupData(genomicLocation) :
-              this.extractPopupData(feature._f || feature, this.getGenomeId());
+                feature.popupData(genomicLocation) :
+                this.extractPopupData(feature._f || feature, this.getGenomeId());
 
             if (featureData) {
                 if (data.length > 0) {
@@ -385,7 +385,7 @@ class FeatureTrack extends TrackBase {
      * Called when the track is removed.  Do any needed cleanup here
      */
     dispose() {
-       this.trackView = undefined;
+        this.trackView = undefined;
     }
 }
 
@@ -401,10 +401,9 @@ function monitorTrackDrag(track) {
     }
 
     function onDragEnd() {
-        if (!track.trackView || !track.trackView.tile || track.displayMode === "SQUISHED") {
-            return;
+        if (track.trackView && track.displayMode !== "SQUISHED") {
+            track.trackView.repaintViews();      // TODO -- refine this to the viewport that was dragged after DOM refactor
         }
-        track.trackView.repaintViews();
     }
 
     function unSubscribe(removedTrack) {
@@ -467,8 +466,8 @@ function getColorForFeature(feature) {
         color = IGVColor.addAlpha(color, feature.alpha);
     } else if (this.useScore && feature.score && !Number.isNaN(feature.score)) {
         // UCSC useScore option, for scores between 0-1000.  See https://genome.ucsc.edu/goldenPath/help/customTrack.html#TRACK
-        const min = this.config.min? this.config.min : 0; //getViewLimitMin(track);
-        const max = this.config.max? this.config.max : 1000; //getViewLimitMax(track);
+        const min = this.config.min ? this.config.min : 0; //getViewLimitMin(track);
+        const max = this.config.max ? this.config.max : 1000; //getViewLimitMax(track);
         const alpha = getAlpha(min, max, feature.score);
         feature.alpha = alpha;    // Avoid computing again
         color = IGVColor.addAlpha(color, alpha);
@@ -495,7 +494,6 @@ function getColorForFeature(feature) {
  */
 function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
 
-    const browser = this.browser;
     let color = getColorForFeature.call(this, feature)
 
     ctx.fillStyle = color;
@@ -604,13 +602,8 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
         }
     }
 
-    const windowX = Math.round(options.viewportContainerX ||  0);
-    // const nLoci = browser.referenceFrameList ? browser.referenceFrameList.length : 1
-    // const windowX1 = windowX + options.viewportContainerWidth / nLoci;
-    const windowX1 = windowX + options.viewportWidth;
-
-    if (options.drawLabel) {
-        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, windowX, windowX1, options.referenceFrame, options);
+    if (options.drawLabel && this.displayMode !== "SQUISHED") {
+        renderFeatureLabel.call(this, ctx, feature, coord.px, coord.px1, py, options.referenceFrame, options);
     }
 }
 
@@ -625,24 +618,23 @@ function renderFeature(feature, bpStart, xScale, pixelHeight, ctx, options) {
  * @param referenceFrame  genomic state
  * @param options  options
  */
-function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX, windowX1, referenceFrame, options) {
+function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referenceFrame, options) {
 
     let name = feature.name;
     if (name === undefined && feature.gene) name = feature.gene.name;
     if (name === undefined) name = feature.id || feature.ID
     if (!name || name === '.') return;
 
-    // feature outside of viewable window
-    let boxX;
-    let boxX1;
-    if (featureX1 < windowX || featureX > windowX1) {
-        boxX = featureX;
-        boxX1 = featureX1;
-    } else {
-        // center label within visible portion of the feature
-        boxX = Math.max(featureX, windowX);
-        boxX1 = Math.min(featureX1, windowX1);
+
+    const t1 = Math.max(featureX, -options.pixelXOffset);
+    const t2 = Math.min(featureX1, -options.pixelXOffset + options.viewportWidth);
+    const centerX = (t1 + t2) / 2;
+
+    let transform;
+    if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
+        transform = {rotate: {angle: 45}};
     }
+    const labelY = getFeatureLabelY(featureY, transform);
 
     let color = getColorForFeature.call(this, feature);
     let geneColor;
@@ -652,41 +644,20 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, windowX
         gtexSelection = true;
         geneColor = referenceFrame.selection.colorForGene(name);
     }
+    
+    const geneFontStyle = {
+        textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
+        fillStyle: geneColor || color,
+        strokeStyle: geneColor || color
+    };
 
+    const textBox = ctx.measureText(name);
+    const xleft = centerX - textBox.width / 2;
+    const xright = centerX + textBox.width / 2;
+    if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
+        options.rowLastX[feature.row] = xright;
+        IGVGraphics.fillText(ctx, name, centerX, labelY, geneFontStyle, transform);
 
-    if (this.displayMode !== "SQUISHED") {
-        const geneFontStyle = {
-            textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
-            fillStyle: geneColor || color,
-            strokeStyle: geneColor || color
-        };
-
-        let transform;
-        if (this.displayMode === "COLLAPSED" && this.labelDisplayMode === "SLANT") {
-            transform = {rotate: {angle: 45}};
-        }
-
-        const labelX = boxX + ((boxX1 - boxX) / 2);
-        const labelY = getFeatureLabelY(featureY, transform);
-
-        const textBox = ctx.measureText(name);
-        const xleft = labelX - textBox.width / 2;
-        const xright = labelX + textBox.width / 2;
-        if (options.labelAllFeatures || xleft > options.rowLastX[feature.row] || gtexSelection) {
-
-            options.rowLastX[feature.row] = xright;
-
-            // This is for compatibility with JuiceboxJS.
-            if (options.labelTransform) {
-                ctx.save();
-                options.labelTransform(ctx, labelX);
-                IGVGraphics.fillText(ctx, name, labelX, labelY, geneFontStyle, undefined);
-                ctx.restore();
-
-            } else {
-                IGVGraphics.fillText(ctx, name, labelX, labelY, geneFontStyle, transform);
-            }
-        }
     }
 }
 
@@ -834,7 +805,7 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
             return
         }
         if (feature.attributes.num_samples_total) {
-            feature.attributes.percent_samples_with_this_junction = 100*numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
+            feature.attributes.percent_samples_with_this_junction = 100 * numSamplesWithThisJunction / parseFloat(feature.attributes.num_samples_total)
             if (this.config.minPercentSamplesWithThisJunction) {
                 if (feature.attributes.percent_samples_with_this_junction < this.config.minPercentSamplesWithThisJunction ||
                     feature.attributes.percent_samples_with_this_junction > this.config.maxPercentSamplesWithThisJunction) {
@@ -906,40 +877,40 @@ function renderJunctions(feature, bpStart, xScale, pixelHeight, ctx) {
     } else if (this.config.labelWith === undefined || this.config.labelWith === 'uniqueReadCount') {
         //default label
         label = uniquelyMappedReadCount
-    } else if(this.config.labelWith === 'totalReadCount') {
+    } else if (this.config.labelWith === 'totalReadCount') {
         label = totalReadCount
-    } else if(this.config.labelWith === 'numSamplesWithThisJunction') {
+    } else if (this.config.labelWith === 'numSamplesWithThisJunction') {
         if (numSamplesWithThisJunction !== undefined) {
             label = numSamplesWithThisJunction
         }
-    } else if(this.config.labelWith === 'percentSamplesWithThisJunction') {
-        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
+    } else if (this.config.labelWith === 'percentSamplesWithThisJunction') {
+        if (feature.attributes.percent_samples_with_this_junction !== undefined) {
             label = feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%'
         }
-    } else if(this.config.labelWith === 'motif') {
-        if(feature.attributes.motif !== undefined) {
+    } else if (this.config.labelWith === 'motif') {
+        if (feature.attributes.motif !== undefined) {
             label += feature.attributes.motif
         }
     }
 
     if (this.config.labelWithInParen === 'uniqueReadCount') {
         label += ' (' + uniquelyMappedReadCount + ')'
-    } else if(this.config.labelWithInParen === 'totalReadCount') {
+    } else if (this.config.labelWithInParen === 'totalReadCount') {
         label += ' (' + totalReadCount + ')'
-    } else if(this.config.labelWithInParen === 'multiMappedReadCount') {
+    } else if (this.config.labelWithInParen === 'multiMappedReadCount') {
         if (multiMappedReadCount > 0) {
             label += ' (+' + multiMappedReadCount + ')'
         }
-    } else if(this.config.labelWithInParen === 'numSamplesWithThisJunction') {
-        if(numSamplesWithThisJunction !== undefined) {
+    } else if (this.config.labelWithInParen === 'numSamplesWithThisJunction') {
+        if (numSamplesWithThisJunction !== undefined) {
             label += ' (' + numSamplesWithThisJunction + ')'
         }
-    } else if(this.config.labelWithInParen === 'percentSamplesWithThisJunction') {
-        if(feature.attributes.percent_samples_with_this_junction !== undefined) {
+    } else if (this.config.labelWithInParen === 'percentSamplesWithThisJunction') {
+        if (feature.attributes.percent_samples_with_this_junction !== undefined) {
             label += ' (' + feature.attributes.percent_samples_with_this_junction.toFixed(0) + '%)'
         }
-    } else if(this.config.labelWithInParen === 'motif') {
-        if(feature.attributes.motif !== undefined) {
+    } else if (this.config.labelWithInParen === 'motif') {
+        if (feature.attributes.motif !== undefined) {
             label += ` ${feature.attributes.motif}`
         }
     }
