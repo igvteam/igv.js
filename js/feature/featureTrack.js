@@ -626,8 +626,9 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
     if (!name || name === '.') return;
 
 
-    const t1 = Math.max(featureX, -options.pixelXOffset);
-    const t2 = Math.min(featureX1, -options.pixelXOffset + options.viewportWidth);
+    let pixelXOffset = options.pixelXOffset || 0;
+    const t1 = Math.max(featureX, - pixelXOffset);
+    const t2 = Math.min(featureX1, -pixelXOffset + options.viewportWidth);
     const centerX = (t1 + t2) / 2;
 
     let transform;
@@ -644,7 +645,7 @@ function renderFeatureLabel(ctx, feature, featureX, featureX1, featureY, referen
         gtexSelection = true;
         geneColor = referenceFrame.selection.colorForGene(name);
     }
-    
+
     const geneFontStyle = {
         textAlign: "SLANT" === this.labelDisplayMode ? undefined : 'center',
         fillStyle: geneColor || color,
