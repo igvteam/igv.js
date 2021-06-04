@@ -289,6 +289,7 @@ class ViewPort extends ViewportBase {
         const drawConfiguration =
             {
                 context: ctx,
+                pixelXOffset,
                 pixelWidth,
                 pixelHeight,
                 pixelTop: canvasTop,
@@ -660,20 +661,17 @@ class ViewPort extends ViewportBase {
 
         function handleMouseUp(e) {
 
-
             // Any mouse up cancels drag and scrolling
             if (self.browser.dragObject || self.browser.isScrolling) {
                 self.browser.cancelTrackPan();
                 e.preventDefault();
                 e.stopPropagation();
-
                 self.enableClick = false;   // Until next mouse down
-
                 return;
+            } else {
+                self.browser.cancelTrackPan();
+                self.browser.endTrackDrag();
             }
-
-            self.browser.cancelTrackPan();
-            self.browser.endTrackDrag();
         }
 
         function handleClick(e) {
