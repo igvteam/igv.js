@@ -26,7 +26,7 @@ suite("testOauth", function () {
 
     test("Test exact host", function () {
 
-        igv.oauth.setToken("foo", "host");
+        igv.setOauthToken("foo", "host");
         assert.equal(igv.oauth.getToken("host"), "foo");
 
         igv.oauth.removeToken("host");
@@ -34,7 +34,7 @@ suite("testOauth", function () {
     })
 
     test("Test wildcard host", function () {
-        igv.oauth.setToken("foo", "hos*");
+        igv.setOauthToken("foo", "hos*");
         assert.equal(igv.oauth.getToken("host.com"), "foo");
 
         igv.oauth.removeToken("hos*");

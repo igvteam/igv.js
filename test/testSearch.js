@@ -1,8 +1,7 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai';
 import {genome} from "./utils/Genome.js";
-import {macacaGenome} from "./utils/MacacaGenome.js";
-import {parseLocusString, searchWebService, searchDefaultService} from "../js/search.js";
+import {parseLocusString, searchWebService} from "../js/search.js";
 import search from "../js/search.js";
 
 suite("testSearch", function () {
@@ -79,20 +78,6 @@ suite("testSearch", function () {
         assert.equal(locus.end, 127742951);
         assert.equal(locus.locusSearchString, gene);
     });
-
-    test("default webservice", async function () {
-
-        this.timeout(10000);
-
-        // myc =>  chr8:127,735,434-127,742,951 (+), chr8:127,736,231-127,742,951 (+)
-        const gene = "myc";
-        const locus = await searchWebService(browser, gene);
-        assert.equal(locus.chr, "chr8");
-        assert.equal(locus.start, 127735432);
-        assert.equal(locus.end, 127742951);
-        assert.equal(locus.locusSearchString, gene);
-    });
-
 
     test("search (main function)", async function () {
 
