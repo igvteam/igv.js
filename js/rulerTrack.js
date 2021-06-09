@@ -78,30 +78,35 @@ class RulerTrack {
 
             let nTick = Math.floor(bpStart / tick.majorTick) - 1;
 
-            let bp = Math.floor(nTick * tick.majorTick);
-            let x = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5));
+            let xTick
+            let bp
+            do {
 
-            while (x < pixelWidth) {
+                bp = Math.floor(nTick * tick.majorTick)
+                const bpLabel = `${ StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier)) } ${ tick.majorUnit }`
 
-                bp = Math.floor(nTick * tick.majorTick);
-                x = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5));
+                xTick = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+                const xLabel = Math.round(xTick - context.measureText(bpLabel).width / 2)
 
-                const label = numberFormatter(Math.floor(bp / tick.unitMultiplier)) + " " + tick.majorUnit;
-                const labelWidth = context.measureText(label).width;
-
-                const labelX = Math.round(x - labelWidth / 2);
-
-                const nTickMod2 = nTick % 2
-                if (/*0 === nTickMod2 &&*/ labelX > 0) {
-                    IGVGraphics.fillText(context, label, labelX, this.height - (tickHeight / 0.75));
+                if (xLabel > 0) {
+                    IGVGraphics.fillText(context, bpLabel, xLabel, this.height - (tickHeight / 0.75))
                 }
 
-                if(x > 0) {
-                    IGVGraphics.strokeLine(context, x, this.height - tickHeight, x, this.height - shim);
+                if(xTick > 0) {
+                    IGVGraphics.strokeLine(context, xTick, this.height - tickHeight, xTick, this.height - shim)
                 }
 
-                ++nTick;
-            }
+                bp = Math.floor((1 + nTick) * tick.majorTick)
+                let pixel = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+                let delta = (pixel - xTick)/2
+                let xx = xTick + delta
+                if(xx > 0) {
+                    IGVGraphics.strokeLine(context, xx, this.height - tickHeight, xx, this.height - shim)
+                }
+
+                ++nTick
+
+            } while (xTick < pixelWidth)
 
             IGVGraphics.strokeLine(context, 0, this.height - shim, pixelWidth, this.height - shim);
 
@@ -175,12 +180,18 @@ function findSpacing(bpLength, isSVG) {
         unitMultiplier = 1e3
     }
 
-    const nMajorTicks = bpLength / Math.pow(10, nZeroes - 1)
+    const denom = Math.pow(10, nZeroes - 1)
+    const nMajorTicks = bpLength / denom
 
-    const threshold = 50
-    const majorTick = (nMajorTicks < threshold && isSVG !== true) ? Math.pow(10, nZeroes - 1) : Math.pow(10, nZeroes)/2
+    // const threshold = 25
+    const threshold = 3 * 25
 
-    // console.log(`MajorTick Count ${ nMajorTicks } - MajorTick ${ StringUtils.numberFormatter(majorTick) }`)
+    const belowThresholdTick = Math.pow(10, nZeroes - 1)
+    const aboveThresholdTick = Math.pow(10, nZeroes)/2
+
+    // console.log(`zeros ${ nZeroes } tick-threshold ${ threshold } ticks ${ nMajorTicks } belowTick ${ StringUtils.numberFormatter(belowThresholdTick) } aboveTick ${ StringUtils.numberFormatter(aboveThresholdTick) }`)
+
+    const majorTick = (nMajorTicks < threshold && isSVG !== true) ? belowThresholdTick : aboveThresholdTick
 
     return new Tick(majorTick, majorUnit, unitMultiplier)
 }

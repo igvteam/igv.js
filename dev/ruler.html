@@ -49,26 +49,13 @@
 
 <body>
 
-<div>
-    <button id="bmBtn">Bookmark</button>
-    <button id="sessionButton">Save Session</button>
-</div>
-
-<h3>Example tracks - click to load</h3>
-
-
-
-<div id="trackList"></div>
-
-<div id="igvDiv" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
+<div id="igv-container" style="padding-top: 50px;padding-bottom: 20px; height: auto"></div>
 
 </body>
 
 <script type="module">
 
     import igv from '../js/index.js'
-    import GtexUtils from '../js/gtex/gtexUtils.js'
-    import { igvxhr } from '../node_modules/igv-utils/src/index.js'
 
     let browser
     (async () => {
@@ -207,80 +194,9 @@
                 ]
             };
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), config_git_852_example_0)
-
-        await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
-
-        document.getElementById("sessionButton").addEventListener("click", () => {
-            try {
-                const json = browser.toJSON();
-                console.log(json);
-                const jsonString = JSON.stringify(json, null, '\t');
-                const data = URL.createObjectURL(new Blob([jsonString], {type: "application/octet-stream"}));
-                download("session.json", data);
-            } catch (e) {
-                alert(e);
-            }
-        })
+        browser = await igv.createBrowser(document.getElementById('igv-container'), config_git_852_example_1)
 
     })()
-
-    async function createTrackList(div, file, browser) {
-
-        const tracks = await igvxhr.loadJson(file)
-
-        for (let track of tracks) {
-
-            if (track.HEADING) {
-                div.insertAdjacentHTML("beforeend",
-                    "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>"
-                    + track.HEADING + "</div>");
-            } else {
-                const trackDiv = document.createElement('div');
-                trackDiv.innerHTML = track.name;
-                trackDiv.addEventListener('click', () => {
-
-                    // Convert to json to insure we can load json representations (not strictly neccessary).
-                    const json = JSON.stringify(track)
-                    browser.loadTrack(json)
-                });
-
-                div.appendChild(trackDiv);
-            }
-
-        }
-
-        div.insertAdjacentHTML("beforeend", "<div style='cursor:default;background:lightgrey;color:black;margin-left:0; font-weight:bold;font-size: larger'>GTEX</div>");
-
-        const { tissueInfo } = await GtexUtils.getTissueInfo("gtex_v7")
-
-        for (let config of tissueInfo) {
-            const trackDiv = document.createElement('div')
-            trackDiv.innerHTML = (config.tissueSiteDetailId.split('_').join(' '))
-            div.appendChild(trackDiv)
-            trackDiv.addEventListener('click', () => {
-                browser.loadTrack(GtexUtils.trackConfiguration(config))
-            })
-        }
-
-    }
-
-    function bookmark() {
-        window.history.pushState({}, "IGV", browser.sessionURL());
-    }
-
-    function download(filename, data) {
-
-        const element = document.createElement('a');
-        element.setAttribute('href', data);
-        element.setAttribute('download', filename);
-        element.style.display = 'none';
-        document.body.appendChild(element);
-        element.click();
-        document.body.removeChild(element);
-    }
-
-    document.getElementById("bmBtn").addEventListener("click", bookmark);
 
 </script>
 </html>
