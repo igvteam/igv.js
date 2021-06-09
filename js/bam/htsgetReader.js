@@ -27,6 +27,7 @@
 import AlignmentContainer from "./alignmentContainer.js";
 import BamUtils from "./bamUtils.js";
 import {igvxhr, BGZip} from "../../node_modules/igv-utils/src/index.js";
+import {buildOptions} from "../util/igvUtils.js";
 
 class HtsgetReader {
 
@@ -63,7 +64,7 @@ class HtsgetReader {
             '&start=' + start +
             '&end=' + end;
 
-        const data = await igvxhr.loadJson(url, this.config);
+        const data = await igvxhr.loadJson(url, buildOptions(this.config));
         const dataArr = await loadUrls(data.htsget.urls);
         const compressedData = concatArrays(dataArr);  // In essence a complete bam file
         const unc = BGZip.unbgzf(compressedData.buffer);
@@ -94,14 +95,14 @@ async function loadUrls(urls) {
 
     const promiseArray = [];
 
-    urls.forEach(function (urlData) {
+    for(let urlData of urls) {
 
         if (urlData.url.startsWith('data:')) {
             // this is a data-uri
             promiseArray.push(Promise.resolve(dataUriToBytes(urlData.url)));
 
         } else {
-            const options = {};
+            const options = buildOptions(this.config);
 
             if (urlData.headers) {
                 options.headers = urlData.headers;
@@ -117,7 +118,7 @@ async function loadUrls(urls) {
                     });
             }));
         }
-    });
+    }
 
     return Promise.all(promiseArray)
 }
