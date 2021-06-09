@@ -31,6 +31,8 @@ import {Alert} from '../../node_modules/igv-ui/dist/igv-ui.js'
 import version from "../version.js";
 
 const DEFAULT_GENOMES_URL = "https://igv.org/genomes/genomes.json";
+const BACKUP_GENOMES_URL = "https://s3.amazonaws.com/igv.org.genomes/genomes.json";
+
 const splitLines = StringUtils.splitLines;
 
 const GenomeUtils = {
@@ -62,10 +64,17 @@ const GenomeUtils = {
             const table = {};
 
             // Get default genomes
-            if(config.loadDefaultGenomes !== false) {
-                const url  = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
-                const jsonArray = await igvxhr.loadJson(url, {});
-                processJson(jsonArray);
+            if (config.loadDefaultGenomes !== false) {
+                try {
+                    const url = DEFAULT_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
+                    const jsonArray = await igvxhr.loadJson(url, {timeout: 3000});
+                    processJson(jsonArray);
+                } catch (e) {
+                    console.error(e);
+                    const url = BACKUP_GENOMES_URL + `?randomSeed=${Math.random().toString(36)}&version=${version()}`;  // prevent caching
+                    const jsonArray = await igvxhr.loadJson(url, {});
+                    processJson(jsonArray);
+                }
             }
 
             // Add user-defined genomes
@@ -95,7 +104,7 @@ const GenomeUtils = {
     },
 
     // Expand a genome id to a reference object, if needed
-    expandReference: function(idOrConfig) {
+    expandReference: function (idOrConfig) {
 
         // idOrConfig might be json
         if (StringUtils.isString(idOrConfig) && idOrConfig.startsWith("{")) {
@@ -120,7 +129,7 @@ const GenomeUtils = {
             const knownGenomes = GenomeUtils.KNOWN_GENOMES;
             const reference = knownGenomes[genomeID];
             if (!reference) {
-                Alert.presentAlert(new Error(`Unknown genome id: ${ genomeID }`), undefined);
+                Alert.presentAlert(new Error(`Unknown genome id: ${genomeID}`), undefined);
             }
             return reference;
         } else {
