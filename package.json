@@ -62,6 +62,6 @@
   },
   "dependencies": {
     "igv-ui": "git+https://github.com/igvteam/igv-ui.git#v1.1.7",
-    "igv-utils": "git+https://github.com/igvteam/igv-utils.git#v1.2.8"
+    "igv-utils": "git+https://github.com/igvteam/igv-utils.git#v1.2.9"
   }
 }

@@ -172,28 +172,6 @@ class Browser {
                 snpField: config.search.snpField || "snp",
                 resultsField: config.search.resultsField
             }
-        } else {
-
-            if (config.reference && config.reference.id) {
-                genomeId = config.reference.id;
-            } else if (config.genome) {
-                genomeId = config.genome;
-            } else {
-                genomeId = "hg19";
-            }
-
-            this.searchConfig = {
-                // Legacy support -- deprecated
-                type: "plain",
-                url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
-                coords: 0,
-                chromosomeField: "chromosome",
-                startField: "start",
-                endField: "end",
-                geneField: "gene",
-                snpField: "snp"
-
-            }
         }
     }
 
