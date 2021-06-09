@@ -19,6 +19,10 @@ function setGoogleOauthToken(accessToken) {
     return oauth.setToken(accessToken);
 }
 
+function setOauthToken(accessToken, host) {
+    return oauth.setToken(accessToken, host)
+}
+
 export default {
     IGVGraphics,
     MenuUtils,
@@ -29,6 +33,8 @@ export default {
     removeAllBrowsers,
     visibilityChange,
     setGoogleOauthToken,
+    setOauthToken,
+    oauth,
     version,
     setApiKey,
     doAutoscale,
