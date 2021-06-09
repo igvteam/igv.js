@@ -1,5 +1,19 @@
 import {igvxhr, StringUtils} from "../node_modules/igv-utils/src/index.js"
 
+
+const DEFAULT_SEARCH_CONFIG = {
+    timeout: 5000,
+    type: "plain",   // Legacy plain text support -- deprecated
+    url: 'https://igv.org/genomes/locus.php?genome=$GENOME$&name=$FEATURE$',
+    coords: 0,
+    chromosomeField: "chromosome",
+    startField: "start",
+    endField: "end",
+    geneField: "gene",
+    snpField: "snp"
+}
+
+
 async function search(browser, string) {
 
     if (undefined === string || '' === string.trim()) {
@@ -12,7 +26,7 @@ async function search(browser, string) {
 
     const loci = string.split(' ')
 
-    let searchConfig = browser.searchConfig;
+    let searchConfig = browser.searchConfig || DEFAULT_SEARCH_CONFIG;
     let list = [];
 
     const searchLocus = async (locus) => {
@@ -23,7 +37,12 @@ async function search(browser, string) {
         }
 
         if (!locusObject && (browser.config && false !== browser.config.search)) {
-            locusObject = await searchWebService(browser, locus, searchConfig)
+            try {
+                locusObject = await searchWebService(browser, locus, searchConfig)
+            } catch (error) {
+                console.error(error);
+                throw Error("Search service currently unavailable.");
+            }
         }
         return locusObject
     }
@@ -111,10 +130,11 @@ async function searchWebService(browser, locus, searchConfig) {
     if (path.indexOf("$GENOME$") > -1) {
         path = path.replace("$GENOME$", (browser.genome.id ? browser.genome.id : "hg19"));
     }
-    const result = await igvxhr.loadString(path);
+    const options = searchConfig.timeout ? {timeout: searchConfig.timeout} : undefined;
+    const result = await igvxhr.loadString(path, options);
 
     const locusObject = processSearchResult(browser, result, searchConfig);
-    if(locusObject) {
+    if (locusObject) {
         locusObject.locusSearchString = locus;
     }
     return locusObject;
@@ -239,6 +259,27 @@ function parseSearchResults(browser, data) {
 
     return results;
 
+}
+
+async function searchDefaultService(browser, locus) {
+
+    let locusObject;
+    try {
+        locusObject = await searchWebService(browser, locus, DEFAULT_SEARCH_CONFIG);
+    } catch (error) {
+        console.error(error);
+        // This is a bit twisted and repetitive but is an emergency backup for situations when igv.org is down
+        const genomeID = browser.genome.id;
+        const url = `https://k59mhokqg3.execute-api.us-east-1.amazonaws.com/dev/GeneLocations/${genomeID}/${locus.toUpperCase()}`
+        const result = await igvxhr.loadJson(url,);
+        if (result && result.location) {
+            const tmp = `${result.gene_name}\t${result.location}\ts3`;
+            locusObject = processSearchResult(browser, tmp, {type: 'plain'});
+        }
+    }
+    if (locusObject) {
+        locusObject.locusSearchString = locus;
+    }
 }
 
 // Export some functions for unit testing
