@@ -21,3 +21,4 @@ igv.css.map
 /package-lock.json
 /deploy-release.sh
 /deploy/
+/config_demo.json
