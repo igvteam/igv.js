@@ -261,26 +261,6 @@ function parseSearchResults(browser, data) {
 
 }
 
-async function searchDefaultService(browser, locus) {
-
-    let locusObject;
-    try {
-        locusObject = await searchWebService(browser, locus, DEFAULT_SEARCH_CONFIG);
-    } catch (error) {
-        console.error(error);
-        // This is a bit twisted and repetitive but is an emergency backup for situations when igv.org is down
-        const genomeID = browser.genome.id;
-        const url = `https://k59mhokqg3.execute-api.us-east-1.amazonaws.com/dev/GeneLocations/${genomeID}/${locus.toUpperCase()}`
-        const result = await igvxhr.loadJson(url,);
-        if (result && result.location) {
-            const tmp = `${result.gene_name}\t${result.location}\ts3`;
-            locusObject = processSearchResult(browser, tmp, {type: 'plain'});
-        }
-    }
-    if (locusObject) {
-        locusObject.locusSearchString = locus;
-    }
-}
 
 // Export some functions for unit testing
 export {parseLocusString, searchWebService}
