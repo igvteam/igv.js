@@ -3,14 +3,14 @@ import {assert} from 'chai';
 import HtsgetReader from "../js/bam/htsgetReader.js";
 
 
-suite("testBAM", async function () {
+suite("testBAM", function () {
 
     /**
      * Minimal test of htsget -- just verifies that something parsable as a BAM record is returned.
      */
     test("GIAB NA12878", async function () {
 
-        this.timeout(10000);
+        this.timeout(20000);
 
         const id = 'giab.NA12878.NIST7086.1',
             chr = 'chr1',
