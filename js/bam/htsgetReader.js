@@ -65,7 +65,7 @@ class HtsgetReader {
             '&end=' + end;
 
         const data = await igvxhr.loadJson(url, buildOptions(this.config));
-        const dataArr = await loadUrls(data.htsget.urls);
+        const dataArr = await this.loadUrls(data.htsget.urls);
         const compressedData = concatArrays(dataArr);  // In essence a complete bam file
         const unc = BGZip.unbgzf(compressedData.buffer);
         const ba = unc;
@@ -89,38 +89,39 @@ class HtsgetReader {
         }
 
     }
-}
 
-async function loadUrls(urls) {
 
-    const promiseArray = [];
+    async loadUrls(urls) {
 
-    for(let urlData of urls) {
+        const promiseArray = [];
 
-        if (urlData.url.startsWith('data:')) {
-            // this is a data-uri
-            promiseArray.push(Promise.resolve(dataUriToBytes(urlData.url)));
+        for (let urlData of urls) {
 
-        } else {
-            const options = buildOptions(this.config);
+            if (urlData.url.startsWith('data:')) {
+                // this is a data-uri
+                promiseArray.push(Promise.resolve(dataUriToBytes(urlData.url)));
 
-            if (urlData.headers) {
-                options.headers = urlData.headers;
-                if (options.headers.hasOwnProperty("referer")) {
-                    delete options.headers["referer"];
+            } else {
+                const options = buildOptions(this.config);
+
+                if (urlData.headers) {
+                    options.headers = urlData.headers;
+                    if (options.headers.hasOwnProperty("referer")) {
+                        delete options.headers["referer"];
+                    }
                 }
+
+                promiseArray.push(new Promise(function (fulfill, reject) {
+                    igvxhr.loadArrayBuffer(urlData.url, options)
+                        .then(function (buffer) {
+                            fulfill(new Uint8Array(buffer));
+                        });
+                }));
             }
-
-            promiseArray.push(new Promise(function (fulfill, reject) {
-                igvxhr.loadArrayBuffer(urlData.url, options)
-                    .then(function (buffer) {
-                        fulfill(new Uint8Array(buffer));
-                    });
-            }));
         }
-    }
 
-    return Promise.all(promiseArray)
+        return Promise.all(promiseArray)
+    }
 }
 
 /**
