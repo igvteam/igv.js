@@ -291,26 +291,6 @@ class Browser {
         return false === this.showSampleNames ? 0 : this.sampleNameViewportWidth
     }
 
-    startSpinner() {}
-
-    _startSpinner() {
-        const $spinner = this.$spinner;
-        if ($spinner) {
-            $spinner.addClass("igv-fa5-spin");
-            $spinner.show();
-        }
-    };
-
-    stopSpinner() {}
-
-    _stopSpinner() {
-        const $spinner = this.$spinner;
-        if ($spinner) {
-            $spinner.hide();
-            $spinner.removeClass("igv-fa5-spin");
-        }
-    };
-
     isMultiLocusMode() {
         return this.referenceFrameList && this.referenceFrameList.length > 1;
     };
@@ -749,7 +729,6 @@ class Browser {
     async loadTrackList(configList) {
 
         try {
-            // this.startSpinner();
             const promises = [];
             for (let config of configList) {
                 promises.push(this.loadTrack(config, false));
@@ -1300,6 +1279,12 @@ class Browser {
         // console.log(`${ Date.now() }  column-container ${ width } viewport ${ Math.floor(width/columnCount) } sample-name-viewport ${ sampleNameViewportWidth }`)
 
         return Math.floor(width/columnCount)
+    }
+
+    getCenterGuideXOffset() {
+        let { width:columnContainerWidth } = this.columnContainer.getBoundingClientRect()
+        columnContainerWidth -= igv_axis_column_width + this.getSampleNameViewportWidth() + igv_scrollbar_outer_width + igv_track_manipulation_handle_width + igv_track_gear_menu_column_width
+        return Math.floor(columnContainerWidth/2 + igv_axis_column_width)
     }
 
     minimumBases() {

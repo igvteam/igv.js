@@ -75,24 +75,7 @@
 
         const config =
             {
-                // showCursorTrackingGuide: true,
-                genome: "hg19",
-                // locus: [ 'ace', 'myc' ]
-                locus: 'myc',
-                tracks:
-                    [
-                        {
-                            "url": "https://www.encodeproject.org/files/ENCFF754TJH/@@download/ENCFF754TJH.bigWig",
-                            "graphType": "points",
-                            "pointSize": 3,
-                            "name": "Encode bigwig points"
-                        }
-                    ]
-            };
-
-        const config_with_tracks =
-            {
-               // showSampleNames: true,
+                showCenterGuide: true,
                 genome: "hg19",
 
                 // for multi-locus testing
@@ -118,17 +101,17 @@
                         //     "order": 1,
                         //     "format": "seg"
                         // },
-                        // {
-                        //     "sourceType": "gcs",
-                        //     "type": "alignment",
-                        //     "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
-                        //     "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
-                        //     "name": "NA12891"
-                        // }
+                        {
+                            "sourceType": "gcs",
+                            "type": "alignment",
+                            "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+                            "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+                            "name": "NA12891"
+                        }
                     ]
             };
 
-        browser = await igv.createBrowser(document.getElementById('igvDiv'), config_with_tracks)
+        browser = await igv.createBrowser(document.getElementById('igvDiv'), config)
 
         await createTrackList(document.getElementById('trackList'), 'testTracks.json', browser)
 
@@ -146,12 +129,12 @@
         })
 
         // programmatic search
-        await browser.search('chr1:153,588,447-153,707,067')
-        const [ locus ] = browser.currentLoci()
-        console.log(`locus ${ locus }`)
+        // await browser.search('chr1:153,588,447-153,707,067')
+        // const [ locus ] = browser.currentLoci()
+        // console.log(`locus ${ locus }`)
 
         // programatic hide track labels
-        browser.hideTrackLabels()
+        // browser.hideTrackLabels()
 
     })()
 

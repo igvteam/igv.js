@@ -116,32 +116,14 @@ class CenterGuide {
         if (this.browser.referenceFrameList) {
 
             const referenceFrame = this.browser.referenceFrameList[0]
-            const ppb = 1.0 / referenceFrame.bpPerPixel;
+            const ppb = 1.0 / referenceFrame.bpPerPixel
 
             if (ppb > 1) {
-
-                // This is terrible hack but should be irrlevant after the coming DOM refactor
-                let trackView = this.browser.trackViews[0];
-                const axisWidth = trackView.$axis.width();
-                const viewportContainerWidth = trackView.$viewportContainer.width();
-                const viewportWidth = viewportContainerWidth - axisWidth;   // This assumes 1 viewport
-
-                const xy = trackView.$viewportContainer.position();
-                const halfWidth = Math.round(viewportWidth / 2);
-
-                const center = xy.left + halfWidth + axisWidth;
-                const width = referenceFrame.toPixels(1);
-                const left = center - 0.5 * width;
-
-                const ls = Math.round(left).toString() + 'px';
-                const ws = Math.round(width).toString() + 'px';
-                this.$container.css({left: ls, width: ws});
-
+                this.$container.css({ left:`${ this.browser.getCenterGuideXOffset() }px`, width:`${ Math.floor(referenceFrame.toPixels(1)) }px` });
                 this.$container.removeClass('igv-center-guide-thin');
                 this.$container.addClass('igv-center-guide-wide');
             } else {
-
-                this.$container.css({left: '50%', width: '1px'});
+                this.$container.css({ left:`${ this.browser.getCenterGuideXOffset() }px`, width:'1px' });
                 this.$container.removeClass('igv-center-guide-wide');
                 this.$container.addClass('igv-center-guide-thin');
             }
