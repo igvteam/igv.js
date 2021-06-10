@@ -120,10 +120,16 @@ class CenterGuide {
 
             if (ppb > 1) {
 
-                const xy = this.browser.trackViews[0].$viewportContainer.position();
-                const halfWidth = Math.round(this.browser.trackViews[0].$viewportContainer.width() / 2);
+                // This is terrible hack but should be irrlevant after the coming DOM refactor
+                let trackView = this.browser.trackViews[0];
+                const axisWidth = trackView.$axis.width();
+                const viewportContainerWidth = trackView.$viewportContainer.width();
+                const viewportWidth = viewportContainerWidth - axisWidth;   // This assumes 1 viewport
 
-                const center = xy.left + halfWidth;
+                const xy = trackView.$viewportContainer.position();
+                const halfWidth = Math.round(viewportWidth / 2);
+
+                const center = xy.left + halfWidth + axisWidth;
                 const width = referenceFrame.toPixels(1);
                 const left = center - 0.5 * width;
 
