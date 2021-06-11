@@ -145,8 +145,11 @@ class BamAlignment {
                 } else if (type === 'i' || type === 'I') {
                     value = readInt(ba, p);
                     p += 4;
-                } else if (type === 'c' || type === 'C') {
-                    value = ba[p];
+                } else if (type === 'c' ) {
+                    value = readInt8(ba, p);
+                    p++;
+                } else if (type === 'C') {
+                    value = readUInt8(ba, p);
                     p++;
                 } else if (type === 's' || type === 'S') {
                     value = readShort(ba, p);
@@ -360,12 +363,19 @@ function readShort(ba, offset) {
 }
 
 function readFloat(ba, offset) {
-
-    var dataView = new DataView(ba.buffer),
-        littleEndian = true;
-
-    return dataView.getFloat32(offset, littleEndian);
-
+    const dataView = new DataView(ba.buffer);
+    return dataView.getFloat32(offset);
 }
+
+function readInt8(ba, offset) {
+    const dataView = new DataView(ba.buffer);
+    return dataView.getInt8(offset);
+}
+
+function readUInt8(ba, offset) {
+    const dataView = new DataView(ba.buffer);
+    return dataView.getUint8(offset);
+}
+
 
 export default BamAlignment;
