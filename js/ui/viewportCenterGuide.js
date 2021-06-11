@@ -26,12 +26,16 @@
 
 import { DOMUtils } from '../../node_modules/igv-utils/src/index.js';
 
-class CenterGuide {
+class ViewportCenterGuide {
 
-    constructor(browser, parent) {
+    constructor(browser, referenceFrame, column) {
+
         this.browser = browser
+        this.referenceFrame = referenceFrame
+        this.column = column
+
         this.container = DOMUtils.div({ class: 'igv-center-guide' })
-        parent.appendChild(this.container)
+        column.appendChild(this.container)
 
         if (browser.isCenterGuideVisible) {
             this.show()
@@ -43,18 +47,20 @@ class CenterGuide {
 
     repaint() {
 
-        if (this.browser.referenceFrameList) {
+        const { x } = this.column.getBoundingClientRect()
+        const left = Math.floor(x + 0.5 * this.browser.calculateViewportWidth(this.browser.referenceFrameList.length))
 
-            const referenceFrame = this.browser.referenceFrameList[0]
-            const ppb = 1.0 / referenceFrame.bpPerPixel
+        if (this.referenceFrame) {
+
+            const ppb = 1.0 / this.referenceFrame.bpPerPixel
 
             if (ppb > 1) {
-                this.container.style.left = `${ this.browser.getCenterGuideXOffset() }px`
-                this.container.style.width = `${ Math.floor(referenceFrame.toPixels(1)) }px`
+                this.container.style.left = `${ left }px`
+                this.container.style.width = `${ Math.floor(this.referenceFrame.toPixels(1)) }px`
                 this.container.classList.remove('igv-center-guide-thin')
                 this.container.classList.add('igv-center-guide-wide')
             } else {
-                this.container.style.left = `${ this.browser.getCenterGuideXOffset() }px`
+                this.container.style.left = `${ left }px`
                 this.container.style.width = '1px'
                 this.container.classList.remove('igv-center-guide-wide')
                 this.container.classList.add('igv-center-guide-thin')
@@ -77,4 +83,4 @@ class CenterGuide {
     }
 }
 
-export default CenterGuide;
+export default ViewportCenterGuide;

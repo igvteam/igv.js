@@ -75,8 +75,10 @@
 
         const config =
             {
+                genome: 'hg19',
+
+                showCenterGuideButton: true,
                 showCenterGuide: true,
-                genome: "hg19",
 
                 // for multi-locus testing
                 // locus: 'chr8:128,750,264-128,750,995',
@@ -101,13 +103,13 @@
                         //     "order": 1,
                         //     "format": "seg"
                         // },
-                        {
-                            "sourceType": "gcs",
-                            "type": "alignment",
-                            "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
-                            "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
-                            "name": "NA12891"
-                        }
+                        // {
+                        //     "sourceType": "gcs",
+                        //     "type": "alignment",
+                        //     "url": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam",
+                        //     "indexURL": "gs://genomics-public-data/platinum-genomes/bam/NA12891_S1.bam.bai",
+                        //     "name": "NA12891"
+                        // }
                     ]
             };
 

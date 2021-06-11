@@ -77,13 +77,7 @@ async function createBrowser(parentDiv, config) {
         await browser.loadSessionObject(config)
     }
 
-    // Session dependent browser settings (do not set until session is loaded)
     const isWGV = browser.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(browser.referenceFrameList[0].chr);
-    if (browser.isMultiLocusMode() || isWGV) {
-        browser.centerGuide.forcedHide();
-    } else {
-        browser.centerGuide.forcedShow();
-    }
     browser.navbarManager.navbarDidResize(browser.$navigation.width(), isWGV);
 
     return browser;

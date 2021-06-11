@@ -5,11 +5,12 @@ const viewportColumnManager =
     {
         createColumns: (columnContainer, count) => {
             for (let i = 0; i < count; i++) {
+                const column = DOMUtils.div({ class: 'igv-column' })
                 if (0 === i) {
-                    columnContainer.appendChild(DOMUtils.div({ class: 'igv-column' }))
+                    columnContainer.appendChild(column)
                 } else {
                     columnContainer.appendChild(DOMUtils.div({ class: 'igv-column-shim' }))
-                    columnContainer.appendChild(DOMUtils.div({ class: 'igv-column' }))
+                    columnContainer.appendChild(column)
                 }
             }
         },

@@ -54,18 +54,17 @@ import ChromosomeSelectWidget from "./ui/chromosomeSelectWidget.js";
 import {createIcon} from "./igv-icons.js";
 import WindowSizePanel from "./windowSizePanel.js";
 import CursorGuide from "./ui/cursorGuide.js";
-import CenterGuide from "./ui/centerGuide.js";
 import TrackLabelControl from "./ui/trackLabelControl.js";
 import SampleNameControl from "./ui/sampleNameControl.js";
 import ZoomWidget from "./ui/zoomWidget.js";
-import UserFeedback from "./ui/userFeedback.js";
 import DataRangeDialog from "./ui/dataRangeDialog.js";
 import HtsgetReader from "./htsget/htsgetReader.js";
 import SVGSaveControl from "./ui/svgSaveControl.js";
 import MenuPopup from "./ui/menuPopup.js";
-import {randomRGB} from "./util/colorPalletes.js";
-import { viewportColumnManager } from "./viewportColumnManager.js";
+import { viewportColumnManager } from './viewportColumnManager.js';
 import GenericColorPicker from './ui/genericColorPicker.js';
+import CenterGuideButton from './ui/centerGuideButton.js';
+import ViewportCenterGuide from './ui/viewportCenterGuide.js';
 
 // $igv-column-shim-width: 1px;
 // $igv-column-shim-margin: 2px;
@@ -97,12 +96,7 @@ class Browser {
         this.initialize(config);
 
         this.trackViews = [];
-        this.trackLabelsVisible = true;
-        this.isCenterGuideVisible = false;
 
-        this.showSampleNames = false;
-
-        this.cursorGuideVisible = false;
         this.constants = {
             dragThreshold: 3,
             scrollThreshold: 5,
@@ -120,8 +114,6 @@ class Browser {
 
     initialize(config) {
 
-        var genomeId;
-
         if (config.gtex) {
             GtexUtils.gtexLoaded = true
         }
@@ -134,10 +126,15 @@ class Browser {
             this.nucleotideColors[key.toLowerCase()] = this.nucleotideColors[key];
         }
 
+        this.trackLabelsVisible = config.showTrackLabels;
+
+        this.isCenterGuideVisible = config.showCenterGuide;
+
+        this.cursorGuideVisible = config.showCursorTrackingGuide;
+
         this.showSampleNames = config.showSampleNames;
         this.showSampleNameButton = config.showSampleNameButton;
         this.sampleNameViewportWidth = config.sampleNameViewportWidth || defaultSampleNameViewportWidth;
-
 
         if (config.search) {
             this.searchConfig = {
@@ -177,11 +174,6 @@ class Browser {
             this.cursorGuide.doHide();
         } else {
             this.cursorGuide.doShow();
-        }
-        if (false === config.showCenterGuide) {
-            this.centerGuide.doHide();
-        } else {
-            this.centerGuide.doShow();
         }
 
     }
@@ -248,7 +240,7 @@ class Browser {
 
         this.cursorGuide = new CursorGuide($(this.columnContainer), $toggle_button_container, config, this);
 
-        this.centerGuide = new CenterGuide($(this.columnContainer), $toggle_button_container, config, this);
+        this.centerGuideButton = new CenterGuideButton(this, $toggle_button_container.get(0))
 
         if (true === config.showTrackLabelButton) {
             this.trackLabelControl = new TrackLabelControl($toggle_button_container, this);
@@ -270,9 +262,6 @@ class Browser {
         if (false === config.showNavigation) {
             this.$navigation.hide();
         }
-
-        this.userFeedback = new UserFeedback($(this.columnContainer));
-        this.userFeedback.hide();
 
         this.inputDialog = new InputDialog(this.$root.get(0));
         this.inputDialog.container.id = `igv-input-dialog-${ DOMUtils.guid() }`
@@ -456,6 +445,8 @@ class Browser {
 
         viewportColumnManager.createColumns(this.columnContainer, this.referenceFrameList.length)
 
+        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+
         // Add sample name column
         this.sampleNameColumn = createSampleNameColumn(this.columnContainer)
 
@@ -522,23 +513,30 @@ class Browser {
 
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
 
-        if (this.centerGuide) {
-            this.centerGuide.repaint();
-        }
-
         this.updateLocusSearchWidget(this.referenceFrameList);
 
         this.windowSizePanel.updatePanel(this.referenceFrameList);
 
         const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
 
-        if (this.isMultiLocusMode() || isWGV) {
-            this.centerGuide.forcedHide();
-        } else {
-            this.centerGuide.forcedShow();
-        }
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
+    }
+
+    createCenterGuideList(columnContainer) {
+
+        const centerGuides = columnContainer.querySelectorAll('.igv-center-guide')
+        for (let i = 0; i < centerGuides.length; i++) {
+            centerGuides[ i ].remove()
+        }
+
+        const centerGuideList = []
+        const viewportColumns = columnContainer.querySelectorAll('.igv-column')
+        for (let i = 0; i < viewportColumns.length; i++) {
+            centerGuideList.push(new ViewportCenterGuide(this, this.referenceFrameList[i], viewportColumns[i]))
+        }
+
+        return centerGuideList
     }
 
     /**
@@ -668,8 +666,6 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
-        (isWGV || this.isMultiLocusMode()) ? this.centerGuide.forcedHide() : this.centerGuide.forcedShow()
-
         this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
@@ -695,7 +691,6 @@ class Browser {
         toggleTrackLabels(this.trackViews, this.trackLabelsVisible);
     };
 
-
 // cursor guide
     hideCursorGuide() {
         this.cursorGuide.$verticalGuide.hide();
@@ -713,18 +708,17 @@ class Browser {
         this.cursorGuide.customMouseHandler = mouseHandler;
     };
 
-
-// center guide
-    hideCenterGuide() {
-        this.centerGuide.$container.hide();
-        this.isCenterGuideVisible = false;
-    };
-
-    showCenterGuide() {
-        this.centerGuide.$container.show();
-        this.centerGuide.repaint();
-        this.isCenterGuideVisible = true;
-    };
+    // center guide
+    setCenterGuideVisibility(isCenterGuideVisible) {
+        for (let centerGuide of this.centerGuideList) {
+            if (true === isCenterGuideVisible) {
+                centerGuide.show()
+                centerGuide.repaint()
+            } else {
+                centerGuide.hide()
+            }
+        }
+    }
 
     async loadTrackList(configList) {
 
@@ -1109,11 +1103,6 @@ class Browser {
 
         if (this.referenceFrameList) {
             const isWGV = this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(this.referenceFrameList[0].chr);
-            if (isWGV || this.isMultiLocusMode()) {
-                this.centerGuide.forcedHide();
-            } else {
-                this.centerGuide.forcedShow();
-            }
             this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
         }
 
@@ -1163,8 +1152,8 @@ class Browser {
             }
         }
 
-        if (this.centerGuide) {
-            this.centerGuide.repaint();
+        for (let centerGuide of this.centerGuideList) {
+            centerGuide.repaint()
         }
 
         // Don't autoscale while dragging.
@@ -1405,6 +1394,8 @@ class Browser {
 
         }
 
+        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
+
         await this.resize();
 
         if (this.rulerTrack) {
@@ -1439,6 +1430,7 @@ class Browser {
         const scaleFactor = this.calculateViewportWidth(1 + this.referenceFrameList.length) / this.calculateViewportWidth(this.referenceFrameList.length)
 
         this.rescaleForMultiLocus(scaleFactor)
+
     }
 
     async rescaleForMultiLocus(scaleFactor) {
@@ -1456,6 +1448,8 @@ class Browser {
                 viewport.setWidth(viewportWidth);
             }
         }
+
+        this.centerGuideList = this.createCenterGuideList(this.columnContainer)
 
         await this.updateViews(undefined, undefined, true);
 
@@ -1497,13 +1491,12 @@ class Browser {
                 this.trackGearControl.removeGearContainer(trackView)
             }
 
-            // discard track columns
+            // discard viewport columns
             viewportColumnManager.discardAllColumns(this.columnContainer)
 
-
-
-
             viewportColumnManager.insertBefore($(this.sampleNameColumn), this.referenceFrameList.length)
+
+            this.centerGuideList = this.createCenterGuideList(this.columnContainer)
 
             for (let trackView of this.trackViews) {
                 trackView.addDOMToColumnContainer(this, this.columnContainer, this.referenceFrameList);

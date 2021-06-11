@@ -41,7 +41,6 @@ class ReferenceFrame {
         this.id = DOMUtils.guid()
     }
 
-
     calculateEnd(pixels) {
         return this.start + this.bpPerPixel * pixels;
     }
@@ -116,6 +115,10 @@ class ReferenceFrame {
     getPresentionLocus(pixels) {
         const { chr, start, end } = this.getPresentationLocusComponents(pixels)
         return 'all' === chr ? chr : `${ chr }:${ start }-${ end }`
+    }
+
+    description() {
+        console.log(`referenceFrame chr ${ this.chr } bpp ${ this.bpPerPixel } start ${ StringUtils.numberFormatter(this.start) } initialStart ${ StringUtils.numberFormatter(this.initialStart) } `)
     }
 }
 
