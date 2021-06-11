@@ -24,8 +24,8 @@
  */
 
 import IGVGraphics from "./igv-canvas.js";
-import { IGVColor, StringUtils } from "../node_modules/igv-utils/src/index.js";
-import { greyScale, appleCrayonPalette, randomGrey, randomRGB } from "./util/colorPalletes.js"
+import {IGVColor, StringUtils} from "../node_modules/igv-utils/src/index.js";
+import {greyScale, appleCrayonPalette, randomGrey, randomRGB} from "./util/colorPalletes.js"
 
 class IdeogramTrack {
     constructor(browser) {
@@ -52,7 +52,7 @@ class IdeogramTrack {
         return this.height;
     }
 
-    draw({ context, referenceFrame, pixelWidth, pixelHeight }) {
+    draw({context, referenceFrame, pixelWidth, pixelHeight}) {
 
         const chr = referenceFrame.chr;
         const chromosome = referenceFrame.genome.getChromosome(chr);
@@ -63,7 +63,15 @@ class IdeogramTrack {
 
         const stainColors = [];
 
-        drawIdeogram({ ctx: context, chr, referenceFrame, genome: referenceFrame.genome, width: pixelWidth, height: pixelHeight, stainColors });
+        drawIdeogram({
+            ctx: context,
+            chr,
+            referenceFrame,
+            genome: referenceFrame.genome,
+            width: pixelWidth,
+            height: pixelHeight,
+            stainColors
+        });
 
         const widthBP = Math.round(referenceFrame.bpPerPixel * pixelWidth);
         const xBP = referenceFrame.start;
@@ -114,55 +122,45 @@ class IdeogramTrack {
 
 function drawIdeogram({ctx, chr, referenceFrame, genome, width, height, stainColors}) {
 
-    var shim,
-        shim2,
-        ideogramTop,
-        cytobands,
-        cytoband,
-        center,
-        xC,
-        yC,
-        chrLength,
-        scale,
-        start,
-        end,
-        i;
-
-    shim = 1;
-    shim2 = 0.5 * shim;
-    ideogramTop = 0;
+    const shim = 1;
+    const shim2 = 0.5 * shim;
+    const ideogramTop = 0;
 
     if (undefined === genome) {
         return;
     }
 
-    IGVGraphics.fillRect(ctx, 0, 0, width, height, { fillStyle: IGVColor.greyScale(255) });
+    IGVGraphics.fillRect(ctx, 0, 0, width, height, {fillStyle: IGVColor.greyScale(255)});
 
-    cytobands = genome.getCytobands(chr);
+    const cytobands = genome.getCytobands(chr);
     if (cytobands) {
 
-        center = (ideogramTop + height / 2);
+        const center = (ideogramTop + height / 2);
 
-        xC = [];
-        yC = [];
+        const xC = [];
+        const yC = [];
 
         if (0 === cytobands.length) {
             return;
         }
 
-        chrLength = referenceFrame.genome.getChromosome(chr).bpLength;
-        scale = width / chrLength;
+        // Get chrLength from the cytobands -- chromsome.bpLength might not work for igv-reports fasta files, which
+        // contain only a portion of the chromosome sequence
+        // *DOESNT WORK* const chrLength = referenceFrame.genome.getChromosome(chr).bpLength;
+
+        const chrLength = cytobands[cytobands.length - 1].end;
+        const scale = width / chrLength;
 
         // round rect clipping path
         ctx.beginPath();
         IGVGraphics.roundRect(ctx, shim2, shim2 + ideogramTop, width - 2 * shim2, height - 2 * shim2, (height - 2 * shim2) / 2, 0, 1);
         ctx.clip();
 
-        for (i = 0; i < cytobands.length; i++) {
+        for (let i = 0; i < cytobands.length; i++) {
 
-            cytoband = cytobands[i];
-            start = scale * cytoband.start;
-            end = scale * cytoband.end;
+            const cytoband = cytobands[i];
+            const start = scale * cytoband.start;
+            const end = scale * cytoband.end;
 
             if (cytoband.type === 'c') {
 
