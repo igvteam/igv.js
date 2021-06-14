@@ -35,9 +35,11 @@ class VcfParser {
     construtor() {
     }
 
-    async parseHeader(dataWrapper) {
+    async parseHeader(dataWrapper, genome) {
 
         const header = {};
+
+        header.chrAliasTable = new Map();
 
         // First line must be file format
         let line = await dataWrapper.nextLine();
@@ -89,8 +91,14 @@ class VcfParser {
                         if (id) {
                             header[type][id] = values;
                         }
+                    } else if (line.startsWith("##contig") && genome) {
+                        const idx1 = line.indexOf("<ID=");
+                        const idx2 = line.indexOf(",", idx1);
+                        const chr = line.substring(idx1+4, idx2);
+                        const canonicalChromosome = genome.getChromosomeName(chr);
+                        header.chrAliasTable.set(canonicalChromosome, chr);
                     } else {
-                        // Ignoring other ## header lines
+                        // ignoring other directives
                     }
                 } else if (line.startsWith("#CHROM")) {
                     const tokens = line.split("\t");
