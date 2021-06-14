@@ -20,7 +20,7 @@ suite("testBAM", function () {
         validate(assert, alignmentContainer)
     });
 
-    test("BAM alignments", async function () {
+    test("BAM alignments - non indexed", async function () {
 
         const chr = 'chr1';
         const start = 155140000;
@@ -29,11 +29,11 @@ suite("testBAM", function () {
         const bamReader = new BamReader({
             type: 'bam',
             url: require.resolve('./data/bam/na12889.bam'),
-            indexURL: require.resolve('./data/bam/na12889.bam.bai')
+            indexUed: false
         });
 
         const alignmentContainer = await bamReader.readAlignments(chr, start, end)
-        validate(assert, alignmentContainer)
+        validate(assert, alignmentContainer);
     });
 
 

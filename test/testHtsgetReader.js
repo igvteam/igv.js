@@ -1,34 +1,70 @@
 import "./utils/mockObjects.js"
 import {assert} from 'chai';
-import HtsgetReader from "../js/bam/htsgetReader.js";
+import HtsgetBamReader from "../js/htsget/htsgetBamReader.js";
+import HtsgetVariantReader from "../js/htsget/htsgetVariantReader";
 
 
-suite("testBAM", function () {
+// Mock genome with "1,2,3..." name convention
+const genome1 = {
+    getChromosomeName: function(c) {
+        return c.startsWith("chr") ? c.substring(3) : c;
+    }
+}
+
+// Mock genome with "chr1,chr2,chr33..." name convention
+const genome2 = {
+    getChromosomeName: function(c) {
+        return c.startsWith("chr") ? c : "chr" + c;
+    }
+}
+
+suite("htsget", function () {
+
 
     /**
      * Minimal test of htsget -- just verifies that something parsable as a BAM record is returned.
      */
-    test("GIAB NA12878", async function () {
+    test("Alignments - bam", async function () {
 
         this.timeout(20000);
 
-        const id = 'giab.NA12878.NIST7086.1',
-            chr = 'chr1',
-            s = 10000,
-            end = 10100;
-
-        const trackConfig = {
-            url: 'https://htsget.ga4gh.org',
-            endpoint: '/reads/',
-            id: id
+       const trackConfig = {
+            sourceType: 'htsget',
+            format: 'bam',
+            url: 'https://htsget.ga4gh.org/reads/',
+            id: 'giab.NA12878.NIST7086.1'
         }
 
-        const reader = new HtsgetReader(trackConfig);
-        const alignmentContainer = await reader.readAlignments(chr, s, end);
+        const reader = new HtsgetBamReader(trackConfig, genome1);
+        const alignmentContainer = await reader.readAlignments('1', 10000, 10100);
+        assert.equal(7, alignmentContainer.alignments.length);
 
-        assert.ok(alignmentContainer);
-        assert.ok(alignmentContainer.alignments.length > 0);
+        const reade2 = new HtsgetBamReader(trackConfig, genome2);
+        const alignmentContainer2 = await reader.readAlignments('chr1', 10000, 10100);
+        assert.equal(7, alignmentContainer2.alignments.length);
+    })
+
+
+    test("Variants", async function () {
+
+        this.timeout(20000);
+
+        const trackConfig = {
+            sourceType: 'htsget',
+            format: "VCF",
+            url: 'https://htsget.ga4gh.org/variants/',
+            id: 'giab.NA12878'
+        }
+
+        const reader = new HtsgetVariantReader(trackConfig, genome1);
+        const variants = await reader.readFeatures("8", 128732400, 128770475);
+        assert.equal(11, variants.length);
+
+        const reader2 = new HtsgetVariantReader(trackConfig, genome2);
+        const variants2 = await reader2.readFeatures("chr8", 128732400, 128770475);
+        assert.equal(11, variants2.length);
+
 
     })
-})
 
+})
