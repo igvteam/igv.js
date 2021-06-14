@@ -67,13 +67,13 @@ class BamReaderNonIndexed {
             if (this.isDataUri) {
                 const data = decodeDataURI(this.bamPath);
                 const unc = BGZip.unbgzf(data.buffer);
-                parseAlignments.call(this, unc);
-                return fetchAlignments.call(this, chr, bpStart, bpEnd);
+                this.parseAlignments(this, unc);
+                return this.fetchAlignments(chr, bpStart, bpEnd);
             } else {
                 const arrayBuffer = await igvxhr.loadArrayBuffer(this.bamPath, buildOptions(this.config));
                 const unc = BGZip.unbgzf(arrayBuffer);
-                parseAlignments.call(this, unc);
-                return fetchAlignments.call(this, chr, bpStart, bpEnd);
+                this.parseAlignments(unc);
+                return this.fetchAlignments(chr, bpStart, bpEnd);
             }
         }
 
