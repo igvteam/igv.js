@@ -25,17 +25,24 @@
     var div = document.getElementById("myDiv");
     var options = {
         genome: "hg19",
-        locus: "chr8:128,747,267-128,754,546",
+        locus: "chr8:128,734,098-128,763,217",
         tracks: [
             {
-                type: 'alignment',
+                type: 'variant',
+                name: 'giab.NA12878',
                 sourceType: 'htsget',
-                url: 'http://35.196.212.220',
-                endpoint: '/reads/',
-                id: 'genomics-public-data/platinum-genomes/bam/NA12877_S1.bam',
-                name: 'NA12878'
+                format: "VCF",
+                url: 'https://htsget.ga4gh.org/variants/',
+                id: 'giab.NA12878'
+            },
+            {
+                type: 'alignment',
+                name: 'giab.NA12878.NIST7086.1',
+                sourceType: 'htsget',
+                format: 'bam',
+                url: 'https://htsget.ga4gh.org/reads/',
+                id: 'giab.NA12878.NIST7086.1'
             }
-
         ]
     };
 
