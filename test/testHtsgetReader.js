@@ -26,7 +26,7 @@ suite("htsget", function () {
      */
     test("Alignments - bam", async function () {
 
-        this.timeout(20000);
+        this.timeout(40000);
 
        const trackConfig = {
             sourceType: 'htsget',
@@ -47,7 +47,7 @@ suite("htsget", function () {
 
     test("Variants", async function () {
 
-        this.timeout(20000);
+        this.timeout(40000);
 
         const trackConfig = {
             sourceType: 'htsget',
