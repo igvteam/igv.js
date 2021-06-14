@@ -78,18 +78,25 @@ class RulerTrack {
 
             let nTick = Math.floor(bpStart / tick.majorTick) - 1;
 
+            const { tickDelta, labelLength } = calculateDeltas(context, referenceFrame, bpStart, nTick, tick)
+
+            // console.log(`ruler - label length ${ StringUtils.numberFormatter(labelLength)} tick delta ${ StringUtils.numberFormatter(tickDelta)} `)
+            // console.log(`ruler - label length ${ labelLength > tickDelta ? 'clobbers' : 'less than' } tick delta ${ StringUtils.numberFormatter(tickDelta)} `)
+
             let xTick
             let bp
+            let accumulatedTickDelta = tickDelta
             do {
 
                 bp = Math.floor(nTick * tick.majorTick)
-                const bpLabel = `${ StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier)) } ${ tick.majorUnit }`
+                const rulerLabel = `${ StringUtils.numberFormatter(Math.floor(bp / tick.unitMultiplier)) } ${ tick.majorUnit }`
 
                 xTick = Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
-                const xLabel = Math.round(xTick - context.measureText(bpLabel).width / 2)
+                const xLabel = Math.round(xTick - context.measureText(rulerLabel).width / 2)
 
-                if (xLabel > 0) {
-                    IGVGraphics.fillText(context, bpLabel, xLabel, this.height - (tickHeight / 0.75))
+                if (xLabel > 0 && labelLength <= accumulatedTickDelta) {
+                    IGVGraphics.fillText(context, rulerLabel, xLabel, this.height - (tickHeight / 0.75))
+                    accumulatedTickDelta = 0
                 }
 
                 if(xTick > 0) {
@@ -105,6 +112,7 @@ class RulerTrack {
                 }
 
                 ++nTick
+                accumulatedTickDelta += tickDelta
 
             } while (xTick < pixelWidth)
 
@@ -194,6 +202,24 @@ function findSpacing(bpLength, isSVG) {
     const majorTick = (nMajorTicks < threshold && isSVG !== true) ? belowThresholdTick : aboveThresholdTick
 
     return new Tick(majorTick, majorUnit, unitMultiplier)
+}
+
+function calculateDeltas(context, referenceFrame, bpStart, nTick, tick) {
+
+    const tickDelta = getX(referenceFrame, getBP(1 + nTick, tick), bpStart) - getX(referenceFrame, getBP(nTick, tick), bpStart)
+
+    const label = `${ StringUtils.numberFormatter(Math.floor(getBP(nTick, tick) / tick.unitMultiplier)) } ${ tick.majorUnit }`
+    const labelLength = Math.floor(context.measureText(label).width)
+
+    return { tickDelta, labelLength }
+
+    function getBP(nTick, tick) {
+        return Math.floor(nTick * tick.majorTick)
+    }
+
+    function getX(referenceFrame, bp, bpStart) {
+        return Math.round(referenceFrame.toPixels((bp - 1) - bpStart + 0.5))
+    }
 }
 
 class Tick {
