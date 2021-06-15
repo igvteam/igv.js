@@ -80,8 +80,8 @@ class RulerTrack {
 
             const { tickDelta, labelLength } = calculateDeltas(context, referenceFrame, bpStart, nTick, tick)
 
-            // console.log(`ruler - label length ${ StringUtils.numberFormatter(labelLength)} tick delta ${ StringUtils.numberFormatter(tickDelta)} `)
-            // console.log(`ruler - label length ${ labelLength > tickDelta ? 'clobbers' : 'less than' } tick delta ${ StringUtils.numberFormatter(tickDelta)} `)
+            const index = this.browser.referenceFrameList.indexOf(referenceFrame)
+            // console.log(`ruler(${ index }) label-length ${ labelLength > tickDelta ? 'clobbers' : 'less than' } tick-delta ${ StringUtils.numberFormatter(tickDelta)} `)
 
             let xTick
             let bp

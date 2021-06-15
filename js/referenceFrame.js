@@ -105,8 +105,6 @@ class ReferenceFrame {
             const ss = StringUtils.numberFormatter(Math.floor(this.start) + 1)
             const ee = StringUtils.numberFormatter( Math.round(this.start + this.bpPerPixel * pixels) )
 
-            // console.log(`getPresentationLocusComponents(${ StringUtils.numberFormatter(pixels) }) start ${ ss } end ${ ee }`)
-
             return { chr: this.chr, start: ss, end: ee }
         }
 
@@ -117,8 +115,8 @@ class ReferenceFrame {
         return 'all' === chr ? chr : `${ chr }:${ start }-${ end }`
     }
 
-    description() {
-        console.log(`referenceFrame chr ${ this.chr } bpp ${ this.bpPerPixel } start ${ StringUtils.numberFormatter(this.start) } initialStart ${ StringUtils.numberFormatter(this.initialStart) } `)
+    description(blurb) {
+        console.log(` ${ blurb || '' } referenceFrame chr ${ this.chr } bpp ${ this.bpPerPixel.toFixed(3) } start ${ StringUtils.numberFormatter(this.start) } end ${ StringUtils.numberFormatter(this.initialEnd) } `)
     }
 }
 

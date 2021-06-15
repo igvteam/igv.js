@@ -1301,22 +1301,23 @@ class Browser {
         }
 
         const referenceFrame = this.referenceFrameList[0]
-        const { $viewport } = this.trackViews[0].viewports[0];
-
-        const centerBP = referenceFrame.start + referenceFrame.toBP($viewport.width() / 2.0);
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length);
         const { bpStart, bpLength } = referenceFrame.getChromosome();
-        const bpp = IGVMath.lerp((bpLength - bpStart) / $viewport.width(), this.minimumBases() / $viewport.width(), percentage);
-        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * bpp;
 
-        referenceFrame.start = centerBP - (viewportWidthBP / 2);
+        const centerBP = referenceFrame.start + referenceFrame.toBP(0.5 * viewportWidth);
+
+        const bpp = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, percentage);
+
+        referenceFrame.start = centerBP  - referenceFrame.toBP(0.5 * viewportWidth);
+
         referenceFrame.bpPerPixel = bpp;
-        referenceFrame.clamp($viewport.width())
+        referenceFrame.clamp(viewportWidth)
 
         this.updateViews(referenceFrame);
 
     };
 
-    zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
+    zoomWithScaleFactor(scaleFactor, centerBPOrUndefined) {
 
         // Only zoom when in single locus view mode
         if (this.referenceFrameList.length > 1 || this.loadInProgress()) {
@@ -1324,16 +1325,23 @@ class Browser {
         }
 
         const referenceFrame = this.referenceFrameList[0]
+        referenceFrame.description('Before')
+
         const currentReferenceFrameStart = referenceFrame.start;
         const currentBPP = referenceFrame.bpPerPixel;
 
-        const { $viewport } = this.trackViews[0].viewports[0];
-
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length);
         const { bpStart, bpLength } = referenceFrame.getChromosome();
-        const bppThreshold = scaleFactor < 1.0 ?  this.minimumBases() / $viewport.width() : (bpLength - bpStart) / $viewport.width();
 
-        // Current center of scale
-        const centerBP = centerBPOrUndefined || (referenceFrame.start + referenceFrame.toBP($viewport.width() / 2.0));
+        const centerBP = centerBPOrUndefined || (referenceFrame.start + referenceFrame.toBP(0.5 * viewportWidth));
+
+        const cbp = 0.5 * (referenceFrame.start + referenceFrame.initialEnd)
+
+
+
+
+
+        const bppThreshold = (scaleFactor < 1.0 ? this.minimumBases() : (bpLength - bpStart)) / viewportWidth;
 
         let bpp;
         if (scaleFactor < 1.0) {
@@ -1342,11 +1350,12 @@ class Browser {
             bpp = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
         }
 
-        // Update reference frame start and bpp
-        const viewportWidthBP = this.calculateViewportWidth(this.referenceFrameList.length) * bpp;
-        referenceFrame.start = centerBP - (viewportWidthBP / 2)
+        referenceFrame.start = centerBP - referenceFrame.toBP(0.5 * viewportWidth)
+
         referenceFrame.bpPerPixel = bpp;
-        referenceFrame.clamp($viewport.width())
+        referenceFrame.clamp(viewportWidth)
+
+        referenceFrame.description('After')
 
         const viewChanged = currentReferenceFrameStart !== referenceFrame.start || currentBPP !== referenceFrame.bpPerPixel;
         if (viewChanged) {

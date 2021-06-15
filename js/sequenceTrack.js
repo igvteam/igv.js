@@ -25,6 +25,7 @@
 
 import IGVGraphics from "./igv-canvas.js";
 import {Alert} from '../node_modules/igv-ui/dist/igv-ui.js'
+import {randomRGBConstantAlpha} from "./util/colorPalletes.js";
 
 const defaultSequenceTrackOrder = Number.MIN_SAFE_INTEGER;
 
@@ -245,8 +246,10 @@ class SequenceTrack {
                     let bPixel = (offsetBP + 1) / options.bpPerPixel;
                     let color = this.fillColor(letter);
 
+                    IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, { fillStyle: randomRGBConstantAlpha(150, 255, 0.75) });
+
                     if (options.bpPerPixel > 1 / 10) {
-                        IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
+                        // IGVGraphics.fillRect(ctx, aPixel, 5, bPixel - aPixel, height - 5, {fillStyle: color});
                     } else {
                         let xPixel = 0.5 * (aPixel + bPixel - ctx.measureText(letter).width);
                         IGVGraphics.strokeText(ctx, letter, xPixel, height, {strokeStyle: color});
