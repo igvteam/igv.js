@@ -666,7 +666,7 @@ class Browser {
 
         const isWGV = (this.isMultiLocusWholeGenomeView() || GenomeUtils.isWholeGenomeView(referenceFrameList[0].chr));
 
-        this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
+        // this.isMultiLocusMode() ? this.zoomWidget.disable() : this.zoomWidget.enable()
 
         this.navbarManager.navbarDidResize(this.$navigation.width(), isWGV);
 
@@ -1291,112 +1291,68 @@ class Browser {
 
         $slider.val(value);
 
-    };
+    }
 
-    zoomWithRangePercentage(percentage) {
+    async zoomWithRangePercentage(percentage) {
 
-        // Only zoom when in single locus view mode
-        if (this.referenceFrameList.length > 1 || this.loadInProgress()) {
+        if (this.loadInProgress()) {
             return;
         }
 
-        const referenceFrame = this.referenceFrameList[0]
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length);
-        const { bpStart, bpLength } = referenceFrame.getChromosome();
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-        const centerBP = referenceFrame.start + referenceFrame.toBP(0.5 * viewportWidth);
+        for (let referenceFrame of this.referenceFrameList) {
 
-        const bpp = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, percentage);
+            const centerBP = referenceFrame.start + referenceFrame.toBP(viewportWidth / 2.0);
 
-        referenceFrame.start = centerBP  - referenceFrame.toBP(0.5 * viewportWidth);
+            const { bpLength, bpStart } = referenceFrame.getChromosome();
 
-        referenceFrame.bpPerPixel = bpp;
-        referenceFrame.clamp(viewportWidth)
+            // update bpp
+            referenceFrame.bpPerPixel = IGVMath.lerp((bpLength - bpStart) / viewportWidth, this.minimumBases() / viewportWidth, percentage);
 
-        this.updateViews(referenceFrame);
+            // update start
+            referenceFrame.start = centerBP - (referenceFrame.bpPerPixel * viewportWidth / 2.0);
 
-    };
+            referenceFrame.clamp(viewportWidth)
 
-    zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, viewportOrUndefined) {
-
-        let viewports = viewportOrUndefined ? [viewportOrUndefined] : this.trackViews[0].viewports;
-        for (let viewport of viewports) {
-
-            const referenceFrame = viewport.referenceFrame;
-            const chromosome = referenceFrame.getChromosome();
-            const start = referenceFrame.start;
-            const bpPerPixel = referenceFrame.bpPerPixel;
-            const chromosomeLengthBP = chromosome.bpLength - chromosome.bpStart;
-            const bppThreshold = scaleFactor < 1.0 ?
-                this.minimumBases() / viewport.$viewport.width() :
-                chromosomeLengthBP / viewport.$viewport.width();
-            const centerBP = undefined === centerBPOrUndefined ?
-                (referenceFrame.start + referenceFrame.toBP(viewport.$viewport.width() / 2.0)) :
-                centerBPOrUndefined;
-
-            let bpp;
-            if (scaleFactor < 1.0) {
-                bpp = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-            } else {
-                bpp = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-            }
-
-            const viewportWidthBP = bpp * viewport.$viewport.width();
-            referenceFrame.start = centerBP - (viewportWidthBP / 2)
-            referenceFrame.bpPerPixel = bpp;
-            referenceFrame.clamp(viewport.$viewport.width())
-
-            const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
-            if (viewChanged) {
-                this.updateViews(viewport.referenceFrame);
-            }
-
+            await this.updateViews(referenceFrame);
         }
     }
 
-    _zoomWithScaleFactor(scaleFactor, centerBPOrUndefined) {
+    async zoomWithScaleFactor(scaleFactor, centerBPOrUndefined, referenceFrameOrUndefined) {
 
-        // Only zoom when in single locus view mode
-        if (this.referenceFrameList.length > 1 || this.loadInProgress()) {
-            return;
-        }
+        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length)
 
-        const referenceFrame = this.referenceFrameList[0]
-        referenceFrame.description('Before')
+        let referenceFrames = referenceFrameOrUndefined ? [ referenceFrameOrUndefined ] : this.referenceFrameList;
 
-        const currentReferenceFrameStart = referenceFrame.start;
-        const currentBPP = referenceFrame.bpPerPixel;
+        for (let referenceFrame of referenceFrames) {
 
-        const viewportWidth = this.calculateViewportWidth(this.referenceFrameList.length);
-        const { bpStart, bpLength } = referenceFrame.getChromosome();
+            const centerBP = undefined === centerBPOrUndefined ? (referenceFrame.start + referenceFrame.toBP(viewportWidth / 2.0)) : centerBPOrUndefined;
 
-        const centerBP = centerBPOrUndefined || (referenceFrame.start + referenceFrame.toBP(0.5 * viewportWidth));
+            // save initial start and bpp
+            const start = referenceFrame.start;
+            const bpPerPixel = referenceFrame.bpPerPixel;
 
-        const cbp = 0.5 * (referenceFrame.start + referenceFrame.initialEnd)
+            const { bpLength, bpStart } = referenceFrame.getChromosome();
+            const bppThreshold = scaleFactor < 1.0 ? this.minimumBases() / viewportWidth : (bpLength - bpStart) / viewportWidth;
 
+            // update bpp
+            if (scaleFactor < 1.0) {
+                referenceFrame.bpPerPixel = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+            } else {
+                referenceFrame.bpPerPixel = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
+            }
 
+            // update start
+            referenceFrame.start = centerBP - (referenceFrame.bpPerPixel * viewportWidth / 2.0)
 
+            referenceFrame.clamp(viewportWidth)
 
+            const viewChanged = start !== referenceFrame.start || bpPerPixel !== referenceFrame.bpPerPixel;
+            if (viewChanged) {
+                await this.updateViews(referenceFrame);
+            }
 
-        const bppThreshold = (scaleFactor < 1.0 ? this.minimumBases() : (bpLength - bpStart)) / viewportWidth;
-
-        let bpp;
-        if (scaleFactor < 1.0) {
-            bpp = Math.max(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-        } else {
-            bpp = Math.min(referenceFrame.bpPerPixel * scaleFactor, bppThreshold);
-        }
-
-        referenceFrame.start = centerBP - referenceFrame.toBP(0.5 * viewportWidth)
-
-        referenceFrame.bpPerPixel = bpp;
-        referenceFrame.clamp(viewportWidth)
-
-        referenceFrame.description('After')
-
-        const viewChanged = currentReferenceFrameStart !== referenceFrame.start || currentBPP !== referenceFrame.bpPerPixel;
-        if (viewChanged) {
-            this.updateViews(referenceFrame);
         }
     }
 
